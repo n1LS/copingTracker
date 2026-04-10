@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "MixerView.h"
@@ -18,14 +20,14 @@
 
 #define CHANNELS_X_OFFSET_ 3 // stride between each channel
 
-MixerView::MixerView(GUIWindow &w, ViewData *viewData)
-    : FieldView(w, viewData) {
+MixerView::MixerView(GUIWindow &w, ViewData *viewData) : FieldView(w, viewData) {
 
   // Initialize the channel volume fields
   initChannelVolumeFields();
 }
 
-MixerView::~MixerView() {}
+MixerView::~MixerView() {
+}
 
 void MixerView::Reset() {
   needsPlayTimeUpdate_ = false;
@@ -48,7 +50,7 @@ void MixerView::OnFocus() {
       SetFocus((UIField *)&masterVolumeField_.at(0));
     }
   }
-};
+}
 
 void MixerView::SetFocus(UIField *field) {
   // Call parent implementation first
@@ -101,17 +103,16 @@ void MixerView::updateCursor(int dx, int dy) {
 void MixerView::switchSoloMode() {
   UIController *controller = UIController::GetInstance();
   int currentChannel = viewData_->songX_;
-  controller->SwitchSoloMode(currentChannel, currentChannel,
-                             (viewMode_ == VM_NORMAL));
+  controller->SwitchSoloMode(currentChannel, currentChannel, (viewMode_ == VM_NORMAL));
   viewMode_ = (viewMode_ != VM_SOLOON) ? VM_SOLOON : VM_NORMAL;
   isDirty_ = true;
-};
+}
 
 void MixerView::unMuteAll() {
   UIController *controller = UIController::GetInstance();
   controller->UnMuteAll();
   isDirty_ = true;
-};
+}
 
 void MixerView::toggleMute() {
 
@@ -120,7 +121,7 @@ void MixerView::toggleMute() {
   controller->ToggleMute(currentChannel, currentChannel);
   viewMode_ = (viewMode_ != VM_MUTEON) ? VM_MUTEON : VM_NORMAL;
   isDirty_ = true;
-};
+}
 
 void MixerView::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (!pressed) {
@@ -201,7 +202,7 @@ void MixerView::ProcessButtonMask(unsigned short mask, bool pressed) {
   // Force a full redraw of the mixer view when any button is pressed
   SetDirty(true);
   processNormalButtonMask(mask);
-};
+}
 
 /******************************************************
  processNormalButtonMask:
@@ -244,7 +245,7 @@ void MixerView::processNormalButtonMask(unsigned int mask) {
       updateCursor(1, 0);
     }
   }
-};
+}
 
 /******************************************************
  processSelectionButtonMask:
@@ -290,10 +291,8 @@ void MixerView::initChannelVolumeFields() {
 
   // Get FourCC codes for channel volumes
   FourCC channelVolumeFourCCs[SONG_CHANNEL_COUNT] = {
-      FourCC::VarChannel1Volume, FourCC::VarChannel2Volume,
-      FourCC::VarChannel3Volume, FourCC::VarChannel4Volume,
-      FourCC::VarChannel5Volume, FourCC::VarChannel6Volume,
-      FourCC::VarChannel7Volume, FourCC::VarChannel8Volume};
+      FourCC::VarChannel1Volume, FourCC::VarChannel2Volume, FourCC::VarChannel3Volume, FourCC::VarChannel4Volume,
+      FourCC::VarChannel5Volume, FourCC::VarChannel6Volume, FourCC::VarChannel7Volume, FourCC::VarChannel8Volume};
 
   // Clear any existing fields
   channelVolumeFields_.clear();
@@ -348,8 +347,7 @@ void MixerView::DrawView() {
   Project *project = player->GetProject(); // Use Player's GetProject method
 
   props.invert_ = true;
-  const char *buffer =
-      ((player->GetSequencerMode() == SM_SONG) ? "Song" : "Live");
+  const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song" : "Live");
   DrawString(pos._x, pos._y, buffer, props);
   props.invert_ = false;
 
@@ -404,7 +402,7 @@ void MixerView::DrawView() {
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
   };
-};
+}
 
 void MixerView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
   // Since this can be called from core1 via the Observer pattern,
@@ -420,7 +418,7 @@ void MixerView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
   }
 
   needsNotesUpdate_ = true;
-};
+}
 
 void MixerView::AnimationUpdate() {
   // First call the parent class implementation to draw the battery gauge
@@ -439,8 +437,7 @@ void MixerView::AnimationUpdate() {
 
   // Always update VU meters, whether the sequencer is running or not
   // This ensures we see VU meter updates from MIDI input even when not playing
-  etl::array<stereosample, SONG_CHANNEL_COUNT> *levels =
-      player->GetMixerLevels();
+  etl::array<stereosample, SONG_CHANNEL_COUNT> *levels = player->GetMixerLevels();
   if (levels) {
     drawChannelVUMeters(levels, player, props);
     drawMasterVuMeter(player, props);
@@ -464,11 +461,10 @@ void MixerView::AnimationUpdate() {
 
   // Flush the window to ensure changes are displayed
   w_.Flush();
-};
+}
 
-void MixerView::drawChannelVUMeters(
-    etl::array<stereosample, SONG_CHANNEL_COUNT> *levels, Player *player,
-    GUITextProperties props, bool forceRedraw) {
+void MixerView::drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT> *levels, Player *player,
+                                    GUITextProperties props, bool forceRedraw) {
 
   // Quick optimization: If not forcing redraw, check if any levels have changed
   // This saves CPU cycles by avoiding unnecessary drawing operations
@@ -514,6 +510,5 @@ void MixerView::drawChannelVUMeters(
 
 void MixerView::togglePlay() {
   Player *player = Player::GetInstance();
-  player->OnStartButton(PM_CHAIN, viewData_->songX_, true,
-                        viewData_->chainRow_);
-};
+  player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
+}

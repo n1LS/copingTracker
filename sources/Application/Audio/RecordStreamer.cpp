@@ -2,16 +2,20 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "RecordStreamer.h"
 #include "System/Console/Trace.h"
 
-RecordStreamer::RecordStreamer() { mode_ = RSM_STOPPED; };
+RecordStreamer::RecordStreamer() {
+  mode_ = RSM_STOPPED;
+}
 
-RecordStreamer::~RecordStreamer(){};
+RecordStreamer::~RecordStreamer() {};
 
 bool RecordStreamer::Start(uint16_t *srcBuffer, uint32_t size, bool stereo) {
   Trace::Debug("Starting to stream from record buffer");
@@ -21,14 +25,16 @@ bool RecordStreamer::Start(uint16_t *srcBuffer, uint32_t size, bool stereo) {
   stereo_ = stereo;
   srcBufferPos_ = 0;
   return true;
-};
+}
 
 void RecordStreamer::Stop() {
   mode_ = RSM_STOPPED;
   Trace::Debug("record streaming stopped");
-};
+}
 
-bool RecordStreamer::IsPlaying() { return (mode_ == RSM_PLAYING); }
+bool RecordStreamer::IsPlaying() {
+  return (mode_ == RSM_PLAYING);
+}
 
 bool RecordStreamer::Render(fixed *buffer, int samplecount) {
 

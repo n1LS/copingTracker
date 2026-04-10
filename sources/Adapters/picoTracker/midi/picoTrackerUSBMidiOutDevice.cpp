@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerUSBMidiOutDevice.h"
@@ -12,16 +14,21 @@
 #include "pico/stdlib.h"
 #include "usb_utils.h"
 
-picoTrackerUSBMidiOutDevice::picoTrackerUSBMidiOutDevice(const char *name)
-    : MidiOutDevice(name) {}
+picoTrackerUSBMidiOutDevice::picoTrackerUSBMidiOutDevice(const char *name) : MidiOutDevice(name) {
+}
 
-bool picoTrackerUSBMidiOutDevice::Init() { return true; }
+bool picoTrackerUSBMidiOutDevice::Init() {
+  return true;
+}
 
-void picoTrackerUSBMidiOutDevice::Close(){};
+void picoTrackerUSBMidiOutDevice::Close() {};
 
-bool picoTrackerUSBMidiOutDevice::Start() { return true; };
+bool picoTrackerUSBMidiOutDevice::Start() {
+  return true;
+}
 
-void picoTrackerUSBMidiOutDevice::Stop() {}
+void picoTrackerUSBMidiOutDevice::Stop() {
+}
 
 void picoTrackerUSBMidiOutDevice::SendMessage(MidiMessage &msg) {
   uint8_t midicmd[3] = {0, 0, 0};

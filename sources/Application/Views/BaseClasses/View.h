@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _VIEW_H_
@@ -62,14 +64,7 @@ enum ViewType {
   VT_RECORD             // Recording screen
 };
 
-enum ViewMode {
-  VM_NORMAL,
-  VM_NEW,
-  VM_CLONE,
-  VM_SELECTION,
-  VM_MUTEON,
-  VM_SOLOON
-};
+enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
 
 enum ColorDefinition {
   CD_BACKGROUND,
@@ -124,14 +119,16 @@ public:
 
   void Redraw();
 
-  bool isDirty() { return isDirty_; };
+  bool isDirty() {
+    return isDirty_;
+  };
 
   // Override in subclasses
 
   virtual void DrawView() = 0;
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int currentTick) = 0;
   virtual void OnFocus() = 0;
-  virtual void OnFocusLost(){};
+  virtual void OnFocusLost() {};
   virtual void AnimationUpdate() = 0;
 
   void SetDirty(bool dirty);
@@ -139,8 +136,12 @@ public:
   void switchToRecordView();
 
   // Methods to access modal view
-  bool HasModalView() const { return modalView_ != nullptr; }
-  ModalView *GetModalView() const { return modalView_; }
+  bool HasModalView() const {
+    return modalView_ != nullptr;
+  }
+  ModalView *GetModalView() const {
+    return modalView_;
+  }
 
   // Primitive locking mechanism
 
@@ -152,8 +153,8 @@ public:
 
   virtual void SetColor(ColorDefinition cd);
   virtual void ClearTextRect(int x, int y, int w, int h);
-  virtual void DrawString(int x, int y, const char *txt,
-                          const GUITextProperties &props);
+  virtual void DrawString(int x, int y, const char *txt, const GUITextProperties &props);
+  virtual void DrawChar(int x, int y, const char character, const GUITextProperties &props);
   virtual void DrawRect(GUIRect &r, ColorDefinition color);
 
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
@@ -164,8 +165,7 @@ protected:
 
   // to remove once everything got to viewdata
 
-  inline void updateData(unsigned char *c, int offset, unsigned char limit,
-                         bool wrap) {
+  inline void updateData(unsigned char *c, int offset, unsigned char limit, bool wrap) {
     int v = *c;
     if (v == 0xFF) { // Uninitiaized data
       v = 0;
@@ -183,19 +183,16 @@ protected:
 
   void drawMap();
   void drawNotes();
-  void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index,
-                     uint16_t total);
+  void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery(GUITextProperties &props);
-  void drawMasterVuMeter(Player *player, GUITextProperties props,
-                         bool forceRedraw = false, uint8_t xoffset = 24);
+  void drawMasterVuMeter(Player *player, GUITextProperties props, bool forceRedraw = false, uint8_t xoffset = 24);
   void drawPlayTime(Player *player, GUIPoint pos, GUITextProperties &props);
-  void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos,
-                   GUITextProperties props, int vuIndex,
+  void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, GUITextProperties props, int vuIndex,
                    bool forceRedraw = false);
   void drawPowerButtonUI(GUITextProperties &props);
+  void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height);
 
-  static inline void amplitudeToBars(stereosample level, int32_t *left,
-                                     int32_t *right) {
+  static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
     // Extract both channels
     uint16_t leftAmp = (level >> 16) & 0xFFFF;
     uint16_t rightAmp = level & 0xFFFF;

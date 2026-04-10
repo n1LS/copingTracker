@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 /*
@@ -21,7 +23,9 @@
 #include "Application/Model/Config.h"
 #include <cstring>
 
-bool EventManager::Init() { return true; }
+bool EventManager::Init() {
+  return true;
+}
 
 void EventManager::MapAppButton(const char *mapping, AppButton button) {
 
@@ -31,7 +35,7 @@ void EventManager::MapAppButton(const char *mapping, AppButton button) {
   };
   mapString += mapping;
   mapping_[button] = mapString;
-};
+}
 
 void EventManager::InstallMappings() {
   // Controller mapping layer removed; nothing to install.

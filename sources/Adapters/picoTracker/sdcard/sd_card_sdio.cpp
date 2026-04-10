@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 // Driver for accessing SD card in SDIO mode on RP2040.
@@ -23,12 +25,10 @@ static sdio_status_t g_sdio_error;
 static uint32_t g_sdio_dma_buf[128];
 static uint32_t g_sdio_sector_count;
 
-#define checkReturnOk(call)                                                    \
-  ((g_sdio_error = (call)) == SDIO_OK ? true : logSDError(__LINE__))
+#define checkReturnOk(call) ((g_sdio_error = (call)) == SDIO_OK ? true : logSDError(__LINE__))
 static bool logSDError(int line) {
   g_sdio_error_line = line;
-  Trace::Log("SDIO", "SDIO SD card error on line ", line, ", error code ",
-             (int)g_sdio_error);
+  Trace::Log("SDIO", "SDIO SD card error on line ", line, ", error code ", (int)g_sdio_error);
   return false;
 }
 
@@ -45,9 +45,7 @@ void azplatform_set_sd_callback(sd_callback_t func, const uint8_t *buffer) {
   m_stream_count_start = 0;
 }
 
-static sd_callback_t get_stream_callback(const uint8_t *buf, uint32_t count,
-                                         const char *accesstype,
-                                         uint32_t sector) {
+static sd_callback_t get_stream_callback(const uint8_t *buf, uint32_t count, const char *accesstype, uint32_t sector) {
   m_stream_count_start = m_stream_count;
 
   if (m_stream_callback) {
@@ -55,8 +53,7 @@ static sd_callback_t get_stream_callback(const uint8_t *buf, uint32_t count,
       m_stream_count += count;
       return m_stream_callback;
     } else {
-      Trace::Debug("SD card ", accesstype, "(", (int)sector,
-                   ") slow transfer, buffer", (uint32_t)buf, " vs. ",
+      Trace::Debug("SD card ", accesstype, "(", (int)sector, ") slow transfer, buffer", (uint32_t)buf, " vs. ",
                    (uint32_t)(m_stream_buffer + m_stream_count));
       return NULL;
     }
@@ -120,8 +117,7 @@ bool SdioCard::begin(SdioConfig sdioConfig) {
   }
 
   // Get CSD
-  if (!checkReturnOk(
-          rp2040_sdio_command_R2(CMD9, g_sdio_rca, (uint8_t *)&g_sdio_csd))) {
+  if (!checkReturnOk(rp2040_sdio_command_R2(CMD9, g_sdio_rca, (uint8_t *)&g_sdio_csd))) {
     Trace::Debug("SDIO failed to read CSD");
     return false;
   }
@@ -147,15 +143,25 @@ bool SdioCard::begin(SdioConfig sdioConfig) {
   return true;
 }
 
-uint8_t SdioCard::errorCode() const { return g_sdio_error; }
+uint8_t SdioCard::errorCode() const {
+  return g_sdio_error;
+}
 
-uint32_t SdioCard::errorData() const { return 0; }
+uint32_t SdioCard::errorData() const {
+  return 0;
+}
 
-uint32_t SdioCard::errorLine() const { return g_sdio_error_line; }
+uint32_t SdioCard::errorLine() const {
+  return g_sdio_error_line;
+}
 
-bool SdioCard::isBusy() { return (sio_hw->gpio_in & (1 << SDIO_D0)) == 0; }
+bool SdioCard::isBusy() {
+  return (sio_hw->gpio_in & (1 << SDIO_D0)) == 0;
+}
 
-uint32_t SdioCard::kHzSdClk() { return 0; }
+uint32_t SdioCard::kHzSdClk() {
+  return 0;
+}
 
 bool SdioCard::readCID(cid_t *cid) {
   *cid = g_sdio_cid;
@@ -188,7 +194,9 @@ bool SdioCard::readStop() {
   return false;
 }
 
-uint32_t SdioCard::sectorCount() { return g_sdio_csd.capacity(); }
+uint32_t SdioCard::sectorCount() {
+  return g_sdio_csd.capacity();
+}
 
 uint32_t SdioCard::status() {
   uint32_t reply;
@@ -222,7 +230,9 @@ bool SdioCard::stopTransmission(bool blocking) {
   }
 }
 
-bool SdioCard::syncDevice() { return true; }
+bool SdioCard::syncDevice() {
+  return true;
+}
 
 uint8_t SdioCard::type() const {
   if (g_sdio_ocr & (1 << 30))
@@ -274,10 +284,9 @@ bool SdioCard::writeSector(uint32_t sector, const uint8_t *src) {
   sd_callback_t callback = get_stream_callback(src, 512, "writeSector", sector);
 
   uint32_t reply;
-  if (!checkReturnOk(rp2040_sdio_command_R1(16, 512, &reply)) || // SET_BLOCKLEN
-      !checkReturnOk(
-          rp2040_sdio_command_R1(CMD24, sector, &reply)) || // WRITE_BLOCK
-      !checkReturnOk(rp2040_sdio_tx_start(src, 1))) // Start transmission
+  if (!checkReturnOk(rp2040_sdio_command_R1(16, 512, &reply)) ||       // SET_BLOCKLEN
+      !checkReturnOk(rp2040_sdio_command_R1(CMD24, sector, &reply)) || // WRITE_BLOCK
+      !checkReturnOk(rp2040_sdio_tx_start(src, 1)))                    // Start transmission
   {
     return false;
   }
@@ -292,8 +301,7 @@ bool SdioCard::writeSector(uint32_t sector, const uint8_t *src) {
   } while (g_sdio_error == SDIO_BUSY);
 
   if (g_sdio_error != SDIO_OK) {
-    Trace::Log("SDIO", "SdioCard::writeSector(", sector,
-               ") failed: ", (int)g_sdio_error);
+    Trace::Log("SDIO", "SdioCard::writeSector(", sector, ") failed: ", (int)g_sdio_error);
   }
 
   return g_sdio_error == SDIO_OK;
@@ -310,15 +318,12 @@ bool SdioCard::writeSectors(uint32_t sector, const uint8_t *src, size_t n) {
     return true;
   }
 
-  sd_callback_t callback =
-      get_stream_callback(src, n * 512, "writeSectors", sector);
+  sd_callback_t callback = get_stream_callback(src, n * 512, "writeSectors", sector);
 
   uint32_t reply;
-  if (!checkReturnOk(rp2040_sdio_command_R1(16, 512, &reply)) || // SET_BLOCKLEN
-      !checkReturnOk(
-          rp2040_sdio_command_R1(CMD55, g_sdio_rca, &reply)) || // APP_CMD
-      !checkReturnOk(rp2040_sdio_command_R1(
-          ACMD23, n, &reply)) || // SET_WR_CLK_ERASE_COUNT
+  if (!checkReturnOk(rp2040_sdio_command_R1(16, 512, &reply)) ||           // SET_BLOCKLEN
+      !checkReturnOk(rp2040_sdio_command_R1(CMD55, g_sdio_rca, &reply)) || // APP_CMD
+      !checkReturnOk(rp2040_sdio_command_R1(ACMD23, n, &reply)) ||         // SET_WR_CLK_ERASE_COUNT
       !checkReturnOk(rp2040_sdio_command_R1(CMD25, sector,
                                             &reply)) || // WRITE_MULTIPLE_BLOCK
       !checkReturnOk(rp2040_sdio_tx_start(src, n)))     // Start transmission
@@ -336,8 +341,7 @@ bool SdioCard::writeSectors(uint32_t sector, const uint8_t *src, size_t n) {
   } while (g_sdio_error == SDIO_BUSY);
 
   if (g_sdio_error != SDIO_OK) {
-    Trace::Log("SDIO", "SdioCard::writeSectors(", sector, ",...,", (int)n,
-               ") failed: ", (int)g_sdio_error);
+    Trace::Log("SDIO", "SdioCard::writeSectors(", sector, ",...,", (int)n, ") failed: ", (int)g_sdio_error);
     stopTransmission(true);
     return false;
   } else {
@@ -355,10 +359,9 @@ bool SdioCard::readSector(uint32_t sector, uint8_t *dst) {
   sd_callback_t callback = get_stream_callback(dst, 512, "readSector", sector);
 
   uint32_t reply;
-  if (!checkReturnOk(rp2040_sdio_command_R1(16, 512, &reply)) || // SET_BLOCKLEN
-      !checkReturnOk(rp2040_sdio_rx_start(dst, 1)) || // Prepare for reception
-      !checkReturnOk(
-          rp2040_sdio_command_R1(CMD17, sector, &reply))) // READ_SINGLE_BLOCK
+  if (!checkReturnOk(rp2040_sdio_command_R1(16, 512, &reply)) ||     // SET_BLOCKLEN
+      !checkReturnOk(rp2040_sdio_rx_start(dst, 1)) ||                // Prepare for reception
+      !checkReturnOk(rp2040_sdio_command_R1(CMD17, sector, &reply))) // READ_SINGLE_BLOCK
   {
     return false;
   }
@@ -373,8 +376,7 @@ bool SdioCard::readSector(uint32_t sector, uint8_t *dst) {
   } while (g_sdio_error == SDIO_BUSY);
 
   if (g_sdio_error != SDIO_OK) {
-    Trace::Log("SDIO", "SdioCard::readSector(", sector,
-               ") failed: ", (int)g_sdio_error);
+    Trace::Log("SDIO", "SdioCard::readSector(", sector, ") failed: ", (int)g_sdio_error);
   }
 
   if (dst != real_dst) {
@@ -395,14 +397,12 @@ bool SdioCard::readSectors(uint32_t sector, uint8_t *dst, size_t n) {
     return true;
   }
 
-  sd_callback_t callback =
-      get_stream_callback(dst, n * 512, "readSectors", sector);
+  sd_callback_t callback = get_stream_callback(dst, n * 512, "readSectors", sector);
 
   uint32_t reply;
-  if (!checkReturnOk(rp2040_sdio_command_R1(16, 512, &reply)) || // SET_BLOCKLEN
-      !checkReturnOk(rp2040_sdio_rx_start(dst, n)) || // Prepare for reception
-      !checkReturnOk(
-          rp2040_sdio_command_R1(CMD18, sector, &reply))) // READ_MULTIPLE_BLOCK
+  if (!checkReturnOk(rp2040_sdio_command_R1(16, 512, &reply)) ||     // SET_BLOCKLEN
+      !checkReturnOk(rp2040_sdio_rx_start(dst, n)) ||                // Prepare for reception
+      !checkReturnOk(rp2040_sdio_command_R1(CMD18, sector, &reply))) // READ_MULTIPLE_BLOCK
   {
     return false;
   }
@@ -417,8 +417,7 @@ bool SdioCard::readSectors(uint32_t sector, uint8_t *dst, size_t n) {
   } while (g_sdio_error == SDIO_BUSY);
 
   if (g_sdio_error != SDIO_OK) {
-    Trace::Log("SDIO", "SdioCard::readSectors(", sector, ",...,", (int)n,
-               ") failed: ", (int)g_sdio_error);
+    Trace::Log("SDIO", "SdioCard::readSectors(", sector, ",...,", (int)n, ") failed: ", (int)g_sdio_error);
     stopTransmission(true);
     return false;
   } else {
@@ -428,8 +427,10 @@ bool SdioCard::readSectors(uint32_t sector, uint8_t *dst, size_t n) {
 
 // These functions are not used for SDIO mode but are needed to avoid build
 // error.
-void sdCsInit(SdCsPin_t pin) {}
-void sdCsWrite(SdCsPin_t pin, bool level) {}
+void sdCsInit(SdCsPin_t pin) {
+}
+void sdCsWrite(SdCsPin_t pin, bool level) {
+}
 
 // SDIO configuration for main program
 SdioConfig g_sd_sdio_config(DMA_SDIO);

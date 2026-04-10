@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "AppWindow.h"
@@ -50,11 +52,7 @@
 #include <nanoprintf.h>
 #include <string.h>
 
-#ifdef ADV
-#include "Adapters/adv/audio/record.h"
-#else
 #include "Adapters/picoTracker/audio/record.h"
-#endif
 
 const uint16_t AUTOSAVE_INTERVAL_IN_SECONDS = 1 * 60;
 
@@ -89,9 +87,6 @@ GUIColor AppWindow::reserved4Color_(0xFF, 0xFF, 0x00, 15);
 // Initialize the animation frame counter
 uint32_t AppWindow::animationFrameCounter_ = 0;
 
-int AppWindow::charWidth_ = 8;
-int AppWindow::charHeight_ = 8;
-
 struct AppWindowViews {
   SongView songView;
   ChainView chainView;
@@ -113,19 +108,16 @@ struct AppWindowViews {
   NullView nullView;
 
   AppWindowViews(GUIWindow &w, ViewData &viewData)
-      : songView(w, &viewData), chainView(w, &viewData),
-        phraseView(w, &viewData), deviceView(w, &viewData),
-        themeView(w, &viewData), themeImportView(w, &viewData),
-        projectView(w, &viewData), importView(w, &viewData),
-        instrumentImportView(w, &viewData), instrumentView(w, &viewData),
-        tableView(w, &viewData), grooveView(w, &viewData),
-        selectProjectView(w, &viewData), mixerView(w, &viewData),
-        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData),
-        recordView(w, &viewData), nullView(w, &viewData) {}
+      : songView(w, &viewData), chainView(w, &viewData), phraseView(w, &viewData), deviceView(w, &viewData),
+        themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData), importView(w, &viewData),
+        instrumentImportView(w, &viewData), instrumentView(w, &viewData), tableView(w, &viewData),
+        grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
+        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), recordView(w, &viewData),
+        nullView(w, &viewData) {
+  }
 };
 
-void AppWindow::defineColor(FourCC colorCode, GUIColor &color,
-                            int paletteIndex) {
+void AppWindow::defineColor(FourCC colorCode, GUIColor &color, int paletteIndex) {
 
   Config *config = Config::GetInstance();
   auto rgbVar = config->FindVariable(colorCode);
@@ -145,8 +137,7 @@ void AppWindow::defineColor(FourCC colorCode, GUIColor &color,
 }
 
 AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
-    : GUIWindow(imp), project_(projectName), viewData_(&project_),
-      views_(nullptr), _currentView(nullptr) {
+    : GUIWindow(imp), project_(projectName), viewData_(&project_), views_(nullptr), _currentView(nullptr) {
 
   instance = this;
 
@@ -214,9 +205,11 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   // LoadProject() to be called from within the next time that AnimationUpdate()
   // is called
   loadProject_ = true;
-};
+}
 
-AppWindow::~AppWindow() { MidiService::GetInstance()->Close(); }
+AppWindow::~AppWindow() {
+  MidiService::GetInstance()->Close();
+}
 
 void AppWindow::SetSdCardPresent(bool present) {
   sdCardMissing_ = !present;
@@ -232,43 +225,38 @@ void appwindow_set_sdcard_present(bool present) {
   }
 }
 
-void AppWindow::DrawString(const char *string, const GUIPoint &pos,
-                           const GUITextProperties &props, bool force) {
+void AppWindow::DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props, bool force) {
 
   // Safety check for null string
   if (!string) {
     return;
   }
 
-  // we know we don't have more than SCREEN_WIDTH chars
-  char buffer[SCREEN_WIDTH + 1];
-  int len = strlen(string);
+  (void)force;
 
-  // Safety checks for offset calculation
-  int offset = (pos._x < 0) ? -pos._x / 8 : 0;
-  if (offset >= len) {
-    return; // Nothing to draw if offset is beyond string length
+  // DrawString and DrawChar share the same cache staging logic.
+  int x = pos._x;
+  for (const char *current = string; *current; ++current, ++x) {
+    GUIPoint charPos(x, pos._y);
+    DrawChar(*current, charPos, props);
   }
+}
 
-  len -= offset;
-  int available = SCREEN_WIDTH - ((pos._x < 0) ? 0 : pos._x);
-  len = std::min(len, available);
-
-  // Additional safety check
-  if (len <= 0) {
+void AppWindow::DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props) {
+  if (pos._y < 0 || pos._y >= SCREEN_HEIGHT) {
+    return;
+  }
+  if (pos._x < 0 || pos._x >= SCREEN_WIDTH) {
     return;
   }
 
-  memcpy(buffer, string + offset, len);
-  buffer[len] = 0;
-
-  NAssert((pos._x < SCREEN_WIDTH) && (pos._y < SCREEN_HEIGHT));
   int index = pos._x + SCREEN_WIDTH * pos._y;
-  memcpy(_charScreen + index, buffer, len);
-  // Ensure color index is masked to prevent overlap with inversion bit
+  _charScreen[index] = c;
+
+  // Ensure color index is masked to prevent overlap with inversion bit.
   unsigned char prop = (colorIndex_ & 0x7F) + (props.invert_ ? PROP_INVERT : 0);
-  memset(_charScreenProp + index, prop, len);
-};
+  _charScreenProp[index] = prop;
+}
 
 void AppWindow::Clear(bool all) {
   memset(_charScreen, ' ', SCREEN_CHARS);
@@ -277,14 +265,34 @@ void AppWindow::Clear(bool all) {
     memset(_preScreen, 0, SCREEN_CHARS);
     memset(_preScreenProp, 0, SCREEN_CHARS);
   };
-};
+}
 
 void AppWindow::ClearTextRect(GUIRect &r) {
-
   int x = r.Left();
   int y = r.Top();
   int w = r.Width();
   int h = r.Height();
+
+  // Clamp rectangle to screen bounds.
+  if (x < 0) {
+    w += x;  // Reduce width by the amount we're off-screen
+    x = 0;
+  }
+  if (y < 0) {
+    h += y;  // Reduce height by the amount we're off-screen
+    y = 0;
+  }
+  if (x + w > SCREEN_WIDTH) {
+    w = SCREEN_WIDTH - x;
+  }
+  if (y + h > SCREEN_HEIGHT) {
+    h = SCREEN_HEIGHT - y;
+  }
+
+  // Only clear if there's a valid region.
+  if (w <= 0 || h <= 0) {
+    return;
+  }
 
   unsigned char *st = _charScreen + x + (SCREEN_WIDTH * y);
   unsigned char *pr = _charScreenProp + x + (SCREEN_WIDTH * y);
@@ -296,7 +304,7 @@ void AppWindow::ClearTextRect(GUIRect &r) {
     st += (SCREEN_WIDTH - w);
     pr += (SCREEN_WIDTH - w);
   }
-};
+}
 
 void AppWindow::InvalidateTextCache() {
   // Force the next text flush to resend all cells without changing the current
@@ -407,16 +415,16 @@ void AppWindow::Flush() {
       previous++;
       currentProp++;
       previousProp++;
-      pos._x += AppWindow::charWidth_;
+      pos._x++;
     }
-    pos._y += AppWindow::charHeight_;
+    pos._y++;
     pos._x = 0;
   }
   GUIWindow::Flush();
   Unlock();
   memcpy(_preScreen, _charScreen, SCREEN_CHARS);
   memcpy(_preScreenProp, _charScreenProp, SCREEN_CHARS);
-};
+}
 
 AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
 
@@ -521,8 +529,7 @@ AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
   _currentView->OnFocus();
 
   if (!playerOK) {
-    MessageBox *mb = MessageBox::Create(views_->songView,
-                                        "Failed to initialize audio", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(views_->songView, "Failed to initialize audio", MBBF_OK);
     views_->songView.DoModal(mb);
   }
 
@@ -557,22 +564,20 @@ void AppWindow::CloseProject() {
 
   _currentView = &views_->nullView;
   views_->nullView.SetDirty(true);
-};
+}
 
-AppWindow *AppWindow::Create(GUICreateWindowParams &params,
-                             const char *projectName) {
-  I_GUIWindowImp &imp =
-      I_GUIWindowFactory::GetInstance()->CreateWindowImp(params);
+AppWindow *AppWindow::Create(GUICreateWindowParams &params, const char *projectName) {
+  I_GUIWindowImp &imp = I_GUIWindowFactory::GetInstance()->CreateWindowImp(params);
   alignas(AppWindow) static char appWindowMemBuf[sizeof(AppWindow)];
   AppWindow *w = new (appWindowMemBuf) AppWindow(imp, projectName);
   return w;
-};
+}
 
 void AppWindow::SetDirty() {
   if (_currentView) {
     _currentView->SetDirty(true);
   }
-};
+}
 
 void AppWindow::UpdateColorsFromConfig() {
   // now assign custom colors if they have been set device config
@@ -595,7 +600,7 @@ void AppWindow::UpdateColorsFromConfig() {
   // defineColor(FourCC::VarReserved2Color, reserved2Color_, 13);
   // defineColor(FourCC::VarReserved3Color, reserved3Color_, 14);
   // defineColor(FourCC::VarReserved4Color, reserved4Color_, 15);
-};
+}
 
 bool AppWindow::onEvent(GUIEvent &event) {
 
@@ -660,7 +665,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
   // View dirty flag will be checked in AnimationUpdate to determine if redraw
   // is needed
   return false;
-};
+}
 
 void AppWindow::onUpdate(bool redraw) {
   if (redraw) {
@@ -670,7 +675,7 @@ void AppWindow::onUpdate(bool redraw) {
     SetDirty();
   }
   // No Flush here - AnimationUpdate will handle it
-};
+}
 
 void AppWindow::AnimationUpdate() {
   // Increment the animation frame counter
@@ -680,12 +685,10 @@ void AppWindow::AnimationUpdate() {
   if (awaitingProjectLoadAck_) {
     if (_mask != 0) {
       FileSystem::GetInstance()->DeleteFile("/.current");
-      npf_snprintf(projectName_, sizeof(projectName_), "%s",
-                   UNNAMED_PROJECT_NAME);
+      npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
       loadProject_ = true;
       awaitingProjectLoadAck_ = false;
-      Trace::Error("Falling back to untitled after failed load of '%s'",
-                   failedProjectName_);
+      Trace::Error("Falling back to untitled after failed load of '%s'", failedProjectName_);
     }
     return;
   }
@@ -694,14 +697,9 @@ void AppWindow::AnimationUpdate() {
     LoadProjectResult loadResult = LoadProject(projectName_);
     loadProject_ = false;
     if (loadResult == LoadProjectResult::LOAD_FAILED) {
-      npf_snprintf(failedProjectName_, sizeof(failedProjectName_), "%s",
-                   projectName_);
-      Status::SetMultiLine(
-          "Invalid Project:\n%s\n  \nPress any key\nto continue...",
-          failedProjectName_);
-      Trace::Error(
-          "Failed to load project '%s'. Waiting for key press to load untitled",
-          failedProjectName_);
+      npf_snprintf(failedProjectName_, sizeof(failedProjectName_), "%s", projectName_);
+      Status::SetMultiLine("Invalid Project:\n%s\n  \nPress any key\nto continue...", failedProjectName_);
+      Trace::Error("Failed to load project '%s'. Waiting for key press to load untitled", failedProjectName_);
       awaitingProjectLoadAck_ = true;
       return;
     }
@@ -714,8 +712,7 @@ void AppWindow::AnimationUpdate() {
     System::GetInstance()->GetBatteryState(batteryState);
     if (!batteryState.error) {
       // only process battery status if no error state
-      if (batteryState.percentage < MINIMUM_ALLOWED_BATTERY_PERCENTAGE &&
-          !batteryState.charging) {
+      if (batteryState.percentage < MINIMUM_ALLOWED_BATTERY_PERCENTAGE && !batteryState.charging) {
         lowBatteryState_ = true;
         lowBatteryWarningCounter_++;
       } else {
@@ -730,8 +727,7 @@ void AppWindow::AnimationUpdate() {
 
   if (lowBatteryState_ && !lowBatteryMessageShown_) {
     if (!_currentView->HasModalView()) {
-      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "Low battery!",
-                                                "Connect charger", 0);
+      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "Low battery!", "Connect charger", 0);
       _currentView->DoModal(mb);
       lowBatteryMessageShown_ = true;
       SetDirty();
@@ -749,8 +745,7 @@ void AppWindow::AnimationUpdate() {
 
   if (sdCardMissing_ && !sdCardMessageShown_) {
     if (_currentView) {
-      FullScreenBox *mb = FullScreenBox::Create(
-          *_currentView, "SD Card Missing", "Insert SD Card", 0);
+      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "SD Card Missing", "Insert SD Card", 0);
       _currentView->DoModal(mb);
       sdCardMessageShown_ = true;
       SetDirty();
@@ -801,7 +796,7 @@ void AppWindow::AnimationUpdate() {
   }
 }
 
-void AppWindow::LayoutChildren(){};
+void AppWindow::LayoutChildren() {};
 
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
   if (d && (uintptr_t)d == (uintptr_t)FourCC::VarProjectName) {
@@ -900,8 +895,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
       // Check if the current view has a modal view
       const bool hasModal = _currentView->HasModalView();
       if (hasModal) {
-        _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(),
-                                                     pt->GetTickCount());
+        _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
       } else {
         _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
       }
@@ -919,8 +913,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
     break;
   }
   case VET_NEW_PROJECT: {
-    npf_snprintf(projectName_, sizeof(projectName_), "%s",
-                 UNNAMED_PROJECT_NAME);
+    npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
     createProjectOnLoad_ = true;
     loadProject_ = true;
     break;
@@ -947,7 +940,9 @@ void AppWindow::onQuitApp() {
   System::GetInstance()->PostQuitMessage();
 }
 
-void AppWindow::Print(char *line) { PrintMultiLine(line); }
+void AppWindow::Print(char *line) {
+  PrintMultiLine(line);
+}
 
 void AppWindow::PrintMultiLine(char *line) {
   Clear();
@@ -990,13 +985,13 @@ void AppWindow::PrintMultiLine(char *line) {
 
   // Preserve the build string at the bottom of the screen
   char buildString[SCREEN_WIDTH + 1];
-  npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s",
-               PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
+  npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
+               BUILD_COUNT);
   GUIPoint pos(0, 22);
   pos._x = (32 - strlen(buildString)) / 2;
   DrawString(buildString, pos, props);
   Flush();
-};
+}
 
 void AppWindow::SetColor(ColorDefinition cd) {
   // Ensure color index is within valid range (0-15)
@@ -1006,7 +1001,7 @@ void AppWindow::SetColor(ColorDefinition cd) {
     Trace::Error("APPWINDOW", "Invalid color index: %d", cd);
     colorIndex_ = CD_NORMAL; // Default to normal color
   }
-};
+}
 
 bool AppWindow::AutoSave() {
   Player *player = Player::GetInstance();
@@ -1015,14 +1010,11 @@ bool AppWindow::AutoSave() {
   }
   // only auto save when sequencer is not running, not recording,
   // and the user is in an autosave-safe view.
-  bool autosaveSafeView =
-      _currentView == &views_->songView || _currentView == &views_->chainView ||
-      _currentView == &views_->phraseView ||
-      _currentView == &views_->tableView ||
-      _currentView == &views_->grooveView ||
-      _currentView == &views_->instrumentView ||
-      _currentView == &views_->deviceView ||
-      _currentView == &views_->themeView || _currentView == &views_->mixerView;
+  bool autosaveSafeView = _currentView == &views_->songView || _currentView == &views_->chainView ||
+                          _currentView == &views_->phraseView || _currentView == &views_->tableView ||
+                          _currentView == &views_->grooveView || _currentView == &views_->instrumentView ||
+                          _currentView == &views_->deviceView || _currentView == &views_->themeView ||
+                          _currentView == &views_->mixerView;
   bool recording = IsRecordingActive();
   if (!player->IsRunning() && !recording && autosaveSafeView) {
     Trace::Log("APPWINDOW", "AutoSaving Project Data");

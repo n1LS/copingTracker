@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _TEXT_CHARGFX_H
@@ -47,18 +49,14 @@ void chargfx_clear(chargfx_color_t color);
 void chargfx_draw_screen();
 void chargfx_draw_changed();
 void chargfx_draw_changed_simple();
-void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width,
-                             uint8_t height);
+void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y,
-                       uint16_t width, uint16_t height);
+void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 void chargfx_set_foreground(chargfx_color_t color);
 void chargfx_set_background(chargfx_color_t color);
 void chargfx_set_cursor(uint8_t x, uint8_t y);
 uint8_t chargfx_get_cursor_x();
 uint8_t chargfx_get_cursor_y();
-void chargfx_print(const char *s, bool invert);
-void chargfx_write(const char *s, int len, bool invert);
 void chargfx_putc(char c, bool invert);
 void chargfx_set_palette_color(int idx, uint16_t rgb565_color);
 void chargfx_set_font_index(uint8_t idx);

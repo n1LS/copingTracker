@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "MidiInstrument.h"
@@ -23,10 +25,8 @@ MidiInstrument::NoteOffInfo MidiInstrument::NoteOffInfo::current = {0, 0};
 
 MidiInstrument::MidiInstrument()
     : I_Instrument(&variables_), channel_(FourCC::MidiInstrumentChannel, 0),
-      noteLen_(FourCC::MidiInstrumentNoteLength, 0),
-      volume_(FourCC::MidiInstrumentVolume, 255),
-      table_(FourCC::MidiInstrumentTable, VAR_OFF),
-      tableAuto_(FourCC::MidiInstrumentTableAutomation, false),
+      noteLen_(FourCC::MidiInstrumentNoteLength, 0), volume_(FourCC::MidiInstrumentVolume, 255),
+      table_(FourCC::MidiInstrumentTable, VAR_OFF), tableAuto_(FourCC::MidiInstrumentTableAutomation, false),
       program_(FourCC::MidiInstrumentProgram, VAR_OFF) {
 
   if (svc_ == 0) {
@@ -46,12 +46,12 @@ MidiInstrument::MidiInstrument()
   variables_.insert(variables_.end(), &program_);
 }
 
-MidiInstrument::~MidiInstrument(){};
+MidiInstrument::~MidiInstrument() {};
 
 bool MidiInstrument::Init() {
   tableState_.Reset();
   return true;
-};
+}
 
 void MidiInstrument::OnStart() {
   tableState_.Reset();
@@ -76,7 +76,7 @@ void MidiInstrument::OnStart() {
   }
 
   svc_->RegisterActiveChannel(channel_.GetInt());
-};
+}
 
 bool MidiInstrument::Start(int c, unsigned char note, bool retrigger) {
 
@@ -100,7 +100,7 @@ bool MidiInstrument::Start(int c, unsigned char note, bool retrigger) {
   useLogCurve_ = false;
 
   return true;
-};
+}
 
 void MidiInstrument::Stop(int c) {
 
@@ -123,15 +123,14 @@ void MidiInstrument::Stop(int c) {
   // clear last notes array
   lastNotes_[c].fill(0);
   playing_ = false;
-};
+}
 
 void MidiInstrument::SetChannel(int channel) {
   Variable *v = FindVariable(FourCC::MidiInstrumentChannel);
   v->SetInt(channel);
-};
+}
 
-bool MidiInstrument::Render(int channel, fixed *buffer, int size,
-                            bool updateTick) {
+bool MidiInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
 
   // We do it here so we have the opportunity to send some command before
   Variable *v = FindVariable(FourCC::MidiInstrumentChannel);
@@ -158,8 +157,7 @@ bool MidiInstrument::Render(int channel, fixed *buffer, int size,
         float diff = pitchBendTarget_ - pitchBendCurrent_;
         float sign = (diff > 0) ? 1.0f : -1.0f;
         float nextValue = pitchBendCurrent_ + (sign * pitchBendStep_);
-        if ((sign > 0 && nextValue >= pitchBendTarget_) ||
-            (sign < 0 && nextValue <= pitchBendTarget_)) {
+        if ((sign > 0 && nextValue >= pitchBendTarget_) || (sign < 0 && nextValue <= pitchBendTarget_)) {
           pitchBendCurrent_ = pitchBendTarget_;
           pitchBend_ = false;
           pitchBendStep_ = 1.0f;
@@ -176,8 +174,7 @@ bool MidiInstrument::Render(int channel, fixed *buffer, int size,
             }
           } else {
             // Linear pitch bend calculation.
-            pitchBendStep_ = (diff > 0 ? 1 : -1) *
-                             (abs(diff) / static_cast<float>(pitchBendSpeed_));
+            pitchBendStep_ = (diff > 0 ? 1 : -1) * (abs(diff) / static_cast<float>(pitchBendSpeed_));
             pitchBendCurrent_ += pitchBendStep_;
           }
         }
@@ -185,8 +182,7 @@ bool MidiInstrument::Render(int channel, fixed *buffer, int size,
       // If pitch bend value changed, send MIDI pitch bend message.
       if (pitchBendCurrent_ != prev) {
         // Convert internal pitch bend value to MIDI pitch bend range (0-16383).
-        int16_t midiValue =
-            ((pitchBendCurrent_ - PB_7BIT_MAX) * PB_CENTER) / PB_7BIT_MAX;
+        int16_t midiValue = ((pitchBendCurrent_ - PB_7BIT_MAX) * PB_CENTER) / PB_7BIT_MAX;
         int16_t bend = midiValue + PB_CENTER;
         // Clamp bend value to valid MIDI range.
         if (bend < 0) {
@@ -224,11 +220,11 @@ bool MidiInstrument::Render(int channel, fixed *buffer, int size,
     };
   };
   return false;
-};
+}
 
 bool MidiInstrument::IsInitialized() {
   return true; // Always initialised
-};
+}
 
 void MidiInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
 
@@ -255,9 +251,8 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     useLogCurve_ = true;
 
     // Convert to interpolation alpha using a nonlinear curve.
-    float growthFactor =
-        PB_MIN_GROWTH_FACTOR + (PB_MAX_GROWTH_FACTOR - PB_MIN_GROWTH_FACTOR) *
-                                   (1.0f - ((pitchBendSpeed_ - 1) / 253.0f));
+    float growthFactor = PB_MIN_GROWTH_FACTOR +
+                         (PB_MAX_GROWTH_FACTOR - PB_MIN_GROWTH_FACTOR) * (1.0f - ((pitchBendSpeed_ - 1) / 253.0f));
     float normalized = (growthFactor - 1.0f) / (PB_MAX_GROWTH_FACTOR - 1.0f);
     interpolationAlpha_ = powf(normalized, PB_CURVE_SHAPE) * PB_MAX_ALPHA;
   } break;
@@ -349,26 +344,24 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> MidiInstrument::GetDefaultName() {
 int MidiInstrument::GetTable() {
   Variable *v = FindVariable(FourCC::MidiInstrumentTable);
   return v->GetInt();
-};
+}
 
 bool MidiInstrument::GetTableAutomation() {
   Variable *v = FindVariable(FourCC::MidiInstrumentTableAutomation);
   return v->GetBool();
-};
+}
 
 void MidiInstrument::GetTableState(TableSaveState &state) {
-  memcpy(state.hopCount_, tableState_.hopCount_,
-         sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(state.hopCount_, tableState_.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
   memcpy(state.position_, tableState_.position_, sizeof(int) * 3);
   state.groove_ = tableState_.groove_;
-};
+}
 
 void MidiInstrument::SetTableState(TableSaveState &state) {
-  memcpy(tableState_.hopCount_, state.hopCount_,
-         sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(tableState_.hopCount_, state.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
   memcpy(tableState_.position_, state.position_, sizeof(int) * 3);
   tableState_.groove_ = state.groove_;
-};
+}
 
 void MidiInstrument::SendProgramChange(int channel, int program) {
   MidiMessage msg;
@@ -376,7 +369,7 @@ void MidiInstrument::SendProgramChange(int channel, int program) {
   msg.data1_ = program;
   msg.data2_ = MidiMessage::UNUSED_BYTE;
   svc_->QueueMessage(msg);
-};
+}
 
 void MidiInstrument::SendProgramChangeWithNote(int channel, int program) {
   // First send the program change
@@ -396,7 +389,7 @@ void MidiInstrument::SendProgramChangeWithNote(int channel, int program) {
   // Schedule the note-off message after 300ms using TimerService
   // This is non-blocking and will happen asynchronously
   timerSvc_->TriggerCallback(300, NoteOffCallback);
-};
+}
 
 void MidiInstrument::NoteOffCallback() {
   // This static callback will be called after the timer expires
@@ -408,4 +401,4 @@ void MidiInstrument::NoteOffCallback() {
     noteOff.data2_ = 0x00;
     svc_->QueueMessage(noteOff);
   }
-};
+}

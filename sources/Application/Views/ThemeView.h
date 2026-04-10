@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _THEME_VIEW_H_
@@ -36,7 +38,7 @@ public:
 
   virtual void ProcessButtonMask(unsigned short mask, bool pressed);
   virtual void DrawView();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int){};
+  virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   void OnFocus() override;
   void OnFocusLost() override;
 
@@ -53,8 +55,7 @@ private:
   void onConfirmThemeOverwrite(View &view, ModalView &dialog);
 
   void addSwatchField(ColorDefinition color, GUIPoint position);
-  void addColorField(const char *label, Variable *colorVar,
-                     ColorDefinition color, GUIPoint position);
+  void addColorField(const char *label, Variable *colorVar, ColorDefinition color, GUIPoint position);
   void syncFieldsFromConfig();
   void syncColorComponentVars(Variable *colorVar);
 
@@ -67,16 +68,13 @@ private:
 
   ColorComponentField *findColorComponentField(Observable *observable);
 
-  etl::vector<UIIntVarField, (COLOR_SUB_FIELDS_COUNT + 1)>
-      intVarField_; // for colors + 1 for font selector
+  etl::vector<UIIntVarField, (COLOR_SUB_FIELDS_COUNT + 1)> intVarField_; // for colors + 1 for font selector
   etl::vector<UISwatchField, COLOR_COUNT> swatchField_;
   etl::vector<UIStaticField, COLOR_COUNT> staticField_;
   etl::vector<Variable, COLOR_SUB_FIELDS_COUNT> colorComponentVars_;
-  etl::vector<ColorComponentField, COLOR_SUB_FIELDS_COUNT>
-      colorComponentFields_;
-  etl::vector<UIActionField, 2> actionField_; // For Import/Export buttons
-  etl::vector<UITextField<MAX_THEME_NAME_LENGTH>, 1>
-      textFields_; // For theme name input
+  etl::vector<ColorComponentField, COLOR_SUB_FIELDS_COUNT> colorComponentFields_;
+  etl::vector<UIActionField, 2> actionField_;                     // For Import/Export buttons
+  etl::vector<UITextField<MAX_THEME_NAME_LENGTH>, 1> textFields_; // For theme name input
   StringVariable<MAX_THEME_NAME_LENGTH> themeNameVar_;
 
   // Reference to the theme name field for direct access

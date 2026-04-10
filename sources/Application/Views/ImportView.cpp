@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ImportView.h"
@@ -47,10 +49,11 @@ enum ProjectPoolButton : uint8_t {
 };
 } // namespace
 
-ImportView::ImportView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData) {}
+ImportView::ImportView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
+}
 
-ImportView::~ImportView() {}
+ImportView::~ImportView() {
+}
 
 void ImportView::Reset() {
   topIndex_ = 0;
@@ -68,7 +71,9 @@ void ImportView::Reset() {
 }
 
 // Static method to set the source view type before opening ImportView
-void ImportView::SetSourceViewType(ViewType vt) { sourceViewType_ = vt; }
+void ImportView::SetSourceViewType(ViewType vt) {
+  sourceViewType_ = vt;
+}
 
 void ImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
   // Check for key release events
@@ -122,8 +127,7 @@ void ImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
     // EDIT+LEFT: go to parent directory within the import file browser.
     // NAV+LEFT remains reserved for leaving the ImportView entirely.
-    if ((mask & EPBM_EDIT) && (mask & EPBM_LEFT) && !(mask & EPBM_NAV) &&
-        !inProjectSampleDir_) {
+    if ((mask & EPBM_EDIT) && (mask & EPBM_LEFT) && !(mask & EPBM_NAV) && !inProjectSampleDir_) {
       goToParentDirectory(fs);
       isDirty_ = true;
       return;
@@ -206,10 +210,7 @@ void ImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
           fs->getFileName(fileIndex, name, PFILENAME_SIZE);
           showSampleEditor(name, true);
         } else if (selectedButton_ == kProjectButtonRemove) {
-#ifdef ADV
-          unsigned fileIndex = fileIndexList_[currentIndex_];
-          removeProjectSample(fileIndex, fs);
-#endif
+          // note yet supported on pico
         }
         return;
       }
@@ -255,9 +256,8 @@ void ImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
       if (inProjectSampleDir_ && fileIndexList_.empty()) {
         return; // Do nothing if the list is empty
       }
-      uint8_t buttonCount = inProjectSampleDir_
-                                ? static_cast<uint8_t>(kProjectPoolButtonCount)
-                                : static_cast<uint8_t>(kImportButtonCount);
+      uint8_t buttonCount = inProjectSampleDir_ ? static_cast<uint8_t>(kProjectPoolButtonCount)
+                                                : static_cast<uint8_t>(kImportButtonCount);
       if (mask & EPBM_LEFT) {
         selectedButton_ = (selectedButton_ + buttonCount - 1) % buttonCount;
       } else {
@@ -294,7 +294,7 @@ void ImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
   } else {
     // A modifier
   }
-};
+}
 
 void ImportView::DrawView() {
   if (fileIndexList_.empty()) {
@@ -316,8 +316,7 @@ void ImportView::DrawView() {
   auto fs = FileSystem::GetInstance();
 
   // Draw title with available storage space
-  const char *baseTitle =
-      inProjectSampleDir_ ? "Project Pool" : "Import Sample";
+  const char *baseTitle = inProjectSampleDir_ ? "Project Pool" : "Import Sample";
 
   // Create title with storage info
   char titleBuffer[40];
@@ -330,12 +329,10 @@ void ImportView::DrawView() {
   int x = 1;
   int y = pos._y + 2;
 
-  uint32_t availableSpace =
-      SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
+  uint32_t availableSpace = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
 
   // Loop through visible files in the list
-  for (size_t i = topIndex_;
-       i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
+  for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
     props.invert_ = false;
 
     unsigned fileIndex = fileIndexList_[i];
@@ -354,8 +351,7 @@ void ImportView::DrawView() {
       displayName += tempBuffer;
       // Format the display name with appropriate prefix
       if (inProjectSampleDir_ &&
-          viewData_->project_->SampleInUse(
-              etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
+          viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
         SetColor(CD_ACCENT);
         DrawString(x, y, "*", props);
         SetColor(CD_NORMAL);
@@ -441,9 +437,7 @@ void ImportView::DrawView() {
       props.invert_ = false;
       DrawString(2, 3, "[pool empty]", props);
     } else {
-      // we make edit the first button to make things easier because remove is
-      // only available for now on the Advance and even on Advance we dont want
-      // remove to be the default button
+      // we make edit the first button to make things easier
       if (selectedButton_ == 0) {
         SetColor(CD_HILITE2);
         props.invert_ = true;
@@ -459,11 +453,7 @@ void ImportView::DrawView() {
         SetColor(CD_HILITE1);
         props.invert_ = false;
       }
-#ifdef ADV
-      DrawString(x + 9, y, "Remove", props);
-#else
       DrawString(x + 9, y, "N/A", props);
-#endif
 
       if (selectedButton_ == kProjectButtonVolume) {
         SetColor(CD_HILITE2);
@@ -501,27 +491,24 @@ void ImportView::DrawView() {
   char tempBuffer[SCREEN_WIDTH];
   tempBuffer[SCREEN_WIDTH - 1] = '\0';
 
-  npf_snprintf(tempBuffer, sizeof(tempBuffer), "size:%i/%i", filesize,
-               availableSpace);
+  npf_snprintf(tempBuffer, sizeof(tempBuffer), "size:%i/%i", filesize, availableSpace);
 
   // pad status line buffer with trailing space chars to ensure the invert
   // color is applied to entire line
-  int32_t padWidth =
-      (SCREEN_WIDTH - 2) - static_cast<int32_t>(strlen(tempBuffer));
+  int32_t padWidth = (SCREEN_WIDTH - 2) - static_cast<int32_t>(strlen(tempBuffer));
   if (padWidth < 0) {
     padWidth = 0;
   }
-  npf_snprintf(tempBuffer, sizeof(tempBuffer), "%s%*s", tempBuffer, padWidth,
-               " ");
+  npf_snprintf(tempBuffer, sizeof(tempBuffer), "%s%*s", tempBuffer, padWidth, " ");
 
   x = 1;  // align with rest screen title & file list
   y = 23; // bottom line
   DrawString(x, y, tempBuffer, props);
 
   SetColor(CD_NORMAL);
-};
+}
 
-void ImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick){};
+void ImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {};
 
 void ImportView::OnFocus() {
   // clear stale flags
@@ -542,7 +529,7 @@ void ImportView::OnFocus() {
   } else {
     jumpToDirectory(fs, viewData_->importViewStartDir);
   }
-};
+}
 
 void ImportView::warpToNextSample(bool goUp) {
   if (goUp) {
@@ -594,8 +581,7 @@ void ImportView::preview(char *name) {
     auto error = wavRes.error();
     switch (error) {
     case INVALID_FILE:
-      mb = MessageBox::Create(*this, "Preview Failed", "Could not open file",
-                              MBBF_OK);
+      mb = MessageBox::Create(*this, "Preview Failed", "Could not open file", MBBF_OK);
       break;
     case UNSUPPORTED_FILE_FORMAT:
     case INVALID_HEADER:
@@ -605,8 +591,7 @@ void ImportView::preview(char *name) {
     case UNSUPPORTED_AUDIO_FORMAT:
     case UNSUPPORTED_BITDEPTH:
     case UNSUPPORTED_SAMPLERATE:
-      mb = MessageBox::Create(*this, "Preview Failed", "Unsupported format",
-                              MBBF_OK);
+      mb = MessageBox::Create(*this, "Preview Failed", "Unsupported format", MBBF_OK);
       break;
     }
   } else {
@@ -619,14 +604,12 @@ void ImportView::preview(char *name) {
   }
 
   // Start playing the selected sample
-  Trace::Debug("Starting preview of %s (single cycle: %d)", name,
-               isSingleCycle);
+  Trace::Debug("Starting preview of %s (single cycle: %d)", name, isSingleCycle);
   previewPlayingIndex_ = currentIndex_;
 
   // Use looping for single cycle waveforms
   if (isSingleCycle) {
-    Trace::Debug("Looping single cycle waveform: %s (size: %d bytes)", name,
-                 fileSize);
+    Trace::Debug("Looping single cycle waveform: %s (size: %d bytes)", name, fileSize);
     Player::GetInstance()->StartLoopingStreaming(name);
   } else {
     Player::GetInstance()->StartStreaming(name);
@@ -636,8 +619,7 @@ void ImportView::preview(char *name) {
 void ImportView::import() {
   // stop playing before trying to import
   if (Player::GetInstance()->IsPlaying()) {
-    MessageBox *mb =
-        MessageBox::Create(*this, "Can't import while previewing", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Can't import while previewing", MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -653,8 +635,7 @@ void ImportView::import() {
 
   // Check if we're in the project's sample directory
   if (inProjectSampleDir_) {
-    MessageBox *mb =
-        MessageBox::Create(*this, "Can't import from project!", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Can't import from project!", MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -666,11 +647,9 @@ void ImportView::import() {
   if (currentCount >= MAX_SAMPLES) {
     // Show error dialog to inform the user
     char message[SCREEN_WIDTH];
-    npf_snprintf(message, sizeof(message), "Maximum of %d samples reached",
-                 MAX_SAMPLES);
+    npf_snprintf(message, sizeof(message), "Maximum of %d samples reached", MAX_SAMPLES);
     // pad with trailing spaces as dialog size based on title
-    MessageBox *mb = MessageBox::Create(*this, "Cannot Import Sample      ",
-                                        message, MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Cannot Import Sample      ", message, MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -681,8 +660,7 @@ void ImportView::import() {
   // Check if the sample would fit in available storage
   if (!pool->CheckSampleFits(fileSize)) {
     // Get available flash space for the message
-    uint32_t availableFlash =
-        SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
+    uint32_t availableFlash = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
 
     // Show error dialog to inform the user
     char message[SCREEN_WIDTH];
@@ -690,8 +668,7 @@ void ImportView::import() {
     uint32_t availBytes = availableFlash;
     npf_snprintf(message, sizeof(message), "Only %d bytes free", availBytes);
     // pad with trailing spaces as dialog width based on title length
-    MessageBox *mb =
-        MessageBox::Create(*this, "Sample Too Large       ", message, MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Sample Too Large       ", message, MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -704,8 +681,7 @@ void ImportView::import() {
     auto error = wavRes.error();
     switch (error) {
     case INVALID_FILE:
-      mb = MessageBox::Create(*this, "Import Failed", "Could not open file",
-                              MBBF_OK);
+      mb = MessageBox::Create(*this, "Import Failed", "Could not open file", MBBF_OK);
       break;
     case UNSUPPORTED_FILE_FORMAT:
     case INVALID_HEADER:
@@ -715,8 +691,7 @@ void ImportView::import() {
     case UNSUPPORTED_AUDIO_FORMAT:
     case UNSUPPORTED_BITDEPTH:
     case UNSUPPORTED_SAMPLERATE:
-      mb = MessageBox::Create(*this, "Import Failed", "unsupported format",
-                              MBBF_OK);
+      mb = MessageBox::Create(*this, "Import Failed", "unsupported format", MBBF_OK);
       break;
     }
   } else {
@@ -731,8 +706,7 @@ void ImportView::import() {
   int sampleID = pool->ImportSample(name, projName);
 
   if (sampleID >= 0) {
-    I_Instrument *instr =
-        viewData_->project_->GetInstrumentBank()->GetInstrument(toInstr_);
+    I_Instrument *instr = viewData_->project_->GetInstrumentBank()->GetInstrument(toInstr_);
     if (instr->GetType() == IT_SAMPLE) {
       SampleInstrument *sinstr = (SampleInstrument *)instr;
       sinstr->AssignSample(sampleID);
@@ -742,21 +716,19 @@ void ImportView::import() {
     // check if we had to truncate filename
     size_t nameLength = strlen(name);
     if (nameLength > MAX_INSTRUMENT_FILENAME_LENGTH) {
-      Trace::Log("PICOIMPORT", "Filename too long: %s (%zu chars, max is %d)",
-                 name, nameLength, MAX_INSTRUMENT_FILENAME_LENGTH);
-      MessageBox *mb = MessageBox::Create(*this, "Sample name Truncated!",
-                                          "Max filename length:24", MBBF_OK);
+      Trace::Log("PICOIMPORT", "Filename too long: %s (%zu chars, max is %d)", name, nameLength,
+                 MAX_INSTRUMENT_FILENAME_LENGTH);
+      MessageBox *mb = MessageBox::Create(*this, "Sample name Truncated!", "Max filename length:24", MBBF_OK);
       DoModal(mb);
     }
   } else {
     Trace::Error("failed to import sample");
     // Show a generic error message if import failed for other reasons
-    MessageBox *mb = MessageBox::Create(*this, "Import Failed",
-                                        "Could not import sample", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Import Failed", "Could not import sample", MBBF_OK);
     DoModal(mb);
   };
   isDirty_ = true;
-};
+}
 
 void ImportView::adjustPreviewVolume(int offset) {
   // Get the project instance
@@ -785,8 +757,7 @@ void ImportView::adjustPreviewVolume(int offset) {
 
 bool ImportView::changeDirectory(FileSystem *fs, const char *name) {
   if (strcmp(name, "..") == 0 && fs->isParentRoot()) {
-    Trace::Log("PICOIMPORT",
-               "Detected top-level directory, navigating to root");
+    Trace::Log("PICOIMPORT", "Detected top-level directory, navigating to root");
     return fs->chdir("/");
   }
 
@@ -804,19 +775,15 @@ void ImportView::enterDirectory(FileSystem *fs, const char *name) {
   if (strcmp(projName, name) == 0) {
     jumpToDirectory(fs, PROJECTS_DIR);
 
-    Trace::Log("PICOIMPORT",
-               "NOT allowed to browse into current project sample directory");
+    Trace::Log("PICOIMPORT", "NOT allowed to browse into current project sample directory");
     return;
   }
 
   if (dirIndexStack_.full()) {
-    Trace::Error("ImportView directory stack overflow at depth %d",
-                 DirectoryIndexStackDepth);
+    Trace::Error("ImportView directory stack overflow at depth %d", DirectoryIndexStackDepth);
     char message[SCREEN_WIDTH];
-    npf_snprintf(message, sizeof(message), "Max depth is %d",
-                 DirectoryIndexStackDepth);
-    MessageBox *mb =
-        MessageBox::Create(*this, "Can't enter folder", message, MBBF_OK);
+    npf_snprintf(message, sizeof(message), "Max depth is %d", DirectoryIndexStackDepth);
+    MessageBox *mb = MessageBox::Create(*this, "Can't enter folder", message, MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -856,9 +823,7 @@ void ImportView::jumpToDirectory(FileSystem *fs, const char *name) {
   refreshFileIndexList(fs);
 }
 
-void ImportView::showSampleEditor(
-    etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename,
-    bool isProjectSample) {
+void ImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample) {
 
   viewData_->sampleEditorFilename = filename;
   viewData_->isShowingSampleEditorProjectPool = isProjectSample;
@@ -878,27 +843,21 @@ void ImportView::removeProjectSample(uint8_t fileIndex, FileSystem *fs) {
   fs->getFileName(fileIndex, filename, PFILENAME_SIZE);
 
   // first check if a instrument uses this sample
-  bool inUse = viewData_->project_->SampleInUse(
-      etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(filename));
+  bool inUse = viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(filename));
 
   if (inUse) {
-    MessageBox *mb =
-        MessageBox::Create(*this, "Cannot remove", "Sample in use!", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Cannot remove", "Sample in use!", MBBF_OK);
     DoModal(mb);
     return;
   }
 
   // add spacing for basic way to size dialog wider to give Ok/cancel
   // buttons between space
-  MessageBox *mb = MessageBox::Create(*this, "    Remove sample?    ", filename,
-                                      MBBF_OK | MBBF_CANCEL);
+  MessageBox *mb = MessageBox::Create(*this, "    Remove sample?    ", filename, MBBF_OK | MBBF_CANCEL);
   pendingDeleteFs_ = fs;
   strncpy(pendingDeleteFilename_, filename, PFILENAME_SIZE - 1);
   pendingDeleteFilename_[PFILENAME_SIZE - 1] = '\0';
-  DoModal(mb,
-          ModalViewCallback::create<ImportView,
-                                    &ImportView::onConfirmRemoveProjectSample>(
-              *this));
+  DoModal(mb, ModalViewCallback::create<ImportView, &ImportView::onConfirmRemoveProjectSample>(*this));
 }
 
 void ImportView::onConfirmRemoveProjectSample(View &, ModalView &dialog) {

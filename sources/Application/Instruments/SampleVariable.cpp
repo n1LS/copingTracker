@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SampleVariable.h"
@@ -12,15 +14,15 @@
 
 SampleVariable::SampleVariable(FourCC id) : WatchedVariable(id, 0, 0, -1) {
   SamplePool *pool = SamplePool::GetInstance();
-  list_.char_ = pool->GetNameList();
+  list_ = pool->GetNameList();
   listSize_ = pool->GetNameListSize();
   pool->AddObserver(*this);
-};
+}
 
 SampleVariable::~SampleVariable() {
   SamplePool *pool = SamplePool::GetInstance();
   pool->RemoveObserver(*this);
-};
+}
 
 void SampleVariable::Update(Observable &o, I_ObservableData *d) {
   SamplePoolEvent *e = (SamplePoolEvent *)d;
@@ -43,6 +45,6 @@ void SampleVariable::Update(Observable &o, I_ObservableData *d) {
   // For inserts, just refresh list pointers below
   // indices remain valid since imports append at the end
   SamplePool *pool = (SamplePool *)&o;
-  list_.char_ = pool->GetNameList();
+  list_ = pool->GetNameList();
   listSize_ = pool->GetNameListSize();
-};
+}

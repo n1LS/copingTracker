@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MESSAGE_BOX_H_
@@ -20,19 +22,12 @@
 
 enum MessageBoxList { MBL_OK = 0, MBL_YES, MBL_CANCEL, MBL_NO, MBL_LAST };
 
-enum MessageBoxButtonFlag {
-  MBBF_OK = 1,
-  MBBF_YES = 2,
-  MBBF_CANCEL = 4,
-  MBBF_NO = 8
-};
+enum MessageBoxButtonFlag { MBBF_OK = 1, MBBF_YES = 2, MBBF_CANCEL = 4, MBBF_NO = 8 };
 
 class MessageBox : public ModalView {
 public:
-  static MessageBox *Create(View &view, const char *message,
-                            int btnFlags = MBBF_OK);
-  static MessageBox *Create(View &view, const char *message,
-                            const char *message2, int btnFlags = MBBF_OK);
+  static MessageBox *Create(View &view, const char *message, int btnFlags = MBBF_OK);
+  static MessageBox *Create(View &view, const char *message, const char *message2, int btnFlags = MBBF_OK);
   virtual ~MessageBox();
   virtual void Destroy() override;
 
@@ -40,12 +35,11 @@ public:
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int currentTick);
   virtual void OnFocus();
   virtual void ProcessButtonMask(unsigned short mask, bool pressed);
-  virtual void AnimationUpdate(){};
+  virtual void AnimationUpdate() {};
 
 protected:
   MessageBox(View &view, const char *message, int btnFlags = MBBF_OK);
-  MessageBox(View &view, const char *message, const char *message2,
-             int btnFlags = MBBF_OK);
+  MessageBox(View &view, const char *message, const char *message2, int btnFlags = MBBF_OK);
   etl::string<SCREEN_WIDTH - 2> line1_ = "";
   etl::string<SCREEN_WIDTH - 2> line2_ = "";
   int button_[4];

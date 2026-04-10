@@ -3,19 +3,24 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Observable.h"
 
-Observable::Observable() { _hasChanged = false; }
+Observable::Observable() {
+  _hasChanged = false;
+}
 
 Observable::Observable(etl::ivector<I_Observer *> *list) : _list(list) {
   _hasChanged = false;
 }
 
-Observable::~Observable() {}
+Observable::~Observable() {
+}
 
 void Observable::AddObserver(I_Observer &o) {
   if (_list != NULL) {
@@ -66,6 +71,10 @@ void Observable::NotifyObservers(I_ObservableData *d) {
   }
 }
 
-void Observable::SetChanged() { _hasChanged = true; }
+void Observable::SetChanged() {
+  _hasChanged = true;
+}
 
-bool Observable::HasChanged() { return _hasChanged; }
+bool Observable::HasChanged() {
+  return _hasChanged;
+}

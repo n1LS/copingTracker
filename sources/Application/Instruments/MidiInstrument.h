@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MIDI_INSTRUMENT_H_
@@ -49,9 +51,13 @@ public:
 
   virtual bool IsInitialized();
 
-  virtual bool IsEmpty() { return false; };
+  virtual bool IsEmpty() {
+    return false;
+  };
 
-  virtual InstrumentType GetType() { return IT_MIDI; };
+  virtual InstrumentType GetType() {
+    return IT_MIDI;
+  };
 
   virtual etl::string<MAX_INSTRUMENT_NAME_LENGTH> GetDefaultName();
 
@@ -61,7 +67,9 @@ public:
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
   virtual void SetTableState(TableSaveState &state);
-  etl::ilist<Variable *> *Variables() { return &variables_; };
+  etl::ilist<Variable *> *Variables() {
+    return &variables_;
+  };
 
   void SetChannel(int i);
   void SendProgramChange(int channel, int program);

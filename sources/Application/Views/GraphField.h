@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _GRAPH_FIELD_H_
@@ -16,13 +18,9 @@
 
 class GraphField : public UIField {
 public:
-#ifdef ADV
-  static constexpr int32_t BitmapWidth = 720;
-  static constexpr int32_t BitmapHeight = 180;
-#else
   static constexpr int32_t BitmapWidth = 320;
   static constexpr int32_t BitmapHeight = 80;
-#endif
+
   static constexpr int32_t CacheSize = BitmapWidth;
   static constexpr size_t MaxMarkers = SampleInstrument::MaxSlices + 3;
 
@@ -30,8 +28,8 @@ public:
   ~GraphField() override = default;
 
   void Draw(GUIWindow &w, int offset = 0) override;
-  void OnClick() override{};
-  void ProcessArrow(unsigned short) override{};
+  void OnClick() override {};
+  void ProcessArrow(unsigned short) override {};
 
   void Reset();
   void SetShowBaseline(bool show);
@@ -59,8 +57,7 @@ public:
   void RequestFullRedraw();
 
   void SetMarkerCount(size_t count);
-  void SetMarker(size_t index, uint32_t sample, ColorDefinition color,
-                 bool visible);
+  void SetMarker(size_t index, uint32_t sample, ColorDefinition color, bool visible);
 
   int32_t SampleToPixel(uint32_t sample) const;
   void DrawGraph(View &view);

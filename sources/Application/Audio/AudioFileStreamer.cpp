@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "AudioFileStreamer.h"
@@ -29,14 +31,14 @@ AudioFileStreamer::AudioFileStreamer() {
   fpSpeed_ = FP_ONE;         // Default 1.0 in fixed point
   project_ = NULL;
   singleCycleData_ = NULL;
-#ifndef ADV
   stopRequested_ = false;
-#endif
   referencePitch_ = 261.63f; // C4 = 261.63 Hz (using C4 to compensate for how
                              // its actually what we call C3 in pT)
-};
+}
 
-AudioFileStreamer::~AudioFileStreamer() { wav_.Close(); };
+AudioFileStreamer::~AudioFileStreamer() {
+  wav_.Close();
+}
 
 bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
   Trace::Debug("Starting to stream:%s from sample %d", name, startSample);
@@ -48,9 +50,7 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
 
   name_ = name;
   position_ = (startSample > 0) ? float(startSample) : 0.0f;
-#ifndef ADV
   stopRequested_ = false;
-#endif
 
   wav_.Close();
   Trace::Log("", "wave open:%s", name_.c_str());
@@ -80,16 +80,13 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
     // Calculate the speed factor for the reference pitch
     ratio = (float)samplesPerSecond / (float)systemSampleRate_;
 
-    Trace::Debug(
-        "AudioFileStreamer: Using reference pitch for single cycle waveform. "
-        "Pitch: %.2f Hz, Samples: %ld, Ratio: %.6f",
-        referencePitch_, size, ratio);
+    Trace::Debug("AudioFileStreamer: Using reference pitch for single cycle waveform. "
+                 "Pitch: %.2f Hz, Samples: %ld, Ratio: %.6f",
+                 referencePitch_, size, ratio);
   } else {
     // Standard sample rate conversion for normal samples
     ratio = (float)fileSampleRate_ / (float)systemSampleRate_;
-    Trace::Debug(
-        "AudioFileStreamer: Using file sample rate for playback. Ratio: %.6f",
-        ratio);
+    Trace::Debug("AudioFileStreamer: Using file sample rate for playback. Ratio: %.6f", ratio);
   }
 
   fpSpeed_ = fl2fp(ratio);
@@ -114,13 +111,11 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
 
     while (remainingSize > 0) {
       // Calculate the chunk size for this iteration
-      int chunkSize =
-          (remainingSize > SAFE_CHUNK_SIZE) ? SAFE_CHUNK_SIZE : remainingSize;
+      int chunkSize = (remainingSize > SAFE_CHUNK_SIZE) ? SAFE_CHUNK_SIZE : remainingSize;
 
       // Load this chunk
       if (!wav_.GetBuffer(currentPos, chunkSize)) {
-        Trace::Error("Failed to load chunk at position %d, size %d", currentPos,
-                     chunkSize);
+        Trace::Error("Failed to load chunk at position %d, size %d", currentPos, chunkSize);
         break;
       }
 
@@ -138,8 +133,7 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
         //     "(%d bytes)",
         //     currentPos, chunkSize, bytesToCopy);
       } else {
-        Trace::Error("Failed to get sample buffer for chunk at position %d",
-                     currentPos);
+        Trace::Error("Failed to get sample buffer for chunk at position %d", currentPos);
         break;
       }
 
@@ -151,9 +145,7 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
     // Set the pointer to our buffer
     if (remainingSize == 0) {
       singleCycleData_ = singleCycleBuffer_;
-      Trace::Debug(
-          "Successfully loaded entire single cycle waveform: %ld samples",
-          size);
+      Trace::Debug("Successfully loaded entire single cycle waveform: %ld samples", size);
     } else {
       // We didn't load the entire waveform
       Trace::Error("Failed to load entire single cycle waveform");
@@ -165,10 +157,9 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
   mode_ = looping ? AFSM_LOOPING : AFSM_PLAYING;
 
   return true;
-};
+}
 
 void AudioFileStreamer::Stop() {
-#ifndef ADV
   // Because Stop() is called from the "ui thread"" (Core0 on pico) while
   // rendering is on "audio thread" (Core1 on pico), can get a race if the wav
   // file is closed in Stop() while rendering is still reading from the file to
@@ -177,26 +168,19 @@ void AudioFileStreamer::Stop() {
   stopRequested_ = true;
   mode_ = AFSM_STOPPED;
   Trace::Debug("Streaming stopped");
-#else
-  mode_ = AFSM_STOPPED;
-  wav_.Close();
-  Trace::Debug("Streaming stopped");
-#endif
-};
+}
 
 bool AudioFileStreamer::IsPlaying() {
   return (mode_ == AFSM_PLAYING || mode_ == AFSM_LOOPING);
 }
 
 bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
-#ifndef ADV
   if (stopRequested_) {
     wav_.Close();
     stopRequested_ = false;
     mode_ = AFSM_STOPPED;
     return false;
   }
-#endif
   // See if we're playing
   if (mode_ == AFSM_STOPPED) {
     return false;
@@ -320,8 +304,7 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
 
   // Read the samples from the file - just once at the current position
   if (!wav_.GetBuffer((int)position_, bufferSize)) {
-    Trace::Error("AudioFileStreamer: Failed to get buffer at position %d",
-                 (int)position_);
+    Trace::Error("AudioFileStreamer: Failed to get buffer at position %d", (int)position_);
     mode_ = AFSM_STOPPED;
     return false;
   }
@@ -351,8 +334,7 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
 
       // Read the next buffer
       if (!wav_.GetBuffer((int)position_, bufferSize)) {
-        Trace::Error("AudioFileStreamer: Failed to get buffer at position %d",
-                     (int)position_);
+        Trace::Error("AudioFileStreamer: Failed to get buffer at position %d", (int)position_);
         mode_ = AFSM_STOPPED;
         return false;
       }

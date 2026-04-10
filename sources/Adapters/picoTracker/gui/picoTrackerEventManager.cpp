@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerEventManager.h"
@@ -67,9 +69,11 @@ int readFromUSBCDC(char *buf, int len) {
   return rc;
 }
 
-picoTrackerEventManager::picoTrackerEventManager() {}
+picoTrackerEventManager::picoTrackerEventManager() {
+}
 
-picoTrackerEventManager::~picoTrackerEventManager() {}
+picoTrackerEventManager::~picoTrackerEventManager() {
+}
 
 bool picoTrackerEventManager::Init() {
   EventManager::Init();
@@ -96,8 +100,7 @@ int picoTrackerEventManager::MainLoop() {
 
     // Poll MIDI service to process any pending MIDI messages
     if (midiService) {
-      picoTrackerMidiService *ptMidiService =
-          (picoTrackerMidiService *)midiService;
+      picoTrackerMidiService *ptMidiService = (picoTrackerMidiService *)midiService;
       if (ptMidiService) {
         ptMidiService->poll();
       }
@@ -122,7 +125,9 @@ void picoTrackerEventManager::PostQuitMessage() {
   finished_ = true;
 }
 
-int picoTrackerEventManager::GetKeyCode(const char *name) { return -1; }
+int picoTrackerEventManager::GetKeyCode(const char *name) {
+  return -1;
+}
 
 void picoTrackerEventManager::ProcessInputEvent() {
   uint16_t newMask, sendMask;
@@ -151,8 +156,7 @@ void picoTrackerEventManager::ProcessInputEvent() {
   }
 
   // compute mask to send
-  sendMask = (newMask ^ buttonMask_) |
-             (newMask & (KEY_LEFT | KEY_RIGHT | KEY_UP | KEY_DOWN));
+  sendMask = (newMask ^ buttonMask_) | (newMask & (KEY_LEFT | KEY_RIGHT | KEY_UP | KEY_DOWN));
 
   // see if we're repeating
   if (newMask == buttonMask_) {

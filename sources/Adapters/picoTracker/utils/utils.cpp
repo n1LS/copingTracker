@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "utils.h"
@@ -17,10 +19,8 @@
 #include <stdio.h>
 
 void measure_freqs(void) {
-  uint f_pll_sys =
-      frequency_count_khz(CLOCKS_FC0_SRC_VALUE_PLL_SYS_CLKSRC_PRIMARY);
-  uint f_pll_usb =
-      frequency_count_khz(CLOCKS_FC0_SRC_VALUE_PLL_USB_CLKSRC_PRIMARY);
+  uint f_pll_sys = frequency_count_khz(CLOCKS_FC0_SRC_VALUE_PLL_SYS_CLKSRC_PRIMARY);
+  uint f_pll_usb = frequency_count_khz(CLOCKS_FC0_SRC_VALUE_PLL_USB_CLKSRC_PRIMARY);
   uint f_rosc = frequency_count_khz(CLOCKS_FC0_SRC_VALUE_ROSC_CLKSRC);
   uint f_clk_sys = frequency_count_khz(CLOCKS_FC0_SRC_VALUE_CLK_SYS);
   uint f_clk_peri = frequency_count_khz(CLOCKS_FC0_SRC_VALUE_CLK_PERI);
@@ -180,8 +180,7 @@ void sd_bench() {
     file.sync();
     t = millis() - t;
     s = file.fileSize();
-    Trace::Debug("%i,%i,%i,%i", s / t, maxLatency, minLatency,
-                 totalLatency / n);
+    Trace::Debug("%i,%i,%i,%i", s / t, maxLatency, minLatency, totalLatency / n);
   }
   Trace::Debug("Starting read test, please wait.");
   Trace::Debug("read speed and latency");
@@ -222,8 +221,7 @@ void sd_bench() {
     }
     s = file.fileSize();
     t = millis() - t;
-    Trace::Debug("%i,%i,%i,%i", s / t, maxLatency, minLatency,
-                 totalLatency / n);
+    Trace::Debug("%i,%i,%i,%i", s / t, maxLatency, minLatency, totalLatency / n);
   }
   Trace::Debug("Done");
   file.close();

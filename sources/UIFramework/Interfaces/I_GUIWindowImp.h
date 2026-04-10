@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _I_GUIWINDOWIMP_H_
@@ -23,7 +25,7 @@ class GUIWindow;
 
 class I_GUIWindowImp : public I_GUIGraphics {
 public:
-  virtual ~I_GUIWindowImp(){};
+  virtual ~I_GUIWindowImp() {};
 
   // This method allows to have back pointer to the framework window
   // to avoid heavy searches when having to forward system events

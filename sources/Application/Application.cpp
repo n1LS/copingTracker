@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Application/Application.h"
@@ -22,7 +24,8 @@ bool forceLoadUntitledProject = false;
 
 Application *Application::instance_ = NULL;
 
-Application::Application() {}
+Application::Application() {
+}
 
 bool Application::Init(GUICreateWindowParams &params) {
   PersistencyService::GetInstance();
@@ -44,13 +47,12 @@ bool Application::Init(GUICreateWindowParams &params) {
     if (v) {
       unsigned char brightness = (unsigned char)v->GetInt();
       System::GetInstance()->SetDisplayBrightness(brightness);
-      Trace::Log("PICOTRACKERSYSTEM", "Set display brightness to %d",
-                 brightness);
+      Trace::Log("PICOTRACKERSYSTEM", "Set display brightness to %d", brightness);
     }
   }
 
   return true;
-};
+}
 
 // will put the current project name into the passed in char buffer projectName
 // will return true if a new project was created (vs loading prev open project)
@@ -64,15 +66,12 @@ bool Application::initProject(char *projectName) {
   }
 
   // read new proj name after reboot
-  if (PersistencyService::GetInstance()->LoadCurrentProjectName(projectName) !=
-      PERSIST_LOAD_FAILED) {
-    if (PersistencyService::GetInstance()->Load(projectName) ==
-        PERSIST_LOAD_FAILED) {
+  if (PersistencyService::GetInstance()->LoadCurrentProjectName(projectName) != PERSIST_LOAD_FAILED) {
+    if (PersistencyService::GetInstance()->Load(projectName) == PERSIST_LOAD_FAILED) {
       Trace::Error("failed to load CURRENT proj: %s", projectName);
       if (strcmp(projectName, UNNAMED_PROJECT_NAME) == 0) {
         // untitled project is missing so need to create a new one
-        if (PersistencyService::GetInstance()->CreateProject() !=
-            PERSIST_SAVED) {
+        if (PersistencyService::GetInstance()->CreateProject() != PERSIST_SAVED) {
           Trace::Log("APPLICATION", "FAILED to create new UNTITLED project !!");
           // TODO: show user some sort of error message and how to recover from
           // this?
@@ -114,6 +113,10 @@ void Application::createIfNotExists(FileSystem *fs, const char *path) {
   }
 }
 
-GUIWindow *Application::GetWindow() { return window_; };
+GUIWindow *Application::GetWindow() {
+  return window_;
+}
 
-Application::~Application() { delete window_; }
+Application::~Application() {
+  delete window_;
+}

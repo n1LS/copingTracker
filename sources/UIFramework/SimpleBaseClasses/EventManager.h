@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 /*
@@ -24,17 +26,12 @@
 #define PICO_CLOCK_INTERVAL 33 // ~30Hz
 #define PICO_CLOCK_HZ (1000 / PICO_CLOCK_INTERVAL)
 
-enum AppButton {
-  APP_BUTTON_PLAY,
-  APP_BUTTON_VOLINC,
-  APP_BUTTON_VOLDEC,
-  APP_BUTTON_LAST
-};
+enum AppButton { APP_BUTTON_PLAY, APP_BUTTON_VOLINC, APP_BUTTON_VOLDEC, APP_BUTTON_LAST };
 
 class EventManager {
 public:
-  EventManager(){};
-  virtual ~EventManager(){};
+  EventManager() {};
+  virtual ~EventManager() {};
   virtual bool Init();
   virtual int MainLoop() = 0;
   virtual void PostQuitMessage() = 0;

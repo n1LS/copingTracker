@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _PHRASE_H_
@@ -12,13 +14,8 @@
 
 #include "Foundation/Types/Types.h"
 
-#ifdef ADV
-#define PHRASE_COUNT 0xFF
-#define NO_MORE_PHRASE 0x100
-#else
 #define PHRASE_COUNT 0x80
 #define NO_MORE_PHRASE 0x81
-#endif
 #define STEPS_PER_PHRASE 16
 
 class Phrase {

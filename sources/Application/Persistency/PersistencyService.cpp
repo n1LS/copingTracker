@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "PersistencyService.h"
@@ -20,20 +22,18 @@
 #define PROJECT_STATE_FILE "/.current"
 #define MAX_DELETE_DEPTH 3
 
-PersistencyService::PersistencyService()
-    : Service(FourCC::ServicePersistency){};
+PersistencyService::PersistencyService() : Service(FourCC::ServicePersistency) {};
 
 PersistencyResult PersistencyService::CreateProject() {
   Trace::Log("APPLICATION", "create new project");
   // create  project
   CreateProjectDirs_(UNNAMED_PROJECT_NAME);
-  return PersistencyService::GetInstance()->Save(UNNAMED_PROJECT_NAME, "",
-                                                 false);
-};
+  return PersistencyService::GetInstance()->Save(UNNAMED_PROJECT_NAME, "", false);
+}
 
 bool PersistencyService::PurgeUnnamedProject() {
   return DeleteProject(UNNAMED_PROJECT_NAME);
-};
+}
 
 bool PersistencyService::DeleteProject(const char *projectName) {
   auto fs = FileSystem::GetInstance();
@@ -84,11 +84,9 @@ bool PersistencyService::DeleteDirectoryContents_(uint8_t depth) {
     bool foundEntry = false;
     bool deletedEntry = false;
     for (size_t i = 0; i < fileIndexes_.size(); ++i) {
-      fs->getFileName(fileIndexes_[i], deleteNameBuffer_,
-                      sizeof(deleteNameBuffer_));
+      fs->getFileName(fileIndexes_[i], deleteNameBuffer_, sizeof(deleteNameBuffer_));
 
-      if ((strcmp(deleteNameBuffer_, ".") == 0) ||
-          (strcmp(deleteNameBuffer_, "..") == 0)) {
+      if ((strcmp(deleteNameBuffer_, ".") == 0) || (strcmp(deleteNameBuffer_, "..") == 0)) {
         continue;
       }
 
@@ -97,8 +95,7 @@ bool PersistencyService::DeleteDirectoryContents_(uint8_t depth) {
       const PicoFileType type = fs->getFileType(fileIndexes_[i]);
       if (type == PFT_FILE) {
         if (!fs->DeleteFile(deleteNameBuffer_)) {
-          Trace::Error("PERSISTENCYSERVICE: Could not delete file: %s",
-                       deleteNameBuffer_);
+          Trace::Error("PERSISTENCYSERVICE: Could not delete file: %s", deleteNameBuffer_);
           return false;
         }
       } else if (type == PFT_DIR) {
@@ -106,8 +103,7 @@ bool PersistencyService::DeleteDirectoryContents_(uint8_t depth) {
           return false;
         }
       } else {
-        Trace::Error("PERSISTENCYSERVICE: Unknown file type for %s",
-                     deleteNameBuffer_);
+        Trace::Error("PERSISTENCYSERVICE: Unknown file type for %s", deleteNameBuffer_);
         return false;
       }
 
@@ -126,8 +122,7 @@ bool PersistencyService::DeleteDirectoryContents_(uint8_t depth) {
   }
 }
 
-bool PersistencyService::DeleteDirectoryTree_(const char *dirname,
-                                              uint8_t depth) {
+bool PersistencyService::DeleteDirectoryTree_(const char *dirname, uint8_t depth) {
   auto fs = FileSystem::GetInstance();
   char dirnameCopy[PFILENAME_SIZE];
   strncpy(dirnameCopy, dirname, sizeof(dirnameCopy));
@@ -139,8 +134,7 @@ bool PersistencyService::DeleteDirectoryTree_(const char *dirname,
   }
 
   if (!fs->chdir(dirnameCopy)) {
-    Trace::Error("PERSISTENCYSERVICE: Could not chdir into dir: %s",
-                 dirnameCopy);
+    Trace::Error("PERSISTENCYSERVICE: Could not chdir into dir: %s", dirnameCopy);
     return false;
   }
 
@@ -161,26 +155,20 @@ bool PersistencyService::DeleteDirectoryTree_(const char *dirname,
   return true;
 }
 
-PersistencyResult
-PersistencyService::CreateProjectDirs_(const char *projectName) {
+PersistencyResult PersistencyService::CreateProjectDirs_(const char *projectName) {
   auto fs = FileSystem::GetInstance();
 
   // create samples sub dir as well as project dir containing it
-  etl::vector<const char *, 3> segments = {PROJECTS_DIR, projectName,
-                                           PROJECT_SAMPLES_DIR};
+  etl::vector<const char *, 3> segments = {PROJECTS_DIR, projectName, PROJECT_SAMPLES_DIR};
   CreatePath(pathBufferA, segments);
 
   auto result = fs->makeDir(pathBufferA.c_str(), true);
-  Trace::Log("PERSISTENCYSERVICE", "created samples subdir: %s [%b]",
-             pathBufferA.c_str(), result);
+  Trace::Log("PERSISTENCYSERVICE", "created samples subdir: %s [%b]", pathBufferA.c_str(), result);
 
-  return result ? PersistencyResult::PERSIST_SAVED
-                : PersistencyResult::PERSIST_ERROR;
+  return result ? PersistencyResult::PERSIST_SAVED : PersistencyResult::PERSIST_ERROR;
 }
 
-PersistencyResult PersistencyService::Save(const char *projectName,
-                                           const char *oldProjectName,
-                                           bool saveAs) {
+PersistencyResult PersistencyService::Save(const char *projectName, const char *oldProjectName, bool saveAs) {
   auto fs = FileSystem::GetInstance();
 
   if (saveAs && !Exists(projectName)) {
@@ -191,8 +179,7 @@ PersistencyResult PersistencyService::Save(const char *projectName,
     fs->chdir(oldProjectName);
     fs->chdir(PROJECT_SAMPLES_DIR);
 
-    Trace::Debug("get list of samples to copy from old project: %s",
-                 oldProjectName);
+    Trace::Debug("get list of samples to copy from old project: %s", oldProjectName);
 
     fs->list(&fileIndexes_, ".wav", false);
     char filenameBuffer[PFILENAME_SIZE];
@@ -203,27 +190,24 @@ PersistencyResult PersistencyService::Save(const char *projectName,
       if (strcmp(filenameBuffer, ".") == 0 || strcmp(filenameBuffer, "..") == 0)
         continue;
 
-      etl::vector<const char *, 4> filePathSegments = {
-          PROJECTS_DIR, oldProjectName, PROJECT_SAMPLES_DIR, filenameBuffer};
+      etl::vector<const char *, 4> filePathSegments = {PROJECTS_DIR, oldProjectName, PROJECT_SAMPLES_DIR,
+                                                       filenameBuffer};
       CreatePath(pathBufferA, filePathSegments);
 
-      filePathSegments = {PROJECTS_DIR, projectName, PROJECT_SAMPLES_DIR,
-                          filenameBuffer};
+      filePathSegments = {PROJECTS_DIR, projectName, PROJECT_SAMPLES_DIR, filenameBuffer};
       CreatePath(pathBufferB, filePathSegments);
 
       fs->CopyFile(pathBufferA.c_str(), pathBufferB.c_str());
     };
   }
   return SaveProjectData(projectName, false);
-};
+}
 
-PersistencyResult
-PersistencyService::AutoSaveProjectData(const char *projectName) {
+PersistencyResult PersistencyService::AutoSaveProjectData(const char *projectName) {
   return SaveProjectData(projectName, true);
-};
+}
 
-PersistencyResult PersistencyService::SaveProjectData(const char *projectName,
-                                                      bool autosave) {
+PersistencyResult PersistencyService::SaveProjectData(const char *projectName, bool autosave) {
 
   const char *filename = autosave ? AUTO_SAVE_FILENAME : PROJECT_DATA_FILE;
 
@@ -233,8 +217,7 @@ PersistencyResult PersistencyService::SaveProjectData(const char *projectName,
   auto fs = FileSystem::GetInstance();
   auto fp = fs->Open(pathBufferA.c_str(), "w");
   if (!fp) {
-    Trace::Error("PERSISTENCYSERVICE: Could not open file for writing: %s",
-                 pathBufferA.c_str());
+    Trace::Error("PERSISTENCYSERVICE: Could not open file for writing: %s", pathBufferA.c_str());
     return PERSIST_ERROR;
   }
   Trace::Log("PERSISTENCYSERVICE", "Opened Proj File: %s", pathBufferA.c_str());
@@ -255,17 +238,15 @@ PersistencyResult PersistencyService::SaveProjectData(const char *projectName,
   // in case subsequent autosave has changes the user doesn't want to keep
   if (!autosave) {
     if (!ClearAutosave(projectName)) {
-      Trace::Log("PERSISTENCYSERVICE", "Error Deleting Autosave File: %s",
-                 pathBufferA.c_str());
+      Trace::Log("PERSISTENCYSERVICE", "Error Deleting Autosave File: %s", pathBufferA.c_str());
       // the autosave file may not have been created yet, eg. if this is a new
       // project or a project beign "saved as" so just keep going
     }
-    Trace::Log("PERSISTENCYSERVICE", "Deleted Autosave File: %s",
-               pathBufferA.c_str());
+    Trace::Log("PERSISTENCYSERVICE", "Deleted Autosave File: %s", pathBufferA.c_str());
   }
 
   return PERSIST_SAVED;
-};
+}
 
 // return true if existing proj with the given name already exists
 bool PersistencyService::Exists(const char *projectName) {
@@ -323,10 +304,9 @@ PersistencyResult PersistencyService::Load(const char *projectName) {
     return PERSIST_LOAD_FAILED;
   }
   return PERSIST_LOADED;
-};
+}
 
-PersistencyResult
-PersistencyService::LoadCurrentProjectName(char *projectName) {
+PersistencyResult PersistencyService::LoadCurrentProjectName(char *projectName) {
   auto fs = FileSystem::GetInstance();
   if (fs->exists(PROJECT_STATE_FILE)) {
     auto current = fs->Open(PROJECT_STATE_FILE, "r");
@@ -340,9 +320,7 @@ PersistencyService::LoadCurrentProjectName(char *projectName) {
     if (Exists(projectName)) {
       return PERSIST_LOADED;
     } else {
-      Trace::Log("APPLICATION",
-                 "Project '%s' not found, loading untitled project",
-                 projectName);
+      Trace::Log("APPLICATION", "Project '%s' not found, loading untitled project", projectName);
       fs->DeleteFile(PROJECT_STATE_FILE);
       strcpy(projectName, UNNAMED_PROJECT_NAME);
       return PERSIST_LOADED;
@@ -352,8 +330,7 @@ PersistencyService::LoadCurrentProjectName(char *projectName) {
   }
 }
 
-PersistencyResult
-PersistencyService::SaveProjectState(const char *projectName) {
+PersistencyResult PersistencyService::SaveProjectState(const char *projectName) {
   auto fs = FileSystem::GetInstance();
   auto current = fs->Open(PROJECT_STATE_FILE, "w");
   if (!current) {
@@ -363,8 +340,7 @@ PersistencyService::SaveProjectState(const char *projectName) {
   return PERSIST_SAVED;
 }
 
-void PersistencyService::CreatePath(
-    etl::istring &path, const etl::ivector<const char *> &segments) {
+void PersistencyService::CreatePath(etl::istring &path, const etl::ivector<const char *> &segments) {
   // concatenate path segments into a single path
   path.clear();
   // iterate over segments and concatenate using iterator
@@ -378,8 +354,7 @@ void PersistencyService::CreatePath(
 
 bool PersistencyService::ClearAutosave(const char *projectName) {
   auto fs = FileSystem::GetInstance();
-  etl::vector<const char *, 3> segments = {PROJECTS_DIR, projectName,
-                                           AUTO_SAVE_FILENAME};
+  etl::vector<const char *, 3> segments = {PROJECTS_DIR, projectName, AUTO_SAVE_FILENAME};
   CreatePath(pathBufferA, segments);
   // TODO: check if file exists before deleting and only return false if it does
   // exist and deleting fails but this can only be done once Open() return
@@ -387,9 +362,8 @@ bool PersistencyService::ClearAutosave(const char *projectName) {
   return fs->DeleteFile(pathBufferA.c_str());
 }
 
-PersistencyResult PersistencyService::ExportInstrument(
-    I_Instrument *instrument, etl::string<MAX_INSTRUMENT_NAME_LENGTH> name,
-    bool overwrite) {
+PersistencyResult PersistencyService::ExportInstrument(I_Instrument *instrument,
+                                                       etl::string<MAX_INSTRUMENT_NAME_LENGTH> name, bool overwrite) {
   auto fs = FileSystem::GetInstance();
 
   // Add .pti extension to the filename
@@ -406,16 +380,14 @@ PersistencyResult PersistencyService::ExportInstrument(
     }
     // Delete the existing file if overwrite is true
     if (!fs->DeleteFile(pathBufferA.c_str())) {
-      Trace::Error("PERSISTENCYSERVICE: Failed to delete existing file: %s",
-                   pathBufferA.c_str());
+      Trace::Error("PERSISTENCYSERVICE: Failed to delete existing file: %s", pathBufferA.c_str());
       return PERSIST_ERROR;
     }
   }
 
   auto fp = fs->Open(pathBufferA.c_str(), "w");
   if (!fp) {
-    Trace::Error("PERSISTENCYSERVICE: Could not open file for writing: %s",
-                 pathBufferA.c_str());
+    Trace::Error("PERSISTENCYSERVICE: Could not open file for writing: %s", pathBufferA.c_str());
     return PERSIST_ERROR;
   }
 
@@ -431,8 +403,7 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
   auto fs = FileSystem::GetInstance();
 
   if (!fs->chdir(INSTRUMENTS_DIR)) {
-    Trace::Error(
-        "PERSISTENCYSERVICE: Could not change to instruments directory");
+    Trace::Error("PERSISTENCYSERVICE: Could not change to instruments directory");
     return IT_NONE;
   }
 
@@ -446,8 +417,7 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
   // Find the INSTRUMENT element
   bool elem = doc.FirstChild();
   if (!elem || strcmp(doc.ElemName(), "INSTRUMENT")) {
-    Trace::Error(
-        "PERSISTENCYSERVICE: Could not find INSTRUMENT node in file: %s", name);
+    Trace::Error("PERSISTENCYSERVICE: Could not find INSTRUMENT node in file: %s", name);
     return IT_NONE;
   }
 
@@ -456,15 +426,13 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
   bool hasAttr = doc.NextAttribute();
   while (hasAttr) {
     if (!strcasecmp(doc.attrname_, "TYPE")) {
-      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s",
-                 doc.attrval_);
+      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval_);
 
       // Map the type string to InstrumentType enum
       for (int i = 0; i < IT_LAST; i++) {
         if (!strcasecmp(doc.attrval_, InstrumentTypeNames[i])) {
           importedType = static_cast<InstrumentType>(i);
-          Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d",
-                     importedType);
+          Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
           break;
         }
       }
@@ -474,13 +442,11 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
   return importedType;
 }
 
-PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
-                                                       const char *name) {
+PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument, const char *name) {
   auto fs = FileSystem::GetInstance();
 
   if (!fs->chdir(INSTRUMENTS_DIR)) {
-    Trace::Error(
-        "PERSISTENCYSERVICE: Could not change to instruments directory");
+    Trace::Error("PERSISTENCYSERVICE: Could not change to instruments directory");
     return PERSIST_ERROR;
   }
 
@@ -494,8 +460,7 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
   // Find the INSTRUMENT element
   bool elem = doc.FirstChild();
   if (!elem || strcmp(doc.ElemName(), "INSTRUMENT")) {
-    Trace::Error(
-        "PERSISTENCYSERVICE: Could not find INSTRUMENT node in file: %s", name);
+    Trace::Error("PERSISTENCYSERVICE: Could not find INSTRUMENT node in file: %s", name);
     return PERSIST_ERROR;
   }
 
@@ -508,18 +473,15 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
     if (!strcasecmp(doc.attrname_, "VERSION")) {
       // Store version information for logging
       versionInfo = doc.attrval_;
-      Trace::Log("PERSISTENCYSERVICE", "Instrument file version: %s",
-                 doc.attrval_);
+      Trace::Log("PERSISTENCYSERVICE", "Instrument file version: %s", doc.attrval_);
     } else if (!strcasecmp(doc.attrname_, "TYPE")) {
-      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s",
-                 doc.attrval_);
+      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval_);
 
       // Map the type string to InstrumentType enum
       for (int i = 0; i < IT_LAST; i++) {
         if (!strcasecmp(doc.attrval_, InstrumentTypeNames[i])) {
           importedType = static_cast<InstrumentType>(i);
-          Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d",
-                     importedType);
+          Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
           break;
         }
       }
@@ -529,28 +491,23 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
 
   // Log the complete version info if available
   if (versionInfo.length() > 0) {
-    Trace::Log("PERSISTENCYSERVICE",
-               "Instrument created with firmware version: %s",
-               versionInfo.c_str());
+    Trace::Log("PERSISTENCYSERVICE", "Instrument created with firmware version: %s", versionInfo.c_str());
   }
 
   // If we found a valid instrument type and it doesn't match the current
   // instrument
   if (importedType != IT_NONE && importedType != instrument->GetType()) {
-    Trace::Log("PERSISTENCYSERVICE",
-               "Current instrument type: %d, imported type: %d",
-               instrument->GetType(), importedType);
+    Trace::Log("PERSISTENCYSERVICE", "Current instrument type: %d, imported type: %d", instrument->GetType(),
+               importedType);
 
     // We can't directly change the instrument type, so we'll need to
     // create a new instrument of the correct type and copy parameters later
-    Trace::Log("PERSISTENCYSERVICE",
-               "Instrument type mismatch, will convert after loading");
+    Trace::Log("PERSISTENCYSERVICE", "Instrument type mismatch, will convert after loading");
   }
 
   // Restore the instrument content
   if (!instrument->Restore(&doc)) {
-    Trace::Error(
-        "PERSISTENCYSERVICE: Failed to restore instrument from file: %s", name);
+    Trace::Error("PERSISTENCYSERVICE: Failed to restore instrument from file: %s", name);
     return PERSIST_ERROR;
   }
 
@@ -561,15 +518,12 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
     // Calculate the length of the name without extension
     size_t nameLength = dotPos - name;
     // Copy only up to MAX_INSTRUMENT_NAME_LENGTH characters
-    nameLength = nameLength < MAX_INSTRUMENT_NAME_LENGTH
-                     ? nameLength
-                     : MAX_INSTRUMENT_NAME_LENGTH - 1;
+    nameLength = nameLength < MAX_INSTRUMENT_NAME_LENGTH ? nameLength : MAX_INSTRUMENT_NAME_LENGTH - 1;
     instrumentName.assign(name, nameLength);
   } else {
     // No extension found, use the whole name (up to MAX_INSTRUMENT_NAME_LENGTH)
-    instrumentName.assign(name, strlen(name) < MAX_INSTRUMENT_NAME_LENGTH
-                                    ? strlen(name)
-                                    : MAX_INSTRUMENT_NAME_LENGTH - 1);
+    instrumentName.assign(name,
+                          strlen(name) < MAX_INSTRUMENT_NAME_LENGTH ? strlen(name) : MAX_INSTRUMENT_NAME_LENGTH - 1);
   }
 
   // Set the instrument name
@@ -583,7 +537,6 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
   instrument->NotifyObservers();
 
   Trace::Log("PERSISTENCYSERVICE", "Successfully imported instrument settings");
-  Trace::Log("PERSISTENCYSERVICE", "Set instrument name to: %s",
-             instrumentName.c_str());
+  Trace::Log("PERSISTENCYSERVICE", "Set instrument name to: %s", instrumentName.c_str());
   return PERSIST_LOADED;
 }

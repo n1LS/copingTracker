@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UINoteVarField.h"
@@ -13,10 +15,9 @@
 #include "ViewUtils.h"
 #include <System/Console/nanoprintf.h>
 
-UINoteVarField::UINoteVarField(const GUIPoint &position, Variable &v,
-                               const char *format, int min, int max,
-                               int xOffset, int yOffset)
-    : UIIntVarField(position, v, format, min, max, xOffset, yOffset){};
+UINoteVarField::UINoteVarField(const GUIPoint &position, Variable &v, const char *format, int min, int max, int xOffset,
+                               int yOffset)
+    : UIIntVarField(position, v, format, min, max, xOffset, yOffset) {};
 
 void UINoteVarField::Draw(GUIWindow &w, int offset) {
 
@@ -39,4 +40,4 @@ void UINoteVarField::Draw(GUIWindow &w, int offset) {
   } else {
     DrawLabeledField(w, position, buffer);
   }
-};
+}

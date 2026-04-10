@@ -3,15 +3,17 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIController.h"
 
 #include "Application/Player/Player.h"
 
-UIController::UIController(){};
+UIController::UIController() {};
 
 void UIController::Init(Project *project, ViewData *viewData) {
   viewData_ = viewData;
@@ -21,7 +23,7 @@ void UIController::Init(Project *project, ViewData *viewData) {
 void UIController::Reset() {
   viewData_ = 0;
   project_ = 0;
-};
+}
 
 void UIController::UnMuteAll() {
 
@@ -29,7 +31,7 @@ void UIController::UnMuteAll() {
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     player->SetChannelMute(i, false);
   };
-};
+}
 
 void UIController::ToggleMute(int from, int to) {
 
@@ -38,7 +40,7 @@ void UIController::ToggleMute(int from, int to) {
     bool muted = player->IsChannelMuted(i);
     player->SetChannelMute(i, !muted);
   };
-};
+}
 
 void UIController::SwitchSoloMode(int from, int to, bool soloing) {
 
@@ -57,4 +59,4 @@ void UIController::SwitchSoloMode(int from, int to, bool soloing) {
       player->SetChannelMute(i, soloMask_[i]);
     };
   }
-};
+}

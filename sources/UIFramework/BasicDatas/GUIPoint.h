@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _GUIPOINT_H_
@@ -26,8 +28,12 @@ public:
     _x = _x - p._x;
     _y = _y - p._y;
   };
-  bool operator==(const GUIPoint &p) const { return _x == p._x && _y == p._y; };
-  bool operator!=(const GUIPoint &p) const { return _x != p._x || _y != p._y; };
+  bool operator==(const GUIPoint &p) const {
+    return _x == p._x && _y == p._y;
+  };
+  bool operator!=(const GUIPoint &p) const {
+    return _x != p._x || _y != p._y;
+  };
 
   GUIPoint operator+(const GUIPoint &p) const {
     return GUIPoint(_x + p._x, _y + p._y);

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "MidiNoteTracker.h"
@@ -19,13 +21,10 @@ MidiNoteTracker::~MidiNoteTracker() {
   // Nothing to clean up
 }
 
-bool MidiNoteTracker::registerNote(uint8_t note, uint8_t midiChannel,
-                                   uint8_t instrumentChannel,
-                                   uint8_t velocity) {
+bool MidiNoteTracker::registerNote(uint8_t note, uint8_t midiChannel, uint8_t instrumentChannel, uint8_t velocity) {
   // Validate parameters
   if (note > 127 || midiChannel > 15) {
-    Trace::Debug("Invalid parameters in registerNote: note=%d, midiChannel=%d",
-                 note, midiChannel);
+    Trace::Debug("Invalid parameters in registerNote: note=%d, midiChannel=%d", note, midiChannel);
     return false;
   }
 
@@ -41,12 +40,10 @@ bool MidiNoteTracker::registerNote(uint8_t note, uint8_t midiChannel,
   playingNotes_[availableChannel].active = true;
   playingNotes_[availableChannel].midiNote = note;
   playingNotes_[availableChannel].midiChannel = midiChannel;
-  playingNotes_[availableChannel].instrumentChannel =
-      availableChannel; // Audio channel = array index
+  playingNotes_[availableChannel].instrumentChannel = availableChannel; // Audio channel = array index
   playingNotes_[availableChannel].velocity = velocity;
 
-  Trace::Debug("Note %d registered on MIDI channel %d, audio channel %d", note,
-               midiChannel, availableChannel);
+  Trace::Debug("Note %d registered on MIDI channel %d, audio channel %d", note, midiChannel, availableChannel);
   return true;
 }
 
@@ -60,25 +57,21 @@ bool MidiNoteTracker::isNoteActive(uint8_t note) const {
   return false;
 }
 
-bool MidiNoteTracker::isNoteActiveOnChannel(uint8_t note,
-                                            uint8_t midiChannel) const {
+bool MidiNoteTracker::isNoteActiveOnChannel(uint8_t note, uint8_t midiChannel) const {
   // Check if the specific note is active on the specific MIDI channel
   for (const auto &activeNote : playingNotes_) {
-    if (activeNote.active && activeNote.midiNote == note &&
-        activeNote.midiChannel == midiChannel) {
+    if (activeNote.active && activeNote.midiNote == note && activeNote.midiChannel == midiChannel) {
       return true;
     }
   }
   return false;
 }
 
-int MidiNoteTracker::getAudioChannelForNote(uint8_t note,
-                                            uint8_t midiChannel) const {
+int MidiNoteTracker::getAudioChannelForNote(uint8_t note, uint8_t midiChannel) const {
   // Find the audio channel assigned to this note on this MIDI channel
   for (size_t i = 0; i < playingNotes_.size(); i++) {
     const auto &activeNote = playingNotes_[i];
-    if (activeNote.active && activeNote.midiNote == note &&
-        activeNote.midiChannel == midiChannel) {
+    if (activeNote.active && activeNote.midiNote == note && activeNote.midiChannel == midiChannel) {
       // The audio channel is the index in the array
       return static_cast<int>(i);
     }
@@ -102,8 +95,7 @@ int MidiNoteTracker::unregisterNote(uint8_t note, uint8_t midiChannel) {
   // Find the note in the active notes list
   for (size_t i = 0; i < playingNotes_.size(); i++) {
     auto &activeNote = playingNotes_[i];
-    if (activeNote.active && activeNote.midiNote == note &&
-        activeNote.midiChannel == midiChannel) {
+    if (activeNote.active && activeNote.midiNote == note && activeNote.midiChannel == midiChannel) {
       // Found the note, mark it as inactive
       int audioChannel = static_cast<int>(i); // Audio channel = array index
       activeNote.active = false;

@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _STRING_VARIABLE_H_
@@ -14,8 +16,7 @@
 
 // Lightweight string-capable variable without heap allocations.
 // Stores string data in an internal ETL string buffer.
-template <size_t MaxLen = MAX_VARIABLE_STRING_LENGTH>
-class StringVariable : public Variable {
+template <size_t MaxLen = MAX_VARIABLE_STRING_LENGTH> class StringVariable : public Variable {
 public:
   explicit StringVariable(FourCC id, const char *value = "") : Variable(id, 0) {
     type_ = STRING;
@@ -29,7 +30,9 @@ public:
     onChange();
   }
 
-  bool IsModified() override { return storage_ != defaultValue_; }
+  bool IsModified() override {
+    return storage_ != defaultValue_;
+  }
 
 protected:
   using Variable::setStringValue;
@@ -39,11 +42,9 @@ private:
   etl::string<MaxLen> defaultValue_;
 };
 
-template <size_t MaxLen = MAX_VARIABLE_STRING_LENGTH>
-class StringWatchedVariable : public WatchedVariable {
+template <size_t MaxLen = MAX_VARIABLE_STRING_LENGTH> class StringWatchedVariable : public WatchedVariable {
 public:
-  explicit StringWatchedVariable(FourCC id, const char *value = "")
-      : WatchedVariable(id, false) {
+  explicit StringWatchedVariable(FourCC id, const char *value = "") : WatchedVariable(id, false) {
     type_ = STRING;
     stringValue_ = &storage_;
     setStringValue(value ? value : "");
@@ -55,7 +56,9 @@ public:
     onChange();
   }
 
-  bool IsModified() override { return storage_ != defaultValue_; }
+  bool IsModified() override {
+    return storage_ != defaultValue_;
+  }
 
 protected:
   using Variable::setStringValue;

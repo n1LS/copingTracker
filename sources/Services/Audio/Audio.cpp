@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Audio.h"
@@ -27,15 +29,24 @@ Audio::Audio(AudioSettings &hints) : settings_() {
   Trace::Log("AUDIO", "Pre Buffer Count:%d", settings_.preBufferCount_);
 }
 
-Audio::~Audio() {}
+Audio::~Audio() {
+}
 
-const char *Audio::GetAudioAPI() { return settings_.audioAPI_.c_str(); }
+const char *Audio::GetAudioAPI() {
+  return settings_.audioAPI_.c_str();
+}
 
-const char *Audio::GetAudioDevice() { return settings_.audioDevice_.c_str(); };
+const char *Audio::GetAudioDevice() {
+  return settings_.audioDevice_.c_str();
+}
 
-int Audio::GetAudioBufferSize() { return settings_.bufferSize_; };
+int Audio::GetAudioBufferSize() {
+  return settings_.bufferSize_;
+}
 
-int Audio::GetAudioPreBufferCount() { return settings_.preBufferCount_; };
+int Audio::GetAudioPreBufferCount() {
+  return settings_.preBufferCount_;
+}
 
 void Audio::AddOutput(AudioOut &out) {
   if (outputs_.full()) {

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "GUIBitmap.h"
@@ -16,9 +18,13 @@
 // This constructor. We wrap the class around an Implementation class
 // That way, we can change the imps we use without changing the core code
 
-GUIBitmap::GUIBitmap(I_GUIBitmapImp &imp) { _imp = &imp; };
+GUIBitmap::GUIBitmap(I_GUIBitmapImp &imp) {
+  _imp = &imp;
+}
 
-GUIBitmap::~GUIBitmap() { delete _imp; }
+GUIBitmap::~GUIBitmap() {
+  delete _imp;
+}
 // I_GUIGraphics implementation: we forward everything to the imp
 
 void GUIBitmap::DrawLine(long x1, long y1, long x2, long y2) {
@@ -29,14 +35,19 @@ void GUIBitmap::DrawLine(GUIPoint &pt1, GUIPoint &pt2) {
   _imp->DrawLine(pt1, pt2);
 }
 
-void GUIBitmap::DrawRect(GUIRect &rect) { _imp->DrawRect(rect); }
+void GUIBitmap::DrawRect(GUIRect &rect) {
+  _imp->DrawRect(rect);
+}
 
-void GUIBitmap::SetColor(GUIColor &c) { _imp->SetColor(c); }
+void GUIBitmap::SetColor(GUIColor &c) {
+  _imp->SetColor(c);
+}
 
-void GUIBitmap::SelectFont(int type, int size) { _imp->SelectFont(type, size); }
+void GUIBitmap::SelectFont(int type, int size) {
+  _imp->SelectFont(type, size);
+}
 
-void GUIBitmap::DrawString(const char *string, const GUIPoint &pos,
-                           const GUITextProperties &props) {
+void GUIBitmap::DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props) {
   _imp->DrawString(string, pos, props);
 }
 
@@ -56,22 +67,31 @@ void GUIBitmap::StretchENGBitmap(ENGBitmap &bmp, GUIRect &srcR, GUIRect &dstR) {
   _imp->StretchENGBitmap(bmp, srcR, dstR);
 }
 
-GUIRect GUIBitmap::GetRect() { return _imp->GetRect(); }
+GUIRect GUIBitmap::GetRect() {
+  return _imp->GetRect();
+}
 
-void GUIBitmap::SetClipRect(GUIRect &r) { _imp->SetClipRect(r); }
+void GUIBitmap::SetClipRect(GUIRect &r) {
+  _imp->SetClipRect(r);
+}
 
-void GUIBitmap::Invalidate() { _imp->Invalidate(); }
+void GUIBitmap::Invalidate() {
+  _imp->Invalidate();
+}
 
-void GUIBitmap::Flush() { _imp->Invalidate(); }
+void GUIBitmap::Flush() {
+  _imp->Invalidate();
+}
 
-void GUIBitmap::SetRect(GUIRect &r) { _imp->SetRect(r); }
+void GUIBitmap::SetRect(GUIRect &r) {
+  _imp->SetRect(r);
+}
 // Static call to create bitmaps from resources. We rely on the
 // factory object to create an imp compatible with the system and
 // then wrap a GUIBitmap object around it.
 
 GUIBitmap *GUIBitmap::CreateFromResource(GUIResourceID &r) {
-  I_GUIBitmapImp *imp =
-      I_GUIWindowFactory::GetInstance()->CreateBitmapFromResource(r);
+  I_GUIBitmapImp *imp = I_GUIWindowFactory::GetInstance()->CreateBitmapFromResource(r);
   if (imp) {
     return new GUIBitmap(*imp);
   } else {
@@ -81,8 +101,7 @@ GUIBitmap *GUIBitmap::CreateFromResource(GUIResourceID &r) {
 
 GUIBitmap *GUIBitmap::CreateBitmap(int width, int height) {
 
-  I_GUIBitmapImp *imp =
-      I_GUIWindowFactory::GetInstance()->CreateBitmap(width, height);
+  I_GUIBitmapImp *imp = I_GUIWindowFactory::GetInstance()->CreateBitmap(width, height);
   if (imp) {
     return new GUIBitmap(*imp);
   } else {

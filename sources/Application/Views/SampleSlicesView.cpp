@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SampleSlicesView.h"
@@ -29,17 +31,12 @@ constexpr int32_t SliceYOffset = 2 * CHAR_HEIGHT;
 
 SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
     : FieldView(w, data), sliceIndexVar_(FourCC::SampleInstrumentSlices, 0),
-      sliceStartVar_(FourCC::SampleInstrumentStart, 0),
-      autoSliceCountVar_(FourCC::Default, 4), needsFullRedraw_(true),
-      instrument_(nullptr), instrumentIndex_(0), sampleSize_(0),
-      graphFieldPos_(SliceXOffset, SliceYOffset),
-      graphField_(graphFieldPos_, GraphField::BitmapWidth,
-                  GraphField::BitmapHeight),
-      modalWasOpen_(false), modalClearCount_(0), playKeyHeld_(false),
-      previewActive_(false), previewNote_(SampleInstrument::SliceNoteBase),
-      sys_(System::GetInstance()), previewStartMs_(0), previewStartSample_(0),
-      previewEndSample_(0), previewDurationMs_(0.0f), previewPlayheadSample_(0),
-      previewCursorVisible_(false) {
+      sliceStartVar_(FourCC::SampleInstrumentStart, 0), autoSliceCountVar_(FourCC::Default, 4), needsFullRedraw_(true),
+      instrument_(nullptr), instrumentIndex_(0), sampleSize_(0), graphFieldPos_(SliceXOffset, SliceYOffset),
+      graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight), modalWasOpen_(false),
+      modalClearCount_(0), playKeyHeld_(false), previewActive_(false), previewNote_(SampleInstrument::SliceNoteBase),
+      sys_(System::GetInstance()), previewStartMs_(0), previewStartSample_(0), previewEndSample_(0),
+      previewDurationMs_(0.0f), previewPlayheadSample_(0), previewCursorVisible_(false) {
   sliceIndexVar_.AddObserver(*this);
   sliceStartVar_.AddObserver(*this);
   sliceIndexLabel_[0] = '\0';
@@ -47,7 +44,9 @@ SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
   graphField_.SetShowBaseline(false);
 }
 
-SampleSlicesView::~SampleSlicesView() { stopPreview(); }
+SampleSlicesView::~SampleSlicesView() {
+  stopPreview();
+}
 
 void SampleSlicesView::Reset() {
   stopPreview();
@@ -269,12 +268,8 @@ void SampleSlicesView::AnimationUpdate() {
       ((AppWindow &)w_).SetDirty();
     } else {
       float fraction = static_cast<float>(elapsedMs) / previewDurationMs_;
-      uint32_t span = (previewEndSample_ > previewStartSample_)
-                          ? (previewEndSample_ - previewStartSample_)
-                          : 0;
-      previewPlayheadSample_ =
-          previewStartSample_ +
-          static_cast<uint32_t>(fraction * static_cast<float>(span));
+      uint32_t span = (previewEndSample_ > previewStartSample_) ? (previewEndSample_ - previewStartSample_) : 0;
+      previewPlayheadSample_ = previewStartSample_ + static_cast<uint32_t>(fraction * static_cast<float>(span));
       isDirty_ = true;
       ((AppWindow &)w_).SetDirty();
     }
@@ -321,15 +316,13 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
     break;
   case FourCC::ActionAutoSlice:
     if (instrument_ && instrument_->HasSlicesForPlayback()) {
-      MessageBox *mb = MessageBox::Create(*this, "Replace current slices?",
-                                          MBBF_YES | MBBF_NO);
+      MessageBox *mb = MessageBox::Create(*this, "Replace current slices?", MBBF_YES | MBBF_NO);
       modalClearCount_ = 0;
       clearWaveformRegion();
       // Reopening the same modal can reuse identical text, so invalidate only
       // the previous text cache and let the next redraw resend the full dialog.
       ((AppWindow &)w_).InvalidateTextCache();
-      DoModal(mb, ModalViewCallback::create<
-                      &SampleSlicesView::AutoSliceConfirmCallback>());
+      DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
     } else {
       autoSliceEvenly();
     }
@@ -362,8 +355,7 @@ void SampleSlicesView::buildFieldLayout() {
   fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position._x = 12;
-  intVarField_.emplace_back(position, autoSliceCountVar_, "%2d", 1,
-                            static_cast<int32_t>(SampleInstrument::MaxSlices),
+  intVarField_.emplace_back(position, autoSliceCountVar_, "%2d", 1, static_cast<int32_t>(SampleInstrument::MaxSlices),
                             1, 4);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
@@ -454,9 +446,7 @@ void SampleSlicesView::drawWaveform() {
         graphField_.SetMarker(i, 0, CD_ACCENT, false);
         continue;
       }
-      ColorDefinition color =
-          (static_cast<int32_t>(i) == sliceIndexVar_.GetInt()) ? CD_HILITE2
-                                                               : CD_ACCENT;
+      ColorDefinition color = (static_cast<int32_t>(i) == sliceIndexVar_.GetInt()) ? CD_HILITE2 : CD_ACCENT;
       graphField_.SetMarker(i, start, color, true);
     }
   } else {
@@ -467,8 +457,7 @@ void SampleSlicesView::drawWaveform() {
 
   size_t playheadIndex = SampleInstrument::MaxSlices;
   if (previewCursorVisible_) {
-    graphField_.SetMarker(playheadIndex, previewPlayheadSample_, CD_NORMAL,
-                          true);
+    graphField_.SetMarker(playheadIndex, previewPlayheadSample_, CD_NORMAL, true);
   } else {
     graphField_.SetMarker(playheadIndex, 0, CD_NORMAL, false);
   }
@@ -477,8 +466,7 @@ void SampleSlicesView::drawWaveform() {
 }
 
 void SampleSlicesView::clearWaveformRegion() {
-  GUIRect rect(graphFieldPos_._x, graphFieldPos_._y,
-               graphFieldPos_._x + GraphField::BitmapWidth,
+  GUIRect rect(graphFieldPos_._x, graphFieldPos_._y, graphFieldPos_._x + GraphField::BitmapWidth,
                graphFieldPos_._y + GraphField::BitmapHeight);
   DrawRect(rect, CD_BACKGROUND);
 }
@@ -566,9 +554,7 @@ void SampleSlicesView::autoSliceEvenly() {
   instrument_->ClearSlices();
   if (count > 1) {
     for (int32_t i = 0; i < count; ++i) {
-      uint32_t start =
-          (static_cast<uint64_t>(sampleSize_) * static_cast<uint64_t>(i)) /
-          static_cast<uint32_t>(count);
+      uint32_t start = (static_cast<uint64_t>(sampleSize_) * static_cast<uint64_t>(i)) / static_cast<uint32_t>(count);
       instrument_->SetSlicePoint(static_cast<size_t>(i), start);
     }
   }
@@ -610,8 +596,7 @@ void SampleSlicesView::updateStatusLabels() {
   if (sliceIndex < 0) {
     sliceIndex = 0;
   }
-  npf_snprintf(sliceIndexLabel_, sizeof(sliceIndexLabel_), "slice: %2d",
-               sliceIndex);
+  npf_snprintf(sliceIndexLabel_, sizeof(sliceIndexLabel_), "slice: %2d", sliceIndex);
 
   uint32_t zoom = 1u;
   uint8_t level = graphField_.ZoomLevel();
@@ -665,26 +650,22 @@ void SampleSlicesView::startPreview() {
   stopPreview();
 
   uint32_t startSample = selectedSliceStart();
-  uint32_t endSample = sliceEndForIndex(
-      static_cast<size_t>(sliceIndexVar_.GetInt()), startSample);
+  uint32_t endSample = sliceEndForIndex(static_cast<size_t>(sliceIndexVar_.GetInt()), startSample);
   if (endSample <= startSample && sampleSize_ > 0) {
     endSample = sampleSize_ - 1;
   }
 
-  uint8_t note = static_cast<uint8_t>(SampleInstrument::SliceNoteBase +
-                                      sliceIndexVar_.GetInt());
+  uint8_t note = static_cast<uint8_t>(SampleInstrument::SliceNoteBase + sliceIndexVar_.GetInt());
   if (instrument_ && !instrument_->HasSlicesForPlayback()) {
     // For samples  that have no stored slice points yet, triggering a
     // slice note in that state is interpreted as a pitched note, which makes
     // preview play at the wrong speed because for slices we set the "root note"
     // to C2 for the first slice when we enter the slicer
-    Variable *rootNoteVar =
-        instrument_->FindVariable(FourCC::SampleInstrumentRootNote);
+    Variable *rootNoteVar = instrument_->FindVariable(FourCC::SampleInstrumentRootNote);
     note = static_cast<uint8_t>(rootNoteVar->GetInt());
   }
 
-  Player::GetInstance()->PlayNote(static_cast<unsigned short>(instrumentIndex_),
-                                  PreviewChannel, note, 0x7F);
+  Player::GetInstance()->PlayNote(static_cast<unsigned short>(instrumentIndex_), PreviewChannel, note, 0x7F);
   previewNote_ = note;
   previewActive_ = true;
   previewStartSample_ = startSample;
@@ -700,8 +681,7 @@ void SampleSlicesView::startPreview() {
         int32_t sampleRate = source->GetSampleRate(note);
         if (sampleRate > 0 && endSample > startSample) {
           uint32_t frames = endSample - startSample;
-          durationMs = (static_cast<float>(frames) * 1000.0f) /
-                       static_cast<float>(sampleRate);
+          durationMs = (static_cast<float>(frames) * 1000.0f) / static_cast<float>(sampleRate);
         }
       }
     }
@@ -715,8 +695,7 @@ void SampleSlicesView::stopPreview() {
   if (!previewActive_) {
     return;
   }
-  Player::GetInstance()->StopNote(static_cast<unsigned short>(instrumentIndex_),
-                                  PreviewChannel);
+  Player::GetInstance()->StopNote(static_cast<unsigned short>(instrumentIndex_), PreviewChannel);
   previewActive_ = false;
   previewCursorVisible_ = false;
   graphField_.RequestFullRedraw();
@@ -744,8 +723,7 @@ uint32_t SampleSlicesView::selectedSliceStart() {
   return static_cast<uint32_t>(start);
 }
 
-uint32_t SampleSlicesView::sliceEndForIndex(size_t index,
-                                            uint32_t start) const {
+uint32_t SampleSlicesView::sliceEndForIndex(size_t index, uint32_t start) const {
   if (!instrument_ || sampleSize_ == 0) {
     return 0;
   }

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIField.h"
@@ -13,9 +15,9 @@ UIField::UIField(const GUIPoint &position) {
   x_ = position._x;
   y_ = position._y;
   focus_ = false;
-};
+}
 
-UIField::~UIField(){};
+UIField::~UIField() {};
 
 GUIPoint UIField::GetPosition() {
   GUIPoint point(x_, y_);
@@ -25,12 +27,20 @@ GUIPoint UIField::GetPosition() {
 void UIField::SetPosition(GUIPoint &p) {
   x_ = p._x;
   y_ = p._y;
-};
+}
 
-void UIField::ClearFocus() { focus_ = false; };
+void UIField::ClearFocus() {
+  focus_ = false;
+}
 
-void UIField::SetFocus() { focus_ = true; };
+void UIField::SetFocus() {
+  focus_ = true;
+}
 
-bool UIField::HasFocus() { return focus_; };
+bool UIField::HasFocus() {
+  return focus_;
+}
 
-bool UIField::IsStatic() { return false; };
+bool UIField::IsStatic() {
+  return false;
+}

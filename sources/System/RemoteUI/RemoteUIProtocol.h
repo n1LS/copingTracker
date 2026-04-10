@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _REMOTEUIPROTOCOL_H_
@@ -62,24 +64,18 @@ static GUIEventPadButtonType eventMappingPico[11] = {
     EPBT_START,  // SW9
     EPBT_SELECT, // No SW
     EPBT_POWER   // Power button
-};
+  };
 
-#define to_rgb565(color)                                                       \
-  ((color._r & 0b11111000) << 8) | ((color._g & 0b11111100) << 3) |            \
-      (color._b >> 3)
+#define to_rgb565(color) ((color._r & 0b11111000) << 8) | ((color._g & 0b11111100) << 3) | (color._b >> 3)
 
 void remoteUIFontCommand(uint8_t uifontIndex, char *buffer);
 
-void remoteUIDrawCharCommand(const char c, uint8_t x, uint8_t y, bool invert,
-                             char *buffer);
+void remoteUIDrawCharCommand(const char c, uint8_t x, uint8_t y, bool invert, char *buffer);
 
-uint16_t remoteUIDrawRectCommand(int left, int top, int width, int height,
-                                 char *buffer);
+uint16_t remoteUIDrawRectCommand(int left, int top, int width, int height, char *buffer);
 
-void remoteUIClearCommand(unsigned short r, unsigned short g, unsigned short b,
-                          char *buffer);
+void remoteUIClearCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer);
 
-uint16_t remoteUISetColorCommand(unsigned short r, unsigned short g,
-                                 unsigned short b, char *buffer);
+uint16_t remoteUISetColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer);
 
 #endif

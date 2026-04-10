@@ -3,17 +3,19 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SampleInstrument.h"
 #include "Application/Instruments/Filters.h"
 #include "Application/Model/Table.h"
-#include "Application/Player/PlayerMixer.h" // For MIX_BUFFER_SIZE.. kick out pls
 #include "Application/Player/SyncMaster.h"
 #include "Application/Utils/fixed.h"
 #include "CommandList.h"
+#include "Foundation/Constants/SineTable.h"
 #include "SamplePool.h"
 #include "SampleVariable.h"
 #include "Services/Audio/Audio.h"
@@ -42,26 +44,17 @@ signed char SampleInstrument::lastMidiNote_[SONG_CHANNEL_COUNT];
 #define KRATE_SAMPLE_COUNT 100
 
 SampleInstrument::SampleInstrument()
-    : I_Instrument(&variables_), sample_(FourCC::SampleInstrumentSample),
-      volume_(FourCC::SampleInstrumentVolume, 0x80),
-      interpolation_(FourCC::SampleInstrumentInterpolation, interpolationTypes,
-                     2, 0),
-      crush_(FourCC::SampleInstrumentCrush, 16),
-      drive_(FourCC::SampleInstrumentCrushVolume, 0xFF),
-      downsample_(FourCC::SampleInstrumentDownsample, 0),
-      rootNote_(FourCC::SampleInstrumentRootNote, 60),
-      fineTune_(FourCC::SampleInstrumentFineTune, 0x7F),
-      pan_(FourCC::SampleInstrumentPan, 0x7F),
-      cutoff_(FourCC::SampleInstrumentFilterCutOff, 0xFF),
-      reso_(FourCC::SampleInstrumentFilterResonance, 0x00),
+    : I_Instrument(&variables_), sample_(FourCC::SampleInstrumentSample), volume_(FourCC::SampleInstrumentVolume, 0x80),
+      interpolation_(FourCC::SampleInstrumentInterpolation, interpolationTypes, 2, 0),
+      crush_(FourCC::SampleInstrumentCrush, 16), drive_(FourCC::SampleInstrumentCrushVolume, 0xFF),
+      downsample_(FourCC::SampleInstrumentDownsample, 0), rootNote_(FourCC::SampleInstrumentRootNote, 60),
+      fineTune_(FourCC::SampleInstrumentFineTune, 0x7F), pan_(FourCC::SampleInstrumentPan, 0x7F),
+      cutoff_(FourCC::SampleInstrumentFilterCutOff, 0xFF), reso_(FourCC::SampleInstrumentFilterResonance, 0x00),
       filterMix_(FourCC::SampleInstrumentFilterType, 0x00),
-      filterMode_(FourCC::SampleInstrumentFilterMode, filterMode, 3, 0),
-      start_(FourCC::SampleInstrumentStart, 0),
+      filterMode_(FourCC::SampleInstrumentFilterMode, filterMode, 3, 0), start_(FourCC::SampleInstrumentStart, 0),
       loopMode_(FourCC::SampleInstrumentLoopMode, loopTypes, SILM_LAST, 0),
-      loopStart_(FourCC::SampleInstrumentLoopStart, 0),
-      loopEnd_(FourCC::SampleInstrumentEnd, 0),
-      table_(FourCC::SampleInstrumentTable, -1),
-      tableAuto_(FourCC::SampleInstrumentTableAutomation, false) {
+      loopStart_(FourCC::SampleInstrumentLoopStart, 0), loopEnd_(FourCC::SampleInstrumentEnd, 0),
+      table_(FourCC::SampleInstrumentTable, -1), tableAuto_(FourCC::SampleInstrumentTableAutomation, false) {
 
   // Initialize MIDI notes
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
@@ -105,7 +98,8 @@ SampleInstrument::SampleInstrument()
   slicePoints_.fill(0);
 }
 
-SampleInstrument::~SampleInstrument() {}
+SampleInstrument::~SampleInstrument() {
+}
 
 uint32_t SampleInstrument::GetSlicePoint(size_t index) const {
   if (index >= MaxSlices) {
@@ -256,9 +250,7 @@ bool SampleInstrument::isSliceIndexActive(size_t index) const {
   return slicePoints_[index] > 0;
 }
 
-bool SampleInstrument::shouldUseSlice(unsigned char midinote,
-                                      size_t &sliceIndex,
-                                      uint32_t sampleSize) const {
+bool SampleInstrument::shouldUseSlice(unsigned char midinote, size_t &sliceIndex, uint32_t sampleSize) const {
   if (!HasSlicesForPlayback()) {
     return false;
   }
@@ -285,8 +277,7 @@ bool SampleInstrument::shouldUseSlice(unsigned char midinote,
   return true;
 }
 
-uint32_t SampleInstrument::computeSliceStart(size_t index,
-                                             uint32_t sampleSize) const {
+uint32_t SampleInstrument::computeSliceStart(size_t index, uint32_t sampleSize) const {
   if (index >= MaxSlices || sampleSize == 0) {
     return 0;
   }
@@ -300,8 +291,7 @@ uint32_t SampleInstrument::computeSliceStart(size_t index,
   return stored;
 }
 
-uint32_t SampleInstrument::computeSliceEnd(size_t index,
-                                           uint32_t sampleSize) const {
+uint32_t SampleInstrument::computeSliceEnd(size_t index, uint32_t sampleSize) const {
   if (sampleSize == 0) {
     return 0;
   }
@@ -345,20 +335,24 @@ void SampleInstrument::clampSlicePoints(uint32_t sampleSize) {
 }
 
 bool SampleInstrument::Init() {
-
   SamplePool *pool = SamplePool::GetInstance();
   Variable *vSample = FindVariable(FourCC::SampleInstrumentSample);
   NAssert(vSample);
   int index = vSample->GetInt();
+  if (index != NO_SAMPLE) {
+    Trace::Log("SAMPLEINSTRUMENT", "unexpected sample value for new instrument: %d", index);
+    return false;
+  }
   source_ = (index >= 0) ? pool->GetSource(index) : 0;
   tableState_.Reset();
-  return false;
+  return true;
 }
 
-void SampleInstrument::OnStart() { tableState_.Reset(); };
+void SampleInstrument::OnStart() {
+  tableState_.Reset();
+}
 
-bool SampleInstrument::Start(int channel, unsigned char midinote,
-                             bool cleanstart) {
+bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstart) {
   // Look if we're dirty & need to update this instrument's data
 
   if (dirty_) {
@@ -392,8 +386,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote,
   int sampleSize = source_->GetSize(rp->midiNote_);
   uint32_t sampleSizeU = sampleSize > 0 ? static_cast<uint32_t>(sampleSize) : 0;
 
-  int rootNote =
-      (rootNote_.GetInt() - 60) + source_->GetRootNote(rp->midiNote_);
+  int rootNote = (rootNote_.GetInt() - 60) + source_->GetRootNote(rp->midiNote_);
 
   rp->volume_ = rp->baseVolume_ = i2fp(volume_.GetInt());
 
@@ -405,8 +398,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote,
   } else {
     long start = source_->GetLoopStart(rp->midiNote_);
     if (start > 0) {
-      rp->rendLoopStart_ =
-          source_->GetLoopStart(rp->midiNote_); // hack at the moment
+      rp->rendLoopStart_ = source_->GetLoopStart(rp->midiNote_); // hack at the moment
       rp->rendLoopEnd_ = source_->GetLoopEnd(rp->midiNote_);
       loopMode_.SetInt(SILM_LOOP);
     } else {
@@ -415,8 +407,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote,
       loopMode_.SetInt(SILM_ONESHOT);
     };
   }
-  SampleInstrumentLoopMode loopmode =
-      (SampleInstrumentLoopMode)loopMode_.GetInt();
+  SampleInstrumentLoopMode loopmode = (SampleInstrumentLoopMode)loopMode_.GetInt();
 
   size_t sliceIndex = 0;
   bool sliceActive = shouldUseSlice(midinote, sliceIndex, sampleSizeU);
@@ -572,8 +563,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote,
     rp->downsample_ = downsample_.GetInt();
 
     // Disable all active updaters for new voice
-    for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end();
-         it++) {
+    for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
       I_SRPUpdater *current = *it;
       current->Disable();
     }
@@ -591,27 +581,24 @@ void SampleInstrument::doTickUpdate(int channel) {
 
   // Process updaters
   renderParams *rp = renderParams_ + channel;
-  for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end();
-       it++) {
+  for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
     I_SRPUpdater *current = *it;
     current->Trigger(true);
   }
-};
+}
 
 void SampleInstrument::doKRateUpdate(int channel) {
 
   renderParams *rp = renderParams_ + channel;
-  for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end();
-       it++) {
+  for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
     I_SRPUpdater *current = *it;
     current->Trigger(false);
   }
-};
+}
 
 // Size in samples
 
-bool SampleInstrument::Render(int channel, fixed *buffer, int size,
-                              bool updateTick) {
+bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
 
   bool somethingToMix = false;
 
@@ -638,8 +625,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
 
     // Be sure filters are properly initialized
 
-    set_filter(channel, FLT_LOWPASS, rp->cutoff_, rp->reso_, filterMix,
-               bassyFilter);
+    set_filter(channel, FLT_LOWPASS, rp->cutoff_, rp->reso_, filterMix, bassyFilter);
 
     filter_t *flt = get_filter(channel);
     bool filtering = (rp->cutoff_ < i2fp(1)) || (rp->reso_ > i2fp(0));
@@ -653,12 +639,10 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
         doTickUpdate(channel);
 
         struct RUParams rup;
-        rup.cutOffset_ = rup.resOffset_ = rup.volumeOffset_ = rup.panOffset_ =
-            0;
+        rup.cutOffset_ = rup.resOffset_ = rup.volumeOffset_ = rup.panOffset_ = 0;
         rup.speedOffset_ = FP_ONE;
 
-        for (auto it = rp->activeUpdaters_.begin();
-             it != rp->activeUpdaters_.end(); it++) {
+        for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
           I_SRPUpdater *current = *it;
           current->UpdateSRP(rup);
         }
@@ -673,8 +657,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
       if (rp->retrig_) {
         if (rp->retrigCount_ == 0) {
           int ticks = rp->retrigOffset_ - rp->retrigLoop_;
-          long offset =
-              long(ticks * SyncMaster::GetInstance()->GetTickSampleCount());
+          long offset = long(ticks * SyncMaster::GetInstance()->GetTickSampleCount());
           rp->position_ += offset * fp2fl(rp->speed_);
           if (rp->position_ < 0) {
             rp->position_ = 0;
@@ -707,8 +690,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
 
     // Loop mode
 
-    SampleInstrumentLoopMode loopMode =
-        (SampleInstrumentLoopMode)rp->loopModeValue_;
+    SampleInstrumentLoopMode loopMode = (SampleInstrumentLoopMode)rp->loopModeValue_;
 
     // Interpolation
 
@@ -740,9 +722,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
     // Get pan multiplicators, and take volume into account
 
     int n = int(rp->position_);
-    short *input = (short *)(wavbuf + 2 * channelCount *
-                                          n); // input is the current
-                                              // sample to the left of position
+    short *input = (short *)(wavbuf + 2 * channelCount * n); // input is the current
+                                                             // sample to the left of position
 
     fixed fpPos = fl2fp(rp->position_ - n); // fpPos is current pos from input
     fixed fpSpeed = rp->speed_;             // speed in fixed
@@ -754,10 +735,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
     s2 = 0;
     t2 = 0;
 
-    short *loopPosition =
-        (short *)(wavbuf + rp->rendLoopStart_ * 2 * channelCount);
-    short *lastSample =
-        (short *)(wavbuf + (rp->rendLoopEnd_ - 1) * 2 * channelCount);
+    short *loopPosition = (short *)(wavbuf + rp->rendLoopStart_ * 2 * channelCount);
+    short *lastSample = (short *)(wavbuf + (rp->rendLoopEnd_ - 1) * 2 * channelCount);
 
     if (/*(loopMode==SILM_OSCFINE)||*/ (rp->reverse_)) {
       lastSample = (short *)(wavbuf + rp->rendLoopEnd_ * 2 * channelCount);
@@ -897,12 +876,11 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
           if (hasUpdaters) {
             doKRateUpdate(channel);
             struct RUParams rup;
-            rup.cutOffset_ = rup.resOffset_ = rup.volumeOffset_ =
-                rup.panOffset_ = rup.fbMixOffset_ = rup.fbTunOffset_ = 0;
+            rup.cutOffset_ = rup.resOffset_ = rup.volumeOffset_ = rup.panOffset_ = rup.fbMixOffset_ = rup.fbTunOffset_ =
+                0;
             rup.speedOffset_ = FP_ONE;
 
-            for (auto it = rp->activeUpdaters_.begin();
-                 it != rp->activeUpdaters_.end(); it++) {
+            for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
               I_SRPUpdater *current = *it;
               current->UpdateSRP(rup);
             }
@@ -915,8 +893,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
             rp->fbMix_ = rp->baseFbMix_ + rup.fbMixOffset_;
             rp->fbTun_ = rp->baseFbTun_ + rup.fbTunOffset_;
 
-            set_filter(channel, FLT_LOWPASS, rp->cutoff_, rp->reso_, filterMix,
-                       bassyFilter);
+            set_filter(channel, FLT_LOWPASS, rp->cutoff_, rp->reso_, filterMix, bassyFilter);
             filtering = (rp->cutoff_ < i2fp(1)) || (rp->reso_ > i2fp(0));
 
             volfactor = fp_mul(rp->volume_, volscale);
@@ -944,8 +921,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
             if (input < dsBasePtr) {
               i1 = dsBasePtr;
             } else {
-              unsigned int distance =
-                  (unsigned int)(input - dsBasePtr) / channelCount;
+              unsigned int distance = (unsigned int)(input - dsBasePtr) / channelCount;
               i1 = dsBasePtr + (distance & dsMask) * channelCount;
             }
           }
@@ -1021,13 +997,10 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
               *fltSpeedPtr = fp_mul(*fltSpeedPtr, fltDirt);
             }
 
-            *fltSpeedPtr =
-                fp_mul(*fltSpeedPtr, fltParm2); // mul by res, it's some kind
-                                                // of inertia.
-            /*HOG:5*/ *fltSpeedPtr = fp_add(
-                *fltSpeedPtr,
-                fp_mul(difr, fltParm1)); // mul by cutoff, less cutoff = no
-                                         // sound, so it's better not be 0.
+            *fltSpeedPtr = fp_mul(*fltSpeedPtr, fltParm2);                         // mul by res, it's some kind
+                                                                                   // of inertia.
+            /*HOG:5*/ *fltSpeedPtr = fp_add(*fltSpeedPtr, fp_mul(difr, fltParm1)); // mul by cutoff, less cutoff = no
+                                                                                   // sound, so it's better not be 0.
 
             *fltHeightPtr += *fltSpeedPtr;
             *fltHeightPtr += *fltDelayPtr - hpin;
@@ -1067,35 +1040,34 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size,
     rp->reverse_ = rpReverse;
 
     // Update final sample position
-    rp->position_ =
-        (((char *)input) - wavbuf) / (2 * channelCount) + fp2fl(fpPos);
+    rp->position_ = (((char *)input) - wavbuf) / (2 * channelCount) + fp2fl(fpPos);
 
     somethingToMix = true;
   }
 
   return somethingToMix;
-};
+}
 
 void SampleInstrument::AssignSample(int i) {
 
   Variable *v = FindVariable(FourCC::SampleInstrumentSample);
   v->SetInt(i);
-};
+}
 
 int SampleInstrument::GetSampleIndex() {
   Variable *v = FindVariable(FourCC::SampleInstrumentSample);
   return v->GetInt();
-};
+}
 
 void SampleInstrument::SetVolume(int volume) {
   Variable *v = FindVariable(FourCC::SampleInstrumentVolume);
   v->SetInt(volume);
-};
+}
 
 int SampleInstrument::GetVolume() {
   Variable *v = FindVariable(FourCC::SampleInstrumentVolume);
   return v->GetInt();
-};
+}
 
 int SampleInstrument::GetSampleSize(int channel) {
   if (source_) {
@@ -1103,7 +1075,7 @@ int SampleInstrument::GetSampleSize(int channel) {
     return source_->GetSize(rp->midiNote_);
   };
   return 0;
-};
+}
 
 float SampleInstrument::GetLengthInSec() {
   if (source_) {
@@ -1111,9 +1083,11 @@ float SampleInstrument::GetLengthInSec() {
   } else {
     return 0.0f;
   }
-};
+}
 
-bool SampleInstrument::IsInitialized() { return (source_ != 0); };
+bool SampleInstrument::IsInitialized() {
+  return (source_ != 0);
+}
 
 void SampleInstrument::updateInstrumentData(bool search) {
 
@@ -1149,7 +1123,7 @@ void SampleInstrument::updateInstrumentData(bool search) {
   v->SetInt(0);
   clampSlicePoints(static_cast<uint32_t>(instrSize));
   dirty_ = false;
-};
+}
 
 void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
   WatchedVariable &v = (WatchedVariable &)o;
@@ -1171,7 +1145,7 @@ void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
     //         %c%c%c%c",fourcc[0],fourcc[1],fourcc[2],fourcc[3]) ;
     break;
   };
-};
+}
 
 void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
 
@@ -1233,11 +1207,8 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     float baseVolume = fp2fl(rp->baseVolume_);
 
     int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
-    speed = (speed == 0) ? 0
-                         : fabs(targetVolume - startVolume) *
-                               KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
-    rp->volumeRamp_.SetData(targetVolume - baseVolume, speed,
-                            startVolume - baseVolume);
+    speed = (speed == 0) ? 0 : fabs(targetVolume - startVolume) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
+    rp->volumeRamp_.SetData(targetVolume - baseVolume, speed, startVolume - baseVolume);
     if (!rp->volumeRamp_.Enabled()) {
       rp->volumeRamp_.Enable();
       rp->activeUpdaters_.push_back(&rp->volumeRamp_);
@@ -1253,9 +1224,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     float speed = float(value >> 8);
     float startPan = fp2fl(rp->pan_);
     int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
-    speed = (speed == 0) ? 0
-                         : fabs(targetPan - startPan) * KRATE_SAMPLE_COUNT /
-                               float(speed) / sampleCount;
+    speed = (speed == 0) ? 0 : fabs(targetPan - startPan) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
     rp->panner_.SetData(targetPan - basePan, speed, startPan - basePan);
     if (!rp->panner_.Enabled()) {
       rp->panner_.Enable();
@@ -1269,9 +1238,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     float start = fp2fl(rp->cutoff_);
     float baseCut = fp2fl(rp->baseFCut_);
     int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
-    speed = (speed == 0) ? 0
-                         : fabs(target - start) * KRATE_SAMPLE_COUNT /
-                               float(speed) / sampleCount;
+    speed = (speed == 0) ? 0 : fabs(target - start) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
     rp->cutRamp_.SetData(target - baseCut, speed, start - baseCut);
     if (!rp->cutRamp_.Enabled()) {
       rp->cutRamp_.Enable();
@@ -1285,9 +1252,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     float start = fp2fl(rp->reso_);
     float baseRes = fp2fl(rp->baseFRes_);
     int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
-    speed = (speed == 0) ? 0
-                         : fabs(target - start) * KRATE_SAMPLE_COUNT /
-                               float(speed) / sampleCount;
+    speed = (speed == 0) ? 0 : fabs(target - start) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
     rp->resRamp_.SetData(target - baseRes, speed, start - baseRes);
     if (!rp->resRamp_.Enabled()) {
       rp->resRamp_.Enable();
@@ -1307,9 +1272,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
 
     // speed of ramp
 
-    speed = (speed == 0) ? 0.0f
-                         : fp2fl(rp->speed_) * 255.0f / speed /
-                               KRATE_SAMPLE_COUNT / 32.0f;
+    speed = (speed == 0) ? 0.0f : fp2fl(rp->speed_) * 255.0f / speed / KRATE_SAMPLE_COUNT / 32.0f;
 
     // Fill ramp data & enable
 
@@ -1380,8 +1343,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
 
   case FourCC::InstrumentCommandRetrigger: {
     unsigned char loop = (value & 0xFF); // number of ticks before repeat
-    unsigned char offset =
-        (value >> 8); // number of ticks to offset at each repeat
+    unsigned char offset = (value >> 8); // number of ticks to offset at each repeat
     if (loop != 0) {
       rp->retrig_ = true;
       rp->retrigLoop_ = loop;
@@ -1393,10 +1355,8 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     }
   } break;
   case FourCC::InstrumentCommandLowPassFilter: {
-    float cut =
-        (value >> 8) / 255.0f; // cutoff frequency (FF=all pass, 0=none pass)
-    float res =
-        (value & 0xFF) / 255.0f; // resonance, aka Q (0=none) so default is FF00
+    float cut = (value >> 8) / 255.0f;   // cutoff frequency (FF=all pass, 0=none pass)
+    float res = (value & 0xFF) / 255.0f; // resonance, aka Q (0=none) so default is FF00
     rp->cutoff_ = rp->baseFCut_ = fl2fp(cut);
     rp->reso_ = rp->baseFRes_ = fl2fp(res);
     if (rp->cutRamp_.Enabled()) {
@@ -1433,25 +1393,37 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     if (crush > 0)
       rp->crush_ = crush;
   }
+
+  case FourCC::InstrumentCommandVibrato: {
+    uint8_t rate = value >> 8;
+    uint8_t depth = value & 0xFF;
+    // setup the vibrato
+    rp->vibrato_.SetData(rate, depth);
+    if (!rp->vibrato_.Enabled()) {
+      // enable and add to active updaters
+      rp->vibrato_.Enable();
+      rp->activeUpdaters_.push_back(&rp->vibrato_);
+    }
+  } break;
+
   default:
     break;
   };
-};
+}
 
 etl::string<MAX_INSTRUMENT_NAME_LENGTH> SampleInstrument::GetUserSetName() {
   // Return the user-set name from the base class
   return I_Instrument::GetUserSetName();
-};
+}
 
 // Get the sample file name from the SampleInstrumentSample variable
-etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>
-SampleInstrument::GetSampleFileName() {
+etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> SampleInstrument::GetSampleFileName() {
   Variable *v = this->FindVariable(FourCC::SampleInstrumentSample);
   if (v) {
     return v->GetString();
   }
   return etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>();
-};
+}
 
 etl::string<MAX_INSTRUMENT_NAME_LENGTH> SampleInstrument::GetDisplayName() {
   // Check if user has explicitly set a name
@@ -1477,7 +1449,7 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SampleInstrument::GetDisplayName() {
   }
 
   return sampleFileName;
-};
+}
 
 void SampleInstrument::SaveContent(tinyxml2::XMLPrinter *printer) {
   I_Instrument::SaveContent(printer);
@@ -1488,8 +1460,7 @@ void SampleInstrument::SaveContent(tinyxml2::XMLPrinter *printer) {
     }
     printer->OpenElement("PARAM");
     char sliceName[6];
-    npf_snprintf(sliceName, sizeof(sliceName), "SL%02u",
-                 static_cast<unsigned>(i));
+    npf_snprintf(sliceName, sizeof(sliceName), "SL%02u", static_cast<unsigned>(i));
     printer->PushAttribute("NAME", sliceName);
     printer->PushAttribute("VALUE", static_cast<unsigned int>(slicePoints_[i]));
     printer->CloseElement();
@@ -1570,11 +1541,11 @@ void SampleInstrument::Purge() {
   }
   source_ = NULL;
   slicePoints_.fill(0);
-};
+}
 bool SampleInstrument::IsEmpty() {
   Variable *v = FindVariable(FourCC::SampleInstrumentSample);
   return (v->GetInt() == -1);
-};
+}
 
 int SampleInstrument::GetTable() {
   int result = table_.GetInt();
@@ -1582,25 +1553,27 @@ int SampleInstrument::GetTable() {
     return VAR_OFF;
   }
   return result;
-};
+}
 
-bool SampleInstrument::GetTableAutomation() { return tableAuto_.GetBool(); };
+bool SampleInstrument::GetTableAutomation() {
+  return tableAuto_.GetBool();
+}
 
 void SampleInstrument::GetTableState(TableSaveState &state) {
-  memcpy(state.hopCount_, tableState_.hopCount_,
-         sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(state.hopCount_, tableState_.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
   memcpy(state.position_, tableState_.position_, sizeof(int) * 3);
   state.groove_ = tableState_.groove_;
-};
+}
 
 void SampleInstrument::SetTableState(TableSaveState &state) {
-  memcpy(tableState_.hopCount_, state.hopCount_,
-         sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(tableState_.hopCount_, state.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
   memcpy(tableState_.position_, state.position_, sizeof(int) * 3);
   tableState_.groove_ = state.groove_;
-};
+}
 
-bool SampleInstrument::IsMulti() { return source_->IsMulti(); }
+bool SampleInstrument::IsMulti() {
+  return source_->IsMulti();
+}
 
 void SampleInstrument::EnableDownsamplingLegacy() {
   useDirtyDownsampling_ = true;

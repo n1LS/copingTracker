@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ProjectView.h"
@@ -34,14 +36,14 @@ static void CreateNewProjectCallback(View &v, ModalView &dialog) {
     ((ProjectView &)v).SetChanged();
     ((ProjectView &)v).NotifyObservers(&ve);
   }
-};
+}
 
 static void BootselCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
     System *sys = System::GetInstance();
     sys->SystemBootloader();
   }
-};
+}
 
 static void SaveAsOverwriteCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_CANCEL) {
@@ -53,12 +55,9 @@ static void SaveAsOverwriteCallback(View &v, ModalView &dialog) {
   const char *oldProjName = ((ProjectView &)v).getOldProjectName().c_str();
 
   if (persist->Save(projName, oldProjName, true) != PERSIST_SAVED) {
-    Trace::Error("failed to save renamed project %s [old: %s]", projName,
-                 oldProjName);
-    MessageBox *mb = MessageBox::Create(
-        ((ProjectView &)v), "Failed to save project", MBBF_OK | MBBF_CANCEL);
-    ((ProjectView &)v)
-        .DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
+    Trace::Error("failed to save renamed project %s [old: %s]", projName, oldProjName);
+    MessageBox *mb = MessageBox::Create(((ProjectView &)v), "Failed to save project", MBBF_OK | MBBF_CANCEL);
+    ((ProjectView &)v).DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
     return;
   }
   if (persist->SaveProjectState(projName) != PERSIST_SAVED) {
@@ -73,13 +72,13 @@ static void PurgeCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
     ((ProjectView &)v).OnPurge();
   }
-};
+}
 
 static void PurgeInstrumentsCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
     ((ProjectView &)v).OnPurgeInstruments();
   }
-};
+}
 
 static void RenderStopCallback(View &v, ModalView &dialog) {
   // If the user clicked OK, stop the rendering
@@ -89,8 +88,7 @@ static void RenderStopCallback(View &v, ModalView &dialog) {
       player->Stop();
 
       // Show cancellation message
-      MessageBox *cancelDialog =
-          MessageBox::Create(((ProjectView &)v), "Rendering Stopped", MBBF_OK);
+      MessageBox *cancelDialog = MessageBox::Create(((ProjectView &)v), "Rendering Stopped", MBBF_OK);
       ((ProjectView &)v).DoModal(cancelDialog);
     }
   }
@@ -109,8 +107,7 @@ bool ProjectView::canRenderFromFirstSongRow() const {
     }
 
     for (int phrase = 0; phrase < PHRASES_PER_CHAIN; phrase++) {
-      const unsigned char phraseId =
-          project_->song_.chain_.data_[chain * PHRASES_PER_CHAIN + phrase];
+      const unsigned char phraseId = project_->song_.chain_.data_[chain * PHRASES_PER_CHAIN + phrase];
       if (phraseId != EMPTY_SONG_VALUE) {
         return true;
       }
@@ -130,22 +127,19 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   GUIPoint position = GetAnchor();
 
   Variable *v = project_->FindVariable(FourCC::VarTempo);
-  tempoField_.emplace_back(FourCC::ActionTempoChanged, position, *v,
-                           "tempo: %d [%2.2X]  ", MIN_TEMPO, MAX_TEMPO, 1, 10);
+  tempoField_.emplace_back(FourCC::ActionTempoChanged, position, *v, "tempo: %d [%2.2X]  ", MIN_TEMPO, MAX_TEMPO, 1,
+                           10);
   fieldList_.insert(fieldList_.end(), &(*tempoField_.rbegin()));
   (*tempoField_.rbegin()).AddObserver(*this);
 
-#ifndef ADV
   v = project_->FindVariable(FourCC::VarMasterVolume);
   position._y += 1;
   intVarField_.emplace_back(position, *v, "master vol: %d%%", 0, 100, 1, 5);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-#endif
 
   v = project_->FindVariable(FourCC::VarTranspose);
   position._y += 1;
-  intVarField_.emplace_back(position, *v, "transpose: %3.2d", -48, 48, 0x1,
-                            0xC);
+  intVarField_.emplace_back(position, *v, "transpose: %3.2d", -48, 48, 0x1, 0xC);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   v = project_->FindVariable(FourCC::VarScale);
@@ -169,24 +163,14 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   (*actionField_.rbegin()).AddObserver(*this);
 
   position._y += 1;
-  actionField_.emplace_back("Remove Unused Samples", FourCC::ActionPurge,
-                            position);
+  actionField_.emplace_back("Remove Unused Samples", FourCC::ActionPurge, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   position._y += 1;
-  actionField_.emplace_back("Remove Unused Instruments",
-                            FourCC::ActionPurgeInstrument, position);
+  actionField_.emplace_back("Remove Unused Instruments", FourCC::ActionPurgeInstrument, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
-
-#ifdef ADV
-  position._y += 1;
-  actionField_.emplace_back("Recording", FourCC::ActionShowRecordView,
-                            position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
-#endif
 
   position._y += 2;
 
@@ -194,12 +178,9 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   int xalign = position._x;
 
   v = project_->FindVariable(FourCC::VarProjectName);
-  auto label =
-      etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("project: ");
-  auto defaultName = etl::make_string_with_capacity<MAX_PROJECT_NAME_LENGTH>(
-      UNNAMED_PROJECT_NAME);
-  textField_.emplace_back(*v, position, label, FourCC::ActionProjectRename,
-                          defaultName);
+  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("project: ");
+  auto defaultName = etl::make_string_with_capacity<MAX_PROJECT_NAME_LENGTH>(UNNAMED_PROJECT_NAME);
+  textField_.emplace_back(*v, position, label, FourCC::ActionProjectRename, defaultName);
   nameField_ = &(*textField_.rbegin());
 
   nameField_->AddObserver(*this);
@@ -246,7 +227,8 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   position._x = xalign;
 }
 
-ProjectView::~ProjectView() {}
+ProjectView::~ProjectView() {
+}
 
 void ProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
@@ -285,7 +267,7 @@ void ProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   }
-};
+}
 
 void ProjectView::Reset() {
   lastClock_ = 0;
@@ -313,7 +295,7 @@ void ProjectView::DrawView() {
 
   FieldView::Redraw();
   drawMap();
-};
+}
 
 void ProjectView::Update(Observable &, I_ObservableData *data) {
 
@@ -336,14 +318,12 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
 
   switch (fourcc) {
   case FourCC::ActionPurge: {
-    MessageBox *mb =
-        MessageBox::Create(*this, "Remove unused samples?", MBBF_YES | MBBF_NO);
+    MessageBox *mb = MessageBox::Create(*this, "Remove unused samples?", MBBF_YES | MBBF_NO);
     DoModal(mb, ModalViewCallback::create<&PurgeCallback>());
     break;
   }
   case FourCC::ActionPurgeInstrument: {
-    MessageBox *mb = MessageBox::Create(*this, "Remove unused instruments?",
-                                        MBBF_YES | MBBF_NO);
+    MessageBox *mb = MessageBox::Create(*this, "Remove unused instruments?", MBBF_YES | MBBF_NO);
     DoModal(mb, ModalViewCallback::create<&PurgeInstrumentsCallback>());
     break;
   }
@@ -366,26 +346,21 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
       // first need to check if project with this name already exists
       if (persist->Exists(projName)) {
         Trace::Error("project already exists ask user to confirm overwrite");
-        MessageBox *mb = MessageBox::Create(
-            *this, "Overwrite EXISTING project?", MBBF_OK | MBBF_CANCEL);
+        MessageBox *mb = MessageBox::Create(*this, "Overwrite EXISTING project?", MBBF_OK | MBBF_CANCEL);
         DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
         return;
       }
-      if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) !=
-          PERSIST_SAVED) {
+      if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) != PERSIST_SAVED) {
         Trace::Error("failed to save project state");
-        MessageBox *mb =
-            MessageBox::Create(*this, "Error saving Project", MBBF_OK);
+        MessageBox *mb = MessageBox::Create(*this, "Error saving Project", MBBF_OK);
         DoModal(mb);
         return;
       }
       clearSaveAsFlag();
     } else {
-      if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) !=
-          PERSIST_SAVED) {
+      if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) != PERSIST_SAVED) {
         Trace::Error("failed to save project state");
-        MessageBox *mb =
-            MessageBox::Create(*this, "Error saving Project", MBBF_OK);
+        MessageBox *mb = MessageBox::Create(*this, "Error saving Project", MBBF_OK);
         DoModal(mb);
         return;
       }
@@ -395,8 +370,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
     break;
   }
   case FourCC::ActionProjectRename:
-    Trace::Log("PROJECTVIEW", "Project renamed! prev name:%s",
-               nameField_->GetString().c_str());
+    Trace::Log("PROJECTVIEW", "Project renamed! prev name:%s", nameField_->GetString().c_str());
     saveAsFlag_ = true;
     break;
   case FourCC::ActionBrowse: {
@@ -409,16 +383,13 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
     break;
   }
   case FourCC::ActionNewProject: {
-    MessageBox *mb =
-        MessageBox::Create(*this, "Create a new project and",
-                           "   lose all changes?", MBBF_YES | MBBF_NO);
+    MessageBox *mb = MessageBox::Create(*this, "Create a new project and", "   lose all changes?", MBBF_YES | MBBF_NO);
     DoModal(mb, ModalViewCallback::create<&CreateNewProjectCallback>());
     break;
   }
   case FourCC::ActionBootSelect: {
     if (!player->IsRunning()) {
-      MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?",
-                                          MBBF_YES | MBBF_NO);
+      MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
       DoModal(mb, ModalViewCallback::create<&BootselCallback>());
     } else {
       MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
@@ -432,16 +403,13 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   case FourCC::ActionRenderMixdown:
     if (!player->IsRunning()) {
       if (!canRenderFromFirstSongRow()) {
-        MessageBox *mb =
-            MessageBox::Create(*this, "      Render failed",
-                               "Song row 00 has no phrases", MBBF_OK);
+        MessageBox *mb = MessageBox::Create(*this, "      Render failed", "Song row 00 has no phrases", MBBF_OK);
         DoModal(mb);
         break;
       }
       // Show a dialog with a Stop button during rendering
-      RenderProgressModal *renderDialog = RenderProgressModal::Create(
-          *this, "Rendering", "",
-          RenderProgressModal::ProgressDisplayMode::SongPercent);
+      RenderProgressModal *renderDialog =
+          RenderProgressModal::Create(*this, "Rendering", "", RenderProgressModal::ProgressDisplayMode::SongPercent);
       DoModal(renderDialog, ModalViewCallback::create<&RenderStopCallback>());
 
       // Start playback in rendering mode with MSM_FILE
@@ -451,16 +419,13 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   case FourCC::ActionRenderStems:
     if (!player->IsRunning()) {
       if (!canRenderFromFirstSongRow()) {
-        MessageBox *mb =
-            MessageBox::Create(*this, "      Render failed",
-                               "Song row 00 has no phrases", MBBF_OK);
+        MessageBox *mb = MessageBox::Create(*this, "      Render failed", "Song row 00 has no phrases", MBBF_OK);
         DoModal(mb);
         break;
       }
       // Show a dialog with a Stop button during rendering
       RenderProgressModal *renderDialog = RenderProgressModal::Create(
-          *this, "Stems Rendering", "",
-          RenderProgressModal::ProgressDisplayMode::SongPercent);
+          *this, "Stems Rendering", "", RenderProgressModal::ProgressDisplayMode::SongPercent);
       DoModal(renderDialog, ModalViewCallback::create<&RenderStopCallback>());
 
       // Start playback in rendering mode with MSM_FILESPLIT
@@ -477,8 +442,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
       bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
 
       if (!samplelibExists) {
-        MessageBox *mb =
-            MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
+        MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
         DoModal(mb);
       } else {
         ImportView::SetSourceViewType(VT_PROJECT);
@@ -502,17 +466,21 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   };
   focus->Draw(w_);
   isDirty_ = true;
-};
+}
 
-void ProjectView::OnPurge() { project_->PurgeSamples(); };
+void ProjectView::OnPurge() {
+  project_->PurgeSamples();
+}
 
-void ProjectView::OnPurgeInstruments() { project_->PurgeInstruments(); };
+void ProjectView::OnPurgeInstruments() {
+  project_->PurgeInstruments();
+}
 
 void ProjectView::OnQuit() {
   ViewEvent ve(VET_QUIT_APP);
   SetChanged();
   NotifyObservers(&ve);
-};
+}
 
 void ProjectView::OnFocus() {
   // only store current project name for use in a "save as" operation if it's
@@ -525,10 +493,9 @@ void ProjectView::OnFocus() {
 
 bool ProjectView::CanExit() {
   if (saveAsFlag_) {
-    MessageBox *mb =
-        MessageBox::Create(*this, "Save project rename first", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Save project rename first", MBBF_OK);
     DoModal(mb);
     return false;
   }
   return true;
-};
+}

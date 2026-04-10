@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _AUDIO_H_
@@ -25,9 +27,13 @@ public:
   virtual ~Audio();
   virtual void Init() = 0;
   virtual void Close() = 0;
-  virtual int GetSampleRate() { return 44100; };
-  virtual int GetMixerVolume() { return 100; };
-  virtual void SetMixerVolume(int volume){};
+  virtual int GetSampleRate() {
+    return 44100;
+  };
+  virtual int GetMixerVolume() {
+    return 100;
+  };
+  virtual void SetMixerVolume(int volume) {};
 
   const char *GetAudioAPI();
   const char *GetAudioDevice();
@@ -35,7 +41,9 @@ public:
   int GetAudioPreBufferCount();
   void AddOutput(AudioOut &out);
   AudioOut *GetFirstOutput();
-  etl::vector<AudioOut *, MaxAudioOuts> &Outputs() { return outputs_; }
+  etl::vector<AudioOut *, MaxAudioOuts> &Outputs() {
+    return outputs_;
+  }
 
 protected:
   AudioSettings settings_;

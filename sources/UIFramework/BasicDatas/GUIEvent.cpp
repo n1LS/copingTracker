@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "GUIEvent.h"
@@ -12,24 +14,26 @@
 
 // Typed constructor
 
-GUIEvent::GUIEvent(GUIPoint &point, GUIEventType type, long when, bool ctrl,
-                   bool shift, bool btn)
-    : _position(point), _type(type), _value(0), _when(when), _ctrl(ctrl),
-      _shift(shift), _btn(btn){};
+GUIEvent::GUIEvent(GUIPoint &point, GUIEventType type, long when, bool ctrl, bool shift, bool btn)
+    : _position(point), _type(type), _value(0), _when(when), _ctrl(ctrl), _shift(shift), _btn(btn) {};
 
-GUIEvent::GUIEvent(long value, GUIEventType type, long when, bool ctrl,
-                   bool shift, bool btn)
-    : _position(), _type(type), _value(value), _when(when), _ctrl(ctrl),
-      _shift(shift), _btn(btn){};
+GUIEvent::GUIEvent(long value, GUIEventType type, long when, bool ctrl, bool shift, bool btn)
+    : _position(), _type(type), _value(value), _when(when), _ctrl(ctrl), _shift(shift), _btn(btn) {};
 
 // Position accessor
 
-void GUIEvent::SetPosition(GUIPoint &point) { _position = point; }
+void GUIEvent::SetPosition(GUIPoint &point) {
+  _position = point;
+}
 
 // Position accessor
 
-GUIPoint GUIEvent::GetPosition() { return _position; }
+GUIPoint GUIEvent::GetPosition() {
+  return _position;
+}
 
 // Type accessor
 
-GUIEventType GUIEvent::GetType() { return _type; }
+GUIEventType GUIEvent::GetType() {
+  return _type;
+}

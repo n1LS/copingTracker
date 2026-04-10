@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "FieldView.h"
@@ -13,7 +15,7 @@
 
 FieldView::FieldView(GUIWindow &w, ViewData *data) : ScreenView(w, data) {
   focus_ = 0;
-};
+}
 
 void FieldView::SetFocus(UIField *field) {
 
@@ -28,16 +30,18 @@ void FieldView::SetFocus(UIField *field) {
     return;
 
   focus_->SetFocus();
-};
+}
 
 void FieldView::ClearFocus() {
   if (focus_) {
     focus_->ClearFocus();
   };
   focus_ = 0;
-};
+}
 
-UIField *FieldView::GetFocus() { return focus_; };
+UIField *FieldView::GetFocus() {
+  return focus_;
+}
 
 void FieldView::Redraw() {
 
@@ -50,7 +54,7 @@ void FieldView::Redraw() {
     (*it)->Draw(w_);
     it++;
   };
-};
+}
 
 void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
@@ -120,8 +124,7 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
     } else { // Nor ENTER or EDIT is pressed
 
-      if (!(mask & (EPBM_ENTER | EPBM_EDIT | EPBM_ALT | EPBM_NAV | EPBM_SELECT |
-                    EPBM_PLAY))) {
+      if (!(mask & (EPBM_ENTER | EPBM_EDIT | EPBM_ALT | EPBM_NAV | EPBM_SELECT | EPBM_PLAY))) {
 
         if (mask & EPBM_DOWN) {
           UIField *next = 0;
@@ -141,8 +144,7 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
                 if (next) {
                   if ((*it)->GetPosition()._y < next->GetPosition()._y) {
                     next = *it;
-                  } else if ((*it)->GetPosition()._y ==
-                             next->GetPosition()._y) {
+                  } else if ((*it)->GetPosition()._y == next->GetPosition()._y) {
                     // if both targets at same height, prefer the target with an
                     // X value closest to the current focus
 
@@ -192,8 +194,7 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
                 if (prev) {
                   if ((*it)->GetPosition()._y > prev->GetPosition()._y) {
                     prev = *it;
-                  } else if ((*it)->GetPosition()._y ==
-                             prev->GetPosition()._y) {
+                  } else if ((*it)->GetPosition()._y == prev->GetPosition()._y) {
                     // if both targets at same height, prefer the target with an
                     // X value closest to the current focus
 
@@ -230,8 +231,7 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
           auto it = fieldList_.begin();
           for (size_t i = 0; i < fieldList_.size(); i++) {
 
-            if (!(*it)->IsStatic() &&
-                ((*it)->GetPosition()._y == focus_->GetPosition()._y)) {
+            if (!(*it)->IsStatic() && ((*it)->GetPosition()._y == focus_->GetPosition()._y)) {
               if (first) {
                 if ((*it)->GetPosition()._x < first->GetPosition()._x) {
                   first = *it;
@@ -271,8 +271,7 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
           auto it = fieldList_.begin();
           for (size_t i = 0; i < fieldList_.size(); i++) {
 
-            if (!(*it)->IsStatic() &&
-                ((*it)->GetPosition()._y == focus_->GetPosition()._y)) {
+            if (!(*it)->IsStatic() && ((*it)->GetPosition()._y == focus_->GetPosition()._y)) {
               if (last) {
                 if ((*it)->GetPosition()._x > last->GetPosition()._x) {
                   last = *it;

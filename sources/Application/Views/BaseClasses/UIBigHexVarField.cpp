@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIBigHexVarField.h"
@@ -13,15 +15,14 @@
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 
-UIBigHexVarField::UIBigHexVarField(const GUIPoint &position, Variable &v,
-                                   int precision, const char *format, int min,
+UIBigHexVarField::UIBigHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min,
                                    int max, int power, bool wrap)
     : UIIntVarField(position, v, format, min, max, 0, 0) {
   precision_ = precision - 1;
   power_ = power;
   position_ = 0;
   wrap_ = wrap;
-};
+}
 
 void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
 
@@ -55,7 +56,7 @@ void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
   } else {
     DrawLabeledField(w, position, buffer);
   }
-};
+}
 
 void UIBigHexVarField::ProcessArrow(unsigned short mask) {
 
@@ -93,6 +94,5 @@ void UIBigHexVarField::ProcessArrow(unsigned short mask) {
   src_.SetInt(value);
 
   SetChanged();
-  NotifyObservers(reinterpret_cast<I_ObservableData *>(
-      static_cast<uintptr_t>(src_.GetID())));
-};
+  NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(src_.GetID())));
+}

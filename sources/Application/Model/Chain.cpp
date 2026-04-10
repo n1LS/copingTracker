@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Chain.h"
@@ -14,7 +16,7 @@
 
 Chain::Chain() { Reset(); };
 
-Chain::~Chain(){};
+Chain::~Chain() {};
 
 void Chain::Reset() {
   for (int i = 0; i < CHAIN_COUNT * PHRASES_PER_CHAIN; i++) {
@@ -34,7 +36,7 @@ unsigned short Chain::GetNext() {
     }
   }
   return NO_MORE_CHAIN;
-};
+}
 
 void Chain::SetUsed(unsigned char c) { isUsed_[c] = true; }
 

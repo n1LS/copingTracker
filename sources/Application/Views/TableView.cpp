@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "TableView.h"
@@ -17,8 +19,7 @@
 #include <nanoprintf.h>
 
 TableView::TableView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData), cmdEdit_(FourCC::ActionEdit, 0),
-      cmdEditPos_(0, 10),
+    : ScreenView(w, viewData), cmdEdit_(FourCC::ActionEdit, 0), cmdEditPos_(0, 10),
       cmdEditField_(cmdEditPos_, cmdEdit_, 4, "%4.4X", 0, 0xFFFF, 16, true) {
   row_ = 0;
   col_ = 0;
@@ -34,7 +35,8 @@ TableView::TableView(GUIWindow &w, ViewData *viewData)
   clipboard_.height_ = 0;
 }
 
-TableView::~TableView() {}
+TableView::~TableView() {
+}
 
 void TableView::Reset() {
   row_ = 0;
@@ -75,7 +77,7 @@ void TableView::OnFocus() {
   viewMode_ = VM_NORMAL;
   lastPosition_[0] = lastPosition_[1] = lastPosition_[2] = 0xFF;
   updateCursor(0, 0);
-};
+}
 
 void TableView::cutPosition() {
 
@@ -89,13 +91,13 @@ void TableView::cutPosition() {
     col_ += 1; // This way, A+B on note cuts
                // the instruments too and parameters get cut with commands
   cutSelection();
-};
+}
 
 GUIRect TableView::getSelectionRect() {
   GUIRect r(clipboard_.col_, clipboard_.row_, col_, row_);
   r.Normalize();
   return r;
-};
+}
 
 void TableView::fillClipboardData() {
 
@@ -136,7 +138,7 @@ void TableView::fillClipboardData() {
     dst6[i] = src6[clipboard_.row_ + i];
   };
   updateCursor(0, 0);
-};
+}
 
 void TableView::extendSelection() {
   GUIRect rect = getSelectionRect();
@@ -174,7 +176,7 @@ void TableView::copySelection() {
   col_ = saveCol_;
 
   isDirty_ = true;
-};
+}
 
 void TableView::cutSelection() {
 
@@ -226,7 +228,7 @@ void TableView::cutSelection() {
   col_ = saveCol_;
   updateCursor(0, 0);
   isDirty_ = true;
-};
+}
 
 /******************************************************
  pasteClipboard:
@@ -284,7 +286,7 @@ void TableView::pasteClipboard() {
   int offset = (row_ + height) % 16 - row_;
   updateCursor(0x00, offset);
   isDirty_ = true;
-};
+}
 
 void TableView::updateCursor(int dx, int dy) {
   col_ += dx;
@@ -327,7 +329,7 @@ void TableView::updateCursor(int dx, int dy) {
   };
 
   isDirty_ = true;
-};
+}
 
 void TableView::warpToNeighbour(int dir) {
 
@@ -582,7 +584,7 @@ void TableView::pasteLast() {
   case 5:
     break;
   }
-};
+}
 
 void TableView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
@@ -665,8 +667,7 @@ void TableView::processNormalButtonMask(unsigned short mask) {
       }
     }
     if (mask & EPBM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, true,
-                            viewData_->chainRow_);
+      player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
 
   } else {
@@ -680,8 +681,7 @@ void TableView::processNormalButtonMask(unsigned short mask) {
     if (mask & EPBM_RIGHT)
       updateCursor(1, 0);
     if (mask & EPBM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, false,
-                            viewData_->chainRow_);
+      player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
 }
@@ -716,8 +716,7 @@ void TableView::processSelectionButtonMask(unsigned short mask) {
           NotifyObservers(&ve);
         }
         if (mask & EPBM_PLAY) {
-          player->OnStartButton(PM_PHRASE, viewData_->songX_, true,
-                                viewData_->chainRow_);
+          player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
         }
         /*			if (mask&EPBM_L) unMuteAll() ;
          */
@@ -737,8 +736,7 @@ void TableView::processSelectionButtonMask(unsigned short mask) {
           if (mask & EPBM_RIGHT)
             updateCursor(1, 0);
           if (mask & EPBM_PLAY) {
-            player->OnStartButton(PM_PHRASE, viewData_->songX_, false,
-                                  viewData_->chainRow_);
+            player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
           }
         }
       }
@@ -746,15 +744,13 @@ void TableView::processSelectionButtonMask(unsigned short mask) {
   }
 }
 
-void TableView::setTextProps(GUITextProperties &props, int row, int col,
-                             bool restore) {
+void TableView::setTextProps(GUITextProperties &props, int row, int col, bool restore) {
 
   bool invert = false;
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
-    if ((row >= selRect.Left()) && (row <= selRect.Right()) &&
-        (col >= selRect.Top()) && (col <= selRect.Bottom())) {
+    if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
       invert = true;
     }
   } else {
@@ -912,8 +908,7 @@ void TableView::DrawView() {
     pos._y++;
   }
 
-  if ((viewMode_ != VM_SELECTION) &&
-      ((col_ == 1) || (col_ == 3) || (col_ == 5))) {
+  if ((viewMode_ != VM_SELECTION) && ((col_ == 1) || (col_ == 3) || (col_ == 5))) {
     cmdEditField_.SetFocus();
     cmdEditField_.Draw(w_);
   };

@@ -45,8 +45,7 @@ public:
 
 private:
   // Static map for multiple moving average profilers
-  static etl::map<etl::string<32>, MovingAverageProfiler, MAX_PROFILERS>
-      moving_avg_profilers_;
+  static etl::map<etl::string<32>, MovingAverageProfiler, MAX_PROFILERS> moving_avg_profilers_;
 
   // Private constructor for moving average profilers
   Profiler(const etl::string<32> &name, bool use_moving_avg);
@@ -86,13 +85,15 @@ private:
 
 // Macro for measuring average time of a specific code block
 #if ENABLE_PROFILING
-#define PROFILE_AVERAGE(name)                                                  \
-  static AverageProfiler avg_prof(name);                                       \
-  uint32_t start_time_avg = micros();                                          \
-  struct scope_guard {                                                         \
-    AverageProfiler &prof;                                                     \
-    uint32_t &start;                                                           \
-    ~scope_guard() { prof.addSample(time_diff(micros(), start)); }             \
+#define PROFILE_AVERAGE(name)                                                                                          \
+  static AverageProfiler avg_prof(name);                                                                               \
+  uint32_t start_time_avg = micros();                                                                                  \
+  struct scope_guard {                                                                                                 \
+    AverageProfiler &prof;                                                                                             \
+    uint32_t &start;                                                                                                   \
+    ~scope_guard() {                                                                                                   \
+      prof.addSample(time_diff(micros(), start));                                                                      \
+    }                                                                                                                  \
   } guard{avg_prof, start_time_avg};
 #else
 #define PROFILE_AVERAGE(name)

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MACRO_INSTRUMENT_H_
@@ -36,13 +38,17 @@ public:
   virtual bool IsEmpty();
 
   // TODO: set a real instrument type before shipping macro instruments
-  virtual InstrumentType GetType() { return IT_NONE; };
+  virtual InstrumentType GetType() {
+    return IT_NONE;
+  };
   virtual void ProcessCommand(int channel, FourCC cc, ushort value);
   virtual int GetTable();
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
   virtual void SetTableState(TableSaveState &state);
-  etl::ilist<Variable *> *Variables() { return &variables_; };
+  etl::ilist<Variable *> *Variables() {
+    return &variables_;
+  };
 
   // Engine playback  start callback
   virtual void OnStart();

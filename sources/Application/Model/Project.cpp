@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Project.h"
@@ -26,11 +28,7 @@
 #define DEFAULT_CHANNEL_VOLUME 99
 #define DEFAULT_PREVIEW_VOLUME 60
 
-#ifdef ADV
-#define DEFAULT_MASTER_VOLUME 100
-#else
 #define DEFAULT_MASTER_VOLUME 60
-#endif
 
 #define DATA_UNUSED_VALUE 0xFF
 
@@ -87,7 +85,7 @@ Project::Project(const char *name)
   tempoTapCount_ = 0;
 
   Status::Set("About to load project");
-};
+}
 
 Project::~Project() {}
 
@@ -144,7 +142,7 @@ int Project::GetTempo() {
   NAssert(v);
   int tempo = v->GetInt() + tempoNudge_;
   return tempo;
-};
+}
 
 int Project::GetMasterVolume() {
   Variable *v = FindVariable(FourCC::VarMasterVolume);
@@ -175,7 +173,7 @@ int Project::GetChannelVolume(int channel) {
     NAssert(false);
     return 0;
   }
-};
+}
 
 void Project::GetProjectName(char *name) {
   Variable *v = FindVariable(FourCC::VarProjectName);
@@ -195,7 +193,7 @@ void Project::NudgeTempo(int value) {
   if ((GetTempo() + tempoNudge_) > 0) {
     tempoNudge_ += value;
   }
-};
+}
 
 void Project::Trigger() {
   if (tempoNudge_ != 0) {
@@ -205,7 +203,7 @@ void Project::Trigger() {
       tempoNudge_++;
     };
   }
-};
+}
 
 int Project::GetTranspose() {
   Variable *v = FindVariable(FourCC::VarTranspose);
@@ -215,13 +213,13 @@ int Project::GetTranspose() {
     result -= 128;
   }
   return result;
-};
+}
 
 bool Project::Wrap() {
   Variable *v = FindVariable(FourCC::VarWrap);
   NAssert(v);
   return v->GetBool();
-};
+}
 
 InstrumentBank *Project::GetInstrumentBank() { return &instrumentBank_; };
 
@@ -290,7 +288,7 @@ void Project::Purge() {
       param2++;
     };
   }
-};
+}
 
 // Returns true if sample is used by at least 1 Sampler instrument
 bool Project::SampleInUse(
@@ -371,7 +369,7 @@ void Project::PurgeInstruments() {
       Trace::Debug("Set unused instrument slot [%d] to NONE", i);
     }
   }
-};
+}
 
 void Project::RestoreContent(PersistencyDocument *doc) {
   bool attr = doc->NextAttribute();
@@ -442,7 +440,7 @@ void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
     printer->CloseElement();
     it++;
   }
-};
+}
 
 void Project::OnTempoTap() {
 

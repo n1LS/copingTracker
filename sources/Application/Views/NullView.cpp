@@ -3,21 +3,25 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "NullView.h"
 #include <Application/AppWindow.h>
 #include <nanoprintf.h>
 
-NullView::NullView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {}
+NullView::NullView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {
+}
 
-NullView::~NullView() {}
+NullView::~NullView() {
+}
 
-void NullView::ProcessButtonMask(unsigned short mask, bool pressed){
+void NullView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
-};
+}
 
 void NullView::DrawView() {
 
@@ -27,16 +31,16 @@ void NullView::DrawView() {
   SetColor(CD_HILITE2);
 
   char buildString[SCREEN_WIDTH + 1];
-  npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s",
-               PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
+  npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
+               BUILD_COUNT);
   GUIPoint pos;
   pos._y = 22;
   pos._x = (32 - strlen(buildString)) / 2;
   DrawString(pos._x, pos._y, buildString, props);
-};
+}
 
-void NullView::OnPlayerUpdate(PlayerEventType, unsigned int tick){
+void NullView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
 
-};
+}
 
-void NullView::OnFocus(){};
+void NullView::OnFocus() {};

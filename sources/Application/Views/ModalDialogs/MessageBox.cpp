@@ -3,13 +3,16 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "MessageBox.h"
 #include "System/Console/n_assert.h"
 #include <Application/AppWindow.h>
+#include "System/Console/nanoprintf.h"
 #include <new>
 
 static const char *buttonText[MBL_LAST] = {"Ok", "Yes", "Cancel", "No"};
@@ -28,8 +31,7 @@ MessageBox *MessageBox::Create(View &view, const char *message, int btnFlags) {
   return new (storage_) MessageBox(view, message, btnFlags);
 }
 
-MessageBox *MessageBox::Create(View &view, const char *message,
-                               const char *message2, int btnFlags) {
+MessageBox *MessageBox::Create(View &view, const char *message, const char *message2, int btnFlags) {
   if (inUse_) {
     auto *existing = reinterpret_cast<MessageBox *>(storage_);
     existing->~MessageBox();
@@ -39,37 +41,37 @@ MessageBox *MessageBox::Create(View &view, const char *message,
   return new (storage_) MessageBox(view, message, message2, btnFlags);
 }
 
-MessageBox::MessageBox(View &view, const char *message, int btnFlags)
-    : ModalView(view), line1_(message) {
-
+MessageBox::MessageBox(View &view, const char *message, int btnFlags) : ModalView(view), line1_(message) {
   buttonCount_ = 0;
+
   for (int i = 0; i < MBL_LAST; i++) {
     if (btnFlags & (1 << (i))) {
       button_[buttonCount_] = i;
       buttonCount_++;
     }
   }
-  selected_ = buttonCount_ - 1;
-  NAssert(buttonCount_ != 0);
-};
 
-// Constructor for 2 line message
-MessageBox::MessageBox(View &view, const char *messageLine1,
-                       const char *messageLine2, int btnFlags)
-    : ModalView(view), line1_(messageLine1), line2_(messageLine2) {
-
-  buttonCount_ = 0;
-  for (int i = 0; i < MBL_LAST; i++) {
-    if (btnFlags & (1 << (i))) {
-      button_[buttonCount_] = i;
-      buttonCount_++;
-    }
-  }
   selected_ = buttonCount_ - 1;
   NAssert(buttonCount_ != 0);
 }
 
-MessageBox::~MessageBox(){};
+// Constructor for 2 line message
+MessageBox::MessageBox(View &view, const char *messageLine1, const char *messageLine2, int btnFlags)
+    : ModalView(view), line1_(messageLine1), line2_(messageLine2) {
+  buttonCount_ = 0;
+
+  for (int i = 0; i < MBL_LAST; i++) {
+    if (btnFlags & (1 << (i))) {
+      button_[buttonCount_] = i;
+      buttonCount_++;
+    }
+  }
+
+  selected_ = buttonCount_ - 1;
+  NAssert(buttonCount_ != 0);
+}
+
+MessageBox::~MessageBox() {};
 
 void MessageBox::Destroy() {
   this->~MessageBox();
@@ -115,11 +117,20 @@ void MessageBox::DrawView() {
       props.invert_ = false;
     }
     DrawString(x, y, text, props);
+    if (selected_ == i) {
+      props.invert_ = !props.invert_;;
+      DrawChar(x - 1, y, GLYPH(char_button_border_left_s), props);
+      DrawChar(x + strlen(text), y, GLYPH(char_button_border_right_s), props);
+    }
   }
-};
+}
 
-void MessageBox::OnPlayerUpdate(PlayerEventType, unsigned int currentTick){};
-void MessageBox::OnFocus(){};
+void MessageBox::OnPlayerUpdate(PlayerEventType, unsigned int currentTick) {
+}
+
+void MessageBox::OnFocus() {
+}
+
 void MessageBox::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (mask & EPBM_LEFT) {
     selected_ = (selected_ + 1);
@@ -135,4 +146,4 @@ void MessageBox::ProcessButtonMask(unsigned short mask, bool pressed) {
     EndModal(button_[selected_]);
   }
   isDirty_ = true;
-};
+}

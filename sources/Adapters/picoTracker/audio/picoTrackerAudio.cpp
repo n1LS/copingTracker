@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerAudio.h"
@@ -15,7 +17,8 @@ picoTrackerAudio::picoTrackerAudio(AudioSettings &hints) : Audio(hints) {
   hints_ = hints;
 }
 
-picoTrackerAudio::~picoTrackerAudio() {}
+picoTrackerAudio::~picoTrackerAudio() {
+}
 
 void picoTrackerAudio::Init() {
   AudioSettings settings;
@@ -24,14 +27,12 @@ void picoTrackerAudio::Init() {
   settings.bufferSize_ = GetAudioBufferSize();
   settings.preBufferCount_ = GetAudioPreBufferCount();
 
-  alignas(picoTrackerAudioDriver) static char
-      audioDriver[sizeof(picoTrackerAudioDriver)];
-  picoTrackerAudioDriver *drv =
-      new (audioDriver) picoTrackerAudioDriver(settings);
+  alignas(picoTrackerAudioDriver) static char audioDriver[sizeof(picoTrackerAudioDriver)];
+  picoTrackerAudioDriver *drv = new (audioDriver) picoTrackerAudioDriver(settings);
   alignas(AudioOutDriver) static char audioOutDriver[sizeof(AudioOutDriver)];
   AudioOutDriver *out = new (audioOutDriver) AudioOutDriver(*drv);
   AddOutput(*out);
-};
+}
 
 void picoTrackerAudio::Close() {
   for (auto *out : Outputs()) {
@@ -39,7 +40,7 @@ void picoTrackerAudio::Close() {
       out->Close();
     }
   }
-};
+}
 
 void picoTrackerAudio::SetMixerVolume(int v) {
   AudioOutDriver *out = (AudioOutDriver *)GetFirstOutput();

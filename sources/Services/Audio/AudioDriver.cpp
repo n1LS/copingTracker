@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "AudioDriver.h"
@@ -14,9 +16,12 @@
 
 AudioBufferData AudioDriver::pool_[SOUND_BUFFER_COUNT];
 
-AudioDriver::AudioDriver(AudioSettings &settings) { settings_ = settings; }
+AudioDriver::AudioDriver(AudioSettings &settings) {
+  settings_ = settings;
+}
 
-AudioDriver::~AudioDriver() {}
+AudioDriver::~AudioDriver() {
+}
 
 bool AudioDriver::Init() {
 
@@ -31,7 +36,9 @@ bool AudioDriver::Init() {
   return InitDriver();
 }
 
-void AudioDriver::Close() { CloseDriver(); };
+void AudioDriver::Close() {
+  CloseDriver();
+}
 
 bool AudioDriver::Start() {
 
@@ -42,7 +49,7 @@ bool AudioDriver::Start() {
   hasData_ = false;
 
   return StartDriver();
-};
+}
 
 void AudioDriver::Stop() {
   isPlaying_ = false;
@@ -78,7 +85,7 @@ void AudioDriver::OnNewBufferNeeded() {
   SetChanged();
   Event event(Event::ADET_BUFFERNEEDED);
   NotifyObservers(&event);
-};
+}
 
 void AudioDriver::onAudioBufferTick() {
   SetChanged();
@@ -86,6 +93,10 @@ void AudioDriver::onAudioBufferTick() {
   NotifyObservers(&event);
 }
 
-bool AudioDriver::hasData() { return hasData_; };
+bool AudioDriver::hasData() {
+  return hasData_;
+}
 
-AudioSettings AudioDriver::GetAudioSettings() { return settings_; };
+AudioSettings AudioDriver::GetAudioSettings() {
+  return settings_;
+}

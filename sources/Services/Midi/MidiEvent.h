@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MIDI_EVENT_H_
@@ -14,8 +16,7 @@ enum MidiEventType { MET_SHORT, MET_SYSEX };
 
 class MidiEvent {
 public:
-  MidiEvent(unsigned char status = 0, unsigned char data1 = 0,
-            unsigned char data2 = 0);
+  MidiEvent(unsigned char status = 0, unsigned char data1 = 0, unsigned char data2 = 0);
   MidiEvent(char *buffer, int len);
   // there is no maximum length specified for SysEx, we choose 256 as an
   // arbitrary number to support

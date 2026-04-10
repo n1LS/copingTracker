@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _I_SRP_UPDATER_H_
@@ -24,13 +26,19 @@ struct RUParams {
 
 class I_SRPUpdater {
 public:
-  I_SRPUpdater(){};
-  virtual ~I_SRPUpdater(){};
+  I_SRPUpdater() {};
+  virtual ~I_SRPUpdater() {};
   virtual void Trigger(bool tableTick) = 0;
   virtual void UpdateSRP(struct RUParams &rup) = 0;
-  void Enable() { enabled_ = true; };
-  void Disable() { enabled_ = false; };
-  bool Enabled() { return enabled_; };
+  void Enable() {
+    enabled_ = true;
+  };
+  void Disable() {
+    enabled_ = false;
+  };
+  bool Enabled() {
+    return enabled_;
+  };
 
 protected:
   bool enabled_ = false;

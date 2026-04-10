@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include <cstdio>
@@ -109,6 +111,10 @@ static char **getHelpLegend(FourCC command) {
     result[0] = (char *)("Delay: ---b");
     result[1] = (char *)("delay b+1 ticks");
     break;
+  case FourCC::InstrumentCommandSetInstrumentParameter:
+    result[0] = (char *)("SetInstrumentParameter");
+    result[1] = (char *)("aabb: set param aa to value bb");
+    break;
   case FourCC::InstrumentCommandStop:
     result[0] = (char *)("Stop table playback");
     result[1] = (char *)("");
@@ -120,6 +126,10 @@ static char **getHelpLegend(FourCC command) {
   case FourCC::InstrumentCommandMidiChord:
     result[0] = (char *)("MIDI Chord:abcd");
     result[1] = (char *)("send rel notes:+a,+b,+c,+d");
+    break;
+  case FourCC::InstrumentCommandVibrato:
+    result[0] = (char *)("VIBrato:aabb");
+    result[1] = (char *)("rate aa, depth bb");
     break;
   default:
     result[0] = result[1] = (char *)("");

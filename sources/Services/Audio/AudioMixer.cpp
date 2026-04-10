@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "AudioMixer.h"
@@ -13,14 +15,16 @@
 
 fixed AudioMixer::renderBuffer_[MAX_SAMPLE_COUNT * 2];
 
-AudioMixer::AudioMixer(const char *name)
-    : enableRendering_(0), name_(name), modules_() {
+AudioMixer::AudioMixer(const char *name) : enableRendering_(0), name_(name), modules_() {
   volume_ = (i2fp(1));
-};
+}
 
-AudioMixer::~AudioMixer() {}
+AudioMixer::~AudioMixer() {
+}
 
-void AudioMixer::SetFileRenderer(const char *path) { renderPath_ = path; };
+void AudioMixer::SetFileRenderer(const char *path) {
+  renderPath_ = path;
+}
 
 void AudioMixer::EnableRendering(bool enable) {
   if (enable == enableRendering_) {
@@ -29,8 +33,7 @@ void AudioMixer::EnableRendering(bool enable) {
 
   if (enable) {
     if (!writer_.Open(renderPath_.c_str())) {
-      Trace::Error("AUDIO_MIXER", "Failed to open render file: %s",
-                   renderPath_.c_str());
+      Trace::Error("AUDIO_MIXER", "Failed to open render file: %s", renderPath_.c_str());
       enableRendering_ = false;
       return;
     }
@@ -40,7 +43,7 @@ void AudioMixer::EnableRendering(bool enable) {
   if (!enable) {
     writer_.Close();
   }
-};
+}
 
 bool AudioMixer::Render(fixed *buffer, int samplecount) {
   bool gotData = false;
@@ -143,9 +146,11 @@ bool AudioMixer::Render(fixed *buffer, int samplecount) {
     writer_.AddBuffer(buffer, samplecount);
   }
   return gotData;
-};
+}
 
-void AudioMixer::SetVolume(fixed volume) { volume_ = volume; }
+void AudioMixer::SetVolume(fixed volume) {
+  volume_ = volume;
+}
 
 void AudioMixer::AddModule(AudioModule &module) {
   if (modules_.full()) {
@@ -164,4 +169,6 @@ void AudioMixer::RemoveModule(AudioModule &module) {
   }
 }
 
-void AudioMixer::ClearModules() { modules_.clear(); }
+void AudioMixer::ClearModules() {
+  modules_.clear();
+}

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _GUIRECT_H_
@@ -47,12 +49,24 @@ public:
 
   // Accessor to the rectangle coordinates and size
 
-  inline int Top() const { return _topLeft._y; }
-  inline int Left() const { return _topLeft._x; }
-  inline int Bottom() const { return _bottomRight._y; }
-  inline int Right() const { return _bottomRight._x; }
-  inline int Width() const { return _bottomRight._x - _topLeft._x; }
-  inline int Height() const { return _bottomRight._y - _topLeft._y; }
+  inline int Top() const {
+    return _topLeft._y;
+  }
+  inline int Left() const {
+    return _topLeft._x;
+  }
+  inline int Bottom() const {
+    return _bottomRight._y;
+  }
+  inline int Right() const {
+    return _bottomRight._x;
+  }
+  inline int Width() const {
+    return _bottomRight._x - _topLeft._x;
+  }
+  inline int Height() const {
+    return _bottomRight._y - _topLeft._y;
+  }
 
 public:
   GUIPoint _topLeft;     // Top left Corner

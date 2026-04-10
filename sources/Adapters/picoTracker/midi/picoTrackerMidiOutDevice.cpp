@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerMidiOutDevice.h"
@@ -12,16 +14,21 @@
 #include "hardware/uart.h"
 #include "pico/stdlib.h"
 
-picoTrackerMidiOutDevice::picoTrackerMidiOutDevice(const char *name)
-    : MidiOutDevice(name) {}
+picoTrackerMidiOutDevice::picoTrackerMidiOutDevice(const char *name) : MidiOutDevice(name) {
+}
 
-bool picoTrackerMidiOutDevice::Init() { return true; }
+bool picoTrackerMidiOutDevice::Init() {
+  return true;
+}
 
-void picoTrackerMidiOutDevice::Close(){};
+void picoTrackerMidiOutDevice::Close() {};
 
-bool picoTrackerMidiOutDevice::Start() { return true; };
+bool picoTrackerMidiOutDevice::Start() {
+  return true;
+}
 
-void picoTrackerMidiOutDevice::Stop() {}
+void picoTrackerMidiOutDevice::Stop() {
+}
 
 void picoTrackerMidiOutDevice::SendMessage(MidiMessage &msg) {
   uart_putc_raw(MIDI_UART, msg.status_);

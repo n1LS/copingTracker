@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "View.h"
@@ -43,10 +45,8 @@ uint32_t View::lastBatteryDisplayFrame_ = 0;
 bool View::batteryDisplayInitialized_ = false;
 
 View::View(GUIWindow &w, ViewData *viewData)
-    : w_(w), viewData_(viewData), needsRedraw_(false), isVisible_(true),
-      vuMeterCount_(0), viewMode_(VM_NORMAL), isDirty_(true),
-      viewType_(VT_SONG), hasFocus_(false), powerButtonPressed_(false),
-      powerButtonHoldCount_(0) {
+    : w_(w), viewData_(viewData), needsRedraw_(false), isVisible_(true), vuMeterCount_(0), viewMode_(VM_NORMAL),
+      isDirty_(true), viewType_(VT_SONG), hasFocus_(false), powerButtonPressed_(false), powerButtonHoldCount_(0) {
   if (!initPrivate_) {
     View::margin_ = 0;
     songRowCount_ = 16;
@@ -70,21 +70,25 @@ GUIPoint View::GetAnchor() {
   return GUIPoint(5, 3);
 }
 
-GUIPoint View::GetTitlePosition() { return GUIPoint(0, 0); };
+GUIPoint View::GetTitlePosition() {
+  return GUIPoint(0, 0);
+}
 
 bool View::Lock() {
   if (locked_)
     return false;
   locked_ = true;
   return true;
-};
+}
 
 void View::WaitForObject() {
   while (locked_) {
   };
 }
 
-void View::Unlock() { locked_ = false; }
+void View::Unlock() {
+  locked_ = false;
+}
 
 void View::drawMap() {
   GUIPoint anchor = GetAnchor();
@@ -215,8 +219,7 @@ void View::drawNotes() {
   }
 }
 
-void View::drawMasterVuMeter(Player *player, GUITextProperties props,
-                             bool forceRedraw, uint8_t xoffset) {
+void View::drawMasterVuMeter(Player *player, GUITextProperties props, bool forceRedraw, uint8_t xoffset) {
   stereosample playerLevel = player->GetMasterLevel();
 
   // Convert amplitude to bar levels
@@ -232,8 +235,8 @@ void View::drawMasterVuMeter(Player *player, GUITextProperties props,
   drawVUMeter(leftBars, rightBars, pos, props, 0, forceRedraw);
 }
 
-void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos,
-                       GUITextProperties props, int vuIndex, bool forceRedraw) {
+void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, GUITextProperties props, int vuIndex,
+                       bool forceRedraw) {
 
   // Clamp the values to the maximum height
   leftBars = std::min<int32_t>(leftBars, VU_METER_MAX);
@@ -292,14 +295,12 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos,
 
       // draw left channel if changed
       if (leftChanged) {
-        DrawString(pos._x, pos._y - i, char_bargraph_s(leftBars - 10 * i),
-                   props);
+        DrawString(pos._x, pos._y - i, char_bargraph_s(leftBars - 10 * i), props);
       }
 
       // draw right channel if changed
       if (rightChanged) {
-        DrawString(pos._x + 1, pos._y - i, char_bargraph_s(rightBars - 10 * i),
-                   props);
+        DrawString(pos._x + 1, pos._y - i, char_bargraph_s(rightBars - 10 * i), props);
       }
     }
   }
@@ -309,8 +310,7 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos,
   prevRightVU_[vuIndex] = rightBars;
 }
 
-void View::drawPlayTime(Player *player, GUIPoint pos,
-                        GUITextProperties &props) {
+void View::drawPlayTime(Player *player, GUIPoint pos, GUITextProperties &props) {
   char strbuffer[10];
 
   SetColor(CD_NORMAL);
@@ -327,7 +327,7 @@ void View::DoModal(ModalView *view, ModalViewCallback cb) {
   modalView_->OnFocus();
   modalViewCallback_ = cb;
   isDirty_ = true;
-};
+}
 
 void View::DismissModal() {
   if (modalView_ && modalView_->IsFinished()) {
@@ -350,7 +350,7 @@ void View::DismissModal() {
 
     isDirty_ = true;
   }
-};
+}
 
 void View::Redraw() {
   if (modalView_) {
@@ -362,9 +362,11 @@ void View::Redraw() {
     DrawView();
   }
   isDirty_ = false;
-};
+}
 
-void View::SetDirty(bool isDirty) { isDirty_ = isDirty; };
+void View::SetDirty(bool isDirty) {
+  isDirty_ = isDirty;
+}
 
 void View::ProcessButton(unsigned short mask, bool pressed) {
   if (!pressed) {
@@ -384,24 +386,34 @@ void View::ProcessButton(unsigned short mask, bool pressed) {
 
   if (isDirty_)
     ((AppWindow &)w_).SetDirty();
-};
+}
 
-void View::Clear() { ((AppWindow &)w_).Clear(); }
+void View::Clear() {
+  ((AppWindow &)w_).Clear();
+}
 
-void View::ForceClear() { ((AppWindow &)w_).Clear(true); }
+void View::ForceClear() {
+  ((AppWindow &)w_).Clear(true);
+}
 
-void View::SetColor(ColorDefinition cd) { ((AppWindow &)w_).SetColor(cd); };
+void View::SetColor(ColorDefinition cd) {
+  ((AppWindow &)w_).SetColor(cd);
+}
 
 void View::ClearTextRect(int x, int y, int w, int h) {
   GUIRect rect(x, y, (x + w), (y + h));
   w_.ClearTextRect(rect);
-};
+}
 
-void View::DrawString(int x, int y, const char *txt,
-                      const GUITextProperties &props) {
+void View::DrawString(int x, int y, const char *txt, const GUITextProperties &props) {
   GUIPoint pos(x, y);
   w_.DrawString(txt, pos, props);
-};
+}
+
+void View::DrawChar(int x, int y, const char character, const GUITextProperties &props) {
+  GUIPoint pos(x, y);
+  w_.DrawChar(character, pos, props);
+}
 
 void View::DrawRect(GUIRect &r, ColorDefinition color) {
   w_.SetCurrentRectColor(AppWindow::GetColor(color));
@@ -430,8 +442,7 @@ void View::drawBattery(GUITextProperties &props) {
         lastBatteryDisplayFrame_ = frameCounter;
       } else {
         constexpr uint32_t kBatteryDisplayUpdateFrames = PICO_CLOCK_HZ * 120;
-        if ((frameCounter - lastBatteryDisplayFrame_) >=
-            kBatteryDisplayUpdateFrames) {
+        if ((frameCounter - lastBatteryDisplayFrame_) >= kBatteryDisplayUpdateFrames) {
           // While discharging, update the display at most every 120 seconds.
           batteryState_ = latestBatteryState_;
           lastBatteryDisplayFrame_ = frameCounter;
@@ -475,8 +486,7 @@ void View::drawBattery(GUITextProperties &props) {
   ClearTextRect(startX, battpos._y, kBatteryWidgetWidth, 1);
 
   DrawString(startX, battpos._y, batteryText, invertedProps);
-  const char *rightSymbol =
-      batteryState_.charging ? char_symbol_charging_s : char_battery_right_s;
+  const char *rightSymbol = batteryState_.charging ? char_symbol_charging_s : char_battery_right_s;
   DrawString(startX + 3, battpos._y, rightSymbol, normalProps);
 #else
   // use define to choose between drawing battery percentage or battery level as
@@ -509,8 +519,7 @@ void View::drawBattery(GUITextProperties &props) {
   constexpr int kBattWidth = 6; // "[100%]" is the widest we render
   int startX = SCREEN_WIDTH - kBattWidth;
   ClearTextRect(startX, battpos._y, kBattWidth, 1);
-  battpos._x =
-      startX + (kBattWidth - battLen); // we want to right align the batt widget
+  battpos._x = startX + (kBattWidth - battLen); // we want to right align the batt widget
   DrawString(battpos._x, battpos._y, battText, props);
 #endif
 }
@@ -527,8 +536,7 @@ void View::drawPowerButtonUI(GUITextProperties &props) {
       remainingSeconds = 0;
     }
 
-    snprintf(countdownMessage, sizeof(countdownMessage),
-             "Hold for shutdown (%d sec)", remainingSeconds);
+    snprintf(countdownMessage, sizeof(countdownMessage), "Hold for shutdown (%d sec)", remainingSeconds);
 
     if (remainingSeconds == 0) {
       Trace::Debug("Power button held for threshold time, Powerdown!");
@@ -568,22 +576,41 @@ void View::drawPowerButtonUI(GUITextProperties &props) {
 }
 
 void View::switchToRecordView() {
-  // recording view only for the Advance
-#ifndef ADV
+  // recording view only not yet supported on pico
   return;
-#endif
-  if (!Player::GetInstance()->IsRunning()) {
-    RecordView::SetSourceViewType(viewType_);
-    SampleEditorView::SetSourceViewType(viewType_);
-    ViewType vt = VT_RECORD;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
+
+  // if (!Player::GetInstance()->IsRunning()) {
+  //   RecordView::SetSourceViewType(viewType_);
+  //   SampleEditorView::SetSourceViewType(viewType_);
+  //   ViewType vt = VT_RECORD;
+  //   ViewEvent ve(VET_SWITCH_VIEW, &vt);
+  //   SetChanged();
+  //   NotifyObservers(&ve);
+  // }
+}
+
+void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height) {
+  GUITextProperties props;
+  
+  DrawChar(x, y, GLYPH(char_border_single_topLeft_s), props);
+  DrawChar(x + width- 1, y, GLYPH(char_border_single_topRight_s), props);
+  DrawChar(x, y + height - 1, GLYPH(char_border_single_bottomLeft_s), props);
+  DrawChar(x + width - 1, y + height - 1, GLYPH(char_border_single_bottomRight_s), props);
+
+  // horizontal borders
+  for (int32_t i = x + 1; i < x + width - 1; i++) {
+    DrawChar(i, y, GLYPH(char_border_single_horizontal_s), props);
+    DrawChar(i, y + height - 1, GLYPH(char_border_single_horizontal_s), props);
+  }
+  
+  // left and right borders
+  for (int32_t j = y + 1; j < y + height - 1; j++) {
+    DrawChar(x, j, GLYPH(char_border_single_vertical_s), props);
+    DrawChar(x + width - 1, j, GLYPH(char_border_single_vertical_s), props);
   }
 }
 
-void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height,
-                         uint16_t index, uint16_t total) {
+void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total) {
   if (total <= height) {
     return; // no scrollbar needed
   }

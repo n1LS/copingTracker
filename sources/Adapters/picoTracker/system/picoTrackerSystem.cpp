@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerSystem.h"
@@ -19,6 +21,7 @@
 #include "hardware/gpio.h"
 #include "input.h"
 #include "pico/rand.h"
+#include "tusb.h"
 #include <assert.h>
 #include <fcntl.h>
 #include <memory.h>
@@ -32,6 +35,7 @@
 #include "Adapters/picoTracker/platform/platform.h"
 #include "critical_error_message.h"
 #include "hardware/adc.h"
+#include "hardware/structs/watchdog.h"
 #include "pico/stdlib.h"
 
 EventManager *picoTrackerSystem::eventManager_ = NULL;
@@ -42,14 +46,11 @@ int picoTrackerSystem::MainLoop() {
 
   eventManager_->InstallMappings();
   return eventManager_->MainLoop();
-};
+}
 
-enum SdCardStatus { SD_OK, SD_EXFAT, SD_MISSING };
+enum SdCardStatus { SD_OK, SD_MISSING };
 
 static SdCardStatus checkSDCard(FileSystem *fs) {
-  if (fs->isExFat()) {
-    return SD_EXFAT;
-  }
   if (!fs->chdir("/")) {
     return SD_MISSING;
   }
@@ -59,8 +60,7 @@ static SdCardStatus checkSDCard(FileSystem *fs) {
 static bool pollForValidSDCard() {
   drawInputTester();
 
-  alignas(picoTrackerFileSystem) static char
-      fsMemBuf[sizeof(picoTrackerFileSystem)];
+  alignas(picoTrackerFileSystem) static char fsMemBuf[sizeof(picoTrackerFileSystem)];
   FileSystem::Install(new (fsMemBuf) picoTrackerFileSystem());
 
   auto fs = FileSystem::GetInstance();
@@ -70,8 +70,7 @@ static bool pollForValidSDCard() {
 void picoTrackerSystem::Boot(int argc, char **argv) {
 
   // Install System
-  alignas(
-      picoTrackerSystem) static char systemMemBuf[sizeof(picoTrackerSystem)];
+  alignas(picoTrackerSystem) static char systemMemBuf[sizeof(picoTrackerSystem)];
   System::Install(new (systemMemBuf) picoTrackerSystem());
 
   // Install GUI Factory
@@ -79,23 +78,17 @@ void picoTrackerSystem::Boot(int argc, char **argv) {
   I_GUIWindowFactory::Install(new (guiMemBuf) GUIFactory());
 
   // Install Timers
-  alignas(picoTrackerTimerService) static char
-      timerMemBuf[sizeof(picoTrackerTimerService)];
-  TimerService::GetInstance()->Install(new (timerMemBuf)
-                                           picoTrackerTimerService());
+  alignas(picoTrackerTimerService) static char timerMemBuf[sizeof(picoTrackerTimerService)];
+  TimerService::GetInstance()->Install(new (timerMemBuf) picoTrackerTimerService());
 
   // Install FileSystem
-  alignas(picoTrackerFileSystem) static char
-      fsMemBuf[sizeof(picoTrackerFileSystem)];
+  alignas(picoTrackerFileSystem) static char fsMemBuf[sizeof(picoTrackerFileSystem)];
   FileSystem::Install(new (fsMemBuf) picoTrackerFileSystem());
 
   // First check for SDCard
   auto fs = FileSystem::GetInstance();
   SdCardStatus sdStatus = checkSDCard(fs);
-  if (sdStatus == SD_EXFAT) {
-    Trace::Log("PICOTRACKERSYSTEM", "SDCARD exFAT not supported");
-    critical_error_message("unsupported sdcard", 0x01, pollForValidSDCard);
-  } else if (sdStatus == SD_MISSING || scanKeys()) {
+  if (sdStatus == SD_MISSING || scanKeys()) {
     Trace::Log("PICOTRACKERSYSTEM", "SDCARD MISSING!!");
     critical_error_message("SDCARD MISSING", 0x01, pollForValidSDCard);
   }
@@ -104,8 +97,7 @@ void picoTrackerSystem::Boot(int argc, char **argv) {
   // **NOTE**: MIDI install MUST happen before Audio install because it triggers
   // reading config file and config file needs to have MidiService already
   // installed in order to apply midi settings read from the config file
-  alignas(picoTrackerMidiService) static char
-      midiMemBuf[sizeof(picoTrackerMidiService)];
+  alignas(picoTrackerMidiService) static char midiMemBuf[sizeof(picoTrackerMidiService)];
   MidiService::Install(new (midiMemBuf) picoTrackerMidiService());
 
   // Install Sound
@@ -116,8 +108,7 @@ void picoTrackerSystem::Boot(int argc, char **argv) {
   Audio::Install(new (audioMemBuf) picoTrackerAudio(hint));
 
   // Install SamplePool
-  alignas(picoTrackerSamplePool) static char
-      samplePoolMemBuf[sizeof(picoTrackerSamplePool)];
+  alignas(picoTrackerSamplePool) static char samplePoolMemBuf[sizeof(picoTrackerSamplePool)];
   SamplePool::Install(new (samplePoolMemBuf) picoTrackerSamplePool());
 
   eventManager_ = I_GUIWindowFactory::GetInstance()->GetEventManager();
@@ -134,9 +125,11 @@ void picoTrackerSystem::Boot(int argc, char **argv) {
 
   Trace::Log("PICOTRACKERSYSTEM", "ADC INIT DONE");
 #endif
-};
+}
 
-void picoTrackerSystem::Shutdown() { delete Audio::GetInstance(); };
+void picoTrackerSystem::Shutdown() {
+  delete Audio::GetInstance();
+}
 
 static int secbase;
 
@@ -187,18 +180,49 @@ void picoTrackerSystem::Sleep(int millisec) {
   //		assert(0) ;
 }
 
-void picoTrackerSystem::PostQuitMessage() { eventManager_->PostQuitMessage(); }
+void picoTrackerSystem::PostQuitMessage() {
+  eventManager_->PostQuitMessage();
+}
 
-unsigned int picoTrackerSystem::GetMemoryUsage() { return 0; }
+unsigned int picoTrackerSystem::GetMemoryUsage() {
+  return 0;
+}
 
-void picoTrackerSystem::SystemPutChar(int c) { putchar(c); }
+void picoTrackerSystem::SystemPutChar(int c) {
+  putchar(c);
+}
 
-uint32_t picoTrackerSystem::GetRandomNumber() { return get_rand_32(); }
+uint32_t picoTrackerSystem::GetRandomNumber() {
+  return get_rand_32();
+}
 
-void picoTrackerSystem::SystemBootloader() { platform_bootloader(); }
+void picoTrackerSystem::SystemBootloader() {
+  platform_bootloader();
+}
 
-void picoTrackerSystem::SystemReboot() { platform_reboot(); }
+void picoTrackerSystem::SystemReboot() {
+  platform_reboot();
+}
 
-uint32_t picoTrackerSystem::Micros() { return micros(); }
+void picoTrackerSystem::SystemMassStorage() {
+  // Write magic value to watchdog scratch register 5
+  // Scratch registers survive a watchdog reboot
+  watchdog_hw->scratch[5] = 0x4D534400; // "MSD\0"
 
-uint32_t picoTrackerSystem::Millis() { return millis(); }
+  // Disconnect USB cleanly before rebooting so the host detects the old
+  // (CDC+MIDI) device going away. Without this, the watchdog reboot
+  // is so fast that the host never sees a disconnect and won't
+  // re-enumerate the new MSC device after reboot.
+  tud_disconnect();
+  sleep_ms(1000);
+
+  platform_reboot();
+}
+
+uint32_t picoTrackerSystem::Micros() {
+  return micros();
+}
+
+uint32_t picoTrackerSystem::Millis() {
+  return millis();
+}

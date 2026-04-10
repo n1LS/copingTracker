@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerSamplePool.h"
@@ -22,10 +24,8 @@
 // Define where sample storage begins in flash
 // Use all flash available after binary for samples
 extern char __flash_binary_end;
-#define FLASH_TARGET_OFFSET                                                    \
-  ((((uintptr_t) & __flash_binary_end - 0x10000000u) / FLASH_SECTOR_SIZE) +    \
-   1) *                                                                        \
-      FLASH_SECTOR_SIZE
+#define FLASH_TARGET_OFFSET                                                                                            \
+  ((((uintptr_t)&__flash_binary_end - 0x10000000u) / FLASH_SECTOR_SIZE) + 1) * FLASH_SECTOR_SIZE
 
 // Total flash size depends on hardware:
 // - Raspberry Pi Pico: 2MB
@@ -40,8 +40,7 @@ uint32_t picoTrackerSamplePool::flashLimit_ = 0;
 // From the SDK, values are not defined in the header file
 #define FLASH_RUID_DUMMY_BYTES 4
 #define FLASH_RUID_DATA_BYTES 8
-#define FLASH_RUID_TOTAL_BYTES                                                 \
-  (1 + FLASH_RUID_DUMMY_BYTES + FLASH_RUID_DATA_BYTES)
+#define FLASH_RUID_TOTAL_BYTES (1 + FLASH_RUID_DUMMY_BYTES + FLASH_RUID_DATA_BYTES)
 
 uint storage_get_flash_capacity() {
   uint8_t txbuf[FLASH_RUID_TOTAL_BYTES] = {0x9f};
@@ -65,8 +64,7 @@ picoTrackerSamplePool::picoTrackerSamplePool() : SamplePool() {
   // Set the flash offset to maximum usable flash back from the top of the flash
   // or immediately after the firmware
   flashWriteOffset_ = flashEraseOffset_ =
-      flashLimit_ < SAMPLE_STORAGE_START_MB * MB ? FLASH_TARGET_OFFSET
-                                                 : SAMPLE_STORAGE_START_MB * MB;
+      flashLimit_ < SAMPLE_STORAGE_START_MB * MB ? FLASH_TARGET_OFFSET : SAMPLE_STORAGE_START_MB * MB;
 
   Trace::Debug("Total flash size: %u bytes", totalFlashSize);
   Trace::Debug("Flash target offset: %u bytes", FLASH_TARGET_OFFSET);
@@ -85,7 +83,7 @@ void picoTrackerSamplePool::Reset() {
   // Reset flash erase and write pointers when we close project
   flashEraseOffset_ = FLASH_TARGET_OFFSET;
   flashWriteOffset_ = FLASH_TARGET_OFFSET;
-};
+}
 
 bool picoTrackerSamplePool::loadSample(const char *name) {
   Trace::Log("SAMPLEPOOL", "Loading sample into flash: %s", name);
@@ -130,7 +128,7 @@ bool picoTrackerSamplePool::loadSample(const char *name) {
     multicore_lockout_end_blocking();
   }
   return true;
-};
+}
 
 bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
 
@@ -138,9 +136,7 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
 
   // Size actually occupied in flash
   uint32_t FlashPageBufferSize =
-      ((FlashBaseBufferSize / FLASH_PAGE_SIZE) +
-       ((FlashBaseBufferSize % FLASH_PAGE_SIZE) != 0)) *
-      FLASH_PAGE_SIZE;
+      ((FlashBaseBufferSize / FLASH_PAGE_SIZE) + ((FlashBaseBufferSize % FLASH_PAGE_SIZE) != 0)) * FLASH_PAGE_SIZE;
   // Trace::Debug("Size in flash: %i (%i 256 byte pages)", FlashPageBufferSize,
   //              FlashPageBufferSize / FLASH_PAGE_SIZE);
 
@@ -159,11 +155,9 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
   // If data doesn't fit in previously erased page, we'll have to erase
   // additional ones
   if (FlashPageBufferSize > (flashEraseOffset_ - flashWriteOffset_)) {
-    uint32_t additionalData =
-        FlashPageBufferSize - flashEraseOffset_ + flashWriteOffset_;
-    uint32_t sectorsToErase = ((additionalData / FLASH_SECTOR_SIZE) +
-                               ((additionalData % FLASH_SECTOR_SIZE) != 0)) *
-                              FLASH_SECTOR_SIZE;
+    uint32_t additionalData = FlashPageBufferSize - flashEraseOffset_ + flashWriteOffset_;
+    uint32_t sectorsToErase =
+        ((additionalData / FLASH_SECTOR_SIZE) + ((additionalData % FLASH_SECTOR_SIZE) != 0)) * FLASH_SECTOR_SIZE;
     // Trace::Debug("About to erase %i sectors in flash region 0x%X - 0x%X",
     //              sectorsToErase, flashEraseOffset_,
     //              flashEraseOffset_ + sectorsToErase);
@@ -185,9 +179,7 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
     // Write size will be either 256 (which is the flash page size) or 512
     uint32_t writeSize = br;
     // Adjust to page size
-    writeSize =
-        ((writeSize / FLASH_PAGE_SIZE) + ((writeSize % FLASH_PAGE_SIZE) != 0)) *
-        FLASH_PAGE_SIZE;
+    writeSize = ((writeSize / FLASH_PAGE_SIZE) + ((writeSize % FLASH_PAGE_SIZE) != 0)) * FLASH_PAGE_SIZE;
 
     // There will be trash at the end, but sampleBufferSize_ gives me the
     // bounds
@@ -199,15 +191,15 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
   // Lastly we restore the IRQs
   restore_interrupts(irqs);
   return true;
-};
+}
 
-bool picoTrackerSamplePool::unloadSample(uint32_t index) { return false; };
+bool picoTrackerSamplePool::unloadSample(uint32_t index) {
+  return false;
+}
 
 bool picoTrackerSamplePool::CheckSampleFits(int sampleSize) {
   // Calculate flash storage needed (round up to flash page size)
-  uint32_t flashNeeded =
-      ((sampleSize / FLASH_PAGE_SIZE) + ((sampleSize % FLASH_PAGE_SIZE) != 0)) *
-      FLASH_PAGE_SIZE;
+  uint32_t flashNeeded = ((sampleSize / FLASH_PAGE_SIZE) + ((sampleSize % FLASH_PAGE_SIZE) != 0)) * FLASH_PAGE_SIZE;
 
   // Check if there's enough space available
   uint32_t availableFlash = flashLimit_ - flashWriteOffset_;

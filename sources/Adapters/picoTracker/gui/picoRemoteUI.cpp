@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoRemoteUI.h"
@@ -29,9 +31,7 @@ void sendToUSBCDC(char buf[], int length) {
       } else {
         tud_task();
         tud_cdc_write_flush();
-        if (!tud_cdc_connected() ||
-            (!tud_cdc_write_available() &&
-             time_us_64() > last_avail_time + USB_TIMEOUT_US)) {
+        if (!tud_cdc_connected() || (!tud_cdc_write_available() && time_us_64() > last_avail_time + USB_TIMEOUT_US)) {
           break;
         }
       }

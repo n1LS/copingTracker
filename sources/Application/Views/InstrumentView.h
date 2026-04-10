@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _INSTRUMENT_VIEW_H_
@@ -38,7 +40,7 @@ public:
 
   virtual void ProcessButtonMask(unsigned short mask, bool pressed);
   virtual void DrawView();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int){};
+  virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   virtual void OnFocus();
   void onInstrumentTypeChange(bool updateUI = false);
   bool checkInstrumentModified();
@@ -46,12 +48,15 @@ public:
   void applyProposedTypeChangeUI();
 
 protected:
+  void addIndexToLine(uint8_t index, uint8_t line);
+
   void warpToNext(int offset);
   void onInstrumentChange();
   void fillSampleParameters();
   void fillSIDParameters();
   void fillMidiParameters();
   void fillOpalParameters();
+  void fillChiptuneParameters();
   void fillNoneParameters();
   I_Instrument *getInstrument();
   void Update(Observable &o, I_ObservableData *d);
@@ -85,9 +90,9 @@ private:
   etl::vector<UIActionField, 2> persistentActionField_;
   etl::vector<UIIntVarField, 40> intVarField_;
   etl::vector<UINoteVarField, 1> noteVarField_;
-  etl::vector<UIStaticField, 10> staticField_;
+  etl::vector<UIStaticField, 16> staticField_;
   etl::vector<UIBigHexVarField, 4> bigHexVarField_;
-  etl::vector<UIIntVarOffField, 2> intVarOffField_;
+  etl::vector<UIIntVarOffField, 3> intVarOffField_;
   etl::vector<UIActionField, 1> sampleActionField_;
   etl::vector<UIBitmaskVarField, 3> bitmaskVarField_;
   etl::vector<UITextField<MAX_INSTRUMENT_NAME_LENGTH>, 1> nameTextField_;

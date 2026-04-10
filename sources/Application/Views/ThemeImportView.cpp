@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ThemeImportView.h"
@@ -22,10 +24,11 @@
 // -4 to allow for title, filesize & spacers
 #define LIST_PAGE_SIZE (SCREEN_HEIGHT - 4)
 
-ThemeImportView::ThemeImportView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData) {}
+ThemeImportView::ThemeImportView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
+}
 
-ThemeImportView::~ThemeImportView() {}
+ThemeImportView::~ThemeImportView() {
+}
 
 void ThemeImportView::Reset() {
   topIndex_ = 0;
@@ -34,26 +37,6 @@ void ThemeImportView::Reset() {
 }
 
 void ThemeImportView::OpenSelectedItem() {
-<<<<<<< HEAD
-  auto fs = FileSystem::GetInstance();
-
-  if (currentIndex_ >= fileIndexList_.size())
-    return;
-
-  char name[PFILENAME_SIZE];
-  bool isDir = false;
-  bool hasEntry = false;
-
-  // get selected item
-  unsigned fileIndex = fileIndexList_[currentIndex_];
-  fs->getFileName(fileIndex, name, PFILENAME_SIZE);
-
-  if (fs->getFileType(fileIndex) == PFT_DIR) { // directory, navigate into it
-    setCurrentFolder(fs, name);
-  } else { // file, import it
-    onImportTheme(name);
-  }
-=======
   if (currentIndex_ >= fileIndexList_.size())
     return;
 
@@ -63,20 +46,13 @@ void ThemeImportView::OpenSelectedItem() {
   char name[PFILENAME_SIZE];
   fs->getFileName(fileIndex, name, PFILENAME_SIZE);
   onImportTheme(name);
->>>>>>> upstream/master
 }
 
 void ThemeImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (!pressed)
     return;
 
-<<<<<<< HEAD
-  bool openSelecterd = false;
-
-  if ((mask & EPBM_ENTER) || (mask == (EPBM_ALT | EPBM_PLAY))) {
-=======
   if (mask & EPBM_ENTER) {
->>>>>>> upstream/master
     OpenSelectedItem();
   } else if (mask & EPBM_UP) {
     changeSelection(mask & EPBM_EDIT ? -LIST_PAGE_SIZE : -1);
@@ -90,7 +66,7 @@ void ThemeImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
     NotifyObservers(&ve);
     return;
   }
-};
+}
 
 void ThemeImportView::DrawView() {
   Clear();
@@ -113,8 +89,7 @@ void ThemeImportView::DrawView() {
   // than buffer but instead returns empty string in buffer :-(
   size_t total = fileIndexList_.size();
   char buffer[PFILENAME_SIZE];
-  for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total);
-       i++) {
+  for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total); i++) {
     if (i == currentIndex_) {
       SetColor(CD_HILITE2);
       props.invert_ = true;
@@ -138,9 +113,10 @@ void ThemeImportView::DrawView() {
   }
 
   drawScrollBar(SCREEN_WIDTH - 1, pos._y + 2, LIST_PAGE_SIZE, topIndex_, total);
-};
+}
 
-void ThemeImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {}
+void ThemeImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
+}
 
 void ThemeImportView::OnFocus() {
   // Navigate to the themes directory
@@ -161,9 +137,7 @@ void ThemeImportView::changeSelection(int delta) {
 
   if (willScroll) {
     size_t offset = (target > bottom) ? LIST_PAGE_SIZE - 1 : 0;
-    size_t upper = fileIndexList_.size() > LIST_PAGE_SIZE
-                       ? fileIndexList_.size() - LIST_PAGE_SIZE
-                       : 0zu;
+    size_t upper = fileIndexList_.size() > LIST_PAGE_SIZE ? fileIndexList_.size() - LIST_PAGE_SIZE : 0zu;
     size_t base = target > offset ? target - offset : 0zu;
     topIndex_ = std::min(base, upper);
   }
@@ -189,22 +163,12 @@ void ThemeImportView::onImportTheme(const char *filename) {
     ForceClear();
 
     // Show success message
-    MessageBox *mb =
-        MessageBox::Create(*this, "Theme imported successfully", MBBF_OK);
-    DoModal(
-        mb,
-        ModalViewCallback::create<ThemeImportView,
-                                  &ThemeImportView::onImportThemeModalDismiss>(
-            *this));
+    MessageBox *mb = MessageBox::Create(*this, "Theme imported successfully", MBBF_OK);
+    DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
   } else {
     // Show error message
-    MessageBox *mb =
-        MessageBox::Create(*this, "Failed to import theme", MBBF_OK);
-    DoModal(
-        mb,
-        ModalViewCallback::create<ThemeImportView,
-                                  &ThemeImportView::onImportThemeModalDismiss>(
-            *this));
+    MessageBox *mb = MessageBox::Create(*this, "Failed to import theme", MBBF_OK);
+    DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
   }
   isDirty_ = true;
 }

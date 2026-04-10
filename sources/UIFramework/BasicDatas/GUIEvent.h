@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _GUIEVENT_H_
@@ -65,14 +67,14 @@ class GUIEvent {
 public:
   // Blank constructor
 
-  GUIEvent() { _type = ET_NONE; };
+  GUIEvent() {
+    _type = ET_NONE;
+  };
 
   // Constructor with data
 
-  GUIEvent(GUIPoint &point, GUIEventType type, long when = 0, bool ctrl = false,
-           bool shift = false, bool btn = false);
-  GUIEvent(long value, GUIEventType type, long when = 0, bool ctrl = false,
-           bool shift = false, bool btn = false);
+  GUIEvent(GUIPoint &point, GUIEventType type, long when = 0, bool ctrl = false, bool shift = false, bool btn = false);
+  GUIEvent(long value, GUIEventType type, long when = 0, bool ctrl = false, bool shift = false, bool btn = false);
 
   // Position accessor
 
@@ -82,13 +84,23 @@ public:
   // Type accessor
 
   GUIEventType GetType();
-  long GetValue() { return _value; };
+  long GetValue() {
+    return _value;
+  };
 
-  long When() { return _when; };
+  long When() {
+    return _when;
+  };
 
-  bool IsShiftPressed() { return _shift; };
-  bool IsCtrlPressed() { return _ctrl; };
-  bool IsBtnPressed() { return _btn; };
+  bool IsShiftPressed() {
+    return _shift;
+  };
+  bool IsCtrlPressed() {
+    return _ctrl;
+  };
+  bool IsBtnPressed() {
+    return _btn;
+  };
 
 private:
   GUIPoint _position; // The event's position

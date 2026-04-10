@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SAMPLE_POOL_H_
@@ -17,7 +19,7 @@
 #include "WavFile.h"
 #include <cstdint>
 
-#define MAX_SAMPLES MAX_SAMPLEINSTRUMENT_COUNT * 4
+#define MAX_SAMPLES MAX_INSTRUMENT_COUNT
 
 enum SamplePoolEventType { SPET_INSERT, SPET_DELETE };
 
@@ -35,8 +37,7 @@ public:
   SoundSource *GetSource(uint32_t i);
   char **GetNameList();
   int GetNameListSize();
-  uint32_t FindSampleIndexByName(
-      const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &name);
+  uint32_t FindSampleIndexByName(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &name);
   int ImportSample(const char *name, const char *projectName);
   void PurgeSample(int i, const char *projectName);
   virtual bool CheckSampleFits(int sampleSize) = 0;
@@ -45,8 +46,7 @@ public:
   int8_t ReloadSample(uint8_t index, const char *name);
 
 protected:
-  virtual void updateStatus(uint32_t current, uint32_t total,
-                            const char *message);
+  virtual void updateStatus(uint32_t current, uint32_t total, const char *message);
   virtual bool loadSample(const char *name) = 0;
   bool loadSoundFont(const char *path);
   uint32_t count_;
@@ -60,7 +60,7 @@ protected:
   const char *importName;
 
 private:
-  etl::vector<I_Observer *, MAX_SAMPLEINSTRUMENT_COUNT> observers_;
+  etl::vector<I_Observer *, MAX_INSTRUMENT_COUNT> observers_;
 };
 
 #endif

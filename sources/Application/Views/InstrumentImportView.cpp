@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "InstrumentImportView.h"
@@ -19,13 +21,13 @@
 // -4 to allow for title, filesize & spacers
 #define LIST_PAGE_SIZE (SCREEN_HEIGHT - 4)
 
-InstrumentImportView::InstrumentImportView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData) {
+InstrumentImportView::InstrumentImportView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
   // Store the current instrument ID
   toInstrID_ = viewData_->currentInstrumentID_;
 }
 
-InstrumentImportView::~InstrumentImportView() {}
+InstrumentImportView::~InstrumentImportView() {
+}
 
 void InstrumentImportView::Reset() {
   topIndex_ = 0;
@@ -35,8 +37,7 @@ void InstrumentImportView::Reset() {
   fileIndexList_.clear();
 }
 
-void InstrumentImportView::ProcessButtonMask(unsigned short mask,
-                                             bool pressed) {
+void InstrumentImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (!pressed)
     return;
 
@@ -80,8 +81,7 @@ void InstrumentImportView::ProcessButtonMask(unsigned short mask,
         fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 
         // Only allow navigation into directories, not to parent directory
-        if (fs->getFileType(fileIndex) == PFT_DIR && strcmp(name, ".") != 0 &&
-            strcmp(name, "..") != 0) {
+        if (fs->getFileType(fileIndex) == PFT_DIR && strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
           setCurrentFolder(fs, name);
           isDirty_ = true;
           topIndex_ = 0; // need to reset when entering a dir as prev dir may
@@ -90,7 +90,7 @@ void InstrumentImportView::ProcessButtonMask(unsigned short mask,
       }
     }
   }
-};
+}
 
 void InstrumentImportView::DrawView() {
   Clear();
@@ -114,8 +114,7 @@ void InstrumentImportView::DrawView() {
   // need to use fullsize buffer as sdfat doesnt truncate if filename longer
   // than buffer but instead returns empty string in buffer :-(
   char buffer[PFILENAME_SIZE];
-  for (size_t i = topIndex_;
-       i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
+  for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
     if (i == currentIndex_) {
       SetColor(CD_HILITE2);
       props.invert_ = true;
@@ -139,9 +138,10 @@ void InstrumentImportView::DrawView() {
     }
     y++;
   }
-};
+}
 
-void InstrumentImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {}
+void InstrumentImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
+}
 
 void InstrumentImportView::OnFocus() {
   auto fs = FileSystem::GetInstance();
@@ -182,10 +182,8 @@ void InstrumentImportView::importInstrument(char *name) {
                  name, strlen(name), MAX_INSTRUMENT_FILENAME_LENGTH);
 
     char sizeMesg[32];
-    npf_snprintf(sizeMesg, sizeof(sizeMesg), "Max is %d chars",
-                 MAX_INSTRUMENT_FILENAME_LENGTH);
-    MessageBox *mb =
-        MessageBox::Create(*this, "Filename too long", sizeMesg, MBBF_OK);
+    npf_snprintf(sizeMesg, sizeof(sizeMesg), "Max is %d chars", MAX_INSTRUMENT_FILENAME_LENGTH);
+    MessageBox *mb = MessageBox::Create(*this, "Filename too long", sizeMesg, MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -200,12 +198,10 @@ void InstrumentImportView::importInstrument(char *name) {
   toInstrID_ = viewData_->currentInstrumentID_;
 
   // First detect the instrument type from the file
-  InstrumentType importedType =
-      PersistencyService::GetInstance()->DetectInstrumentType(name);
+  InstrumentType importedType = PersistencyService::GetInstance()->DetectInstrumentType(name);
 
   if (importedType == IT_NONE) {
-    MessageBox *mb =
-        MessageBox::Create(*this, "Unknown instrument type", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Unknown instrument type", MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -224,47 +220,38 @@ void InstrumentImportView::importInstrument(char *name) {
   }
 
   // Log the current instrument type for debugging
-  Trace::Log("INSTRUMENTIMPORT",
-             "Current instrument type: %d, Imported type: %d",
-             currentInstrument->GetType(), importedType);
+  Trace::Log("INSTRUMENTIMPORT", "Current instrument type: %d, Imported type: %d", currentInstrument->GetType(),
+             importedType);
 
   if (currentInstrument->GetType() != importedType) {
-    Trace::Log("INSTRUMENTIMPORT", "Converting instrument from type %d to %d",
-               currentInstrument->GetType(), importedType);
+    Trace::Log("INSTRUMENTIMPORT", "Converting instrument from type %d to %d", currentInstrument->GetType(),
+               importedType);
 
     // Delete the current instrument
     bank->releaseInstrument(toInstrID_);
 
     // Create a new instrument of the correct type in the same slot
-    if (bank->GetNextAndAssignID(importedType, toInstrID_) ==
-        NO_MORE_INSTRUMENT) {
-      MessageBox *mb =
-          MessageBox::Create(*this, "Failed to create instrument", MBBF_OK);
+    if (bank->AssignInstrumentToSlot(importedType, toInstrID_) != InstrumentAssignResult::Success) {
+      MessageBox *mb = MessageBox::Create(*this, "Failed to create instrument", MBBF_OK);
       DoModal(mb);
       return;
     }
 
-    Trace::Log("INSTRUMENTIMPORT",
-               "Created new instrument of type %d in slot %d", importedType,
-               toInstrID_);
+    Trace::Log("INSTRUMENTIMPORT", "Created new instrument of type %d in slot %d", importedType, toInstrID_);
   } else {
-    Trace::Log("INSTRUMENTIMPORT",
-               "Keeping existing instrument of type %d in slot %d",
-               importedType, toInstrID_);
+    Trace::Log("INSTRUMENTIMPORT", "Keeping existing instrument of type %d in slot %d", importedType, toInstrID_);
   }
 
   // Force the ViewData to update its current instrument type
   // This ensures the InstrumentView will show the correct instrument type
   // when we return to it
-  Trace::Log("INSTRUMENTIMPORT", "Created new instrument of type %d",
-             importedType);
+  Trace::Log("INSTRUMENTIMPORT", "Created new instrument of type %d", importedType);
 
   // Get the updated instrument (which may be a new one if we converted)
   I_Instrument *instrument = bank->GetInstrument(toInstrID_);
 
   // Import the instrument settings
-  PersistencyResult result =
-      PersistencyService::GetInstance()->ImportInstrument(instrument, name);
+  PersistencyResult result = PersistencyService::GetInstance()->ImportInstrument(instrument, name);
 
   // debug logging to show final instrument type
   Trace::Log("INSTRUMENTIMPORT", "Imported TYPE: %d", instrument->GetType());
@@ -278,31 +265,23 @@ void InstrumentImportView::importInstrument(char *name) {
     instrument->NotifyObservers();
 
     // Log the final state of the instrument for debugging
-    Variable *channelVar =
-        instrument->FindVariable(FourCC::MidiInstrumentChannel);
+    Variable *channelVar = instrument->FindVariable(FourCC::MidiInstrumentChannel);
     if (channelVar) {
-      Trace::Log("INSTRUMENTIMPORT", "Final MIDI channel: %d",
-                 channelVar->GetInt());
+      Trace::Log("INSTRUMENTIMPORT", "Final MIDI channel: %d", channelVar->GetInt());
     }
 
     // Log the final instrument type for debugging
-    Trace::Log("INSTRUMENTIMPORT",
-               "Final instrument type in importInstrument: %d",
-               instrument->GetType());
+    Trace::Log("INSTRUMENTIMPORT", "Final instrument type in importInstrument: %d", instrument->GetType());
 
     // Update the current instrument ID in the view data
     // This ensures the InstrumentView will display the correct instrument when
     // we return
     viewData_->currentInstrumentID_ = toInstrID_;
-    Trace::Log("INSTRUMENTIMPORT",
-               "Updated viewData_ currentInstrumentID_ to: %d", toInstrID_);
+    Trace::Log("INSTRUMENTIMPORT", "Updated viewData_ currentInstrumentID_ to: %d", toInstrID_);
 
     // Show success message and return to instrument view
     MessageBox *mb = MessageBox::Create(*this, "Import successful", MBBF_OK);
-    DoModal(mb,
-            ModalViewCallback::create<InstrumentImportView,
-                                      &InstrumentImportView::onImportSuccess>(
-                *this));
+    DoModal(mb, ModalViewCallback::create<InstrumentImportView, &InstrumentImportView::onImportSuccess>(*this));
   } else {
     MessageBox *mb = MessageBox::Create(*this, "Import failed", MBBF_OK);
     DoModal(mb);
@@ -316,11 +295,9 @@ void InstrumentImportView::onImportSuccess(View &, ModalView &dialog) {
     return;
   }
 
-  Trace::Log("INSTRUMENTIMPORT",
-             "Switching back to instrument view with ID: %d", toInstrID_);
+  Trace::Log("INSTRUMENTIMPORT", "Switching back to instrument view with ID: %d", toInstrID_);
 
-  I_Instrument *instrument =
-      viewData_->project_->GetInstrumentBank()->GetInstrument(toInstrID_);
+  I_Instrument *instrument = viewData_->project_->GetInstrumentBank()->GetInstrument(toInstrID_);
   if (instrument) {
     instrument->SetChanged();
     instrument->NotifyObservers();

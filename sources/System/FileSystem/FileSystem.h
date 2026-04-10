@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _FILESYSTEM_H_
@@ -28,16 +30,18 @@ class I_File;
 // platform-specific classes
 class FileSystem : public T_Factory<FileSystem> {
 public:
-  FileSystem() {}
-  virtual ~FileSystem() {}
+  FileSystem() {
+  }
+  virtual ~FileSystem() {
+  }
 
   virtual FileHandle Open(const char *name, const char *mode) = 0;
   virtual bool chdir(const char *path) = 0;
   virtual bool read(int index, void *data) {
     return false;
   } // Default implementation
-  virtual void list(etl::ivector<int> *fileIndexes, const char *filter,
-                    bool subDirOnly, bool includeHidden = false) = 0;
+  virtual void list(etl::ivector<int> *fileIndexes, const char *filter, bool subDirOnly,
+                    bool includeHidden = false) = 0;
   virtual void getFileName(int index, char *name, int length) = 0;
   virtual PicoFileType getFileType(int index) = 0;
   virtual bool isParentRoot() = 0;
@@ -45,8 +49,10 @@ public:
   virtual bool DeleteFile(const char *name) = 0;
   virtual bool DeleteDir(const char *name) = 0;
   // Optional batching hook for filesystem implementations that cache listings.
-  virtual void BeginBatch() {}
-  virtual void EndBatch() {}
+  virtual void BeginBatch() {
+  }
+  virtual void EndBatch() {
+  }
   virtual bool exists(const char *path) = 0;
   virtual bool makeDir(const char *path, bool pFlag = false) = 0;
   virtual uint64_t getFileSize(int index) = 0;

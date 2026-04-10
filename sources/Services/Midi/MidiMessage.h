@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #pragma once
@@ -37,10 +39,8 @@ struct MidiMessage : public I_ObservableData {
 
   static const unsigned char UNUSED_BYTE = 255;
 
-  MidiMessage(unsigned char status = UNUSED_BYTE,
-              unsigned char data1 = UNUSED_BYTE,
-              unsigned char data2 = UNUSED_BYTE)
-      : status_(status), data1_(data1), data2_(data2){};
+  MidiMessage(unsigned char status = UNUSED_BYTE, unsigned char data1 = UNUSED_BYTE, unsigned char data2 = UNUSED_BYTE)
+      : status_(status), data1_(data1), data2_(data2) {};
 
   //----------------------------------------------------------------------------
 

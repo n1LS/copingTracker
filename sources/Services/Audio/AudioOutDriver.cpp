@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "AudioOutDriver.h"
@@ -21,11 +23,15 @@ AudioOutDriver::AudioOutDriver(AudioDriver &driver) {
 AudioOutDriver::~AudioOutDriver() {
   driver_->RemoveObserver(*this);
   delete driver_;
-};
+}
 
-bool AudioOutDriver::Init() { return driver_->Init(); };
+bool AudioOutDriver::Init() {
+  return driver_->Init();
+}
 
-void AudioOutDriver::Close() { driver_->Close(); }
+void AudioOutDriver::Close() {
+  driver_->Close();
+}
 
 bool AudioOutDriver::Start() {
   sampleCount_ = 0;
@@ -41,7 +47,9 @@ void AudioOutDriver::SetAudioActive(bool active) {
   driver_->OnAudioActive(active);
 }
 
-stereosample AudioOutDriver::GetLastPeakLevels() { return lastPeakVolume_; };
+stereosample AudioOutDriver::GetLastPeakLevels() {
+  return lastPeakVolume_;
+}
 
 void AudioOutDriver::Trigger() {
   prepareMixBuffers();
@@ -57,7 +65,7 @@ void AudioOutDriver::Update(Observable &o, I_ObservableData *d) {
 
 void AudioOutDriver::prepareMixBuffers() {
   sampleCount_ = getPlaySampleCount();
-};
+}
 
 void AudioOutDriver::clipToMix() {
 
@@ -102,27 +110,29 @@ void AudioOutDriver::clipToMix() {
     lastPeakVolume_ += peakR;
     peakL = peakR = 0;
   }
-};
+}
 
 int AudioOutDriver::GetPlayedBufferPercentage() {
   return driver_->GetPlayedBufferPercentage();
-};
+}
 
-AudioDriver *AudioOutDriver::GetDriver() { return driver_; };
+AudioDriver *AudioOutDriver::GetDriver() {
+  return driver_;
+}
 
 etl::string<STRING_AUDIO_API_MAX> AudioOutDriver::GetAudioAPI() {
   AudioSettings as = driver_->GetAudioSettings();
   return as.audioAPI_;
-};
+}
 
 etl::string<STRING_AUDIO_DEVICE_MAX> AudioOutDriver::GetAudioDevice() {
   AudioSettings as = driver_->GetAudioSettings();
   return as.audioDevice_;
-};
+}
 int AudioOutDriver::GetAudioBufferSize() {
   AudioSettings as = driver_->GetAudioSettings();
   return as.bufferSize_;
-};
+}
 
 int AudioOutDriver::GetAudioRequestedBufferSize() {
   AudioSettings as = driver_->GetAudioSettings();
@@ -132,5 +142,7 @@ int AudioOutDriver::GetAudioRequestedBufferSize() {
 int AudioOutDriver::GetAudioPreBufferCount() {
   AudioSettings as = driver_->GetAudioSettings();
   return as.preBufferCount_;
-};
-double AudioOutDriver::GetStreamTime() { return driver_->GetStreamTime(); };
+}
+double AudioOutDriver::GetStreamTime() {
+  return driver_->GetStreamTime();
+}

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "CommandList.h"
@@ -35,11 +37,13 @@ static FourCC _all[] = {
     FourCC::InstrumentCommandPitchSlide,
     FourCC::InstrumentCommandRetrigger,
     FourCC::InstrumentCommandStop,
+    FourCC::InstrumentCommandSetInstrumentParameter,
     FourCC::InstrumentCommandTable,
     FourCC::InstrumentCommandTempo,
     FourCC::InstrumentCommandVelocity,
+    FourCC::InstrumentCommandVibrato,
     FourCC::InstrumentCommandVolume,
-};
+  };
 
 static char GetCommandGroupLetter(FourCC command) {
   const char *name = FourCC(command).c_str();
@@ -72,7 +76,7 @@ FourCC CommandList::GetNext(FourCC current) {
     };
   };
   return current;
-};
+}
 
 FourCC CommandList::GetPrev(FourCC current) {
   uint count = sizeof(_all) / sizeof(FourCC);
@@ -82,7 +86,7 @@ FourCC CommandList::GetPrev(FourCC current) {
     };
   };
   return current;
-};
+}
 
 FourCC CommandList::GetNextAlpha(FourCC current) {
   char letter = GetCommandGroupLetter(current);
@@ -100,7 +104,7 @@ FourCC CommandList::GetNextAlpha(FourCC current) {
     };
   };
   return current;
-};
+}
 
 FourCC CommandList::GetPrevAlpha(FourCC current) {
 
@@ -133,4 +137,4 @@ FourCC CommandList::GetPrevAlpha(FourCC current) {
     return tReturn;
   }
   return current;
-};
+}

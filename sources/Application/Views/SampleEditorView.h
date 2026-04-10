@@ -4,8 +4,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SAMPLE_EDITOR_VIEW_H_
@@ -33,7 +35,7 @@ public:
 
   virtual void ProcessButtonMask(unsigned short mask, bool pressed);
   virtual void DrawView();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int){};
+  virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   virtual void OnFocus();
 
   // Observer for action callback
@@ -63,26 +65,20 @@ private:
   const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &activeFilename() const;
   bool ensureWorkingCopy();
   void discardWorkingCopy();
-  bool commitWorkingCopy(
-      const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &targetFilename);
+  bool commitWorkingCopy(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &targetFilename);
   void assignWorkingFilename();
-  bool buildSiblingPath(
-      const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &srcFilename,
-      etl::string_view siblingName,
-      etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &outFilename) const;
-  bool
-  resolveSaveFilename(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &filename);
+  bool buildSiblingPath(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &srcFilename, etl::string_view siblingName,
+                        etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &outFilename) const;
+  bool resolveSaveFilename(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &filename);
   bool fileExists(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &filename);
   void attemptSave(bool loadToPool);
   void confirmSave(bool loadToPool);
   void showSaveFailedDialog();
   void showLoadToPoolFailedDialog();
-  void loadSample(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> path,
-                  bool isProjectSampleFile);
+  void loadSample(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> path, bool isProjectSampleFile);
   bool reloadEditedSample();
   bool saveSample(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &savedFilename);
-  bool loadSampleToPool(
-      const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &savedFilename);
+  bool loadSampleToPool(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &savedFilename);
   bool applySelectedOperation();
   bool applyTrimOperation(uint32_t startFrame, uint32_t endFrame);
   bool applyNormalizeOperation();
@@ -117,8 +113,8 @@ private:
 
   void DrawWaveForm();
 
-  float playbackPosition_; // Current playback position as normalized value (0.0
-                           // - 1.0)
+  float playbackPosition_;      // Current playback position as normalized value (0.0
+                                // - 1.0)
   uint32_t playbackStartFrame_; // Animation frame when playback started
   uint32_t lastAnimationTime_;  // Timestamp of the last animation frame
   System *sys_;

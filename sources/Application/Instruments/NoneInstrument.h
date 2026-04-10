@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _NONE_INSTRUMENT_H_
@@ -33,19 +35,25 @@ public:
 
   virtual bool IsInitialized();
 
-  virtual bool IsEmpty() { return true; };
+  virtual bool IsEmpty() {
+    return true;
+  };
 
-  virtual InstrumentType GetType() { return IT_NONE; };
+  virtual InstrumentType GetType() {
+    return IT_NONE;
+  };
 
   virtual void OnStart();
 
-  virtual void Purge(){};
+  virtual void Purge() {};
 
   virtual int GetTable();
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
   virtual void SetTableState(TableSaveState &state);
-  etl::ilist<Variable *> *Variables() { return &variables_; };
+  etl::ilist<Variable *> *Variables() {
+    return &variables_;
+  };
 
 private:
   etl::list<Variable *, 2> variables_;

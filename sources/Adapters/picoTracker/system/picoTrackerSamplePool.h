@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _PICOTRACKERSAMPLEPOOL_H_
@@ -16,7 +18,8 @@ class picoTrackerSamplePool : public SamplePool {
 public:
   picoTrackerSamplePool();
   virtual void Reset();
-  ~picoTrackerSamplePool() {}
+  ~picoTrackerSamplePool() {
+  }
   virtual bool CheckSampleFits(int sampleSize);
 
   virtual uint32_t GetAvailableSampleStorageSpace() override {

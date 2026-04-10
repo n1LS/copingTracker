@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #pragma once
@@ -21,7 +23,7 @@ class Observable;
 
 class I_Observer {
 public:
-  virtual ~I_Observer(){};
+  virtual ~I_Observer() {};
   virtual void Update(Observable &o, I_ObservableData *d) = 0;
 };
 
@@ -37,12 +39,16 @@ public:
   void RemoveAllObservers();
   int CountObservers();
 
-  inline void NotifyObservers() { NotifyObservers(0); };
+  inline void NotifyObservers() {
+    NotifyObservers(0);
+  };
 
   void NotifyObservers(I_ObservableData *d);
 
   void SetChanged();
-  inline void ClearChanged() { _hasChanged = false; };
+  inline void ClearChanged() {
+    _hasChanged = false;
+  };
   bool HasChanged();
 
 private:

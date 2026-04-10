@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 // SD card access using SDIO for RP2040 platform.
@@ -24,12 +26,11 @@ enum sdio_status_t {
   SDIO_BUSY = 1,
   SDIO_ERR_RESPONSE_TIMEOUT = 2, // Timed out waiting for response from card
   SDIO_ERR_RESPONSE_CRC = 3,     // Response CRC is wrong
-  SDIO_ERR_RESPONSE_CODE =
-      4, // Response command code does not match what was sent
-  SDIO_ERR_DATA_TIMEOUT = 5, // Timed out waiting for data block
-  SDIO_ERR_DATA_CRC = 6,     // CRC for data packet is wrong
-  SDIO_ERR_WRITE_CRC = 7,    // Card reports bad CRC for write
-  SDIO_ERR_WRITE_FAIL = 8,   // Card reports write failure
+  SDIO_ERR_RESPONSE_CODE = 4,    // Response command code does not match what was sent
+  SDIO_ERR_DATA_TIMEOUT = 5,     // Timed out waiting for data block
+  SDIO_ERR_DATA_CRC = 6,         // CRC for data packet is wrong
+  SDIO_ERR_WRITE_CRC = 7,        // Card reports bad CRC for write
+  SDIO_ERR_WRITE_FAIL = 8,       // Card reports write failure
 };
 
 #define SDIO_BLOCK_SIZE 512
@@ -37,17 +38,14 @@ enum sdio_status_t {
 
 // Execute a command that has 48-bit reply (response types R1, R6, R7)
 // If response is NULL, does not wait for reply.
-sdio_status_t rp2040_sdio_command_R1(uint8_t command, uint32_t arg,
-                                     uint32_t *response);
+sdio_status_t rp2040_sdio_command_R1(uint8_t command, uint32_t arg, uint32_t *response);
 
 // Execute a command that has 136-bit reply (response type R2)
 // Response buffer should have space for 16 bytes (the 128 bit payload)
-sdio_status_t rp2040_sdio_command_R2(uint8_t command, uint32_t arg,
-                                     uint8_t *response);
+sdio_status_t rp2040_sdio_command_R2(uint8_t command, uint32_t arg, uint8_t *response);
 
 // Execute a command that has 48-bit reply but without CRC (response R3)
-sdio_status_t rp2040_sdio_command_R3(uint8_t command, uint32_t arg,
-                                     uint32_t *response);
+sdio_status_t rp2040_sdio_command_R3(uint8_t command, uint32_t arg, uint32_t *response);
 
 // Start transferring data from SD card to memory buffer
 // Transfer block size is always 512 bytes.

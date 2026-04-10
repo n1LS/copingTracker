@@ -3,13 +3,17 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
-template <class Item> T_Singleton<Item>::T_Singleton() {}
+template <class Item> T_Singleton<Item>::T_Singleton() {
+}
 
-template <class Item> T_Singleton<Item>::~T_Singleton() {}
+template <class Item> T_Singleton<Item>::~T_Singleton() {
+}
 
 template <class Item> Item *T_Singleton<Item>::GetInstance() {
   if (!etl::singleton<Item>::is_valid()) {
@@ -18,9 +22,7 @@ template <class Item> Item *T_Singleton<Item>::GetInstance() {
   return &etl::singleton<Item>::instance();
 }
 
-template <class Item>
-template <typename... TArgs>
-Item *T_Singleton<Item>::Create(TArgs &&...args) {
+template <class Item> template <typename... TArgs> Item *T_Singleton<Item>::Create(TArgs &&...args) {
   etl::singleton<Item>::create(etl::forward<TArgs>(args)...);
   return &etl::singleton<Item>::instance();
 }

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _AUDIO_FILE_STREAMER_H_
@@ -49,12 +51,12 @@ protected:
 
   // For matching oscillator mode in SampleInstrument
   float referencePitch_; // Reference pitch in Hz (C3 = 130.81 Hz)
-#ifndef ADV
   volatile bool stopRequested_;
-#endif
 
 public:
-  void SetProject(Project *project) { project_ = project; }
+  void SetProject(Project *project) {
+    project_ = project;
+  }
 };
 
 #endif

@@ -3,12 +3,16 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _THEME_CONSTANTS_H_
 #define _THEME_CONSTANTS_H_
+
+#include "Adapters/picoTracker/display/font.h"
 
 // Define default color values to be used across the application
 namespace ThemeConstants {
@@ -32,8 +36,8 @@ const uint32_t DEFAULT_EMPHASIS = 0x787878;
 
 // Font constants
 const int DEFAULT_UIFONT = 0x0;
-const int FONT_COUNT = 3;
-inline const char *FONT_NAMES[FONT_COUNT] = {"Regular", "Bold", "Wide"};
+inline const int THEME_FONT_COUNT = FONT_COUNT;
+inline const char *THEME_FONT_NAMES[THEME_FONT_COUNT] = {"Regular", "Bold", "Block"};
 
 inline const char *DEFAULT_THEME_NAME = "Default";
 } // namespace ThemeConstants

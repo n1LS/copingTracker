@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _FILEHANDLE_H_
@@ -25,7 +27,8 @@ struct FileCloser {
 class FileHandle {
 public:
   FileHandle() = default;
-  explicit FileHandle(I_File *file) : ptr_(file) {}
+  explicit FileHandle(I_File *file) : ptr_(file) {
+  }
 
   FileHandle(FileHandle &&) noexcept = default;
   FileHandle &operator=(FileHandle &&) noexcept = default;
@@ -33,12 +36,22 @@ public:
   FileHandle(const FileHandle &) = delete;
   FileHandle &operator=(const FileHandle &) = delete;
 
-  I_File *get() const { return ptr_.get(); }
-  I_File &operator*() const { return *ptr_; }
-  I_File *operator->() const { return ptr_.get(); }
-  explicit operator bool() const { return static_cast<bool>(ptr_); }
+  I_File *get() const {
+    return ptr_.get();
+  }
+  I_File &operator*() const {
+    return *ptr_;
+  }
+  I_File *operator->() const {
+    return ptr_.get();
+  }
+  explicit operator bool() const {
+    return static_cast<bool>(ptr_);
+  }
 
-  void reset(I_File *file = nullptr) { ptr_.reset(file); }
+  void reset(I_File *file = nullptr) {
+    ptr_.reset(file);
+  }
 
 private:
   std::unique_ptr<I_File, FileCloser> ptr_;
@@ -49,7 +62,9 @@ private:
   friend bool CloseFile_DO_NOT_USE(I_File *file);
 };
 
-inline FileHandle MakeFileHandle(I_File *file) { return FileHandle(file); }
+inline FileHandle MakeFileHandle(I_File *file) {
+  return FileHandle(file);
+}
 
 inline I_File *AcquireLegacyFileHandle_DO_NOT_USE(FileHandle &&handle) {
   return handle.ptr_.release();

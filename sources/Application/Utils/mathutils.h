@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #pragma once
@@ -14,6 +16,5 @@ inline int amplitudeToDb(int amplitude) {
   if (amplitude <= 0) {
     return -100; // Or some other minimum value for silence
   }
-  return static_cast<int>(20.0 *
-                          log10(static_cast<double>(amplitude) / 32767.0));
+  return static_cast<int>(20.0 * log10(static_cast<double>(amplitude) / 32767.0));
 }

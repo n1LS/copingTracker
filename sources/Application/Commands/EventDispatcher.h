@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _EVENT_DISPATCHER_H_
@@ -16,16 +18,16 @@
 #include "Foundation/T_Singleton.h"
 #include "System/Timer/Timer.h"
 
-class EventDispatcher : public T_Singleton<EventDispatcher>,
-                        public CommandExecuter,
-                        public I_Observer {
+class EventDispatcher : public T_Singleton<EventDispatcher>, public CommandExecuter, public I_Observer {
 public:
   EventDispatcher();
   ~EventDispatcher();
   void SetWindow(GUIWindow *window);
   virtual void Execute(FourCC id, float value);
   unsigned int OnTimerTick();
-  int GetEventMask() { return eventMask_; };
+  int GetEventMask() {
+    return eventMask_;
+  };
   virtual void Update(Observable &o, I_ObservableData *d);
 
 private:

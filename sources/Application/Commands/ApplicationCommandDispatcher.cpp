@@ -3,16 +3,20 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ApplicationCommandDispatcher.h"
 #include "Application/Player/Player.h"
 
-ApplicationCommandDispatcher::ApplicationCommandDispatcher() { project_ = 0; };
+ApplicationCommandDispatcher::ApplicationCommandDispatcher() {
+  project_ = 0;
+}
 
-ApplicationCommandDispatcher::~ApplicationCommandDispatcher(){};
+ApplicationCommandDispatcher::~ApplicationCommandDispatcher() {};
 
 void ApplicationCommandDispatcher::Execute(FourCC id, float value) {
   switch (id) {
@@ -25,19 +29,21 @@ void ApplicationCommandDispatcher::Execute(FourCC id, float value) {
       OnQueueRow();
     break;
   }
-};
+}
 
 void ApplicationCommandDispatcher::Init(Project *project) {
   project_ = project;
-};
+}
 
-void ApplicationCommandDispatcher::Close() { project_ = 0; };
+void ApplicationCommandDispatcher::Close() {
+  project_ = 0;
+}
 
 void ApplicationCommandDispatcher::OnTempoTap() {
   if (!project_)
     return;
   project_->OnTempoTap();
-};
+}
 
 void ApplicationCommandDispatcher::OnQueueRow() {
   if (!project_)
@@ -45,13 +51,13 @@ void ApplicationCommandDispatcher::OnQueueRow() {
   Player *player = Player::GetInstance();
   player->SetSequencerMode(SM_LIVE);
   player->OnSongStartButton(0, 7, false, false);
-};
+}
 
 #define TEMPO_NUDGE 3
 void ApplicationCommandDispatcher::OnNudgeDown() {
   project_->NudgeTempo(-TEMPO_NUDGE);
-};
+}
 
 void ApplicationCommandDispatcher::OnNudgeUp() {
   project_->NudgeTempo(TEMPO_NUDGE);
-};
+}

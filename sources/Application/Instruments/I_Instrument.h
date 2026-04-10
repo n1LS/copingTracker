@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _I_INSTRUMENT_H_
@@ -19,29 +21,16 @@
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
 
-enum InstrumentType {
-  IT_NONE = 0,
-  IT_SAMPLE,
-  IT_MIDI,
-  IT_SID,
-  IT_OPAL,
-  IT_LAST
-};
-static const char *InstrumentTypeNames[IT_LAST] = {"NONE", "SAMPLE", "MIDI",
-                                                   "SID", "OPAL"};
+enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_MIDI, IT_SID, IT_OPAL, IT_CHIPTUNE, IT_LAST };
+static const char *InstrumentTypeNames[IT_LAST] = {"NONE", "SAMPLE", "MIDI", "SID", "OPAL", "Chiptune"};
 
-class I_Instrument : public VariableContainer,
-                     public Observable,
-                     public Persistent {
+class I_Instrument : public VariableContainer, public Observable, public Persistent {
 protected:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name_;
 
 public:
-  I_Instrument(etl::ilist<Variable *> *list,
-               const char *nodeName = "INSTRUMENT",
-               bool registerWithPersistence = false)
-      : VariableContainer(list),
-        Persistent(nodeName, registerWithPersistence){};
+  I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = "INSTRUMENT", bool registerWithPersistence = false)
+      : VariableContainer(list), Persistent(nodeName, registerWithPersistence) {};
   virtual ~I_Instrument();
 
   // Initialisation routine
@@ -49,8 +38,7 @@ public:
   virtual bool Init() = 0;
 
   // Start & stop the instument
-  virtual bool Start(int channel, unsigned char note,
-                     bool retrigger = true) = 0;
+  virtual bool Start(int channel, unsigned char note, bool retrigger = true) = 0;
   virtual void Stop(int channel) = 0;
 
   // Engine playback  start callback
@@ -60,8 +48,7 @@ public:
   // size refers to the number of samples
   // should always fill interleaved stereo / 16bit
   // return value is true if any audio was rendered
-  virtual bool Render(int channel, fixed *buffer, int size,
-                      bool updateTick) = 0;
+  virtual bool Render(int channel, fixed *buffer, int size, bool updateTick) = 0;
 
   virtual bool IsInitialized() = 0;
 
@@ -70,8 +57,7 @@ public:
   virtual InstrumentType GetType() = 0;
 
   virtual etl::string<MAX_INSTRUMENT_NAME_LENGTH> GetDefaultName() {
-    return etl::string<MAX_INSTRUMENT_NAME_LENGTH>(
-        InstrumentTypeNames[GetType()]);
+    return etl::string<MAX_INSTRUMENT_NAME_LENGTH>(InstrumentTypeNames[GetType()]);
   };
 
   virtual etl::string<MAX_INSTRUMENT_NAME_LENGTH> GetUserSetName() {

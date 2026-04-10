@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SOUND_SOURCE_H_
@@ -12,10 +14,14 @@
 
 class SoundSource {
 public:
-  SoundSource(){};
-  virtual ~SoundSource(){};
-  virtual int GetLoopStart(int note) { return -1; };
-  virtual int GetLoopEnd(int note) { return -1; };
+  SoundSource() {};
+  virtual ~SoundSource() {};
+  virtual int GetLoopStart(int note) {
+    return -1;
+  };
+  virtual int GetLoopEnd(int note) {
+    return -1;
+  };
   virtual int GetSize(int note) = 0;
   virtual int GetSampleRate(int note) = 0;
   virtual int GetChannelCount(int note) = 0;

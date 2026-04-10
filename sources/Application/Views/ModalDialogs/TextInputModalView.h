@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _TEXT_INPUT_MODAL_VIEW_H_
@@ -24,25 +26,28 @@
 
 class TextInputModalView : public ModalView, public I_Observer {
 public:
-  TextInputModalView(View &view, const char *title, const char *prompt,
-                     int btnFlags,
+  TextInputModalView(View &view, const char *title, const char *prompt, int btnFlags,
                      etl::string<MAX_TEXT_INPUT_LENGTH> defaultValue);
   virtual ~TextInputModalView();
 
   virtual void DrawView();
   virtual void ProcessButtonMask(unsigned short mask, bool pressed);
   virtual void OnFocus();
-  virtual void AnimationUpdate(){};
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int){};
+  virtual void AnimationUpdate() {};
+  virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
 
   // Observer implementation
   virtual void Update(Observable &o, I_ObservableData *d);
 
-  UITextField<MAX_TEXT_INPUT_LENGTH> *GetTextField() { return &textField_; }
+  UITextField<MAX_TEXT_INPUT_LENGTH> *GetTextField() {
+    return &textField_;
+  }
 
   // Focus management methods
   void SetFocus(UIField *field);
-  UIField *GetFocus() { return focus_; }
+  UIField *GetFocus() {
+    return focus_;
+  }
   void ClearFocus();
 
 private:

@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerTimer.h"
@@ -14,26 +16,27 @@
 int64_t picoTrackerTimerCallback(int32_t interval, void *param) {
   picoTrackerTimer *timer = (picoTrackerTimer *)param;
   return timer->OnTimerTick();
-};
+}
 
 int64_t picoTrackerTriggerCallback(int32_t interval, void *param) {
   timerCallback tc = (timerCallback)param;
   (*tc)();
   return 0;
-};
+}
 
 picoTrackerTimer::picoTrackerTimer() {
   period_ = -1;
   timer_ = 0;
   running_ = false;
-};
+}
 
-picoTrackerTimer::~picoTrackerTimer() {}
+picoTrackerTimer::~picoTrackerTimer() {
+}
 
 void picoTrackerTimer::SetPeriod(float msec) {
   period_ = int64_t(msec);
   offset_ = 0;
-};
+}
 
 bool picoTrackerTimer::Start() {
   if (period_ > 0) {
@@ -45,15 +48,17 @@ bool picoTrackerTimer::Start() {
     running_ = true;
   }
   return (timer_ != 0);
-};
+}
 
 void picoTrackerTimer::Stop() {
   cancel_alarm(timer_);
   timer_ = 0;
   running_ = false;
-};
+}
 
-float picoTrackerTimer::GetPeriod() { return period_; };
+float picoTrackerTimer::GetPeriod() {
+  return period_;
+}
 
 int64_t picoTrackerTimer::OnTimerTick() {
   int64_t newcb = 0;
@@ -66,14 +71,14 @@ int64_t picoTrackerTimer::OnTimerTick() {
     NAssert(newcb > 0);
   }
   return newcb;
-};
+}
 
 I_Timer *picoTrackerTimerService::CreateTimer() {
   static picoTrackerTimer timerInstance;
   timerInstance.Stop();
   timerInstance.SetPeriod(-1.0f);
   return &timerInstance;
-};
+}
 
 void picoTrackerTimerService::TriggerCallback(int msec, timerCallback cb) {
   add_alarm_in_ms(msec, picoTrackerTriggerCallback, (void *)cb, false);

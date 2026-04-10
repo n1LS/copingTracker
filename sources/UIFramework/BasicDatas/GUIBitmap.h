@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _GUIBITMAP_H_
@@ -38,8 +40,7 @@ public:
   virtual void DrawBitmap(GUIBitmap &, GUIPoint &p);
   virtual void StretchBitmap(GUIBitmap &, GUIRect &srcR, GUIRect &dstR);
   virtual void SelectFont(int type, int size);
-  virtual void DrawString(const char *string, const GUIPoint &pos,
-                          const GUITextProperties &props);
+  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props);
   virtual int GetStringWidth(char *string);
 
   virtual GUIRect GetRect();
@@ -55,7 +56,9 @@ public:
   // Returns the implementation used to actually do the job. Don't
   // use this as the result you get might be system dependent
 
-  I_GUIBitmapImp *GetImp() { return _imp; };
+  I_GUIBitmapImp *GetImp() {
+    return _imp;
+  };
 
 public:
   // Static call to create Bitmaps

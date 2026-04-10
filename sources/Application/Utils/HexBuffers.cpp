@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "HexBuffers.h"
@@ -13,8 +15,7 @@
 
 #define XML_CUT_LENGTH 64
 
-void prepareHexChunk(tinyxml2::XMLPrinter *printer, unsigned char *datasrc,
-                     int len) {
+void prepareHexChunk(tinyxml2::XMLPrinter *printer, unsigned char *datasrc, int len) {
 
   bool singleValue = true;
   int singleValueData = -1;
@@ -41,8 +42,7 @@ void prepareHexChunk(tinyxml2::XMLPrinter *printer, unsigned char *datasrc,
   }
 }
 
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
-                   unsigned char *src, unsigned len) {
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned char *src, unsigned len) {
 
   printer->OpenElement(nodeName);
 
@@ -63,22 +63,18 @@ void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
     printer->CloseElement();
   }
   printer->CloseElement();
-};
+}
 
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
-                   unsigned int *src, unsigned len) {
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned int *src, unsigned len) {
   saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(int));
 }
 
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
-                   unsigned short *src, unsigned len) {
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned short *src, unsigned len) {
   saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(short));
 }
 
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
-                   FourCC *src, unsigned len) {
-  saveHexBuffer(printer, nodeName, (unsigned char *)src,
-                len * sizeof(FourCC::enum_type));
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, FourCC *src, unsigned len) {
+  saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(FourCC::enum_type));
 }
 
 void restoreHexBuffer(PersistencyDocument *doc, unsigned char *destination) {

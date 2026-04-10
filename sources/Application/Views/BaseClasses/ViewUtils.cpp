@@ -42,16 +42,14 @@ bool goProjectSamplesDir(ViewData *viewData_) {
       // Finally, navigate into the samples subdirectory
       return fs->chdir(PROJECT_SAMPLES_DIR);
     } else {
-      Trace::Error("SampleEditorView: Failed to chdir to project dir: %s",
-                   projectName);
+      Trace::Error("SampleEditorView: Failed to chdir to project dir: %s", projectName);
       // It's good practice to return to the root to avoid being in an unknown
       // state
       fs->chdir("/");
       return false; // Abort if we can't find the project directory
     }
   } else {
-    Trace::Error(
-        "SampleEditorView: No project data available to find samples dir.");
+    Trace::Error("SampleEditorView: No project data available to find samples dir.");
     fs->chdir("/");
     return false; // Abort if project data is missing
   }

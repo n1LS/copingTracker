@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _PHRASE_VIEW_H_
@@ -28,8 +30,7 @@ public:
 
 protected:
   void updateCursor(int dx, int dy);
-  void updateCursorValue(ViewUpdateDirection offset, int xOffset = 0,
-                         int yOffset = 0);
+  void updateCursorValue(ViewUpdateDirection offset, int xOffset = 0, int yOffset = 0);
   void updateSelectionValue(ViewUpdateDirection direction);
   void warpToNeighbour(int offset);
   void warpInChain(int offset);

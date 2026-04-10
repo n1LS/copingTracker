@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _UI_VAR_NOTE_FIELD_H_
@@ -15,8 +17,7 @@
 class UINoteVarField : public UIIntVarField {
 
 public:
-  UINoteVarField(const GUIPoint &position, Variable &v, const char *format,
-                 int min, int max, int xOffset, int yOffset);
+  UINoteVarField(const GUIPoint &position, Variable &v, const char *format, int min, int max, int xOffset, int yOffset);
   virtual void Draw(GUIWindow &w, int offset = 0);
 };
 

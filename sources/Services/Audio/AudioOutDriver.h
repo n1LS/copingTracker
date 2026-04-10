@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _AUDIO_OUT_DRIVER_H_
@@ -57,10 +59,8 @@ private:
   bool hasSound_ = false;
   stereosample lastPeakVolume_ = 0;
 
-  __attribute__((section(".DTCMRAM"))) __attribute__((
-      aligned(32))) static fixed primarySoundBuffer_[MIX_BUFFER_SIZE];
-  __attribute__((section(".DTCMRAM")))
-  __attribute__((aligned(32))) static short mixBuffer_[MIX_BUFFER_SIZE];
+  __attribute__((section(".DTCMRAM"))) __attribute__((aligned(32))) static fixed primarySoundBuffer_[MIX_BUFFER_SIZE];
+  __attribute__((section(".DTCMRAM"))) __attribute__((aligned(32))) static short mixBuffer_[MIX_BUFFER_SIZE];
   int sampleCount_;
 };
 #endif

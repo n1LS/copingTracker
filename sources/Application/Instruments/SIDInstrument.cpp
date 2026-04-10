@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SIDInstrument.h"
@@ -17,16 +19,15 @@
 #include "System/System/System.h"
 #include <string.h>
 
-const char *sidWaveformText[DWF_LAST] = {
-    "--------",
-    char_waveform_tri_s "------",
-    "--" char_waveform_saw_s "----",
-    char_waveform_tri_s char_waveform_saw_s "----",
-    "----" char_waveform_pulse_s "--",
-    char_waveform_tri_s "--" char_waveform_pulse_s "--",
-    "--" char_waveform_saw_s char_waveform_pulse_s "--",
-    char_waveform_tri_s char_waveform_saw_s char_waveform_pulse_s "--",
-    "------" char_waveform_noise_s};
+const char *sidWaveformText[DWF_LAST] = {"--------",
+                                         char_waveform_tri_s "------",
+                                         "--" char_waveform_saw_s "----",
+                                         char_waveform_tri_s char_waveform_saw_s "----",
+                                         "----" char_waveform_pulse_s "--",
+                                         char_waveform_tri_s "--" char_waveform_pulse_s "--",
+                                         "--" char_waveform_saw_s char_waveform_pulse_s "--",
+                                         char_waveform_tri_s char_waveform_saw_s char_waveform_pulse_s "--",
+                                         "------" char_waveform_noise_s};
 const char *sidFilterModeText[DFM_LAST] = {"LP", "BP", "HP", "Notch"};
 
 cRSID SIDInstrument::sid1_(44100);
@@ -36,27 +37,20 @@ SIDInstrument *SIDInstrument::SID2RenderMaster = 0;
 
 Variable SIDInstrument::fltcut1_(FourCC::SIDInstrument1FilterCut, 0x1FF);
 Variable SIDInstrument::fltres1_(FourCC::SIDInstrument1FilterResonance, 0x0);
-Variable SIDInstrument::fltmode1_(FourCC::SIDInstrument1FilterMode,
-                                  sidFilterModeText, DFM_LAST, 0x0);
+Variable SIDInstrument::fltmode1_(FourCC::SIDInstrument1FilterMode, sidFilterModeText, DFM_LAST, 0x0);
 Variable SIDInstrument::vol1_(FourCC::SIDInstrument1Volume, 0xF);
 
 Variable SIDInstrument::fltcut2_(FourCC::SIDInstrument2FilterCut, 0x1FF);
 Variable SIDInstrument::fltres2_(FourCC::SIDInstrument2FilterResonance, 0x0);
-Variable SIDInstrument::fltmode2_(FourCC::SIDInstrument2FilterMode,
-                                  sidFilterModeText, DFM_LAST, 0x0);
+Variable SIDInstrument::fltmode2_(FourCC::SIDInstrument2FilterMode, sidFilterModeText, DFM_LAST, 0x0);
 Variable SIDInstrument::vol2_(FourCC::SIDInstrument2Volume, 0xF);
 
 SIDInstrument::SIDInstrument(SIDInstrumentInstance chip)
-    : I_Instrument(&variables_), chip_(chip),
-      vpw_(FourCC::SIDInstrumentPulseWidth, 0x800),
-      vwf_(FourCC::SIDInstrumentWaveform, sidWaveformText, DWF_LAST, 0x1),
-      vsync_(FourCC::SIDInstrumentVSync, false),
-      vring_(FourCC::SIDInstrumentRingModulator, false),
-      vadsr_(FourCC::SIDInstrumentADSR, 0x2282),
-      vfon_(FourCC::SIDInstrumentFilterOn, false),
-      table_(FourCC::SIDInstrumentTable, -1),
-      tableAuto_(FourCC::SIDInstrumentTableAutomation, false),
-      osc_(FourCC::SIDInstrumentOSCNumber, 0) {
+    : I_Instrument(&variables_), chip_(chip), vpw_(FourCC::SIDInstrumentPulseWidth, 0x800),
+      vwf_(FourCC::SIDInstrumentWaveform, sidWaveformText, DWF_LAST, 0x1), vsync_(FourCC::SIDInstrumentVSync, false),
+      vring_(FourCC::SIDInstrumentRingModulator, false), vadsr_(FourCC::SIDInstrumentADSR, 0x2282),
+      vfon_(FourCC::SIDInstrumentFilterOn, false), table_(FourCC::SIDInstrumentTable, -1),
+      tableAuto_(FourCC::SIDInstrumentTableAutomation, false), osc_(FourCC::SIDInstrumentOSCNumber, 0) {
 
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &vpw_);
@@ -79,7 +73,7 @@ SIDInstrument::SIDInstrument(SIDInstrumentInstance chip)
   variables_.insert(variables_.end(), &vol2_);
 }
 
-SIDInstrument::~SIDInstrument(){};
+SIDInstrument::~SIDInstrument() {};
 
 bool SIDInstrument::Init() {
   tableState_.Reset();
@@ -105,20 +99,19 @@ bool SIDInstrument::Init() {
   }
 
   return true;
-};
+}
 
 void SIDInstrument::OnStart() {
   tableState_.Reset();
   int osc = GetOsc();
   sid_->cRSID_resetChannel(osc);
-};
+}
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte)                                                   \
-  ((byte) & 0x80 ? '1' : '0'), ((byte) & 0x40 ? '1' : '0'),                    \
-      ((byte) & 0x20 ? '1' : '0'), ((byte) & 0x10 ? '1' : '0'),                \
-      ((byte) & 0x08 ? '1' : '0'), ((byte) & 0x04 ? '1' : '0'),                \
-      ((byte) & 0x02 ? '1' : '0'), ((byte) & 0x01 ? '1' : '0')
+#define BYTE_TO_BINARY(byte)                                                                                           \
+  ((byte) & 0x80 ? '1' : '0'), ((byte) & 0x40 ? '1' : '0'), ((byte) & 0x20 ? '1' : '0'), ((byte) & 0x10 ? '1' : '0'),  \
+      ((byte) & 0x08 ? '1' : '0'), ((byte) & 0x04 ? '1' : '0'), ((byte) & 0x02 ? '1' : '0'),                           \
+      ((byte) & 0x01 ? '1' : '0')
 
 bool SIDInstrument::Start(int c, unsigned char note, bool retrigger) {
   Trace::Debug("Retrigger: %i", retrigger);
@@ -133,24 +126,20 @@ bool SIDInstrument::Start(int c, unsigned char note, bool retrigger) {
   case SID1:
     if (SID1RenderMaster) {
       SID1RenderMaster->SetRender(false);
-      Trace::Debug("Previous renderer for SID1 was %s",
-                   SID1RenderMaster->GetName().c_str());
+      Trace::Debug("Previous renderer for SID1 was %s", SID1RenderMaster->GetName().c_str());
     }
     SID1RenderMaster = this;
     SID1RenderMaster->SetRender(true);
-    Trace::Debug("New renderer for SID1 is %s",
-                 SID1RenderMaster->GetName().c_str());
+    Trace::Debug("New renderer for SID1 is %s", SID1RenderMaster->GetName().c_str());
     break;
   case SID2:
     if (SID2RenderMaster) {
       SID2RenderMaster->SetRender(false);
-      Trace::Debug("Previous renderer for SID2 was %s",
-                   SID2RenderMaster->GetName().c_str());
+      Trace::Debug("Previous renderer for SID2 was %s", SID2RenderMaster->GetName().c_str());
     }
     SID2RenderMaster = this;
     SID2RenderMaster->SetRender(true);
-    Trace::Debug("New renderer for SID2 is %s",
-                 SID2RenderMaster->GetName().c_str());
+    Trace::Debug("New renderer for SID2 is %s", SID2RenderMaster->GetName().c_str());
     break;
   }
 
@@ -160,11 +149,10 @@ bool SIDInstrument::Start(int c, unsigned char note, bool retrigger) {
   sid_->Register[1 + osc * 7] = sid_notes[note - 24] >> 8;   // V1 Freq Hi
   sid_->Register[2 + osc * 7] = vpw_.GetInt() & 0xFF;        // V1 PW Lo
   sid_->Register[3 + osc * 7] = vpw_.GetInt() >> 8;          // V1 PW Hi
-  sid_->Register[4 + osc * 7] = vwf_.GetInt() << 4 | vring_.GetInt() << 2 |
-                                vsync_.GetInt() << 1 |
-                                (int)gate_;             // V1 Control Reg
-  sid_->Register[5 + osc * 7] = vadsr_.GetInt() >> 8;   // V1 Attack/Decay
-  sid_->Register[6 + osc * 7] = vadsr_.GetInt() & 0xFF; // V1 Sustain/Release
+  sid_->Register[4 + osc * 7] =
+      vwf_.GetInt() << 4 | vring_.GetInt() << 2 | vsync_.GetInt() << 1 | (int)gate_; // V1 Control Reg
+  sid_->Register[5 + osc * 7] = vadsr_.GetInt() >> 8;                                // V1 Attack/Decay
+  sid_->Register[6 + osc * 7] = vadsr_.GetInt() & 0xFF;                              // V1 Sustain/Release
 
   // filter settings
   sid_->Register[21] = fltcut_->GetInt() & 0x7; // Filter Cut lo
@@ -174,9 +162,8 @@ bool SIDInstrument::Start(int c, unsigned char note, bool retrigger) {
   //  we need to clear filter resonance and the current oscillator's filter on
   //  bit while preserving the filter on bits of the other two oscillators for
   //  this chip
-  sid_->Register[23] = (sid_->Register[23] & 0xF & ~(1 << osc)) |
-                       fltres_->GetInt() << 4 | // filter resonance
-                       vfon_.GetInt() << osc;   // filter on bit for this osc
+  sid_->Register[23] = (sid_->Register[23] & 0xF & ~(1 << osc)) | fltres_->GetInt() << 4 | // filter resonance
+                       vfon_.GetInt() << osc;                                              // filter on bit for this osc
 
   int8_t mode = 0;
   switch (fltmode_->GetInt()) {
@@ -208,17 +195,16 @@ bool SIDInstrument::Start(int c, unsigned char note, bool retrigger) {
   playing_ = true;
 
   return true;
-};
+}
 
 void SIDInstrument::Stop(int c) {
   playing_ = false;
   int osc = GetOsc();
   sid_->Register[4 + osc * 7] &= ~1; // Set gate bit off
   gate_ = false;
-};
+}
 
-bool SIDInstrument::Render(int channel, fixed *buffer, int size,
-                           bool updateTick) {
+bool SIDInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   if (playing_ and render_) {
 
     // clear the fixed point buffer
@@ -229,11 +215,11 @@ bool SIDInstrument::Render(int channel, fixed *buffer, int size,
     return true;
   }
   return false;
-};
+}
 
 bool SIDInstrument::IsInitialized() {
   return true; // Always initialised
-};
+}
 
 void SIDInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
   switch (cc) {
@@ -243,7 +229,7 @@ void SIDInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     gate_ = false;
     break;
   }
-};
+}
 
 etl::string<MAX_INSTRUMENT_NAME_LENGTH> SIDInstrument::GetName() {
   // first check if the name_ string has been explicitly set
@@ -257,23 +243,21 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SIDInstrument::GetName() {
 int SIDInstrument::GetTable() {
   Variable *v = FindVariable(FourCC::SIDInstrumentTable);
   return v->GetInt();
-};
+}
 
 bool SIDInstrument::GetTableAutomation() {
   Variable *v = FindVariable(FourCC::SIDInstrumentTableAutomation);
   return v->GetBool();
-};
+}
 
 void SIDInstrument::GetTableState(TableSaveState &state) {
-  memcpy(state.hopCount_, tableState_.hopCount_,
-         sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(state.hopCount_, tableState_.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
   memcpy(state.position_, tableState_.position_, sizeof(int) * 3);
   state.groove_ = tableState_.groove_;
-};
+}
 
 void SIDInstrument::SetTableState(TableSaveState &state) {
-  memcpy(tableState_.hopCount_, state.hopCount_,
-         sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(tableState_.hopCount_, state.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
   memcpy(tableState_.position_, state.position_, sizeof(int) * 3);
   tableState_.groove_ = state.groove_;
-};
+}

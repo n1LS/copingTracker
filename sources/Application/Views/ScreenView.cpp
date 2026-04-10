@@ -3,17 +3,21 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ScreenView.h"
 #include <Application/AppWindow.h>
 #include <nanoprintf.h>
 
-ScreenView::ScreenView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {}
+ScreenView::ScreenView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {
+}
 
-ScreenView::~ScreenView() {}
+ScreenView::~ScreenView() {
+}
 
 /// Updates the animation by redrawing the battery gauge and power button UI on
 /// every clock tick
@@ -21,4 +25,4 @@ void ScreenView::AnimationUpdate() {
   GUITextProperties props;
   drawBattery(props);
   drawPowerButtonUI(props);
-};
+}

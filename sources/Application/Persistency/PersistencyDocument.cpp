@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "PersistencyDocument.h"
@@ -22,7 +24,9 @@ PersistencyDocument::~PersistencyDocument() {
   Close();
 }
 
-void PersistencyDocument::Close() { fp_.reset(); }
+void PersistencyDocument::Close() {
+  fp_.reset();
+}
 
 bool PersistencyDocument::Load(const char *filename) {
   Trace::Log("PERSISTENCYDOCUMENT", "Loading document from file: %s", filename);
@@ -52,12 +56,13 @@ bool PersistencyDocument::Load(const char *filename) {
   return true;
 }
 
-char *PersistencyDocument::ElemName() { return state_->elem; }
+char *PersistencyDocument::ElemName() {
+  return state_->elem;
+}
 
 bool PersistencyDocument::FirstChild() {
   // Only to be called after YXML_ATTREND or YXML_ELEMSTART or YXML_CONTENT
-  if ((r_ != YXML_OK) && (r_ != YXML_ELEMSTART) && (r_ != YXML_ATTREND) &&
-      (r_ != YXML_CONTENT)) {
+  if ((r_ != YXML_OK) && (r_ != YXML_ELEMSTART) && (r_ != YXML_ATTREND) && (r_ != YXML_CONTENT)) {
     return false;
   }
 
@@ -93,9 +98,8 @@ bool PersistencyDocument::NextSibling() {
   // accept both plus the idle OK state. Also accept coming straight from an
   // element start  (YXML_ELEMSTART).
   if ((r_ != YXML_OK) && (r_ != YXML_ELEMEND) && (r_ != YXML_ELEMSTART)) {
-    Trace::Error(
-        "XML NextSibling called with invalid state: %d for element '%s'", r_,
-        state_->elem ? state_->elem : "<unknown>");
+    Trace::Error("XML NextSibling called with invalid state: %d for element '%s'", r_,
+                 state_->elem ? state_->elem : "<unknown>");
     // we use r_ = YXML_EREF to signal that the xml parsing had a fatal error
     r_ = YXML_EREF;
 
@@ -148,8 +152,7 @@ bool PersistencyDocument::NextSibling() {
       stateStr = "YXML_ESYN";
       break;
     }
-    Trace::Error("XML Parser state: %s, current path: %s", stateStr,
-                 state_->elem ? state_->elem : "<none>");
+    Trace::Error("XML Parser state: %s, current path: %s", stateStr, state_->elem ? state_->elem : "<none>");
     return false;
   }
 
@@ -191,8 +194,8 @@ bool PersistencyDocument::NextAttribute() {
   // in YXML_CONTENT; if it's not whitespace, treat it as an error.
   if (r_ == YXML_CONTENT) {
     char contentChar = state_->data[0];
-    if (contentChar == ' ' || contentChar == '\t' || contentChar == '\n' ||
-        contentChar == '\r' || contentChar == '\0') {
+    if (contentChar == ' ' || contentChar == '\t' || contentChar == '\n' || contentChar == '\r' ||
+        contentChar == '\0') {
       Trace::Log("XML", "ignoring whitespace between attributes");
       return false;
     }
@@ -262,8 +265,7 @@ bool PersistencyDocument::NextAttribute() {
 
 bool PersistencyDocument::HasContent() {
   // This is called after YXML_ELEMSTART, YXML_ATTREND or YXML_CONTENT
-  if ((r_ != YXML_OK) && (r_ != YXML_ELEMSTART) && (r_ != YXML_ATTREND) &&
-      (r_ != YXML_CONTENT))
+  if ((r_ != YXML_OK) && (r_ != YXML_ELEMSTART) && (r_ != YXML_ATTREND) && (r_ != YXML_CONTENT))
     return false;
 
   bool found = false;
@@ -278,8 +280,7 @@ bool PersistencyDocument::HasContent() {
       cur++;
       found = true;
     } else {
-      Trace::Error("HasContent truncating initial content for element '%s'",
-                   state_->elem);
+      Trace::Error("HasContent truncating initial content for element '%s'", state_->elem);
       // we use r_ = YXML_EREF to signal that the xml parsing had a fatal error
       r_ = YXML_EREF;
       return false;
@@ -305,8 +306,7 @@ bool PersistencyDocument::HasContent() {
         cur++;
         found = true;
       } else {
-        Trace::Error("HasContent truncating content for element '%s'",
-                     state_->elem);
+        Trace::Error("HasContent truncating content for element '%s'", state_->elem);
         r_ = YXML_EREF;
         return false;
       }

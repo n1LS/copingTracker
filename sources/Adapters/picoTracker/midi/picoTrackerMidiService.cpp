@@ -2,16 +2,17 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerMidiService.h"
 
 picoTrackerMidiService::picoTrackerMidiService()
     : // Initialize static member variables with their respective names
-      midiOutDevice_("MIDI OUT"), usbMidiOutDevice_("USB"),
-      midiInDevice_("MIDI IN"), usbMidiInDevice_("USB MIDI IN") {
+      midiOutDevice_("MIDI OUT"), usbMidiOutDevice_("USB"), midiInDevice_("MIDI IN"), usbMidiInDevice_("USB MIDI IN") {
   // Add MIDI output devices to the output device list
   outList_.insert(outList_.end(), &midiOutDevice_);
   outList_.insert(outList_.end(), &usbMidiOutDevice_);
@@ -19,9 +20,9 @@ picoTrackerMidiService::picoTrackerMidiService()
   // Add MIDI input devices to the input device list
   inList_.insert(inList_.end(), &midiInDevice_);
   inList_.insert(inList_.end(), &usbMidiInDevice_);
-};
+}
 
-picoTrackerMidiService::~picoTrackerMidiService(){};
+picoTrackerMidiService::~picoTrackerMidiService() {};
 
 void picoTrackerMidiService::poll() {
   // Poll all MIDI input devices
@@ -31,4 +32,4 @@ void picoTrackerMidiService::poll() {
       ptDev->poll();
     }
   }
-};
+}

@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerFileSystem.h"
@@ -35,8 +37,7 @@ picoTrackerFileSystem::picoTrackerFileSystem() {
   }
   // Try to mount the whole card as FAT (without partition table)
   if (static_cast<FsVolume *>(&sd)->begin(sd.card(), true, 0)) {
-    Trace::Log("FILESYSTEM",
-               "Mounted SD Card FAT Filesystem without partition table");
+    Trace::Log("FILESYSTEM", "Mounted SD Card FAT Filesystem without partition table");
     return;
   }
 }
@@ -79,8 +80,7 @@ FileHandle picoTrackerFileSystem::Open(const char *name, const char *mode) {
   }
   wFile = filePool.create(cwd);
   if (wFile == nullptr) {
-    Trace::Error("FILESYSTEM: No file slots available (max %d)",
-                 static_cast<int>(MAX_OPEN_FILES));
+    Trace::Error("FILESYSTEM: No file slots available (max %d)", static_cast<int>(MAX_OPEN_FILES));
     return FileHandle();
   }
   return MakeFileHandle(wFile);
@@ -119,8 +119,7 @@ PicoFileType picoTrackerFileSystem::getFileType(int index) {
   return isDir ? PFT_DIR : PFT_FILE;
 }
 
-void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes,
-                                 const char *filter, bool subDirOnly,
+void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *filter, bool subDirOnly,
                                  bool includeHidden) {
   std::lock_guard<Mutex> lock(mutex);
 
@@ -157,8 +156,7 @@ void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes,
       //            matchesFilter);
     }
     // filter out "." and files that dont match filter if a filter is given
-    if ((entry.isDirectory() && entry.dirIndex() != 0) ||
-        ((includeHidden || !entry.isHidden()) && matchesFilter)) {
+    if ((entry.isDirectory() && entry.dirIndex() != 0) || ((includeHidden || !entry.isHidden()) && matchesFilter)) {
       if (subDirOnly) {
         if (entry.isDirectory()) {
           fileIndexes->push_back(index);
@@ -174,8 +172,7 @@ void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes,
     entry.close();
   }
   cwd.close();
-  Trace::Log("FILESYSTEM", "scanned: %d, added file indexes:%d", count,
-             fileIndexes->size());
+  Trace::Log("FILESYSTEM", "scanned: %d, added file indexes:%d", count, fileIndexes->size());
 }
 
 void picoTrackerFileSystem::getFileName(int index, char *name, int length) {
@@ -206,13 +203,12 @@ bool picoTrackerFileSystem::isParentRoot() {
 
   FsFile root;
   root.openRoot(sd.vol());
-  FsFile up;
-  up.open(1);
-  // check the index=1 entry, aka ".." if its firstSector  matches
-  // the root dirs firstSector, ie they are the same dir
-  bool result = root.firstSector() == up.firstSector();
+  FsBaseFile parent;
+  parent.open(&cwd, "..", O_READ);
+  // check if ".." points to root by comparing first sectors
+  bool result = root.firstSector() == parent.firstSector();
   root.close();
-  up.close();
+  parent.close();
   cwd.close();
   return result;
 }
@@ -271,8 +267,7 @@ uint64_t picoTrackerFileSystem::getFileSize(const int index) {
   return size;
 }
 
-bool picoTrackerFileSystem::CopyFile(const char *srcFilename,
-                                     const char *destFilename) {
+bool picoTrackerFileSystem::CopyFile(const char *srcFilename, const char *destFilename) {
   std::lock_guard<Mutex> lock(mutex);
   auto fSrc = sd.open(srcFilename, O_READ);
   auto fDest = sd.open(destFilename, O_WRITE | O_CREAT);
@@ -297,8 +292,7 @@ bool picoTrackerFileSystem::CopyFile(const char *srcFilename,
   return true;
 }
 
-bool picoTrackerFileSystem::MoveFile(const char *srcFilename,
-                                     const char *destFilename) {
+bool picoTrackerFileSystem::MoveFile(const char *srcFilename, const char *destFilename) {
   std::lock_guard<Mutex> lock(mutex);
   return sd.rename(srcFilename, destFilename);
 }
@@ -314,10 +308,12 @@ void picoTrackerFileSystem::tolowercase(char *temp) {
 
 // picoTrackerFile implementation
 
-picoTrackerFile::picoTrackerFile(FsBaseFile file)
-    : file_(file), isOpen_(true) {}
+picoTrackerFile::picoTrackerFile(FsBaseFile file) : file_(file), isOpen_(true) {
+}
 
-picoTrackerFile::~picoTrackerFile() { Close(); }
+picoTrackerFile::~picoTrackerFile() {
+  Close();
+}
 
 int picoTrackerFile::Read(void *ptr, int size) {
   std::lock_guard<Mutex> lock(mutex);
@@ -379,4 +375,6 @@ bool picoTrackerFile::Sync() {
   return file_.sync();
 }
 
-void picoTrackerFile::Dispose() { filePool.destroy(this); }
+void picoTrackerFile::Dispose() {
+  filePool.destroy(this);
+}

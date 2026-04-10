@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "GrooveView.h"
@@ -15,13 +17,13 @@
 #include <Application/AppWindow.h>
 #include <nanoprintf.h>
 
-GrooveView::GrooveView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData) {
+GrooveView::GrooveView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
   position_ = 0;
   lastPosition_ = 0;
 }
 
-GrooveView::~GrooveView() {}
+GrooveView::~GrooveView() {
+}
 
 void GrooveView::Reset() {
   position_ = 0;
@@ -35,11 +37,10 @@ void GrooveView::updateCursor(int dir) {
   if (position_ > 15)
     position_ -= 16;
   isDirty_ = true;
-};
+}
 
 void GrooveView::updateCursorValue(int val, bool sync) {
-  unsigned char *grooveData =
-      Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
+  unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
   int value = grooveData[position_];
   val += value;
   if (val < 1)
@@ -48,7 +49,7 @@ void GrooveView::updateCursorValue(int val, bool sync) {
     val = 0xF;
   grooveData[position_] = val;
   isDirty_ = true;
-};
+}
 
 void GrooveView::warpGroove(int dir) {
   int current = viewData_->currentGroove_;
@@ -61,20 +62,18 @@ void GrooveView::warpGroove(int dir) {
   };
   viewData_->currentGroove_ = current;
   isDirty_ = true;
-};
+}
 
 void GrooveView::initCursorValue() {
-  unsigned char *grooveData =
-      Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
+  unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
   if (grooveData[position_] == NO_GROOVE_DATA) {
     grooveData[position_] = 1;
   };
   isDirty_ = true;
-};
+}
 
 void GrooveView::clearCursorValue() {
-  unsigned char *grooveData =
-      Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
+  unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
   grooveData[position_] = NO_GROOVE_DATA;
   isDirty_ = true;
 }
@@ -134,8 +133,7 @@ void GrooveView::ProcessButtonMask(unsigned short mask, bool pressed) {
       NotifyObservers(&ve);
     }
     if (mask & EPBM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, true,
-                            viewData_->chainRow_);
+      player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
   } else {
     // No modifier
@@ -144,8 +142,7 @@ void GrooveView::ProcessButtonMask(unsigned short mask, bool pressed) {
     if (mask & EPBM_UP)
       updateCursor(-1);
     if (mask & EPBM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, false,
-                            viewData_->chainRow_);
+      player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
 }
@@ -162,8 +159,7 @@ void GrooveView::DrawView() {
 
   SetColor(CD_NORMAL);
 
-  npf_snprintf(title, sizeof(title), "Groove: %2.2X",
-               viewData_->currentGroove_);
+  npf_snprintf(title, sizeof(title), "Groove: %2.2X", viewData_->currentGroove_);
   DrawString(pos._x, pos._y, title, props);
 
   // Compute song grid location
@@ -186,8 +182,7 @@ void GrooveView::DrawView() {
   pos = anchor;
   SetColor(CD_NORMAL);
 
-  unsigned char *grooveData =
-      Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
+  unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
   for (int j = 0; j < 16; j++) {
     if (grooveData[j] != NO_GROOVE_DATA) {
       hex2char(grooveData[j], buffer);
@@ -202,7 +197,7 @@ void GrooveView::DrawView() {
 
   drawMap();
   drawNotes();
-};
+}
 
 void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
 
@@ -223,8 +218,7 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
 
   gr->GetChannelData(channel, &groove, &groovepos);
 
-  if (groove == viewData_->currentGroove_ &&
-      viewData_->playMode_ != PM_AUDITION) {
+  if (groove == viewData_->currentGroove_ && viewData_->playMode_ != PM_AUDITION) {
     lastPosition_ = groovepos;
     pos._x = anchor._x - 1;
     pos._y = anchor._y + lastPosition_;
@@ -234,6 +228,6 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
   };
 
   drawNotes();
-};
+}
 
-void GrooveView::OnFocus(){};
+void GrooveView::OnFocus() {};

@@ -3,16 +3,21 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ViewData.h"
 #include "BaseClasses/View.h"
 
-ViewData::ViewData(Project *project) { Load(project); };
+ViewData::ViewData(Project *project) {
+  Load(project);
+}
 
-ViewData::~ViewData() {}
+ViewData::~ViewData() {
+}
 
 void ViewData::Load(Project *project) {
   project_ = project;
@@ -44,15 +49,13 @@ void ViewData::Load(Project *project) {
 }
 
 unsigned char ViewData::UpdateSongChain(int offset) {
-  unsigned char *c =
-      song_->data_ + songX_ + SONG_CHANNEL_COUNT * (songOffset_ + songY_);
+  unsigned char *c = song_->data_ + songX_ + SONG_CHANNEL_COUNT * (songOffset_ + songY_);
   updateData(c, offset, CHAIN_COUNT - 1, false);
   return *c;
 }
 
 void ViewData::SetSongChain(unsigned char value) {
-  unsigned char *c =
-      song_->data_ + songX_ + SONG_CHANNEL_COUNT * (songOffset_ + songY_);
+  unsigned char *c = song_->data_ + songX_ + SONG_CHANNEL_COUNT * (songOffset_ + songY_);
   *c = value;
 }
 
@@ -90,7 +93,7 @@ void ViewData::checkSongBoundaries() {
 
 unsigned char *ViewData::GetCurrentSongPointer() {
   return song_->data_ + songX_ + SONG_CHANNEL_COUNT * (songOffset_ + songY_);
-};
+}
 
 unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
 
@@ -134,4 +137,4 @@ void ViewData::SetChainPhrase(unsigned char value) {
 
 unsigned char *ViewData::GetCurrentChainPointer() {
   return song_->chain_.data_ + (16 * currentChain_ + chainRow_);
-};
+}

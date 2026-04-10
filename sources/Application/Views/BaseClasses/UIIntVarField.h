@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _UI_INT_VAR_FIELD_H_
@@ -16,14 +18,13 @@
 class UIIntVarField : public UIField, public Observable {
 
 public:
-  UIIntVarField(const GUIPoint &position, Variable &v, const char *format,
-                int min, int max, int xOffset, int yOffset,
+  UIIntVarField(const GUIPoint &position, Variable &v, const char *format, int min, int max, int xOffset, int yOffset,
                 int displayOffset = 0);
 
-  virtual ~UIIntVarField(){};
+  virtual ~UIIntVarField() {};
   virtual void Draw(GUIWindow &w, int offset = 0);
   virtual void ProcessArrow(unsigned short mask);
-  virtual void OnClick(){};
+  virtual void OnClick() {};
 
   void ProcessClear();
   FourCC GetVariableID();

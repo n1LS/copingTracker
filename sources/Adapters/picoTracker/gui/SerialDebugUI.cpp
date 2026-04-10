@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SerialDebugUI.h"
@@ -22,7 +24,7 @@
 #define DELETE 127
 #define READ_BUFFER_SIZE 32
 
-SerialDebugUI::SerialDebugUI(){};
+SerialDebugUI::SerialDebugUI() {};
 
 // ref: https://forums.raspberrypi.com/viewtopic.php?t=303964
 // will return true if user pressed return and the buffer now contains the

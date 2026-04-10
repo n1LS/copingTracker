@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "EventDispatcher.h"
@@ -32,13 +34,13 @@ EventDispatcher::EventDispatcher() {
 
   timer_ = TimerService::GetInstance()->CreateTimer();
   timer_->AddObserver(*this);
-};
+}
 
 EventDispatcher::~EventDispatcher() {
   timer_->RemoveObserver(*this);
   timer_->Stop();
   timer_ = nullptr;
-};
+}
 
 void EventDispatcher::Execute(FourCC id, float value) {
 
@@ -97,9 +99,11 @@ void EventDispatcher::Execute(FourCC id, float value) {
       timer_->Stop();
     }
   };
-};
+}
 
-void EventDispatcher::SetWindow(GUIWindow *window) { window_ = window; };
+void EventDispatcher::SetWindow(GUIWindow *window) {
+  window_ = window;
+}
 
 unsigned int EventDispatcher::OnTimerTick() {
 
@@ -119,7 +123,7 @@ unsigned int EventDispatcher::OnTimerTick() {
     return keyRepeat_;
   }
   return 0;
-};
+}
 
 void EventDispatcher::Update(Observable &o, I_ObservableData *d) {
   unsigned int tick = OnTimerTick();
@@ -128,4 +132,4 @@ void EventDispatcher::Update(Observable &o, I_ObservableData *d) {
   } else {
     timer_->Stop();
   };
-};
+}

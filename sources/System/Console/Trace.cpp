@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Trace.h"
@@ -22,7 +24,8 @@
 #define NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS 1
 #include "nanoprintf.h"
 
-Trace::Trace() {}
+Trace::Trace() {
+}
 
 void Trace::trace_uart_putc(int c, void *context) {
   System *sys = System::GetInstance();

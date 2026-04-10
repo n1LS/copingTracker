@@ -3,12 +3,12 @@
 
 // Helper function to safely calculate time differences with wrap-around
 uint32_t time_diff(uint32_t newer, uint32_t older) {
-  return newer -
-         older; // This works correctly for uint32_t even with wrap-around
+  return newer - older; // This works correctly for uint32_t even with wrap-around
 }
 
 // MovingAverageProfiler implementation
-MovingAverageProfiler::MovingAverageProfiler(const char *name) : name_(name) {}
+MovingAverageProfiler::MovingAverageProfiler(const char *name) : name_(name) {
+}
 
 void MovingAverageProfiler::addSample(uint32_t duration) {
   // Store the sample
@@ -43,8 +43,7 @@ void MovingAverageProfiler::addSample(uint32_t duration) {
   }
 
   uint32_t avg = (uint32_t)(total / count);
-  Trace::Log("PROFILER", "%-30s: avg=%lu us (samples: %d)", name_.c_str(),
-             (unsigned long)avg, count);
+  Trace::Log("PROFILER", "%-30s: avg=%lu us (samples: %d)", name_.c_str(), (unsigned long)avg, count);
 
   // Reset for next window
   sample_count = 0;
@@ -52,23 +51,22 @@ void MovingAverageProfiler::addSample(uint32_t duration) {
 }
 
 // map to hold named profilers
-etl::map<etl::string<32>, MovingAverageProfiler, MAX_PROFILERS>
-    Profiler::moving_avg_profilers_;
+etl::map<etl::string<32>, MovingAverageProfiler, MAX_PROFILERS> Profiler::moving_avg_profilers_;
 
 // Profiler implementation
-Profiler::Profiler(const char *name) : Profiler(etl::string<32>(name), false) {}
+Profiler::Profiler(const char *name) : Profiler(etl::string<32>(name), false) {
+}
 
 Profiler::Profiler(const etl::string<32> &name, bool use_moving_avg)
-    : name_(name.c_str()), start_time_(0), use_moving_avg_(use_moving_avg),
-      total_time_(0), call_count_(0), last_log_time_(0) {
+    : name_(name.c_str()), start_time_(0), use_moving_avg_(use_moving_avg), total_time_(0), call_count_(0),
+      last_log_time_(0) {
 #if ENABLE_PROFILING
   start_time_ = System::GetInstance()->Micros();
   if (use_moving_avg_) {
     // Automatically create the profiler if it doesn't exist
     auto it = moving_avg_profilers_.find(name);
     if (it == moving_avg_profilers_.end()) {
-      moving_avg_profilers_.insert(
-          etl::make_pair(name, MovingAverageProfiler(name.c_str())));
+      moving_avg_profilers_.insert(etl::make_pair(name, MovingAverageProfiler(name.c_str())));
     }
   }
 #endif
@@ -90,17 +88,18 @@ Profiler::~Profiler() {
       it->second.addSample(duration);
     }
   } else {
-    Trace::Log("PROFILER", "%-30s: %6lu us", name_.c_str(),
-               (unsigned long)duration);
+    Trace::Log("PROFILER", "%-30s: %6lu us", name_.c_str(), (unsigned long)duration);
   }
 #endif
 }
 
 // AverageProfiler implementation
-AverageProfiler::AverageProfiler(const char *name)
-    : name_(name), total_time_(0), call_count_(0), last_log_time_(0) {}
+AverageProfiler::AverageProfiler(const char *name) : name_(name), total_time_(0), call_count_(0), last_log_time_(0) {
+}
 
-AverageProfiler::~AverageProfiler() { logStats(); }
+AverageProfiler::~AverageProfiler() {
+  logStats();
+}
 
 void AverageProfiler::addSample(uint32_t duration) {
   static uint32_t sample_count = 0;
@@ -108,8 +107,7 @@ void AverageProfiler::addSample(uint32_t duration) {
 
   // Debug: Print every 1000th sample
   if (sample_count % 1000 == 0) {
-    printf("[PROFILER] %-30s: sample %lu, duration=%lu\n", name_,
-           (unsigned long)sample_count, (unsigned long)duration);
+    printf("[PROFILER] %-30s: sample %lu, duration=%lu\n", name_, (unsigned long)sample_count, (unsigned long)duration);
   }
 
   total_time_ += duration;
@@ -129,8 +127,7 @@ void AverageProfiler::logStats() {
   if (call_count_ > 0) {
     // Always log all stats for now
     uint32_t avg = total_time_ / call_count_;
-    Trace::Log("PROFILER", "%-30s: avg=%4u us, calls=%5u, total=%6llu us",
-               name_, avg, call_count_, total_time_);
+    Trace::Log("PROFILER", "%-30s: avg=%4u us, calls=%5u, total=%6llu us", name_, avg, call_count_, total_time_);
 
     // Reset counters after logging
     total_time_ = 0;

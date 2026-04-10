@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 /*
@@ -21,8 +23,8 @@
 
 class SysMutex {
 public:
-  SysMutex(){};
-  ~SysMutex(){};
+  SysMutex() {};
+  ~SysMutex() {};
   virtual bool Lock() = 0;
   virtual void Unlock() = 0;
 };

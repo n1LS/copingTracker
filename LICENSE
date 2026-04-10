@@ -2,6 +2,8 @@ BSD 3-Clause License
 
 Copyright (c) 2018, Discodirt
 Copyright (c) 2024, xiphonics, inc.
+Copyright (c) 2026, nILS Podewski
+
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -90,26 +92,6 @@ subject to its own license. Below is a summary of included external code:
    Path: sources/Externals/yxml
    SPDX-License-Identifier: MIT
    License file: sources/Externals/yxml/COPYING
-
-12. STM32 CMSIS
-   Path: sources/Adapters/adv/Drivers/CMSIS
-   SPDX-License-Identifier: Apache-2.0
-   License file: sources/Adapters/adv/Drivers/CMSIS/LICENSE.txt
-
-13. STM32 HAL
-   Path: sources/Adapters/adv/Drivers/STM32H7xx_HAL_Driver
-   SPDX-License-Identifier: BSD-3-Clause
-   License file: sources/Adapters/adv/Drivers/STM32H7xx_HAL_Driver/LICENSE.txt
-
-14. Ubuntu Mono font
-   Path: sources/Adapters/adv/display/font.h
-   SPDX-License-Identifier: Ubuntu-font-1.0
-   License file: sources/Adapters/adv/display/Ubuntu-Font-Licence-1.0.txt
-
-15. ZX-Origins fonts
-   Path: sources/Adapters/picoTracker/display/font.h
-   SPDX-License-Identifier: custom
-   License file: sources/Adapters/picoTracker/display/FONT-LICENSE.md
 
 The license texts for the above components are available in their respective
 folders. This project does not relicense or modify the terms of those licenses.

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _WAV_FILE_H_
@@ -45,7 +47,9 @@ public:
   bool ReadFloat(float *buff, uint32_t maxSamples, uint32_t *samplesRead);
   void Close();
 
-  virtual bool IsMulti() { return false; };
+  virtual bool IsMulti() {
+    return false;
+  };
 
 protected:
   long readBlock(long position, long count);

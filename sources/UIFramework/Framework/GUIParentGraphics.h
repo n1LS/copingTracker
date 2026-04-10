@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _GUIPARENTGRAPHICS_H_
@@ -35,8 +37,7 @@ public:
   virtual void StretchBitmap(GUIBitmap &, GUIRect &srcR, GUIRect &dstR);
   virtual void StretchENGBitmap(ENGBitmap &, GUIRect &srcR, GUIRect &dstR);
   virtual void SelectFont(int type, int size);
-  virtual void DrawString(const char *string, const GUIPoint &pos,
-                          const GUITextProperties &);
+  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &);
   virtual int GetStringWidth(char *string);
   virtual void SetClipRect(GUIRect &r);
   virtual void Invalidate();

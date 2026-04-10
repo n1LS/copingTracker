@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Phrase.h"
@@ -15,7 +17,7 @@
 
 Phrase::Phrase() { Reset(); };
 
-Phrase::~Phrase(){};
+Phrase::~Phrase() {};
 
 void Phrase::Reset() {
   for (int i = 0; i < PHRASE_COUNT * STEPS_PER_PHRASE; i++) {
@@ -39,7 +41,7 @@ unsigned short Phrase::GetNext() {
     }
   }
   return NO_MORE_PHRASE;
-};
+}
 
 void Phrase::SetUsed(unsigned char c) { isUsed_[c] = true; }
 
@@ -48,4 +50,4 @@ void Phrase::ClearAllocation() {
   for (int i = 0; i < PHRASE_COUNT; i++) {
     isUsed_[i] = false;
   }
-};
+}

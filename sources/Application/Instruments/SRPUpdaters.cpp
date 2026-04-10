@@ -3,13 +3,17 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SRPUpdaters.h"
+#include "Foundation/Constants/SineTable.h"
 #include "System/Console/Trace.h"
 #include <math.h>
+
 //
 // Volume Ramp
 //
@@ -18,7 +22,7 @@ void VolumeRamp::SetData(float target, float speed, float start) {
   target_ = fl2fp(target);
   speed_ = (speed == 0) ? 0 : fl2fp(speed);
   current_ = fl2fp(start);
-};
+}
 
 void VolumeRamp::Trigger(bool tableTick) {
   if (!enabled_)
@@ -40,13 +44,13 @@ void VolumeRamp::Trigger(bool tableTick) {
       };
     }
   };
-};
+}
 
 void VolumeRamp::UpdateSRP(struct RUParams &rup) {
   if (!enabled_)
     return;
   rup.volumeOffset_ = fp_add(rup.volumeOffset_, current_);
-};
+}
 
 //
 // FilterCut off ramp
@@ -56,7 +60,7 @@ void FCRamp::SetData(float target, float speed, float start) {
   target_ = fl2fp(target);
   speed_ = (speed == 0) ? 0 : fl2fp(speed);
   current_ = fl2fp(start);
-};
+}
 
 void FCRamp::Trigger(bool tableTick) {
   if (!enabled_)
@@ -78,13 +82,13 @@ void FCRamp::Trigger(bool tableTick) {
       };
     }
   };
-};
+}
 
 void FCRamp::UpdateSRP(struct RUParams &rup) {
   if (!enabled_)
     return;
   rup.cutOffset_ = fp_add(rup.cutOffset_, current_);
-};
+}
 
 //
 // Filter Resonance ramp
@@ -94,7 +98,7 @@ void FRRamp::SetData(float target, float speed, float start) {
   target_ = fl2fp(target);
   speed_ = (speed == 0) ? 0 : fl2fp(speed);
   current_ = fl2fp(start);
-};
+}
 
 void FRRamp::Trigger(bool tableTick) {
   if (!enabled_)
@@ -116,13 +120,13 @@ void FRRamp::Trigger(bool tableTick) {
       };
     }
   };
-};
+}
 
 void FRRamp::UpdateSRP(struct RUParams &rup) {
   if (!enabled_)
     return;
   rup.resOffset_ = fp_add(rup.resOffset_, current_);
-};
+}
 
 //
 // Speed/Frequency Ramp
@@ -140,9 +144,11 @@ void LogSpeedRamp::SetData(float target, float speed, float start) {
       speed_ = fl2fp(1.0F / speed);
     }
   }
-};
+}
 
-float LogSpeedRamp::GetCurrent() { return fp2fl(current_); };
+float LogSpeedRamp::GetCurrent() {
+  return fp2fl(current_);
+}
 
 void LogSpeedRamp::Trigger(bool tableTick) {
   if (!enabled_)
@@ -168,7 +174,7 @@ void LogSpeedRamp::Trigger(bool tableTick) {
       };
     }
   };
-};
+}
 
 void LogSpeedRamp::UpdateSRP(struct RUParams &rup) {
   if (!enabled_)
@@ -176,7 +182,7 @@ void LogSpeedRamp::UpdateSRP(struct RUParams &rup) {
   rup.speedOffset_ = fp_mul(rup.speedOffset_, current_);
   //	Trace::Debug("Log: current=%f,offset
   // now=%f",fp2fl(current_),fp2fl(rup.speedOffset_)) ;
-};
+}
 
 //
 // Linear Speed/Frequency Ramp
@@ -187,7 +193,7 @@ void LinSpeedRamp::SetData(float target, float speed, float start) {
   current_ = fl2fp(start);
 
   speed_ = (speed == 0) ? 0 : fl2fp(speed);
-};
+}
 
 void LinSpeedRamp::Trigger(bool tableTick) {
   if (!enabled_)
@@ -211,13 +217,13 @@ void LinSpeedRamp::Trigger(bool tableTick) {
       };
     }
   };
-};
+}
 
 void LinSpeedRamp::UpdateSRP(struct RUParams &rup) {
   if (!enabled_)
     return;
   rup.speedOffset_ = fp_mul(rup.speedOffset_, current_);
-};
+}
 
 //
 // Panner
@@ -228,7 +234,7 @@ void Panner::SetData(float target, float speed, float start) {
   current_ = fl2fp(start);
 
   speed_ = (speed == 0) ? 0 : fl2fp(speed);
-};
+}
 
 void Panner::Trigger(bool tableTick) {
   if (!enabled_)
@@ -252,13 +258,13 @@ void Panner::Trigger(bool tableTick) {
       };
     }
   };
-};
+}
 
 void Panner::UpdateSRP(struct RUParams &rup) {
   if (!enabled_)
     return;
   rup.panOffset_ = fp_add(rup.panOffset_, current_);
-};
+}
 
 //
 // Arpegiator
@@ -278,7 +284,7 @@ void Arp::SetData(unsigned int value) {
   arpLength_ = position;
   arpPosition_ = 0;
   current_ = fl2fp(1.0);
-};
+}
 
 void Arp::Trigger(bool tableTick) {
 
@@ -291,10 +297,41 @@ void Arp::Trigger(bool tableTick) {
     };
     current_ = fl2fp(float(pow(2.0, arp_[arpPosition_] / 12.0)));
   }
-};
+}
 
 void Arp::UpdateSRP(struct RUParams &rup) {
   if (!enabled_)
     return;
   rup.speedOffset_ = fp_mul(rup.speedOffset_, current_);
-};
+}
+
+//
+// Vibrato
+//
+
+void Vibrato::SetData(uint8_t rate, uint8_t depth) {
+  // lower 8 bits: depth, upper 8 bits: speed
+  depth_ = depth;
+  rate_ = 1 + (rate << 4);
+
+  // reset output and phase
+  phase_ = 0;
+  current_ = FP_ONE;
+}
+
+void Vibrato::Trigger(bool tableTick) {
+  if (!enabled_)
+    return;
+
+  // step the lfo phase
+  phase_ += rate_;
+  // sine is i16, depth u8 -> 23 bit value, shifted down by 10 bits gives a
+  // range of 13 bits (~±0.26 -> four semitones)
+  current_ = FP_ONE + ((sine_i16_interpolated_64(phase_) * depth_) >> 10);
+}
+
+void Vibrato::UpdateSRP(struct RUParams &rup) {
+  if (!enabled_)
+    return;
+  rup.speedOffset_ = fp_mul(rup.speedOffset_, current_);
+}

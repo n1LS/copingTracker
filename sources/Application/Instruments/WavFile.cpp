@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "WavFile.h"
@@ -28,16 +30,14 @@ int16_t ClampToInt16(double sample) {
   return static_cast<int16_t>(s * 32768.0f);
 }
 
-int16_t ConvertSampleToInt16(const uint8_t *samplePtr, uint16_t audioFormat,
-                             int32_t bytePerSample) {
+int16_t ConvertSampleToInt16(const uint8_t *samplePtr, uint16_t audioFormat, int32_t bytePerSample) {
 
   if (audioFormat == 1) { // PCM
     switch (bytePerSample) {
     case 1: {
       // expand 8-bit to 16-bit
       // 8-bit PCM is unsigned while >8-bit is signed
-      return static_cast<int16_t>((static_cast<int16_t>(samplePtr[0]) - 128)
-                                  << 8);
+      return static_cast<int16_t>((static_cast<int16_t>(samplePtr[0]) - 128) << 8);
     }
     case 2: {
       // signed 16-bit
@@ -47,8 +47,7 @@ int16_t ConvertSampleToInt16(const uint8_t *samplePtr, uint16_t audioFormat,
     }
     case 3: {
       // signed 24-bit
-      int32_t value = samplePtr[0] | (samplePtr[1] << 8) |
-                      (static_cast<int32_t>(samplePtr[2]) << 16);
+      int32_t value = samplePtr[0] | (samplePtr[1] << 8) | (static_cast<int32_t>(samplePtr[2]) << 16);
       value = (value << 8) >> 8; // Sign extend
       return static_cast<int16_t>(value >> 8);
     }
@@ -74,13 +73,11 @@ int16_t ConvertSampleToInt16(const uint8_t *samplePtr, uint16_t audioFormat,
     }
   }
 
-  Trace::Error("WAVFILE: Unsupported format (%u) or byte depth (%d)",
-               audioFormat, bytePerSample);
+  Trace::Error("WAVFILE: Unsupported format (%u) or byte depth (%d)", audioFormat, bytePerSample);
   return 0;
 }
 
-float ConvertSampleToFloat(const uint8_t *samplePtr, uint16_t audioFormat,
-                           int32_t bytePerSample) {
+float ConvertSampleToFloat(const uint8_t *samplePtr, uint16_t audioFormat, int32_t bytePerSample) {
   if (audioFormat == 1) { // PCM
     switch (bytePerSample) {
     case 1: {
@@ -93,8 +90,7 @@ float ConvertSampleToFloat(const uint8_t *samplePtr, uint16_t audioFormat,
       return static_cast<float>(value) / 32768.0f;
     }
     case 3: {
-      int32_t value = samplePtr[0] | (samplePtr[1] << 8) |
-                      (static_cast<int32_t>(samplePtr[2]) << 16);
+      int32_t value = samplePtr[0] | (samplePtr[1] << 8) | (static_cast<int32_t>(samplePtr[2]) << 16);
       value = (value << 8) >> 8; // Sign extend
       return static_cast<float>(value) / 8388608.0f;
     }
@@ -119,15 +115,14 @@ float ConvertSampleToFloat(const uint8_t *samplePtr, uint16_t audioFormat,
     }
   }
 
-  Trace::Error("WAVFILE: Unsupported format (%u) or byte depth (%d)",
-               audioFormat, bytePerSample);
+  Trace::Error("WAVFILE: Unsupported format (%u) or byte depth (%d)", audioFormat, bytePerSample);
   return 0.0f;
 }
 
 WavFile::WavFile()
-    : file_(), readBufferSize_(0), samples_(nullptr), sampleBufferSize_(0),
-      size_(0), sampleRate_(0), channelCount_(0), bytePerSample_(0),
-      audioFormat_(0), dataPosition_(0), readCount_(0) {}
+    : file_(), readBufferSize_(0), samples_(nullptr), sampleBufferSize_(0), size_(0), sampleRate_(0), channelCount_(0),
+      bytePerSample_(0), audioFormat_(0), dataPosition_(0), readCount_(0) {
+}
 
 etl::expected<void, WAVEFILE_ERROR> WavFile::Open(const char *name) {
   // open file
@@ -151,8 +146,7 @@ etl::expected<void, WAVEFILE_ERROR> WavFile::Open(const char *name) {
 
   Trace::Debug("File data bytes: %u", header->dataChunkSize);
 
-  size_ =
-      header->dataChunkSize / (header->numChannels * header->bytesPerSample);
+  size_ = header->dataChunkSize / (header->numChannels * header->bytesPerSample);
   Trace::Debug("File sample count: %i", size_);
 
   // All samples are saved as 16bit/sample in memory
@@ -167,19 +161,31 @@ etl::expected<void, WAVEFILE_ERROR> WavFile::Open(const char *name) {
 
   file_->Seek(header->dataOffset, SEEK_SET);
   return {};
-};
+}
 
-void *WavFile::GetSampleBuffer(int note) { return samples_; };
+void *WavFile::GetSampleBuffer(int note) {
+  return samples_;
+}
 
-void WavFile::SetSampleBuffer(short *ptr) { samples_ = ptr; }
+void WavFile::SetSampleBuffer(short *ptr) {
+  samples_ = ptr;
+}
 
-int WavFile::GetSize(int note) { return size_; };
+int WavFile::GetSize(int note) {
+  return size_;
+}
 
-int WavFile::GetChannelCount(int note) { return channelCount_; };
+int WavFile::GetChannelCount(int note) {
+  return channelCount_;
+}
 
-int WavFile::GetSampleRate(int note) { return sampleRate_; };
+int WavFile::GetSampleRate(int note) {
+  return sampleRate_;
+}
 
-float WavFile::GetLengthInSec() { return (float)size_ / sampleRate_; };
+float WavFile::GetLengthInSec() {
+  return (float)size_ / sampleRate_;
+}
 
 long WavFile::readBlock(long start, long size) {
   if (size > readBufferSize_) {
@@ -188,22 +194,20 @@ long WavFile::readBlock(long start, long size) {
   file_->Seek(start, SEEK_SET);
   file_->Read(readBuffer_, size);
   return size;
-};
+}
 
 bool WavFile::GetBuffer(long start, long size) {
   samples_ = convertedBuffer_;
 
   const int32_t totalSamples = size * channelCount_;
-  const int32_t maxSamples =
-      static_cast<int32_t>(sizeof(convertedBuffer_) / sizeof(int16_t));
+  const int32_t maxSamples = static_cast<int32_t>(sizeof(convertedBuffer_) / sizeof(int16_t));
   if (totalSamples > maxSamples) {
     Trace::Error("WAVFILE: Requested buffer too large (%ld frames)", size);
     return false;
   }
 
   const int32_t bytesPerFrame = channelCount_ * bytePerSample_;
-  const int32_t maxFramesPerRead =
-      (bytesPerFrame > 0) ? (BUFFER_SIZE / bytesPerFrame) : 0;
+  const int32_t maxFramesPerRead = (bytesPerFrame > 0) ? (BUFFER_SIZE / bytesPerFrame) : 0;
   if (maxFramesPerRead == 0) {
     Trace::Error("WAVFILE: Invalid frame sizing");
     return false;
@@ -214,32 +218,32 @@ bool WavFile::GetBuffer(long start, long size) {
   int32_t dstOffset = 0;
 
   while (framesRemaining > 0) {
-    const int32_t framesThisRead =
-        std::min<int32_t>(framesRemaining, maxFramesPerRead);
+    const int32_t framesThisRead = std::min<int32_t>(framesRemaining, maxFramesPerRead);
     const int32_t readSize = framesThisRead * bytesPerFrame;
 
     readBlock(bufferStart, readSize);
 
     for (int32_t i = 0; i < framesThisRead * channelCount_; ++i) {
       const uint8_t *samplePtr = readBuffer_ + i * bytePerSample_;
-      convertedBuffer_[dstOffset + i] =
-          ConvertSampleToInt16(samplePtr, audioFormat_, bytePerSample_);
+      convertedBuffer_[dstOffset + i] = ConvertSampleToInt16(samplePtr, audioFormat_, bytePerSample_);
     }
     bufferStart += readSize;
     framesRemaining -= framesThisRead;
     dstOffset += framesThisRead * channelCount_;
   }
   return true;
-};
+}
 
-uint32_t WavFile::GetDiskSize(int note) { return sampleBufferSize_; }
+uint32_t WavFile::GetDiskSize(int note) {
+  return sampleBufferSize_;
+}
 
 // rewind to start of data (no header)
 bool WavFile::Rewind() {
   file_->Seek(dataPosition_, SEEK_SET);
   readCount_ = size_ * channelCount_ * bytePerSample_;
   return true;
-};
+}
 
 // incrementally read file, use rewind method to go to beginning
 bool WavFile::Read(void *buff, uint32_t btr, uint32_t *bytesRead) {
@@ -317,8 +321,7 @@ bool WavFile::Read(void *buff, uint32_t btr, uint32_t *bytesRead) {
 
 // Resampler takes it's input in float, so we read as float if we are resampling
 // so that we don't lose precision from higher bitrate samples
-bool WavFile::ReadFloat(float *buff, uint32_t maxSamples,
-                        uint32_t *samplesRead) {
+bool WavFile::ReadFloat(float *buff, uint32_t maxSamples, uint32_t *samplesRead) {
   if (!buff || !samplesRead) {
     return false;
   }
@@ -385,7 +388,9 @@ bool WavFile::ReadFloat(float *buff, uint32_t maxSamples,
   return true;
 }
 
-bool WavFile::IsOpen() const { return static_cast<bool>(file_); }
+bool WavFile::IsOpen() const {
+  return static_cast<bool>(file_);
+}
 
 void WavFile::Close() {
   if (file_) {
@@ -394,4 +399,6 @@ void WavFile::Close() {
   readBufferSize_ = 0;
 }
 
-int WavFile::GetRootNote(int note) { return NOTE_C3; }
+int WavFile::GetRootNote(int note) {
+  return NOTE_C3;
+}

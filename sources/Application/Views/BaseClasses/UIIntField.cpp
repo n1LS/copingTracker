@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIIntField.h"
@@ -16,8 +18,8 @@
 
 #define abs(x) (x < 0 ? -x : x)
 
-UIIntField::UIIntField(const GUIPoint &position, int *src, const char *format,
-                       int min, int max, int xOffset, int yOffset)
+UIIntField::UIIntField(const GUIPoint &position, int *src, const char *format, int min, int max, int xOffset,
+                       int yOffset)
     : UIField(position) {
   src_ = src;
   format_ = format;
@@ -25,7 +27,7 @@ UIIntField::UIIntField(const GUIPoint &position, int *src, const char *format,
   max_ = max;
   xOffset_ = xOffset;
   yOffset_ = yOffset;
-};
+}
 
 void UIIntField::Draw(GUIWindow &w) {
 
@@ -44,7 +46,7 @@ void UIIntField::Draw(GUIWindow &w) {
   } else {
     DrawLabeledField(w, position, buffer);
   }
-};
+}
 
 void UIIntField::ProcessArrow(unsigned short mask) {
 
@@ -72,4 +74,4 @@ void UIIntField::ProcessArrow(unsigned short mask) {
   }
 
   *src_ = value;
-};
+}

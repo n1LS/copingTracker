@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _WAV_HEADER_WRITER_H_
@@ -31,13 +33,11 @@ struct WavHeaderInfo {
 class WavHeaderWriter {
 public:
   // Write WAV header to I_File
-  static bool WriteHeader(I_File *file, uint32_t sampleRate = 44100,
-                          uint16_t channels = 2, uint16_t bytesPerSample = 2);
+  static bool WriteHeader(I_File *file, uint32_t sampleRate = 44100, uint16_t channels = 2,
+                          uint16_t bytesPerSample = 2);
 
   // Update file size in WAV header for I_File
-  static bool UpdateFileSize(I_File *file, uint32_t sampleCount,
-                             uint16_t channels = 2,
-                             uint16_t bytesPerSample = 2);
+  static bool UpdateFileSize(I_File *file, uint32_t sampleCount, uint16_t channels = 2, uint16_t bytesPerSample = 2);
 
   static etl::expected<WavHeaderInfo, WAVEFILE_ERROR> ReadHeader(I_File *file);
 };

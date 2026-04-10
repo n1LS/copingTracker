@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _AUDIO_DRIVER_H_
@@ -31,7 +33,9 @@ public:
   public:
     enum Type { ADET_DRIVERTICK, ADET_BUFFERNEEDED };
 
-    Event(Type type) { type_ = type; };
+    Event(Type type) {
+      type_ = type;
+    };
     Type type_;
   };
 
@@ -51,7 +55,8 @@ public:
 
   virtual bool Interlaced() = 0;
   virtual int GetPlayedBufferPercentage() = 0;
-  virtual void OnAudioActive(bool active) {}
+  virtual void OnAudioActive(bool active) {
+  }
 
   virtual double GetStreamTime() = 0; // in secs
 

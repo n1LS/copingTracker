@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SyncMaster.h"
@@ -16,51 +18,59 @@
 #define AUDIO_SLICES_PER_STEP 6 // needs to be a multiple of 6 !
 #endif
 
-SyncMaster::SyncMaster() { tableRatio_ = 1; }
+SyncMaster::SyncMaster() {
+  tableRatio_ = 1;
+}
 
 void SyncMaster::Start() {
   currentSlice_ = 0;
   beatCount_ = 0;
-};
+}
 
-void SyncMaster::Stop(){};
+void SyncMaster::Stop() {};
 
 void SyncMaster::SetTempo(int tempo) {
   tempo_ = tempo;
   int driverRate = Audio::GetInstance()->GetSampleRate();
-  playSampleCount_ =
-      60.0f * driverRate * 2.0f / tempo_ / 8.0f / float(AUDIO_SLICES_PER_STEP);
-  tickSampleCount_ = 60.0f * driverRate * 2.0f / tempo_ / 8.0f /
-                     float(AUDIO_SLICES_PER_STEP) * tableRatio_;
-};
+  playSampleCount_ = 60.0f * driverRate * 2.0f / tempo_ / 8.0f / float(AUDIO_SLICES_PER_STEP);
+  tickSampleCount_ = 60.0f * driverRate * 2.0f / tempo_ / 8.0f / float(AUDIO_SLICES_PER_STEP) * tableRatio_;
+}
 
-int SyncMaster::GetTempo() { return tempo_; };
+int SyncMaster::GetTempo() {
+  return tempo_;
+}
 
 void SyncMaster::NextSlice() {
   currentSlice_ = (currentSlice_ + 1) % AUDIO_SLICES_PER_STEP;
   if (currentSlice_ == 0) {
     beatCount_++;
   };
-};
+}
 
-bool SyncMaster::MajorSlice() { return currentSlice_ == 0; };
+bool SyncMaster::MajorSlice() {
+  return currentSlice_ == 0;
+}
 
 bool SyncMaster::TableSlice() {
   int tableTick = currentSlice_ % (AUDIO_SLICES_PER_STEP / 6 * tableRatio_);
   return tableTick == 0;
-};
+}
 
 bool SyncMaster::MidiSlice() {
   int midiTick = currentSlice_ % (AUDIO_SLICES_PER_STEP / 6);
   return midiTick == 0;
-};
+}
 
 // Returns the number of samples per play slice
 
-float SyncMaster::GetPlaySampleCount() { return playSampleCount_; };
+float SyncMaster::GetPlaySampleCount() {
+  return playSampleCount_;
+}
 
 // Returns the number of sample per tick
-float SyncMaster::GetTickSampleCount() { return tickSampleCount_; };
+float SyncMaster::GetTickSampleCount() {
+  return tickSampleCount_;
+}
 
 // xx samples per tick
 // xx/driverRate seconds
@@ -68,10 +78,16 @@ float SyncMaster::GetTickSampleCount() { return tickSampleCount_; };
 
 float SyncMaster::GetTickTime() {
   return 60.0f * 2.0f / tempo_ / 8.0f / AUDIO_SLICES_PER_STEP * 1000.0f;
-};
+}
 
-void SyncMaster::SetTableRatio(int ratio) { tableRatio_ = ratio; }
+void SyncMaster::SetTableRatio(int ratio) {
+  tableRatio_ = ratio;
+}
 
-int SyncMaster::GetTableRatio() { return tableRatio_; }
+int SyncMaster::GetTableRatio() {
+  return tableRatio_;
+}
 
-unsigned int SyncMaster::GetBeatCount() { return beatCount_; };
+unsigned int SyncMaster::GetBeatCount() {
+  return beatCount_;
+}

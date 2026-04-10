@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef SAMPLE_EDIT_PROGRESS_DISPLAY_H_
@@ -14,8 +16,7 @@
 
 class SampleEditProgressDisplay {
 public:
-  explicit SampleEditProgressDisplay(
-      const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &filename);
+  explicit SampleEditProgressDisplay(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &filename);
 
   void Update(uint8_t percent);
   void Finish(bool success);

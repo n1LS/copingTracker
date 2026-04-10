@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SamplePool.h"
@@ -31,30 +33,26 @@ SamplePool::SamplePool() : Observable(&observers_) {
     names_[i] = nameStore_[i];
     nameStore_[i][0] = '\0';
   };
-};
+}
 
 SamplePool::~SamplePool() {
   for (int i = 0; i < MAX_SAMPLES; i++) {
     wav_[i].Close();
   };
-};
+}
 
-void SamplePool::updateStatus(uint32_t index, uint32_t total,
-                              const char *message) {
+void SamplePool::updateStatus(uint32_t index, uint32_t total, const char *message) {
   progressBar_t progressBar;
   uint32_t percentage = (total > 0) ? (index * 100U) / total : 100U;
   fillProgressBar(index, total, &progressBar);
-  Status::SetMultiLine("%s %.19s" char_indicator_ellipsis_s " \n \n %s %3d%%",
-                       message, importName, progressBar,
+  Status::SetMultiLine("%s %.19s" char_indicator_ellipsis_s " \n \n %s %3d%%", message, importName, progressBar,
                        static_cast<int>(percentage));
-};
+}
 
 void SamplePool::Load(const char *projectName) {
   auto fs = FileSystem::GetInstance();
-  if (!fs->chdir(PROJECTS_DIR) || !fs->chdir(projectName) ||
-      !fs->chdir(PROJECT_SAMPLES_DIR)) {
-    Trace::Error("Failed to chdir into %s/%s/%s", PROJECTS_DIR, projectName,
-                 PROJECT_SAMPLES_DIR);
+  if (!fs->chdir(PROJECTS_DIR) || !fs->chdir(projectName) || !fs->chdir(PROJECT_SAMPLES_DIR)) {
+    Trace::Error("Failed to chdir into %s/%s/%s", PROJECTS_DIR, projectName, PROJECT_SAMPLES_DIR);
   }
   // First, find all wav files
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes;
@@ -73,15 +71,26 @@ void SamplePool::Load(const char *projectName) {
     if (fs->getFileType(fileIndexes[i]) == PFT_FILE) {
       // Check if the filename exceeds the maximum allowed length
       if (strlen(name) > MAX_INSTRUMENT_FILENAME_LENGTH) {
-        Trace::Error(
-            "SAMPLEPOOL: Sample filename exceeds maximum length: %s (%zu > %d)",
-            name, strlen(name), MAX_INSTRUMENT_FILENAME_LENGTH);
+        Trace::Error("SAMPLEPOOL: Sample filename exceeds maximum length: %s (%zu > %d)", name, strlen(name),
+                     MAX_INSTRUMENT_FILENAME_LENGTH);
         // Skip this sample and continue with the next one
         continue;
       }
 
       // Show progress as percentage
       int progress = (int)((i * 100) / totalSamples);
+      int prog10 = progress / 10;
+
+      char progressBar[13];
+      for (int j = 1; j < 11; j++) {
+        progressBar[j] = j >= prog10 ? GLYPH(char_battery_empty_s) : GLYPH(char_block_full_s);
+      }
+      progressBar[0] = GLYPH(char_button_border_left_s);
+      progressBar[11] = GLYPH(char_button_border_right_s);
+      progressBar[12] = 0;
+
+      Status::Set("Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", name,
+                  (const char *)progressBar, progress);
 
       updateStatus(importIndex, importCount, "Loading");
       loadSample(name);
@@ -104,21 +113,24 @@ void SamplePool::Load(const char *projectName) {
     swapEntries(index, rest - 1);
     rest--;
   };
-};
+}
 
 SoundSource *SamplePool::GetSource(uint32_t i) {
   if (i < 0 || i >= count_) {
     return nullptr;
   }
   return &wav_[i];
-};
+}
 
-char **SamplePool::GetNameList() { return names_; };
+char **SamplePool::GetNameList() {
+  return names_;
+}
 
-int SamplePool::GetNameListSize() { return count_; };
+int SamplePool::GetNameListSize() {
+  return count_;
+}
 
-uint32_t SamplePool::FindSampleIndexByName(
-    const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &name) {
+uint32_t SamplePool::FindSampleIndexByName(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &name) {
   char **names = GetNameList();
   uint16_t count = GetNameListSize();
   for (uint16_t i = 0; i < count; ++i) {
@@ -130,10 +142,8 @@ uint32_t SamplePool::FindSampleIndexByName(
 }
 
 #define IMPORT_CHUNK_SIZE 512
-static constexpr int32_t kImportInputSamples =
-    IMPORT_CHUNK_SIZE / static_cast<int32_t>(sizeof(int16_t));
-static constexpr int32_t kImportMaxOutputSamples =
-    (kImportInputSamples * SRC_MAX_RATIO) + 8;
+static constexpr int32_t kImportInputSamples = IMPORT_CHUNK_SIZE / static_cast<int32_t>(sizeof(int16_t));
+static constexpr int32_t kImportMaxOutputSamples = (kImportInputSamples * SRC_MAX_RATIO) + 8;
 static float importResampleIn_[kImportInputSamples];
 static float importResampleOut_[kImportMaxOutputSamples];
 static int16_t importResampleOutInt16_[kImportMaxOutputSamples];
@@ -155,8 +165,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> projSampleFilename(name);
   if (projSampleFilename.is_truncated()) {
     // Truncate the string in-place and then append the extension
-    projSampleFilename =
-        projSampleFilename.substr(0, MAX_INSTRUMENT_FILENAME_LENGTH - 4);
+    projSampleFilename = projSampleFilename.substr(0, MAX_INSTRUMENT_FILENAME_LENGTH - 4);
     projSampleFilename.append(".wav");
   }
 
@@ -174,14 +183,11 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
 
   const int32_t sourceSampleRate = wav.GetSampleRate(-1);
   const int32_t channelCount = wav.GetChannelCount(-1);
-  const int32_t importResampler =
-      Config::GetInstance()->GetValue("IMPORTRESAMP");
-  const bool shouldResample =
-      (importResampler > 0) && (sourceSampleRate != 44100);
+  const int32_t importResampler = Config::GetInstance()->GetValue("IMPORTRESAMP");
+  const bool shouldResample = (importResampler > 0) && (sourceSampleRate != 44100);
   const int32_t outputSampleRate = shouldResample ? 44100 : sourceSampleRate;
 
-  if (!WavHeaderWriter::WriteHeader(fout.get(), outputSampleRate, channelCount,
-                                    16)) {
+  if (!WavHeaderWriter::WriteHeader(fout.get(), outputSampleRate, channelCount, 16)) {
     Trace::Error("Failed to write WAV header for:%s", projectSamplePath);
     return -1;
   }
@@ -215,8 +221,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
     src_reset(resampler);
   }
 
-  const double srcRatio =
-      shouldResample ? (44100.0 / static_cast<double>(sourceSampleRate)) : 1.0;
+  const double srcRatio = shouldResample ? (44100.0 / static_cast<double>(sourceSampleRate)) : 1.0;
 
   while (true) {
     if (!shouldResample) {
@@ -233,11 +238,9 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
         Trace::Error("Failed writing sample data to:%s", projectSamplePath);
         return -1;
       }
-      totalWrittenFrames +=
-          bytesRead / (static_cast<uint32_t>(channelCount) * 2);
+      totalWrittenFrames += bytesRead / (static_cast<uint32_t>(channelCount) * 2);
     } else {
-      if (!wav.ReadFloat(importResampleIn_, kImportInputSamples,
-                         &samplesRead)) {
+      if (!wav.ReadFloat(importResampleIn_, kImportInputSamples, &samplesRead)) {
         Trace::Error("Failed reading sample data from:%s", name);
         return -1;
       }
@@ -246,8 +249,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
       }
       totalRead += samplesRead * 2;
 
-      const uint32_t inputFrames =
-          samplesRead / static_cast<uint32_t>(channelCount);
+      const uint32_t inputFrames = samplesRead / static_cast<uint32_t>(channelCount);
       uint32_t framesRemaining = inputFrames;
       float *inPtr = importResampleIn_;
       while (framesRemaining > 0) {
@@ -256,8 +258,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
         data.data_in = inPtr;
         data.input_frames = static_cast<long>(framesRemaining);
         data.data_out = importResampleOut_;
-        data.output_frames = static_cast<long>(
-            kImportMaxOutputSamples / static_cast<int32_t>(channelCount));
+        data.output_frames = static_cast<long>(kImportMaxOutputSamples / static_cast<int32_t>(channelCount));
         data.src_ratio = srcRatio;
         data.end_of_input = 0;
 
@@ -268,13 +269,10 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
         }
 
         if (data.output_frames_gen > 0) {
-          const int32_t outputSamples =
-              static_cast<int32_t>(data.output_frames_gen) * channelCount;
-          src_float_to_short_array(importResampleOut_, importResampleOutInt16_,
-                                   outputSamples);
+          const int32_t outputSamples = static_cast<int32_t>(data.output_frames_gen) * channelCount;
+          src_float_to_short_array(importResampleOut_, importResampleOutInt16_, outputSamples);
           const int32_t bytesToWrite = outputSamples * sizeof(int16_t);
-          uint32_t written =
-              fout->Write(importResampleOutInt16_, 1, bytesToWrite);
+          uint32_t written = fout->Write(importResampleOutInt16_, 1, bytesToWrite);
           if (written != static_cast<uint32_t>(bytesToWrite)) {
             Trace::Error("Failed writing sample data to:%s", projectSamplePath);
             return -1;
@@ -287,11 +285,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
       }
     }
 
-#ifdef ADV
-    uint32_t total = totalSize;
-#else
     uint32_t total = totalSize * 2U;
-#endif
 
     importCount = total;
     importIndex = totalRead;
@@ -306,8 +300,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
       data.data_in = nullptr;
       data.input_frames = 0;
       data.data_out = importResampleOut_;
-      data.output_frames = static_cast<long>(
-          kImportMaxOutputSamples / static_cast<int32_t>(channelCount));
+      data.output_frames = static_cast<long>(kImportMaxOutputSamples / static_cast<int32_t>(channelCount));
       data.src_ratio = srcRatio;
       data.end_of_input = 1;
 
@@ -321,10 +314,8 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
         break;
       }
 
-      const int32_t outputSamples =
-          static_cast<int32_t>(data.output_frames_gen) * channelCount;
-      src_float_to_short_array(importResampleOut_, importResampleOutInt16_,
-                               outputSamples);
+      const int32_t outputSamples = static_cast<int32_t>(data.output_frames_gen) * channelCount;
+      src_float_to_short_array(importResampleOut_, importResampleOutInt16_, outputSamples);
       const int32_t bytesToWrite = outputSamples * sizeof(int16_t);
       uint32_t written = fout->Write(importResampleOutInt16_, 1, bytesToWrite);
       if (written != static_cast<uint32_t>(bytesToWrite)) {
@@ -337,10 +328,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   }
 
   if (!WavHeaderWriter::UpdateFileSize(
-          fout.get(),
-          shouldResample ? totalWrittenFrames
-                         : static_cast<uint32_t>(wav.GetSize(-1)),
-          channelCount, 2)) {
+          fout.get(), shouldResample ? totalWrittenFrames : static_cast<uint32_t>(wav.GetSize(-1)), channelCount, 2)) {
     Trace::Error("Failed to update WAV header for:%s", projectSamplePath);
     return -1;
   }
@@ -355,8 +343,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
     // truncated filename we actually stored into the project pool subdir
     const int loadedIndex = count_ - 1;
     if (loadedIndex >= 0) {
-      projSampleFilename.copy(nameStore_[loadedIndex],
-                              projSampleFilename.size());
+      projSampleFilename.copy(nameStore_[loadedIndex], projSampleFilename.size());
       nameStore_[loadedIndex][projSampleFilename.size()] = '\0';
     }
   }
@@ -366,8 +353,9 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   ev.index_ = count_ - 1;
   ev.type_ = SPET_INSERT;
   NotifyObservers(&ev);
+
   return status ? (count_ - 1) : -1;
-};
+}
 
 void SamplePool::PurgeSample(int i, const char *projectName) {
   auto fs = FileSystem::GetInstance();
@@ -375,16 +363,14 @@ void SamplePool::PurgeSample(int i, const char *projectName) {
   etl::string<MAX_PROJECT_SAMPLE_PATH_LENGTH> buffer;
   etl::string_stream delPath(buffer);
 
-  delPath << "/" << PROJECTS_DIR << "/" << projectName << "/"
-          << PROJECT_SAMPLES_DIR << "/" << names_[i];
+  delPath << "/" << PROJECTS_DIR << "/" << projectName << "/" << PROJECT_SAMPLES_DIR << "/" << names_[i];
 
   // delete file
   FileSystem::GetInstance()->DeleteFile(delPath.str().c_str());
   // shift all entries from deleted to end
   for (uint32_t j = i; j < count_ - 1; j++) {
     wav_[j] = std::move(wav_[j + 1]);
-    memcpy(nameStore_[j], nameStore_[j + 1],
-           MAX_INSTRUMENT_FILENAME_LENGTH + 1);
+    memcpy(nameStore_[j], nameStore_[j + 1], MAX_INSTRUMENT_FILENAME_LENGTH + 1);
   };
   // decrease sample count
   count_--;
@@ -397,7 +383,7 @@ void SamplePool::PurgeSample(int i, const char *projectName) {
   ev.index_ = i;
   ev.type_ = SPET_DELETE;
   NotifyObservers(&ev);
-};
+}
 
 // returns the new samples index or -1 on error
 int8_t SamplePool::ReloadSample(uint8_t index, const char *name) {

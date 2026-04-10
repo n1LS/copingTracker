@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _WAV_FILE_WRITER_H_
@@ -43,14 +45,11 @@ public:
   bool IsOpen() const;
   void AddBuffer(fixed *, int size); // size in samples
   void Close();
-  static bool TrimFile(const char *path, uint32_t startFrame, uint32_t endFrame,
-                       void *scratchBuffer, uint32_t scratchBufferSize,
-                       WavTrimResult &result,
+  static bool TrimFile(const char *path, uint32_t startFrame, uint32_t endFrame, void *scratchBuffer,
+                       uint32_t scratchBufferSize, WavTrimResult &result,
                        SampleEditProgressCallback progressCallback = nullptr);
-  static bool
-  NormalizeFile(const char *path, void *scratchBuffer,
-                uint32_t scratchBufferSize, WavNormalizeResult &result,
-                SampleEditProgressCallback progressCallback = nullptr);
+  static bool NormalizeFile(const char *path, void *scratchBuffer, uint32_t scratchBufferSize,
+                            WavNormalizeResult &result, SampleEditProgressCallback progressCallback = nullptr);
 
 private:
   int sampleCount_;

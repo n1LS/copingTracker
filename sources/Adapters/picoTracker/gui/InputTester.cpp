@@ -14,17 +14,12 @@ static void draw_string(int x, int y, const char *s, bool invert) {
 }
 
 static void draw_button(uint8_t x, uint8_t y, char label, bool invert) {
-  const char line[4] = {GLYPH(char_border_single_vertical_s), label,
-                        GLYPH(char_border_single_vertical_s), 0};
-  draw_string(x, y + 0,
-              char_border_single_topLeft_s char_border_single_horizontal_s
-                  char_border_single_topRight_s,
+  const char line[4] = {GLYPH(char_border_single_vertical_s), label, GLYPH(char_border_single_vertical_s), 0};
+  draw_string(x, y + 0, char_border_single_topLeft_s char_border_single_horizontal_s char_border_single_topRight_s,
               invert);
   draw_string(x, y + 1, (const char *)line, invert);
   draw_string(x, y + 2,
-              char_border_single_bottomLeft_s char_border_single_horizontal_s
-                  char_border_single_bottomRight_s,
-              invert);
+              char_border_single_bottomLeft_s char_border_single_horizontal_s char_border_single_bottomRight_s, invert);
 }
 
 void drawInputTester() {
@@ -32,8 +27,7 @@ void drawInputTester() {
   uint16_t keys = scanKeys();
 
   // Title
-  chargfx_set_cursor(10, 2);
-  chargfx_print("Button Tester", false);
+  draw_string(12, 2, "Button Tester", false);
 
   // Row 1: Up, Play, Edit
   draw_button(13, 14, GLYPH(char_button_up_s), keys & KEY_UP);

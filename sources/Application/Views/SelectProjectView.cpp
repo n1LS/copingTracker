@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "SelectProjectView.h"
@@ -29,8 +31,10 @@ public:
   virtual ~DeleteProjectConfirmModal();
   virtual void Destroy() override;
   virtual void DrawView() override;
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int) override {}
-  virtual void OnFocus() override {}
+  virtual void OnPlayerUpdate(PlayerEventType, unsigned int) override {
+  }
+  virtual void OnFocus() override {
+  }
   virtual void ProcessButtonMask(unsigned short mask, bool pressed) override;
   virtual void AnimationUpdate() override;
 
@@ -48,12 +52,10 @@ private:
 
 bool DeleteProjectConfirmModal::inUse_ = false;
 alignas(
-    DeleteProjectConfirmModal) static unsigned char DeleteProjectConfirmModalStorage
-    [sizeof(DeleteProjectConfirmModal)];
+    DeleteProjectConfirmModal) static unsigned char DeleteProjectConfirmModalStorage[sizeof(DeleteProjectConfirmModal)];
 void *DeleteProjectConfirmModal::storage_ = DeleteProjectConfirmModalStorage;
 
-DeleteProjectConfirmModal *DeleteProjectConfirmModal::Create(View &view,
-                                                             const char *name) {
+DeleteProjectConfirmModal *DeleteProjectConfirmModal::Create(View &view, const char *name) {
   if (inUse_) {
     auto *existing = reinterpret_cast<DeleteProjectConfirmModal *>(storage_);
     existing->~DeleteProjectConfirmModal();
@@ -63,14 +65,14 @@ DeleteProjectConfirmModal *DeleteProjectConfirmModal::Create(View &view,
   return new (storage_) DeleteProjectConfirmModal(view, name);
 }
 
-DeleteProjectConfirmModal::DeleteProjectConfirmModal(View &view,
-                                                     const char *projectName)
+DeleteProjectConfirmModal::DeleteProjectConfirmModal(View &view, const char *projectName)
     : ModalView(view), projectLine_("Delete \"") {
   projectLine_.append(projectName);
   projectLine_.append("\"");
 }
 
-DeleteProjectConfirmModal::~DeleteProjectConfirmModal() {}
+DeleteProjectConfirmModal::~DeleteProjectConfirmModal() {
+}
 
 void DeleteProjectConfirmModal::Destroy() {
   this->~DeleteProjectConfirmModal();
@@ -116,10 +118,11 @@ void DeleteProjectConfirmModal::UpdateProgress_() {
   }
 }
 
-void DeleteProjectConfirmModal::AnimationUpdate() { UpdateProgress_(); }
+void DeleteProjectConfirmModal::AnimationUpdate() {
+  UpdateProgress_();
+}
 
-void DeleteProjectConfirmModal::ProcessButtonMask(unsigned short mask,
-                                                  bool pressed) {
+void DeleteProjectConfirmModal::ProcessButtonMask(unsigned short mask, bool pressed) {
   currentMask_ = mask;
 
   if (pressed && (mask & EPBM_ENTER)) {
@@ -147,7 +150,7 @@ void DeleteProjectConfirmModal::DrawView() {
     DrawString((26 - 12) / 2, 3, progressBar, props);
   }
 
-  const char *cancelButton = "[ Cancel ]";
+  const char *cancelButton = "Cancel";
   SetColor(CD_HILITE2);
   props.invert_ = true;
   DrawString((26 - strlen(cancelButton)) / 2, 5, cancelButton, props);
@@ -171,8 +174,7 @@ static void DeleteProjectCallback(View &v, ModalView &dialog) {
     char buffer[MAX_PROJECT_NAME_LENGTH + 1];
     view.getHighlightedProjectName(buffer);
     if (!ps->DeleteProject(buffer)) {
-      MessageBox *mb =
-          MessageBox::Create(view, "Project could not be deleted", MBBF_OK);
+      MessageBox *mb = MessageBox::Create(view, "Project could not be deleted", MBBF_OK);
       view.DoModal(mb);
       return;
     }
@@ -182,10 +184,11 @@ static void DeleteProjectCallback(View &v, ModalView &dialog) {
   }
 }
 
-SelectProjectView::SelectProjectView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData) {}
+SelectProjectView::SelectProjectView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
+}
 
-SelectProjectView::~SelectProjectView() {}
+SelectProjectView::~SelectProjectView() {
+}
 
 void SelectProjectView::Reset() {
   topIndex_ = 0;
@@ -218,8 +221,7 @@ void SelectProjectView::DrawView() {
   const char *currentProject = projectName.c_str();
   size_t total = fileIndexList_.size();
 
-  for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total);
-       i++) {
+  for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total); i++) {
     if (i == currentIndex_) {
       SetColor(CD_HILITE2);
       props.invert_ = true;
@@ -266,15 +268,14 @@ void SelectProjectView::DrawView() {
 
   // scroll bar
   drawScrollBar(SCREEN_WIDTH - 1, pos._y + 2, LIST_PAGE_SIZE, topIndex_, total);
-};
+}
 
-void SelectProjectView::OnPlayerUpdate(PlayerEventType,
-                                       unsigned int currentTick){};
+void SelectProjectView::OnPlayerUpdate(PlayerEventType, unsigned int currentTick) {};
 
 void SelectProjectView::OnFocus() {
   selectedButton_ = 0; // Always default to "Load" when entering this view.
   setCurrentFolder();
-};
+}
 
 void SelectProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (!pressed)
@@ -362,8 +363,7 @@ void SelectProjectView::setCurrentFolder() {
   for (auto it = fileIndexList_.begin(); it != fileIndexList_.end();) {
     fs->getFileName(*it, selection_, MAX_PROJECT_NAME_LENGTH + 1);
 
-    const bool isDotEntry =
-        (strcmp(selection_, ".") == 0) || (strcmp(selection_, "..") == 0);
+    const bool isDotEntry = (strcmp(selection_, ".") == 0) || (strcmp(selection_, "..") == 0);
     const bool isUntitled = (strcmp(selection_, UNNAMED_PROJECT_NAME) == 0);
 
     if (isDotEntry || isUntitled) {
@@ -414,8 +414,7 @@ void SelectProjectView::LoadProject() {
   auto fs = FileSystem::GetInstance();
   fs->getFileName(fileIndex, selection_, MAX_PROJECT_NAME_LENGTH + 1);
   if (strlen(selection_) == 0) {
-    Trace::Log("SELECTPROJECTVIEW",
-               "skipping too long project name on Index:%d", fileIndex);
+    Trace::Log("SELECTPROJECTVIEW", "skipping too long project name on Index:%d", fileIndex);
     return;
   }
 
@@ -456,8 +455,7 @@ void SelectProjectView::AttemptDeletingSelectedProject() {
   }
 
   if (SelectionIsCurrentProject()) {
-    MessageBox *mb = MessageBox::Create(*this, "Cannot delete the active",
-                                        "project.", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Cannot delete the active", "project.", MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -474,8 +472,7 @@ void SelectProjectView::AttemptLoadingProject() {
     return;
   }
 
-  MessageBox *mb = MessageBox::Create(*this, "Load song and lose changes?",
-                                      MBBF_YES | MBBF_NO);
+  MessageBox *mb = MessageBox::Create(*this, "Load song and lose changes?", MBBF_YES | MBBF_NO);
   DoModal(mb, ModalViewCallback::create<&LoadProjectCallback>());
 }
 
@@ -485,9 +482,7 @@ void SelectProjectView::ClearAutoSave() {
   PersistencyService *ps = PersistencyService::GetInstance();
   if (!projectName.empty()) {
     if (!ps->ClearAutosave(projectName.c_str())) {
-      Trace::Log("SELECTPROJECTVIEW",
-                 "Autosave clear failed or missing for project: %s",
-                 projectName.c_str());
+      Trace::Log("SELECTPROJECTVIEW", "Autosave clear failed or missing for project: %s", projectName.c_str());
     }
   }
 }

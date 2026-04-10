@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "GUIWindow.h"
@@ -22,30 +24,40 @@ GUIWindow::GUIWindow(I_GUIWindowImp &imp) {
 
 // Destructor
 
-GUIWindow::~GUIWindow() { delete _imp; }
+GUIWindow::~GUIWindow() {
+  delete _imp;
+}
 
 // I_GUIGraphics Implementation: We rely on the imp window to provide
 // core graphics on the window
 
-void GUIWindow::SetColor(GUIColor &color) { _imp->SetColor(color); }
+void GUIWindow::SetColor(GUIColor &color) {
+  _imp->SetColor(color);
+}
 
-void GUIWindow::ClearTextRect(GUIRect &r) { _imp->ClearTextRect(r); }
+void GUIWindow::ClearTextRect(GUIRect &r) {
+  _imp->ClearTextRect(r);
+}
 
-void GUIWindow::DrawString(const char *string, const GUIPoint &pos,
-                           const GUITextProperties &props, bool overlay) {
+void GUIWindow::DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props, bool overlay) {
   _imp->DrawString(string, pos, props, overlay);
 }
 
-void GUIWindow::SetCurrentRectColor(GUIColor color) { _imp->SetColor(color); }
+void GUIWindow::SetCurrentRectColor(GUIColor color) {
+  _imp->SetColor(color);
+}
 
-void GUIWindow::DrawRect(GUIRect &r) { _imp->DrawRect(r); }
+void GUIWindow::DrawRect(GUIRect &r) {
+  _imp->DrawRect(r);
+}
 
-void GUIWindow::DrawChar(const char c, const GUIPoint &pos,
-                         const GUITextProperties &props) {
+void GUIWindow::DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props) {
   _imp->DrawChar(c, pos, props);
 }
 
-void GUIWindow::Clear(GUIColor &c, bool overlay) { _imp->Clear(c, overlay); };
+void GUIWindow::Clear(GUIColor &c, bool overlay) {
+  _imp->Clear(c, overlay);
+}
 
 /*void GUIWindow::Save() {
         _imp->Save() ;
@@ -55,22 +67,40 @@ void GUIWindow::Restore() {
         _imp->Restore() ;
 } ;*/
 
-GUIRect GUIWindow::GetRect() { return _imp->GetRect(); }
+GUIRect GUIWindow::GetRect() {
+  return _imp->GetRect();
+}
 
-void GUIWindow::Invalidate() { _imp->Invalidate(); }
+void GUIWindow::Invalidate() {
+  _imp->Invalidate();
+}
 
-void GUIWindow::Flush() { _imp->Flush(); }
+void GUIWindow::Flush() {
+  _imp->Flush();
+}
 
-void GUIWindow::Lock() { _imp->Lock(); }
-void GUIWindow::Unlock() { _imp->Unlock(); }
+void GUIWindow::Lock() {
+  _imp->Lock();
+}
+void GUIWindow::Unlock() {
+  _imp->Unlock();
+}
 
-void GUIWindow::Update(bool redraw) { onUpdate(redraw); }
+void GUIWindow::Update(bool redraw) {
+  onUpdate(redraw);
+}
 
-void GUIWindow::ClockTick() { AnimationUpdate(); }
+void GUIWindow::ClockTick() {
+  AnimationUpdate();
+}
 
-I_GUIGraphics *GUIWindow::GetGraphics() { return this; }
+I_GUIGraphics *GUIWindow::GetGraphics() {
+  return this;
+}
 
-I_GUIGraphics *GUIWindow::GetDC() { return this; }
+I_GUIGraphics *GUIWindow::GetDC() {
+  return this;
+}
 
 // Redifine the event Dispatcher to handle focused controll
 
@@ -79,4 +109,6 @@ bool GUIWindow::DispatchEvent(GUIEvent &event) {
   ;
 }
 
-void GUIWindow::PushEvent(GUIEvent &event) { _imp->PushEvent(event); };
+void GUIWindow::PushEvent(GUIEvent &event) {
+  _imp->PushEvent(event);
+}

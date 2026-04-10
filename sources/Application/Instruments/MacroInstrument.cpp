@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "MacroInstrument.h"
@@ -22,12 +24,9 @@
 
 MacroInstrument::MacroInstrument()
     : I_Instrument(&variables_),
-      shape_(FourCC::MacroInstrumentShape, braids::algo_values,
-             braids::MACRO_OSC_SHAPE_LAST - 2, 0),
-      timbre_(FourCC::MacroInstrmentTimbre, 0x7f),
-      color_(FourCC::MacroInstrumentColor, 0x7f),
-      attack_(FourCC::MacroInstrumentAttack, 0),
-      decay_(FourCC::MacroInstrumentDecay, 0x05),
+      shape_(FourCC::MacroInstrumentShape, braids::algo_values, braids::MACRO_OSC_SHAPE_LAST - 2, 0),
+      timbre_(FourCC::MacroInstrmentTimbre, 0x7f), color_(FourCC::MacroInstrumentColor, 0x7f),
+      attack_(FourCC::MacroInstrumentAttack, 0), decay_(FourCC::MacroInstrumentDecay, 0x05),
       signature_(FourCC::MacroInstrumentSignature, 0) {
 
   running_ = false;
@@ -40,7 +39,8 @@ MacroInstrument::MacroInstrument()
   variables_.insert(variables_.end(), &signature_);
 }
 
-MacroInstrument::~MacroInstrument() {}
+MacroInstrument::~MacroInstrument() {
+}
 
 bool MacroInstrument::Init() {
   osc_.Init();
@@ -53,10 +53,9 @@ bool MacroInstrument::Init() {
   return true;
 }
 
-void MacroInstrument::OnStart(){/* tableState_.Reset();*/};
+void MacroInstrument::OnStart() { /* tableState_.Reset();*/ };
 
-bool MacroInstrument::Start(int channel, unsigned char midinote,
-                            bool cleanstart) {
+bool MacroInstrument::Start(int channel, unsigned char midinote, bool cleanstart) {
   Variable *vShape = FindVariable(FourCC::MacroInstrumentShape);
   osc_shape_ = static_cast<braids::MacroOscillatorShape>(vShape->GetInt());
 
@@ -78,11 +77,12 @@ bool MacroInstrument::Start(int channel, unsigned char midinote,
   return true;
 }
 
-void MacroInstrument::Stop(int channel) { running_ = false; }
+void MacroInstrument::Stop(int channel) {
+  running_ = false;
+}
 
 // Size in samples
-bool MacroInstrument::Render(int channel, fixed *buffer, int size,
-                             bool updateTick) {
+bool MacroInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   //  int start = micros();
 
   // clear the fixed point buffer
@@ -130,24 +130,28 @@ bool MacroInstrument::Render(int channel, fixed *buffer, int size,
   }
 
   return true;
-};
+}
 
 bool MacroInstrument::IsInitialized() { /*return (source_ != 0); */
   return true;
-};
+}
 
-void MacroInstrument::Update(Observable &o, I_ObservableData *d){};
+void MacroInstrument::Update(Observable &o, I_ObservableData *d) {};
 
-void MacroInstrument::ProcessCommand(int channel, FourCC cc, ushort value){};
+void MacroInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {};
 
-bool MacroInstrument::IsEmpty() { return false; };
+bool MacroInstrument::IsEmpty() {
+  return false;
+}
 
-int MacroInstrument::GetTable() { return 0; };
+int MacroInstrument::GetTable() {
+  return 0;
+}
 
 bool MacroInstrument::GetTableAutomation() { /*return tableAuto_->GetBool();*/
   return false;
-};
+}
 
-void MacroInstrument::GetTableState(TableSaveState &state){};
+void MacroInstrument::GetTableState(TableSaveState &state) {};
 
-void MacroInstrument::SetTableState(TableSaveState &state){};
+void MacroInstrument::SetTableState(TableSaveState &state) {};

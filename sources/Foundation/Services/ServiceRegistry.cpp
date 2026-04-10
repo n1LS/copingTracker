@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ServiceRegistry.h"
@@ -16,7 +18,7 @@ void ServiceRegistry::Register(Service *s) {
     return;
   }
   services_.push_back(s);
-};
+}
 
 void ServiceRegistry::Register(SubService *s) {
   for (auto *svc : services_) {
@@ -24,7 +26,7 @@ void ServiceRegistry::Register(SubService *s) {
       svc->Register(s);
     };
   };
-};
+}
 
 void ServiceRegistry::Unregister(SubService *s) {
   for (auto *svc : services_) {
@@ -32,4 +34,4 @@ void ServiceRegistry::Unregister(SubService *s) {
       svc->Unregister(s);
     };
   };
-};
+}

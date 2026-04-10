@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SERVICE_REGISTRY_H_
@@ -22,7 +24,9 @@ public:
   void Register(Service *);
   void Register(SubService *);
   void Unregister(SubService *);
-  etl::vector<Service *, MaxServices> &Services() { return services_; }
+  etl::vector<Service *, MaxServices> &Services() {
+    return services_;
+  }
 
 protected:
   etl::vector<Service *, MaxServices> services_;

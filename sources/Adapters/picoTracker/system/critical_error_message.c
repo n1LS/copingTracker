@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "critical_error_message.h"
@@ -14,8 +16,7 @@
 
 // show this message and basically crash, so only for critical errors where
 // we need to show user a message and cannot continue until a reboot
-void critical_error_message(const char *message, int guruId,
-                            bool (*externalCallback)(void)) {
+void critical_error_message(const char *message, int guruId, bool (*externalCallback)(void)) {
   chargfx_init();
 
   chargfx_set_font_index(0);
@@ -55,10 +56,8 @@ void critical_error_message(const char *message, int guruId,
         if (y == 0 || y == 2) {
           char c = GLYPH(char_border_double_horizontal_s);
           if (x == 0 || x == 31) {
-            c = (x == 0) ? (y == 0 ? GLYPH(char_border_double_topLeft_s)
-                                   : GLYPH(char_border_double_bottomLeft_s))
-                         : (y == 0 ? GLYPH(char_border_double_topRight_s)
-                                   : GLYPH(char_border_double_bottomRight_s));
+            c = (x == 0) ? (y == 0 ? GLYPH(char_border_double_topLeft_s) : GLYPH(char_border_double_bottomLeft_s))
+                         : (y == 0 ? GLYPH(char_border_double_topRight_s) : GLYPH(char_border_double_bottomRight_s));
           }
           chargfx_putc(border ? c : ' ', false);
         } else {

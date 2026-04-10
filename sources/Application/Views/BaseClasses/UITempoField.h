@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _UI_TEMPOFIELD_H_
@@ -15,8 +17,8 @@
 
 class UITempoField : public UIIntVarField, public I_Observer {
 public:
-  UITempoField(FourCC action, const GUIPoint &position, Variable &variable,
-               const char *format, int min, int max, int xOffset, int yOffset);
+  UITempoField(FourCC action, const GUIPoint &position, Variable &variable, const char *format, int min, int max,
+               int xOffset, int yOffset);
   virtual void OnEditClick();
   void Update(Observable &, I_ObservableData *);
   void ProcessArrow(unsigned short mask);

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Config.h"
@@ -33,14 +35,8 @@ static const char *midiDeviceList[MIDI_DEVICE_LEN] = {"OFF", "TRS", "USB",
 static const char *midiSendSync[2] = {"Off", "Send"};
 static const char *midiClockSyncOptions[2] = {"Internal", "External"};
 static const char *remoteUIOnOff[2] = {"Off", "On"};
-#ifdef ADV
-static const char *importResamplerOptions[] = {"None", "Linear", "Sinc",
-                                               "Sinc Best"};
-static constexpr int kImportResamplerOptionCount = 4;
-#else
 static const char *importResamplerOptions[] = {"None", "Linear"};
 static constexpr int kImportResamplerOptionCount = 2;
-#endif
 
 // NOTE: these MUST match up to the RecordSource enum in record.h (of all
 // adapters) also note we *dont* show "All Off" as a UI option for now
@@ -61,11 +57,7 @@ constexpr int DEFAULT_REC_SOURCE = 0x0;
 constexpr int DEFAULT_RECORD_LINE_GAIN_DB = 0;
 constexpr int DEFAULT_RECORD_MIC_GAIN_DB = 0;
 constexpr int DEFAULT_OUTPUT_VOLUME = 40;
-#ifdef ADV
-constexpr int DEFAULT_IMPORT_RESAMPLER = 2; // Sinc by default
-#else
 constexpr int DEFAULT_IMPORT_RESAMPLER = 0; // default for picoTracker is none (as original)
-#endif
 
 // Use a struct to define parameter information
 struct ConfigParam {
@@ -186,8 +178,8 @@ static const ConfigParam configParams[] = {
     {"UIFONT",
      {.intValue = ThemeConstants::DEFAULT_UIFONT},
      FourCC::VarUIFont,
-     ThemeConstants::FONT_NAMES,
-     ThemeConstants::FONT_COUNT,
+     ThemeConstants::THEME_FONT_NAMES,
+     ThemeConstants::THEME_FONT_COUNT,
      false},
 
     // {"RESERVED1", ThemeConstants::DEFAULT_RESERVED1,
@@ -244,7 +236,7 @@ static const ConfigParam configParams[] = {
      nullptr,
      0,
      false},
-};
+  };
 
 Config::Config()
     : VariableContainer(&variables_),
@@ -278,8 +270,8 @@ Config::Config()
       remoteUI_(FourCC::VarRemoteUI, remoteUIOnOff, 2, DEFAULT_REMOTEUI),
       importResampler_(FourCC::VarImportResampler, importResamplerOptions,
                        kImportResamplerOptionCount, DEFAULT_IMPORT_RESAMPLER),
-      uiFont_(FourCC::VarUIFont, ThemeConstants::FONT_NAMES,
-              ThemeConstants::FONT_COUNT, ThemeConstants::DEFAULT_UIFONT),
+      uiFont_(FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES,
+              ThemeConstants::THEME_FONT_COUNT, ThemeConstants::DEFAULT_UIFONT),
       themeName_(FourCC::VarThemeName, ThemeConstants::DEFAULT_THEME_NAME),
       backlightLevel_(FourCC::VarBacklightLevel, DEFAULT_BACKLIGHT_LEVEL),
       outputVolume_(FourCC::VarOutputVolume, DEFAULT_OUTPUT_VOLUME),
@@ -616,7 +608,7 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
 
   printer->CloseElement();
   Trace::Log("CONFIG", "Saved config");
-};
+}
 
 bool Config::LoadTheme(PersistencyDocument *doc) {
   Trace::Log("CONFIG", "Loading theme content from XML");
@@ -669,7 +661,7 @@ int Config::GetValue(const char *key) {
     Trace::Log("CONFIG", "No value for requested key:%s", key);
   }
   return v ? v->GetInt() : 0;
-};
+}
 
 bool Config::ExportTheme(const char *themeName, bool overwrite) {
   auto fs = FileSystem::GetInstance();

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _DEVICE_VIEW_H_
@@ -25,8 +27,8 @@ public:
 
   virtual void ProcessButtonMask(unsigned short mask, bool pressed);
   virtual void DrawView();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int){};
-  virtual void OnFocus(){};
+  virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
+  virtual void OnFocus() {};
   void OnFocusLost() override;
 
   // Observer for action callback
@@ -38,7 +40,7 @@ private:
   void addSwatchField(ColorDefinition color, GUIPoint position);
 
   etl::vector<UIIntVarField, 7> intVarField_;
-  etl::vector<UIActionField, 2> actionField_;
+  etl::vector<UIActionField, 3> actionField_;
   etl::vector<UIBigHexVarField, 16> bigHexVarField_;
   etl::vector<UISwatchField, 16> swatchField_;
   bool configDirty_ = false;

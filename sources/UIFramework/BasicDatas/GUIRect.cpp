@@ -3,30 +3,33 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "GUIRect.h"
 
 // Constructor: specifies top,lef,bottom and right coordinates
 
-GUIRect::GUIRect(long x0, long y0, long x1, long y1)
-    : _topLeft(x0, y0), _bottomRight(x1, y1) {}
+GUIRect::GUIRect(long x0, long y0, long x1, long y1) : _topLeft(x0, y0), _bottomRight(x1, y1) {
+}
 
-GUIRect::GUIRect(GUIPoint &topLeft, GUIPoint &bottomRight)
-    : _topLeft(topLeft), _bottomRight(bottomRight) {}
+GUIRect::GUIRect(GUIPoint &topLeft, GUIPoint &bottomRight) : _topLeft(topLeft), _bottomRight(bottomRight) {
+}
 
 // Returns true if the point is contained inside the specified rectangle
 
 bool GUIRect::Contains(GUIPoint &p) {
-  return p._x >= _topLeft._x && p._x <= _bottomRight._x &&
-         p._y >= _topLeft._y && p._y <= _bottomRight._y;
+  return p._x >= _topLeft._x && p._x <= _bottomRight._x && p._y >= _topLeft._y && p._y <= _bottomRight._y;
 }
 
 // Returns the topLeft corner of the rectangle
 
-GUIPoint GUIRect::GetPosition() { return _topLeft; }
+GUIPoint GUIRect::GetPosition() {
+  return _topLeft;
+}
 
 // Moves the rectangle to the specified topLeft point. The rectangle keeps
 // the same size

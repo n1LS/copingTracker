@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Table.h"
@@ -25,7 +27,7 @@ void Table::Reset() {
     cmd3_[i] = FourCC::InstrumentCommandNone;
     param3_[i] = 0;
   }
-};
+}
 
 void Table::Copy(const Table &other) {
   for (int i = 0; i < TABLE_STEPS; i++) {
@@ -36,7 +38,7 @@ void Table::Copy(const Table &other) {
     cmd3_[i] = *(other.cmd3_ + i);
     param3_[i] = *(other.param3_ + i);
   }
-};
+}
 
 bool Table::IsEmpty() {
 
@@ -74,7 +76,7 @@ void TableHolder::Reset() {
   for (int i = 0; i < TABLE_COUNT; i++) {
     allocation_[i] = false;
   };
-};
+}
 
 Table &TableHolder::GetTable(int table) {
   NAssert((table >= 0) && (table < TABLE_COUNT));
@@ -101,7 +103,7 @@ void TableHolder::SaveContent(tinyxml2::XMLPrinter *printer) {
     }
     printer->CloseElement();
   }
-};
+}
 
 void TableHolder::RestoreContent(PersistencyDocument *doc) {
 
@@ -158,7 +160,7 @@ void TableHolder::SetUsed(int i) {
     NAssert(i < 128);
   }
   allocation_[i] = true;
-};
+}
 
 int TableHolder::GetNext() {
   for (int i = 0; i < TABLE_COUNT; i++) {
@@ -170,7 +172,7 @@ int TableHolder::GetNext() {
     };
   };
   return NO_MORE_TABLE;
-};
+}
 
 int TableHolder::Clone(int table) {
   int target = GetNext();
@@ -178,4 +180,4 @@ int TableHolder::Clone(int table) {
     table_[target].Copy(table_[table]);
   };
   return target;
-};
+}

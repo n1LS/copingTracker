@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "WatchedVariable.h"
@@ -13,14 +15,13 @@ bool WatchedVariable::enabled_ = true;
 
 WatchedVariable::WatchedVariable(FourCC id, int value) : Variable(id, value) {
   updating_ = false;
-};
+}
 
 WatchedVariable::WatchedVariable(FourCC id, bool value) : Variable(id, value) {
   updating_ = false;
-};
+}
 
-WatchedVariable::WatchedVariable(FourCC id, const char *const *list, int size,
-                                 int index)
+WatchedVariable::WatchedVariable(FourCC id, const char *const *list, int size, int index)
     : Variable(id, list, size, index) {
   updating_ = false;
 }
@@ -34,8 +35,12 @@ void WatchedVariable::onChange() {
     NotifyObservers((I_ObservableData *)(uintptr_t)id_);
     updating_ = false;
   }
-};
+}
 
-void WatchedVariable::Enable() { enabled_ = true; }
+void WatchedVariable::Enable() {
+  enabled_ = true;
+}
 
-void WatchedVariable::Disable() { enabled_ = false; }
+void WatchedVariable::Disable() {
+  enabled_ = false;
+}

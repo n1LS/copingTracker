@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _TABLE_VIEW_H_
@@ -79,8 +81,7 @@ private:
 
   // Flags to track which UI elements need updating
   // These prevent core1 from directly updating the UI
-  bool needsUIUpdate_ =
-      false; // Single flag for all UI updates (notes, VU meter, positions)
+  bool needsUIUpdate_ = false; // Single flag for all UI updates (notes, VU meter, positions)
 
   // Keep these for backward compatibility
   bool needsPlayPositionUpdate_ = false;

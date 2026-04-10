@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "System/Console/Trace.h"
@@ -20,4 +22,4 @@ void __NAssert(const char *exp, const char *file, unsigned line) {
   Trace::Error("  >> file [%s]", filestr);
   Trace::Error("  >> line %d", line);
   assert(0);
-};
+}

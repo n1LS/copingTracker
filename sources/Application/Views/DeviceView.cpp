@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "DeviceView.h"
@@ -30,7 +32,14 @@ static void BootselCallback(View &v, ModalView &dialog) {
     System *sys = System::GetInstance();
     sys->SystemBootloader();
   }
-};
+}
+
+static void MassStorageCallback(View &v, ModalView &dialog) {
+  if (dialog.GetReturnCode() == MBL_YES) {
+    System *sys = System::GetInstance();
+    sys->SystemMassStorage();
+  }
+}
 
 DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
@@ -52,13 +61,11 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-#ifndef ADV
   position._y += 1;
   v = config->FindVariable(FourCC::VarLineOut);
   intVarField_.emplace_back(position, *v, "Line Out Mode: %s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
-#endif
 
   position._y += 1;
   v = config->FindVariable(FourCC::VarRemoteUI);
@@ -68,41 +75,37 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   position._y += 1;
   v = config->FindVariable(FourCC::VarImportResampler);
-  intVarField_.emplace_back(position, *v, "Import resampler: %s", 0,
-                            v->GetListSize() - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Import resampler: %s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position._y += 1;
   v = config->FindVariable(FourCC::VarBacklightLevel);
   // MIN brightness is 0xF (15)
-  intVarField_.emplace_back(position, *v, "Display brightness: %2.2X", 0xF,
-                            0xFF, 1, 16);
+  intVarField_.emplace_back(position, *v, "Display brightness: %2.2X", 0xF, 0xFF, 1, 16);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-#ifdef ADV
-  position._y += 1;
-  v = config->FindVariable(FourCC::VarOutputVolume);
-  intVarField_.emplace_back(position, *v, "Output volume: %3d", 0, 100, 1, 5);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  position._y += 2;
+  actionField_.emplace_back("Theme settings", FourCC::ActionShowTheme, position);
+  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
+  (*actionField_.rbegin()).AddObserver(*this);
+
+  position._y += 2;
+  actionField_.emplace_back("Update firmware", FourCC::ActionBootSelect, position);
+  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
+  (*actionField_.rbegin()).AddObserver(*this);
+
+#ifndef ADV
+  position._y += 2;
+  actionField_.emplace_back("USB Storage", FourCC::ActionMassStorage, position);
+  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
+  (*actionField_.rbegin()).AddObserver(*this);
 #endif
-
-  position._y += 2;
-  actionField_.emplace_back("Theme settings", FourCC::ActionShowTheme,
-                            position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
-
-  position._y += 2;
-  actionField_.emplace_back("Update firmware", FourCC::ActionBootSelect,
-                            position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
 }
 
-DeviceView::~DeviceView() {}
+DeviceView::~DeviceView() {
+}
 
 void DeviceView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
@@ -129,7 +132,7 @@ void DeviceView::ProcessButtonMask(unsigned short mask, bool pressed) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   };
-};
+}
 
 void DeviceView::DrawView() {
 
@@ -147,33 +150,16 @@ void DeviceView::DrawView() {
 
   FieldView::Redraw();
 
-#ifdef ADV
-  // Draw battery health
-  pos._x = SCREEN_MAP_WIDTH + 1;
-  pos._y = 21;
-  SetColor(CD_NORMAL);
-  DrawString(pos._x, pos._y, "Battery health:", props);
-
-  pos._x += strlen("Battery health") + 1;
-  int16_t soh = battery_health();
-  char sohText[5];
-  (soh < 0) ? npf_snprintf(sohText, sizeof(sohText), "%s", "NA")
-            : npf_snprintf(sohText, sizeof(sohText), "%i%%", soh);
-  SetColor(CD_NORMAL);
-  DrawString(pos._x, pos._y, sohText, props);
-#endif
-
   SetColor(CD_NORMAL);
   drawMap();
 
   pos._x = SCREEN_MAP_WIDTH + 1;
   pos._y = SCREEN_HEIGHT - 1;
 
-  npf_snprintf(projectString, sizeof(projectString), "Build %s%s_%s",
-               PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
+  npf_snprintf(projectString, sizeof(projectString), "Build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
   SetColor(CD_NORMAL);
   DrawString(pos._x, pos._y, projectString, props);
-};
+}
 
 void DeviceView::Update(Observable &, I_ObservableData *data) {
   if (!hasFocus_) {
@@ -204,9 +190,18 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   switch (fourcc) {
   case FourCC::ActionBootSelect: {
     if (!player->IsRunning()) {
-      MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?",
-                                          MBBF_YES | MBBF_NO);
+      MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
       DoModal(mb, ModalViewCallback::create<&BootselCallback>());
+    } else {
+      MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
+      DoModal(mb);
+    }
+    return;
+  }
+  case FourCC::ActionMassStorage: {
+    if (!player->IsRunning()) {
+      MessageBox *mb = MessageBox::Create(*this, "Reboot to USB storage?", MBBF_YES | MBBF_NO);
+      DoModal(mb, ModalViewCallback::create<&MassStorageCallback>());
     } else {
       MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
       DoModal(mb);
@@ -221,13 +216,11 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
     return;
   }
   case FourCC::VarLineOut: {
-    MessageBox *mb =
-        MessageBox::Create(*this, "Reboot for new Audio Level!", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Reboot for new Audio Level!", MBBF_OK);
     DoModal(mb);
     Config *config = Config::GetInstance();
     if (!config->Save()) {
-      Trace::Error("DEVICEVIEW",
-                   "Failed to save device config after line out change");
+      Trace::Error("DEVICEVIEW", "Failed to save device config after line out change");
       configDirty_ = true;
     } else {
       Trace::Log("DEVICEVIEW", "Saved device config after line out change");
@@ -262,7 +255,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   };
   focus->Draw(w_);
   isDirty_ = true;
-};
+}
 
 void DeviceView::addSwatchField(ColorDefinition color, GUIPoint position) {
   position._x -= 5;

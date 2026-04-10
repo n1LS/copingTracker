@@ -128,8 +128,7 @@
 #define char_border_single_verticalRight_s "\xC3"
 #define char_border_single_cross_s "\xC5"
 
-#define char_line_2_s                                                          \
-  char_border_single_horizontal_s char_border_single_horizontal_s
+#define char_line_2_s char_border_single_horizontal_s char_border_single_horizontal_s
 #define char_line_3_s char_line_2_s char_border_single_horizontal_s
 #define char_line_4_s char_line_3_s char_border_single_horizontal_s
 #define char_line_5_s char_line_4_s char_border_single_horizontal_s
@@ -161,39 +160,25 @@
 #define char_logo_xiponics_5_s "\xD6"
 #define char_logo_xiponics_6_s "\xD7"
 
-#define char_logo_string_s                                                     \
-  char_logo_x_s char_logo_xiponics_0_s char_logo_xiponics_1_s                  \
-      char_logo_xiponics_2_s char_logo_xiponics_3_s char_logo_xiponics_4_s     \
-          char_logo_xiponics_5_s char_logo_xiponics_6_s
+#define char_logo_string_s                                                                                             \
+  char_logo_x_s char_logo_xiponics_0_s char_logo_xiponics_1_s char_logo_xiponics_2_s char_logo_xiponics_3_s            \
+      char_logo_xiponics_4_s char_logo_xiponics_5_s char_logo_xiponics_6_s
 
-#define string_battery_charging                                                \
-  char_battery_left_s char_battery_charging1_s char_battery_charging2_s        \
-      char_battery_right_s
-#define string_battery_100_percent                                             \
-  char_battery_left_s char_battery_full_s char_battery_full_s                  \
-      char_battery_right_s
-#define string_battery_75_percent                                              \
-  char_battery_left_s char_battery_full_s char_battery_half_s                  \
-      char_battery_right_s
-#define string_battery_50_percent                                              \
-  char_battery_left_s char_battery_full_s char_battery_empty_s                 \
-      char_battery_right_s
-#define string_battery_25_percent                                              \
-  char_battery_left_s char_battery_half_s char_battery_empty_s                 \
-      char_battery_right_s
-#define string_battery_0_percent                                               \
-  char_battery_left_s char_battery_empty_s char_battery_empty_s                \
-      char_battery_right_s
+#define string_battery_charging                                                                                        \
+  char_battery_left_s char_battery_charging1_s char_battery_charging2_s char_battery_right_s
+#define string_battery_100_percent char_battery_left_s char_battery_full_s char_battery_full_s char_battery_right_s
+#define string_battery_75_percent char_battery_left_s char_battery_full_s char_battery_half_s char_battery_right_s
+#define string_battery_50_percent char_battery_left_s char_battery_full_s char_battery_empty_s char_battery_right_s
+#define string_battery_25_percent char_battery_left_s char_battery_half_s char_battery_empty_s char_battery_right_s
+#define string_battery_0_percent char_battery_left_s char_battery_empty_s char_battery_empty_s char_battery_right_s
 
 // Array of bargraph characters for fast lookup
-static const char *const char_bargraph_lookup[] = {
-    char_bargraph_bar0_s, char_bargraph_bar1_s, char_bargraph_bar2_s,
-    char_bargraph_bar3_s, char_bargraph_bar4_s, char_bargraph_bar5_s,
-    char_bargraph_bar6_s, char_bargraph_bar7_s, char_bargraph_bar8_s,
-    char_bargraph_bar9_s, char_bargraph_bar10_s};
+static const char *const char_bargraph_lookup[] = {char_bargraph_bar0_s, char_bargraph_bar1_s, char_bargraph_bar2_s,
+                                                   char_bargraph_bar3_s, char_bargraph_bar4_s, char_bargraph_bar5_s,
+                                                   char_bargraph_bar6_s, char_bargraph_bar7_s, char_bargraph_bar8_s,
+                                                   char_bargraph_bar9_s, char_bargraph_bar10_s};
 
-#define char_bargraph_s(x)                                                     \
-  (char_bargraph_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
+#define char_bargraph_s(x) (char_bargraph_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
 
 // progress bar parts
 #define char_propgress_bar_0_s "\xEC"

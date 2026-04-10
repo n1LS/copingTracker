@@ -3,21 +3,20 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "TextInputModalView.h"
 #include "Application/AppWindow.h"
 #include "MessageBox.h" // Include for button constants
 
-TextInputModalView::TextInputModalView(
-    View &view, const char *title, const char *prompt, int btnFlags,
-    etl::string<MAX_TEXT_INPUT_LENGTH> defaultValue)
-    : ModalView(view), title_(title), prompt_(prompt),
-      textVariable_(FourCC::ActionEdit, defaultValue.c_str()),
-      textFieldPos_(GetAnchor()), textField_(textVariable_, textFieldPos_, "",
-                                             FourCC::ActionEdit, defaultValue),
+TextInputModalView::TextInputModalView(View &view, const char *title, const char *prompt, int btnFlags,
+                                       etl::string<MAX_TEXT_INPUT_LENGTH> defaultValue)
+    : ModalView(view), title_(title), prompt_(prompt), textVariable_(FourCC::ActionEdit, defaultValue.c_str()),
+      textFieldPos_(GetAnchor()), textField_(textVariable_, textFieldPos_, "", FourCC::ActionEdit, defaultValue),
       focus_(nullptr), editingText_(true) {
 
   buttonCount_ = 0;
@@ -45,7 +44,8 @@ TextInputModalView::TextInputModalView(
   SetFocus(&textField_);
 }
 
-TextInputModalView::~TextInputModalView() {}
+TextInputModalView::~TextInputModalView() {
+}
 
 void TextInputModalView::DrawView() {
   // Calculate window size based on title and prompt
@@ -98,7 +98,8 @@ void TextInputModalView::DrawView() {
   editingText_ = (focus_ == &textField_);
 }
 
-void TextInputModalView::OnFocus() {}
+void TextInputModalView::OnFocus() {
+}
 
 void TextInputModalView::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (!pressed) {

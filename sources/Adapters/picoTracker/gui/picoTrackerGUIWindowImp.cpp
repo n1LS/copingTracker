@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerGUIWindowImp.h"
@@ -38,8 +40,7 @@ picoTrackerGUIWindowImp::picoTrackerGUIWindowImp(GUICreateWindowParams &p) {
 
   Config *config = Config::GetInstance();
 
-  auto remoteUIVar =
-      (WatchedVariable *)config->FindVariable(FourCC::VarRemoteUI);
+  auto remoteUIVar = (WatchedVariable *)config->FindVariable(FourCC::VarRemoteUI);
 
   // register to receive updates to remoteui setting
   remoteUIVar->AddObserver(*this);
@@ -56,7 +57,8 @@ picoTrackerGUIWindowImp::picoTrackerGUIWindowImp(GUICreateWindowParams &p) {
   }
 };
 
-picoTrackerGUIWindowImp::~picoTrackerGUIWindowImp() {}
+picoTrackerGUIWindowImp::~picoTrackerGUIWindowImp() {
+}
 
 void picoTrackerGUIWindowImp::SendFont(uint8_t uifontIndex) {
   char remoteUIBuffer[3];
@@ -64,33 +66,40 @@ void picoTrackerGUIWindowImp::SendFont(uint8_t uifontIndex) {
   sendToUSBCDC(remoteUIBuffer, 3);
 }
 
-void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos,
-                                       const GUITextProperties &p) {
+void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &p) {
   //  Trace::Debug("Draw char \"%c\" at pos x:%ld (%ld), y:%ld (%ld) - invert:
   //  %d", c, pos._x, pos._x / 8, pos._y, pos._y / 8, p.invert_);
-
-  uint8_t x = pos._x / 8;
-  uint8_t y = pos._y / 8;
-  chargfx_set_cursor(x, y);
+  chargfx_set_cursor(pos._x, pos._y);
   chargfx_putc(c, p.invert_);
   if (remoteUIEnabled_) {
     char remoteUIBuffer[6];
-    remoteUIDrawCharCommand(c, x, y, p.invert_, remoteUIBuffer);
+    remoteUIDrawCharCommand(c, pos._x, pos._y, p.invert_, remoteUIBuffer);
     sendToUSBCDC(remoteUIBuffer, 6);
+  }
+}
+
+void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props,
+                                         bool overlay) {
+  (void)overlay;
+  if (!string) {
+    return;
+  }
+
+  GUIPoint drawPos = pos;
+  for (const char *current = string; *current; ++current, ++drawPos._x) {
+    DrawChar(*current, drawPos, props);
   }
 }
 
 void picoTrackerGUIWindowImp::DrawRect(GUIRect &r) {
   // This is the local drawing command for the device's own screen.
-  chargfx_fill_rect(lastRemoteColorIdx, r.Left(), r.Top(), r.Width(),
-                    r.Height());
+  chargfx_fill_rect(lastRemoteColorIdx, r.Left(), r.Top(), r.Width(), r.Height());
   if (remoteUIEnabled_) {
     // Now, send the DrawRect command with full byte-escaping.
     // Worst-case buffer: 2 (header) + 9 payload bytes * 2 (if all are escaped)
     // = 20  bytes.
     char remoteUIBuffer[20];
-    auto bufferIndex = remoteUIDrawRectCommand(r.Left(), r.Top(), r.Width(),
-                                               r.Height(), remoteUIBuffer);
+    auto bufferIndex = remoteUIDrawRectCommand(r.Left(), r.Top(), r.Width(), r.Height(), remoteUIBuffer);
     sendToUSBCDC(remoteUIBuffer, bufferIndex);
   }
 };
@@ -143,18 +152,21 @@ void picoTrackerGUIWindowImp::SetColor(GUIColor &c) {
     // are escaped. Header (2) + 3 color components * 2 bytes/escaped_component
     // = 8 bytes.
     char remoteUIBuffer[8];
-    auto bufferIndex =
-        remoteUISetColorCommand(c._r, c._g, c._b, remoteUIBuffer);
+    auto bufferIndex = remoteUISetColorCommand(c._r, c._g, c._b, remoteUIBuffer);
     sendToUSBCDC(remoteUIBuffer, bufferIndex);
     // Trace::Debug("sent set color: %d,%d,%d", c._r, c._g, c._b);
   }
 };
 
-void picoTrackerGUIWindowImp::Lock(){};
+void picoTrackerGUIWindowImp::Lock() {
+}
 
-void picoTrackerGUIWindowImp::Unlock(){};
+void picoTrackerGUIWindowImp::Unlock() {
+}
 
-void picoTrackerGUIWindowImp::Flush() { chargfx_draw_changed(); };
+void picoTrackerGUIWindowImp::Flush() {
+  chargfx_draw_changed();
+}
 
 void picoTrackerGUIWindowImp::Invalidate() {
   picoTrackerEventQueue::GetInstance()->push(picoTrackerEvent(PICO_FLUSH));
@@ -192,8 +204,7 @@ void picoTrackerGUIWindowImp::ProcessEvent(picoTrackerEvent &event) {
   }
 }
 
-void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask,
-                                                  uint16_t buttonMask) {
+void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t buttonMask) {
   int e = 1;
   System *system = System::GetInstance();
   unsigned long now = system->GetClock();

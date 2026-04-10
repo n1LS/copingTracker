@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _I_GUIGRAPHICS_H_
@@ -19,14 +21,12 @@
 
 class I_GUIGraphics {
 public:
-  virtual ~I_GUIGraphics(){};
+  virtual ~I_GUIGraphics() {};
   virtual void Clear(GUIColor &, bool overlay = false) = 0;
   virtual void SetColor(GUIColor &) = 0;
   virtual void ClearTextRect(GUIRect &) = 0;
-  virtual void DrawString(const char *string, const GUIPoint &pos,
-                          const GUITextProperties &p, bool overlay) = 0;
-  virtual void DrawChar(const char c, const GUIPoint &pos,
-                        const GUITextProperties &props) = 0;
+  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &p, bool overlay) = 0;
+  virtual void DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props) = 0;
 
   virtual GUIRect GetRect() = 0;
   virtual void Invalidate() = 0;

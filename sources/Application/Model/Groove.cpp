@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Groove.h"
@@ -13,7 +15,7 @@ unsigned char Groove::data_[MAX_GROOVES][16];
 
 Groove::Groove() : Persistent("GROOVES") { Clear(); };
 
-Groove::~Groove(){};
+Groove::~Groove() {};
 
 void Groove::Clear() {
   // Init all grooves with basic datas
@@ -29,7 +31,7 @@ void Groove::Clear() {
     channelGroove_[i].position_ = 0;
     channelGroove_[i].ticks_ = data_[0][0];
   };
-};
+}
 // Resest groove data at song startup
 
 void Groove::Reset() {
@@ -39,17 +41,17 @@ void Groove::Reset() {
     c.position_ = 0;
     c.ticks_ = data_[c.groove_][c.position_];
   }
-};
+}
 
 void Groove::GetChannelData(int channel, int *groove, int *position) {
   ChannelGroove &c = channelGroove_[channel];
   *groove = c.groove_;
   *position = c.position_;
-};
+}
 
 void Groove::SaveContent(tinyxml2::XMLPrinter *printer) {
   saveHexBuffer(printer, "DATA", (unsigned char *)data_, 16 * MAX_GROOVES);
-};
+}
 
 void Groove::RestoreContent(PersistencyDocument *doc) {
   if (doc->FirstChild()) {
@@ -63,7 +65,7 @@ void Groove::Trigger() {
     ChannelGroove &c = channelGroove_[i];
     UpdateGroove(c, false);
   }
-};
+}
 
 bool Groove::UpdateGroove(ChannelGroove &c, bool reverse) {
 
@@ -107,7 +109,7 @@ void Groove::SetGroove(int channel, int groove) {
   channelGroove_[channel].position_ = 0;
   channelGroove_[channel].ticks_ =
       data_[channelGroove_[channel].groove_][channelGroove_[channel].position_];
-};
+}
 
 // Returns true if, according to current groove setting it is time to go
 // to the next sequencing step
@@ -115,6 +117,6 @@ void Groove::SetGroove(int channel, int groove) {
 bool Groove::TriggerChannel(int i) {
   ChannelGroove &c = channelGroove_[i];
   return ((c.ticks_) % (data_[c.groove_][c.position_]) == 0);
-};
+}
 
 unsigned char *Groove::GetGrooveData(int groove) { return data_[groove]; };

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 // fixed point arithmatic
@@ -35,9 +37,13 @@
 
 typedef signed int fixed;
 
-inline fixed fl2fp(float val) { return (fixed)(val * FIXED_SCALE); }
+inline fixed fl2fp(float val) {
+  return (fixed)(val * FIXED_SCALE);
+}
 
-inline float fp2fl(fixed val) { return ((float)val) / FIXED_SCALE; }
+inline float fp2fl(fixed val) {
+  return ((float)val) / FIXED_SCALE;
+}
 
 #else // uses float
 

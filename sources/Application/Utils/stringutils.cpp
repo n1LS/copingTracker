@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include <cstring>
@@ -12,20 +14,18 @@
 
 char getNext(char c, bool reverse) {
   // Valid characters in order
-  const char validChars[] =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._";
+  const char validChars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._";
   const int numChars = sizeof(validChars) - 1; // Exclude null terminator
 
   // Find the index of the current character
   for (int i = 0; i < numChars; ++i) {
     if (validChars[i] == c) {
       // Calculate next index based on direction (forward or reverse)
-      int nextIndex =
-          reverse ? (i - 1 + numChars) % numChars : (i + 1) % numChars;
+      int nextIndex = reverse ? (i - 1 + numChars) % numChars : (i + 1) % numChars;
       return validChars[nextIndex];
     }
   }
 
   // If character is not valid, return the first valid character in the list
   return reverse ? validChars[numChars - 1] : validChars[0];
-};
+}

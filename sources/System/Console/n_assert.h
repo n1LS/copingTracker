@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _N_ASSERT_H_
@@ -19,8 +21,8 @@ void __NAssert(const char *, const char *, unsigned);
 
 #define NCodeMissing NAssert(0);
 #define NInvalid NAssert(0);
-#define NImplies(a, b)                                                         \
-  if (a)                                                                       \
+#define NImplies(a, b)                                                                                                 \
+  if (a)                                                                                                               \
     NAssert(b);
 
 #endif

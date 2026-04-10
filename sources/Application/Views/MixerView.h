@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MIXER_VIEW_H_
@@ -29,8 +31,8 @@ public:
 protected:
   void processNormalButtonMask(unsigned int mask);
   void processSelectionButtonMask(unsigned int mask);
-  void onStart(){};
-  void onStop(){};
+  void onStart() {};
+  void onStop() {};
   void updateCursor(int dx, int dy);
 
   void unMuteAll();
@@ -39,9 +41,8 @@ protected:
   void togglePlay();
 
 private:
-  void drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT> *levels,
-                           Player *player, GUITextProperties props,
-                           bool forceRedraw = false);
+  void drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT> *levels, Player *player,
+                           GUITextProperties props, bool forceRedraw = false);
   void initChannelVolumeFields();
 
   // Channel volume UI fields

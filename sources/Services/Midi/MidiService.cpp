@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "MidiService.h"
@@ -27,9 +29,11 @@ MidiService::MidiService() : activeMidiChannelMask_(0), sendSync_(true) {
     queues_[i].clear();
   }
   sendSync_ = Config::GetInstance()->GetValue("MIDISYNC") > 0;
-};
+}
 
-MidiService::~MidiService() { Close(); };
+MidiService::~MidiService() {
+  Close();
+}
 
 bool MidiService::Init() {
   outList_.empty();
@@ -51,38 +55,40 @@ bool MidiService::Init() {
   }
 
   auto config = Config::GetInstance();
-  auto midiDevVar =
-      (WatchedVariable *)config->FindVariable(FourCC::VarMidiDevice);
+  auto midiDevVar = (WatchedVariable *)config->FindVariable(FourCC::VarMidiDevice);
   midiDevVar->AddObserver(*this);
 
   auto activeDeviceConfig = midiDevVar->GetInt();
   updateActiveDevicesList(activeDeviceConfig);
 
-  auto midiSyncVar =
-      (WatchedVariable *)config->FindVariable(FourCC::VarMidiSync);
+  auto midiSyncVar = (WatchedVariable *)config->FindVariable(FourCC::VarMidiSync);
   midiSyncVar->AddObserver(*this);
   auto sync = midiSyncVar->GetInt();
   sendSync_ = sync != 0;
 
   return true;
-};
+}
 
-void MidiService::Close() { Stop(); };
+void MidiService::Close() {
+  Stop();
+}
 
 bool MidiService::Start() {
   currentPlayQueue_ = 0;
   currentOutQueue_ = 0;
   return true;
-};
+}
 
-void MidiService::Stop() { stopDevice(); };
+void MidiService::Stop() {
+  stopDevice();
+}
 
 void MidiService::QueueMessage(MidiMessage &m) {
   if (!activeOutDevices_.empty()) {
     auto queue = &queues_[currentPlayQueue_];
     queue->emplace_back(m.status_, m.data1_, m.data2_);
   }
-};
+}
 
 void MidiService::Trigger() {
   AdvancePlayQueue();
@@ -128,9 +134,13 @@ void MidiService::Update(Observable &o, I_ObservableData *d) {
   }
 }
 
-void MidiService::onAudioTick() { flushOutQueue(); }
+void MidiService::onAudioTick() {
+  flushOutQueue();
+}
 
-void MidiService::Flush() { flushOutQueue(); };
+void MidiService::Flush() {
+  flushOutQueue();
+}
 
 void MidiService::OnMidiStart() {
   // Start the Player in song mode
@@ -184,13 +194,13 @@ void MidiService::startDevice() {
     auto name = dev->GetName();
     dev->Start();
   }
-};
+}
 
 void MidiService::stopDevice() {
   for (auto dev : outList_) {
     dev->Stop();
   }
-};
+}
 
 void MidiService::OnPlayerStart() {
   // Stop and restart devices to ensure clean state
@@ -203,7 +213,7 @@ void MidiService::OnPlayerStart() {
     msg.status_ = MidiMessage::MIDI_START;
     QueueMessage(msg);
   }
-};
+}
 
 void MidiService::RegisterActiveChannel(uint8_t channel) {
   activeMidiChannelMask_ |= static_cast<uint16_t>(1u << (channel & 0x0F));
@@ -211,8 +221,7 @@ void MidiService::RegisterActiveChannel(uint8_t channel) {
 
 void MidiService::OnPlayerStop() {
   for (uint8_t channel = 0; channel < 16; channel++) {
-    if ((activeMidiChannelMask_ & (static_cast<uint16_t>(1u << channel))) ==
-        0) {
+    if ((activeMidiChannelMask_ & (static_cast<uint16_t>(1u << channel))) == 0) {
       continue;
     }
     MidiMessage ccMsg;
@@ -228,4 +237,4 @@ void MidiService::OnPlayerStop() {
     msg.status_ = MidiMessage::MIDI_STOP;
     QueueMessage(msg);
   }
-};
+}

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SAMPLE_INSTRUMENT_H_
@@ -47,24 +49,24 @@ public:
   virtual bool IsInitialized();
   virtual bool IsEmpty();
 
-  virtual InstrumentType GetType() { return IT_SAMPLE; };
+  virtual InstrumentType GetType() {
+    return IT_SAMPLE;
+  };
   virtual void ProcessCommand(int channel, FourCC cc, ushort value);
   virtual int GetTable();
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
   virtual void SetTableState(TableSaveState &state);
-  etl::ilist<Variable *> *Variables() { return &variables_; };
+  etl::ilist<Variable *> *Variables() {
+    return &variables_;
+  };
 
   bool IsMulti();
 
   // Engine playback  start callback
 
   virtual void OnStart();
-#ifdef ADV
-  static constexpr size_t MaxSlices = 64;
-#else
   static constexpr size_t MaxSlices = 16;
-#endif
   static constexpr unsigned char SliceNoteBase = 48;
 
   uint32_t GetSlicePoint(size_t index) const;
@@ -104,8 +106,7 @@ private:
   etl::list<Variable *, 21> variables_;
 
   SoundSource *source_;
-  __attribute__((section(".DTCMRAM"))) static struct renderParams
-      renderParams_[SONG_CHANNEL_COUNT];
+  __attribute__((section(".DTCMRAM"))) static struct renderParams renderParams_[SONG_CHANNEL_COUNT];
   bool running_;
   bool dirty_;
   TableSaveState tableState_;
@@ -136,8 +137,7 @@ private:
 
   static bool useDirtyDownsampling_;
   bool isSliceIndexActive(size_t index) const;
-  bool shouldUseSlice(unsigned char midinote, size_t &sliceIndex,
-                      uint32_t sampleSize) const;
+  bool shouldUseSlice(unsigned char midinote, size_t &sliceIndex, uint32_t sampleSize) const;
   uint32_t computeSliceStart(size_t index, uint32_t sampleSize) const;
   uint32_t computeSliceEnd(size_t index, uint32_t sampleSize) const;
   bool hasAnySliceValue() const;

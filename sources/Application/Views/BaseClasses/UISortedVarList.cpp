@@ -3,18 +3,18 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UISortedVarList.h"
 
-UISortedVarList::UISortedVarList(const GUIPoint &position, Variable &v,
-                                 const char *format)
-    : UIIntVarField(position, v, format, 0, v.GetListSize(), 0,
-                    0 /*dummy 4 last*/) {
+UISortedVarList::UISortedVarList(const GUIPoint &position, Variable &v, const char *format)
+    : UIIntVarField(position, v, format, 0, v.GetListSize(), 0, 0 /*dummy 4 last*/) {
   NAssert(v.GetType() == Variable::CHAR_LIST);
-};
+}
 
 void UISortedVarList::ProcessArrow(unsigned short mask) {
   int value = src_.GetInt();
@@ -47,4 +47,4 @@ void UISortedVarList::ProcessArrow(unsigned short mask) {
   }
 
   src_.SetInt(value);
-};
+}

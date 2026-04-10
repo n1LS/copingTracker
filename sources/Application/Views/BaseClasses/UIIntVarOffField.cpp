@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIIntVarOffField.h"
@@ -13,10 +15,10 @@
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 
-UIIntVarOffField::UIIntVarOffField(const GUIPoint &position, Variable &v,
-                                   const char *format, int min, int max,
+UIIntVarOffField::UIIntVarOffField(const GUIPoint &position, Variable &v, const char *format, int min, int max,
                                    int xOffset, int yOffset)
-    : UIIntVarField(position, v, format, min, max, xOffset, yOffset) {}
+    : UIIntVarField(position, v, format, min, max, xOffset, yOffset) {
+}
 
 void UIIntVarOffField::ProcessArrow(unsigned short mask) {
 
@@ -56,9 +58,8 @@ void UIIntVarOffField::ProcessArrow(unsigned short mask) {
   src_.SetInt(value);
 
   SetChanged();
-  NotifyObservers(reinterpret_cast<I_ObservableData *>(
-      static_cast<uintptr_t>(src_.GetID())));
-};
+  NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(src_.GetID())));
+}
 
 void UIIntVarOffField::Draw(GUIWindow &w, int offset) {
 
@@ -78,8 +79,7 @@ void UIIntVarOffField::Draw(GUIWindow &w, int offset) {
       strcpy(format, format_);
       char *location = strchr(format, '%');
       if (location) {
-        while ((*location != 0) && (*location != 'x') && (*location != 'X') &&
-               (*location != 'd')) {
+        while ((*location != 0) && (*location != 'x') && (*location != 'X') && (*location != 'd')) {
           location++;
         }
         if (*location != 0) {
@@ -107,4 +107,4 @@ void UIIntVarOffField::Draw(GUIWindow &w, int offset) {
   } else {
     DrawLabeledField(w, position, buffer);
   }
-};
+}

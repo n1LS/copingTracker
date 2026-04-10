@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIStaticField.h"
@@ -12,10 +14,9 @@
 #include "ViewUtils.h"
 #include <string.h>
 
-UIStaticField::UIStaticField(const GUIPoint &position, const char *string)
-    : UIField(position) {
+UIStaticField::UIStaticField(const GUIPoint &position, const char *string) : UIField(position), color_(CD_NORMAL) {
   string_ = string;
-};
+}
 
 void UIStaticField::Draw(GUIWindow &w, int offset) {
 
@@ -23,10 +24,12 @@ void UIStaticField::Draw(GUIWindow &w, int offset) {
   GUIPoint position = GetPosition();
   position._y += offset;
 
-  ((AppWindow &)w).SetColor(CD_NORMAL);
+  ((AppWindow &)w).SetColor(color_);
   w.DrawString(string_, position, props);
-};
+}
 
-void UIStaticField::ProcessArrow(unsigned short mask){};
+void UIStaticField::ProcessArrow(unsigned short mask) {};
 
-bool UIStaticField::IsStatic() { return true; };
+bool UIStaticField::IsStatic() {
+  return true;
+}

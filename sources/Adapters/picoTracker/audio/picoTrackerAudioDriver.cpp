@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerAudioDriver.h"
@@ -26,15 +28,16 @@
 #include <string.h>
 
 // mini blank buffer for underrun, initialized to 0
-const char picoTrackerAudioDriver::miniBlank_[MINI_BLANK_SIZE * 2 *
-                                              sizeof(short)] = {0};
+const char picoTrackerAudioDriver::miniBlank_[MINI_BLANK_SIZE * 2 * sizeof(short)] = {0};
 
 picoTrackerAudioDriver *picoTrackerAudioDriver::instance_ = NULL;
 semaphore_t core1_audio;
 
 static volatile unsigned long picoTracker_sound_pausei, picoTracker_exit;
 
-void picoTracker_sound_pause(int yes) { picoTracker_sound_pausei = yes; }
+void picoTracker_sound_pause(int yes) {
+  picoTracker_sound_pausei = yes;
+}
 
 // This calls comes after the call to the same function name in the pico audio
 // driver
@@ -45,7 +48,9 @@ void __isr __time_critical_func(audio_i2s_dma_irq_handler)() {
   }
 }
 
-void picoTrackerAudioDriver::IRQHandler() { instance_->OnChunkDone(); }
+void picoTrackerAudioDriver::IRQHandler() {
+  instance_->OnChunkDone();
+}
 
 void AudioThread() {
   // Allow core0 to pause this core when writing to flash
@@ -69,24 +74,24 @@ void picoTrackerAudioDriver::BufferNeeded() {
   instance_->OnNewBufferNeeded();
 }
 
-picoTrackerAudioDriver::picoTrackerAudioDriver(AudioSettings &settings)
-    : AudioDriver(settings) {
+picoTrackerAudioDriver::picoTrackerAudioDriver(AudioSettings &settings) : AudioDriver(settings) {
 
   isPlaying_ = false;
   picoTracker_exit = 0;
 }
 
-picoTrackerAudioDriver::~picoTrackerAudioDriver() { picoTracker_exit = 1; }
+picoTrackerAudioDriver::~picoTrackerAudioDriver() {
+  picoTracker_exit = 1;
+}
 
 static uint16_t modified_audio_i2s_instructions[24];
 
-static struct pio_program modified_audio_i2s_program = {
-    .instructions = modified_audio_i2s_instructions,
-    .length = 24,
-    .origin = -1,
-    .pio_version = 0,
+static struct pio_program modified_audio_i2s_program = {.instructions = modified_audio_i2s_instructions,
+                                                        .length = 24,
+                                                        .origin = -1,
+                                                        .pio_version = 0,
 #if PICO_PIO_VERSION > 0
-    .used_gpio_ranges = 0x0
+                                                        .used_gpio_ranges = 0x0
 #endif
 };
 
@@ -115,8 +120,7 @@ bool picoTrackerAudioDriver::InitDriver() {
   // instructions 3 and 15 to use aka the BACKFILL_COUNT in the PIO asm code,
   // its value is 10 for default "headphones level" the matching number of
   // "backfill" number of bits required
-  memcpy(modified_audio_i2s_instructions, audio_i2s_program_instructions,
-         24 * 2);
+  memcpy(modified_audio_i2s_instructions, audio_i2s_program_instructions, 24 * 2);
 
   // ---- HP High volume
   if (audioLevel == 1) {
@@ -157,18 +161,15 @@ bool picoTrackerAudioDriver::InitDriver() {
   );
 
   // Add our own callback func to run after the i2s irq func (priority 0x80)
-  irq_set_exclusive_handler(DMA_IRQ_0 + AUDIO_DMA_IRQ,
-                            audio_i2s_dma_irq_handler);
+  irq_set_exclusive_handler(DMA_IRQ_0 + AUDIO_DMA_IRQ, audio_i2s_dma_irq_handler);
   dma_irqn_set_channel_enabled(AUDIO_DMA_IRQ, AUDIO_DMA, true);
 
   // Set PIO frequency
   uint32_t system_clock_frequency = clock_get_hz(clk_sys);
   int sample_freq = 44100;
   // This number is exactly 10000 for our 220.5MHz core freq
-  uint32_t divider =
-      system_clock_frequency * 2 / sample_freq; // avoid arithmetic overflow
-  pio_sm_set_clkdiv_int_frac(AUDIO_PIO, AUDIO_SM, divider >> 8u,
-                             divider & 0xffu);
+  uint32_t divider = system_clock_frequency * 2 / sample_freq; // avoid arithmetic overflow
+  pio_sm_set_clkdiv_int_frac(AUDIO_PIO, AUDIO_SM, divider >> 8u, divider & 0xffu);
 
   // Enable audio
   irq_set_enabled(DMA_IRQ_0 + AUDIO_DMA_IRQ, true);
@@ -180,14 +181,16 @@ bool picoTrackerAudioDriver::InitDriver() {
   sem_init(&core1_audio, 0, SOUND_BUFFER_COUNT - 1);
 
   return true;
-};
+}
 
 void picoTrackerAudioDriver::SetVolume(int v) {
   volume_ = (v <= 100) ? v : 100;
   Trace::Debug("Setting volume to %d", volume_);
-};
+}
 
-int picoTrackerAudioDriver::GetVolume() { return volume_; };
+int picoTrackerAudioDriver::GetVolume() {
+  return volume_;
+}
 
 void picoTrackerAudioDriver::CloseDriver() {
 
@@ -198,7 +201,7 @@ void picoTrackerAudioDriver::CloseDriver() {
   dma_channel_unclaim(AUDIO_DMA);
   pio_sm_unclaim(AUDIO_PIO, AUDIO_SM);
   pio_clear_instruction_memory(AUDIO_PIO);
-};
+}
 
 bool picoTrackerAudioDriver::StartDriver() {
   isPlaying_ = true;
@@ -217,12 +220,12 @@ bool picoTrackerAudioDriver::StartDriver() {
   startTime_ = millis();
 
   return true;
-};
+}
 
 void picoTrackerAudioDriver::StopDriver() {
   picoTracker_sound_pause(1);
   isPlaying_ = false;
-};
+}
 
 void picoTrackerAudioDriver::OnChunkDone() {
   if (isPlaying_) {
@@ -238,12 +241,10 @@ void picoTrackerAudioDriver::OnChunkDone() {
 
     int next = (poolPlayPosition_ + 1) % SOUND_BUFFER_COUNT;
     if (pool_[next].empty_) {
-      dma_channel_transfer_from_buffer_now(AUDIO_DMA, miniBlank_,
-                                           MINI_BLANK_SIZE);
+      dma_channel_transfer_from_buffer_now(AUDIO_DMA, miniBlank_, MINI_BLANK_SIZE);
     } else {
       poolPlayPosition_ = next;
-      dma_channel_transfer_from_buffer_now(AUDIO_DMA,
-                                           pool_[poolPlayPosition_].buffer_,
+      dma_channel_transfer_from_buffer_now(AUDIO_DMA, pool_[poolPlayPosition_].buffer_,
                                            pool_[poolPlayPosition_].size_ / 4);
     }
 
@@ -257,8 +258,8 @@ int picoTrackerAudioDriver::GetPlayedBufferPercentage() {
   // 100-(bufferSize_-bufferPos_-fragSize_)*100/(bufferSize_-fragSize_);
   // TODO: Do this right
   return 0;
-};
+}
 
 double picoTrackerAudioDriver::GetStreamTime() {
   return (millis() - startTime_) / 1000.0;
-};
+}

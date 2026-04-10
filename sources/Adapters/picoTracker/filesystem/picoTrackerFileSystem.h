@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _PICOTRACKER_FILESYSTEM_H_
@@ -25,13 +27,14 @@ class picoTrackerFile;
 class picoTrackerFileSystem : public FileSystem {
 public:
   picoTrackerFileSystem();
-  virtual ~picoTrackerFileSystem() {}
+  virtual ~picoTrackerFileSystem() {
+  }
 
   // FileSystem interface implementation
   virtual FileHandle Open(const char *name, const char *mode) override;
   virtual bool chdir(const char *path) override;
-  virtual void list(etl::ivector<int> *fileIndexes, const char *filter,
-                    bool subDirOnly, bool includeHidden = false) override;
+  virtual void list(etl::ivector<int> *fileIndexes, const char *filter, bool subDirOnly,
+                    bool includeHidden = false) override;
   virtual void getFileName(int index, char *name, int length) override;
   virtual PicoFileType getFileType(int index) override;
   virtual bool isParentRoot() override;
@@ -41,10 +44,8 @@ public:
   virtual bool exists(const char *path) override;
   virtual bool makeDir(const char *path, bool pFlag = false) override;
   virtual uint64_t getFileSize(int index) override;
-  virtual bool CopyFile(const char *srcFilename,
-                        const char *destFilename) override;
-  virtual bool MoveFile(const char *srcFilename,
-                        const char *destFilename) override;
+  virtual bool CopyFile(const char *srcFilename, const char *destFilename) override;
+  virtual bool MoveFile(const char *srcFilename, const char *destFilename) override;
   virtual bool isExFat();
 
 private:
@@ -79,9 +80,15 @@ private:
 
 // Mutex implementation for thread safety
 struct Mutex {
-  Mutex() { mutex_init(&mutex); }
-  void lock() { mutex_enter_blocking(&mutex); }
-  void unlock() { mutex_exit(&mutex); }
+  Mutex() {
+    mutex_init(&mutex);
+  }
+  void lock() {
+    mutex_enter_blocking(&mutex);
+  }
+  void unlock() {
+    mutex_exit(&mutex);
+  }
   Mutex(const Mutex &) = delete;
   Mutex &operator=(const Mutex &) = delete;
 

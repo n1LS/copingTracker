@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SYSTEM_H_
@@ -35,6 +37,7 @@ public:                                 // Override in implementation
   virtual void SystemPutChar(int c) = 0;
   virtual void SystemBootloader() = 0;
   virtual void SystemReboot() = 0;
+  virtual void SystemMassStorage() = 0;
   virtual uint32_t GetRandomNumber() = 0;
   virtual uint32_t Micros() = 0;
   virtual uint32_t Millis() = 0;

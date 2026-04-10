@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _UI_BIG_HEX_VAR_FIELD_H_
@@ -16,10 +18,9 @@
 class UIBigHexVarField : public UIIntVarField {
 
 public:
-  UIBigHexVarField(const GUIPoint &position, Variable &v, int precision,
-                   const char *format, int min, int max, int power,
-                   bool wrap = false);
-  virtual ~UIBigHexVarField(){};
+  UIBigHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min, int max,
+                   int power, bool wrap = false);
+  virtual ~UIBigHexVarField() {};
   virtual void Draw(GUIWindow &w, int offset = 0);
   virtual void ProcessArrow(unsigned short mask);
 

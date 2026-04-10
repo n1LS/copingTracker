@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerMidiInDevice.h"
@@ -44,8 +46,7 @@ void __isr __time_critical_func(midi_uart_irq_handler)() {
   }
 }
 
-picoTrackerMidiInDevice::picoTrackerMidiInDevice(const char *name)
-    : MidiInDevice(name) {
+picoTrackerMidiInDevice::picoTrackerMidiInDevice(const char *name) : MidiInDevice(name) {
   g_midiInDevice = this;
   Trace::Log("MIDI", "Created MIDI input device %s", name);
 }
@@ -68,9 +69,13 @@ void picoTrackerMidiInDevice::closeDriver() {
   Trace::Log("MIDI", "Closed MIDI input driver");
 }
 
-bool picoTrackerMidiInDevice::Start() { return startDriver(); }
+bool picoTrackerMidiInDevice::Start() {
+  return startDriver();
+}
 
-void picoTrackerMidiInDevice::Stop() { stopDriver(); }
+void picoTrackerMidiInDevice::Stop() {
+  stopDriver();
+}
 
 bool picoTrackerMidiInDevice::startDriver() {
   // Clear the queue
@@ -83,8 +88,8 @@ bool picoTrackerMidiInDevice::startDriver() {
   // Enable UART RX interrupt
   uart_set_irq_enables(MIDI_UART, true, false);
 
-  Trace::Log("MIDI", "Started MIDI input driver on UART%d (IRQ: %d, Baud: %d)",
-             MIDI_UART == uart0 ? 0 : 1, MIDI_UART_IRQ, MIDI_BAUD_RATE);
+  Trace::Log("MIDI", "Started MIDI input driver on UART%d (IRQ: %d, Baud: %d)", MIDI_UART == uart0 ? 0 : 1,
+             MIDI_UART_IRQ, MIDI_BAUD_RATE);
   return true;
 }
 

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _VARIABLE_H_
@@ -53,11 +55,12 @@ public:
   virtual bool IsModified();
 
 protected:
-  virtual void onChange(){};
+  virtual void onChange() {};
   void setStringValue(const char *value);
 
   FourCC id_;
   Type type_;
+  uint8_t listSize_ = 0;
 
   union {
     int int_;
@@ -73,12 +76,12 @@ protected:
     int index_;
   } defaultValue_;
 
+  // list_ and stringValue_ are mutually exclusive:
+  // list_ is only used when type_ == CHAR_LIST
+  // stringValue_ is only used when type_ == STRING
   union {
-    const char *const *char_;
-  } list_;
-
-  etl::istring *stringValue_ = nullptr;
-
-  uint8_t listSize_;
+    const char *const *list_;
+    etl::istring *stringValue_;
+  };
 };
 #endif

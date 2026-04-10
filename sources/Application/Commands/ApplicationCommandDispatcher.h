@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _APPLICATION_COMMAND_DISPATCHER_H_
@@ -15,14 +17,12 @@
 
 class CommandExecuter {
 public:
-  CommandExecuter(){};
-  virtual ~CommandExecuter(){};
+  CommandExecuter() {};
+  virtual ~CommandExecuter() {};
   virtual void Execute(FourCC id, float value) = 0;
 };
 
-class ApplicationCommandDispatcher
-    : public T_Singleton<ApplicationCommandDispatcher>,
-      public CommandExecuter {
+class ApplicationCommandDispatcher : public T_Singleton<ApplicationCommandDispatcher>, public CommandExecuter {
 public:
   ApplicationCommandDispatcher();
   ~ApplicationCommandDispatcher();

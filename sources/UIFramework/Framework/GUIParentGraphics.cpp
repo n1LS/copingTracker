@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "GUIParentGraphics.h"
@@ -103,8 +105,7 @@ void GUIParentGraphics::DrawBitmap(GUIBitmap &b, GUIPoint &p) {
   }
 }
 
-void GUIParentGraphics::StretchBitmap(GUIBitmap &bmp, GUIRect &srcR,
-                                      GUIRect &dstR) {
+void GUIParentGraphics::StretchBitmap(GUIBitmap &bmp, GUIRect &srcR, GUIRect &dstR) {
 
   if (_useBs) {
     _bs->StretchBitmap(bmp, srcR, dstR);
@@ -119,8 +120,7 @@ void GUIParentGraphics::StretchBitmap(GUIBitmap &bmp, GUIRect &srcR,
   }
 }
 
-void GUIParentGraphics::StretchENGBitmap(ENGBitmap &bmp, GUIRect &srcR,
-                                         GUIRect &dstR) {
+void GUIParentGraphics::StretchENGBitmap(ENGBitmap &bmp, GUIRect &srcR, GUIRect &dstR) {
 
   if (_useBs) {
     _bs->StretchENGBitmap(bmp, srcR, dstR);
@@ -153,8 +153,7 @@ int GUIParentGraphics::GetStringWidth(char *string) {
   }
 }
 
-void GUIParentGraphics::DrawString(const char *string, const GUIPoint &pos,
-                                   const GUITextProperties &props) {
+void GUIParentGraphics::DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props) {
   if (_useBs) {
     _bs->DrawString(string, pos, props);
   } else {
@@ -183,7 +182,9 @@ void GUIParentGraphics::Invalidate() {
   graphicDC->Invalidate();
 }
 
-GUIRect GUIParentGraphics::GetRect() { return _control->GetRect(); }
+GUIRect GUIParentGraphics::GetRect() {
+  return _control->GetRect();
+}
 
 void GUIParentGraphics::SetRect(GUIRect &) {
   if (_useBs) {
@@ -211,7 +212,9 @@ void GUIParentGraphics::UseBackingStore(bool useit) {
   }
 }
 
-bool GUIParentGraphics::UseBackingStore() { return _useBs; }
+bool GUIParentGraphics::UseBackingStore() {
+  return _useBs;
+}
 
 void GUIParentGraphics::Flush() {
   if (_useBs && _bs) {

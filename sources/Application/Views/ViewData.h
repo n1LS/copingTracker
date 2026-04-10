@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _VIEW_DATA_
@@ -36,8 +38,7 @@ public:
 protected:
   void checkSongBoundaries();
 
-  inline void updateData(unsigned char *c, int offset, unsigned char limit,
-                         bool wrap) {
+  inline void updateData(unsigned char *c, int offset, unsigned char limit, bool wrap) {
     int v = *c;
     if ((v == 0xFF) && (limit != 0xFF)) {
       v = 0;
@@ -77,17 +78,16 @@ public:
   // Player Settings
 
   PlayMode playMode_;
-  int songPlayPos_[SONG_CHANNEL_COUNT]; // .Play position of each channel
-  unsigned char currentPlayChain_[SONG_CHANNEL_COUNT]; // .Current played chain
-                                                       // for each channel
-  int chainPlayPos_[SONG_CHANNEL_COUNT]; // .Play position in chain for each
-                                         // channel
-  unsigned char
-      currentPlayPhrase_[SONG_CHANNEL_COUNT]; // .Current played phrase for each
-                                              // channel
-  int phrasePlayPos_[SONG_CHANNEL_COUNT]; // .Play position in phrase for each
-                                          // channel
-  int phraseCurPos_;                      // current UI cursor row position
+  int songPlayPos_[SONG_CHANNEL_COUNT];                 // .Play position of each channel
+  unsigned char currentPlayChain_[SONG_CHANNEL_COUNT];  // .Current played chain
+                                                        // for each channel
+  int chainPlayPos_[SONG_CHANNEL_COUNT];                // .Play position in chain for each
+                                                        // channel
+  unsigned char currentPlayPhrase_[SONG_CHANNEL_COUNT]; // .Current played phrase for each
+                                                        // channel
+  int phrasePlayPos_[SONG_CHANNEL_COUNT];               // .Play position in phrase for each
+                                                        // channel
+  int phraseCurPos_;                                    // current UI cursor row position
 
   // Sample Editor
   etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> sampleEditorFilename;

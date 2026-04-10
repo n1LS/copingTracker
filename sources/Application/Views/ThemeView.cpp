@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ThemeView.h"
@@ -25,12 +27,10 @@
 
 constexpr uint8_t COLOR_COMPONENT_X_COL_POS[COLOR_COMPONENT_COUNT] = {16, 8, 0};
 constexpr uint8_t COLOR_COMPONENT_X_OFFSETS[COLOR_COMPONENT_COUNT] = {
-    COLOR_LABEL_WIDTH, COLOR_LABEL_WIDTH + COMPONENT_SPACING,
-    COLOR_LABEL_WIDTH + 2 * COMPONENT_SPACING};
+    COLOR_LABEL_WIDTH, COLOR_LABEL_WIDTH + COMPONENT_SPACING, COLOR_LABEL_WIDTH + 2 * COMPONENT_SPACING};
 
 ThemeView::ThemeView(GUIWindow &w, ViewData *data)
-    : FieldView(w, data), themeNameVar_(FourCC::ActionThemeName,
-                                        ThemeConstants::DEFAULT_THEME_NAME) {
+    : FieldView(w, data), themeNameVar_(FourCC::ActionThemeName, ThemeConstants::DEFAULT_THEME_NAME) {
 
   GUIPoint position = GetAnchor();
 
@@ -52,19 +52,13 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   actionPos._y += 1;
 
   // Font selection
-  // BUT Not on the Advance where there is currently only a single font
-#ifndef ADV
   position._y = FONT_FIELD_LINE;
   Variable *fontVar = config->FindVariable(FourCC::VarUIFont);
-  intVarField_.emplace_back(position, *fontVar, "Font: %s", 0,
-                            ThemeConstants::FONT_COUNT - 1, 1,
-                            ThemeConstants::FONT_COUNT - 1);
+  intVarField_.emplace_back(position, *fontVar, "Font: %s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
+                            ThemeConstants::THEME_FONT_COUNT - 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
   position._y += 2;
-#else
-  position._y += 1;
-#endif
 
   // Get the current theme name from Config
   Variable *configThemeVar = config->FindVariable(FourCC::VarThemeName);
@@ -82,8 +76,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   themeNameVar_.SetString(currentThemeName.c_str(), false);
 
   // Add the text field
-  textFields_.emplace_back(themeNameVar_, position, label,
-                           FourCC::ActionThemeName, defaultValue);
+  textFields_.emplace_back(themeNameVar_, position, label, FourCC::ActionThemeName, defaultValue);
   themeNameField_ = &(*textFields_.rbegin());
   themeNameField_->AddObserver(*this);
   fieldList_.insert(fieldList_.end(), themeNameField_);
@@ -96,66 +89,55 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   // Foreground color
   position._y += 3;
-  addColorField("Foreground", config->FindVariable(FourCC::VarFGColor),
-                CD_NORMAL, position);
+  addColorField("Foreground", config->FindVariable(FourCC::VarFGColor), CD_NORMAL, position);
 
   // Background color
   position._y += 1;
-  addColorField("Background", config->FindVariable(FourCC::VarBGColor),
-                CD_BACKGROUND, position);
+  addColorField("Background", config->FindVariable(FourCC::VarBGColor), CD_BACKGROUND, position);
 
   // Highlight color
   position._y += 1;
-  addColorField("Highlight1", config->FindVariable(FourCC::VarHI1Color),
-                CD_HILITE1, position);
+  addColorField("Highlight1", config->FindVariable(FourCC::VarHI1Color), CD_HILITE1, position);
 
   // Highlight2 color
   position._y += 1;
-  addColorField("Highlight2", config->FindVariable(FourCC::VarHI2Color),
-                CD_HILITE2, position);
+  addColorField("Highlight2", config->FindVariable(FourCC::VarHI2Color), CD_HILITE2, position);
 
   // Console color
   position._y += 1;
-  addColorField("Console", config->FindVariable(FourCC::VarConsoleColor),
-                CD_CONSOLE, position);
+  addColorField("Console", config->FindVariable(FourCC::VarConsoleColor), CD_CONSOLE, position);
 
   // Cursor color
   position._y += 1;
-  addColorField("Cursor", config->FindVariable(FourCC::VarCursorColor),
-                CD_CURSOR, position);
+  addColorField("Cursor", config->FindVariable(FourCC::VarCursorColor), CD_CURSOR, position);
 
   // Info color
   position._y += 1;
-  addColorField("Info", config->FindVariable(FourCC::VarInfoColor), CD_INFO,
-                position);
+  addColorField("Info", config->FindVariable(FourCC::VarInfoColor), CD_INFO, position);
 
   // Warning color
   position._y += 1;
-  addColorField("Warning", config->FindVariable(FourCC::VarWarnColor), CD_WARN,
-                position);
+  addColorField("Warning", config->FindVariable(FourCC::VarWarnColor), CD_WARN, position);
 
   // Error color
   position._y += 1;
-  addColorField("Error", config->FindVariable(FourCC::VarErrorColor), CD_ERROR,
-                position);
+  addColorField("Error", config->FindVariable(FourCC::VarErrorColor), CD_ERROR, position);
 
   // Play color
   position._y += 1;
-  addColorField("Accent", config->FindVariable(FourCC::VarAccentColor),
-                CD_ACCENT, position);
+  addColorField("Accent", config->FindVariable(FourCC::VarAccentColor), CD_ACCENT, position);
 
   // Mute color
   position._y += 1;
-  addColorField("AccentAlt", config->FindVariable(FourCC::VarAccentAltColor),
-                CD_ACCENTALT, position);
+  addColorField("AccentAlt", config->FindVariable(FourCC::VarAccentAltColor), CD_ACCENTALT, position);
 
   // Emphasis color
   position._y += 1;
-  addColorField("Emphasis", config->FindVariable(FourCC::VarEmphasisColor),
-                CD_EMPHASIS, position);
+  addColorField("Emphasis", config->FindVariable(FourCC::VarEmphasisColor), CD_EMPHASIS, position);
 }
 
-ThemeView::~ThemeView() {}
+ThemeView::~ThemeView() {
+}
 
 void ThemeView::Reset() {
   exportThemeName_.clear();
@@ -215,8 +197,7 @@ void ThemeView::addSwatchField(ColorDefinition color, GUIPoint position) {
   fieldList_.insert(fieldList_.end(), &(*swatchField_.rbegin()));
 }
 
-void ThemeView::addColorField(const char *label, Variable *colorVar,
-                              ColorDefinition color, GUIPoint position) {
+void ThemeView::addColorField(const char *label, Variable *colorVar, ColorDefinition color, GUIPoint position) {
 
   staticField_.emplace_back(position, label);
   UIStaticField &labelField = *staticField_.rbegin();
@@ -228,19 +209,15 @@ void ThemeView::addColorField(const char *label, Variable *colorVar,
     GUIPoint componentPosition = position;
     componentPosition._x += COLOR_COMPONENT_X_OFFSETS[i];
 
-    colorComponentVars_.emplace_back(
-        colorVar->GetID(),
-        static_cast<int>((colorValue >> COLOR_COMPONENT_X_COL_POS[i]) &
-                         static_cast<uint32_t>(0xFF)));
+    colorComponentVars_.emplace_back(colorVar->GetID(), static_cast<int>((colorValue >> COLOR_COMPONENT_X_COL_POS[i]) &
+                                                                         static_cast<uint32_t>(0xFF)));
     Variable &componentVar = *colorComponentVars_.rbegin();
 
     // bigger steps and set limits because we use RGB565 for colors
     if (i == 0 || i == 2) {
-      intVarField_.emplace_back(componentPosition, componentVar, "%2.2X", 0,
-                                248, 8, 16, 0);
+      intVarField_.emplace_back(componentPosition, componentVar, "%2.2X", 0, 248, 8, 16, 0);
     } else {
-      intVarField_.emplace_back(componentPosition, componentVar, "%2.2X", 0,
-                                252, 4, 16, 0);
+      intVarField_.emplace_back(componentPosition, componentVar, "%2.2X", 0, 252, 4, 16, 0);
     }
     UIIntVarField &componentField = *intVarField_.rbegin();
     fieldList_.insert(fieldList_.end(), &componentField);
@@ -257,8 +234,7 @@ void ThemeView::addColorField(const char *label, Variable *colorVar,
   addSwatchField(color, position);
 }
 
-ThemeView::ColorComponentField *
-ThemeView::findColorComponentField(Observable *observable) {
+ThemeView::ColorComponentField *ThemeView::findColorComponentField(Observable *observable) {
   for (auto &entry : colorComponentFields_) {
     if (entry.observable == observable) {
       return &entry;
@@ -276,8 +252,7 @@ void ThemeView::syncColorComponentVars(Variable *colorVar) {
     if (entry.colorVar != colorVar) {
       continue;
     }
-    uint32_t componentValue =
-        (colorValue >> entry.shift) & static_cast<uint32_t>(0xFF);
+    uint32_t componentValue = (colorValue >> entry.shift) & static_cast<uint32_t>(0xFF);
     entry.componentVar->SetInt(static_cast<int>(componentValue), false);
 
     if (entry.colorVar->GetID() == FourCC::VarBGColor) {
@@ -309,8 +284,7 @@ void ThemeView::syncFieldsFromConfig() {
     }
 
     uint32_t colorValue = entry.colorVar->GetInt();
-    uint32_t componentValue =
-        (colorValue >> entry.shift) & static_cast<uint32_t>(0xFF);
+    uint32_t componentValue = (colorValue >> entry.shift) & static_cast<uint32_t>(0xFF);
     entry.componentVar->SetInt(componentValue, false);
   }
 }
@@ -441,12 +415,9 @@ void ThemeView::handleThemeExport() {
   auto fs = FileSystem::GetInstance();
   if (fs->exists(pathBuffer)) {
     // Theme exists, ask for confirmation
-    MessageBox *mb = MessageBox::Create(*this, "Theme already exists",
-                                        "     Overwrite?", MBBF_YES | MBBF_NO);
+    MessageBox *mb = MessageBox::Create(*this, "Theme already exists", "     Overwrite?", MBBF_YES | MBBF_NO);
 
-    DoModal(mb, ModalViewCallback::create<ThemeView,
-                                          &ThemeView::onConfirmThemeOverwrite>(
-                    *this));
+    DoModal(mb, ModalViewCallback::create<ThemeView, &ThemeView::onConfirmThemeOverwrite>(*this));
   } else {
     // Theme doesn't exist, export directly
     exportThemeWithName(exportThemeName_.c_str(), false);
@@ -479,9 +450,8 @@ void ThemeView::exportThemeWithName(const char *themeName, bool overwrite) {
   }
 
   // Show result message
-  MessageBox *resultMb = MessageBox::Create(
-      *this, result ? "Theme exported successfully " : "Failed to export theme",
-      MBBF_OK);
+  MessageBox *resultMb =
+      MessageBox::Create(*this, result ? "Theme exported successfully " : "Failed to export theme", MBBF_OK);
   DoModal(resultMb);
 }
 

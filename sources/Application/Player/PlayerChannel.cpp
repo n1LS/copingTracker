@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "PlayerChannel.h"
@@ -20,28 +22,27 @@ PlayerChannel::PlayerChannel(int index) {
   busIndex_ = -1;
 }
 
-PlayerChannel::~PlayerChannel() {}
+PlayerChannel::~PlayerChannel() {
+}
 
-void PlayerChannel::StartInstrument(I_Instrument *instr, unsigned char note,
-                                    bool trigger) {
+void PlayerChannel::StartInstrument(I_Instrument *instr, unsigned char note, bool trigger) {
   if (instr_) {
     StopInstrument();
   }
-  if (instr->Start(
-          index_, note,
-          trigger)) { // note could be refused coz it's out of the keymap
+  if (instr->Start(index_, note,
+                   trigger)) { // note could be refused coz it's out of the keymap
     instr_ = instr;
   } else {
     instr_ = 0;
   };
-};
+}
 
 void PlayerChannel::StopInstrument() {
   if (instr_) {
     instr_->Stop(index_);
     instr_ = 0;
   }
-};
+}
 
 bool PlayerChannel::Render(fixed *buffer, int samplecount) {
   if (instr_) {
@@ -51,13 +52,19 @@ bool PlayerChannel::Render(fixed *buffer, int samplecount) {
   } else {
     return false;
   }
-};
+}
 
-I_Instrument *PlayerChannel::GetInstrument() { return instr_; };
+I_Instrument *PlayerChannel::GetInstrument() {
+  return instr_;
+}
 
-void PlayerChannel::SetMute(bool muted) { muted_ = muted; }
+void PlayerChannel::SetMute(bool muted) {
+  muted_ = muted;
+}
 
-bool PlayerChannel::IsMuted() { return muted_; }
+bool PlayerChannel::IsMuted() {
+  return muted_;
+}
 
 void PlayerChannel::SetMixBus(int i) {
 
@@ -74,7 +81,7 @@ void PlayerChannel::SetMixBus(int i) {
   } else {
     busIndex_ = -1;
   }
-};
+}
 
 void PlayerChannel::Reset() {
   if (mixBus_) {
@@ -83,4 +90,4 @@ void PlayerChannel::Reset() {
   }
   muted_ = false;
   busIndex_ = -1;
-};
+}

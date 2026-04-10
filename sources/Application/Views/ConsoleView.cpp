@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ConsoleView.h"
@@ -16,9 +18,9 @@ ConsoleView::ConsoleView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {
     lines_[i][0] = 0;
   }
   isDirty_ = true;
-};
+}
 
-void ConsoleView::ProcessButtonMask(unsigned short mask, bool pressed){};
+void ConsoleView::ProcessButtonMask(unsigned short mask, bool pressed) {};
 
 void ConsoleView::DrawView() {
 
@@ -30,8 +32,10 @@ void ConsoleView::DrawView() {
     w_.DrawString(lines_[(currentLine_ + i) % CONSOLE_HEIGHT], pos, props);
     pos._y += 8;
   }
-};
+}
 
-bool ConsoleView::IsDirty() { return isDirty_; };
+bool ConsoleView::IsDirty() {
+  return isDirty_;
+}
 
-void ConsoleView::AddBuffer(char *buffer){};
+void ConsoleView::AddBuffer(char *buffer) {};

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "RenderProgressModal.h"
@@ -16,26 +18,22 @@
 #include <stdio.h>
 
 bool RenderProgressModal::inUse_ = false;
-alignas(RenderProgressModal) static unsigned char RenderProgressModalStorage
-    [sizeof(RenderProgressModal)];
+alignas(RenderProgressModal) static unsigned char RenderProgressModalStorage[sizeof(RenderProgressModal)];
 void *RenderProgressModal::storage_ = RenderProgressModalStorage;
 
-RenderProgressModal *
-RenderProgressModal::Create(View &view, const char *title, const char *message,
-                            ProgressDisplayMode progressDisplayMode) {
+RenderProgressModal *RenderProgressModal::Create(View &view, const char *title, const char *message,
+                                                 ProgressDisplayMode progressDisplayMode) {
   if (inUse_) {
     auto *existing = reinterpret_cast<RenderProgressModal *>(storage_);
     existing->~RenderProgressModal();
     inUse_ = false;
   }
   inUse_ = true;
-  return new (storage_)
-      RenderProgressModal(view, title, message, progressDisplayMode);
+  return new (storage_) RenderProgressModal(view, title, message, progressDisplayMode);
 }
 
-RenderProgressModal::RenderProgressModal(
-    View &view, const char *title, const char *message,
-    ProgressDisplayMode progressDisplayMode)
+RenderProgressModal::RenderProgressModal(View &view, const char *title, const char *message,
+                                         ProgressDisplayMode progressDisplayMode)
     : ModalView(view), title_(title), message_(message), totalSamples_(0.0f),
       progressDisplayMode_(progressDisplayMode) {
   dialogWidth_ = title_.size();
@@ -47,7 +45,8 @@ RenderProgressModal::RenderProgressModal(
   }
 }
 
-RenderProgressModal::~RenderProgressModal() {}
+RenderProgressModal::~RenderProgressModal() {
+}
 
 void RenderProgressModal::Destroy() {
   this->~RenderProgressModal();
@@ -86,13 +85,13 @@ void RenderProgressModal::DrawView() {
   DrawString(x, y, renderComplete_ ? "  OK  " : "Cancel", props);
 }
 
-void RenderProgressModal::OnPlayerUpdate(PlayerEventType eventType,
-                                         unsigned int currentTick) {
+void RenderProgressModal::OnPlayerUpdate(PlayerEventType eventType, unsigned int currentTick) {
   (void)eventType;
   (void)currentTick;
 }
 
-void RenderProgressModal::OnFocus() {}
+void RenderProgressModal::OnFocus() {
+}
 
 void RenderProgressModal::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (mask & EPBM_ENTER && pressed) {
@@ -131,8 +130,7 @@ void RenderProgressModal::AnimationUpdate() {
           initializeSongProgressTracking();
         }
         if (progressChannel_ >= 0) {
-          const int renderedUnits =
-              calculateChannelRenderedUnits(progressChannel_, startSongRow_);
+          const int renderedUnits = calculateChannelRenderedUnits(progressChannel_, startSongRow_);
           if (renderedUnits > renderedUnits_) {
             renderedUnits_ = renderedUnits;
           }
@@ -169,12 +167,10 @@ void RenderProgressModal::AnimationUpdate() {
   // Keep button label in sync with render state.
   ClearTextRect(0, y + 1, width, 1);
   props.invert_ = true;
-  DrawString(width / 2 - 3, y + 2, renderComplete_ ? "  OK  " : "Cancel",
-             props);
+  DrawString(width / 2 - 3, y + 2, renderComplete_ ? "  OK  " : "Cancel", props);
 }
 
-void RenderProgressModal::drawRenderProgress(GUIPoint &pos,
-                                             GUITextProperties &props) {
+void RenderProgressModal::drawRenderProgress(GUIPoint &pos, GUITextProperties &props) {
   const char *spinnerchars = "|/-\\";
   char spinner = spinnerchars[spinner_++ % 4];
 
@@ -193,7 +189,9 @@ void RenderProgressModal::drawRenderProgress(GUIPoint &pos,
   DrawString(pos._x, pos._y, buffer, props);
 }
 
-uint32_t RenderProgressModal::getDialogWidth() const { return dialogWidth_; }
+uint32_t RenderProgressModal::getDialogWidth() const {
+  return dialogWidth_;
+}
 
 int RenderProgressModal::getCurrentRenderedSongRow(bool *hasActive) const {
   if (hasActive != nullptr) {
@@ -232,14 +230,12 @@ int RenderProgressModal::getChainPhraseCount(int songRow, int channel) const {
   if (viewData_ == nullptr || viewData_->song_ == nullptr) {
     return 0;
   }
-  if (songRow < 0 || songRow >= SONG_ROW_COUNT || channel < 0 ||
-      channel >= SONG_CHANNEL_COUNT) {
+  if (songRow < 0 || songRow >= SONG_ROW_COUNT || channel < 0 || channel >= SONG_CHANNEL_COUNT) {
     return 0;
   }
 
   const Song *song = viewData_->song_;
-  const unsigned char chain =
-      song->data_[songRow * SONG_CHANNEL_COUNT + channel];
+  const unsigned char chain = song->data_[songRow * SONG_CHANNEL_COUNT + channel];
   if (chain == EMPTY_SONG_VALUE) {
     return 0;
   }
@@ -254,8 +250,7 @@ int RenderProgressModal::getChainPhraseCount(int songRow, int channel) const {
   return phraseCount;
 }
 
-int RenderProgressModal::calculateChannelTotalRenderUnits(
-    int channel, int startSongRow) const {
+int RenderProgressModal::calculateChannelTotalRenderUnits(int channel, int startSongRow) const {
   if (startSongRow < 0 || startSongRow >= SONG_ROW_COUNT) {
     return 0;
   }
@@ -268,8 +263,7 @@ int RenderProgressModal::calculateChannelTotalRenderUnits(
     }
     totalUnits += phraseCount * STEPS_PER_PHRASE;
 
-    if (row + 1 >= SONG_ROW_COUNT ||
-        getChainPhraseCount(row + 1, channel) <= 0) {
+    if (row + 1 >= SONG_ROW_COUNT || getChainPhraseCount(row + 1, channel) <= 0) {
       break;
     }
   }
@@ -277,10 +271,8 @@ int RenderProgressModal::calculateChannelTotalRenderUnits(
   return totalUnits;
 }
 
-int RenderProgressModal::calculateChannelRenderedUnits(int channel,
-                                                       int startSongRow) const {
-  if (startSongRow < 0 || startSongRow >= SONG_ROW_COUNT ||
-      viewData_ == nullptr) {
+int RenderProgressModal::calculateChannelRenderedUnits(int channel, int startSongRow) const {
+  if (startSongRow < 0 || startSongRow >= SONG_ROW_COUNT || viewData_ == nullptr) {
     return 0;
   }
   if (channel < 0 || channel >= SONG_CHANNEL_COUNT) {
@@ -293,8 +285,7 @@ int RenderProgressModal::calculateChannelRenderedUnits(int channel,
   }
 
   int renderedUnits = 0;
-  for (int row = startSongRow; row < currentSongRow && row < SONG_ROW_COUNT;
-       row++) {
+  for (int row = startSongRow; row < currentSongRow && row < SONG_ROW_COUNT; row++) {
     const int phraseCount = getChainPhraseCount(row, channel);
     if (phraseCount <= 0) {
       return renderedUnits;
@@ -339,8 +330,7 @@ void RenderProgressModal::initializeSongProgressTracking() {
 
   int bestTotalUnits = 0;
   for (int channel = 0; channel < SONG_CHANNEL_COUNT; channel++) {
-    const int totalUnits =
-        calculateChannelTotalRenderUnits(channel, startSongRow_);
+    const int totalUnits = calculateChannelTotalRenderUnits(channel, startSongRow_);
     if (totalUnits <= 0) {
       continue;
     }

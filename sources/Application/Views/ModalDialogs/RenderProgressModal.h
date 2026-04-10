@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _RENDER_PROGRESS_MODAL_H_
@@ -24,14 +26,11 @@ class RenderProgressModal : public ModalView {
 public:
   enum class ProgressDisplayMode { ElapsedTime, SongPercent };
 
-  static RenderProgressModal *Create(View &view, const char *title,
-                                     const char *message,
-                                     ProgressDisplayMode progressDisplayMode =
-                                         ProgressDisplayMode::ElapsedTime);
+  static RenderProgressModal *Create(View &view, const char *title, const char *message,
+                                     ProgressDisplayMode progressDisplayMode = ProgressDisplayMode::ElapsedTime);
 
   // Constructor taking a view, title and message
-  RenderProgressModal(View &view, const char *title, const char *message,
-                      ProgressDisplayMode progressDisplayMode);
+  RenderProgressModal(View &view, const char *title, const char *message, ProgressDisplayMode progressDisplayMode);
 
   // Virtual destructor
   virtual ~RenderProgressModal();

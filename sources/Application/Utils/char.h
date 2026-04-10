@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _CHAR_H_
@@ -52,14 +54,14 @@ inline void note2char(unsigned char d, char *s) {
     s[2] = ' ';
   }
   s[3] = '0' + oct;
-};
+}
 
 inline void note2visualizer(unsigned char d, char *s) {
   int note = d % 12;
   strcpy(s, noteNames[note]);
   s[2] = '\0'; // sloppy, can we make the array shorter?
   s[3] = '\0'; // sloppy, can we make the array shorter?
-};
+}
 
 inline void oct2visualizer(unsigned char d, char *s) {
   int oct = d / 12 - 2;
@@ -72,6 +74,6 @@ inline void oct2visualizer(unsigned char d, char *s) {
   s[1] = '0' + oct;
   s[2] = '\0'; // sloppy, can we make the array shorter?
   s[3] = '\0'; // sloppy, can we make the array shorter?
-};
+}
 
 #endif

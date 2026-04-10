@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "TablePlayback.h"
@@ -26,14 +28,14 @@ void TableSaveState::Reset() {
     hopCount_[i][1] = 0;
     hopCount_[i][2] = 0;
   };
-};
+}
 
 void TablePlayback::Reset() {
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     playback_[i].Init(i);
     automationPlayback_[i].Init(i);
   }
-};
+}
 
 TablePlayback &TablePlayback::GetTablePlayback(int channel) {
   NAssert((channel >= 0) && (channel < SONG_CHANNEL_COUNT));
@@ -73,8 +75,7 @@ void TablePlayback::Init(int channel) {
 }
 
 void TablePlayback::Start(I_Instrument *i, Table &table, bool automated) {
-  if ((!automated) || (automated_ != automated) || (i != instrument_) ||
-      (table_ == 0)) {
+  if ((!automated) || (automated_ != automated) || (i != instrument_) || (table_ == 0)) {
     instrument_ = i;
     position_[0] = 0;
     position_[1] = 0;
@@ -113,17 +114,21 @@ void TablePlayback::Stop() {
   hopped_[0] = false;
   hopped_[1] = false;
   hopped_[2] = false;
-};
+}
 
-int TablePlayback::GetPlaybackPosition(int i) { return previous_[i]; }
+int TablePlayback::GetPlaybackPosition(int i) {
+  return previous_[i];
+}
 
-Table *TablePlayback::GetTable() { return table_; };
+Table *TablePlayback::GetTable() {
+  return table_;
+}
 
-bool TablePlayback::GetAutomation() { return automated_; };
+bool TablePlayback::GetAutomation() {
+  return automated_;
+}
 
-bool TablePlayback::ProcessLocalCommand(int row, FourCC *commandList,
-                                        ushort *paramList,
-                                        TablePlayerChange &tpc) {
+bool TablePlayback::ProcessLocalCommand(int row, FourCC *commandList, ushort *paramList, TablePlayerChange &tpc) {
 
   bool hopped = false;
 
@@ -196,27 +201,20 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
         if (automated_) {
           TableSaveState state;
           instrument_->GetTableState(state);
-          memcpy(hopCount_, state.hopCount_,
-                 sizeof(uchar) * TABLE_STEPS * TABLE_COLUMNS);
+          memcpy(hopCount_, state.hopCount_, sizeof(uchar) * TABLE_STEPS * TABLE_COLUMNS);
           memcpy(position_, state.position_, sizeof(int) * TABLE_COLUMNS);
           groove_ = state.groove_;
         }
 
         // try local processing for if it changes current table or position
 
-        hopped_[0] =
-            ProcessLocalCommand(0, table_->cmd1_, table_->param1_, tpc);
-        hopped_[1] =
-            ProcessLocalCommand(1, table_->cmd2_, table_->param2_, tpc);
-        hopped_[2] =
-            ProcessLocalCommand(2, table_->cmd3_, table_->param3_, tpc);
+        hopped_[0] = ProcessLocalCommand(0, table_->cmd1_, table_->param1_, tpc);
+        hopped_[1] = ProcessLocalCommand(1, table_->cmd2_, table_->param2_, tpc);
+        hopped_[2] = ProcessLocalCommand(2, table_->cmd3_, table_->param3_, tpc);
 
-        instrument_->ProcessCommand(channel_, table_->cmd1_[position_[0]],
-                                    table_->param1_[position_[0]]);
-        instrument_->ProcessCommand(channel_, table_->cmd2_[position_[1]],
-                                    table_->param2_[position_[1]]);
-        instrument_->ProcessCommand(channel_, table_->cmd3_[position_[2]],
-                                    table_->param3_[position_[2]]);
+        instrument_->ProcessCommand(channel_, table_->cmd1_[position_[0]], table_->param1_[position_[0]]);
+        instrument_->ProcessCommand(channel_, table_->cmd2_[position_[1]], table_->param2_[position_[1]]);
+        instrument_->ProcessCommand(channel_, table_->cmd3_[position_[2]], table_->param3_[position_[2]]);
 
         previous_[0] = position_[0];
         previous_[1] = position_[1];
@@ -227,16 +225,13 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
 
       if (gs->UpdateGroove(groove_, true)) {
 
-        if ((table_->cmd1_[position_[0]] != FourCC::InstrumentCommandHop) ||
-            (!hopped_[0])) {
+        if ((table_->cmd1_[position_[0]] != FourCC::InstrumentCommandHop) || (!hopped_[0])) {
           position_[0] = (position_[0] + 1) % 16;
         }
-        if ((table_->cmd2_[position_[1]] != FourCC::InstrumentCommandHop) ||
-            (!hopped_[1])) {
+        if ((table_->cmd2_[position_[1]] != FourCC::InstrumentCommandHop) || (!hopped_[1])) {
           position_[1] = (position_[1] + 1) % 16;
         }
-        if ((table_->cmd3_[position_[2]] != FourCC::InstrumentCommandHop) ||
-            (!hopped_[2])) {
+        if ((table_->cmd3_[position_[2]] != FourCC::InstrumentCommandHop) || (!hopped_[2])) {
           position_[2] = (position_[2] + 1) % 16;
         }
 
@@ -246,8 +241,7 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
 
         if (automated_) {
           TableSaveState state;
-          memcpy(state.hopCount_, hopCount_,
-                 sizeof(uchar) * TABLE_STEPS * TABLE_COLUMNS);
+          memcpy(state.hopCount_, hopCount_, sizeof(uchar) * TABLE_STEPS * TABLE_COLUMNS);
           memcpy(state.position_, position_, sizeof(int) * TABLE_COLUMNS);
           state.groove_ = groove_;
           instrument_->SetTableState(state);

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SONG_H_
@@ -14,32 +16,10 @@
 #include "Chain.h"
 #include "Phrase.h"
 
-#ifdef ADV
-#define SONG_CHANNEL_COUNT 8
-#define SONG_ROW_COUNT 256
-
-#define MAX_SAMPLEINSTRUMENT_COUNT 0x40
-#define MAX_SIDINSTRUMENT_COUNT 0x00
-#define MAX_MIDIINSTRUMENT_COUNT 0x40
-#define MAX_OPALINSTRUMENT_COUNT 0x00
-#define MAX_MACROINSTRUMENT_COUNT 0x00
-
-#define MAX_INSTRUMENT_COUNT 0x40
-#else
 #define SONG_CHANNEL_COUNT 8
 #define SONG_ROW_COUNT 128
 
-#define MAX_SAMPLEINSTRUMENT_COUNT 0x10
-#define MAX_SIDINSTRUMENT_COUNT 0x03
-#define MAX_MIDIINSTRUMENT_COUNT 0x10
-#define MAX_OPALINSTRUMENT_COUNT 0x03
-#define MAX_MACROINSTRUMENT_COUNT 0x01
-
-#define MAX_INSTRUMENT_COUNT                               \
-  (MAX_SAMPLEINSTRUMENT_COUNT + MAX_MIDIINSTRUMENT_COUNT + \
-   MAX_SIDINSTRUMENT_COUNT + MAX_OPALINSTRUMENT_COUNT +    \
-   MAX_MACROINSTRUMENT_COUNT)
-#endif
+#define MAX_INSTRUMENT_COUNT 32
 
 #define HIGHEST_NOTE 119
 #define NOTE_OFF 0xFE

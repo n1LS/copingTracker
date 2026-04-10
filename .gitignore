@@ -1,9 +1,4 @@
 build**
-ref/**
-doxygen/html/**
-projects/buildOSX/**
-projects/lgpt
-lgpt.log
 
 # OSX
 ## General
@@ -33,10 +28,4 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# usermanual output
-usermanual/output
-usermanual/bin
-usermanual/web
-
-optbuild/**
 AGENTS.md

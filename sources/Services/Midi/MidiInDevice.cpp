@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "MidiInDevice.h"
@@ -19,8 +21,7 @@
 bool MidiInDevice::dumpEvents_ = false;
 
 // Initialize the static channel-to-instrument mapping array
-int8_t MidiInDevice::channelToInstrument_[16] = {
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+int8_t MidiInDevice::channelToInstrument_[16] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 MidiInDevice::MidiInDevice(const char *name) : isRunning_(false) {
   for (int channel = 0; channel < 16; channel++) {
@@ -30,13 +31,17 @@ MidiInDevice::MidiInDevice(const char *name) : isRunning_(false) {
 
   // Initialize the note tracker
   noteTracker_.clear();
-};
+}
 
-MidiInDevice::~MidiInDevice(){};
+MidiInDevice::~MidiInDevice() {};
 
-bool MidiInDevice::Init() { return initDriver(); };
+bool MidiInDevice::Init() {
+  return initDriver();
+}
 
-void MidiInDevice::Close() { closeDriver(); };
+void MidiInDevice::Close() {
+  closeDriver();
+}
 
 bool MidiInDevice::Start() {
   isRunning_ = true;
@@ -49,14 +54,16 @@ bool MidiInDevice::Start() {
   noteTracker_.clear();
 
   return startDriver();
-};
+}
 
 void MidiInDevice::Stop() {
   isRunning_ = false;
   stopDriver();
-};
+}
 
-bool MidiInDevice::IsRunning() { return isRunning_; };
+bool MidiInDevice::IsRunning() {
+  return isRunning_;
+}
 
 void MidiInDevice::onMidiStart() {
   MidiSyncData data(MSM_START);
@@ -69,7 +76,7 @@ void MidiInDevice::onMidiStart() {
     // Start playback on all channels (0-7) like the play button does
     player->OnSongStartButton(0, 7, false, false);
   }
-};
+}
 
 void MidiInDevice::onMidiStop() {
   MidiSyncData data(MSM_STOP);
@@ -86,7 +93,7 @@ void MidiInDevice::onMidiStop() {
       player->Stop();
     }
   }
-};
+}
 
 void MidiInDevice::onMidiContinue() {
   MidiSyncData data(MSM_CONTINUE);
@@ -102,27 +109,27 @@ void MidiInDevice::onMidiContinue() {
       player->OnSongStartButton(0, 7, false, false);
     }
   }
-};
+}
 
 void MidiInDevice::onMidiTempoTick() {
   MidiSyncData data(MSM_TEMPOTICK);
   SetChanged();
   NotifyObservers();
-};
+}
 
-void MidiInDevice::queueEvent(MidiEvent &event){
-    // TODO: queue the event
-};
+void MidiInDevice::queueEvent(MidiEvent &event) {
+  // TODO: queue the event
+}
 
 void MidiInDevice::onDriverMessage(MidiMessage &message) {
   SetChanged();
   NotifyObservers(&message);
   treatChannelEvent(message);
-};
+}
 
-void MidiInDevice::Trigger(){
-    // No-op: events are handled immediately in onDriverMessage.
-};
+void MidiInDevice::Trigger() {
+  // No-op: events are handled immediately in onDriverMessage.
+}
 
 void MidiInDevice::treatChannelEvent(MidiMessage &event) {
 
@@ -132,8 +139,7 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
 
   // display as hex
   if (!isMidiClockEvent) {
-    Trace::Debug("midi:%02X:%02X:%02X", event.status_, event.data1_,
-                 event.data2_);
+    Trace::Debug("midi:%02X:%02X:%02X", event.status_, event.data1_, event.data2_);
     Trace::Debug("miditype:%02X", event.GetType());
   }
 
@@ -168,13 +174,11 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
         // Get the audio channel this note is playing on
         int audioChannel = noteTracker_.unregisterNote(note, midiChannel);
         if (audioChannel >= 0) {
-          Trace::Debug("Stopping note %d on MIDI channel %d, audio channel %d",
-                       note, midiChannel, audioChannel);
+          Trace::Debug("Stopping note %d on MIDI channel %d, audio channel %d", note, midiChannel, audioChannel);
           player->StopNote(instrumentIndex, audioChannel);
         }
       } else {
-        Trace::Debug("Note %d not active on MIDI channel %d, not stopping",
-                     note, midiChannel);
+        Trace::Debug("Note %d not active on MIDI channel %d, not stopping", note, midiChannel);
       }
     }
   } break;
@@ -210,8 +214,7 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
 
         if (audioChannel >= 0) {
           // Register the note with the tracker
-          if (noteTracker_.registerNote(note, midiChannel, audioChannel,
-                                        value)) {
+          if (noteTracker_.registerNote(note, midiChannel, audioChannel, value)) {
             Trace::Debug("Playing note %d on MIDI channel %d (instrument %d), "
                          "audio channel %d",
                          note, midiChannel, instrumentIndex, audioChannel);
@@ -269,11 +272,10 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
   default:
     break;
   };
-};
+}
 
 // New methods for direct instrument mapping
-void MidiInDevice::AssignInstrumentToChannel(int midiChannel,
-                                             int instrumentIndex) {
+void MidiInDevice::AssignInstrumentToChannel(int midiChannel, int instrumentIndex) {
   if (midiChannel >= 0 && midiChannel < 16) {
     channelToInstrument_[midiChannel] = instrumentIndex;
     // Trace::Log("MIDI", "Assigned instrument %d to MIDI channel %d",

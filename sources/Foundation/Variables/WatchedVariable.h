@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _WATCHED_VARIABLE_H_
@@ -20,7 +22,7 @@ public:
   WatchedVariable(FourCC id, const char *const *list, int size, int index = 0);
   WatchedVariable(FourCC id,
                   const char *value) = delete; // Use StringWatchedVariable
-  virtual ~WatchedVariable(){};
+  virtual ~WatchedVariable() {};
   static void Enable();
   static void Disable();
 

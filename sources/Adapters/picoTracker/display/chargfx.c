@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "chargfx.h"
@@ -36,13 +38,10 @@ static uint8_t changed[TEXT_HEIGHT * TEXT_WIDTH / 8] = {0};
 #define TestBit(A, k) (A[(k) / 8] & (1 << ((k) % 8)))
 
 // Default palette, can be redefined
-static uint16_t palette[16] = {
-    SWAP_BYTES(0x0000), SWAP_BYTES(0x49E5), SWAP_BYTES(0xB926),
-    SWAP_BYTES(0xE371), SWAP_BYTES(0x9CF3), SWAP_BYTES(0xA324),
-    SWAP_BYTES(0xEC46), SWAP_BYTES(0xF70D), SWAP_BYTES(0xffff),
-    SWAP_BYTES(0x1926), SWAP_BYTES(0x2A49), SWAP_BYTES(0x4443),
-    SWAP_BYTES(0xA664), SWAP_BYTES(0x02B0), SWAP_BYTES(0x351E),
-    SWAP_BYTES(0xB6FD)};
+static uint16_t palette[16] = {SWAP_BYTES(0x0000), SWAP_BYTES(0x49E5), SWAP_BYTES(0xB926), SWAP_BYTES(0xE371),
+                               SWAP_BYTES(0x9CF3), SWAP_BYTES(0xA324), SWAP_BYTES(0xEC46), SWAP_BYTES(0xF70D),
+                               SWAP_BYTES(0xffff), SWAP_BYTES(0x1926), SWAP_BYTES(0x2A49), SWAP_BYTES(0x4443),
+                               SWAP_BYTES(0xA664), SWAP_BYTES(0x02B0), SWAP_BYTES(0x351E), SWAP_BYTES(0xB6FD)};
 
 void chargfx_clear(chargfx_color_t color) {
   int size = TEXT_WIDTH * TEXT_HEIGHT;
@@ -52,20 +51,30 @@ void chargfx_clear(chargfx_color_t color) {
   chargfx_draw_screen();
 }
 
-void chargfx_set_foreground(chargfx_color_t color) { screen_fg_color = color; }
+void chargfx_set_foreground(chargfx_color_t color) {
+  screen_fg_color = color;
+}
 
-void chargfx_set_background(chargfx_color_t color) { screen_bg_color = color; }
+void chargfx_set_background(chargfx_color_t color) {
+  screen_bg_color = color;
+}
 
-void chargfx_set_font_index(uint8_t idx) { ui_font_index = idx; }
+void chargfx_set_font_index(uint8_t idx) {
+  ui_font_index = idx;
+}
 
 void chargfx_set_cursor(uint8_t x, uint8_t y) {
   cursor_x = x;
   cursor_y = y;
 }
 
-uint8_t chargfx_get_cursor_x() { return cursor_x; }
+uint8_t chargfx_get_cursor_x() {
+  return cursor_x;
+}
 
-uint8_t chargfx_get_cursor_y() { return cursor_y; }
+uint8_t chargfx_get_cursor_y() {
+  return cursor_y;
+}
 
 void chargfx_putc(char c, bool invert) {
   int idx = cursor_y * TEXT_WIDTH + cursor_x;
@@ -77,19 +86,6 @@ void chargfx_putc(char c, bool invert) {
     } else {
       colors[idx] = ((screen_fg_color & 0xf) << 4) | (screen_bg_color & 0xf);
     }
-  }
-}
-
-void chargfx_print(const char *str, bool invert) {
-  char c;
-  while ((c = *str++)) {
-    chargfx_putc(c, invert);
-  }
-}
-
-void chargfx_write(const char *str, int len, bool invert) {
-  for (int i = 0; i < len; i++) {
-    chargfx_putc(*str++, invert);
   }
 }
 
@@ -111,8 +107,7 @@ void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
 // mounted rotated 90deg clockwise, ie. the "bottom" of the LCD with the flex
 // pcb connector is actually on the left instead of its normal orientation of
 // being mounted on the bottom of the LCD
-void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y,
-                       uint16_t width, uint16_t height) {
+void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
   // Get the RGB565 color from the current foreground palette index
   uint16_t color = palette[color_index];
 
@@ -173,8 +168,7 @@ void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y,
   ili9341_command_param(LCD_MADCTL_DEFAULT);
 }
 
-inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width,
-                                    uint8_t height) {
+inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   assert(height <= BUFFER_CHARS);
 
   uint16_t screen_x = x * CHAR_WIDTH;
@@ -210,9 +204,7 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width,
         uint16_t fg_color = palette[colors[idx] >> 4];
         uint16_t bg_color = palette[colors[idx] & 0xf];
 
-        const uint16_t *pixel_data =
-            (character < 96) ? (*font)[character]
-                             : FONT_SPECIAL_CHARACTERS_BITMAP[character - 96];
+        const uint16_t *pixel_data = (character < 96) ? (*font)[character] : FONT_SPECIAL_BITMAP[character - 96];
 
         // draw the character into the buffer
         for (int j = CHAR_HEIGHT - 1; j >= 0; j--) {
@@ -221,8 +213,7 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width,
         }
       }
     }
-    ili9341_write_data_continuous(buffer,
-                                  CHAR_WIDTH * screen_height * sizeof(int16_t));
+    ili9341_write_data_continuous(buffer, CHAR_WIDTH * screen_height * sizeof(int16_t));
   }
   ili9341_stop_writing();
 }
@@ -291,4 +282,6 @@ void chargfx_set_palette_color(int idx, uint16_t rgb565_color) {
   palette[idx] = SWAP_BYTES(rgb565_color);
 }
 
-void chargfx_init() { ili9341_init(); }
+void chargfx_init() {
+  ili9341_init();
+}

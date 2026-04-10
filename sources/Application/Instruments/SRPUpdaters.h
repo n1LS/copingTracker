@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SRP_UPDATERS_H_
@@ -15,8 +17,8 @@
 
 class VolumeRamp : public I_SRPUpdater {
 public:
-  VolumeRamp(){};
-  virtual ~VolumeRamp(){};
+  VolumeRamp() {};
+  virtual ~VolumeRamp() {};
   void SetData(float target, float speed, float start);
   virtual void Trigger(bool tableTick);
   virtual void UpdateSRP(struct RUParams &rup);
@@ -29,8 +31,8 @@ private:
 
 class FCRamp : public I_SRPUpdater {
 public:
-  FCRamp(){};
-  virtual ~FCRamp(){};
+  FCRamp() {};
+  virtual ~FCRamp() {};
   void SetData(float target, float speed, float start);
   virtual void Trigger(bool tableTick);
   virtual void UpdateSRP(struct RUParams &rup);
@@ -43,8 +45,8 @@ private:
 
 class FRRamp : public I_SRPUpdater {
 public:
-  FRRamp(){};
-  virtual ~FRRamp(){};
+  FRRamp() {};
+  virtual ~FRRamp() {};
   void SetData(float target, float speed, float start);
   virtual void Trigger(bool tableTick);
   virtual void UpdateSRP(struct RUParams &rup);
@@ -57,8 +59,8 @@ private:
 
 class LogSpeedRamp : public I_SRPUpdater {
 public:
-  LogSpeedRamp(){};
-  virtual ~LogSpeedRamp(){};
+  LogSpeedRamp() {};
+  virtual ~LogSpeedRamp() {};
   void SetData(float target, float speed, float start);
   float GetCurrent();
   virtual void Trigger(bool tableTick);
@@ -72,8 +74,8 @@ private:
 
 class LinSpeedRamp : public I_SRPUpdater {
 public:
-  LinSpeedRamp(){};
-  virtual ~LinSpeedRamp(){};
+  LinSpeedRamp() {};
+  virtual ~LinSpeedRamp() {};
   void SetData(float target, float speed, float start);
   virtual void Trigger(bool tableTick);
   virtual void UpdateSRP(struct RUParams &rup);
@@ -86,8 +88,8 @@ private:
 
 class Arp : public I_SRPUpdater {
 public:
-  Arp(){};
-  virtual ~Arp(){};
+  Arp() {};
+  virtual ~Arp() {};
   void SetData(uint data);
   virtual void Trigger(bool tableTick);
   virtual void UpdateSRP(struct RUParams &rup);
@@ -101,8 +103,8 @@ private:
 
 class Panner : public I_SRPUpdater {
 public:
-  Panner(){};
-  virtual ~Panner(){};
+  Panner() {};
+  virtual ~Panner() {};
   void SetData(float target, float speed, float start);
   virtual void Trigger(bool tableTick);
   virtual void UpdateSRP(struct RUParams &rup);
@@ -113,14 +115,19 @@ private:
   fixed speed_;
 };
 
-/*class Vibrato: public I_SRPUpdater {
+class Vibrato : public I_SRPUpdater {
 public:
-        Vibrato() {} ;
-        virtual ~Vibrato() {} ;
-        void SetData() ;
-        virtual void Trigger(bool tableTick) ;
-        virtual void UpdateSRP(struct RUParams &rup) ;
+  Vibrato() {};
+  virtual ~Vibrato() {};
+  void SetData(uint8_t rate, uint8_t depth);
+  virtual void Trigger(bool tableTick);
+  virtual void UpdateSRP(struct RUParams &rup);
+
 private:
-} ;
-*/
+  fixed current_;
+  uint8_t depth_;
+  uint16_t phase_;
+  uint16_t rate_;
+};
+
 #endif

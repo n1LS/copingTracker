@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MIDI_SERVICE_H_
@@ -73,8 +75,7 @@ private:
   uint16_t activeMidiChannelMask_;
   etl::vector<MidiOutDevice *, 2> activeOutDevices_;
 
-  etl::array<etl::vector<MidiMessage, MIDI_MAX_MESG_QUEUE>, MIDI_MAX_BUFFERS>
-      queues_;
+  etl::array<etl::vector<MidiMessage, MIDI_MAX_MESG_QUEUE>, MIDI_MAX_BUFFERS> queues_;
 
   int currentPlayQueue_;
   int currentOutQueue_;

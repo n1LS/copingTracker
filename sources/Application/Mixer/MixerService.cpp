@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "MixerService.h"
@@ -29,9 +31,9 @@ MixerService::MixerService() : master_(), sync_(platform_mutex()) {
   project_ = NULL;
   mode_ = MSM_AUDIO;
   master_.SetName("Master");
-};
+}
 
-MixerService::~MixerService(){};
+MixerService::~MixerService() {};
 
 bool MixerService::Init() {
   out_ = 0;
@@ -69,7 +71,7 @@ bool MixerService::Init() {
     Trace::Error("[MixerService::Init] Failed to get output");
   }
   return (result);
-};
+}
 
 void MixerService::Close() {
   if (out_) {
@@ -82,7 +84,7 @@ void MixerService::Close() {
     bus_[i].ClearModules();
   }
   out_ = 0;
-};
+}
 
 bool MixerService::Start() {
   MidiService::GetInstance()->Start();
@@ -91,7 +93,7 @@ bool MixerService::Start() {
     out_->Start();
   }
   return true;
-};
+}
 
 void MixerService::Stop() {
   MidiService::GetInstance()->Stop();
@@ -101,7 +103,9 @@ void MixerService::Stop() {
   }
 }
 
-MixBus *MixerService::GetMixBus(int i) { return &(bus_[i]); };
+MixBus *MixerService::GetMixBus(int i) {
+  return &(bus_[i]);
+}
 
 void MixerService::Update(Observable &o, I_ObservableData *d) {
 
@@ -175,8 +179,7 @@ void MixerService::setRenderingMode(MixerServiceMode mode) {
     // in case proj name changed since last time paths were configured
     bool pathsResult = configureRenderPaths();
     if (!pathsResult) {
-      Trace::Error(
-          "[MixerService::setRenderingMode] Failed to set render paths");
+      Trace::Error("[MixerService::setRenderingMode] Failed to set render paths");
     }
   }
 
@@ -200,12 +203,12 @@ void MixerService::setRenderingMode(MixerServiceMode mode) {
 
 void MixerService::OnPlayerStart(MixerServiceMode mode) {
   setRenderingMode(mode);
-};
+}
 
 void MixerService::OnPlayerStop() {
   // always reset back to audio mode when stopping
   setRenderingMode(MSM_AUDIO);
-};
+}
 
 bool MixerService::configureRenderPaths() {
   if (!out_) {
@@ -226,8 +229,7 @@ bool MixerService::configureRenderPaths() {
   npf_snprintf(path, sizeof(path), "/renders/%s-mixdown.wav", projectname);
   out_->SetFileRenderer(path);
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-    npf_snprintf(path, sizeof(path), "/renders/%s-channel%d.wav", projectname,
-                 i);
+    npf_snprintf(path, sizeof(path), "/renders/%s-channel%d.wav", projectname, i);
     bus_[i].SetFileRenderer(path);
   }
   return true;
@@ -251,8 +253,14 @@ void MixerService::Execute(FourCC id, float value) {
   };
 }
 
-AudioOut *MixerService::GetAudioOut() { return out_; };
+AudioOut *MixerService::GetAudioOut() {
+  return out_;
+}
 
-void MixerService::Lock() { sync_->Lock(); }
+void MixerService::Lock() {
+  sync_->Lock();
+}
 
-void MixerService::Unlock() { sync_->Unlock(); }
+void MixerService::Unlock() {
+  sync_->Unlock();
+}

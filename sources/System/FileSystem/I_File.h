@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _I_FILE_H_
@@ -16,8 +18,10 @@ bool CloseFile_DO_NOT_USE(I_File *);
 
 class I_File {
 public:
-  I_File() {}
-  virtual ~I_File() {}
+  I_File() {
+  }
+  virtual ~I_File() {
+  }
 
   virtual int Read(void *ptr, int size) = 0;
   virtual int GetC() = 0;

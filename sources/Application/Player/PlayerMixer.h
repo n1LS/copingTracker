@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _APPLICATION_MIXER_H_
@@ -23,12 +25,10 @@
 
 #define STREAM_MIX_BUS 8
 
-class PlayerMixer : public T_Singleton<PlayerMixer>,
-                    public Observable,
-                    public I_Observer {
+class PlayerMixer : public T_Singleton<PlayerMixer>, public Observable, public I_Observer {
 public:
   PlayerMixer();
-  virtual ~PlayerMixer(){};
+  virtual ~PlayerMixer() {};
 
   bool Start();
   void Stop();
@@ -40,8 +40,7 @@ public:
   void OnPlayerStart(MixerServiceMode msmMode);
   void OnPlayerStop();
 
-  void StartInstrument(int channel, I_Instrument *instrument,
-                       unsigned char note, bool newInstrument);
+  void StartInstrument(int channel, I_Instrument *instrument, unsigned char note, bool newInstrument);
   void StopInstrument(int channel);
 
   int GetChannelNote(int Channel);
@@ -80,7 +79,9 @@ public:
   void Unlock();
 
   // Get the current project
-  Project *GetProject() { return project_; }
+  Project *GetProject() {
+    return project_;
+  }
 
   etl::array<stereosample, SONG_CHANNEL_COUNT> *GetMixerLevels();
 

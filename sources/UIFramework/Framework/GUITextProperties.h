@@ -3,16 +3,18 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _GUI_TEXT_PROPERTIES_H_
 #define _GUI_TEXT_PROPERTIES_H_
 
 struct GUITextProperties {
-  GUITextProperties() : invert_(false){};
-  GUITextProperties(bool inverted) : invert_(inverted){};
+  GUITextProperties() : invert_(false) {};
+  GUITextProperties(bool inverted) : invert_(inverted) {};
   bool invert_;
 };
 

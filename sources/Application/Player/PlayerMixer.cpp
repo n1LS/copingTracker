@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "PlayerMixer.h"
@@ -27,11 +29,9 @@ PlayerMixer::PlayerMixer() {
     lastInstrument_[i] = 0;
   };
 
-  alignas(PlayerChannel) static char
-      playerChannelMemBuf[sizeof(PlayerChannel) * SONG_CHANNEL_COUNT];
+  alignas(PlayerChannel) static char playerChannelMemBuf[sizeof(PlayerChannel) * SONG_CHANNEL_COUNT];
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-    channel_[i] =
-        new (playerChannelMemBuf + i * sizeof(PlayerChannel)) PlayerChannel(i);
+    channel_[i] = new (playerChannelMemBuf + i * sizeof(PlayerChannel)) PlayerChannel(i);
   }
 }
 
@@ -65,7 +65,7 @@ bool PlayerMixer::Init(Project *project) {
   fileStreamer_.SetProject(project);
 
   return true;
-};
+}
 
 void PlayerMixer::BindProject(Project *project) {
   project_ = project;
@@ -97,31 +97,31 @@ bool PlayerMixer::Start() {
   };
 
   return ms->Start();
-};
+}
 
 void PlayerMixer::Stop() {
   MixerService *ms = MixerService::GetInstance();
   ms->Stop();
   ms->RemoveObserver(*this);
-};
+}
 
 void PlayerMixer::StartChannel(int channel) {
   isChannelPlaying_[channel] = true;
-};
+}
 
 void PlayerMixer::StopChannel(int channel) {
 
   StopInstrument(channel);
   isChannelPlaying_[channel] = false;
-};
+}
 
 bool PlayerMixer::IsChannelPlaying(int channel) {
   return isChannelPlaying_[channel];
-};
+}
 
 I_Instrument *PlayerMixer::GetLastInstrument(int channel) {
   return lastInstrument_[channel];
-};
+}
 
 stereosample PlayerMixer::GetMasterOutLevel() {
   MixerService *ms = MixerService::GetInstance();
@@ -149,14 +149,13 @@ void PlayerMixer::Update(Observable &o, I_ObservableData *d) {
 
   MixerService *ms = MixerService::GetInstance();
   ms->SetMasterVolume(project_->GetMasterVolume());
-};
+}
 
-void PlayerMixer::StartInstrument(int channel, I_Instrument *instrument,
-                                  unsigned char note, bool newInstrument) {
+void PlayerMixer::StartInstrument(int channel, I_Instrument *instrument, unsigned char note, bool newInstrument) {
   channel_[channel]->StartInstrument(instrument, note, newInstrument);
   lastInstrument_[channel] = instrument;
   notes_[channel] = note;
-};
+}
 
 void PlayerMixer::StopInstrument(int channel) {
   channel_[channel]->StopInstrument();
@@ -170,7 +169,7 @@ I_Instrument *PlayerMixer::GetInstrument(int channel) {
 int PlayerMixer::GetPlayedBufferPercentage() {
   MixerService *ms = MixerService::GetInstance();
   return ms->GetPlayedBufferPercentage();
-};
+}
 
 void PlayerMixer::SetChannelMute(int channel, bool mode) {
   channel_[channel]->SetMute(mode);
@@ -182,22 +181,27 @@ bool PlayerMixer::IsChannelMuted(int channel) {
 
 void PlayerMixer::StartStreaming(const char *name, int startSample) {
   fileStreamer_.Start(name, startSample);
-};
+}
 
 void PlayerMixer::StartLoopingStreaming(const char *name) {
   fileStreamer_.Start(name, 0, true);
-};
+}
 
-void PlayerMixer::StopStreaming() { fileStreamer_.Stop(); };
+void PlayerMixer::StopStreaming() {
+  fileStreamer_.Stop();
+}
 
-void PlayerMixer::StartRecordStreaming(uint16_t *srcBuffer, uint32_t size,
-                                       bool stereo) {
+void PlayerMixer::StartRecordStreaming(uint16_t *srcBuffer, uint32_t size, bool stereo) {
   recordStreamer_.Start(srcBuffer, size, stereo);
-};
+}
 
-void PlayerMixer::StopRecordStreaming() { recordStreamer_.Stop(); };
+void PlayerMixer::StopRecordStreaming() {
+  recordStreamer_.Stop();
+}
 
-bool PlayerMixer::IsPlaying() { return fileStreamer_.IsPlaying(); }
+bool PlayerMixer::IsPlaying() {
+  return fileStreamer_.IsPlaying();
+}
 
 void PlayerMixer::OnPlayerStart(MixerServiceMode msmMode) {
   MixerService *ms = MixerService::GetInstance();
@@ -211,9 +215,7 @@ void PlayerMixer::OnPlayerStop() {
 
 static char noteBuffer[5];
 
-static bool shouldShowSlice(int channel, uint8_t &sliceIndex,
-                            I_Instrument *instrument,
-                            const unsigned char *notes) {
+static bool shouldShowSlice(int channel, uint8_t &sliceIndex, I_Instrument *instrument, const unsigned char *notes) {
   if (!instrument || instrument->GetType() != IT_SAMPLE) {
     return false;
   }
@@ -224,12 +226,13 @@ static bool shouldShowSlice(int channel, uint8_t &sliceIndex,
   if (!sampleInstr->ShouldDisplaySliceForNote(notes[channel])) {
     return false;
   }
-  sliceIndex =
-      static_cast<uint8_t>(notes[channel] - SampleInstrument::SliceNoteBase);
+  sliceIndex = static_cast<uint8_t>(notes[channel] - SampleInstrument::SliceNoteBase);
   return true;
 }
 
-int PlayerMixer::GetChannelNote(int channel) { return notes_[channel]; }
+int PlayerMixer::GetChannelNote(int channel) {
+  return notes_[channel];
+}
 
 const char *PlayerMixer::GetPlayedNote(int channel) {
 
@@ -238,7 +241,7 @@ const char *PlayerMixer::GetPlayedNote(int channel) {
     return noteBuffer;
   }
   return "  ";
-};
+}
 
 const char *PlayerMixer::GetPlayedOctive(int channel) {
   if (notes_[channel] <= HIGHEST_NOTE) {
@@ -250,7 +253,7 @@ const char *PlayerMixer::GetPlayedOctive(int channel) {
     }
   }
   return "  ";
-};
+}
 
 bool PlayerMixer::GetPlayedSliceIndex(int channel, uint8_t &sliceIndex) {
   return shouldShowSlice(channel, sliceIndex, lastInstrument_[channel], notes_);
@@ -259,14 +262,14 @@ bool PlayerMixer::GetPlayedSliceIndex(int channel, uint8_t &sliceIndex) {
 AudioOut *PlayerMixer::GetAudioOut() {
   MixerService *ms = MixerService::GetInstance();
   return ms->GetAudioOut();
-};
+}
 
 void PlayerMixer::Lock() {
   MixerService *ms = MixerService::GetInstance();
   ms->Lock();
-};
+}
 
 void PlayerMixer::Unlock() {
   MixerService *ms = MixerService::GetInstance();
   ms->Unlock();
-};
+}

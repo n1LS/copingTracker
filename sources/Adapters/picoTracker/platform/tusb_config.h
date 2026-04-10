@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 /*
@@ -42,9 +44,8 @@ extern "C" {
 #ifndef CFG_TUSB_MCU
 #error CFG_TUSB_MCU must be defined
 #endif
-#if CFG_TUSB_MCU == OPT_MCU_LPC18XX || CFG_TUSB_MCU == OPT_MCU_LPC43XX ||      \
-    CFG_TUSB_MCU == OPT_MCU_MIMXRT10XX || CFG_TUSB_MCU == OPT_MCU_NUC505 ||    \
-    CFG_TUSB_MCU == OPT_MCU_CXD56
+#if CFG_TUSB_MCU == OPT_MCU_LPC18XX || CFG_TUSB_MCU == OPT_MCU_LPC43XX || CFG_TUSB_MCU == OPT_MCU_MIMXRT10XX ||        \
+    CFG_TUSB_MCU == OPT_MCU_NUC505 || CFG_TUSB_MCU == OPT_MCU_CXD56
 #define CFG_TUSB_RHPORT0_MODE (OPT_MODE_DEVICE | OPT_MODE_HIGH_SPEED)
 #else
 #define CFG_TUSB_RHPORT0_MODE OPT_MODE_DEVICE
@@ -74,7 +75,7 @@ extern "C" {
 #endif
 //------------- CLASS -------------//
 #define CFG_TUD_CDC 1
-#define CFG_TUD_MSC 0
+#define CFG_TUD_MSC 1
 #define CFG_TUD_HID 0
 #define CFG_TUD_MIDI 1
 #define CFG_TUD_VENDOR 0
@@ -89,6 +90,9 @@ extern "C" {
 
 // CDC Endpoint transfer buffer size, more is faster
 #define CFG_TUD_CDC_EP_BUFSIZE (TUD_OPT_HIGH_SPEED ? 512 : 64)
+
+// MSC Buffer size of Device Mass storage
+#define CFG_TUD_MSC_EP_BUFSIZE 4096
 
 #ifdef __cplusplus
 }

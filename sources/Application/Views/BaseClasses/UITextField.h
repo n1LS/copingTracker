@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _UI_TEXT_FIELD_
@@ -16,11 +18,9 @@
 
 #define MAX_UITEXTFIELD_LABEL_LENGTH 9
 
-template <uint8_t MaxLength>
-class UITextField : public UIField, public Observable {
+template <uint8_t MaxLength> class UITextField : public UIField, public Observable {
 public:
-  UITextField(Variable &v, const GUIPoint &position,
-              const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label,
+  UITextField(Variable &v, const GUIPoint &position, const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label,
               uint8_t fourcc, etl::string<MaxLength> &defaultValue_);
 
   virtual ~UITextField();
@@ -36,6 +36,7 @@ public:
 private:
   int selected_;
   uint8_t currentChar_ = 0;
+  uint8_t lastUsedChar_ = 'A';
   Variable *src_; // Pointer instead of reference
   const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> label_;
   uint8_t fourcc_;

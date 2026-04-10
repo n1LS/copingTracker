@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _PICOTRACKERUSBMIDIINDEVICE_H_
@@ -26,10 +28,16 @@ public:
   virtual void poll();
 
 protected:
-  virtual bool initDriver() { return true; };
-  virtual bool startDriver() { return true; };
-  virtual void stopDriver() {}
-  virtual void closeDriver() {}
+  virtual bool initDriver() {
+    return true;
+  };
+  virtual bool startDriver() {
+    return true;
+  };
+  virtual void stopDriver() {
+  }
+  virtual void closeDriver() {
+  }
 };
 
 #endif

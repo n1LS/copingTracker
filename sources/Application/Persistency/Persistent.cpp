@@ -3,22 +3,24 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Persistent.h"
 #include "Foundation/Types/Types.h"
 
 Persistent::Persistent(const char *nodeName, bool registerWithService)
-    : SubService(FourCC::ServicePersistency, registerWithService),
-      nodeName_(nodeName) {}
+    : SubService(FourCC::ServicePersistency, registerWithService), nodeName_(nodeName) {
+}
 
 void Persistent::Save(tinyxml2::XMLPrinter *printer) {
   printer->OpenElement(nodeName_);
   SaveContent(printer);
   printer->CloseElement();
-};
+}
 
 bool Persistent::Restore(PersistencyDocument *doc) {
   if (!strcmp(doc->ElemName(), nodeName_)) {
@@ -26,4 +28,4 @@ bool Persistent::Restore(PersistencyDocument *doc) {
     return true;
   }
   return false;
-};
+}

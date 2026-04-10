@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 #ifndef _RECORD_H_
 #define _RECORD_H_
@@ -19,8 +21,7 @@
 enum RecordSource { AllOff, LineIn, Mic, USBIn };
 
 void Record(void *);
-bool StartRecording(const char *filename, uint8_t threshold,
-                    uint32_t milliseconds);
+bool StartRecording(const char *filename, uint8_t threshold, uint32_t milliseconds);
 void StopRecording();
 void RequestStopRecording();
 bool WaitForRecordingStop(uint32_t timeoutMs);

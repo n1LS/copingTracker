@@ -3,14 +3,14 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "char.h"
 
-char h2c__[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                  '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+char h2c__[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-const char *noteNames[12] = {"C ", "C#", "D ", "D#", "E ", "F ",
-                             "F#", "G ", "G#", "A ", "A#", "B "};
+const char *noteNames[12] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "};

@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 // Implementation of SDIO communication for RP2040
@@ -75,35 +77,26 @@ void rp2040_sdio_dma_irq();
 //    crc = crc7_table[crc ^ byte];
 //    .. repeat for every byte ..
 static const uint8_t crc7_table[256] = {
-    0x00, 0x12, 0x24, 0x36, 0x48, 0x5a, 0x6c, 0x7e, 0x90, 0x82, 0xb4, 0xa6,
-    0xd8, 0xca, 0xfc, 0xee, 0x32, 0x20, 0x16, 0x04, 0x7a, 0x68, 0x5e, 0x4c,
-    0xa2, 0xb0, 0x86, 0x94, 0xea, 0xf8, 0xce, 0xdc, 0x64, 0x76, 0x40, 0x52,
-    0x2c, 0x3e, 0x08, 0x1a, 0xf4, 0xe6, 0xd0, 0xc2, 0xbc, 0xae, 0x98, 0x8a,
-    0x56, 0x44, 0x72, 0x60, 0x1e, 0x0c, 0x3a, 0x28, 0xc6, 0xd4, 0xe2, 0xf0,
-    0x8e, 0x9c, 0xaa, 0xb8, 0xc8, 0xda, 0xec, 0xfe, 0x80, 0x92, 0xa4, 0xb6,
-    0x58, 0x4a, 0x7c, 0x6e, 0x10, 0x02, 0x34, 0x26, 0xfa, 0xe8, 0xde, 0xcc,
-    0xb2, 0xa0, 0x96, 0x84, 0x6a, 0x78, 0x4e, 0x5c, 0x22, 0x30, 0x06, 0x14,
-    0xac, 0xbe, 0x88, 0x9a, 0xe4, 0xf6, 0xc0, 0xd2, 0x3c, 0x2e, 0x18, 0x0a,
-    0x74, 0x66, 0x50, 0x42, 0x9e, 0x8c, 0xba, 0xa8, 0xd6, 0xc4, 0xf2, 0xe0,
-    0x0e, 0x1c, 0x2a, 0x38, 0x46, 0x54, 0x62, 0x70, 0x82, 0x90, 0xa6, 0xb4,
-    0xca, 0xd8, 0xee, 0xfc, 0x12, 0x00, 0x36, 0x24, 0x5a, 0x48, 0x7e, 0x6c,
-    0xb0, 0xa2, 0x94, 0x86, 0xf8, 0xea, 0xdc, 0xce, 0x20, 0x32, 0x04, 0x16,
-    0x68, 0x7a, 0x4c, 0x5e, 0xe6, 0xf4, 0xc2, 0xd0, 0xae, 0xbc, 0x8a, 0x98,
-    0x76, 0x64, 0x52, 0x40, 0x3e, 0x2c, 0x1a, 0x08, 0xd4, 0xc6, 0xf0, 0xe2,
-    0x9c, 0x8e, 0xb8, 0xaa, 0x44, 0x56, 0x60, 0x72, 0x0c, 0x1e, 0x28, 0x3a,
-    0x4a, 0x58, 0x6e, 0x7c, 0x02, 0x10, 0x26, 0x34, 0xda, 0xc8, 0xfe, 0xec,
-    0x92, 0x80, 0xb6, 0xa4, 0x78, 0x6a, 0x5c, 0x4e, 0x30, 0x22, 0x14, 0x06,
-    0xe8, 0xfa, 0xcc, 0xde, 0xa0, 0xb2, 0x84, 0x96, 0x2e, 0x3c, 0x0a, 0x18,
-    0x66, 0x74, 0x42, 0x50, 0xbe, 0xac, 0x9a, 0x88, 0xf6, 0xe4, 0xd2, 0xc0,
-    0x1c, 0x0e, 0x38, 0x2a, 0x54, 0x46, 0x70, 0x62, 0x8c, 0x9e, 0xa8, 0xba,
-    0xc4, 0xd6, 0xe0, 0xf2};
+    0x00, 0x12, 0x24, 0x36, 0x48, 0x5a, 0x6c, 0x7e, 0x90, 0x82, 0xb4, 0xa6, 0xd8, 0xca, 0xfc, 0xee, 0x32, 0x20, 0x16,
+    0x04, 0x7a, 0x68, 0x5e, 0x4c, 0xa2, 0xb0, 0x86, 0x94, 0xea, 0xf8, 0xce, 0xdc, 0x64, 0x76, 0x40, 0x52, 0x2c, 0x3e,
+    0x08, 0x1a, 0xf4, 0xe6, 0xd0, 0xc2, 0xbc, 0xae, 0x98, 0x8a, 0x56, 0x44, 0x72, 0x60, 0x1e, 0x0c, 0x3a, 0x28, 0xc6,
+    0xd4, 0xe2, 0xf0, 0x8e, 0x9c, 0xaa, 0xb8, 0xc8, 0xda, 0xec, 0xfe, 0x80, 0x92, 0xa4, 0xb6, 0x58, 0x4a, 0x7c, 0x6e,
+    0x10, 0x02, 0x34, 0x26, 0xfa, 0xe8, 0xde, 0xcc, 0xb2, 0xa0, 0x96, 0x84, 0x6a, 0x78, 0x4e, 0x5c, 0x22, 0x30, 0x06,
+    0x14, 0xac, 0xbe, 0x88, 0x9a, 0xe4, 0xf6, 0xc0, 0xd2, 0x3c, 0x2e, 0x18, 0x0a, 0x74, 0x66, 0x50, 0x42, 0x9e, 0x8c,
+    0xba, 0xa8, 0xd6, 0xc4, 0xf2, 0xe0, 0x0e, 0x1c, 0x2a, 0x38, 0x46, 0x54, 0x62, 0x70, 0x82, 0x90, 0xa6, 0xb4, 0xca,
+    0xd8, 0xee, 0xfc, 0x12, 0x00, 0x36, 0x24, 0x5a, 0x48, 0x7e, 0x6c, 0xb0, 0xa2, 0x94, 0x86, 0xf8, 0xea, 0xdc, 0xce,
+    0x20, 0x32, 0x04, 0x16, 0x68, 0x7a, 0x4c, 0x5e, 0xe6, 0xf4, 0xc2, 0xd0, 0xae, 0xbc, 0x8a, 0x98, 0x76, 0x64, 0x52,
+    0x40, 0x3e, 0x2c, 0x1a, 0x08, 0xd4, 0xc6, 0xf0, 0xe2, 0x9c, 0x8e, 0xb8, 0xaa, 0x44, 0x56, 0x60, 0x72, 0x0c, 0x1e,
+    0x28, 0x3a, 0x4a, 0x58, 0x6e, 0x7c, 0x02, 0x10, 0x26, 0x34, 0xda, 0xc8, 0xfe, 0xec, 0x92, 0x80, 0xb6, 0xa4, 0x78,
+    0x6a, 0x5c, 0x4e, 0x30, 0x22, 0x14, 0x06, 0xe8, 0xfa, 0xcc, 0xde, 0xa0, 0xb2, 0x84, 0x96, 0x2e, 0x3c, 0x0a, 0x18,
+    0x66, 0x74, 0x42, 0x50, 0xbe, 0xac, 0x9a, 0x88, 0xf6, 0xe4, 0xd2, 0xc0, 0x1c, 0x0e, 0x38, 0x2a, 0x54, 0x46, 0x70,
+    0x62, 0x8c, 0x9e, 0xa8, 0xba, 0xc4, 0xd6, 0xe0, 0xf2};
 
 // Calculate the CRC16 checksum for parallel 4 bit lines separately.
 // When the SDIO bus operates in 4-bit mode, the CRC16 algorithm
 // is applied to each line separately and generates total of
 // 4 x 16 = 64 bits of checksum.
-__attribute__((optimize("O3"))) uint64_t
-sdio_crc16_4bit_checksum(uint32_t *data, uint32_t num_words) {
+__attribute__((optimize("O3"))) uint64_t sdio_crc16_4bit_checksum(uint32_t *data, uint32_t num_words) {
   uint64_t crc = 0;
   uint32_t *end = data + num_words;
   while (data < end) {
@@ -137,20 +130,18 @@ sdio_crc16_4bit_checksum(uint32_t *data, uint32_t num_words) {
  * Basic SDIO command execution
  *******************************************************/
 
-static void sdio_send_command(uint8_t command, uint32_t arg,
-                              uint8_t response_bits) {
+static void sdio_send_command(uint8_t command, uint32_t arg, uint8_t response_bits) {
   // Trace::Debug("SDIO Command: ", (int)command, " arg ", arg);
 
   // Format the arguments in the way expected by the PIO code.
-  uint32_t word0 = (47 << 24) |      // Number of bits in command minus one
-                   (1 << 22) |       // Transfer direction from host to card
-                   (command << 16) | // Command byte
+  uint32_t word0 = (47 << 24) |                  // Number of bits in command minus one
+                   (1 << 22) |                   // Transfer direction from host to card
+                   (command << 16) |             // Command byte
                    (((arg >> 24) & 0xFF) << 8) | // MSB byte of argument
                    (((arg >> 16) & 0xFF) << 0);
 
-  uint32_t word1 = (((arg >> 8) & 0xFF) << 24) |
-                   (((arg >> 0) & 0xFF) << 16) | // LSB byte of argument
-                   (1 << 8);                     // End bit
+  uint32_t word1 = (((arg >> 8) & 0xFF) << 24) | (((arg >> 0) & 0xFF) << 16) | // LSB byte of argument
+                   (1 << 8);                                                   // End bit
 
   // Set number of bits in response minus one, or leave at 0 if no response
   // expected
@@ -174,8 +165,7 @@ static void sdio_send_command(uint8_t command, uint32_t arg,
   pio_sm_put(SDIO_PIO, SDIO_CMD_SM, word1);
 }
 
-sdio_status_t rp2040_sdio_command_R1(uint8_t command, uint32_t arg,
-                                     uint32_t *response) {
+sdio_status_t rp2040_sdio_command_R1(uint8_t command, uint32_t arg, uint32_t *response) {
   sdio_send_command(command, arg, response ? 48 : 0);
 
   // Wait for response
@@ -185,19 +175,15 @@ sdio_status_t rp2040_sdio_command_R1(uint8_t command, uint32_t arg,
     if ((uint32_t)(millis() - start) > 2) {
       if (command != 8) // Don't log for missing SD card
       {
-        Trace::Debug(
-            "Timeout waiting for response in rp2040_sdio_command_R1(",
-            (int)command, "), ", "PIO PC: ",
-            (int)pio_sm_get_pc(SDIO_PIO, SDIO_CMD_SM) -
-                (int)g_sdio.pio_cmd_clk_offset,
-            " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_CMD_SM),
-            " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_CMD_SM));
+        Trace::Debug("Timeout waiting for response in rp2040_sdio_command_R1(", (int)command, "), ",
+                     "PIO PC: ", (int)pio_sm_get_pc(SDIO_PIO, SDIO_CMD_SM) - (int)g_sdio.pio_cmd_clk_offset,
+                     " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_CMD_SM),
+                     " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_CMD_SM));
       }
 
       // Reset the state machine program
       pio_sm_clear_fifos(SDIO_PIO, SDIO_CMD_SM);
-      pio_sm_exec(SDIO_PIO, SDIO_CMD_SM,
-                  pio_encode_jmp(g_sdio.pio_cmd_clk_offset));
+      pio_sm_exec(SDIO_PIO, SDIO_CMD_SM, pio_encode_jmp(g_sdio.pio_cmd_clk_offset));
       return SDIO_ERR_RESPONSE_TIMEOUT;
     }
   }
@@ -218,16 +204,14 @@ sdio_status_t rp2040_sdio_command_R1(uint8_t command, uint32_t arg,
 
     uint8_t actual_crc = ((resp1 >> 0) & 0xFE);
     if (crc != actual_crc) {
-      Trace::Debug("rp2040_sdio_command_R1(", (int)command,
-                   "): CRC error, calculated ", crc, " packet has ",
+      Trace::Debug("rp2040_sdio_command_R1(", (int)command, "): CRC error, calculated ", crc, " packet has ",
                    actual_crc);
       return SDIO_ERR_RESPONSE_CRC;
     }
 
     uint8_t response_cmd = ((resp0 >> 24) & 0xFF);
     if (response_cmd != command && command != 41) {
-      Trace::Debug("rp2040_sdio_command_R1(", (int)command,
-                   "): received reply for ", (int)response_cmd);
+      Trace::Debug("rp2040_sdio_command_R1(", (int)command, "): received reply for ", (int)response_cmd);
       return SDIO_ERR_RESPONSE_CODE;
     }
 
@@ -240,8 +224,7 @@ sdio_status_t rp2040_sdio_command_R1(uint8_t command, uint32_t arg,
   return SDIO_OK;
 }
 
-sdio_status_t rp2040_sdio_command_R2(uint8_t command, uint32_t arg,
-                                     uint8_t response[16]) {
+sdio_status_t rp2040_sdio_command_R2(uint8_t command, uint32_t arg, uint8_t response[16]) {
   // The response is too long to fit in the PIO FIFO, so use DMA to receive it.
   pio_sm_clear_fifos(SDIO_PIO, SDIO_CMD_SM);
   uint32_t response_buf[5];
@@ -250,27 +233,22 @@ sdio_status_t rp2040_sdio_command_R2(uint8_t command, uint32_t arg,
   channel_config_set_read_increment(&dmacfg, false);
   channel_config_set_write_increment(&dmacfg, true);
   channel_config_set_dreq(&dmacfg, pio_get_dreq(SDIO_PIO, SDIO_CMD_SM, false));
-  dma_channel_configure(SDIO_DMA_CH, &dmacfg, &response_buf,
-                        &SDIO_PIO->rxf[SDIO_CMD_SM], 5, true);
+  dma_channel_configure(SDIO_DMA_CH, &dmacfg, &response_buf, &SDIO_PIO->rxf[SDIO_CMD_SM], 5, true);
 
   sdio_send_command(command, arg, 136);
 
   uint32_t start = millis();
   while (dma_channel_is_busy(SDIO_DMA_CH)) {
     if ((uint32_t)(millis() - start) > 2) {
-      Trace::Debug(
-          "Timeout waiting for response in rp2040_sdio_command_R2(",
-          (int)command, "), ", "PIO PC: ",
-          (int)pio_sm_get_pc(SDIO_PIO, SDIO_CMD_SM) -
-              (int)g_sdio.pio_cmd_clk_offset,
-          " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_CMD_SM),
-          " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_CMD_SM));
+      Trace::Debug("Timeout waiting for response in rp2040_sdio_command_R2(", (int)command, "), ",
+                   "PIO PC: ", (int)pio_sm_get_pc(SDIO_PIO, SDIO_CMD_SM) - (int)g_sdio.pio_cmd_clk_offset,
+                   " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_CMD_SM),
+                   " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_CMD_SM));
 
       // Reset the state machine program
       dma_channel_abort(SDIO_DMA_CH);
       pio_sm_clear_fifos(SDIO_PIO, SDIO_CMD_SM);
-      pio_sm_exec(SDIO_PIO, SDIO_CMD_SM,
-                  pio_encode_jmp(g_sdio.pio_cmd_clk_offset));
+      pio_sm_exec(SDIO_PIO, SDIO_CMD_SM, pio_encode_jmp(g_sdio.pio_cmd_clk_offset));
       return SDIO_ERR_RESPONSE_TIMEOUT;
     }
   }
@@ -303,41 +281,34 @@ sdio_status_t rp2040_sdio_command_R2(uint8_t command, uint32_t arg,
 
   uint8_t actual_crc = response[15] & 0xFE;
   if (crc != actual_crc) {
-    Trace::Debug("rp2040_sdio_command_R2(", (int)command,
-                 "): CRC error, calculated ", crc, " packet has ", actual_crc);
+    Trace::Debug("rp2040_sdio_command_R2(", (int)command, "): CRC error, calculated ", crc, " packet has ", actual_crc);
     return SDIO_ERR_RESPONSE_CRC;
   }
 
   uint8_t response_cmd = ((response_buf[0] >> 24) & 0xFF);
   if (response_cmd != 0x3F) {
-    Trace::Debug("rp2040_sdio_command_R2(", (int)command,
-                 "): Expected reply code 0x3F");
+    Trace::Debug("rp2040_sdio_command_R2(", (int)command, "): Expected reply code 0x3F");
     return SDIO_ERR_RESPONSE_CODE;
   }
 
   return SDIO_OK;
 }
 
-sdio_status_t rp2040_sdio_command_R3(uint8_t command, uint32_t arg,
-                                     uint32_t *response) {
+sdio_status_t rp2040_sdio_command_R3(uint8_t command, uint32_t arg, uint32_t *response) {
   sdio_send_command(command, arg, 48);
 
   // Wait for response
   uint32_t start = millis();
   while (pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_CMD_SM) < 2) {
     if ((uint32_t)(millis() - start) > 2) {
-      Trace::Debug(
-          "Timeout waiting for response in rp2040_sdio_command_R3(",
-          (int)command, "), ", "PIO PC: ",
-          (int)pio_sm_get_pc(SDIO_PIO, SDIO_CMD_SM) -
-              (int)g_sdio.pio_cmd_clk_offset,
-          " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_CMD_SM),
-          " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_CMD_SM));
+      Trace::Debug("Timeout waiting for response in rp2040_sdio_command_R3(", (int)command, "), ",
+                   "PIO PC: ", (int)pio_sm_get_pc(SDIO_PIO, SDIO_CMD_SM) - (int)g_sdio.pio_cmd_clk_offset,
+                   " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_CMD_SM),
+                   " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_CMD_SM));
 
       // Reset the state machine program
       pio_sm_clear_fifos(SDIO_PIO, SDIO_CMD_SM);
-      pio_sm_exec(SDIO_PIO, SDIO_CMD_SM,
-                  pio_encode_jmp(g_sdio.pio_cmd_clk_offset));
+      pio_sm_exec(SDIO_PIO, SDIO_CMD_SM, pio_encode_jmp(g_sdio.pio_cmd_clk_offset));
       return SDIO_ERR_RESPONSE_TIMEOUT;
     }
   }
@@ -371,8 +342,7 @@ sdio_status_t rp2040_sdio_rx_start(uint8_t *buffer, uint32_t num_blocks) {
   // buffer and then 8 bytes to g_sdio.received_checksums.
   for (uint32_t i = 0; i < num_blocks; i++) {
     g_sdio.dma_blocks[i * 2].write_addr = buffer + i * SDIO_BLOCK_SIZE;
-    g_sdio.dma_blocks[i * 2].transfer_count =
-        SDIO_BLOCK_SIZE / sizeof(uint32_t);
+    g_sdio.dma_blocks[i * 2].transfer_count = SDIO_BLOCK_SIZE / sizeof(uint32_t);
 
     g_sdio.dma_blocks[i * 2 + 1].write_addr = &g_sdio.received_checksums[i];
     g_sdio.dma_blocks[i * 2 + 1].transfer_count = 2;
@@ -388,8 +358,7 @@ sdio_status_t rp2040_sdio_rx_start(uint8_t *buffer, uint32_t num_blocks) {
   channel_config_set_dreq(&dmacfg, pio_get_dreq(SDIO_PIO, SDIO_DATA_SM, false));
   channel_config_set_bswap(&dmacfg, true);
   channel_config_set_chain_to(&dmacfg, SDIO_DMA_CHB);
-  dma_channel_configure(SDIO_DMA_CH, &dmacfg, 0, &SDIO_PIO->rxf[SDIO_DATA_SM],
-                        0, false);
+  dma_channel_configure(SDIO_DMA_CH, &dmacfg, 0, &SDIO_PIO->rxf[SDIO_DATA_SM], 0, false);
 
   // Configure second DMA channel for reconfiguring the first one
   dmacfg = dma_channel_get_default_config(SDIO_DMA_CHB);
@@ -397,13 +366,10 @@ sdio_status_t rp2040_sdio_rx_start(uint8_t *buffer, uint32_t num_blocks) {
   channel_config_set_read_increment(&dmacfg, true);
   channel_config_set_write_increment(&dmacfg, true);
   channel_config_set_ring(&dmacfg, true, 3);
-  dma_channel_configure(SDIO_DMA_CHB, &dmacfg,
-                        &dma_hw->ch[SDIO_DMA_CH].al1_write_addr,
-                        g_sdio.dma_blocks, 2, false);
+  dma_channel_configure(SDIO_DMA_CHB, &dmacfg, &dma_hw->ch[SDIO_DMA_CH].al1_write_addr, g_sdio.dma_blocks, 2, false);
 
   // Initialize PIO state machine
-  pio_sm_init(SDIO_PIO, SDIO_DATA_SM, g_sdio.pio_data_rx_offset,
-              &g_sdio.pio_cfg_data_rx);
+  pio_sm_init(SDIO_PIO, SDIO_DATA_SM, g_sdio.pio_data_rx_offset, &g_sdio.pio_cfg_data_rx);
   pio_sm_set_consecutive_pindirs(SDIO_PIO, SDIO_DATA_SM, SDIO_D0, 4, false);
 
   // Write number of nibbles to receive to Y register
@@ -426,21 +392,19 @@ static void sdio_verify_rx_checksums(uint32_t maxcount) {
   while (g_sdio.blocks_checksumed < g_sdio.blocks_done && maxcount-- > 0) {
     // Calculate checksum from received data
     int blockidx = g_sdio.blocks_checksumed++;
-    uint64_t checksum = sdio_crc16_4bit_checksum(
-        g_sdio.data_buf + blockidx * SDIO_WORDS_PER_BLOCK,
-        SDIO_WORDS_PER_BLOCK);
+    uint64_t checksum =
+        sdio_crc16_4bit_checksum(g_sdio.data_buf + blockidx * SDIO_WORDS_PER_BLOCK, SDIO_WORDS_PER_BLOCK);
 
     // Convert received checksum to little-endian format
     uint32_t top = __builtin_bswap32(g_sdio.received_checksums[blockidx].top);
-    uint32_t bottom =
-        __builtin_bswap32(g_sdio.received_checksums[blockidx].bottom);
+    uint32_t bottom = __builtin_bswap32(g_sdio.received_checksums[blockidx].bottom);
     uint64_t expected = ((uint64_t)top << 32) | bottom;
 
     if (checksum != expected) {
       g_sdio.checksum_errors++;
       if (g_sdio.checksum_errors == 1) {
-        Trace::Debug("SDIO checksum error in reception: block ", blockidx,
-                     " calculated ", checksum, " expected ", expected);
+        Trace::Debug("SDIO checksum error in reception: block ", blockidx, " calculated ", checksum, " expected ",
+                     expected);
       }
     }
   }
@@ -455,8 +419,7 @@ sdio_status_t rp2040_sdio_rx_poll(uint32_t *bytes_complete) {
     sdio_verify_rx_checksums(4);
 
     // Check how many DMA control blocks have been consumed
-    uint32_t dma_ctrl_block_count =
-        (dma_hw->ch[SDIO_DMA_CHB].read_addr - (uint32_t)&g_sdio.dma_blocks);
+    uint32_t dma_ctrl_block_count = (dma_hw->ch[SDIO_DMA_CHB].read_addr - (uint32_t)&g_sdio.dma_blocks);
     dma_ctrl_block_count /= sizeof(g_sdio.dma_blocks[0]);
 
     // Compute how many complete 512 byte SDIO blocks have been transferred
@@ -482,14 +445,12 @@ sdio_status_t rp2040_sdio_rx_poll(uint32_t *bytes_complete) {
     else
       return SDIO_ERR_DATA_CRC;
   } else if ((uint32_t)(millis() - g_sdio.transfer_start_time) > 1000) {
-    Trace::Debug(
-        "rp2040_sdio_rx_poll() timeout, "
-        "PIO PC: ",
-        (int)pio_sm_get_pc(SDIO_PIO, SDIO_DATA_SM) -
-            (int)g_sdio.pio_data_rx_offset,
-        " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_DATA_SM),
-        " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_DATA_SM),
-        " DMA CNT: ", dma_hw->ch[SDIO_DMA_CH].al2_transfer_count);
+    Trace::Debug("rp2040_sdio_rx_poll() timeout, "
+                 "PIO PC: ",
+                 (int)pio_sm_get_pc(SDIO_PIO, SDIO_DATA_SM) - (int)g_sdio.pio_data_rx_offset,
+                 " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_DATA_SM),
+                 " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_DATA_SM),
+                 " DMA CNT: ", dma_hw->ch[SDIO_DMA_CH].al2_transfer_count);
     rp2040_sdio_stop();
     return SDIO_ERR_DATA_TIMEOUT;
   }
@@ -503,8 +464,7 @@ sdio_status_t rp2040_sdio_rx_poll(uint32_t *bytes_complete) {
 
 static void sdio_start_next_block_tx() {
   // Initialize PIO
-  pio_sm_init(SDIO_PIO, SDIO_DATA_SM, g_sdio.pio_data_tx_offset,
-              &g_sdio.pio_cfg_data_tx);
+  pio_sm_init(SDIO_PIO, SDIO_DATA_SM, g_sdio.pio_data_tx_offset, &g_sdio.pio_cfg_data_tx);
 
   // Configure DMA to send the data block payload (512 bytes)
   dma_channel_config dmacfg = dma_channel_get_default_config(SDIO_DMA_CH);
@@ -515,9 +475,7 @@ static void sdio_start_next_block_tx() {
   channel_config_set_bswap(&dmacfg, true);
   channel_config_set_chain_to(&dmacfg, SDIO_DMA_CHB);
   dma_channel_configure(SDIO_DMA_CH, &dmacfg, &SDIO_PIO->txf[SDIO_DATA_SM],
-                        g_sdio.data_buf +
-                            g_sdio.blocks_done * SDIO_WORDS_PER_BLOCK,
-                        SDIO_WORDS_PER_BLOCK, false);
+                        g_sdio.data_buf + g_sdio.blocks_done * SDIO_WORDS_PER_BLOCK, SDIO_WORDS_PER_BLOCK, false);
 
   // Prepare second DMA channel to send the CRC and block end marker
   uint64_t crc = g_sdio.next_wr_block_checksum;
@@ -525,8 +483,7 @@ static void sdio_start_next_block_tx() {
   g_sdio.end_token_buf[1] = (uint32_t)(crc >> 0);
   g_sdio.end_token_buf[2] = 0xFFFFFFFF;
   channel_config_set_bswap(&dmacfg, false);
-  dma_channel_configure(SDIO_DMA_CHB, &dmacfg, &SDIO_PIO->txf[SDIO_DATA_SM],
-                        g_sdio.end_token_buf, 3, false);
+  dma_channel_configure(SDIO_DMA_CHB, &dmacfg, &SDIO_PIO->txf[SDIO_DATA_SM], g_sdio.end_token_buf, 3, false);
 
   // Enable IRQ to trigger when block is done
   dma_hw->ints1 = 1 << SDIO_DMA_CHB;
@@ -552,11 +509,10 @@ static void sdio_start_next_block_tx() {
 }
 
 static void sdio_compute_next_tx_checksum() {
-  assert(g_sdio.blocks_done < g_sdio.total_blocks &&
-         g_sdio.blocks_checksumed < g_sdio.total_blocks);
+  assert(g_sdio.blocks_done < g_sdio.total_blocks && g_sdio.blocks_checksumed < g_sdio.total_blocks);
   int blockidx = g_sdio.blocks_checksumed++;
-  g_sdio.next_wr_block_checksum = sdio_crc16_4bit_checksum(
-      g_sdio.data_buf + blockidx * SDIO_WORDS_PER_BLOCK, SDIO_WORDS_PER_BLOCK);
+  g_sdio.next_wr_block_checksum =
+      sdio_crc16_4bit_checksum(g_sdio.data_buf + blockidx * SDIO_WORDS_PER_BLOCK, SDIO_WORDS_PER_BLOCK);
 }
 
 // Start transferring data from memory to SD card
@@ -623,8 +579,7 @@ static void rp2040_sdio_tx_irq() {
   dma_hw->ints1 = 1 << SDIO_DMA_CHB;
 
   if (g_sdio.transfer_state == SDIO_TX) {
-    if (!dma_channel_is_busy(SDIO_DMA_CH) &&
-        !dma_channel_is_busy(SDIO_DMA_CHB)) {
+    if (!dma_channel_is_busy(SDIO_DMA_CH) && !dma_channel_is_busy(SDIO_DMA_CHB)) {
       // Main data transfer is finished now.
       // When card is ready, PIO will put card response on RX fifo
       g_sdio.transfer_state = SDIO_TX_WAIT_IDLE;
@@ -633,15 +588,12 @@ static void rp2040_sdio_tx_irq() {
         g_sdio.card_response = pio_sm_get(SDIO_PIO, SDIO_DATA_SM);
       } else {
         // Use DMA to wait for the response
-        dma_channel_config dmacfg =
-            dma_channel_get_default_config(SDIO_DMA_CHB);
+        dma_channel_config dmacfg = dma_channel_get_default_config(SDIO_DMA_CHB);
         channel_config_set_transfer_data_size(&dmacfg, DMA_SIZE_32);
         channel_config_set_read_increment(&dmacfg, false);
         channel_config_set_write_increment(&dmacfg, false);
-        channel_config_set_dreq(&dmacfg,
-                                pio_get_dreq(SDIO_PIO, SDIO_DATA_SM, false));
-        dma_channel_configure(SDIO_DMA_CHB, &dmacfg, &g_sdio.card_response,
-                              &SDIO_PIO->rxf[SDIO_DATA_SM], 1, true);
+        channel_config_set_dreq(&dmacfg, pio_get_dreq(SDIO_PIO, SDIO_DATA_SM, false));
+        dma_channel_configure(SDIO_DMA_CHB, &dmacfg, &g_sdio.card_response, &SDIO_PIO->rxf[SDIO_DATA_SM], 1, true);
       }
     }
   }
@@ -690,14 +642,12 @@ sdio_status_t rp2040_sdio_tx_poll(uint32_t *bytes_complete) {
     rp2040_sdio_stop();
     return g_sdio.wr_status;
   } else if ((uint32_t)(millis() - g_sdio.transfer_start_time) > 1000) {
-    Trace::Debug(
-        "rp2040_sdio_tx_poll() timeout, "
-        "PIO PC: ",
-        (int)pio_sm_get_pc(SDIO_PIO, SDIO_DATA_SM) -
-            (int)g_sdio.pio_data_tx_offset,
-        " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_DATA_SM),
-        " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_DATA_SM),
-        " DMA CNT: ", dma_hw->ch[SDIO_DMA_CH].al2_transfer_count);
+    Trace::Debug("rp2040_sdio_tx_poll() timeout, "
+                 "PIO PC: ",
+                 (int)pio_sm_get_pc(SDIO_PIO, SDIO_DATA_SM) - (int)g_sdio.pio_data_tx_offset,
+                 " RXF: ", (int)pio_sm_get_rx_fifo_level(SDIO_PIO, SDIO_DATA_SM),
+                 " TXF: ", (int)pio_sm_get_tx_fifo_level(SDIO_PIO, SDIO_DATA_SM),
+                 " DMA CNT: ", dma_hw->ch[SDIO_DMA_CH].al2_transfer_count);
     rp2040_sdio_stop();
     return SDIO_ERR_DATA_TIMEOUT;
   }
@@ -739,8 +689,7 @@ void rp2040_sdio_init(int clock_divider) {
 
   // Command & clock state machine
   g_sdio.pio_cmd_clk_offset = pio_add_program(SDIO_PIO, &sdio_cmd_clk_program);
-  pio_sm_config cfg =
-      sdio_cmd_clk_program_get_default_config(g_sdio.pio_cmd_clk_offset);
+  pio_sm_config cfg = sdio_cmd_clk_program_get_default_config(g_sdio.pio_cmd_clk_offset);
   sm_config_set_out_pins(&cfg, SDIO_CMD, 1);
   sm_config_set_in_pins(&cfg, SDIO_CMD);
   sm_config_set_set_pins(&cfg, SDIO_CMD, 1);
@@ -757,8 +706,7 @@ void rp2040_sdio_init(int clock_divider) {
 
   // Data reception program
   g_sdio.pio_data_rx_offset = pio_add_program(SDIO_PIO, &sdio_data_rx_program);
-  g_sdio.pio_cfg_data_rx =
-      sdio_data_rx_program_get_default_config(g_sdio.pio_data_rx_offset);
+  g_sdio.pio_cfg_data_rx = sdio_data_rx_program_get_default_config(g_sdio.pio_data_rx_offset);
   sm_config_set_in_pins(&g_sdio.pio_cfg_data_rx, SDIO_D0);
   sm_config_set_in_shift(&g_sdio.pio_cfg_data_rx, false, true, 32);
   sm_config_set_out_shift(&g_sdio.pio_cfg_data_rx, false, true, 32);
@@ -766,8 +714,7 @@ void rp2040_sdio_init(int clock_divider) {
 
   // Data transmission program
   g_sdio.pio_data_tx_offset = pio_add_program(SDIO_PIO, &sdio_data_tx_program);
-  g_sdio.pio_cfg_data_tx =
-      sdio_data_tx_program_get_default_config(g_sdio.pio_data_tx_offset);
+  g_sdio.pio_cfg_data_tx = sdio_data_tx_program_get_default_config(g_sdio.pio_data_tx_offset);
   sm_config_set_in_pins(&g_sdio.pio_cfg_data_tx, SDIO_D0);
   sm_config_set_set_pins(&g_sdio.pio_cfg_data_tx, SDIO_D0, 4);
   sm_config_set_out_pins(&g_sdio.pio_cfg_data_tx, SDIO_D0, 4);
@@ -779,9 +726,8 @@ void rp2040_sdio_init(int clock_divider) {
   // This reduces input delay.
   // Because the CLK is driven synchronously to CPU clock,
   // there should be no metastability problems.
-  SDIO_PIO->input_sync_bypass |= (1 << SDIO_CLK) | (1 << SDIO_CMD) |
-                                 (1 << SDIO_D0) | (1 << SDIO_D1) |
-                                 (1 << SDIO_D2) | (1 << SDIO_D3);
+  SDIO_PIO->input_sync_bypass |=
+      (1 << SDIO_CLK) | (1 << SDIO_CMD) | (1 << SDIO_D0) | (1 << SDIO_D1) | (1 << SDIO_D2) | (1 << SDIO_D3);
 
   // Set direction
   gpio_set_dir(SDIO_CMD, true);

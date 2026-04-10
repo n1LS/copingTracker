@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _TABLE_H_
@@ -14,11 +16,7 @@
 #include "Foundation/T_Singleton.h"
 #include "Foundation/Types/Types.h"
 
-#ifdef ADV
-#define TABLE_COUNT 0x80
-#else
 #define TABLE_COUNT 0x20
-#endif
 #define TABLE_STEPS 16
 #define TABLE_COLUMNS 3
 

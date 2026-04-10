@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Service.h"
@@ -14,9 +16,9 @@
 Service::Service(int fourCC) {
   fourCC_ = fourCC;
   ServiceRegistry::GetInstance()->Register(this);
-};
+}
 
-Service::~Service(){};
+Service::~Service() {};
 
 void Service::Register(SubService *sub) {
   if (subs_.full()) {
@@ -24,11 +26,11 @@ void Service::Register(SubService *sub) {
     return;
   }
   subs_.push_back(sub);
-};
+}
 
 void Service::Unregister(SubService *sub) {
   auto it = etl::find(subs_.begin(), subs_.end(), sub);
   if (it != subs_.end()) {
     subs_.erase(it);
   }
-};
+}

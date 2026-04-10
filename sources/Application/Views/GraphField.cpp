@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "GraphField.h"
@@ -18,11 +20,9 @@ int32_t GraphField::rmsSumSquares_[CacheSize];
 uint16_t GraphField::rmsCounts_[CacheSize];
 
 GraphField::GraphField(GUIPoint &position, int32_t width, int32_t height)
-    : UIField(position), width_(width), height_(height), showBaseline_(false),
-      borderNormal_(CD_BACKGROUND), borderFocused_(CD_HILITE2),
-      waveformValid_(false), needsFullRedraw_(true), sampleSize_(0),
-      zoomLevel_(0), maxZoomLevel_(0), viewStart_(0), viewEnd_(0),
-      markerCount_(0) {
+    : UIField(position), width_(width), height_(height), showBaseline_(false), borderNormal_(CD_BACKGROUND),
+      borderFocused_(CD_HILITE2), waveformValid_(false), needsFullRedraw_(true), sampleSize_(0), zoomLevel_(0),
+      maxZoomLevel_(0), viewStart_(0), viewEnd_(0), markerCount_(0) {
   std::memset(waveformCache_, 0, sizeof(waveformCache_));
   resetMarkerCache();
 }
@@ -62,10 +62,11 @@ void GraphField::Reset() {
   resetMarkerCache();
 }
 
-void GraphField::SetShowBaseline(bool show) { showBaseline_ = show; }
+void GraphField::SetShowBaseline(bool show) {
+  showBaseline_ = show;
+}
 
-void GraphField::SetBorderColors(ColorDefinition normal,
-                                 ColorDefinition focused) {
+void GraphField::SetBorderColors(ColorDefinition normal, ColorDefinition focused) {
   borderNormal_ = normal;
   borderFocused_ = focused;
 }
@@ -83,19 +84,33 @@ void GraphField::SetSampleSize(uint32_t sampleSize) {
   }
 }
 
-uint32_t GraphField::SampleSize() const { return sampleSize_; }
+uint32_t GraphField::SampleSize() const {
+  return sampleSize_;
+}
 
-uint8_t GraphField::ZoomLevel() const { return zoomLevel_; }
+uint8_t GraphField::ZoomLevel() const {
+  return zoomLevel_;
+}
 
-uint8_t GraphField::MaxZoomLevel() const { return maxZoomLevel_; }
+uint8_t GraphField::MaxZoomLevel() const {
+  return maxZoomLevel_;
+}
 
-uint32_t GraphField::ViewStart() const { return viewStart_; }
+uint32_t GraphField::ViewStart() const {
+  return viewStart_;
+}
 
-uint32_t GraphField::ViewEnd() const { return viewEnd_; }
+uint32_t GraphField::ViewEnd() const {
+  return viewEnd_;
+}
 
-uint8_t *GraphField::WaveformCache() { return waveformCache_; }
+uint8_t *GraphField::WaveformCache() {
+  return waveformCache_;
+}
 
-bool GraphField::WaveformValid() const { return waveformValid_; }
+bool GraphField::WaveformValid() const {
+  return waveformValid_;
+}
 
 bool GraphField::UpdateZoomWindow(uint32_t centerSample) {
   if (sampleSize_ == 0) {
@@ -105,8 +120,7 @@ bool GraphField::UpdateZoomWindow(uint32_t centerSample) {
     return changed;
   }
 
-  uint32_t zoomFactor =
-      (zoomLevel_ < 31) ? (static_cast<uint32_t>(1) << zoomLevel_) : 0;
+  uint32_t zoomFactor = (zoomLevel_ < 31) ? (static_cast<uint32_t>(1) << zoomLevel_) : 0;
   if (zoomFactor == 0) {
     zoomFactor = 1;
   }
@@ -118,8 +132,7 @@ bool GraphField::UpdateZoomWindow(uint32_t centerSample) {
     viewSpan = sampleSize_;
   }
 
-  uint32_t center =
-      std::min(centerSample, sampleSize_ > 0 ? sampleSize_ - 1 : 0U);
+  uint32_t center = std::min(centerSample, sampleSize_ > 0 ? sampleSize_ - 1 : 0U);
 
   uint32_t start = 0;
   if (viewSpan < sampleSize_) {
@@ -146,8 +159,7 @@ bool GraphField::AdjustZoom(int32_t delta, uint32_t centerSample) {
   if (sampleSize_ == 0) {
     return false;
   }
-  int32_t newLevel =
-      static_cast<int32_t>(zoomLevel_) + static_cast<int32_t>(delta);
+  int32_t newLevel = static_cast<int32_t>(zoomLevel_) + static_cast<int32_t>(delta);
   if (newLevel < 0) {
     newLevel = 0;
   }
@@ -168,8 +180,7 @@ void GraphField::BeginRmsBuild() {
   std::fill_n(rmsCounts_, CacheSize, uint16_t{0});
 }
 
-void GraphField::AccumulateRmsSample(uint32_t sampleIndex,
-                                     int16_t sampleValue) {
+void GraphField::AccumulateRmsSample(uint32_t sampleIndex, int16_t sampleValue) {
   if (!hasValidWindow()) {
     return;
   }
@@ -178,8 +189,7 @@ void GraphField::AccumulateRmsSample(uint32_t sampleIndex,
   }
   uint32_t rel = sampleIndex - viewStart_;
   uint32_t viewSpan = viewEnd_ - viewStart_;
-  uint32_t pixel = static_cast<uint32_t>(
-      (static_cast<uint64_t>(rel) * CacheSize) / viewSpan);
+  uint32_t pixel = static_cast<uint32_t>((static_cast<uint64_t>(rel) * CacheSize) / viewSpan);
   if (pixel >= static_cast<uint32_t>(CacheSize)) {
     pixel = CacheSize - 1;
   }
@@ -200,8 +210,7 @@ void GraphField::FinalizeRmsBuild() {
     }
     float meanSquare = static_cast<float>(rmsSumSquares_[i]) / rmsCounts_[i];
     float rms = std::sqrt(meanSquare) / 128.0f;
-    uint8_t height = static_cast<uint8_t>(
-        std::min<float>(rms * height_, static_cast<float>(height_)));
+    uint8_t height = static_cast<uint8_t>(std::min<float>(rms * height_, static_cast<float>(height_)));
     waveformCache_[i] = height;
   }
   waveformValid_ = true;
@@ -224,7 +233,9 @@ void GraphField::SetWaveformValid(bool valid) {
   }
 }
 
-void GraphField::RequestFullRedraw() { needsFullRedraw_ = true; }
+void GraphField::RequestFullRedraw() {
+  needsFullRedraw_ = true;
+}
 
 void GraphField::SetMarkerCount(size_t count) {
   if (count > MaxMarkers) {
@@ -237,8 +248,7 @@ void GraphField::SetMarkerCount(size_t count) {
   }
 }
 
-void GraphField::SetMarker(size_t index, uint32_t sample, ColorDefinition color,
-                           bool visible) {
+void GraphField::SetMarker(size_t index, uint32_t sample, ColorDefinition color, bool visible) {
   if (index >= MaxMarkers) {
     return;
   }
@@ -257,30 +267,26 @@ int32_t GraphField::SampleToPixel(uint32_t sample) const {
   uint32_t clamped = std::min(sample, sampleSize_ > 0 ? sampleSize_ - 1 : 0U);
   uint32_t viewSpan = viewEnd_ - viewStart_;
   uint32_t rel = clamped - viewStart_;
-  int32_t local = static_cast<int32_t>(
-      (static_cast<uint64_t>(rel) * (width_ - 2)) / viewSpan);
+  int32_t local = static_cast<int32_t>((static_cast<uint64_t>(rel) * (width_ - 2)) / viewSpan);
   return static_cast<int32_t>(x_) + 1 + local;
 }
 
 void GraphField::DrawGraph(View &view) {
   if (needsFullRedraw_) {
-    GUIRect area(static_cast<int32_t>(x_) + 1, static_cast<int32_t>(y_) + 1,
-                 static_cast<int32_t>(x_) + width_ - 1,
+    GUIRect area(static_cast<int32_t>(x_) + 1, static_cast<int32_t>(y_) + 1, static_cast<int32_t>(x_) + width_ - 1,
                  static_cast<int32_t>(y_) + height_ - 1);
     view.DrawRect(area, CD_BACKGROUND);
 
     if (showBaseline_) {
       int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
-      GUIRect baseline(static_cast<int32_t>(x_) + 1, centerY,
-                       static_cast<int32_t>(x_) + width_ - 1, centerY + 1);
+      GUIRect baseline(static_cast<int32_t>(x_) + 1, centerY, static_cast<int32_t>(x_) + width_ - 1, centerY + 1);
       view.DrawRect(baseline, CD_HILITE2);
     }
 
     if (waveformValid_ && hasValidWindow()) {
       int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
       int32_t drawableWidth = width_ - 2;
-      int32_t maxColumns =
-          std::min<int32_t>(drawableWidth, static_cast<int32_t>(CacheSize));
+      int32_t maxColumns = std::min<int32_t>(drawableWidth, static_cast<int32_t>(CacheSize));
       for (int32_t x = 0; x < maxColumns; ++x) {
         uint8_t amplitude = waveformCache_[x];
         if (amplitude == 0) {
@@ -294,8 +300,7 @@ void GraphField::DrawGraph(View &view) {
         if (endY > static_cast<int32_t>(y_) + height_ - 2) {
           endY = static_cast<int32_t>(y_) + height_ - 2;
         }
-        GUIRect column(static_cast<int32_t>(x_) + 1 + x, startY,
-                       static_cast<int32_t>(x_) + 2 + x, endY);
+        GUIRect column(static_cast<int32_t>(x_) + 1 + x, startY, static_cast<int32_t>(x_) + 2 + x, endY);
         view.DrawRect(column, CD_NORMAL);
       }
     }
@@ -315,8 +320,7 @@ void GraphField::DrawGraph(View &view) {
           markerVisibleCache_[i] = false;
           continue;
         }
-        GUIRect marker(markerX, static_cast<int32_t>(y_) + 2, markerX + 1,
-                       static_cast<int32_t>(y_) + height_ - 2);
+        GUIRect marker(markerX, static_cast<int32_t>(y_) + 2, markerX + 1, static_cast<int32_t>(y_) + height_ - 2);
         view.DrawRect(marker, markers_[i].color);
         markerPixelCache_[i] = static_cast<int16_t>(markerX);
         markerColorCache_[i] = markers_[i].color;
@@ -386,8 +390,7 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
   if (x <= left || x >= right) {
     return;
   }
-  GUIRect clearRect(x, static_cast<int32_t>(y_) + 1, x + 1,
-                    static_cast<int32_t>(y_) + height_ - 1);
+  GUIRect clearRect(x, static_cast<int32_t>(y_) + 1, x + 1, static_cast<int32_t>(y_) + height_ - 1);
   view.DrawRect(clearRect, CD_BACKGROUND);
 
   if (showBaseline_) {
@@ -433,8 +436,7 @@ void GraphField::drawMarkersAt(View &view, int32_t x) {
     if (markerX != x) {
       continue;
     }
-    GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1,
-                   static_cast<int32_t>(y_) + height_ - 2);
+    GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_ - 2);
     view.DrawRect(marker, markers_[i].color);
   }
 }

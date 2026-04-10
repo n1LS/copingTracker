@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _I_GUIWINDOWFACTORY_H_
@@ -25,8 +27,8 @@
 class I_GUIWindowFactory : public T_Factory<I_GUIWindowFactory> {
 
 protected:
-  I_GUIWindowFactory(){};
-  virtual ~I_GUIWindowFactory(){};
+  I_GUIWindowFactory() {};
+  virtual ~I_GUIWindowFactory() {};
 
 public:
   // Creates a window system implementation from the specified creational

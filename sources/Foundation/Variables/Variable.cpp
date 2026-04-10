@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Variable.h"
@@ -20,36 +22,41 @@ Variable::Variable(FourCC id, float value) : id_(id) {
   value_.float_ = value;
   defaultValue_.float_ = value;
   type_ = FLOAT;
-};
+}
 
 Variable::Variable(FourCC id, int value) : id_(id) {
   value_.int_ = value;
   defaultValue_.int_ = value;
   type_ = INT;
-};
+}
 
 Variable::Variable(FourCC id, bool value) : id_(id) {
   value_.bool_ = value;
   defaultValue_.bool_ = value;
   type_ = BOOL;
-};
+}
 
-Variable::Variable(FourCC id, const char *const *list, int size, int index)
-    : id_(id) {
-  list_.char_ = list;
+Variable::Variable(FourCC id, const char *const *list, int size, int index) : id_(id) {
+  list_ = list;
   listSize_ = size;
   value_.index_ = index;
   defaultValue_.index_ = index;
   type_ = CHAR_LIST;
-};
+}
 
-Variable::~Variable(){};
+Variable::~Variable() {};
 
-Variable::Type Variable::GetType() { return type_; };
+Variable::Type Variable::GetType() {
+  return type_;
+}
 
-FourCC Variable::GetID() { return id_; };
+FourCC Variable::GetID() {
+  return id_;
+}
 
-const char *Variable::GetName() { return FourCC(id_).c_str(); };
+const char *Variable::GetName() {
+  return FourCC(id_).c_str();
+}
 
 void Variable::SetFloat(float value, bool notify) {
   switch (type_) {
@@ -74,7 +81,7 @@ void Variable::SetFloat(float value, bool notify) {
   if (notify) {
     onChange();
   }
-};
+}
 
 void Variable::SetInt(int value, bool notify) {
   switch (type_) {
@@ -99,7 +106,7 @@ void Variable::SetInt(int value, bool notify) {
   if (notify) {
     onChange();
   }
-};
+}
 
 void Variable::SetBool(bool value, bool notify) {
   switch (type_) {
@@ -122,7 +129,7 @@ void Variable::SetBool(bool value, bool notify) {
   if (notify) {
     onChange();
   }
-};
+}
 
 float Variable::GetFloat() {
   switch (type_) {
@@ -138,7 +145,7 @@ float Variable::GetFloat() {
     return float(atof(stringValue_->c_str()));
   };
   return 0.0f;
-};
+}
 
 int Variable::GetInt() {
   switch (type_) {
@@ -154,7 +161,7 @@ int Variable::GetInt() {
     return atoi(stringValue_->c_str());
   };
   return 0;
-};
+}
 
 bool Variable::GetBool() {
   switch (type_) {
@@ -170,7 +177,7 @@ bool Variable::GetBool() {
     return false;
   };
   return false;
-};
+}
 
 void Variable::SetString(const char *string, bool notify) {
   NAssert(string);
@@ -190,8 +197,8 @@ void Variable::SetString(const char *string, bool notify) {
   case CHAR_LIST:
     value_.index_ = -1;
     for (int i = 0; i < listSize_; i++) {
-      if (list_.char_[i]) {
-        if (strcasecmp(string, list_.char_[i]) == 0) {
+      if (list_[i]) {
+        if (strcasecmp(string, list_[i]) == 0) {
           value_.index_ = i;
           break;
         }
@@ -202,7 +209,7 @@ void Variable::SetString(const char *string, bool notify) {
   if (notify) {
     onChange();
   }
-};
+}
 
 etl::string<MAX_VARIABLE_STRING_LENGTH> Variable::GetString() {
   char buf[MAX_VARIABLE_STRING_LENGTH];
@@ -227,13 +234,13 @@ etl::string<MAX_VARIABLE_STRING_LENGTH> Variable::GetString() {
     if ((value_.index_ < 0) || (value_.index_ >= listSize_)) {
       return "";
     } else {
-      return list_.char_[value_.index_];
+      return list_[value_.index_];
     }
     break;
   };
 
   return etl::string<MAX_VARIABLE_STRING_LENGTH>(buf, etl::strlen(buf));
-};
+}
 
 void Variable::CopyFrom(Variable &other) {
   type_ = other.type_;
@@ -245,13 +252,13 @@ void Variable::CopyFrom(Variable &other) {
 
 const char *const *Variable::GetListPointer() {
   NAssert(type_ == CHAR_LIST);
-  return list_.char_;
-};
+  return list_;
+}
 
 uint8_t Variable::GetListSize() {
   NAssert(type_ == CHAR_LIST);
   return listSize_;
-};
+}
 
 void Variable::Reset() {
 

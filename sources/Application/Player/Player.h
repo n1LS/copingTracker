@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _PLAYER_H_
@@ -23,14 +25,7 @@ enum PlayerEventType { PET_START, PET_UPDATE, PET_STOP };
 
 enum SequencerMode { SM_SONG, SM_LIVE };
 
-enum QueueingMode {
-  QM_NONE,
-  QM_CHAINSTART,
-  QM_PHRASESTART,
-  QM_CHAINSTOP,
-  QM_PHRASESTOP,
-  QM_TICKSTART
-};
+enum QueueingMode { QM_NONE, QM_CHAINSTART, QM_PHRASESTART, QM_CHAINSTOP, QM_PHRASESTOP, QM_TICKSTART };
 
 typedef uint32_t MixerStereoLevel;
 
@@ -47,9 +42,7 @@ private:
   unsigned int tickCount_;
 };
 
-class Player : public I_Observer,
-               public Observable,
-               public T_Singleton<Player> {
+class Player : public I_Observer, public Observable, public T_Singleton<Player> {
 private: // Singleton
   friend class etl::singleton<Player>;
   Player();
@@ -64,27 +57,24 @@ public:
 
   // basic interface
 
-  void Start(PlayMode mode, bool forceSongMode, MixerServiceMode msmMode,
-             bool stopAtEnd = false);
+  void Start(PlayMode mode, bool forceSongMode, MixerServiceMode msmMode, bool stopAtEnd = false);
   void Stop();
 
   void SetSequencerMode(SequencerMode mode);
   SequencerMode GetSequencerMode();
 
-  void OnStartButton(PlayMode origin, unsigned int from, bool startFromLastPos,
-                     unsigned char chainPos,
-                     MixerServiceMode msmMode = MSM_AUDIO,
-                     bool stopAtEnd = false);
-  void OnSongStartButton(unsigned int from, unsigned int to, bool requestStop,
-                         bool forceImmediate,
-                         MixerServiceMode msmMode = MSM_AUDIO,
-                         bool stopAtEnd = false);
+  void OnStartButton(PlayMode origin, unsigned int from, bool startFromLastPos, unsigned char chainPos,
+                     MixerServiceMode msmMode = MSM_AUDIO, bool stopAtEnd = false);
+  void OnSongStartButton(unsigned int from, unsigned int to, bool requestStop, bool forceImmediate,
+                         MixerServiceMode msmMode = MSM_AUDIO, bool stopAtEnd = false);
   bool IsPlaying();
 
   bool IsRunning();
-  bool GetStopAtEnd() { return stopAtEnd_; }
+  bool GetStopAtEnd() {
+    return stopAtEnd_;
+  }
 
-  void ProcessCommands();
+  void ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT] = nullptr);
   bool ProcessChannelCommand(int channel, FourCC cmd, ushort param);
 
   void StartStreaming(const char *name, int startSample = 0);
@@ -105,8 +95,7 @@ public:
   QueueingMode GetQueueingMode(int i);
   unsigned char GetQueuePosition(int i);
   unsigned char GetQueueChainPosition(int i);
-  void QueueChannel(int i, QueueingMode mode, unsigned char position,
-                    unsigned char chainpos = 0);
+  void QueueChannel(int i, QueueingMode mode, unsigned char position, unsigned char chainpos = 0);
 
   const char *GetLiveIndicator(int channel);
   double GetPlayTime();
@@ -130,11 +119,12 @@ public:
   int GetAudioRequestedBufferSize();
   int GetAudioPreBufferCount();
 
-  Project *GetProject() { return project_; }
+  Project *GetProject() {
+    return project_;
+  }
 
   // Direct note playback methods for MIDI
-  void PlayNote(unsigned short instrumentIndex, unsigned short channel,
-                unsigned char note, unsigned char velocity);
+  void PlayNote(unsigned short instrumentIndex, unsigned short channel, unsigned char note, unsigned char velocity);
   void StopNote(unsigned short instrumentIndex, unsigned short channel);
 
 protected:
@@ -143,8 +133,7 @@ protected:
   void updatePhrasePos(int pos, int channel);
   void playCursorPosition(int channel);
   void StepAutomationTableForRetrigger(int channel, I_Instrument *instrument);
-  void RetriggerChannelInstrument(int channel, int semitoneOffset,
-                                  bool stepAutomationTable);
+  void RetriggerChannelInstrument(int channel, int semitoneOffset, bool stepAutomationTable);
   int getChannelHop(int channel, int pos);
   void moveToNextStep();
   void moveToNextPhrase(int channel, int hop = -1);

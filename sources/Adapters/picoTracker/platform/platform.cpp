@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "platform.h"
@@ -39,16 +41,13 @@ void platform_init() {
   // clk_sys will be 220.5 MHz, which is divisible by 44100 in order to have a
   // Set PLL_USB 96MHz
   pll_init(pll_usb, 1, 1536 * MHZ, 4, 4);
-  clock_configure(clk_usb, 0, CLOCKS_CLK_USB_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
-                  96 * MHZ, 48 * MHZ);
+  clock_configure(clk_usb, 0, CLOCKS_CLK_USB_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 96 * MHZ, 48 * MHZ);
   // Change clk_sys to be 96MHz, depending on USB PLL in order to reconfigure
   // SYS_PLL
   clock_configure(clk_sys, CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
-                  CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 96 * MHZ,
-                  96 * MHZ);
+                  CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 96 * MHZ, 96 * MHZ);
   // set clk_peri to be clocked from USB PLL
-  clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
-                  96 * MHZ, 96 * MHZ);
+  clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 96 * MHZ, 96 * MHZ);
   // Review this, this limits the SD SPI clock to 24MHz since 48MHz doesn't work
   // Using the stock freq of 125MHz SD SPI can work at 31.25MHz
 
@@ -66,8 +65,7 @@ void platform_init() {
 
   // Finally set clk_sys to be clocked from SYS PLL
   clock_configure(clk_sys, CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
-                  CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS, 220.5 * MHZ,
-                  220.5 * MHZ);
+                  CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS, 220.5 * MHZ, 220.5 * MHZ);
 
   // Other possible frequencies to improve performance at the cost of inexact
   // i2s clock divider all within 0.001 of exact divider
@@ -224,20 +222,30 @@ void platform_init() {
   gpio_pull_up(INPUT_PLAY);
 }
 
-void platform_reboot() { watchdog_reboot(0, 0, 0); }
+void platform_reboot() {
+  watchdog_reboot(0, 0, 0);
+}
 
-void platform_bootloader() { reset_usb_boot(0, 0); }
+void platform_bootloader() {
+  reset_usb_boot(0, 0);
+}
 
 SysMutex *platform_mutex() {
   static picoTrackerMutex mutex;
   return &mutex;
-};
+}
 
-uint32_t millis(void) { return to_ms_since_boot(get_absolute_time()); }
-uint32_t micros(void) { return to_us_since_boot(get_absolute_time()); }
+uint32_t millis(void) {
+  return to_ms_since_boot(get_absolute_time());
+}
+uint32_t micros(void) {
+  return to_us_since_boot(get_absolute_time());
+}
 
 void platform_brightness(uint8_t value) {
   pwm_set_gpio_level(DISPLAY_PWM, value);
 }
 
-int16_t battery_health() { return -1; };
+int16_t battery_health() {
+  return -1;
+}

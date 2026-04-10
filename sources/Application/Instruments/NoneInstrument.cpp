@@ -3,43 +3,51 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "NoneInstrument.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Externals/etl/include/etl/string.h"
 
-NoneInstrument::NoneInstrument() : I_Instrument(&variables_) {}
+NoneInstrument::NoneInstrument() : I_Instrument(&variables_) {
+}
 
-NoneInstrument::~NoneInstrument(){};
+NoneInstrument::~NoneInstrument() {};
 
-bool NoneInstrument::Init() { return true; };
+bool NoneInstrument::Init() {
+  return true;
+}
 
-void NoneInstrument::OnStart(){};
+void NoneInstrument::OnStart() {};
 
 bool NoneInstrument::Start(int c, unsigned char note, bool retrigger) {
   return true;
-};
+}
 
-void NoneInstrument::Stop(int c){};
+void NoneInstrument::Stop(int c) {};
 
-bool NoneInstrument::Render(int channel, fixed *buffer, int size,
-                            bool updateTick) {
+bool NoneInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   return false;
-};
+}
 
 bool NoneInstrument::IsInitialized() {
   return true; // Always initialised
-};
+}
 
-void NoneInstrument::ProcessCommand(int channel, FourCC cc, ushort value){};
+void NoneInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {};
 
-int NoneInstrument::GetTable() { return 0; };
+int NoneInstrument::GetTable() {
+  return 0;
+}
 
-bool NoneInstrument::GetTableAutomation() { return false; };
+bool NoneInstrument::GetTableAutomation() {
+  return false;
+}
 
-void NoneInstrument::GetTableState(TableSaveState &state){};
+void NoneInstrument::GetTableState(TableSaveState &state) {};
 
-void NoneInstrument::SetTableState(TableSaveState &state){};
+void NoneInstrument::SetTableState(TableSaveState &state) {};

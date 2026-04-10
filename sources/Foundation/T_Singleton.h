@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _T_SINGLETON_H_
@@ -14,7 +16,7 @@
 
 class I_Singleton {
 public:
-  virtual ~I_Singleton(){};
+  virtual ~I_Singleton() {};
 };
 
 template <class Item> class T_Singleton : public I_Singleton {

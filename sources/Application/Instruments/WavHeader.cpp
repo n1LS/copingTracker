@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "WavHeader.h"
@@ -20,8 +22,7 @@ constexpr uint16_t WAV_FORMAT_EXTENSIBLE = 0xFFFE;
 
 } // namespace
 
-bool WavHeaderWriter::WriteHeader(I_File *file, uint32_t sampleRate,
-                                  uint16_t channels, uint16_t bitsPerSample) {
+bool WavHeaderWriter::WriteHeader(I_File *file, uint32_t sampleRate, uint16_t channels, uint16_t bitsPerSample) {
   if (!file)
     return false;
 
@@ -83,8 +84,7 @@ bool WavHeaderWriter::WriteHeader(I_File *file, uint32_t sampleRate,
   return file->Sync();
 }
 
-etl::expected<WavHeaderInfo, WAVEFILE_ERROR>
-WavHeaderWriter::ReadHeader(I_File *file) {
+etl::expected<WavHeaderInfo, WAVEFILE_ERROR> WavHeaderWriter::ReadHeader(I_File *file) {
   if (!file) {
     return etl::unexpected(INVALID_FILE);
   }
@@ -173,10 +173,8 @@ WavHeaderWriter::ReadHeader(I_File *file) {
   }
 
   const bool isExtensible = info.audioFormat == WAV_FORMAT_EXTENSIBLE;
-  if (info.audioFormat != WAV_FORMAT_PCM &&
-      info.audioFormat != WAV_FORMAT_IEEE_FLOAT && !isExtensible) {
-    Trace::Error("WavHeaderWriter: Unsupported audio format %u",
-                 info.audioFormat);
+  if (info.audioFormat != WAV_FORMAT_PCM && info.audioFormat != WAV_FORMAT_IEEE_FLOAT && !isExtensible) {
+    Trace::Error("WavHeaderWriter: Unsupported audio format %u", info.audioFormat);
     return etl::unexpected(UNSUPPORTED_AUDIO_FORMAT);
   }
 
@@ -194,11 +192,9 @@ WavHeaderWriter::ReadHeader(I_File *file) {
   }
 
   bool enableResampling = Config::GetInstance()->GetValue("IMPORTRESAMP") > 0;
-  if ((!enableResampling && info.sampleRate > 44100) ||
-      (info.sampleRate < 44100 / SRC_MAX_RATIO) ||
+  if ((!enableResampling && info.sampleRate > 44100) || (info.sampleRate < 44100 / SRC_MAX_RATIO) ||
       (info.sampleRate > 44100 * SRC_MAX_RATIO)) {
-    Trace::Error("WavHeaderWriter: Unsupported sample rate %u",
-                 info.sampleRate);
+    Trace::Error("WavHeaderWriter: Unsupported sample rate %u", info.sampleRate);
     return etl::unexpected(UNSUPPORTED_SAMPLERATE);
   }
 
@@ -216,8 +212,7 @@ WavHeaderWriter::ReadHeader(I_File *file) {
 
   if (isExtensible) {
     if (info.fmtChunkSize < 40) {
-      Trace::Error("WavHeaderWriter: Extensible fmt chunk too small (%u)",
-                   info.fmtChunkSize);
+      Trace::Error("WavHeaderWriter: Extensible fmt chunk too small (%u)", info.fmtChunkSize);
       return etl::unexpected(INVALID_HEADER);
     }
 
@@ -226,8 +221,7 @@ WavHeaderWriter::ReadHeader(I_File *file) {
     uint32_t channelMask = 0;
     uint8_t subFormat[16] = {0};
 
-    if (file->Read(&extensionSize, 2) != 2 ||
-        file->Read(&validBitsPerSample, 2) != 2 ||
+    if (file->Read(&extensionSize, 2) != 2 || file->Read(&validBitsPerSample, 2) != 2 ||
         file->Read(&channelMask, 4) != 4 || file->Read(subFormat, 16) != 16) {
       return etl::unexpected(INVALID_HEADER);
     }
@@ -236,27 +230,22 @@ WavHeaderWriter::ReadHeader(I_File *file) {
     (void)validBitsPerSample;
     (void)channelMask;
 
-    uint16_t subtype = static_cast<uint16_t>(subFormat[0]) |
-                       (static_cast<uint16_t>(subFormat[1]) << 8);
-    info.audioFormat = (subtype == WAV_FORMAT_IEEE_FLOAT)
-                           ? WAV_FORMAT_IEEE_FLOAT
-                           : WAV_FORMAT_PCM;
+    uint16_t subtype = static_cast<uint16_t>(subFormat[0]) | (static_cast<uint16_t>(subFormat[1]) << 8);
+    info.audioFormat = (subtype == WAV_FORMAT_IEEE_FLOAT) ? WAV_FORMAT_IEEE_FLOAT : WAV_FORMAT_PCM;
   }
 
   const bool isPcm = info.audioFormat == WAV_FORMAT_PCM;
   const bool isFloat = info.audioFormat == WAV_FORMAT_IEEE_FLOAT;
 
   if (isPcm) {
-    if ((info.bitsPerSample != 8) && (info.bitsPerSample != 16) &&
-        (info.bitsPerSample != 24) && (info.bitsPerSample != 32)) {
-      Trace::Error("WavHeaderWriter: Unsupported PCM bit depth %u",
-                   info.bitsPerSample);
+    if ((info.bitsPerSample != 8) && (info.bitsPerSample != 16) && (info.bitsPerSample != 24) &&
+        (info.bitsPerSample != 32)) {
+      Trace::Error("WavHeaderWriter: Unsupported PCM bit depth %u", info.bitsPerSample);
       return etl::unexpected(UNSUPPORTED_BITDEPTH);
     }
   } else if (isFloat) {
     if ((info.bitsPerSample != 32) && (info.bitsPerSample != 64)) {
-      Trace::Error("WavHeaderWriter: Unsupported IEEE float bit depth %u",
-                   info.bitsPerSample);
+      Trace::Error("WavHeaderWriter: Unsupported IEEE float bit depth %u", info.bitsPerSample);
       return etl::unexpected(UNSUPPORTED_BITDEPTH);
     }
   }
@@ -329,9 +318,7 @@ WavHeaderWriter::ReadHeader(I_File *file) {
   file->Seek(info.dataOffset, SEEK_SET);
   return info;
 }
-bool WavHeaderWriter::UpdateFileSize(I_File *file, uint32_t sampleCount,
-                                     uint16_t channels,
-                                     uint16_t bytesPerSample) {
+bool WavHeaderWriter::UpdateFileSize(I_File *file, uint32_t sampleCount, uint16_t channels, uint16_t bytesPerSample) {
   if (!file) {
     return false;
   }
@@ -339,8 +326,7 @@ bool WavHeaderWriter::UpdateFileSize(I_File *file, uint32_t sampleCount,
   // Get the current position, which is the total file size
   uint32_t totalFileSize = file->Tell();
   if (totalFileSize < 44) {
-    Trace::Error("WAVHEADER: file too small to patch header (%u bytes)",
-                 totalFileSize);
+    Trace::Error("WAVHEADER: file too small to patch header (%u bytes)", totalFileSize);
     return false;
   }
 
@@ -352,20 +338,17 @@ bool WavHeaderWriter::UpdateFileSize(I_File *file, uint32_t sampleCount,
   file->Seek(4, SEEK_SET);
   int written = file->Write(&chunk_size, 1, 4);
   if (written != 4) {
-    Trace::Error("WAVHEADER: failed to write RIFF chunk size (wrote=%d err=%d)",
-                 written, file->Error());
+    Trace::Error("WAVHEADER: failed to write RIFF chunk size (wrote=%d err=%d)", written, file->Error());
     return false;
   }
 
-  Trace::Log("WAVHEADER", "Updating header: FileSize=%u, DataSize=%u",
-             chunk_size, subchunk2_size);
+  Trace::Log("WAVHEADER", "Updating header: FileSize=%u, DataSize=%u", chunk_size, subchunk2_size);
 
   // Update Subchunk2Size (the size of the raw data)
   file->Seek(40, SEEK_SET);
   written = file->Write(&subchunk2_size, 1, 4);
   if (written != 4) {
-    Trace::Error("WAVHEADER: failed to write data chunk size (wrote=%d err=%d)",
-                 written, file->Error());
+    Trace::Error("WAVHEADER: failed to write data chunk size (wrote=%d err=%d)", written, file->Error());
     return false;
   }
 

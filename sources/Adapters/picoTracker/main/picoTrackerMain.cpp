@@ -2,12 +2,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Adapters/picoTracker/platform/platform.h"
 #include "Adapters/picoTracker/system/picoTrackerSystem.h"
+#include "Adapters/picoTracker/usb/msd_mode.h"
 #include "Application/Application.h"
 #include "bsp/board.h"
 #include "hardware/clocks.h"
@@ -24,7 +27,9 @@
 // https://github.com/raspberrypi/pico-sdk/issues/1768#issuecomment-2649260970
 #ifdef __cplusplus
 extern "C" {
-int _getentropy(void *buffer, size_t length) { return -1; }
+int _getentropy(void *buffer, size_t length) {
+  return -1;
+}
 }
 #endif
 // ================
@@ -34,7 +39,21 @@ int main(int argc, char *argv[]) {
   // Initialise microcontroller specific hardware
   board_init();
 
-  // Initialise TinyUSB
+  // Check if MSD mode was requested before previous reboot
+  if (msd_mode_requested()) {
+    g_msd_mode = true;
+
+    // Need platform_init for GPIO (display, SD card, input buttons)
+    platform_init();
+
+    // Enter MSD mode - handles SD init, USB init, and main loop.
+    // tusb_init() is called inside msd_mode_run() after all slow
+    // initialization (display, SD card) so that tud_task() can be
+    // serviced immediately, allowing the USB host to enumerate the device.
+    msd_mode_run();
+  }
+
+  // Normal mode: Initialise TinyUSB
   tusb_init();
 
   // Do remaining pT init, this needs to be done *after* above hardware and

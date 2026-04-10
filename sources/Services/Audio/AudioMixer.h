@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _AUDIO_MIXER_H_
@@ -25,9 +27,13 @@ public:
   void SetFileRenderer(const char *path);
   void EnableRendering(bool enable);
   void SetVolume(fixed volume);
-  void SetName(etl::string<12> name) { name_ = name; };
+  void SetName(etl::string<12> name) {
+    name_ = name;
+  };
 
-  stereosample GetMixerLevels() { return peakMixerLevel_; }
+  stereosample GetMixerLevels() {
+    return peakMixerLevel_;
+  }
   void AddModule(AudioModule &module);
   void RemoveModule(AudioModule &module);
   void ClearModules();
@@ -45,7 +51,6 @@ private:
   // the mix
   stereosample peakMixerLevel_ = 0;
 
-  __attribute__((section(".DTCMRAM")))
-  __attribute__((aligned(32))) static fixed renderBuffer_[MAX_SAMPLE_COUNT * 2];
+  __attribute__((section(".DTCMRAM"))) __attribute__((aligned(32))) static fixed renderBuffer_[MAX_SAMPLE_COUNT * 2];
 };
 #endif

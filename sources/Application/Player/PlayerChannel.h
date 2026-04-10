@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _PLAYER_CHANNEL_H_
@@ -19,8 +21,7 @@ public:
   PlayerChannel(int index);
   virtual ~PlayerChannel();
   virtual bool Render(fixed *buffer, int samplecount);
-  void StartInstrument(I_Instrument *instr, unsigned char note,
-                       bool cleanStart);
+  void StartInstrument(I_Instrument *instr, unsigned char note, bool cleanStart);
   void StopInstrument();
   I_Instrument *GetInstrument();
   void SetMute(bool muted);

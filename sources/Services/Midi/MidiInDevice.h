@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MIDIIN_DEVICE_H_
@@ -19,7 +21,7 @@ enum MidiSyncMessage { MSM_START, MSM_STOP, MSM_TEMPOTICK, MSM_CONTINUE };
 
 struct MidiSyncData : public I_ObservableData {
   MidiSyncMessage message_;
-  MidiSyncData(MidiSyncMessage msg) : message_(msg){};
+  MidiSyncData(MidiSyncMessage msg) : message_(msg) {};
 };
 
 class MidiInDevice : public Observable {

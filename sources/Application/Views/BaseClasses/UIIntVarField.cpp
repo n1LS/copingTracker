@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIIntVarField.h"
@@ -19,8 +21,7 @@
 
 #define abs(x) (x < 0 ? -x : x)
 
-UIIntVarField::UIIntVarField(const GUIPoint &position, Variable &v,
-                             const char *format, int min, int max, int xOffset,
+UIIntVarField::UIIntVarField(const GUIPoint &position, Variable &v, const char *format, int min, int max, int xOffset,
                              int yOffset, int displayOffset)
     : UIField(position), src_(v) {
   format_ = format;
@@ -29,7 +30,7 @@ UIIntVarField::UIIntVarField(const GUIPoint &position, Variable &v,
   xOffset_ = xOffset;
   yOffset_ = yOffset;
   displayOffset_ = displayOffset;
-};
+}
 
 void UIIntVarField::Draw(GUIWindow &w, int offset) {
 
@@ -71,7 +72,7 @@ void UIIntVarField::Draw(GUIWindow &w, int offset) {
   } else {
     DrawLabeledField(w, position, buffer);
   }
-};
+}
 
 void UIIntVarField::ProcessArrow(unsigned short mask) {
   int value = src_.GetInt();
@@ -100,9 +101,8 @@ void UIIntVarField::ProcessArrow(unsigned short mask) {
   src_.SetInt(value);
 
   SetChanged();
-  NotifyObservers(reinterpret_cast<I_ObservableData *>(
-      static_cast<uintptr_t>(src_.GetID())));
-};
+  NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(src_.GetID())));
+}
 
 void UIIntVarField::ProcessClear() {
   if (!src_.IsModified())
@@ -111,10 +111,13 @@ void UIIntVarField::ProcessClear() {
   src_.Reset();
 
   SetChanged();
-  NotifyObservers(reinterpret_cast<I_ObservableData *>(
-      static_cast<uintptr_t>(src_.GetID())));
-};
+  NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(src_.GetID())));
+}
 
-FourCC UIIntVarField::GetVariableID() { return src_.GetID(); };
+FourCC UIIntVarField::GetVariableID() {
+  return src_.GetID();
+}
 
-Variable &UIIntVarField::GetVariable() { return src_; };
+Variable &UIIntVarField::GetVariable() {
+  return src_;
+}

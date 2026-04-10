@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIBitmaskVarField.h"
@@ -13,12 +15,11 @@
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 
-UIBitmaskVarField::UIBitmaskVarField(const GUIPoint &position, Variable &v,
-                                     const char *format, int len)
+UIBitmaskVarField::UIBitmaskVarField(const GUIPoint &position, Variable &v, const char *format, int len)
     : UIIntVarField(position, v, format, 0, 0xffff, 0, 0, 0) {
   len_ = len;
   format_ = format;
-};
+}
 
 void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
 
@@ -52,7 +53,7 @@ void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
   } else {
     DrawLabeledField(w, position, buffer);
   }
-};
+}
 
 void UIBitmaskVarField::ProcessArrow(unsigned short mask) {
 
@@ -81,6 +82,5 @@ void UIBitmaskVarField::ProcessArrow(unsigned short mask) {
   src_.SetInt(value);
 
   SetChanged();
-  NotifyObservers(reinterpret_cast<I_ObservableData *>(
-      static_cast<uintptr_t>(src_.GetID())));
-};
+  NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(src_.GetID())));
+}

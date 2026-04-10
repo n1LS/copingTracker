@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _APP_WINDOW_H_
@@ -19,13 +21,8 @@
 #include <UIFramework/SimpleBaseClasses/EventManager.h>
 
 #define PROP_INVERT 0x80
-#ifdef ADV
-#define CHAR_WIDTH 22
-#define CHAR_HEIGHT 30
-#else
 #define CHAR_WIDTH 10
 #define CHAR_HEIGHT 10
-#endif
 #define SCREEN_WIDTH 32
 #define SCREEN_HEIGHT 24
 #define SCREEN_MAP_HEIGHT 4
@@ -70,13 +67,14 @@ protected: // GUIWindow implementation
   virtual void onUpdate(bool redraw);
   virtual void LayoutChildren();
   virtual void Flush();
-  virtual void Redraw(){};
+  virtual void Redraw() {};
   virtual void AnimationUpdate();
 
   // override draw string to avoid going too far off
   // the screen.
-  virtual void DrawString(const char *string, const GUIPoint &pos,
-                          const GUITextProperties &props, bool overlay = false);
+  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props,
+                          bool overlay = false);
+  virtual void DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props);
 
   // I_Observer implementation
 
@@ -151,7 +149,9 @@ private:
 
 public:
   // Static accessor for the animation frame counter
-  static uint32_t GetAnimationFrameCounter() { return animationFrameCounter_; }
+  static uint32_t GetAnimationFrameCounter() {
+    return animationFrameCounter_;
+  }
 };
 
 #endif

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ChainView.h"
@@ -16,8 +18,7 @@
 #include "ViewData.h"
 #include <nanoprintf.h>
 
-ChainView::ChainView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData) {
+ChainView::ChainView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
   updatingPhrase_ = false;
   lastPhrase_ = 0;
   lastPlayingPos_ = 0;
@@ -67,7 +68,7 @@ void ChainView::cutPosition() {
   saveRow_ = viewData_->chainRow_;
   saveCol_ = viewData_->chainCol_;
   cutSelection();
-};
+}
 
 void ChainView::pasteLastPhrase() {
 
@@ -81,7 +82,7 @@ void ChainView::pasteLastPhrase() {
   } else {
     lastPhrase_ = *c;
   }
-};
+}
 
 void ChainView::updateCursor(int dx, int dy) {
   viewData_->UpdateChainCursor(dx, dy);
@@ -134,7 +135,7 @@ void ChainView::warpInColumn(int offset) {
     viewData_->songY_ = saveY;
     viewData_->songOffset_ = saveOffset;
   }
-};
+}
 
 void ChainView::warpToNeighbour(int offset) {
 
@@ -149,7 +150,7 @@ void ChainView::warpToNeighbour(int offset) {
       viewData_->songX_ -= offset;
     }
   }
-};
+}
 
 void ChainView::clonePosition() {
 
@@ -200,7 +201,7 @@ void ChainView::clonePosition() {
 
   setPhrase((unsigned char)next);
   isDirty_ = true;
-};
+}
 
 /******************************************************
  getSelectionRect:
@@ -209,11 +210,10 @@ void ChainView::clonePosition() {
  ******************************************************/
 
 GUIRect ChainView::getSelectionRect() {
-  GUIRect r(clipboard_.col_, clipboard_.row_, viewData_->chainCol_,
-            viewData_->chainRow_);
+  GUIRect r(clipboard_.col_, clipboard_.row_, viewData_->chainCol_, viewData_->chainRow_);
   r.Normalize();
   return r;
-};
+}
 
 /******************************************************
  fillClipboardData:
@@ -241,18 +241,16 @@ void ChainView::fillClipboardData() {
 
   // Copy the data
 
-  unsigned char *src1 =
-      viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
+  unsigned char *src1 = viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
   unsigned char *dst1 = clipboard_.phrase_;
-  unsigned char *src2 =
-      viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
+  unsigned char *src2 = viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
   unsigned char *dst2 = clipboard_.transpose_;
 
   for (int i = 0; i < clipboard_.height_; i++) {
     dst1[i] = src1[clipboard_.row_ + i];
     dst2[i] = src2[clipboard_.row_ + i];
   };
-};
+}
 
 void ChainView::extendSelection() {
   GUIRect rect = getSelectionRect();
@@ -299,7 +297,7 @@ void ChainView::copySelection() {
   viewData_->chainCol_ = saveCol_;
 
   isDirty_ = true;
-};
+}
 
 /******************************************************
  cut:  copies data in the current selection to the
@@ -318,10 +316,8 @@ void ChainView::cutSelection() {
 
   // Loop over selection col, row & clear data inside it
 
-  unsigned char *dst1 =
-      viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
-  unsigned char *dst2 =
-      viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
+  unsigned char *dst1 = viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
+  unsigned char *dst2 = viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
@@ -343,7 +339,7 @@ void ChainView::cutSelection() {
   viewData_->chainRow_ = saveRow_;
   viewData_->chainCol_ = saveCol_;
   isDirty_ = true;
-};
+}
 
 /******************************************************
  pasteClipboard:
@@ -359,11 +355,9 @@ void ChainView::pasteClipboard() {
     height = 16 - viewData_->chainRow_;
   }
 
-  unsigned char *dst1 =
-      viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
+  unsigned char *dst1 = viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
   unsigned char *src1 = clipboard_.phrase_;
-  unsigned char *dst2 =
-      viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
+  unsigned char *dst2 = viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
   unsigned char *src2 = clipboard_.transpose_;
 
   for (int i = 0; i < clipboard_.width_; i++) {
@@ -380,29 +374,28 @@ void ChainView::pasteClipboard() {
   }
   updateCursor(0x00, height);
   isDirty_ = true;
-};
+}
 
 void ChainView::unMuteAll() {
 
   UIController *controller = UIController::GetInstance();
   controller->UnMuteAll();
-};
+}
 
 void ChainView::toggleMute() {
 
   UIController *controller = UIController::GetInstance();
   controller->ToggleMute(viewData_->songX_, viewData_->songX_);
   viewMode_ = (viewMode_ != VM_MUTEON) ? VM_MUTEON : VM_NORMAL;
-};
+}
 
 void ChainView::switchSoloMode() {
 
   UIController *controller = UIController::GetInstance();
-  controller->SwitchSoloMode(viewData_->songX_, viewData_->songX_,
-                             (viewMode_ == VM_NORMAL));
+  controller->SwitchSoloMode(viewData_->songX_, viewData_->songX_, (viewMode_ == VM_NORMAL));
   viewMode_ = (viewMode_ != VM_SOLOON) ? VM_SOLOON : VM_NORMAL;
   isDirty_ = true;
-};
+}
 
 void ChainView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
@@ -531,8 +524,7 @@ void ChainView::processNormalButtonMask(unsigned short mask) {
     // or if the player ain't playing yet
 
     if (mask & EPBM_PLAY) {
-      player->OnStartButton(PM_CHAIN, viewData_->songX_, true,
-                            viewData_->chainRow_);
+      player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
     }
     if (mask & EPBM_ALT)
       unMuteAll();
@@ -547,18 +539,16 @@ void ChainView::processNormalButtonMask(unsigned short mask) {
     if (mask & EPBM_RIGHT)
       updateCursor(1, 0);
     if (mask & EPBM_PLAY) {
-      player->OnStartButton(PM_CHAIN, viewData_->songX_, false,
-                            viewData_->chainRow_);
+      player->OnStartButton(PM_CHAIN, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
 
   if ((!(mask & EPBM_ENTER)) && updatingPhrase_) {
-    unsigned char *c = viewData_->song_->chain_.data_ +
-                       (16 * viewData_->currentChain_ + updateRow_);
+    unsigned char *c = viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_ + updateRow_);
     viewData_->song_->phrase_.SetUsed(*c);
     updatingPhrase_ = false;
   }
-};
+}
 
 void ChainView::processSelectionButtonMask(unsigned short mask) {
 
@@ -618,8 +608,7 @@ void ChainView::processSelectionButtonMask(unsigned short mask) {
         }
 
         if (mask & EPBM_PLAY) {
-          player->OnStartButton(PM_CHAIN, viewData_->songX_, true,
-                                viewData_->chainRow_);
+          player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
         }
 
         if (mask & EPBM_ALT)
@@ -639,25 +628,30 @@ void ChainView::processSelectionButtonMask(unsigned short mask) {
           updateCursor(1, 0);
 
         if (mask & EPBM_PLAY) {
-          player->OnStartButton(PM_CHAIN, viewData_->songX_, false,
-                                viewData_->chainRow_);
+          player->OnStartButton(PM_CHAIN, viewData_->songX_, false, viewData_->chainRow_);
         }
       }
     }
   }
-};
+}
 
-void ChainView::OnFocus() { clipboard_.active_ = false; };
+void ChainView::OnFocus() {
+  clipboard_.active_ = false;
 
-void ChainView::setTextProps(GUITextProperties &props, int row, int col,
-                             bool restore) {
+  // reset the cursor position to within the range with data
+  uint8_t *c = viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_ + viewData_->chainRow_;
+  while (viewData_->chainRow_ > 0 && *c-- == 0xFF) {
+    viewData_->chainRow_--;
+  }
+}
+
+void ChainView::setTextProps(GUITextProperties &props, int row, int col, bool restore) {
 
   bool invert = false;
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
-    if ((row >= selRect.Left()) && (row <= selRect.Right()) &&
-        (col >= selRect.Top()) && (col <= selRect.Bottom())) {
+    if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
       invert = true;
     }
   } else {
@@ -675,7 +669,7 @@ void ChainView::setTextProps(GUITextProperties &props, int row, int col,
       props.invert_ = true;
     }
   }
-};
+}
 
 void ChainView::DrawView() {
 
@@ -715,8 +709,7 @@ void ChainView::DrawView() {
 
   pos = anchor;
 
-  unsigned char *data =
-      viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_);
+  unsigned char *data = viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_);
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = *data++;
@@ -754,7 +747,7 @@ void ChainView::DrawView() {
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
   };
-};
+}
 
 void ChainView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
   // Since this can be called from core1 via the Observer pattern,
@@ -764,7 +757,7 @@ void ChainView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 
   // Flag that UI needs to be updated (notes, positions, VU meter)
   needsUIUpdate_ = true;
-};
+}
 
 void ChainView::AnimationUpdate() {
   // First call the parent class implementation to draw the battery gauge
@@ -809,8 +802,7 @@ void ChainView::AnimationUpdate() {
       // Loop on all channels to see if one of them is playing current chain
       for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
         if (player->IsChannelPlaying(i)) {
-          if (viewData_->currentPlayChain_[i] == viewData_->currentChain_ &&
-              viewData_->playMode_ != PM_AUDITION) {
+          if (viewData_->currentPlayChain_[i] == viewData_->currentChain_ && viewData_->playMode_ != PM_AUDITION) {
             pos._y = anchor._y + viewData_->chainPlayPos_[i];
             if (!player->IsChannelMuted(i)) {
               SetColor(CD_ACCENT);
@@ -833,8 +825,7 @@ void ChainView::AnimationUpdate() {
         if (player->GetQueueingMode(i) != QM_NONE) {
           // find the chain queued in channel
           unsigned char songPos = player->GetQueuePosition(i);
-          unsigned char *chain =
-              viewData_->song_->data_ + i + SONG_CHANNEL_COUNT * songPos;
+          unsigned char *chain = viewData_->song_->data_ + i + SONG_CHANNEL_COUNT * songPos;
           if (*chain == viewData_->currentChain_) {
             unsigned char chainPos = player->GetQueueChainPosition(i);
             pos._y = anchor._y + chainPos;
@@ -853,4 +844,4 @@ void ChainView::AnimationUpdate() {
 
   // Flush the window to ensure changes are displayed
   w_.Flush();
-};
+}

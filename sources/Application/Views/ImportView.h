@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _IMPORT_VIEW_H_
@@ -41,8 +43,7 @@ protected:
   void import();
   void preview(char *name);
   void adjustPreviewVolume(int offset);
-  void showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename,
-                        bool isProjectSample);
+  void showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample);
   void removeProjectSample(uint8_t fileIndex, FileSystem *fs);
   void refreshFileIndexList(FileSystem *fs);
 
@@ -57,14 +58,11 @@ private:
   size_t previewPlayingIndex_ = 0;
   short selectedButton_ = 0;
   int toInstr_ = 0;
-  bool playKeyHeld_ =
-      false; // Flag to track when the play key is being held down
-  bool editKeyHeld_ =
-      false; // Flag to track when the edit key is being held down
-  bool enterKeyHeld_ = false; // Track ENTER key state for deferred dir-enter
+  bool playKeyHeld_ = false;              // Flag to track when the play key is being held down
+  bool editKeyHeld_ = false;              // Flag to track when the edit key is being held down
+  bool enterKeyHeld_ = false;             // Track ENTER key state for deferred dir-enter
   bool pendingDirEnterOnRelease_ = false; // Open dir on ENTER release
-  bool inProjectSampleDir_ =
-      false; // Flag to track if we're in the project's sample directory
+  bool inProjectSampleDir_ = false;       // Flag to track if we're in the project's sample directory
   etl::stack<uint8_t, DirectoryIndexStackDepth> dirIndexStack_;
   FileSystem *pendingDeleteFs_ = nullptr;
   char pendingDeleteFilename_[PFILENAME_SIZE] = {};

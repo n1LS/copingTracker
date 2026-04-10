@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SAMPLE_RENDER_PARAMS_H_
@@ -19,10 +21,10 @@ struct renderParams {
   void *sampleBuffer_; // wavdata
   int channelCount_;
 
-  int krateCount_; // K-rate counter
-  float position_; // Position in the sample stream
-  int rendFirst_;  // position of the first sample (can be either start or loop
-                   // depending on the mode)
+  int krateCount_;    // K-rate counter
+  float position_;    // Position in the sample stream
+  int rendFirst_;     // position of the first sample (can be either start or loop
+                      // depending on the mode)
   int rendLoopStart_; // Loop start position
   int rendLoopEnd_;   // Loop end position
 
@@ -70,6 +72,7 @@ struct renderParams {
   LogSpeedRamp legato_;
   LogSpeedRamp pfin_;
   Arp arp_;
+  Vibrato vibrato_;
 
   bool couldClick_;
 

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 /****************************
@@ -42,8 +44,7 @@ typedef struct {
   fixed mix;
 } filter_t;
 
-void set_filter(int channel, filterType_t type, fixed parm1, fixed parm2,
-                int mix, bool bassyMapping);
+void set_filter(int channel, filterType_t type, fixed parm1, fixed parm2, int mix, bool bassyMapping);
 
 void init_filters(void);
 

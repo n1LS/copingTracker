@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "picoTrackerUSBMidiInDevice.h"
@@ -13,12 +15,13 @@
 #include "pico/stdlib.h"
 #include "tusb.h"
 
-picoTrackerUSBMidiInDevice::picoTrackerUSBMidiInDevice(const char *name)
-    : MidiInDevice(name) {
+picoTrackerUSBMidiInDevice::picoTrackerUSBMidiInDevice(const char *name) : MidiInDevice(name) {
   Trace::Log("MIDI", "Created USB MIDI input device %s", name);
 }
 
-picoTrackerUSBMidiInDevice::~picoTrackerUSBMidiInDevice() { Close(); }
+picoTrackerUSBMidiInDevice::~picoTrackerUSBMidiInDevice() {
+  Close();
+}
 
 bool picoTrackerUSBMidiInDevice::Init() { // TinyUSB should already be
                                           // initialized in the main application

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _T_FACTORY_H_
@@ -18,7 +20,7 @@
 
 template <class Item> class T_Factory {
 protected:
-  virtual ~T_Factory(){};
+  virtual ~T_Factory() {};
 
 public:
   // Install the factory to use

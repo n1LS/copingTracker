@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MIDI_NOTE_TRACKER_H_
@@ -37,8 +39,7 @@ public:
    * @param velocity The note velocity (0-127)
    * @return True if the note was successfully registered
    */
-  bool registerNote(uint8_t note, uint8_t midiChannel,
-                    uint8_t instrumentChannel, uint8_t velocity);
+  bool registerNote(uint8_t note, uint8_t midiChannel, uint8_t instrumentChannel, uint8_t velocity);
 
   /**
    * Check if a note is currently active on any channel

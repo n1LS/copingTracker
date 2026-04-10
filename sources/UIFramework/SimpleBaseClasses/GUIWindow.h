@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _GUIWINDOW_H_
@@ -37,10 +39,9 @@ public:
 public: // I_GUIGraphics implementation
   virtual void SetColor(GUIColor &);
   virtual void ClearTextRect(GUIRect &);
-  virtual void DrawChar(const char c, const GUIPoint &pos,
-                        const GUITextProperties &props);
-  virtual void DrawString(const char *string, const GUIPoint &pos,
-                          const GUITextProperties &props, bool overlay = false);
+  virtual void DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props);
+  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props,
+                          bool overlay = false);
   virtual void DrawRect(GUIRect &r);
   virtual void SetCurrentRectColor(GUIColor color);
   virtual GUIRect GetRect();
@@ -56,7 +57,9 @@ public: // I_GUIGraphics implementation
   //	virtual void Restore() ;
   void PushEvent(GUIEvent &event);
   void Clear(GUIColor &, bool overlay = false);
-  I_GUIWindowImp *GetImpWindow() { return _imp; };
+  I_GUIWindowImp *GetImpWindow() {
+    return _imp;
+  };
 
 public:
   // When a local event has reached the control and could
@@ -70,7 +73,9 @@ public:
   // Returns the offset of the control with respect to the
   // I_GUIGraphics it uses to render itself.
 
-  virtual GUIPoint GetOffset() { return GUIPoint(0, 0); };
+  virtual GUIPoint GetOffset() {
+    return GUIPoint(0, 0);
+  };
 
   virtual I_GUIGraphics *GetDC();
 

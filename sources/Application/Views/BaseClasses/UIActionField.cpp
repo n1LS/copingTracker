@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UIActionField.h"
@@ -12,39 +14,32 @@
 #include "ViewUtils.h"
 #include <string.h>
 
-UIActionField::UIActionField(const char *name, unsigned int fourcc,
-                             GUIPoint &position)
-    : UIField(position) {
+UIActionField::UIActionField(const char *name, unsigned int fourcc, GUIPoint &position) : UIField(position) {
   name_ = name;
   fourcc_ = fourcc;
-};
+}
 
-UIActionField::~UIActionField(){};
+UIActionField::~UIActionField() {};
 
 void UIActionField::Draw(GUIWindow &w, int offset) {
-
   GUITextProperties props;
-
   GUIPoint position(x_, y_ + offset);
 
-  if (focus_) {
-    ((AppWindow &)w).SetColor(CD_HILITE2);
-    props.invert_ = true;
-    w.DrawString(name_, position, props);
-  } else {
-    // enforce max field length
-    char buffer[MAX_FIELD_WIDTH + 1];
-    strncpy(buffer, name_, MAX_FIELD_WIDTH);
-    buffer[MAX_FIELD_WIDTH] = '\0';
+  // enforce max field length
+  char buffer[MAX_FIELD_WIDTH + 1];
+  snprintf(buffer, sizeof(buffer), "(%.*s)", MAX_FIELD_WIDTH, name_);
+  strncpy(buffer, name_, MAX_FIELD_WIDTH);
+  buffer[MAX_FIELD_WIDTH] = '\0';
 
-    ((AppWindow &)w).SetColor(CD_HILITE1);
-    w.DrawString(buffer, position, props);
-  }
-};
+  ((AppWindow &)w).SetColor(focus_ ? CD_HILITE1 : CD_NORMAL);
+  w.DrawString(buffer, position, props);
+}
 
 void UIActionField::OnClick() {
   SetChanged();
   NotifyObservers((I_ObservableData *)fourcc_);
-};
+}
 
-const char *UIActionField::GetString() { return name_; };
+const char *UIActionField::GetString() {
+  return name_;
+}

@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _PICOTRACKEREVENTQUEUE_H_
@@ -16,14 +18,14 @@ enum picoTrackerEventType { PICO_REDRAW, PICO_FLUSH, PICO_CLOCK, LAST };
 
 class picoTrackerEvent {
 public:
-  picoTrackerEvent(picoTrackerEventType type) : type_(type) {}
+  picoTrackerEvent(picoTrackerEventType type) : type_(type) {
+  }
   picoTrackerEventType type_;
 };
 
-inline bool operator==(const picoTrackerEvent &lhs,
-                       const picoTrackerEvent &rhs) {
+inline bool operator==(const picoTrackerEvent &lhs, const picoTrackerEvent &rhs) {
   return lhs.type_ == rhs.type_;
-};
+}
 
 class picoTrackerEventQueue : public T_Singleton<picoTrackerEventQueue> {
 public:

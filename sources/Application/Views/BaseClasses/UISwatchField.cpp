@@ -3,18 +3,18 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UISwatchField.h"
 #include "Application/AppWindow.h"
 
-UISwatchField::UISwatchField(const GUIPoint &position,
-                             const ColorDefinition color)
-    : UIField(position) {
+UISwatchField::UISwatchField(const GUIPoint &position, const ColorDefinition color) : UIField(position) {
   color_ = color;
-};
+}
 
 void UISwatchField::Draw(GUIWindow &w, int offset) {
 
@@ -28,8 +28,10 @@ void UISwatchField::Draw(GUIWindow &w, int offset) {
   ((AppWindow &)w).SetColor(color_);
   w.DrawString("   ", position, props);
   ((AppWindow &)w).SetColor(CD_NORMAL);
-};
+}
 
-void UISwatchField::ProcessArrow(unsigned short mask){};
+void UISwatchField::ProcessArrow(unsigned short mask) {};
 
-bool UISwatchField::IsStatic() { return true; };
+bool UISwatchField::IsStatic() {
+  return true;
+}

@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _I_ITERATOR_H_
@@ -29,7 +31,7 @@
 
 template <class Item> class I_Iterator {
 public:
-  virtual ~I_Iterator(){};
+  virtual ~I_Iterator() {};
   // Resets the iterator to the first item
   virtual void Begin() = 0;
   // Go to the next item... assume there is one more
@@ -41,7 +43,7 @@ public:
 
 protected:
   // This is an interface, we don't want to let it instanciated
-  I_Iterator(){};
+  I_Iterator() {};
 };
 
 #endif

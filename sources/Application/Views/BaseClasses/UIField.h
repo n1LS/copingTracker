@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _UI_FIELD_H_
@@ -22,9 +24,9 @@ public:
   virtual void Draw(GUIWindow &w, int offset = 0) = 0;
   virtual void OnClick() = 0; // ENTER pressed
   virtual void ProcessArrow(unsigned short mask) = 0;
-  virtual void OnEditClick(){}; // EDIT pressed
-  virtual void ProcessEditArrow(unsigned short mask){};
-  virtual void ProcessClear(){}; // EDIT+ENTER pressed
+  virtual void OnEditClick() {}; // EDIT pressed
+  virtual void ProcessEditArrow(unsigned short mask) {};
+  virtual void ProcessClear() {}; // EDIT+ENTER pressed
   void SetFocus();
   void ClearFocus();
   bool HasFocus();

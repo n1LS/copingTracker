@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _CRSID_INSTRUMENT_H_
@@ -30,26 +32,19 @@ enum SIDInstrumentWaveform {
 };
 // TODO: filter modes are additive, so they can be used together. Does it make
 // sense to offer all combinations, or just some that make sense?
-enum SIDInstrumentFilterMode {
-  DFM_LP = 0,
-  DFM_BP,
-  DFM_HP,
-  DFM_NOTCH,
-  DFM_LAST
-};
+enum SIDInstrumentFilterMode { DFM_LP = 0, DFM_BP, DFM_HP, DFM_NOTCH, DFM_LAST };
 
-static const unsigned short sid_notes[96] = {
-    0x0112, 0x0123, 0x0134, 0x0146, 0x015A, 0x016E, 0x0184, 0x018B, 0x01B3,
-    0x01CD, 0x01E9, 0x0206, 0x0225, 0x0245, 0x0268, 0x028C, 0x02B3, 0x02DC,
-    0x0308, 0x0336, 0x0367, 0x039B, 0x03D2, 0x040C, 0x0449, 0x048B, 0x04D0,
-    0x0519, 0x0567, 0x05B9, 0x0610, 0x066C, 0x06CE, 0x0735, 0x07A3, 0x0817,
-    0x0893, 0x0915, 0x099F, 0x0A32, 0x0ACD, 0x0B72, 0x0C20, 0x0CD8, 0x0D9C,
-    0x0E6B, 0x0F46, 0x102F, 0x1125, 0x122A, 0x133F, 0x1464, 0x159A, 0x16E3,
-    0x183F, 0x1981, 0x1B38, 0x1CD6, 0x1E80, 0x205E, 0x224B, 0x2455, 0x267E,
-    0x28C8, 0x2B34, 0x2DC6, 0x2DC6, 0x3361, 0x366F, 0x39AC, 0x3D1A, 0x40BC,
-    0x4495, 0x48A9, 0x4CFC, 0x518F, 0x5669, 0x5B8C, 0x60FE, 0x6602, 0x6CDF,
-    0x7358, 0x7A34, 0x8178, 0x892B, 0x9153, 0x99F7, 0xA31F, 0xACD2, 0xB719,
-    0xC1FC, 0xCD85, 0xD9BD, 0xE6B0, 0xF467, 0xFFFF}; // last one is 0x1F2F0
+static const unsigned short sid_notes[96] = {0x0112, 0x0123, 0x0134, 0x0146, 0x015A, 0x016E, 0x0184, 0x018B, 0x01B3,
+                                             0x01CD, 0x01E9, 0x0206, 0x0225, 0x0245, 0x0268, 0x028C, 0x02B3, 0x02DC,
+                                             0x0308, 0x0336, 0x0367, 0x039B, 0x03D2, 0x040C, 0x0449, 0x048B, 0x04D0,
+                                             0x0519, 0x0567, 0x05B9, 0x0610, 0x066C, 0x06CE, 0x0735, 0x07A3, 0x0817,
+                                             0x0893, 0x0915, 0x099F, 0x0A32, 0x0ACD, 0x0B72, 0x0C20, 0x0CD8, 0x0D9C,
+                                             0x0E6B, 0x0F46, 0x102F, 0x1125, 0x122A, 0x133F, 0x1464, 0x159A, 0x16E3,
+                                             0x183F, 0x1981, 0x1B38, 0x1CD6, 0x1E80, 0x205E, 0x224B, 0x2455, 0x267E,
+                                             0x28C8, 0x2B34, 0x2DC6, 0x2DC6, 0x3361, 0x366F, 0x39AC, 0x3D1A, 0x40BC,
+                                             0x4495, 0x48A9, 0x4CFC, 0x518F, 0x5669, 0x5B8C, 0x60FE, 0x6602, 0x6CDF,
+                                             0x7358, 0x7A34, 0x8178, 0x892B, 0x9153, 0x99F7, 0xA31F, 0xACD2, 0xB719,
+                                             0xC1FC, 0xCD85, 0xD9BD, 0xE6B0, 0xF467, 0xFFFF}; // last one is 0x1F2F0
 
 class SIDInstrument : public I_Instrument {
 
@@ -70,9 +65,13 @@ public:
 
   virtual bool IsInitialized();
 
-  virtual bool IsEmpty() { return false; };
+  virtual bool IsEmpty() {
+    return false;
+  };
 
-  virtual InstrumentType GetType() { return IT_SID; };
+  virtual InstrumentType GetType() {
+    return IT_SID;
+  };
 
   virtual etl::string<MAX_INSTRUMENT_NAME_LENGTH> GetName();
 
@@ -82,14 +81,24 @@ public:
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
   virtual void SetTableState(TableSaveState &state);
-  etl::ilist<Variable *> *Variables() { return &variables_; };
+  etl::ilist<Variable *> *Variables() {
+    return &variables_;
+  };
 
-  SIDInstrumentInstance GetChip() { return chip_; };
-  unsigned short GetOsc() { return osc_.GetInt(); };
-  void SetRender(bool render) { render_ = render; };
+  SIDInstrumentInstance GetChip() {
+    return chip_;
+  };
+  unsigned short GetOsc() {
+    return osc_.GetInt();
+  };
+  void SetRender(bool render) {
+    render_ = render;
+  };
 
   // returns just the chip name, eg "SID #1"
-  const char *GetChipName() { return (chip_ == SID1) ? "SID #1" : "SID #2"; };
+  const char *GetChipName() {
+    return (chip_ == SID1) ? "SID #1" : "SID #2";
+  };
 
 private:
   etl::list<Variable *, 19> variables_;

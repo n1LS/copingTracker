@@ -2,8 +2,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _SAMPLE_SLICES_VIEW_H_
@@ -31,7 +33,7 @@ public:
 
   void ProcessButtonMask(unsigned short mask, bool pressed) override;
   void DrawView() override;
-  void OnPlayerUpdate(PlayerEventType, unsigned int) override{};
+  void OnPlayerUpdate(PlayerEventType, unsigned int) override {};
   void OnFocus() override;
   void AnimationUpdate() override;
   void Update(Observable &o, I_ObservableData *d) override;

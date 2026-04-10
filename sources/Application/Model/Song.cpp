@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "Song.h"
@@ -20,7 +22,7 @@
 
 Song::Song() : Persistent("SONG"), chain_(), phrase_() { Reset(); };
 
-Song::~Song(){};
+Song::~Song() {};
 
 void Song::Reset() {
   for (int i = 0; i < SONG_CHANNEL_COUNT * SONG_ROW_COUNT; i++) {
@@ -48,7 +50,7 @@ void Song::SaveContent(tinyxml2::XMLPrinter *printer) {
                 PHRASE_COUNT * STEPS_PER_PHRASE);
   saveHexBuffer(printer, "PARAM2", phrase_.param2_,
                 PHRASE_COUNT * STEPS_PER_PHRASE);
-};
+}
 
 void Song::RestoreContent(PersistencyDocument *doc) {
   bool elem = doc->FirstChild();
@@ -140,4 +142,4 @@ void Song::RestoreContent(PersistencyDocument *doc) {
       data++;
     };
   }
-};
+}

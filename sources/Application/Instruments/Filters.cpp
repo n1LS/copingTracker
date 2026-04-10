@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 /****************************
@@ -33,8 +35,7 @@ void init_filters(void) {
   filters_inited = true;
 }
 
-void set_filter(int channel, filterType_t type, fixed param1, fixed param2,
-                int mix, bool bassyMapping) {
+void set_filter(int channel, filterType_t type, fixed param1, fixed param2, int mix, bool bassyMapping) {
   filter_t *flt = &filter[channel];
 
   if (flt->type != type) // reset only on filter type change   (maybe no reset
@@ -73,14 +74,13 @@ void set_filter(int channel, filterType_t type, fixed param1, fixed param2,
   if (param2 != flt->parm2) {
     flt->parm2 = param2;
     flt->reso = i2fp(1) - param2;
-    flt->reso = fp_sub(
-        fl2fp(1.f),
-        fp_mul(flt->reso,
-               fp_mul(flt->reso, flt->reso))); // 0 - .5 - 1   =>   0 - .93 - 1
+    flt->reso = fp_sub(fl2fp(1.f), fp_mul(flt->reso, fp_mul(flt->reso, flt->reso))); // 0 - .5 - 1   =>   0 - .93 - 1
   }
 }
 
-filter_t *get_filter(int channel) { return &filter[channel]; };
+filter_t *get_filter(int channel) {
+  return &filter[channel];
+}
 /*
 void filterize(int channel, fixed* buffer, long int size)
 {

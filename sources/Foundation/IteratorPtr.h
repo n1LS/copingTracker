@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _ITERATORPTR_H_
@@ -35,17 +37,23 @@ template <class Item> class IteratorPtr {
 public:
   // Constructor: we wrap a regular iterator
 
-  IteratorPtr(I_Iterator<Item> *i) : _i(i){};
+  IteratorPtr(I_Iterator<Item> *i) : _i(i) {};
 
   // Destructor: we make sure the iterator is deleted
 
-  ~IteratorPtr() { delete _i; };
+  ~IteratorPtr() {
+    delete _i;
+  };
 
   // We declare the pointer operation so that client code
   // is readable as a regular iterator
 
-  I_Iterator<Item> *operator->() { return _i; };
-  I_Iterator<Item> &operator*() { return *_i; };
+  I_Iterator<Item> *operator->() {
+    return _i;
+  };
+  I_Iterator<Item> &operator*() {
+    return *_i;
+  };
 
   // Since we don't want to share the iterators, we prevent
   // copy and assignment

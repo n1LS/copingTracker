@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "InstrumentView.h"
@@ -20,32 +22,26 @@
 #include "BaseClasses/UIIntVarOffField.h"
 #include "BaseClasses/UINoteVarField.h"
 #include "BaseClasses/UIStaticField.h"
-#include "Externals/etl/include/etl/to_string.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalDialogs/MessageBox.h"
 #include "ModalDialogs/TextInputModalView.h"
 #include "System/System/System.h"
 #include <Application/Utils/stringutils.h>
 #include <cstdint>
+#include <etl/format_spec.h>
+#include <etl/to_string.h>
 #include <nanoprintf.h>
 
-#ifdef ADV
-static constexpr InstrumentType kMaxSelectableInstrumentType = IT_MIDI;
-#else
-static constexpr InstrumentType kMaxSelectableInstrumentType =
-    static_cast<InstrumentType>(IT_LAST - 1);
-#endif
+static constexpr InstrumentType kMaxSelectableInstrumentType = static_cast<InstrumentType>(IT_LAST - 1);
 
 InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
-    : FieldView(w, data), instrumentType_(FourCC::VarInstrumentType,
-                                          InstrumentTypeNames, IT_LAST, 0),
+    : FieldView(w, data), instrumentType_(FourCC::VarInstrumentType, InstrumentTypeNames, IT_LAST, 0),
       lastSampleIndex_(-1), suppressSampleChangeWarning_(false) {
   project_ = data->project_;
 
   GUIPoint position = GUIPoint(5, 1);
   typeIntVarField_.emplace_back(position, *&instrumentType_, "Type: %s", 0,
-                                static_cast<int>(kMaxSelectableInstrumentType),
-                                1, 1);
+                                static_cast<int>(kMaxSelectableInstrumentType), 1, 1);
   fieldList_.insert(fieldList_.end(), &(*typeIntVarField_.rbegin()));
   (*typeIntVarField_.rbegin()).AddObserver(*this);
   lastFocusID_ = FourCC::VarInstrumentType;
@@ -77,7 +73,8 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
   sliceCountLabel_.clear();
 }
 
-InstrumentView::~InstrumentView() {}
+InstrumentView::~InstrumentView() {
+}
 
 void InstrumentView::Reset() {
   lastSampleIndex_ = -1;
@@ -89,8 +86,7 @@ void InstrumentView::Reset() {
   sliceCountLabel_.clear();
 }
 
-static void updateSliceCountLabel(etl::string<20> &label,
-                                  SampleInstrument *instrument) {
+static void updateSliceCountLabel(etl::string<20> &label, SampleInstrument *instrument) {
   int32_t count = 0;
   if (instrument) {
     for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
@@ -113,16 +109,14 @@ void InstrumentView::addNameTextField(I_Instrument *instr, GUIPoint &position) {
   nameVariables_.emplace_back(instr);
   Variable &nameVar = *nameVariables_.rbegin();
 
-  auto label =
-      etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Name: ");
+  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Name: ");
 
   // Use an empty default name - we don't want to populate with sample filename
   // The display name will still be shown on the phrase screen via
   // GetDisplayName()
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> defaultName;
 
-  nameTextField_.emplace_back(nameVar, position, label, FourCC::InstrumentName,
-                              defaultName);
+  nameTextField_.emplace_back(nameVar, position, label, FourCC::InstrumentName, defaultName);
   fieldList_.insert(fieldList_.end(), &(*nameTextField_.rbegin()));
 }
 
@@ -130,7 +124,7 @@ I_Instrument *InstrumentView::getInstrument() {
   int id = viewData_->currentInstrumentID_;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   return bank->GetInstrument(id);
-};
+}
 
 void InstrumentView::onInstrumentTypeChange(bool updateUI) {
   auto nuType = (InstrumentType)instrumentType_.GetInt();
@@ -154,57 +148,54 @@ void InstrumentView::onInstrumentTypeChange(bool updateUI) {
   }
 
   // now assign new instrument type to the current instrument slot id
-  unsigned short result = bank->GetNextAndAssignID(nuType, id);
+  InstrumentAssignResult result = bank->AssignInstrumentToSlot(nuType, id);
 
-  if (result == NO_MORE_INSTRUMENT) {
-    Trace::Error("INSTRUMENTVIEW", "Failed to assign new instrument type: %d",
-                 nuType);
+  // lambda to clear on fail
+  auto setCurrentInstrumentToNone = [&]() {
+    bank->AssignInstrumentToSlot(IT_NONE, id);
+    instrumentType_.SetInt(IT_NONE, false);
+  };
 
-    // TODO (democloid): this is a hack in order to ignore all existence of
-    // certain instruments and seamlessly set NONE
-    // Needed as the alternative is to change InstrumentTypeNames array plus all
-    // switch instances which reference the types that wouldn't be available on
-    // this platform
-#ifndef ADV
-    // Show a dialog to the user
-    char message[40];
-    npf_snprintf(message, sizeof(message), "%s instruments exhausted!",
-                 InstrumentTypeNames[nuType]);
-    MessageBox *mb =
-        MessageBox::Create(*this, message, "Trying next...", MBBF_OK);
-    DoModal(mb);
-#endif
-    // Try to find the next available instrument type
+  // initialization failed, could not initialize this instruments, let's try the
+  // next type
+  if (result == InstrumentAssignResult::PoolExhausted) {
+    Trace::Error("Instrument pool exhausted.");
+    setCurrentInstrumentToNone();
+  } else if (result == InstrumentAssignResult::InitFailed) {
+    Trace::Error("Failed to initialize new instrument of type %d", nuType);
+
+    // try to find the next available instrument type
     bool found = false;
-    for (int i = nuType + 1;
-         i <= static_cast<int>(kMaxSelectableInstrumentType); i++) {
-      InstrumentType nextType = (InstrumentType)i;
-      result = bank->GetNextAndAssignID(nextType, id);
-      if (result != NO_MORE_INSTRUMENT) {
-        Trace::Log("INSTRUMENTVIEW", "Assigned next available type: %d",
-                   nextType);
-        instrumentType_.SetInt(nextType, false);
-        found = true;
-        break; // Exit loop on success
+    for (int i = nuType + 1; i <= static_cast<int>(kMaxSelectableInstrumentType); i++) {
+      InstrumentType nextType = static_cast<InstrumentType>(i);
+      result = bank->AssignInstrumentToSlot(nextType, id);
+
+      if (result == InstrumentAssignResult::PoolExhausted) {
+        // no more instruments available
+        break;
+      } else if (result == InstrumentAssignResult::InitFailed) {
+        // failed to initialize this type, keep going
+        Trace::Error("Failed to initialize new instrument of type %d", nextType);
+        continue;
       }
+
+      Trace::Log("INSTRUMENTVIEW", "Assigned next available type: %d", nextType);
+      instrumentType_.SetInt(nextType, false);
+      found = true;
+      // Success, stop searching
+      break;
     }
 
     if (!found) {
-      Trace::Log("INSTRUMENTVIEW",
-                 "No other instrument types available, setting to NONE");
-      instrumentType_.SetInt(IT_NONE, false);
+      Trace::Error("Failed to initialize any instrument type, defaulting to NONE");
+      setCurrentInstrumentToNone();
     }
-
-    refreshInstrumentFields();
-    isDirty_ = true;
-    return;
   }
 
   // Get the new instrument after type change
   I_Instrument *newInstr = getInstrument();
   if (newInstr) {
-    Trace::Log("INSTRUMENTVIEW", "New instrument type: %d",
-               newInstr->GetType());
+    Trace::Log("INSTRUMENTVIEW", "New instrument type: %d", newInstr->GetType());
   }
 
   // Refresh the UI fields for the new instrument type
@@ -234,7 +225,7 @@ void InstrumentView::onInstrumentChange() {
   ((WatchedVariable *)&instrumentType_)->SetInt(getInstrument()->GetType());
 
   refreshInstrumentFields();
-};
+}
 
 void InstrumentView::refreshInstrumentFields() {
   for (auto &f : intVarField_) {
@@ -309,6 +300,9 @@ void InstrumentView::refreshInstrumentFields() {
   case IT_OPAL:
     fillOpalParameters();
     break;
+  case IT_CHIPTUNE:
+    fillChiptuneParameters();
+    break;
   case IT_LAST:
     // NA
     break;
@@ -339,7 +333,8 @@ void InstrumentView::refreshInstrumentFields() {
   getInstrument()->AddObserver(*this);
 }
 
-void InstrumentView::fillNoneParameters() {}
+void InstrumentView::fillNoneParameters() {
+}
 
 void InstrumentView::fillSampleParameters() {
   int i = viewData_->currentInstrumentID_;
@@ -356,8 +351,7 @@ void InstrumentView::fillSampleParameters() {
 
   Variable *v = instrument->FindVariable(FourCC::SampleInstrumentSample);
   SamplePool *sp = SamplePool::GetInstance();
-  intVarField_.emplace_back(position, *v, "sample: %.17s", 0,
-                            sp->GetNameListSize() - 1, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "sample: %.17s", 0, sp->GetNameListSize() - 1, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
@@ -367,8 +361,7 @@ void InstrumentView::fillSampleParameters() {
 
   GUIPoint actionPos = position;
   actionPos._x = baseX + 12;
-  sampleActionField_.emplace_back("Adjust", FourCC::ActionShowSampleSlices,
-                                  actionPos);
+  sampleActionField_.emplace_back("Adjust", FourCC::ActionShowSampleSlices, actionPos);
   fieldList_.insert(fieldList_.end(), &sampleActionField_.back());
   sampleActionField_.back().AddObserver(*this);
 
@@ -440,39 +433,34 @@ void InstrumentView::fillSampleParameters() {
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentLoopMode);
-  intVarField_.emplace_back(position, *v, "loop mode: %s", 0, SILM_LAST - 1, 1,
-                            1);
+  intVarField_.emplace_back(position, *v, "loop mode: %s", 0, SILM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentStart);
-  bigHexVarField_.emplace_back(position, *v, 7, "start: %7.7X", 0,
-                               instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, "start: %7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentLoopStart);
-  bigHexVarField_.emplace_back(position, *v, 7, "loop start: %7.7X", 0,
-                               instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, "loop start: %7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentEnd);
-  bigHexVarField_.emplace_back(position, *v, 7, "loop end: %7.7X", 0,
-                               instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, "loop end: %7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentTable);
-  intVarOffField_.emplace_back(position, *v, "table: %2.2X", 0x00,
-                               TABLE_COUNT - 1, 1, 0x10);
+  intVarOffField_.emplace_back(position, *v, "table: %2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   v = instrument->FindVariable(FourCC::SampleInstrumentTableAutomation);
   position._x += 12;
   intVarField_.emplace_back(position, *v, "auto: %s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-};
+}
 
 void InstrumentView::fillSIDParameters() {
   int i = viewData_->currentInstrumentID_;
@@ -497,15 +485,13 @@ void InstrumentView::fillSIDParameters() {
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentPulseWidth);
-  intVarField_.emplace_back(position, *v, "  Pulsewidth:  %2.2X", 0, 0xFFF, 1,
-                            0x10);
+  intVarField_.emplace_back(position, *v, "  Pulsewidth:  %2.2X", 0, 0xFFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentWaveform);
 
-  intVarField_.emplace_back(position, *v, "  Waveform:    %s", 0, DWF_LAST - 1,
-                            1, 1);
+  intVarField_.emplace_back(position, *v, "  Waveform:    %s", 0, DWF_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
@@ -520,8 +506,7 @@ void InstrumentView::fillSIDParameters() {
 
   position._y += 2;
   v = instrument->FindVariable(FourCC::SIDInstrumentADSR);
-  bigHexVarField_.emplace_back(UIBigHexVarField(
-      position, *v, 4, "Env. A/D/S/R:  %4.4X", 0, 0xFFFF, 16, true));
+  bigHexVarField_.emplace_back(UIBigHexVarField(position, *v, 4, "Env. A/D/S/R:  %4.4X", 0, 0xFFFF, 16, true));
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position._y += 2;
@@ -542,8 +527,7 @@ void InstrumentView::fillSIDParameters() {
     v = instrument->FindVariable(FourCC::SIDInstrument2FilterCut);
     break;
   }
-  intVarField_.emplace_back(position, *v, "  Cutoff:      %1.1X", 0, 0x7FF, 1,
-                            0x10);
+  intVarField_.emplace_back(position, *v, "  Cutoff:      %1.1X", 0, 0x7FF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
@@ -567,8 +551,7 @@ void InstrumentView::fillSIDParameters() {
     v = instrument->FindVariable(FourCC::SIDInstrument2FilterMode);
     break;
   }
-  intVarField_.emplace_back(position, *v, "  Mode:        %s", 0, DFM_LAST - 1,
-                            1, 1);
+  intVarField_.emplace_back(position, *v, "  Mode:        %s", 0, DFM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 2;
@@ -582,7 +565,9 @@ void InstrumentView::fillSIDParameters() {
   }
   intVarField_.emplace_back(position, *v, "Volume:        %1.1X", 0, 0xF, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-};
+}
+
+#include "InstrumentView_Chiptune.ipp"
 
 void InstrumentView::fillMidiParameters() {
 
@@ -596,40 +581,34 @@ void InstrumentView::fillMidiParameters() {
   position._y += 3;
 
   Variable *v = instrument->FindVariable(FourCC::MidiInstrumentChannel);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "channel: %2.2d", 0, 0x0F, 1, 0x04, 1));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "channel: %2.2d", 0, 0x0F, 1, 0x04, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentVolume);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "volume: %2.2X", 0, 0xFF, 1, 0x10));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "volume: %2.2X", 0, 0xFF, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentNoteLength);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "length: %2.2X", 0, 0xFF, 1, 0x10));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "length: %2.2X", 0, 0xFF, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentProgram);
-  intVarOffField_.emplace_back(
-      UIIntVarOffField(position, *v, "program: %2.2X", 0, 0x7F, 1, 0x10));
+  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "program: %2.2X", 0, 0x7F, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentTableAutomation);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "automation: %s", 0, 1, 1, 1));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "automation: %s", 0, 1, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentTable);
-  intVarOffField_.emplace_back(
-      UIIntVarOffField(position, *v, "table: %2.2X", 0, 0x7F, 1, 0x10));
+  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "table: %2.2X", 0, 0x7F, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
-};
+}
 
 void InstrumentView::fillOpalParameters() {
   int i = viewData_->currentInstrumentID_;
@@ -650,14 +629,12 @@ void InstrumentView::fillOpalParameters() {
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::OPALInstrumentDeepTremeloVibrato);
-  bitmaskVarField_.emplace_back(
-      UIBitmaskVarField(position, *v, "Deep Trem/Vib: %02b", 2));
+  bitmaskVarField_.emplace_back(UIBitmaskVarField(position, *v, "Deep Trem/Vib: %02b", 2));
   fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::OPALInstrumentFeedback);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "Feedback:      %1.1X", 0, 0x07, 1, 1, 0));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Feedback:      %1.1X", 0, 0x07, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 2;
@@ -666,14 +643,11 @@ void InstrumentView::fillOpalParameters() {
 
   // operator settings
   position._y += 2;
-  staticField_.emplace_back(
-      position, "               Op 1" char_border_single_vertical_s "Op 2");
+  staticField_.emplace_back(position, "               Op 1" char_border_single_vertical_s "Op 2");
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   position._y += 1;
-  staticField_.emplace_back(
-      position,
-      "               " char_line_4_s char_border_single_cross_s char_line_4_s);
+  staticField_.emplace_back(position, "               " char_line_4_s char_border_single_cross_s char_line_4_s);
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   // vertical table separator
@@ -686,72 +660,60 @@ void InstrumentView::fillOpalParameters() {
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::OPALInstrumentOp1Level);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "Level:         %2.2X", 0, 63, 1, 1, 0));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Level:         %2.2X", 0, 63, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   v = instrument->FindVariable(FourCC::OPALInstrumentOp2Level);
-  intVarField_.emplace_back(
-      UIIntVarField(position + GUIPoint(20, 0), *v, "%2.2X", 0, 63, 1, 1, 0));
+  intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%2.2X", 0, 63, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::OPALInstrumentOp1Multiplier);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "Multiplier:    %1.1X", 0, 15, 1, 1, 0));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Multiplier:    %1.1X", 0, 15, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   v = instrument->FindVariable(FourCC::OPALInstrumentOp2Multiplier);
-  intVarField_.emplace_back(
-      UIIntVarField(position + GUIPoint(20, 0), *v, "%1.1X", 0, 15, 1, 1, 0));
+  intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%1.1X", 0, 15, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::OPALInstrumentOp1ADSR);
-  bigHexVarField_.emplace_back(UIBigHexVarField(
-      position, *v, 4, "A/D/S/R:       %4.4X", 0, 0xFFFF, 16, true));
+  bigHexVarField_.emplace_back(UIBigHexVarField(position, *v, 4, "A/D/S/R:       %4.4X", 0, 0xFFFF, 16, true));
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   v = instrument->FindVariable(FourCC::OPALInstrumentOp2ADSR);
-  bigHexVarField_.emplace_back(UIBigHexVarField(
-      position + GUIPoint(20, 0), *v, 4, "%4.4X", 0, 0xFFFF, 16, true));
+  bigHexVarField_.emplace_back(UIBigHexVarField(position + GUIPoint(20, 0), *v, 4, "%4.4X", 0, 0xFFFF, 16, true));
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::OPALInstrumentOp1WaveShape);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "Shape:         %s", 0, 7, 1, 1));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Shape:         %s", 0, 7, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   v = instrument->FindVariable(FourCC::OPALInstrumentOp2WaveShape);
-  intVarField_.emplace_back(
-      UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 7, 1, 1));
+  intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 7, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::OPALInstrumentOp1TremVibSusKSR);
-  bitmaskVarField_.emplace_back(
-      UIBitmaskVarField(position, *v, "TR/VB/SU/KSR:  %04b", 4));
+  bitmaskVarField_.emplace_back(UIBitmaskVarField(position, *v, "TR/VB/SU/KSR:  %04b", 4));
   fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
 
   v = instrument->FindVariable(FourCC::OPALInstrumentOp2TremVibSusKSR);
-  bitmaskVarField_.emplace_back(
-      UIBitmaskVarField(position + GUIPoint(20, 0), *v, "%04b", 4));
+  bitmaskVarField_.emplace_back(UIBitmaskVarField(position + GUIPoint(20, 0), *v, "%04b", 4));
   fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
 
   position._y += 1;
   v = instrument->FindVariable(FourCC::OPALInstrumentOp1KeyScaleLevel);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, "Keyscale:      %s", 0, 3, 1, 1));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Keyscale:      %s", 0, 3, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   v = instrument->FindVariable(FourCC::OPALInstrumentOp2KeyScaleLevel);
-  intVarField_.emplace_back(
-      UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 3, 1, 1));
+  intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 3, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   Trace::Error("OPAL fill done, total fields: %d", fieldList_.size());
-};
+}
 
 void InstrumentView::warpToNext(int offset) {
   int instrument = viewData_->currentInstrumentID_ + offset;
@@ -764,7 +726,7 @@ void InstrumentView::warpToNext(int offset) {
   viewData_->currentInstrumentID_ = instrument;
   onInstrumentChange();
   isDirty_ = true;
-};
+}
 
 void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
@@ -779,13 +741,9 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
     if (GetFocus() == *fieldList_.begin()) {
       bool instrumentModified = checkInstrumentModified();
       if (instrumentModified) {
-        MessageBox *mb = MessageBox::Create(*this, "Reset all settings?",
-                                            MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Reset all settings?", MBBF_YES | MBBF_NO);
         pendingPurgeInstrument_ = instr;
-        DoModal(mb,
-                ModalViewCallback::create<
-                    InstrumentView, &InstrumentView::onConfirmResetInstrument>(
-                    *this));
+        DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmResetInstrument>(*this));
       }
       return;
     }
@@ -819,12 +777,10 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
         viewMode_ = VM_NORMAL; // clear the "enter double tap" state
         if (!player->IsRunning()) {
           // First check if the samplelib exists
-          bool samplelibExists =
-              FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
+          bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
 
           if (!samplelibExists) {
-            MessageBox *mb = MessageBox::Create(
-                *this, "Can't access the samplelib", MBBF_OK);
+            MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
             DoModal(mb);
           } else {
             ImportView::SetSourceViewType(VT_INSTRUMENT);
@@ -838,8 +794,7 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
             NotifyObservers(&ve);
           }
         } else {
-          MessageBox *mb =
-              MessageBox::Create(*this, "Not while playing", MBBF_OK);
+          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
           DoModal(mb);
         }
       } else {
@@ -952,14 +907,12 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
     }
 
     if (mask & EPBM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, true,
-                            viewData_->chainRow_);
+      player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
   } else {
     // No modifier
     if (mask & EPBM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, false,
-                            viewData_->chainRow_);
+      player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
 
@@ -967,7 +920,7 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (field) {
     lastFocusID_ = field->GetVariableID();
   }
-};
+}
 
 void InstrumentView::DrawView() {
   Clear();
@@ -977,10 +930,10 @@ void InstrumentView::DrawView() {
 
   // Draw title
 
-  char title[20];
+  char title[26];
   SetColor(CD_NORMAL);
-  npf_snprintf(title, sizeof(title), "Instrument %2.2X",
-               viewData_->currentInstrumentID_);
+  npf_snprintf(title, sizeof(title), "Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_,
+               project_->GetInstrumentBank()->UsedInstrumentCount(), MAX_INSTRUMENT_COUNT);
   DrawString(pos._x, pos._y, title, props);
   // Draw fields
   FieldView::Redraw();
@@ -990,7 +943,7 @@ void InstrumentView::DrawView() {
   I_Instrument *instr = getInstrument();
   if (instr) {
     InstrumentType type = instr->GetType();
-    if (type == IT_SID || type == IT_OPAL) {
+    if (type == IT_SID || type == IT_OPAL || type == IT_CHIPTUNE) {
       SetColor(CD_WARN);
       DrawString(18, 1, char_button_border_left_s, props);
       DrawString(19, 1, "EXPERIMENTAL", GUITextProperties(true));
@@ -1006,8 +959,7 @@ void InstrumentView::OnFocus() {
   // Get latest selected instrument, ensures we display the instrument that was
   // selected in the PhraseView
   int currentID = viewData_->currentInstrumentID_;
-  Trace::Debug("INSTRUMENTVIEW", "Current instrument ID from ViewData: %d",
-               currentID);
+  Trace::Debug("INSTRUMENTVIEW", "Current instrument ID from ViewData: %d", currentID);
 
   // Get the current instrument based on the ViewData's currentInstrumentID_
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
@@ -1021,9 +973,8 @@ void InstrumentView::OnFocus() {
 
     // Only update if the type has changed
     if (instrumentType_.GetInt() != currentType) {
-      Trace::Log("INSTRUMENTVIEW",
-                 "OnFocus instrument type changed from %d to %d",
-                 instrumentType_.GetInt(), currentType);
+      Trace::Log("INSTRUMENTVIEW", "OnFocus instrument type changed from %d to %d", instrumentType_.GetInt(),
+                 currentType);
       // Set the instrument type without triggering the observer update
       // because we dont want the observer to do its normal check for a modified
       // instrument
@@ -1062,14 +1013,9 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       // Check if any instrument field has been modified
       bool instrumentModified = checkInstrumentModified();
       if (instrumentModified) {
-        MessageBox *mb = MessageBox::Create(
-            *this, "Change Instrument &", "lose settings?", MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Change Instrument &", "lose settings?", MBBF_YES | MBBF_NO);
         pendingInstrumentType_ = proposedType;
-        DoModal(
-            mb,
-            ModalViewCallback::create<
-                InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(
-                *this));
+        DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
       } else {
         // Apply the proposed type change immediately if not modified
         instrumentType_.SetInt(proposedType, false);
@@ -1118,14 +1064,10 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       break;
     }
 
-    MessageBox *mb = MessageBox::Create(*this, "Change sample &",
-                                        "clear slices?", MBBF_YES | MBBF_NO);
+    MessageBox *mb = MessageBox::Create(*this, "Change sample &", "clear slices?", MBBF_YES | MBBF_NO);
     pendingSampleChangeInstrument_ = sampleInstr;
     pendingSampleChangeNewIndex_ = newIndex;
-    DoModal(mb,
-            ModalViewCallback::create<InstrumentView,
-                                      &InstrumentView::onConfirmSampleChange>(
-                *this));
+    DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmSampleChange>(*this));
   } break;
   case FourCC::ActionShowSampleSlices: {
     I_Instrument *instr = getInstrument();
@@ -1134,8 +1076,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
     }
     SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
     if (sampleInstr->GetSampleIndex() < 0) {
-      MessageBox *mb =
-          MessageBox::Create(*this, "Assign a sample first", MBBF_OK);
+      MessageBox *mb = MessageBox::Create(*this, "Assign a sample first", MBBF_OK);
       DoModal(mb);
       break;
     }
@@ -1156,10 +1097,8 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       MidiInstrument *midiInstr = (MidiInstrument *)instr;
 
       // Get the channel and program values
-      Variable *channelVar =
-          midiInstr->FindVariable(FourCC::MidiInstrumentChannel);
-      Variable *programVar =
-          midiInstr->FindVariable(FourCC::MidiInstrumentProgram);
+      Variable *channelVar = midiInstr->FindVariable(FourCC::MidiInstrumentChannel);
+      Variable *programVar = midiInstr->FindVariable(FourCC::MidiInstrumentProgram);
 
       if (channelVar && programVar) {
         int channel = channelVar->GetInt();
@@ -1224,50 +1163,36 @@ void InstrumentView::resetInstrumentToDefaults() {
 
 void InstrumentView::handleInstrumentExport() {
   // Get current instrument using its id
-  I_Instrument *instrument =
-      viewData_->project_->GetInstrumentBank()->GetInstrument(
-          viewData_->currentInstrumentID_);
+  I_Instrument *instrument = viewData_->project_->GetInstrumentBank()->GetInstrument(viewData_->currentInstrumentID_);
 
   // Check if the instrument has a name set
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name = instrument->GetDisplayName();
   // Check if the name is empty, the default value, or matches the default
   // instrument type name
-  etl::string<MAX_INSTRUMENT_NAME_LENGTH> defaultTypeName =
-      instrument->GetDefaultName();
+  etl::string<MAX_INSTRUMENT_NAME_LENGTH> defaultTypeName = instrument->GetDefaultName();
 
   if (name.empty() || name == defaultTypeName) {
     // Show error message if no name is set
-    MessageBox *mb = MessageBox::Create(*this, "Please set a name",
-                                        "before exporting", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Please set a name", "before exporting", MBBF_OK);
     DoModal(mb);
   } else {
     // Export the instrument using the name field
-    PersistencyResult result =
-        PersistencyService::GetInstance()->ExportInstrument(instrument, name);
+    PersistencyResult result = PersistencyService::GetInstance()->ExportInstrument(instrument, name);
 
     if (result == PERSIST_EXISTS) {
       // File already exists, ask user if they want to override it
-      etl::string<strlen("Overwrite existing file: ")> confirmMsg =
-          "Overwrite existing file?";
-      MessageBox *mb = MessageBox::Create(*this, confirmMsg.c_str(),
-                                          name.c_str(), MBBF_YES | MBBF_NO);
+      etl::string<strlen("Overwrite existing file: ")> confirmMsg = "Overwrite existing file?";
+      MessageBox *mb = MessageBox::Create(*this, confirmMsg.c_str(), name.c_str(), MBBF_YES | MBBF_NO);
 
       exportInstrument_ = instrument;
       exportName_ = name;
-      DoModal(
-          mb,
-          ModalViewCallback::create<InstrumentView,
-                                    &InstrumentView::onConfirmExportOverwrite>(
-              *this));
+      DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmExportOverwrite>(*this));
     } else {
       // Create a message with the instrument name
-      etl::string<MAX_INSTRUMENT_NAME_LENGTH + strlen("Exported: ")>
-          successMsg = "Exported: ";
+      etl::string<MAX_INSTRUMENT_NAME_LENGTH + strlen("Exported: ")> successMsg = "Exported: ";
       successMsg += name;
 
-      const char *message = result == PERSIST_SAVED
-                                ? successMsg.c_str()
-                                : "Failed to export instrument";
+      const char *message = result == PERSIST_SAVED ? successMsg.c_str() : "Failed to export instrument";
       // Show export result message
       MessageBox *mb = MessageBox::Create(*this, message, MBBF_OK);
       DoModal(mb);
@@ -1312,8 +1237,7 @@ void InstrumentView::onConfirmSampleChange(View &, ModalView &dialog) {
   }
 
   suppressSampleChangeWarning_ = true;
-  if (Variable *sampleVar =
-          sampleInstr->FindVariable(FourCC::SampleInstrumentSample)) {
+  if (Variable *sampleVar = sampleInstr->FindVariable(FourCC::SampleInstrumentSample)) {
     sampleVar->SetInt(lastSampleIndex_);
   }
   isDirty_ = true;
@@ -1330,6 +1254,5 @@ void InstrumentView::onConfirmExportOverwrite(View &, ModalView &dialog) {
   }
 
   PersistencyService::GetInstance()->ExportInstrument(instrument, name, true);
-  Trace::Log("INSTRUMENTVIEW", "Instrument '%s' exported with overwrite",
-             name.c_str());
+  Trace::Log("INSTRUMENTVIEW", "Instrument '%s' exported with overwrite", name.c_str());
 }

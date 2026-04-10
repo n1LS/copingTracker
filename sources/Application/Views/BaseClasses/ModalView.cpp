@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "ModalView.h"
@@ -13,30 +15,50 @@
 uint32_t ModalView::nextInstanceId_ = 0;
 
 ModalView::ModalView(View &v)
-    : View(v.w_, v.viewData_), instanceId_(++nextInstanceId_), finished_(false),
-      returnCode_(0){};
+    : View(v.w_, v.viewData_), instanceId_(++nextInstanceId_), finished_(false), returnCode_(0) {
+}
 
-ModalView::~ModalView(){};
+ModalView::~ModalView() {
+}
 
-int ModalView::GetReturnCode() { return returnCode_; };
-uint32_t ModalView::GetInstanceId() const { return instanceId_; };
+int ModalView::GetReturnCode() {
+  return returnCode_;
+}
 
-bool ModalView::IsFinished() { return finished_; };
+uint32_t ModalView::GetInstanceId() const {
+  return instanceId_;
+}
+
+bool ModalView::IsFinished() {
+  return finished_;
+}
 
 void ModalView::EndModal(int returnCode) {
   returnCode_ = returnCode;
   finished_ = true;
-};
+}
 
-void ModalView::Destroy() { delete this; }
+void ModalView::Destroy() {
+  delete this;
+}
 
 void ModalView::ClearTextRect(int x, int y, int w, int h) {
-  View::ClearTextRect(x + left_, y + top_, w, h);
+  // For ModalView, handle both offset-based (from SetWindow) and absolute coords.
+  // If x, y are already in screen space (from SetWindow's direct call), don't offset.
+  // Otherwise, offset by left_/top_ (for modal-relative calls).
+  // SetWindow now calls ClearTextRect with global coords, so we use them directly.
+  View::ClearTextRect(x, y, w, h);
 }
-void ModalView::DrawString(int x, int y, const char *txt,
-                           const GUITextProperties &props) {
-  View::DrawString(x + left_, y + top_, txt, props);
-};
+
+// DrawString override to account for modal window position
+void ModalView::DrawString(int x, int y, const char *text, const GUITextProperties &props) {
+  View::DrawString(x + left_, y + top_, text, props);
+}
+
+// DrawChar override to account for modal window position
+void ModalView::DrawChar(int x, int y, char c, const GUITextProperties &props) {
+  View::DrawChar(x + left_, y + top_, c, props);
+}
 
 GUIPoint ModalView::GetAnchor() {
   // Get the base anchor point from View
@@ -50,33 +72,15 @@ GUIPoint ModalView::GetAnchor() {
 }
 
 void ModalView::SetWindow(int width, int height) {
+  width = std::min(width, SCREEN_WIDTH - 4);
+  height = std::min(height, SCREEN_HEIGHT - 4);
 
-  if (width > 28) {
-    width = 28;
-  };
-  if (height > 20) {
-    height = 20;
-  };
+  left_ = (SCREEN_WIDTH - width) / 2;
+  top_ = (SCREEN_HEIGHT - height) / 2;
 
-  left_ = 16 - width / 2;
-  top_ = 8 - height / 2;
-  if (top_ < 2) {
-    top_ = 2;
-  }
-  ClearTextRect(-1, -1, width + 2, height + 2);
-
-  SetColor(CD_ACCENT);
-  GUITextProperties props;
-  props.invert_ = true;
-  char line[SCREEN_WIDTH + 1];
-  memset(line, ' ', SCREEN_WIDTH);
-  line[SCREEN_WIDTH] = '\0';
-  line[width + 4] = 0;
-  DrawString(-2, -2, line, props);
-  DrawString(-2, height + 1, line, props);
-  line[1] = 0;
-  for (int i = 0; i < height + 2; i++) {
-    DrawString(-2, i - 1, line, props);
-    DrawString(width + 1, i - 1, line, props);
-  }
-};
+  // Clear the entire modal area including the border frame using absolute screen coordinates.
+  ClearTextRect(left_ - 2, top_ - 2, width + 4, height + 4);
+  
+  SetColor(CD_NORMAL);
+  DrawBorder(-2, -2, width + 4, height + 4);
+}

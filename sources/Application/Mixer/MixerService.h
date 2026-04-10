@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _MIXER_SERVICE_H_
@@ -26,10 +28,7 @@ enum MixerServiceMode {
 
 #define MAX_BUS_COUNT 10
 
-class MixerService : public T_Singleton<MixerService>,
-                     public Observable,
-                     public I_Observer,
-                     public CommandExecuter {
+class MixerService : public T_Singleton<MixerService>, public Observable, public I_Observer, public CommandExecuter {
 
 public:
   MixerService();
@@ -43,7 +42,9 @@ public:
 
   MixBus *GetMixBus(int i);
 
-  MixBus *GetMasterBus() { return &master_; };
+  MixBus *GetMasterBus() {
+    return &master_;
+  };
 
   virtual void Update(Observable &o, I_ObservableData *d);
 
@@ -56,7 +57,9 @@ public:
   virtual void Execute(FourCC id, float value);
 
   AudioOut *GetAudioOut();
-  MixerServiceMode GetMode() const { return mode_; }
+  MixerServiceMode GetMode() const {
+    return mode_;
+  }
 
   void Lock();
   void Unlock();

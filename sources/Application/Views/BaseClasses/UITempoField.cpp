@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #include "UITempoField.h"
@@ -12,13 +14,12 @@
 #include "Application/Player/Player.h"
 #include "System/System/System.h"
 
-UITempoField::UITempoField(FourCC action, const GUIPoint &position, Variable &v,
-                           const char *format, int min, int max, int xOffset,
-                           int yOffset)
+UITempoField::UITempoField(FourCC action, const GUIPoint &position, Variable &v, const char *format, int min, int max,
+                           int xOffset, int yOffset)
     : UIIntVarField(position, v, format, min, max, xOffset, yOffset) {
   action_ = action;
   ((WatchedVariable &)v).AddObserver(*this);
-};
+}
 
 /*void UITempoField::OffsetValue(int offset) {
         int oldVal=*src_ ;
@@ -32,12 +33,11 @@ UITempoField::UITempoField(FourCC action, const GUIPoint &position, Variable &v,
 
 void UITempoField::OnEditClick() {
   ApplicationCommandDispatcher::GetInstance()->OnTempoTap();
-};
+}
 
 void UITempoField::Update(Observable &, I_ObservableData *data) {
   SetChanged();
-  NotifyObservers(
-      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(action_)));
+  NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(action_)));
 }
 
 void UITempoField::ProcessArrow(unsigned short mask) {
@@ -65,12 +65,11 @@ void UITempoField::ProcessArrow(unsigned short mask) {
   }
 
   src_.SetInt(value);
-};
+}
 
 void UITempoField::ProcessEditArrow(unsigned short mask) {
 
-  ApplicationCommandDispatcher *dispatcher =
-      ApplicationCommandDispatcher::GetInstance();
+  ApplicationCommandDispatcher *dispatcher = ApplicationCommandDispatcher::GetInstance();
   switch (mask) {
   case EPBM_UP:
     break;
@@ -83,4 +82,4 @@ void UITempoField::ProcessEditArrow(unsigned short mask) {
     dispatcher->OnNudgeUp();
     break;
   };
-};
+}

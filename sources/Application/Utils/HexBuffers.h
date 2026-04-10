@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2018 Discodirt
  * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _HEX_BUFFERS_H_
@@ -14,14 +16,10 @@
 #include "Externals/TinyXML2/tinyxml2.h"
 #include "Foundation/Types/Types.h"
 
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
-                   unsigned char *src, unsigned len);
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
-                   unsigned short *src, unsigned len);
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
-                   unsigned int *src, unsigned len);
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName,
-                   FourCC *src, unsigned len);
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned char *src, unsigned len);
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned short *src, unsigned len);
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned int *src, unsigned len);
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, FourCC *src, unsigned len);
 void restoreHexBuffer(PersistencyDocument *doc, unsigned char *dst);
 
 #endif
