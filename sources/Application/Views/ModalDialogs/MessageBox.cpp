@@ -79,6 +79,8 @@ void MessageBox::Destroy() {
 }
 
 void MessageBox::DrawView() {
+  SetBackgroundColor(cBackground);
+  
   // message size
   int size1 = line1_.size();
   int size2 = line2_.size();
@@ -95,32 +97,29 @@ void MessageBox::DrawView() {
   // draw text
   int y = 0;
   int x = (width - size) / 2;
-  GUITextProperties props;
-  SetColor(CD_NORMAL);
-  DrawString(x, y, line1_.c_str(), props);
+  SetColor(cNormal);
+  DrawString(x, y, line1_.c_str());
   if (line2_.size() > 0) {
     y++;
-    DrawString(x, y, line2_.c_str(), props);
+    DrawString(x, y, line2_.c_str());
   }
 
   y += 2;
   int offset = width / (buttonCount_ + 1);
 
   for (int i = 0; i < buttonCount_; i++) {
+    bool sel = i == selected_;
     const char *text = buttonText[button_[i]];
     x = offset * (i + 1) - strlen(text) / 2;
-    if (i == selected_) {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
-    } else {
-      SetColor(CD_HILITE1);
-      props.invert_ = false;
-    }
-    DrawString(x, y, text, props);
-    if (selected_ == i) {
-      props.invert_ = !props.invert_;;
-      DrawChar(x - 1, y, GLYPH(char_button_border_left_s), props);
-      DrawChar(x + strlen(text), y, GLYPH(char_button_border_right_s), props);
+    SetColor(sel ? cBackground : cHighlight1);
+    SetBackgroundColor(sel ? cHighlight2 : cBackground);
+    DrawString(x, y, text);
+
+    if (sel) {
+      // draw highlight button ends
+      SwapColors();
+      DrawChar(x - 1, y, GLYPH(char_button_border_left_s));
+      DrawChar(x + strlen(text), y, GLYPH(char_button_border_right_s));
     }
   }
 }

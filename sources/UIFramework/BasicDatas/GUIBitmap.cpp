@@ -47,8 +47,8 @@ void GUIBitmap::SelectFont(int type, int size) {
   _imp->SelectFont(type, size);
 }
 
-void GUIBitmap::DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props) {
-  _imp->DrawString(string, pos, props);
+void GUIBitmap::DrawString(const char *string, const GUIPoint &pos) {
+  _imp->DrawString(string, pos);
 }
 
 int GUIBitmap::GetStringWidth(char *string) {

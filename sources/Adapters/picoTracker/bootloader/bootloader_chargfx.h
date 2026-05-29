@@ -25,23 +25,24 @@ extern "C" {
 #define char_border_single_verticalRight_s "\xC3"
 #define char_border_single_cross_s "\xC5"
 
+// todo: allow reuse by removing defitions outside of char_gfx to allow inclusion here
 typedef enum {
-  CHARGFX_BG,
-  CHARGFX_NORMAL,
-  CHARGFX_HILITE,
-  CHARGFX_HILITE2,
-  CHARGFX_GRAY,
-  CHARGFX_DESERT,
-  CHARGFX_ORANGE,
-  CHARGFX_YELLOW,
-  CHARGFX_WHITE,
-  CHARGFX_MIDNIGHT,
-  CHARGFX_DARK_SLATE_GRAY,
+  CHARGFX_BLACK,
+  CHARGFX_RED,
   CHARGFX_GREEN,
-  CHARGFX_YELLOW_GREEN,
+  CHARGFX_YELLOW,
   CHARGFX_BLUE,
-  CHARGFX_GURU_TXT,
-  CHARGFX_GURU_BG
+  CHARGFX_MAGENTA,
+  CHARGFX_CYAN,
+  CHARGFX_LIGHT_GRAY,
+  CHARGFX_DARK_GRAY,
+  CHARGFX_LIGHT_RED,
+  CHARGFX_LIGHT_GREEN,
+  CHARGFX_LIGHT_YELLOW,
+  CHARGFX_LIGHT_BLUE,
+  CHARGFX_LIGHT_MAGENTA,
+  CHARGFX_LIGHT_CYAN,
+  CHARGFX_WHITE
 } chargfx_color_t;
 
 void chargfx_set_cursor(uint8_t x, uint8_t y);

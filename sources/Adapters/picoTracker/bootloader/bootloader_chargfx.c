@@ -19,8 +19,8 @@
 
 #define SWAP_BYTES(color) ((uint16_t)(color >> 8) | (uint16_t)(color << 8))
 #define BUFFER_CHARS 15
-static chargfx_color_t screen_bg_color = CHARGFX_BG;
-static chargfx_color_t screen_fg_color = CHARGFX_NORMAL;
+static chargfx_color_t screen_bg_color = CHARGFX_BLACK;
+static chargfx_color_t screen_fg_color = CHARGFX_WHITE;
 static int cursor_x = 0;
 static int cursor_y = 0;
 uint8_t screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};

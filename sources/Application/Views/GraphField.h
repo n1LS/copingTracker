@@ -33,7 +33,7 @@ public:
 
   void Reset();
   void SetShowBaseline(bool show);
-  void SetBorderColors(ColorDefinition normal, ColorDefinition focused);
+  void SetBorderColors(Color normal, Color focused);
   void SetSampleSize(uint32_t sampleSize);
 
   uint32_t SampleSize() const;
@@ -57,7 +57,7 @@ public:
   void RequestFullRedraw();
 
   void SetMarkerCount(size_t count);
-  void SetMarker(size_t index, uint32_t sample, ColorDefinition color, bool visible);
+  void SetMarker(size_t index, uint32_t sample, Color color, bool visible);
 
   int32_t SampleToPixel(uint32_t sample) const;
   void DrawGraph(View &view);
@@ -71,8 +71,8 @@ private:
   int32_t width_;
   int32_t height_;
   bool showBaseline_;
-  ColorDefinition borderNormal_;
-  ColorDefinition borderFocused_;
+  Color borderNormal_;
+  Color borderFocused_;
 
   static uint8_t waveformCache_[CacheSize];
   bool waveformValid_;
@@ -86,14 +86,14 @@ private:
 
   struct Marker {
     uint32_t sample = 0;
-    ColorDefinition color = CD_NORMAL;
+    Color color = cNormal;
     bool visible = false;
   };
 
   Marker markers_[MaxMarkers];
   size_t markerCount_;
   int16_t markerPixelCache_[MaxMarkers];
-  ColorDefinition markerColorCache_[MaxMarkers];
+  Color markerColorCache_[MaxMarkers];
   bool markerVisibleCache_[MaxMarkers];
 
   static int32_t rmsSumSquares_[CacheSize];

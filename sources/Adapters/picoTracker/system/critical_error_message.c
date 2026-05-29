@@ -21,11 +21,11 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
 
   chargfx_set_font_index(0);
 
-  chargfx_set_palette_color(15, 0x0000); // BLACK
-  chargfx_set_palette_color(14, 0xF800); // RED
+  chargfx_set_palette_color(0, 0x0000); // BLACK
+  chargfx_set_palette_color(1, 0xF800); // RED
 
-  chargfx_set_background(CHARGFX_GURU_BG);
-  chargfx_set_foreground(CHARGFX_GURU_TXT);
+  chargfx_set_background(0);
+  chargfx_set_foreground(1);
 
   int msglen = strlen(message) < 30 ? strlen(message) : 30;
   char msgbuffer[32];
@@ -37,7 +37,7 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
     memset(&msgbuffer[center + msglen], ' ', 32 - center - msglen - 1);
   }
 
-  chargfx_clear(CHARGFX_GURU_BG);
+  chargfx_clear(0);
 
   // halt
   for (int i = 0;; i++) {
@@ -47,7 +47,7 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
     msgbuffer[31] = msgbuffer[0];
 
     chargfx_set_cursor(10, 2);
-    chargfx_putc(' ', false);
+    chargfx_putc(' ');
 
     // draw border
     for (int y = 0; y < 3; y++) {
@@ -59,9 +59,9 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
             c = (x == 0) ? (y == 0 ? GLYPH(char_border_double_topLeft_s) : GLYPH(char_border_double_bottomLeft_s))
                          : (y == 0 ? GLYPH(char_border_double_topRight_s) : GLYPH(char_border_double_bottomRight_s));
           }
-          chargfx_putc(border ? c : ' ', false);
+          chargfx_putc(border ? c : ' ');
         } else {
-          chargfx_putc(msgbuffer[x], false);
+          chargfx_putc(msgbuffer[x]);
         }
       }
     }

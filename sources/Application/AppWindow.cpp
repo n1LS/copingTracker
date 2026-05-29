@@ -63,26 +63,29 @@ const uint16_t AUTOSAVE_INTERVAL_IN_SECONDS = 1 * 60;
 AppWindow *instance = 0;
 
 unsigned char AppWindow::_charScreen[SCREEN_CHARS];
-unsigned char AppWindow::_charScreenProp[SCREEN_CHARS];
+color_t AppWindow::_screenColor[SCREEN_CHARS];
 unsigned char AppWindow::_preScreen[SCREEN_CHARS];
-unsigned char AppWindow::_preScreenProp[SCREEN_CHARS];
+color_t AppWindow::_preScreenColor[SCREEN_CHARS];
 
-GUIColor AppWindow::backgroundColor_(0x0F, 0x0F, 0x0F, 0);
-GUIColor AppWindow::normalColor_(0xAD, 0xAD, 0xAD, 1);
-GUIColor AppWindow::highlightColor_(0x84, 0x6F, 0x94, 2);
-GUIColor AppWindow::highlight2Color_(0x6B, 0x31, 0x6B, 3);
-GUIColor AppWindow::cursorColor_(0x77, 0x6B, 0x56, 4);
-GUIColor AppWindow::consoleColor_(0xFF, 0x00, 0xFF, 5);
-GUIColor AppWindow::infoColor_(0x29, 0xEE, 0x3D, 6);
-GUIColor AppWindow::warnColor_(0xEF, 0xFA, 0x52, 7);
-GUIColor AppWindow::errorColor_(0xE8, 0x4D, 0x15, 8);
-GUIColor AppWindow::accentColor_(0x02, 0xFF, 0x02, 9);
-GUIColor AppWindow::accentAltColor_(0xFF, 0x02, 0x02, 10);
-GUIColor AppWindow::emphasisColor_(0xFF, 0xA5, 0x02, 11);
-GUIColor AppWindow::reserved1Color_(0x02, 0x02, 0xFF, 12);
-GUIColor AppWindow::reserved2Color_(0x55, 0x55, 0x55, 13);
-GUIColor AppWindow::reserved3Color_(0x77, 0x77, 0x77, 14);
-GUIColor AppWindow::reserved4Color_(0xFF, 0xFF, 0x00, 15);
+GUIColor AppWindow::colorPalette_[16] = {
+    GUIColor(0x00, 0x00, 0x00), // 0: black
+    GUIColor(0x80, 0x00, 0x00), // 1: dark red
+    GUIColor(0x00, 0x80, 0x00), // 2: dark green
+    GUIColor(0x80, 0x80, 0x00), // 3: dark yellow
+    GUIColor(0x00, 0x00, 0x80), // 4: dark blue
+    GUIColor(0x80, 0x00, 0x80), // 5: dark magenta
+    GUIColor(0x00, 0x80, 0x80), // 6: dark cyan
+    GUIColor(0x80, 0x80, 0x80), // 7: gray    
+    GUIColor(0xc6, 0xc6, 0xc6), // 8: light gray  
+    GUIColor(0xFF, 0x00, 0x00), // 9: red
+    GUIColor(0x00, 0xFF, 0x00), // 10: green
+    GUIColor(0xFF, 0xFF, 0x00), // 11: yellow
+    GUIColor(0x00, 0x00, 0xFF), // 12: blue
+    GUIColor(0xFF, 0x00, 0xFF), // 13: magenta
+    GUIColor(0x00, 0xFF, 0xFF), // 14: cyan
+    GUIColor(0xFF, 0xFF, 0xFF), // 15: white
+};
+
 
 // Initialize the animation frame counter
 uint32_t AppWindow::animationFrameCounter_ = 0;
@@ -118,7 +121,6 @@ struct AppWindowViews {
 };
 
 void AppWindow::defineColor(FourCC colorCode, GUIColor &color, int paletteIndex) {
-
   Config *config = Config::GetInstance();
   auto rgbVar = config->FindVariable(colorCode);
   if (rgbVar) {
@@ -132,7 +134,7 @@ void AppWindow::defineColor(FourCC colorCode, GUIColor &color, int paletteIndex)
   } else {
     // Even if we don't update the RGB values, ensure the palette index is
     // correct
-    color._paletteIndex = paletteIndex;
+    color.paletteIndex_ = paletteIndex;
   }
 }
 
@@ -167,7 +169,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   UpdateColorsFromConfig();
 
-  GUIWindow::Clear(backgroundColor_);
+  GUIWindow::Clear(colorPalette_[cBackground]);
 
   static AppWindowViews views(*this, viewData_);
   views_ = &views;
@@ -195,8 +197,8 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   memset(_charScreen, ' ', SCREEN_CHARS);
   memset(_preScreen, ' ', SCREEN_CHARS);
-  memset(_charScreenProp, 0, SCREEN_CHARS);
-  memset(_preScreenProp, 0, SCREEN_CHARS);
+  memset(_screenColor, 0, SCREEN_CHARS);
+  memset(_preScreenColor, 0, SCREEN_CHARS);
 
   Redraw();
 
@@ -225,7 +227,7 @@ void appwindow_set_sdcard_present(bool present) {
   }
 }
 
-void AppWindow::DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props, bool force) {
+void AppWindow::DrawString(const char *string, const GUIPoint &pos, bool force) {
 
   // Safety check for null string
   if (!string) {
@@ -235,35 +237,37 @@ void AppWindow::DrawString(const char *string, const GUIPoint &pos, const GUITex
   (void)force;
 
   // DrawString and DrawChar share the same cache staging logic.
-  int x = pos._x;
+  int x = pos.x_;
   for (const char *current = string; *current; ++current, ++x) {
-    GUIPoint charPos(x, pos._y);
-    DrawChar(*current, charPos, props);
+    GUIPoint charPos(x, pos.y_);
+    DrawChar(*current, charPos);
   }
 }
 
-void AppWindow::DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props) {
-  if (pos._y < 0 || pos._y >= SCREEN_HEIGHT) {
+void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
+  if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT) {
     return;
   }
-  if (pos._x < 0 || pos._x >= SCREEN_WIDTH) {
+  if (pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
     return;
   }
 
-  int index = pos._x + SCREEN_WIDTH * pos._y;
+  int index = pos.x_ + SCREEN_WIDTH * pos.y_;
   _charScreen[index] = c;
 
   // Ensure color index is masked to prevent overlap with inversion bit.
-  unsigned char prop = (colorIndex_ & 0x7F) + (props.invert_ ? PROP_INVERT : 0);
-  _charScreenProp[index] = prop;
+  _screenColor[index] = color_;
 }
 
 void AppWindow::Clear(bool all) {
+  color_t base = (color_t){ .fg = cNormal, .bg = cBackground };
+  
   memset(_charScreen, ' ', SCREEN_CHARS);
-  memset(_charScreenProp, 0, SCREEN_CHARS);
+  memset(_screenColor, base.byte, SCREEN_CHARS);
+  
   if (all) {
-    memset(_preScreen, 0, SCREEN_CHARS);
-    memset(_preScreenProp, 0, SCREEN_CHARS);
+    memset(_preScreen, '\0', SCREEN_CHARS);
+    memset(_preScreenColor, base.byte, SCREEN_CHARS);
   };
 }
 
@@ -295,11 +299,11 @@ void AppWindow::ClearTextRect(GUIRect &r) {
   }
 
   unsigned char *st = _charScreen + x + (SCREEN_WIDTH * y);
-  unsigned char *pr = _charScreenProp + x + (SCREEN_WIDTH * y);
+  color_t *pr = _screenColor + x + (SCREEN_WIDTH * y);
   for (int i = 0; i < h; i++) {
     for (int j = 0; j < w; j++) {
       *st++ = ' ';
-      *pr++ = 0;
+      *pr++ = { .byte = 0 };
     }
     st += (SCREEN_WIDTH - w);
     pr += (SCREEN_WIDTH - w);
@@ -310,7 +314,7 @@ void AppWindow::InvalidateTextCache() {
   // Force the next text flush to resend all cells without changing the current
   // text buffer contents.
   memset(_preScreen, 0xFF, SCREEN_CHARS);
-  memset(_preScreenProp, 0xFF, SCREEN_CHARS);
+  memset(_preScreenColor, 0xFF, SCREEN_CHARS);
 }
 
 //
@@ -320,110 +324,57 @@ void AppWindow::Flush() {
 
   Lock();
 
-  GUITextProperties props;
   GUIPoint pos;
 
   // Start with an invalid color to force color setting on first character
-  ColorDefinition color = (ColorDefinition)-1;
-  pos._x = 0;
-  pos._y = 0;
+  Color currentFG = (Color)-1;
+  Color currentBG = (Color)-1;
+  pos.x_ = 0;
+  pos.y_ = 0;
 
   int count = 0;
 
   unsigned char *current = _charScreen;
   unsigned char *previous = _preScreen;
-  unsigned char *currentProp = _charScreenProp;
-  unsigned char *previousProp = _preScreenProp;
+  color_t *currentColor = _screenColor;
+  color_t *previousColor = _preScreenColor;
+  
   for (int y = 0; y < SCREEN_HEIGHT; y++) {
     for (int x = 0; x < SCREEN_WIDTH; x++) {
-#ifndef _LGPT_NO_SCREEN_CACHE_
-      if ((*current != *previous) || (*currentProp != *previousProp)) {
-#endif
+      if ((*current != *previous) || (currentColor->byte != previousColor->byte)) {
         // Extract invert flag from properties
-        props.invert_ = (*currentProp & PROP_INVERT) != 0;
+        Color fg = (Color)currentColor->fg;
+        Color bg = (Color)currentColor->bg;
 
         // Extract color index from properties and check if it's different from
         // current color
-        ColorDefinition charColor = (ColorDefinition)((*currentProp) & 0x7F);
-        if (charColor != color) {
-          color = charColor;
-
-          // Initialize gcolor with a safe default to avoid uninitialized value
-          // if switch falls through
-          GUIColor gcolor = normalColor_;
-          switch (color) {
-          case CD_BACKGROUND:
-            gcolor = backgroundColor_;
-            break;
-          case CD_NORMAL:
-            break;
-          case CD_HILITE1:
-            gcolor = highlightColor_;
-            break;
-          case CD_HILITE2:
-            gcolor = highlight2Color_;
-            break;
-          case CD_CONSOLE:
-            gcolor = consoleColor_;
-            break;
-          case CD_CURSOR:
-            gcolor = cursorColor_;
-            break;
-          case CD_INFO:
-            gcolor = infoColor_;
-            break;
-          case CD_WARN:
-            gcolor = warnColor_;
-            break;
-          case CD_ERROR:
-            gcolor = errorColor_;
-            break;
-          case CD_ACCENT:
-            gcolor = accentColor_;
-            break;
-          case CD_ACCENTALT:
-            gcolor = accentAltColor_;
-            break;
-          case CD_EMPHASIS:
-            gcolor = emphasisColor_;
-            break;
-          case CD_RESERVED1:
-            gcolor = reserved1Color_;
-            break;
-          case CD_RESERVED2:
-            gcolor = reserved2Color_;
-            break;
-          case CD_RESERVED3:
-            gcolor = reserved3Color_;
-            break;
-          case CD_RESERVED4:
-            gcolor = reserved4Color_;
-            break;
-
-          default:
-            NAssert(0);
-            break;
-          }
-          GUIWindow::SetColor(gcolor);
+        if (fg != currentFG) {
+          currentFG = fg;
+          GUIWindow::SetColor(colorPalette_[fg]);
         }
-        GUIWindow::DrawChar(*current, pos, props);
+
+        if (bg != currentBG) {
+          currentBG = bg;
+          GUIWindow::SetBackgroundColor(colorPalette_[bg]);
+        }
+
+        GUIWindow::DrawChar(*current, pos);
         count++;
-#ifndef _LGPT_NO_SCREEN_CACHE_
       }
-#endif
+
       current++;
       previous++;
-      currentProp++;
-      previousProp++;
-      pos._x++;
+      currentColor++;
+      previousColor++;
+      pos.x_++;
     }
-    pos._y++;
-    pos._x = 0;
+    pos.y_++;
+    pos.x_ = 0;
   }
   GUIWindow::Flush();
   Unlock();
   memcpy(_preScreen, _charScreen, SCREEN_CHARS);
-  memcpy(_preScreenProp, _charScreenProp, SCREEN_CHARS);
+  memcpy(_preScreenColor, _screenColor, SCREEN_CHARS);
 }
 
 AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
@@ -581,25 +532,22 @@ void AppWindow::SetDirty() {
 
 void AppWindow::UpdateColorsFromConfig() {
   // now assign custom colors if they have been set device config
-  defineColor(FourCC::VarBGColor, backgroundColor_, 0);
-  defineColor(FourCC::VarFGColor, normalColor_, 1);
-  defineColor(FourCC::VarHI1Color, highlightColor_, 2);
-  defineColor(FourCC::VarHI2Color, highlight2Color_, 3);
-  defineColor(FourCC::VarCursorColor, cursorColor_, 4);
-  defineColor(FourCC::VarConsoleColor, consoleColor_, 5);
-  defineColor(FourCC::VarInfoColor, infoColor_, 6);
-  defineColor(FourCC::VarWarnColor, warnColor_, 7);
-  defineColor(FourCC::VarErrorColor, errorColor_, 8);
-  defineColor(FourCC::VarAccentColor, accentColor_, 9);
-  defineColor(FourCC::VarAccentAltColor, accentAltColor_, 10);
-  defineColor(FourCC::VarEmphasisColor, emphasisColor_, 11);
-
-  // These are commented out so they are not included in config or theme exports
-  // until they are actually used in the future
-  // defineColor(FourCC::VarReserved1Color, reserved1Color_, 12);
-  // defineColor(FourCC::VarReserved2Color, reserved2Color_, 13);
-  // defineColor(FourCC::VarReserved3Color, reserved3Color_, 14);
-  // defineColor(FourCC::VarReserved4Color, reserved4Color_, 15);
+  defineColor(FourCC::VarBGColor, colorPalette_[cBackground], 0);
+  defineColor(FourCC::VarFGColor, colorPalette_[cNormal], 1);
+  defineColor(FourCC::VarHI1Color, colorPalette_[cHighlight1], 2);
+  defineColor(FourCC::VarHI2Color, colorPalette_[cHighlight2], 3);
+  defineColor(FourCC::VarCursorColor, colorPalette_[cCursor], 4);
+  defineColor(FourCC::VarConsoleColor, colorPalette_[cConsole], 5);
+  defineColor(FourCC::VarInfoColor, colorPalette_[cInfo], 6);
+  defineColor(FourCC::VarWarnColor, colorPalette_[cWarn], 7);
+  defineColor(FourCC::VarErrorColor, colorPalette_[cError], 8);
+  defineColor(FourCC::VarAccentColor, colorPalette_[cAccent], 9);
+  defineColor(FourCC::VarAccentAltColor, colorPalette_[cAccentAlt], 10);
+  defineColor(FourCC::VarEmphasisColor, colorPalette_[cEmphasis], 11);
+  defineColor(FourCC::VarReserved1Color, colorPalette_[cReserved1], 12);
+  defineColor(FourCC::VarReserved2Color, colorPalette_[cReserved2], 13);
+  defineColor(FourCC::VarReserved3Color, colorPalette_[cReserved3], 14);
+  defineColor(FourCC::VarReserved4Color, colorPalette_[cReserved4], 15);
 }
 
 bool AppWindow::onEvent(GUIEvent &event) {
@@ -669,7 +617,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
 void AppWindow::onUpdate(bool redraw) {
   if (redraw) {
-    GUIWindow::Clear(backgroundColor_, true);
+    GUIWindow::Clear(colorPalette_[cBackground], true);
     Clear(true);
     // Mark as dirty to trigger redraw in AnimationUpdate
     SetDirty();
@@ -884,7 +832,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
     }
     _currentView->SetFocus(*vt);
     SetDirty();
-    GUIWindow::Clear(backgroundColor_, true);
+    GUIWindow::Clear(colorPalette_[cBackground], true);
     Clear(true);
     break;
   }
@@ -946,8 +894,7 @@ void AppWindow::Print(char *line) {
 
 void AppWindow::PrintMultiLine(char *line) {
   Clear();
-  GUITextProperties props;
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   int current_y = 11; // Start near the middle of the screen
 
@@ -975,7 +922,7 @@ void AppWindow::PrintMultiLine(char *line) {
     position /= 2;
 
     GUIPoint pos(position, current_y);
-    DrawString(token, pos, props);
+    DrawString(token, pos);
 
     // Get the next line
     token = strtok(NULL, "\n");
@@ -984,23 +931,28 @@ void AppWindow::PrintMultiLine(char *line) {
   }
 
   // Preserve the build string at the bottom of the screen
+  // todo: update and merge with instance from nullview
   char buildString[SCREEN_WIDTH + 1];
   npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
                BUILD_COUNT);
   GUIPoint pos(0, 22);
-  pos._x = (32 - strlen(buildString)) / 2;
-  DrawString(buildString, pos, props);
+  pos.x_ = (32 - strlen(buildString)) / 2;
+  DrawString(buildString, pos);
   Flush();
 }
 
-void AppWindow::SetColor(ColorDefinition cd) {
-  // Ensure color index is within valid range (0-15)
-  if (cd <= CD_EMPHASIS) {
-    colorIndex_ = cd;
-  } else {
-    Trace::Error("APPWINDOW", "Invalid color index: %d", cd);
-    colorIndex_ = CD_NORMAL; // Default to normal color
-  }
+void AppWindow::SwapColors() {
+  Color temp = color_.fg;
+  color_.fg = color_.bg;
+  color_.bg = temp;
+}
+
+void AppWindow::SetColor(Color color) {
+  color_.fg = color;
+}
+
+void AppWindow::SetBackgroundColor(Color color) {
+  color_.bg = color;
 }
 
 bool AppWindow::AutoSave() {
@@ -1035,43 +987,6 @@ bool AppWindow::AutoSave() {
 // Maps the ColorDefinition used in View classes to a GUIColor that is needed by
 // DrawRect which unlike the text grid based drawing code works in terms of
 // GUIColor and not definitions
-GUIColor AppWindow::GetColor(ColorDefinition cd) {
-  switch (cd) {
-  case CD_NORMAL:
-    return AppWindow::normalColor_;
-  case CD_BACKGROUND:
-    return AppWindow::backgroundColor_;
-  case CD_HILITE1:
-    return AppWindow::highlightColor_;
-  case CD_HILITE2:
-    return AppWindow::highlight2Color_;
-  case CD_CONSOLE:
-    return AppWindow::consoleColor_;
-  case CD_CURSOR:
-    return AppWindow::cursorColor_;
-  case CD_INFO:
-    return AppWindow::infoColor_;
-  case CD_WARN:
-    return AppWindow::warnColor_;
-  case CD_ERROR:
-    return AppWindow::errorColor_;
-  case CD_ACCENT:
-    return AppWindow::accentColor_;
-  case CD_ACCENTALT:
-    return AppWindow::accentAltColor_;
-  case CD_EMPHASIS:
-    return AppWindow::emphasisColor_;
-  case CD_RESERVED1:
-    return AppWindow::reserved1Color_;
-  case CD_RESERVED2:
-    return AppWindow::reserved2Color_;
-  case CD_RESERVED3:
-    return AppWindow::reserved3Color_;
-  case CD_RESERVED4:
-    return AppWindow::reserved4Color_;
-
-  default:
-    break;
-  }
-  return AppWindow::normalColor_;
+GUIColor AppWindow::GetGUIColor(Color cd) {
+  return colorPalette_[cd];
 }

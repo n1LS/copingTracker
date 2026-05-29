@@ -22,7 +22,6 @@ ScreenView::~ScreenView() {
 /// Updates the animation by redrawing the battery gauge and power button UI on
 /// every clock tick
 void ScreenView::AnimationUpdate() {
-  GUITextProperties props;
-  drawBattery(props);
-  drawPowerButtonUI(props);
+  drawBattery();
+  drawPowerButtonUI();
 }

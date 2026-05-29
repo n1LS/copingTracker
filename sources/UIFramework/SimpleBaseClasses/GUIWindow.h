@@ -15,6 +15,7 @@
 #include "UIFramework/BasicDatas/GUICreateWindowParams.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
+
 class I_GUIWindowImp;
 
 //
@@ -37,12 +38,13 @@ public:
   virtual ~GUIWindow();
 
 public: // I_GUIGraphics implementation
-  virtual void SetColor(GUIColor &);
-  virtual void ClearTextRect(GUIRect &);
-  virtual void DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props);
-  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props,
+  virtual void SetColor(GUIColor &color);
+  virtual void SetBackgroundColor(GUIColor &color);
+  virtual void ClearTextRect(GUIRect &rect);
+  virtual void DrawChar(const char c, const GUIPoint &pos);
+  virtual void DrawString(const char *string, const GUIPoint &pos,
                           bool overlay = false);
-  virtual void DrawRect(GUIRect &r);
+  virtual void DrawRect(GUIRect &rect);
   virtual void SetCurrentRectColor(GUIColor color);
   virtual GUIRect GetRect();
   virtual void Invalidate();

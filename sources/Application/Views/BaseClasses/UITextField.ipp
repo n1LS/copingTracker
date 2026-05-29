@@ -15,15 +15,15 @@ template <uint8_t MaxLength> UITextField<MaxLength>::~UITextField(){};
 template <uint8_t MaxLength>
 void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
 
-  GUITextProperties props;
   GUIPoint position = GetPosition();
-  position._y += offset;
+  position.y_ += offset;
 
-  ((AppWindow &)w).SetColor(CD_NORMAL);
-  w.DrawString(label_.c_str(), position, props);
-  position._x += label_.length();
+  // Draw the label
+  ((AppWindow &)w).SetColor(cNormal);
+  w.DrawString(label_.c_str(), position);
+  position.x_ += label_.length();
 
-  ((AppWindow &)w).SetColor(CD_EMPHASIS);
+  ((AppWindow &)w).SetColor(cEmphasis);
 
   auto srcString = src_->GetString();
   const char *value;
@@ -34,30 +34,35 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
     value = defaultValue_.c_str();
     len = defaultValue_.length();
     // Use a different color for default values to indicate they're not set
-    ((AppWindow &)w).SetColor(CD_EMPHASIS);
+    ((AppWindow &)w).SetColor(cEmphasis);
   } else {
     value = srcString.c_str();
     len = srcString.length();
   }
 
   if (focus_) {
+    ((AppWindow &)w).SetColor(cBackground);
+
     if (len == 0) {
       // For empty fields, draw a cursor at the beginning position
-      props.invert_ = true;
-      w.DrawString(" ", position, props);
+      ((AppWindow &)w).SetBackgroundColor(cCursor);
+      w.DrawString(" ", position);
     } else {
       char buffer[2];
       buffer[1] = 0;
+
       for (int i = 0; i < len; i++) {
-        props.invert_ = (i == currentChar_);
         buffer[0] = value[i];
-        w.DrawString(buffer, position, props);
-        position._x += 1;
+        bool active = currentChar_ == i;
+        ((AppWindow &)w).SetBackgroundColor(active ? cCursor : cHighlight2);
+        w.DrawString(buffer, position);
+        position.x_ += 1;
       }
     }
   } else {
     if (len != 0) {
-      w.DrawString(value, position, props);
+      ((AppWindow &)w).SetColor(cEmphasis);
+      w.DrawString(value, position);
     }
   }
 }

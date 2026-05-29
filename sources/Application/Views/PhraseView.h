@@ -54,7 +54,7 @@ protected:
   void processNormalButtonMask(unsigned short mask);
   void processSelectionButtonMask(unsigned short mask);
 
-  void setTextProps(GUITextProperties &props, int row, int col, bool restore);
+  void setTextProps(int row, int col, Color textColor);
   bool getEffectiveInstrumentForRow(int row, uint8_t &instrumentId) const;
 
 private:
@@ -69,7 +69,7 @@ private:
   Variable cmdEdit_;
   GUIPoint cmdEditPos_;
   UIBigHexVarField cmdEditField_;
-  void printHelpLegend(FourCC command, GUITextProperties props);
+  void printHelpLegend(FourCC command);
 
   struct clipboard {
     bool active_;

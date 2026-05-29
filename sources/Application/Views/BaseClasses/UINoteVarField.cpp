@@ -21,9 +21,8 @@ UINoteVarField::UINoteVarField(const GUIPoint &position, Variable &v, const char
 
 void UINoteVarField::Draw(GUIWindow &w, int offset) {
 
-  GUITextProperties props;
   GUIPoint position = GetPosition();
-  position._y += offset;
+  position.y_ += offset;
 
   char buffer[MAX_FIELD_WIDTH + 1];
   char note[5];
@@ -34,9 +33,9 @@ void UINoteVarField::Draw(GUIWindow &w, int offset) {
   npf_snprintf(buffer, sizeof(buffer), format_, note);
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(CD_HILITE2);
-    props.invert_ = true;
-    w.DrawString(buffer, position, props);
+    ((AppWindow &)w).SetBackgroundColor(cHighlight2);
+    ((AppWindow &)w).SetColor(cBackground);
+    w.DrawString(buffer, position);
   } else {
     DrawLabeledField(w, position, buffer);
   }

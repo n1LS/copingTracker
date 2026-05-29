@@ -4,17 +4,17 @@ This document maps theme color **names** (as configured in Device -> Theme setti
 
 ## Theme Color Names -> Internal Tokens
 
-| Theme name (config/UI) | Internal `ColorDefinition` | Default RGB |
+| Theme name (config/UI) | Internal `Definition` | Default RGB |
 |---|---|---|
-| `BACKGROUND` / `Background` | `CD_BACKGROUND` | `0x0F0F0F` |
+| `BACKGROUND` / `Background` | `cBackground` | `0x0F0F0F` |
 | `FOREGROUND` / `Foreground` | `CD_NORMAL` | `0xADADAD` |
-| `HICOLOR1` / `HiColor1` | `CD_HILITE1` | `0x846F94` |
-| `HICOLOR2` / `HiColor2` | `CD_HILITE2` | `0x6B316B` |
-| `CONSOLECOLOR` / `Console` | `CD_CONSOLE` | `0xFF00FF` |
-| `CURSORCOLOR` / `Cursor` | `CD_CURSOR` | `0x776B56` |
-| `INFOCOLOR` / `Info` | `CD_INFO` | `0x29EE3D` |
-| `WARNCOLOR` / `Warn` | `CD_WARN` | `0xEFFA52` |
-| `ERRORCOLOR` / `Error` | `CD_ERROR` | `0xE84D15` |
+| `HICOLOR1` / `HiColor1` | `cHighlight1` | `0x846F94` |
+| `HICOLOR2` / `HiColor2` | `cHighlight2` | `0x6B316B` |
+| `CONSOLECOLOR` / `Console` | `cConsole` | `0xFF00FF` |
+| `CURSORCOLOR` / `Cursor` | `cCursor` | `0x776B56` |
+| `INFOCOLOR` / `Info` | `cInfo` | `0x29EE3D` |
+| `WARNCOLOR` / `Warn` | `cWarn` | `0xEFFA52` |
+| `ERRORCOLOR` / `Error` | `cError` | `0xE84D15` |
 
 Notes:
 - If `CURSORCOLOR` is not set, cursor color is initialized from `FOREGROUND`.
@@ -186,7 +186,7 @@ The instrument screen’s specific fields depend on instrument type (Macro/Sampl
 
 ## Currently Unused Or Indirect
 
-- `CONSOLE` (`CD_CONSOLE`):
+- `CONSOLE` (`cConsole`):
   - available and fully theme-configurable
   - currently used directly in this UI path for Device screen color swatch preview
   - not currently used for standard text rendering in the main application views

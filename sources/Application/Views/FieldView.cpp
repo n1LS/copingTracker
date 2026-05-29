@@ -134,24 +134,24 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
           for (size_t i = 0; i < fieldList_.size(); i++) {
             if (!(*it)->IsStatic()) {
               if (first) {
-                if ((*it)->GetPosition()._y < first->GetPosition()._y) {
+                if ((*it)->GetPosition().y_ < first->GetPosition().y_) {
                   first = *it;
                 };
               } else {
                 first = *it;
               }
-              if ((*it)->GetPosition()._y > focus_->GetPosition()._y) {
+              if ((*it)->GetPosition().y_ > focus_->GetPosition().y_) {
                 if (next) {
-                  if ((*it)->GetPosition()._y < next->GetPosition()._y) {
+                  if ((*it)->GetPosition().y_ < next->GetPosition().y_) {
                     next = *it;
-                  } else if ((*it)->GetPosition()._y == next->GetPosition()._y) {
+                  } else if ((*it)->GetPosition().y_ == next->GetPosition().y_) {
                     // if both targets at same height, prefer the target with an
                     // X value closest to the current focus
 
                     // cast to signed ints
-                    int32_t itX = (*it)->GetPosition()._x;
-                    int32_t nextX = next->GetPosition()._x;
-                    int32_t focusX = focus_->GetPosition()._x;
+                    int32_t itX = (*it)->GetPosition().x_;
+                    int32_t nextX = next->GetPosition().x_;
+                    int32_t focusX = focus_->GetPosition().x_;
 
                     if (abs(itX - focusX) < abs(nextX - focusX)) {
                       next = *it;
@@ -184,24 +184,24 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
             if (!(*it)->IsStatic()) {
               if (last) {
-                if ((*it)->GetPosition()._y > last->GetPosition()._y) {
+                if ((*it)->GetPosition().y_ > last->GetPosition().y_) {
                   last = *it;
                 };
               } else {
                 last = *it;
               }
-              if ((*it)->GetPosition()._y < focus_->GetPosition()._y) {
+              if ((*it)->GetPosition().y_ < focus_->GetPosition().y_) {
                 if (prev) {
-                  if ((*it)->GetPosition()._y > prev->GetPosition()._y) {
+                  if ((*it)->GetPosition().y_ > prev->GetPosition().y_) {
                     prev = *it;
-                  } else if ((*it)->GetPosition()._y == prev->GetPosition()._y) {
+                  } else if ((*it)->GetPosition().y_ == prev->GetPosition().y_) {
                     // if both targets at same height, prefer the target with an
                     // X value closest to the current focus
 
                     // cast to signed ints
-                    int32_t itX = (*it)->GetPosition()._x;
-                    int32_t prevX = prev->GetPosition()._x;
-                    int32_t focusX = focus_->GetPosition()._x;
+                    int32_t itX = (*it)->GetPosition().x_;
+                    int32_t prevX = prev->GetPosition().x_;
+                    int32_t focusX = focus_->GetPosition().x_;
 
                     if (abs(itX - focusX) < abs(prevX - focusX)) {
                       prev = *it;
@@ -231,17 +231,17 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
           auto it = fieldList_.begin();
           for (size_t i = 0; i < fieldList_.size(); i++) {
 
-            if (!(*it)->IsStatic() && ((*it)->GetPosition()._y == focus_->GetPosition()._y)) {
+            if (!(*it)->IsStatic() && ((*it)->GetPosition().y_ == focus_->GetPosition().y_)) {
               if (first) {
-                if ((*it)->GetPosition()._x < first->GetPosition()._x) {
+                if ((*it)->GetPosition().x_ < first->GetPosition().x_) {
                   first = *it;
                 };
               } else {
                 first = *it;
               }
-              if ((*it)->GetPosition()._x > focus_->GetPosition()._x) {
+              if ((*it)->GetPosition().x_ > focus_->GetPosition().x_) {
                 if (next) {
-                  if ((*it)->GetPosition()._x < next->GetPosition()._x) {
+                  if ((*it)->GetPosition().x_ < next->GetPosition().x_) {
                     next = *it;
                   } else {
                     // if both target at same height
@@ -271,17 +271,17 @@ void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
           auto it = fieldList_.begin();
           for (size_t i = 0; i < fieldList_.size(); i++) {
 
-            if (!(*it)->IsStatic() && ((*it)->GetPosition()._y == focus_->GetPosition()._y)) {
+            if (!(*it)->IsStatic() && ((*it)->GetPosition().y_ == focus_->GetPosition().y_)) {
               if (last) {
-                if ((*it)->GetPosition()._x > last->GetPosition()._x) {
+                if ((*it)->GetPosition().x_ > last->GetPosition().x_) {
                   last = *it;
                 };
               } else {
                 last = *it;
               }
-              if ((*it)->GetPosition()._x < focus_->GetPosition()._x) {
+              if ((*it)->GetPosition().x_ < focus_->GetPosition().x_) {
                 if (prev) {
-                  if ((*it)->GetPosition()._x > prev->GetPosition()._x) {
+                  if ((*it)->GetPosition().x_ > prev->GetPosition().x_) {
                     prev = *it;
                   } else {
                     // if both target at same height

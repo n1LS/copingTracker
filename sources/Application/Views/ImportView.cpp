@@ -310,7 +310,6 @@ void ImportView::DrawView() {
 
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   auto fs = FileSystem::GetInstance();
@@ -322,24 +321,23 @@ void ImportView::DrawView() {
   char titleBuffer[40];
   npf_snprintf(titleBuffer, sizeof(titleBuffer), "%s", baseTitle);
 
-  SetColor(CD_NORMAL);
-  DrawString(pos._x + 1, pos._y, titleBuffer, props);
+  SetColor(cNormal);
+  DrawString(pos.x_ + 1, pos.y_, titleBuffer);
 
   // Draw samples
   int x = 1;
-  int y = pos._y + 2;
+  int y = pos.y_ + 2;
 
   uint32_t availableSpace = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
 
   // Loop through visible files in the list
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
-    props.invert_ = false;
+    SetBackgroundColor(cBackground);
 
     unsigned fileIndex = fileIndexList_[i];
     etl::string<PFILENAME_SIZE> displayName;
 
     if (fs->getFileType(fileIndex) != PFT_DIR) {
-      SetColor(CD_NORMAL);
       // Handle regular files
       char tempBuffer[PFILENAME_SIZE];
       fs->getFileName(fileIndex, tempBuffer, PFILENAME_SIZE);
@@ -350,20 +348,18 @@ void ImportView::DrawView() {
 
       displayName += tempBuffer;
       // Format the display name with appropriate prefix
-      if (inProjectSampleDir_ &&
-          viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
-        SetColor(CD_ACCENT);
-        DrawString(x, y, "*", props);
-        SetColor(CD_NORMAL);
+      if (inProjectSampleDir_ && viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
+        SetColor(cAccent);
+        DrawString(x, y, "*");
       } else if (isSingleCycle) {
-        SetColor(CD_ACCENT);
-        DrawString(x, y, "~", props);
-        SetColor(CD_NORMAL);
+        SetColor(cAccent);
+        DrawString(x, y, "~");
       } else {
-        DrawString(x, y, " ", props);
+        SetColor(cNormal);
+        DrawString(x, y, " ");
       }
     } else {
-      SetColor(CD_ACCENT);
+      SetColor(cAccent);
       // Handle directories
       char tempBuffer[PFILENAME_SIZE];
       displayName = "/";
@@ -378,15 +374,14 @@ void ImportView::DrawView() {
       displayName.resize(LIST_WIDTH);
     }
 
-    if (i == currentIndex_) {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
-    }
-    DrawString(x + 1, y, displayName.c_str(), props);
+    bool highlighted = (i == currentIndex_);
+    SetColor(highlighted ? cBackground : cNormal);
+    SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
+    DrawString(x + 1, y, displayName.c_str());
     y += 1;
   };
 
-  SetColor(CD_HILITE1);
+  SetColor(cHighlight1);
   y = SCREEN_HEIGHT - 2;
   if (inProjectSampleDir_) {
     if (selectedButton_ < 0 || selectedButton_ >= kProjectPoolButtonCount) {
@@ -402,77 +397,46 @@ void ImportView::DrawView() {
     previewVolume = v->GetInt();
   }
 
-  if (!inProjectSampleDir_) {
-    if (selectedButton_ == kImportButtonImport) {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
-    } else {
-      SetColor(CD_HILITE1);
-      props.invert_ = false;
-    }
-    DrawString(x, y, "Import", props);
-    if (selectedButton_ == kImportButtonEdit) {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
-    } else {
-      SetColor(CD_HILITE1);
-      props.invert_ = false;
-    }
-    DrawString(x + 10, y, "Edit", props);
+  auto setColors = [&](bool selected) {
+    SetBackgroundColor(selected ? cHighlight2 : cBackground );
+    SetColor(selected ? cBackground : cHighlight1);
+  }; 
 
-    if (selectedButton_ == kImportButtonVolume) {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
-    } else {
-      SetColor(CD_HILITE1);
-      props.invert_ = false;
-    }
+  if (!inProjectSampleDir_) {
+    setColors(selectedButton_ == kImportButtonImport);
+    DrawString(x, y, "Import");
+    
+    setColors(selectedButton_ == kImportButtonEdit);
+    DrawString(x + 10, y, "Edit");
+
+    setColors(selectedButton_ == kImportButtonVolume);
     char volField[12];
     npf_snprintf(volField, sizeof(volField), "Vol:%2d", previewVolume);
-    DrawString(x + 23, y, volField, props);
+    DrawString(x + 23, y, volField);
   } else {
     if (fileIndexList_.empty()) {
       // draw this a few lines down from *top* of screen
-      SetColor(CD_NORMAL);
-      props.invert_ = false;
-      DrawString(2, 3, "[pool empty]", props);
+      SetColor(cNormal);
+      DrawString(2, 3, "[pool empty]");
     } else {
       // we make edit the first button to make things easier
-      if (selectedButton_ == 0) {
-        SetColor(CD_HILITE2);
-        props.invert_ = true;
-      } else {
-        SetColor(CD_HILITE1);
-        props.invert_ = false;
-      }
-      DrawString(x, y, "Edit", props);
-      if (selectedButton_ == 1) {
-        SetColor(CD_HILITE2);
-        props.invert_ = true;
-      } else {
-        SetColor(CD_HILITE1);
-        props.invert_ = false;
-      }
-      DrawString(x + 9, y, "N/A", props);
+      setColors(selectedButton_ == 0);
+      DrawString(x, y, "Edit");
 
-      if (selectedButton_ == kProjectButtonVolume) {
-        SetColor(CD_HILITE2);
-        props.invert_ = true;
-      } else {
-        SetColor(CD_HILITE1);
-        props.invert_ = false;
-      }
+      // todo: make remove available or remove the button
+      setColors(selectedButton_ == 1);
+      DrawString(x + 9, y, "N/A");
+
+      setColors(selectedButton_ == kProjectButtonVolume);
       char volField[12];
       npf_snprintf(volField, sizeof(volField), "vol:%2d", previewVolume);
-      DrawString(x + 23, y, volField, props);
+      DrawString(x + 23, y, volField);
     }
   }
-  props.invert_ = false;
   y += 1;
 
   // draw current selected file size and available storage indicator
-  SetColor(CD_NORMAL);
-  props.invert_ = true;
+  SetColor(cNormal);
   y = 0;
   uint32_t filesize = 0;
   if (!fileIndexList_.empty()) {
@@ -482,7 +446,7 @@ void ImportView::DrawView() {
       filesize = fs->getFileSize(currentFileIndex);
       // if file size is larger than available space, set color to warning
       if (filesize > availableSpace) {
-        SetColor(CD_WARN);
+        SetColor(cWarn);
       }
     }
   }
@@ -503,9 +467,9 @@ void ImportView::DrawView() {
 
   x = 1;  // align with rest screen title & file list
   y = 23; // bottom line
-  DrawString(x, y, tempBuffer, props);
-
-  SetColor(CD_NORMAL);
+  SetBackgroundColor(cBackground);
+  SetColor(cNormal);
+  DrawString(x, y, tempBuffer);
 }
 
 void ImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {};

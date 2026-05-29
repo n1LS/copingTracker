@@ -63,9 +63,8 @@ void UIIntVarOffField::ProcessArrow(unsigned short mask) {
 
 void UIIntVarOffField::Draw(GUIWindow &w, int offset) {
 
-  GUITextProperties props;
   GUIPoint position = GetPosition();
-  position._y += offset;
+  position.y_ += offset;
 
   Variable::Type type = src_.GetType();
   char buffer[MAX_FIELD_WIDTH + 1];
@@ -101,9 +100,9 @@ void UIIntVarOffField::Draw(GUIWindow &w, int offset) {
   }
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(CD_HILITE2);
-    props.invert_ = true;
-    w.DrawString(buffer, position, props);
+    ((AppWindow &)w).SetBackgroundColor(cHighlight2);
+    ((AppWindow &)w).SetColor(cBackground);
+    w.DrawString(buffer, position);
   } else {
     DrawLabeledField(w, position, buffer);
   }

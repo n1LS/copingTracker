@@ -51,13 +51,13 @@ void ModalView::ClearTextRect(int x, int y, int w, int h) {
 }
 
 // DrawString override to account for modal window position
-void ModalView::DrawString(int x, int y, const char *text, const GUITextProperties &props) {
-  View::DrawString(x + left_, y + top_, text, props);
+void ModalView::DrawString(int x, int y, const char *text) {
+  View::DrawString(x + left_, y + top_, text);
 }
 
 // DrawChar override to account for modal window position
-void ModalView::DrawChar(int x, int y, char c, const GUITextProperties &props) {
-  View::DrawChar(x + left_, y + top_, c, props);
+void ModalView::DrawChar(int x, int y, char c) {
+  View::DrawChar(x + left_, y + top_, c);
 }
 
 GUIPoint ModalView::GetAnchor() {
@@ -65,8 +65,8 @@ GUIPoint ModalView::GetAnchor() {
   GUIPoint baseAnchor = View::GetAnchor();
 
   // Adjust for modal window position
-  baseAnchor._x = left_;
-  baseAnchor._y = top_;
+  baseAnchor.x_ = left_;
+  baseAnchor.y_ = top_;
 
   return baseAnchor;
 }
@@ -81,6 +81,7 @@ void ModalView::SetWindow(int width, int height) {
   // Clear the entire modal area including the border frame using absolute screen coordinates.
   ClearTextRect(left_ - 2, top_ - 2, width + 4, height + 4);
   
-  SetColor(CD_NORMAL);
+  SetBackgroundColor(cBackground);
+  SetColor(cNormal);
   DrawBorder(-2, -2, width + 4, height + 4);
 }

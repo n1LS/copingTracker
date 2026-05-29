@@ -39,26 +39,26 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   // Add import/export buttons at the top
   GUIPoint actionPos = position;
 
-  actionPos._y -= 1;
+  actionPos.y_ -= 1;
 
   actionField_.emplace_back("Import", FourCC::ActionImport, actionPos);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  actionPos._x += 8;
+  actionPos.x_ += 8;
   actionField_.emplace_back("Export", FourCC::ActionExport, actionPos);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
-  actionPos._y += 1;
+  actionPos.y_ += 1;
 
   // Font selection
-  position._y = FONT_FIELD_LINE;
+  position.y_ = FONT_FIELD_LINE;
   Variable *fontVar = config->FindVariable(FourCC::VarUIFont);
   intVarField_.emplace_back(position, *fontVar, "Font: %s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
                             ThemeConstants::THEME_FONT_COUNT - 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
-  position._y += 2;
+  position.y_ += 2;
 
   // Get the current theme name from Config
   Variable *configThemeVar = config->FindVariable(FourCC::VarThemeName);
@@ -88,52 +88,52 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   exportThemeName_ = currentThemeName;
 
   // Foreground color
-  position._y += 3;
-  addColorField("Foreground", config->FindVariable(FourCC::VarFGColor), CD_NORMAL, position);
+  position.y_ += 3;
+  addColorField("Foreground", config->FindVariable(FourCC::VarFGColor), cNormal, position);
 
   // Background color
-  position._y += 1;
-  addColorField("Background", config->FindVariable(FourCC::VarBGColor), CD_BACKGROUND, position);
+  position.y_ += 1;
+  addColorField("Background", config->FindVariable(FourCC::VarBGColor), cBackground, position);
 
   // Highlight color
-  position._y += 1;
-  addColorField("Highlight1", config->FindVariable(FourCC::VarHI1Color), CD_HILITE1, position);
+  position.y_ += 1;
+  addColorField("Highlight1", config->FindVariable(FourCC::VarHI1Color), cHighlight1, position);
 
   // Highlight2 color
-  position._y += 1;
-  addColorField("Highlight2", config->FindVariable(FourCC::VarHI2Color), CD_HILITE2, position);
+  position.y_ += 1;
+  addColorField("Highlight2", config->FindVariable(FourCC::VarHI2Color), cHighlight2, position);
 
   // Console color
-  position._y += 1;
-  addColorField("Console", config->FindVariable(FourCC::VarConsoleColor), CD_CONSOLE, position);
+  position.y_ += 1;
+  addColorField("Console", config->FindVariable(FourCC::VarConsoleColor), cConsole, position);
 
   // Cursor color
-  position._y += 1;
-  addColorField("Cursor", config->FindVariable(FourCC::VarCursorColor), CD_CURSOR, position);
+  position.y_ += 1;
+  addColorField("Cursor", config->FindVariable(FourCC::VarCursorColor), cCursor, position);
 
   // Info color
-  position._y += 1;
-  addColorField("Info", config->FindVariable(FourCC::VarInfoColor), CD_INFO, position);
+  position.y_ += 1;
+  addColorField("Info", config->FindVariable(FourCC::VarInfoColor), cInfo, position);
 
   // Warning color
-  position._y += 1;
-  addColorField("Warning", config->FindVariable(FourCC::VarWarnColor), CD_WARN, position);
+  position.y_ += 1;
+  addColorField("Warning", config->FindVariable(FourCC::VarWarnColor), cWarn, position);
 
   // Error color
-  position._y += 1;
-  addColorField("Error", config->FindVariable(FourCC::VarErrorColor), CD_ERROR, position);
+  position.y_ += 1;
+  addColorField("Error", config->FindVariable(FourCC::VarErrorColor), cError, position);
 
   // Play color
-  position._y += 1;
-  addColorField("Accent", config->FindVariable(FourCC::VarAccentColor), CD_ACCENT, position);
+  position.y_ += 1;
+  addColorField("Accent", config->FindVariable(FourCC::VarAccentColor), cAccent, position);
 
   // Mute color
-  position._y += 1;
-  addColorField("AccentAlt", config->FindVariable(FourCC::VarAccentAltColor), CD_ACCENTALT, position);
+  position.y_ += 1;
+  addColorField("AccentAlt", config->FindVariable(FourCC::VarAccentAltColor), cAccentAlt, position);
 
   // Emphasis color
-  position._y += 1;
-  addColorField("Emphasis", config->FindVariable(FourCC::VarEmphasisColor), CD_EMPHASIS, position);
+  position.y_ += 1;
+  addColorField("Emphasis", config->FindVariable(FourCC::VarEmphasisColor), cEmphasis, position);
 }
 
 ThemeView::~ThemeView() {
@@ -169,35 +169,33 @@ void ThemeView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void ThemeView::DrawView() {
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
   char titleString[SCREEN_WIDTH];
   strcpy(titleString, "Theme Settings");
 
-  SetColor(CD_NORMAL);
-  DrawString(pos._x, pos._y, titleString, props);
+  SetColor(cNormal);
+  DrawString(pos.x_, pos.y_, titleString);
 
   // bit of a hack needed for font change as going from "standard" to "bold"
   // will leave behind partial characters due to different width of those string
   // labels
-  DrawString(5, FONT_FIELD_LINE, "                            ", props);
+  DrawString(5, FONT_FIELD_LINE, "                            ");
 
   FieldView::Redraw();
 
   // just draw the RGB column headings directly:
-  GUITextProperties headerProps;
-  DrawString(17, 6, "R  G  B", headerProps);
+  DrawString(17, 6, "R  G  B");
 }
 
-void ThemeView::addSwatchField(ColorDefinition color, GUIPoint position) {
-  position._x -= 5;
+void ThemeView::addSwatchField(Color color, GUIPoint position) {
+  position.x_ -= 5;
   swatchField_.emplace_back(position, color);
   fieldList_.insert(fieldList_.end(), &(*swatchField_.rbegin()));
 }
 
-void ThemeView::addColorField(const char *label, Variable *colorVar, ColorDefinition color, GUIPoint position) {
+void ThemeView::addColorField(const char *label, Variable *colorVar, Color color, GUIPoint position) {
 
   staticField_.emplace_back(position, label);
   UIStaticField &labelField = *staticField_.rbegin();
@@ -207,7 +205,7 @@ void ThemeView::addColorField(const char *label, Variable *colorVar, ColorDefini
 
   for (uint8_t i = 0; i < COLOR_COMPONENT_COUNT; ++i) {
     GUIPoint componentPosition = position;
-    componentPosition._x += COLOR_COMPONENT_X_OFFSETS[i];
+    componentPosition.x_ += COLOR_COMPONENT_X_OFFSETS[i];
 
     colorComponentVars_.emplace_back(colorVar->GetID(), static_cast<int>((colorValue >> COLOR_COMPONENT_X_COL_POS[i]) &
                                                                          static_cast<uint32_t>(0xFF)));
@@ -498,7 +496,6 @@ void ThemeView::AnimationUpdate() {
     DrawView();
     _forceRedraw = false;
   }
-  GUITextProperties props;
-  drawBattery(props);
-  drawPowerButtonUI(props);
+  drawBattery();
+  drawPowerButtonUI();
 }

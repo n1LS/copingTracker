@@ -230,9 +230,8 @@ void SampleSlicesView::DrawView() {
     Clear();
   }
 
-  GUITextProperties props;
   GUIPoint titlePos = GetTitlePosition();
-  DrawString(titlePos._x, titlePos._y, "Sample Slices", props);
+  DrawString(titlePos.x_, titlePos.y_, "Sample Slices");
 
   bool hasModal = HasModalView();
   if (!hasModal) {
@@ -275,9 +274,8 @@ void SampleSlicesView::AnimationUpdate() {
     }
   }
 
-  GUITextProperties props;
-  drawBattery(props);
-  drawPowerButtonUI(props);
+  drawBattery();
+  drawPowerButtonUI();
   bool hasModal = HasModalView();
   if (modalWasOpen_ && !hasModal) {
     graphField_.RequestFullRedraw();
@@ -345,39 +343,39 @@ void SampleSlicesView::buildFieldLayout() {
   fieldList_.insert(fieldList_.end(), &graphField_);
 
   GUIPoint position = GetAnchor();
-  position._x = 1;
-  position._y = 8;
+  position.x_ = 1;
+  position.y_ = 8;
   updateStatusLabels();
   staticField_.emplace_back(position, sliceIndexLabel_);
   fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position._x += 21;
+  position.x_ += 21;
   staticField_.emplace_back(position, zoomLabel_);
   fieldList_.insert(fieldList_.end(), &staticField_.back());
 
-  position._x = 12;
+  position.x_ = 12;
   intVarField_.emplace_back(position, autoSliceCountVar_, "%2d", 1, static_cast<int32_t>(SampleInstrument::MaxSlices),
                             1, 4);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
-  position._x += 3;
+  position.x_ += 3;
   actionField_.emplace_back("slice", FourCC::ActionAutoSlice, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
-  position._y += 4;
-  position._x = 1;
+  position.y_ += 4;
+  position.x_ = 1;
   staticField_.emplace_back(position, "RIGHT/LEFT: select slice");
   fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position._y += 1;
+  position.y_ += 1;
   staticField_.emplace_back(position, "ENTER+UP/DOWN: coarse move");
   fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position._y += 1;
+  position.y_ += 1;
   staticField_.emplace_back(position, "ENTER+RIGHT/LEFT: fine move");
   fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position._y += 1;
+  position.y_ += 1;
   staticField_.emplace_back(position, "EDIT+UP/DOWN: zoom in/out");
   fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position._y += 1;
+  position.y_ += 1;
   staticField_.emplace_back(position, "PLAY: preview slice");
   fieldList_.insert(fieldList_.end(), &staticField_.back());
 
@@ -438,37 +436,37 @@ void SampleSlicesView::drawWaveform() {
   if (instrument_ && sampleSize_ > 0) {
     for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
       if (!instrument_->IsSliceDefined(i)) {
-        graphField_.SetMarker(i, 0, CD_ACCENT, false);
+        graphField_.SetMarker(i, 0, cAccent, false);
         continue;
       }
       uint32_t start = instrument_->GetSlicePoint(i);
       if (i == 0 && start == 0 && !instrument_->HasSlicesForPlayback()) {
-        graphField_.SetMarker(i, 0, CD_ACCENT, false);
+        graphField_.SetMarker(i, 0, cAccent, false);
         continue;
       }
-      ColorDefinition color = (static_cast<int32_t>(i) == sliceIndexVar_.GetInt()) ? CD_HILITE2 : CD_ACCENT;
+      Color color = (static_cast<int32_t>(i) == sliceIndexVar_.GetInt()) ? cHighlight2 : cAccent;
       graphField_.SetMarker(i, start, color, true);
     }
   } else {
     for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
-      graphField_.SetMarker(i, 0, CD_ACCENT, false);
+      graphField_.SetMarker(i, 0, cAccent, false);
     }
   }
 
   size_t playheadIndex = SampleInstrument::MaxSlices;
   if (previewCursorVisible_) {
-    graphField_.SetMarker(playheadIndex, previewPlayheadSample_, CD_NORMAL, true);
+    graphField_.SetMarker(playheadIndex, previewPlayheadSample_, cNormal, true);
   } else {
-    graphField_.SetMarker(playheadIndex, 0, CD_NORMAL, false);
+    graphField_.SetMarker(playheadIndex, 0, cNormal, false);
   }
 
   graphField_.DrawGraph(*this);
 }
 
 void SampleSlicesView::clearWaveformRegion() {
-  GUIRect rect(graphFieldPos_._x, graphFieldPos_._y, graphFieldPos_._x + GraphField::BitmapWidth,
-               graphFieldPos_._y + GraphField::BitmapHeight);
-  DrawRect(rect, CD_BACKGROUND);
+  GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, graphFieldPos_.x_ + GraphField::BitmapWidth,
+               graphFieldPos_.y_ + GraphField::BitmapHeight);
+  DrawRect(rect, cBackground);
 }
 
 SampleInstrument *SampleSlicesView::currentInstrument() {

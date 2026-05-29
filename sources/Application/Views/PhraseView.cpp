@@ -150,14 +150,14 @@ void PhraseView::updateCursor(int dx, int dy) {
   GUIPoint p(anchor);
   switch (col_) {
   case 3:
-    p._x += 12;
-    p._y += row_;
+    p.x_ += 12;
+    p.y_ += row_;
     cmdEditField_.SetPosition(p);
     cmdEdit_.SetInt(*(phrase_->param1_ + (16 * viewData_->currentPhrase_ + row_)));
     break;
   case 5:
-    p._x += 21;
-    p._y += row_;
+    p.x_ += 21;
+    p.y_ += row_;
     cmdEditField_.SetPosition(p);
     cmdEdit_.SetInt(*(phrase_->param2_ + (16 * viewData_->currentPhrase_ + row_)));
     break;
@@ -1117,46 +1117,38 @@ void PhraseView::processSelectionButtonMask(unsigned short mask) {
   }
 }
 
-void PhraseView::setTextProps(GUITextProperties &props, int row, int col, bool restore) {
-
-  bool invert = false;
+void PhraseView::setTextProps(int row, int col, Color textColor = cNormal) {
+  bool highlighted = false;
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
     if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
-      invert = true;
+      highlighted = true;
     }
   } else {
     if ((col_ == row) && (row_ == col)) {
-      invert = true;
+      highlighted = true;
     }
   }
 
-  if (invert) {
-    if (restore) {
-      SetColor(CD_NORMAL);
-      props.invert_ = false;
-    } else {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
-    }
-  }
+  SetColor(highlighted ? cBackground : textColor);
+  SetBackgroundColor(highlighted ? textColor : cBackground);
 }
 
 void PhraseView::DrawView() {
 
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
 
   char title[SCREEN_WIDTH + 1];
 
-  SetColor(CD_NORMAL);
+  SetBackgroundColor(cBackground);
+  SetColor(cNormal);
   npf_snprintf(title, sizeof(title), "Phrase %2.2X", viewData_->currentPhrase_);
-  DrawString(pos._x, pos._y, title, props);
+  DrawString(pos.x_, pos.y_, title);
 
   // Compute song grid location
 
@@ -1164,18 +1156,18 @@ void PhraseView::DrawView() {
 
   // Display row numbers
 
-  SetColor(CD_HILITE1);
+  SetColor(cHighlight1);
   char buffer[6];
   pos = anchor;
-  pos._x -= 3;
+  pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(CD_ACCENT) : SetColor(CD_ACCENTALT);
+    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
     hex2char(j, buffer);
-    DrawString(pos._x, pos._y, buffer, props);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    pos.y_++;
   }
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   pos = anchor;
 
@@ -1193,12 +1185,12 @@ void PhraseView::DrawView() {
       lastInstr = instr;
     }
     unsigned char effectiveInstr = lastInstr;
-    setTextProps(props, 0, j, false);
-    (0 == j || 4 == j || 8 == j || 12 == j) ? SetColor(CD_HILITE1) : SetColor(CD_NORMAL);
+    Color textColor = (0 == j || 4 == j || 8 == j || 12 == j) ? cHighlight1 : cNormal;
+    setTextProps(0, j, textColor);
     if (d == NO_NOTE) {
-      DrawString(pos._x, pos._y, "----", props);
+      DrawString(pos.x_, pos.y_, "----");
     } else if (d == NOTE_OFF) {
-      DrawString(pos._x, pos._y, "off ", props);
+      DrawString(pos.x_, pos.y_, "off ");
     } else {
       bool showSlice = false;
       bool invalidSlice = false;
@@ -1224,15 +1216,14 @@ void PhraseView::DrawView() {
       } else {
         note2char(d, buffer);
       }
-      DrawString(pos._x, pos._y, buffer, props);
+      DrawString(pos.x_, pos.y_, buffer);
     }
-    setTextProps(props, 0, j, true);
-    pos._y++;
+    pos.y_++;
   }
 
   // Draw instruments
   pos = anchor;
-  pos._x += 4;
+  pos.x_ += 4;
 
   data = phrase_->instr_ + (16 * viewData_->currentPhrase_);
   buffer[0] = 'I';
@@ -1240,108 +1231,90 @@ void PhraseView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = *data++;
-    setTextProps(props, 1, j, false);
+    setTextProps(1, j);
     if (d == 0xFF) {
-      DrawString(pos._x, pos._y, "I--", props);
+      DrawString(pos.x_, pos.y_, "I--");
     } else {
       hex2char(d, buffer + 1);
-      DrawString(pos._x, pos._y, buffer, props);
+      DrawString(pos.x_, pos.y_, buffer);
       if (j == row_) {
         npf_snprintf(buffer, sizeof(buffer), "I%2.2X:", d);
         etl::string<32 - BATTERY_GAUGE_WIDTH> instrLine = buffer;
-        setTextProps(props, 1, j, true);
         GUIPoint location = GetTitlePosition();
-        location._x += 10; // make space for "Phrase %2.2x"
+        location.x_ += 10; // make space for "Phrase %2.2x"
         InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
         I_Instrument *instr = bank->GetInstrument(d);
         instrLine += instr->GetDisplayName();
-        DrawString(location._x, location._y, instrLine.c_str(), props);
+        DrawString(location.x_, location.y_, instrLine.c_str());
       }
     }
-    setTextProps(props, 1, j, true);
-    pos._y++;
+    pos.y_++;
   }
 
   // Draw command 1
 
   pos = anchor;
-  pos._x += 8;
+  pos.x_ += 8;
 
   FourCC *f = phrase_->cmd1_ + (16 * viewData_->currentPhrase_);
 
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
-    setTextProps(props, 2, j, false);
-    DrawString(pos._x, pos._y, command.c_str(), props);
-    setTextProps(props, 2, j, true);
-    pos._y++;
+    setTextProps(2, j);
+    DrawString(pos.x_, pos.y_, command.c_str());
+    pos.y_++;
     if (j == row_ && (col_ == 2 || col_ == 3)) {
-      printHelpLegend(command, props);
+      printHelpLegend(command);
     }
   }
 
   // Draw commands params 1
 
   pos = anchor;
-  pos._x += 12;
+  pos.x_ += 12;
 
   ushort *param = phrase_->param1_ + (16 * viewData_->currentPhrase_);
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
     ushort p = *param++;
-    setTextProps(props, 3, j, false);
-    /*		if (p==0xFFFF) {
-                            DrawString(pos._x,pos._y,"----",props) ;
-                    } else {
-    */
+    setTextProps(3, j);
     hexshort2char(p, buffer);
-    DrawString(pos._x, pos._y, buffer, props);
-    /*		}
-     */
-    setTextProps(props, 3, j, true);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    pos.y_++;
   }
 
   // Draw commands 2
 
   pos = anchor;
-  pos._x += 17;
+  pos.x_ += 17;
 
   f = phrase_->cmd2_ + (16 * viewData_->currentPhrase_);
 
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
-    setTextProps(props, 4, j, false);
-    DrawString(pos._x, pos._y, command.c_str(), props);
-    setTextProps(props, 4, j, true);
-    pos._y++;
+    setTextProps(4, j);
+    DrawString(pos.x_, pos.y_, command.c_str());
+    pos.y_++;
     if (j == row_ && (col_ == 4 || col_ == 5)) {
-      printHelpLegend(command, props);
+      printHelpLegend(command);
     }
   }
 
   // Draw commands params
 
   pos = anchor;
-  pos._x += 21;
+  pos.x_ += 21;
 
   param = phrase_->param2_ + (16 * viewData_->currentPhrase_);
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
     ushort p = *param++;
-    setTextProps(props, 5, j, false);
-    /*		if (p==0xFFFF) {
-                            DrawString(pos._x,pos._y,"----",props) ;
-                    } else {
-    */
+    setTextProps(5, j);
     hexshort2char(p, buffer);
-    DrawString(pos._x, pos._y, buffer, props);
-    /*		}
-     */
-    setTextProps(props, 5, j, true);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    pos.y_++;
   }
 
   drawMap();
@@ -1386,9 +1359,8 @@ void PhraseView::AnimationUpdate() {
     return;
   }
 
-  GUITextProperties props;
   // Always update VU meter even if other parts of UI dont need updating
-  drawMasterVuMeter(player, props, false, 25);
+  drawMasterVuMeter(player, false, 25);
 
   // Handle any pending updates from OnPlayerUpdate using the consolidated flag
   // This ensures all UI drawing happens on the "main" thread (core0)
@@ -1399,13 +1371,14 @@ void PhraseView::AnimationUpdate() {
     // Draw play position marker
     GUIPoint anchor = GetAnchor();
     GUIPoint pos = anchor;
-    pos._x -= 1;
+    pos.x_ -= 1;
 
-    SetColor(CD_NORMAL);
+    SetBackgroundColor(cBackground);
+    SetColor(cNormal);
 
     // Clear last played position
-    pos._y = anchor._y + lastPlayingPos_;
-    DrawString(pos._x, pos._y, " ", props);
+    pos.y_ = anchor.y_ + lastPlayingPos_;
+    DrawString(pos.x_, pos.y_, " ");
 
     // Only update play position if player is running
     if (player->IsRunning()) {
@@ -1413,15 +1386,16 @@ void PhraseView::AnimationUpdate() {
       for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
         if (player->IsChannelPlaying(i)) {
           if (viewData_->currentPlayPhrase_[i] == viewData_->currentPhrase_ && viewData_->playMode_ != PM_AUDITION) {
-            pos._y = anchor._y + viewData_->phrasePlayPos_[i];
+            pos.y_ = anchor.y_ + viewData_->phrasePlayPos_[i];
+            SetBackgroundColor(cBackground);
             if (!player->IsChannelMuted(i)) {
-              SetColor(CD_ACCENT);
-              DrawString(pos._x, pos._y, ">", props);
+              SetColor(cAccent);
+              DrawString(pos.x_, pos.y_, ">");
             } else {
-              SetColor(CD_ACCENTALT);
-              DrawString(pos._x, pos._y, "-", props);
+              SetColor(cAccentAlt);
+              DrawString(pos.x_, pos.y_, "-");
             }
-            SetColor(CD_CURSOR);
+            SetColor(cCursor);
             lastPlayingPos_ = viewData_->phrasePlayPos_[i];
             break;
           }
@@ -1432,8 +1406,8 @@ void PhraseView::AnimationUpdate() {
     // Draw live indicators if in live mode
     if (player->GetSequencerMode() == SM_LIVE) {
       pos = anchor;
-      pos._x -= 1;
-      SetColor(CD_ACCENT);
+      pos.x_ -= 1;
+      SetColor(cAccent);
 
       for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
         if (player->GetQueueingMode(i) != QM_NONE) {
@@ -1442,7 +1416,7 @@ void PhraseView::AnimationUpdate() {
           unsigned char *chain = viewData_->song_->data_ + i + SONG_CHANNEL_COUNT * songPos;
           if (*chain == viewData_->currentChain_) {
             const char *indicator = player->GetLiveIndicator(i);
-            DrawString(pos._x, pos._y, indicator, props);
+            DrawString(pos.x_, pos.y_, indicator);
             break;
           }
         }
@@ -1461,7 +1435,7 @@ void PhraseView::AnimationUpdate() {
   // Flush the window to ensure changes are displayed
   w_.Flush();
 }
-void PhraseView::printHelpLegend(FourCC command, GUITextProperties props) {
+void PhraseView::printHelpLegend(FourCC command) {
   if (command == FourCC::InstrumentCommandNone) {
     // no command -> no help text
     return;
@@ -1470,15 +1444,19 @@ void PhraseView::printHelpLegend(FourCC command, GUITextProperties props) {
   char **helpLegend = getHelpLegend(command);
   char line[32]; //-1 for 1char space start of line
   // first clear top line upto battery gauge
-  DrawString(0, 0, "                           ", props);
+  
+  SetBackgroundColor(cBackground);
+  SetColor(cNormal);
+
+  // TODO: remove if the below worksDrawString(0, 0, "                           ");
   // TODO: use ClearTextRect instead of DrawString() once it is implemented
-  // ClearTextRect(0, 0, SCREEN_WIDTH - BATTERY_GAUGE_WIDTH, 0);
+  ClearTextRect(0, 0, SCREEN_WIDTH - BATTERY_GAUGE_WIDTH, 0);
   strcpy(line, " ");
   strcpy(line, helpLegend[0]);
-  DrawString(0, 0, line, props);
+  DrawString(0, 0, line);
   memset(line, ' ', 32);
   if (helpLegend[1] != NULL) {
     strcpy(line, helpLegend[1]);
-    DrawString(0, 1, line, props);
+    DrawString(0, 1, line);
   }
 }

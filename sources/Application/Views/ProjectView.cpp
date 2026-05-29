@@ -133,12 +133,12 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   (*tempoField_.rbegin()).AddObserver(*this);
 
   v = project_->FindVariable(FourCC::VarMasterVolume);
-  position._y += 1;
+  position.y_ += 1;
   intVarField_.emplace_back(position, *v, "master vol: %d%%", 0, 100, 1, 5);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   v = project_->FindVariable(FourCC::VarTranspose);
-  position._y += 1;
+  position.y_ += 1;
   intVarField_.emplace_back(position, *v, "transpose: %3.2d", -48, 48, 0x1, 0xC);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
@@ -147,35 +147,35 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   if (v->GetInt() < 0) {
     v->SetInt(0);
   }
-  position._y += 1;
+  position.y_ += 1;
   intVarField_.emplace_back(position, *v, "scale: %s", 0, numScales - 1, 1, 10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   // Add Scale Root field
-  position._y += 1;
+  position.y_ += 1;
   v = project_->FindVariable(FourCC::VarScaleRoot);
   intVarField_.emplace_back(position, *v, "scale root: %s", 0, 11, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  position._y += 2;
+  position.y_ += 2;
   actionField_.emplace_back("Sample Pool", FourCC::ActionImport, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   actionField_.emplace_back("Remove Unused Samples", FourCC::ActionPurge, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   actionField_.emplace_back("Remove Unused Instruments", FourCC::ActionPurgeInstrument, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position._y += 2;
+  position.y_ += 2;
 
   // save existing fields horizontal alignment
-  int xalign = position._x;
+  int xalign = position.x_;
 
   v = project_->FindVariable(FourCC::VarProjectName);
   auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("project: ");
@@ -186,45 +186,45 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   nameField_->AddObserver(*this);
   fieldList_.insert(fieldList_.end(), nameField_);
 
-  position._y += 1;
+  position.y_ += 1;
   actionField_.emplace_back("Browse", FourCC::ActionBrowse, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position._x += 7;
+  position.x_ += 7;
   actionField_.emplace_back("Save", FourCC::ActionSave, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position._x += 5;
+  position.x_ += 5;
   actionField_.emplace_back("New", FourCC::ActionNewProject, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position._x += 4;
+  position.x_ += 4;
   actionField_.emplace_back("Random", FourCC::ActionRandomName, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
-  position._x = xalign;
+  position.x_ = xalign;
 
   // Add rendering action fields
-  position._y += 2;
+  position.y_ += 2;
 
   // Add a static field as a label for the render actions
   staticField_.emplace_back(position, "Render:");
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   // Position the Mixdown action field to the right of the label
-  position._x += 8;
+  position.x_ += 8;
   actionField_.emplace_back("Mixdown", FourCC::ActionRenderMixdown, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position._x += 8;
+  position.x_ += 8;
   actionField_.emplace_back("Stems", FourCC::ActionRenderStems, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
-  position._x = xalign;
+  position.x_ = xalign;
 }
 
 ProjectView::~ProjectView() {
@@ -280,18 +280,17 @@ void ProjectView::DrawView() {
 
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   // Draw title
   const char *title = "Project ";
-  DrawString(pos._x, pos._y, title, props);
+  DrawString(pos.x_, pos.y_, title);
 
   Variable *v = viewData_->project_->FindVariable(FourCC::VarProjectName);
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = v->GetString();
-  DrawString(pos._x + strlen(title), pos._y, projectName.c_str(), props);
+  DrawString(pos.x_ + strlen(title), pos.y_, projectName.c_str());
 
   FieldView::Redraw();
   drawMap();

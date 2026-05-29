@@ -12,22 +12,20 @@
 #include "UISwatchField.h"
 #include "Application/AppWindow.h"
 
-UISwatchField::UISwatchField(const GUIPoint &position, const ColorDefinition color) : UIField(position) {
+UISwatchField::UISwatchField(const GUIPoint &position, const Color color) : UIField(position) {
   color_ = color;
 }
 
 void UISwatchField::Draw(GUIWindow &w, int offset) {
 
-  GUITextProperties props;
   GUIPoint position = GetPosition();
-  position._y += offset;
+  position.y_ += offset;
 
-  props.invert_ = true;
-  position._x += 1;
+  position.x_ += 1;
 
   ((AppWindow &)w).SetColor(color_);
-  w.DrawString("   ", position, props);
-  ((AppWindow &)w).SetColor(CD_NORMAL);
+  w.DrawString("   ", position);
+  ((AppWindow &)w).SetColor(cNormal);
 }
 
 void UISwatchField::ProcessArrow(unsigned short mask) {};

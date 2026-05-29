@@ -20,8 +20,8 @@ int32_t GraphField::rmsSumSquares_[CacheSize];
 uint16_t GraphField::rmsCounts_[CacheSize];
 
 GraphField::GraphField(GUIPoint &position, int32_t width, int32_t height)
-    : UIField(position), width_(width), height_(height), showBaseline_(false), borderNormal_(CD_BACKGROUND),
-      borderFocused_(CD_HILITE2), waveformValid_(false), needsFullRedraw_(true), sampleSize_(0), zoomLevel_(0),
+    : UIField(position), width_(width), height_(height), showBaseline_(false), borderNormal_(cBackground),
+      borderFocused_(cHighlight2), waveformValid_(false), needsFullRedraw_(true), sampleSize_(0), zoomLevel_(0),
       maxZoomLevel_(0), viewStart_(0), viewEnd_(0), markerCount_(0) {
   std::memset(waveformCache_, 0, sizeof(waveformCache_));
   resetMarkerCache();
@@ -33,8 +33,8 @@ void GraphField::Draw(GUIWindow &w, int offset) {
   int32_t right = x + width_;
   int32_t bottom = y + height_;
 
-  ColorDefinition borderColor = focus_ ? borderFocused_ : borderNormal_;
-  w.SetCurrentRectColor(AppWindow::GetColor(borderColor));
+  Color borderColor = focus_ ? borderFocused_ : borderNormal_;
+  w.SetCurrentRectColor(AppWindow::GetGUIColor(borderColor));
   GUIRect top(x, y, right, y + 1);
   GUIRect bottomLine(x, bottom - 1, right, bottom);
   GUIRect left(x, y, x + 1, bottom);
@@ -43,13 +43,13 @@ void GraphField::Draw(GUIWindow &w, int offset) {
   w.DrawRect(bottomLine);
   w.DrawRect(left);
   w.DrawRect(rightLine);
-  w.SetCurrentRectColor(AppWindow::GetColor(CD_NORMAL));
+  w.SetCurrentRectColor(AppWindow::GetGUIColor(cNormal));
 }
 
 void GraphField::Reset() {
   showBaseline_ = false;
-  borderNormal_ = CD_BACKGROUND;
-  borderFocused_ = CD_HILITE2;
+  borderNormal_ = cBackground;
+  borderFocused_ = cHighlight2;
   waveformValid_ = false;
   needsFullRedraw_ = true;
   sampleSize_ = 0;
@@ -66,7 +66,7 @@ void GraphField::SetShowBaseline(bool show) {
   showBaseline_ = show;
 }
 
-void GraphField::SetBorderColors(ColorDefinition normal, ColorDefinition focused) {
+void GraphField::SetBorderColors(Color normal, Color focused) {
   borderNormal_ = normal;
   borderFocused_ = focused;
 }
@@ -248,7 +248,7 @@ void GraphField::SetMarkerCount(size_t count) {
   }
 }
 
-void GraphField::SetMarker(size_t index, uint32_t sample, ColorDefinition color, bool visible) {
+void GraphField::SetMarker(size_t index, uint32_t sample, Color color, bool visible) {
   if (index >= MaxMarkers) {
     return;
   }
@@ -275,12 +275,12 @@ void GraphField::DrawGraph(View &view) {
   if (needsFullRedraw_) {
     GUIRect area(static_cast<int32_t>(x_) + 1, static_cast<int32_t>(y_) + 1, static_cast<int32_t>(x_) + width_ - 1,
                  static_cast<int32_t>(y_) + height_ - 1);
-    view.DrawRect(area, CD_BACKGROUND);
+    view.DrawRect(area, cBackground);
 
     if (showBaseline_) {
       int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
       GUIRect baseline(static_cast<int32_t>(x_) + 1, centerY, static_cast<int32_t>(x_) + width_ - 1, centerY + 1);
-      view.DrawRect(baseline, CD_HILITE2);
+      view.DrawRect(baseline, cHighlight2);
     }
 
     if (waveformValid_ && hasValidWindow()) {
@@ -301,7 +301,7 @@ void GraphField::DrawGraph(View &view) {
           endY = static_cast<int32_t>(y_) + height_ - 2;
         }
         GUIRect column(static_cast<int32_t>(x_) + 1 + x, startY, static_cast<int32_t>(x_) + 2 + x, endY);
-        view.DrawRect(column, CD_NORMAL);
+        view.DrawRect(column, cNormal);
       }
     }
 
@@ -391,12 +391,12 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
     return;
   }
   GUIRect clearRect(x, static_cast<int32_t>(y_) + 1, x + 1, static_cast<int32_t>(y_) + height_ - 1);
-  view.DrawRect(clearRect, CD_BACKGROUND);
+  view.DrawRect(clearRect, cBackground);
 
   if (showBaseline_) {
     int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
     GUIRect baseline(x, centerY, x + 1, centerY + 1);
-    view.DrawRect(baseline, CD_HILITE2);
+    view.DrawRect(baseline, cHighlight2);
   }
 
   if (!waveformValid_ || !hasValidWindow()) {
@@ -420,7 +420,7 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
     endY = static_cast<int32_t>(y_) + height_ - 2;
   }
   GUIRect column(x, startY, x + 1, endY);
-  view.DrawRect(column, CD_NORMAL);
+  view.DrawRect(column, cNormal);
 }
 
 void GraphField::drawMarkersAt(View &view, int32_t x) {
@@ -444,10 +444,10 @@ void GraphField::drawMarkersAt(View &view, int32_t x) {
 void GraphField::resetMarkerCache() {
   for (size_t i = 0; i < MaxMarkers; ++i) {
     markerPixelCache_[i] = -1;
-    markerColorCache_[i] = CD_NORMAL;
+    markerColorCache_[i] = cNormal;
     markerVisibleCache_[i] = false;
     markers_[i].sample = 0;
-    markers_[i].color = CD_NORMAL;
+    markers_[i].color = cNormal;
     markers_[i].visible = false;
   }
 }

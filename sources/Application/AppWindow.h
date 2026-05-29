@@ -13,6 +13,16 @@
 #define _APP_WINDOW_H_
 
 #include "Application/Views/BaseClasses/View.h"
+
+typedef union color_t {
+  struct {
+    Color fg : 4;
+    Color bg : 4;
+  };
+  unsigned char byte;
+} color_t;
+
+#include "Application/Views/BaseClasses/View.h"
 #include "Application/Views/ViewData.h"
 #include "Foundation/Observable.h"
 #include "System/Process/SysMutex.h"
@@ -43,7 +53,7 @@ protected:
 public:
   static AppWindow *Create(GUICreateWindowParams &, const char *projectName);
 
-  static GUIColor GetColor(ColorDefinition cd);
+  static GUIColor GetGUIColor(Color cd);
 
   enum LoadProjectResult { LOAD_FAILED = -1, LOAD_OK = 0 };
 
@@ -53,7 +63,9 @@ public:
   using GUIWindow::Clear;
   virtual void Clear(bool all = false);
   virtual void ClearTextRect(GUIRect &rect);
-  virtual void SetColor(ColorDefinition cd);
+  virtual void SwapColors();
+  virtual void SetColor(Color color);
+  virtual void SetBackgroundColor(Color color);
   void InvalidateTextCache();
 
   void SetDirty();
@@ -61,6 +73,8 @@ public:
   void SetSdCardPresent(bool present);
 
   char projectName_[MAX_PROJECT_NAME_LENGTH + 1];
+
+  static GUIColor colorPalette_[16];
 
 protected: // GUIWindow implementation
   virtual bool onEvent(GUIEvent &event);
@@ -72,9 +86,9 @@ protected: // GUIWindow implementation
 
   // override draw string to avoid going too far off
   // the screen.
-  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props,
+  virtual void DrawString(const char *string, const GUIPoint &pos,
                           bool overlay = false);
-  virtual void DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props);
+  virtual void DrawChar(const char c, const GUIPoint &pos);
 
   // I_Observer implementation
 
@@ -111,28 +125,11 @@ private:
   bool sdCardMessageShown_;
 
   static unsigned char _charScreen[SCREEN_CHARS];
-  static unsigned char _charScreenProp[SCREEN_CHARS];
+  static color_t _screenColor[SCREEN_CHARS];
   static unsigned char _preScreen[SCREEN_CHARS];
-  static unsigned char _preScreenProp[SCREEN_CHARS];
+  static color_t _preScreenColor[SCREEN_CHARS];
 
-  static GUIColor backgroundColor_;
-  static GUIColor normalColor_;
-  static GUIColor highlightColor_;
-  static GUIColor highlight2Color_;
-  static GUIColor consoleColor_;
-  static GUIColor cursorColor_;
-  static GUIColor infoColor_;
-  static GUIColor warnColor_;
-  static GUIColor errorColor_;
-  static GUIColor accentColor_;
-  static GUIColor accentAltColor_;
-  static GUIColor emphasisColor_;
-  static GUIColor reserved1Color_;
-  static GUIColor reserved2Color_;
-  static GUIColor reserved3Color_;
-  static GUIColor reserved4Color_;
-
-  ColorDefinition colorIndex_;
+  color_t color_ = { .fg = cNormal, .bg = cBackground };
 
   static int charWidth_;
   static int charHeight_;

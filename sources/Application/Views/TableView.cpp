@@ -309,20 +309,20 @@ void TableView::updateCursor(int dx, int dy) {
   GUIPoint p(anchor);
   switch (col_) {
   case 1:
-    p._x += 4;
-    p._y += row_;
+    p.x_ += 4;
+    p.y_ += row_;
     cmdEditField_.SetPosition(p);
     cmdEdit_.SetInt(*(table.param1_ + row_));
     break;
   case 3:
-    p._x += 13;
-    p._y += row_;
+    p.x_ += 13;
+    p.y_ += row_;
     cmdEditField_.SetPosition(p);
     cmdEdit_.SetInt(*(table.param2_ + row_));
     break;
   case 5:
-    p._x += 22;
-    p._y += row_;
+    p.x_ += 22;
+    p.y_ += row_;
     cmdEditField_.SetPosition(p);
     cmdEdit_.SetInt(*(table.param3_ + row_));
     break;
@@ -744,7 +744,7 @@ void TableView::processSelectionButtonMask(unsigned short mask) {
   }
 }
 
-void TableView::setTextProps(GUITextProperties &props, int row, int col, bool restore) {
+void TableView::setTextProps(int row, int col, bool restore) {
 
   bool invert = false;
 
@@ -761,11 +761,9 @@ void TableView::setTextProps(GUITextProperties &props, int row, int col, bool re
 
   if (invert) {
     if (restore) {
-      SetColor(CD_NORMAL);
-      props.invert_ = false;
+      SetColor(cNormal);
     } else {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
+      SetColor(cHighlight2);
     }
   }
 }
@@ -774,7 +772,6 @@ void TableView::DrawView() {
 
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
@@ -782,27 +779,27 @@ void TableView::DrawView() {
   // Draw title
 
   char title[20];
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
   npf_snprintf(title, sizeof(title), "Table %2.2X", viewData_->currentTable_);
-  DrawString(pos._x, pos._y, title, props);
+  DrawString(pos.x_, pos.y_, title);
 
   // Compute song grid location
 
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetColor(CD_HILITE1);
+  SetColor(cHighlight1);
   char buffer[6];
   pos = anchor;
-  pos._x -= 3;
+  pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(CD_ACCENT) : SetColor(CD_ACCENTALT);
+    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
     hex2char(j, buffer);
-    DrawString(pos._x, pos._y, buffer, props);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    pos.y_++;
   }
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   // Draw command 1
 
@@ -812,100 +809,100 @@ void TableView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
-    setTextProps(props, 0, j, false);
-    DrawString(pos._x, pos._y, command.c_str(), props);
-    setTextProps(props, 0, j, true);
-    pos._y++;
+    setTextProps(0, j, false);
+    DrawString(pos.x_, pos.y_, command.c_str());
+    setTextProps(0, j, true);
+    pos.y_++;
     if (j == row_ && (col_ == 0 || col_ == 1)) {
-      printHelpLegend(command, props);
+      printHelpLegend(command);
     }
   }
 
   // Draw commands params 1
 
   pos = anchor;
-  pos._x += 4;
+  pos.x_ += 4;
 
   ushort *param = table.param1_;
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
     ushort p = *param++;
-    setTextProps(props, 1, j, false);
+    setTextProps(1, j, false);
     hexshort2char(p, buffer);
-    DrawString(pos._x, pos._y, buffer, props);
-    setTextProps(props, 1, j, true);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    setTextProps(1, j, true);
+    pos.y_++;
   }
 
   // Draw commands 2
 
   pos = anchor;
-  pos._x += 9;
+  pos.x_ += 9;
 
   f = table.cmd2_;
 
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
-    setTextProps(props, 2, j, false);
-    DrawString(pos._x, pos._y, command.c_str(), props);
-    setTextProps(props, 2, j, true);
-    pos._y++;
+    setTextProps(2, j, false);
+    DrawString(pos.x_, pos.y_, command.c_str());
+    setTextProps(2, j, true);
+    pos.y_++;
     if (j == row_ && (col_ == 2 || col_ == 3)) {
-      printHelpLegend(command, props);
+      printHelpLegend(command);
     }
   }
 
   // Draw commands params
 
   pos = anchor;
-  pos._x += 13;
+  pos.x_ += 13;
 
   param = table.param2_;
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
     ushort p = *param++;
-    setTextProps(props, 3, j, false);
+    setTextProps(3, j, false);
     hexshort2char(p, buffer);
-    DrawString(pos._x, pos._y, buffer, props);
-    setTextProps(props, 3, j, true);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    setTextProps(3, j, true);
+    pos.y_++;
   }
 
   // Draw command 3
 
   pos = anchor;
-  pos._x += 18;
+  pos.x_ += 18;
 
   f = table.cmd3_;
 
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
-    setTextProps(props, 4, j, false);
-    DrawString(pos._x, pos._y, command.c_str(), props);
-    setTextProps(props, 4, j, true);
-    pos._y++;
+    setTextProps(4, j, false);
+    DrawString(pos.x_, pos.y_, command.c_str());
+    setTextProps(4, j, true);
+    pos.y_++;
     if (j == row_ && (col_ == 4 || col_ == 5)) {
-      printHelpLegend(command, props);
+      printHelpLegend(command);
     }
   }
 
   // Draw commands params 3
 
   pos = anchor;
-  pos._x += 22;
+  pos.x_ += 22;
 
   param = table.param3_;
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
     ushort p = *param++;
-    setTextProps(props, 5, j, false);
+    setTextProps(5, j, false);
     hexshort2char(p, buffer);
-    DrawString(pos._x, pos._y, buffer, props);
-    setTextProps(props, 5, j, true);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    setTextProps(5, j, true);
+    pos.y_++;
   }
 
   if ((viewMode_ != VM_SELECTION) && ((col_ == 1) || (col_ == 3) || (col_ == 5))) {
@@ -951,8 +948,7 @@ void TableView::AnimationUpdate() {
   // Handle any pending updates from OnPlayerUpdate using the consolidated flag
   // This ensures all UI drawing happens on the "main" thread (core0)
   if (needsUIUpdate_) {
-    GUITextProperties props;
-
+  
     // Draw notes
     drawNotes();
 
@@ -961,11 +957,13 @@ void TableView::AnimationUpdate() {
     GUIPoint pos = anchor;
 
     // Clear all cursor columns first (positions 0, 9, 18 from anchor)
+    SetBackgroundColor(cBackground);
+    
     for (int i = 0; i < 3; i++) {
-      pos._x = anchor._x - 1 + (i * 9);
+      pos.x_ = anchor.x_ - 1 + (i * 9);
       for (int row = 0; row < 16; row++) {
-        pos._y = anchor._y + row;
-        DrawString(pos._x, pos._y, " ", props);
+        pos.y_ = anchor.y_ + row;
+        DrawString(pos.x_, pos.y_, " ");
       }
     }
 
@@ -978,14 +976,15 @@ void TableView::AnimationUpdate() {
       Table &viewTable = th->GetTable(viewData_->currentTable_);
 
       if (viewData_->playMode_ != PM_AUDITION) {
-        SetColor(CD_ACCENT);
+        SetBackgroundColor(cBackground);
+        SetColor(cAccent);
         if (tpb.GetTable() == &viewTable) {
           for (int i = 0; i < 3; i++) {
             int yPos = tpb.GetPlaybackPosition(i);
             if (yPos >= 0 && yPos < 16) {
-              pos._x = anchor._x - 1 + (i * 9);
-              pos._y = anchor._y + yPos;
-              DrawString(pos._x, pos._y, ">", props);
+              pos.x_ = anchor.x_ - 1 + (i * 9);
+              pos.y_ = anchor.y_ + yPos;
+              DrawString(pos.x_, pos.y_, ">");
             }
           }
         }
@@ -993,9 +992,9 @@ void TableView::AnimationUpdate() {
           for (int i = 0; i < 3; i++) {
             int yPos = atp.GetPlaybackPosition(i);
             if (yPos >= 0 && yPos < 16) {
-              pos._x = anchor._x - 1 + (i * 9);
-              pos._y = anchor._y + yPos;
-              DrawString(pos._x, pos._y, ">", props);
+              pos.x_ = anchor.x_ - 1 + (i * 9);
+              pos.y_ = anchor.y_ + yPos;
+              DrawString(pos.x_, pos.y_, ">");
             }
           }
         }
@@ -1013,15 +1012,15 @@ void TableView::AnimationUpdate() {
   w_.Flush();
 }
 
-void TableView::printHelpLegend(FourCC command, GUITextProperties props) {
+void TableView::printHelpLegend(FourCC command) {
   char **helpLegend = getHelpLegend(command);
   char line[32]; //-1 for 1char space start of line
   strcpy(line, " ");
   strcpy(line, helpLegend[0]);
-  DrawString(0, 0, line, props);
+  DrawString(0, 0, line);
   memset(line, ' ', 32);
   if (helpLegend[1] != NULL) {
     strcpy(line, helpLegend[1]);
-    DrawString(0, 1, line, props);
+    DrawString(0, 1, line);
   }
 }

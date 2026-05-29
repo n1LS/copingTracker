@@ -20,8 +20,8 @@
 
 #define SWAP_BYTES(color) ((uint16_t)(color >> 8) | (uint16_t)(color << 8))
 
-static chargfx_color_t screen_bg_color = CHARGFX_BG;
-static chargfx_color_t screen_fg_color = CHARGFX_NORMAL;
+static chargfx_color_t screen_bg_color = CHARGFX_BLACK;
+static chargfx_color_t screen_fg_color = CHARGFX_WHITE;
 static int cursor_x = 0;
 static int cursor_y = 0;
 static uint8_t screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};
@@ -59,13 +59,13 @@ void chargfx_set_background(chargfx_color_t color) {
   screen_bg_color = color;
 }
 
-void chargfx_set_font_index(uint8_t idx) {
-  ui_font_index = idx;
-}
-
 void chargfx_set_cursor(uint8_t x, uint8_t y) {
   cursor_x = x;
   cursor_y = y;
+}
+
+void chargfx_set_font_index(uint8_t idx) {
+  ui_font_index = idx;
 }
 
 uint8_t chargfx_get_cursor_x() {
@@ -76,16 +76,12 @@ uint8_t chargfx_get_cursor_y() {
   return cursor_y;
 }
 
-void chargfx_putc(char c, bool invert) {
+void chargfx_putc(char c) {
   int idx = cursor_y * TEXT_WIDTH + cursor_x;
   if (c >= 32) {
     screen[idx] = c - 32;
     SetBit(changed, idx);
-    if (invert) {
-      colors[idx] = ((screen_bg_color & 0xf) << 4) | (screen_fg_color & 0xf);
-    } else {
-      colors[idx] = ((screen_fg_color & 0xf) << 4) | (screen_bg_color & 0xf);
-    }
+    colors[idx] = (screen_fg_color << 4) | screen_bg_color; // todo: use a color_t
   }
 }
 
