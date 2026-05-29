@@ -198,6 +198,7 @@ protected:
 
   void drawMap();
   void drawNotes();
+  void drawHelpLegend(FourCC command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);

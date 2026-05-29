@@ -43,7 +43,7 @@ protected:
 
   void updateCursor(int dx, int dy);
   void updateCursorValue(int offset);
-  void setTextProps(int row, int col, bool restore);
+  void setTextProps(int row, int col);
   void warpToNeighbour(int dir);
 
   GUIRect getSelectionRect();
@@ -60,7 +60,6 @@ private:
   Variable cmdEdit_;
   GUIPoint cmdEditPos_;
   UIBigHexVarField cmdEditField_;
-  void printHelpLegend(FourCC command);
 
   struct clipboard {
     bool active_;

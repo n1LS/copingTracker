@@ -12,7 +12,6 @@
 #include "TableView.h"
 #include "Application/Instruments/CommandList.h"
 #include "Application/Player/TablePlayback.h"
-#include "Application/Utils/HelpLegend.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/SampleEditorView.h"
 #include "ViewData.h"
@@ -744,28 +743,23 @@ void TableView::processSelectionButtonMask(unsigned short mask) {
   }
 }
 
-void TableView::setTextProps(int row, int col, bool restore) {
+void TableView::setTextProps(int row, int col) {
 
-  bool invert = false;
+  bool highlighted = false;
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
     if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
-      invert = true;
+      highlighted = true;
     }
   } else {
     if ((col_ == row) && (row_ == col)) {
-      invert = true;
+      highlighted = true;
     }
   }
 
-  if (invert) {
-    if (restore) {
-      SetColor(cNormal);
-    } else {
-      SetColor(cHighlight2);
-    }
-  }
+  SetBackgroundColor(highlighted ? cHighlight2: cBackground);
+  SetColor(highlighted ? cBackground : cNormal);
 }
 
 void TableView::DrawView() {
@@ -809,12 +803,11 @@ void TableView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
-    setTextProps(0, j, false);
+    setTextProps(0, j);
     DrawString(pos.x_, pos.y_, command.c_str());
-    setTextProps(0, j, true);
     pos.y_++;
     if (j == row_ && (col_ == 0 || col_ == 1)) {
-      printHelpLegend(command);
+      drawHelpLegend(command);
     }
   }
 
@@ -828,10 +821,9 @@ void TableView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     ushort p = *param++;
-    setTextProps(1, j, false);
+    setTextProps(1, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
-    setTextProps(1, j, true);
     pos.y_++;
   }
 
@@ -844,12 +836,11 @@ void TableView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
-    setTextProps(2, j, false);
+    setTextProps(2, j);
     DrawString(pos.x_, pos.y_, command.c_str());
-    setTextProps(2, j, true);
     pos.y_++;
     if (j == row_ && (col_ == 2 || col_ == 3)) {
-      printHelpLegend(command);
+      drawHelpLegend(command);
     }
   }
 
@@ -863,10 +854,9 @@ void TableView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     ushort p = *param++;
-    setTextProps(3, j, false);
+    setTextProps(3, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
-    setTextProps(3, j, true);
     pos.y_++;
   }
 
@@ -879,12 +869,11 @@ void TableView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
-    setTextProps(4, j, false);
+    setTextProps(4, j);
     DrawString(pos.x_, pos.y_, command.c_str());
-    setTextProps(4, j, true);
     pos.y_++;
     if (j == row_ && (col_ == 4 || col_ == 5)) {
-      printHelpLegend(command);
+      drawHelpLegend(command);
     }
   }
 
@@ -898,10 +887,9 @@ void TableView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     ushort p = *param++;
-    setTextProps(5, j, false);
+    setTextProps(5, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
-    setTextProps(5, j, true);
     pos.y_++;
   }
 
@@ -1010,17 +998,4 @@ void TableView::AnimationUpdate() {
 
   // Flush the window to ensure changes are displayed
   w_.Flush();
-}
-
-void TableView::printHelpLegend(FourCC command) {
-  char **helpLegend = getHelpLegend(command);
-  char line[32]; //-1 for 1char space start of line
-  strcpy(line, " ");
-  strcpy(line, helpLegend[0]);
-  DrawString(0, 0, line);
-  memset(line, ' ', 32);
-  if (helpLegend[1] != NULL) {
-    strcpy(line, helpLegend[1]);
-    DrawString(0, 1, line);
-  }
 }

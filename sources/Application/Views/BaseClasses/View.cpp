@@ -12,6 +12,7 @@
 #include "View.h"
 #include "Application/AppWindow.h"
 #include "Application/Player/Player.h"
+#include "Application/Utils/HelpLegend.h"
 #include "Application/Utils/char.h"
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/RecordView.h"
@@ -616,5 +617,42 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
     bool thumb = (dy >= thumbPos) && (dy < thumbPos + thumbSize);
     const char *str = thumb ? char_block_full_s : char_border_single_vertical_s;
     DrawString(x, y + dy, str);
+  }
+}
+
+void View::drawHelpLegend(FourCC command) {
+  if (command == FourCC::InstrumentCommandNone) {
+    // no command -> no help text
+    return;
+  }
+
+  char **helpLegend = getHelpLegend(command);
+  char line[SCREEN_WIDTH]; // -1 for 1char space start of line
+  strcpy(line, helpLegend[0]);
+  
+  // highlight the letters that are the symbol for the command
+  SetBackgroundColor(cBackground);
+
+  bool preColon = true;
+  for (size_t x = 0; x < strlen(line); x++) {
+    unsigned char c = line[x];
+
+    if (c == ':') {
+      preColon = false;
+    }
+
+    if (preColon && c >= 'A' && c <= 'Z') {
+      SetColor(cHighlight1);
+    } else {
+      SetColor(cNormal);
+    }
+
+    DrawChar(x, 0, line[x]);
+  }
+  
+  memset(line, ' ', 32);
+  if (helpLegend[1] != NULL) {
+    strcpy(line, helpLegend[1]);
+    DrawString(0, 1, line);
   }
 }

@@ -189,6 +189,10 @@ void GrooveView::DrawView() {
     } else {
       strcpy(buffer, "--");
     };
+
+    bool highlighted = (j == position_);
+    SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
+    SetColor(highlighted ? cBackground : cNormal);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }

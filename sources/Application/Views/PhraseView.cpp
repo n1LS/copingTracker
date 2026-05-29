@@ -14,7 +14,6 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Model/Scale.h"
 #include "Application/Model/Table.h"
-#include "Application/Utils/HelpLegend.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
@@ -674,10 +673,7 @@ void PhraseView::pasteClipboard() {
   // Get number of row to paste
 
   int height = clipboard_.height_;
-  /*    if (row_+height>16) {
-          height=16-row_ ;
-      }
-    */
+
   uchar *dst1 = viewData_->song_->phrase_.note_ + 16 * viewData_->currentPhrase_;
   uchar *src1 = clipboard_.note_;
   uchar *dst2 = viewData_->song_->phrase_.instr_ + 16 * viewData_->currentPhrase_;
@@ -1264,7 +1260,7 @@ void PhraseView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 2 || col_ == 3)) {
-      printHelpLegend(command);
+      drawHelpLegend(command);
     }
   }
 
@@ -1297,7 +1293,7 @@ void PhraseView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 4 || col_ == 5)) {
-      printHelpLegend(command);
+      drawHelpLegend(command);
     }
   }
 
@@ -1434,29 +1430,4 @@ void PhraseView::AnimationUpdate() {
 
   // Flush the window to ensure changes are displayed
   w_.Flush();
-}
-void PhraseView::printHelpLegend(FourCC command) {
-  if (command == FourCC::InstrumentCommandNone) {
-    // no command -> no help text
-    return;
-  }
-
-  char **helpLegend = getHelpLegend(command);
-  char line[32]; //-1 for 1char space start of line
-  // first clear top line upto battery gauge
-  
-  SetBackgroundColor(cBackground);
-  SetColor(cNormal);
-
-  // TODO: remove if the below worksDrawString(0, 0, "                           ");
-  // TODO: use ClearTextRect instead of DrawString() once it is implemented
-  ClearTextRect(0, 0, SCREEN_WIDTH - BATTERY_GAUGE_WIDTH, 0);
-  strcpy(line, " ");
-  strcpy(line, helpLegend[0]);
-  DrawString(0, 0, line);
-  memset(line, ' ', 32);
-  if (helpLegend[1] != NULL) {
-    strcpy(line, helpLegend[1]);
-    DrawString(0, 1, line);
-  }
 }
