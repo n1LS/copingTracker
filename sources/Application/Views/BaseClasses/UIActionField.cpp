@@ -22,7 +22,6 @@ UIActionField::UIActionField(const char *name, unsigned int fourcc, GUIPoint &po
 UIActionField::~UIActionField() {};
 
 void UIActionField::Draw(GUIWindow &w, int offset) {
-  GUITextProperties props;
   GUIPoint position(x_, y_ + offset);
 
   // enforce max field length
@@ -31,8 +30,19 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
   strncpy(buffer, name_, MAX_FIELD_WIDTH);
   buffer[MAX_FIELD_WIDTH] = '\0';
 
-  ((AppWindow &)w).SetColor(focus_ ? CD_HILITE1 : CD_NORMAL);
-  w.DrawString(buffer, position, props);
+  ((AppWindow &)w).SetBackgroundColor(focus_ ? cHighlight1 : cBackground);
+  ((AppWindow &)w).SetColor(focus_ ? cBackground : cNormal);
+  w.DrawString(buffer, position);
+
+  // add button ends
+  if (focus_) {
+    // draw highlight button ends
+    GUIPoint pos(x_ - 1, y_);
+    ((AppWindow &)w).SwapColors();
+    w.DrawChar(GLYPH(char_button_border_left_s), pos);
+    pos.x_ += strlen(buffer) + 1;
+    w.DrawChar(GLYPH(char_button_border_right_s), pos);
+  }
 }
 
 void UIActionField::OnClick() {

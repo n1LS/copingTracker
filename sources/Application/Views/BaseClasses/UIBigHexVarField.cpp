@@ -26,19 +26,18 @@ UIBigHexVarField::UIBigHexVarField(const GUIPoint &position, Variable &v, int pr
 
 void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
 
-  GUITextProperties props;
   GUIPoint position = GetPosition();
-  position._y += offset;
+  position.y_ += offset;
 
   char buffer[MAX_FIELD_WIDTH + 1];
   int value = src_.GetInt();
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(CD_HILITE2);
-    props.invert_ = true;
-    w.DrawString(buffer, position, props);
-
+    ((AppWindow &)w).SetBackgroundColor(cHighlight2);
+    ((AppWindow &)w).SetColor(cBackground);
+    w.DrawString(buffer, position);
+    
     int percentPos = -1;
     for (unsigned int i = 0; i < strlen(format_); i++) {
       if (format_[i] == '%') {
@@ -49,9 +48,9 @@ void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
     if (percentPos >= 0) {
       int offset = (precision_ - position_) + percentPos;
       buffer[offset + 1] = 0;
-      position._x += offset;
-      ((AppWindow &)w).SetColor(CD_NORMAL);
-      w.DrawString(buffer + offset, position, props);
+      position.x_ += offset;
+      ((AppWindow &)w).SetBackgroundColor(cNormal);
+      w.DrawString(buffer + offset, position);
     }
   } else {
     DrawLabeledField(w, position, buffer);

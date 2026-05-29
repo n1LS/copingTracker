@@ -23,18 +23,16 @@ UIBitmaskVarField::UIBitmaskVarField(const GUIPoint &position, Variable &v, cons
 
 void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
 
-  GUITextProperties props;
   GUIPoint position = GetPosition();
-  position._y += offset;
+  position.y_ += offset;
 
   char buffer[MAX_FIELD_WIDTH + 1];
   int value = src_.GetInt();
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(CD_HILITE2);
-    props.invert_ = true;
-    w.DrawString(buffer, position, props);
+    ((AppWindow &)w).SetColor(cHighlight2);
+    w.DrawString(buffer, position);
 
     int percentPos = -1;
     for (unsigned int i = 0; i < strlen(format_); i++) {
@@ -46,9 +44,9 @@ void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
     if (percentPos >= 0) {
       int offset = (len_ - position_) + percentPos;
       buffer[offset + 1] = 0;
-      position._x += offset;
-      ((AppWindow &)w).SetColor(CD_NORMAL);
-      w.DrawString(buffer + offset, position, props);
+      position.x_ += offset;
+      ((AppWindow &)w).SetColor(cNormal);
+      w.DrawString(buffer + offset, position);
     }
   } else {
     DrawLabeledField(w, position, buffer);

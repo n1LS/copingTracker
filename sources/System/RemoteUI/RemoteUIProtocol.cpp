@@ -53,10 +53,21 @@ void remoteUIClearCommand(unsigned short r, unsigned short g, unsigned short b, 
   buffer[4] = b;
 }
 
+// todo: cleanup and make these a single function
 uint16_t remoteUISetColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer) {
   uint16_t bufferIndex = 0;
   buffer[bufferIndex++] = REMOTE_UI_CMD_MARKER;
   buffer[bufferIndex++] = SETCOLOR_CMD;
+  bufferIndex = addByteEscaped(buffer, bufferIndex, r);
+  bufferIndex = addByteEscaped(buffer, bufferIndex, g);
+  bufferIndex = addByteEscaped(buffer, bufferIndex, b);
+  return bufferIndex;
+}
+
+uint16_t remoteUISetBackgroundColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer) {
+  uint16_t bufferIndex = 0;
+  buffer[bufferIndex++] = REMOTE_UI_CMD_MARKER;
+  buffer[bufferIndex++] = SETBACKGROUNDCOLOR_CMD;
   bufferIndex = addByteEscaped(buffer, bufferIndex, r);
   bufferIndex = addByteEscaped(buffer, bufferIndex, g);
   bufferIndex = addByteEscaped(buffer, bufferIndex, b);

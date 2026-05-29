@@ -14,18 +14,18 @@
 #include "ViewUtils.h"
 #include <string.h>
 
-UIStaticField::UIStaticField(const GUIPoint &position, const char *string) : UIField(position), color_(CD_NORMAL) {
+UIStaticField::UIStaticField(const GUIPoint &position, const char *string) : UIField(position), color_(cNormal) {
   string_ = string;
 }
 
 void UIStaticField::Draw(GUIWindow &w, int offset) {
 
-  GUITextProperties props;
   GUIPoint position = GetPosition();
-  position._y += offset;
+  position.y_ += offset;
 
   ((AppWindow &)w).SetColor(color_);
-  w.DrawString(string_, position, props);
+  ((AppWindow &)w).SetBackgroundColor(cBackground);
+  w.DrawString(string_, position);
 }
 
 void UIStaticField::ProcessArrow(unsigned short mask) {};

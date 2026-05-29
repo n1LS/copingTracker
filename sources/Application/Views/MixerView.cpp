@@ -287,7 +287,7 @@ void MixerView::initChannelVolumeFields() {
 
   // Position for volume fields - below VU meters
   GUIPoint position = GetAnchor();
-  position._y += VU_METER_HEIGHT + 1; // Position below VU meters
+  position.y_ += VU_METER_HEIGHT + 1; // Position below VU meters
 
   // Get FourCC codes for channel volumes
   FourCC channelVolumeFourCCs[SONG_CHANNEL_COUNT] = {
@@ -300,7 +300,7 @@ void MixerView::initChannelVolumeFields() {
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     // Create position for this channel's volume field
     GUIPoint fieldPos = position;
-    fieldPos._x = position._x + (i * CHANNELS_X_OFFSET_);
+    fieldPos.x_ = position.x_ + (i * CHANNELS_X_OFFSET_);
 
     // Find the variable for this channel's volume
     Variable *v = project->FindVariable(channelVolumeFourCCs[i]);
@@ -319,7 +319,7 @@ void MixerView::initChannelVolumeFields() {
   // Add master volume field to the right of channel volumes
   GUIPoint masterPos = position;
   // Position to the right of channel volumes
-  masterPos._x += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
+  masterPos.x_ += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
 
   Variable *v = project->FindVariable(FourCC::VarMasterVolume);
   if (v) {
@@ -336,68 +336,55 @@ void MixerView::initChannelVolumeFields() {
 void MixerView::DrawView() {
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
   GUIPoint anchor = GetAnchor();
 
   // Draw title
-  SetColor(CD_NORMAL);
-
   Player *player = Player::GetInstance();
   Project *project = player->GetProject(); // Use Player's GetProject method
 
-  props.invert_ = true;
   const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song" : "Live");
-  DrawString(pos._x, pos._y, buffer, props);
-  props.invert_ = false;
+  SetColor(cBackground);
+  SetBackgroundColor(cNormal);
+  DrawString(pos.x_, pos.y_, buffer);
 
   // Now draw busses
   // we start at the bottom of the VU meter and draw it growing upwards
   pos = anchor;
-  pos._y += VU_METER_HEIGHT - 1; // -1 to align with song grid
-  props.invert_ = true;
-
-  SetColor(CD_NORMAL);
-  props.invert_ = false;
+  pos.y_ += VU_METER_HEIGHT - 1; // -1 to align with song grid
 
   // Draw all fields (channel volume fields)
   FieldView::Redraw();
 
   // Draw mute indicators below the volume values
-  pos._y = anchor._y + VU_METER_HEIGHT + 2; // Position below volume fields
-  pos._x = GetTitlePosition()._x;
+  pos.y_ = anchor.y_ + VU_METER_HEIGHT + 2; // Position below volume fields
+  pos.x_ = GetTitlePosition().x_;
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-    if (i == viewData_->songX_) {
-      props.invert_ = true;
-      SetColor(CD_HILITE2);
-    }
-
     char state[2];
     state[0] = player->IsChannelMuted(i) ? 'M' : '-';
     state[1] = '\0';
 
-    DrawString(pos._x, pos._y, state, props);
-    pos._x += CHANNELS_X_OFFSET_;
-
-    if (i == viewData_->songX_) {
-      props.invert_ = false;
-      SetColor(CD_NORMAL);
-    }
+    bool highlighted = (i == viewData_->songX_);
+    SetColor(highlighted ? cBackground : cNormal);
+    SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
+    DrawString(pos.x_, pos.y_, state);
+    pos.x_ += CHANNELS_X_OFFSET_;
   }
 
   drawMap();
   drawNotes();
-  drawMasterVuMeter(player, props);
+  drawMasterVuMeter(player);
 
   // Draw master volume label
   GUIPoint labelPos = GetAnchor();
   // Align with master volume control
-  labelPos._x += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
-  labelPos._y = SCREEN_HEIGHT - 3; // Position below the volume control
-  SetColor(CD_HILITE2);
-  DrawString(labelPos._x, labelPos._y, "MB", props);
-  SetColor(CD_NORMAL);
+  labelPos.x_ += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
+  labelPos.y_ = SCREEN_HEIGHT - 3; // Position below the volume control
+  SetBackgroundColor(cHighlight2);
+  SetColor(cBackground);
+  DrawString(labelPos.x_, labelPos.y_, "MB");
+  SetColor(cNormal);
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
@@ -423,7 +410,6 @@ void MixerView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 void MixerView::AnimationUpdate() {
   // First call the parent class implementation to draw the battery gauge
   ScreenView::AnimationUpdate();
-  GUITextProperties props;
 
   // Get the player safely
   Player *player = Player::GetInstance();
@@ -439,8 +425,8 @@ void MixerView::AnimationUpdate() {
   // This ensures we see VU meter updates from MIDI input even when not playing
   etl::array<stereosample, SONG_CHANNEL_COUNT> *levels = player->GetMixerLevels();
   if (levels) {
-    drawChannelVUMeters(levels, player, props);
-    drawMasterVuMeter(player, props);
+    drawChannelVUMeters(levels, player);
+    drawMasterVuMeter(player);
   }
 
   // Handle any pending updates from OnPlayerUpdate
@@ -448,9 +434,9 @@ void MixerView::AnimationUpdate() {
   if (needsPlayTimeUpdate_) {
     GUIPoint pos = GetAnchor();
     // explicitly position timer directly below the battery gauge
-    pos._x = 27;
-    pos._y = 1;
-    drawPlayTime(player, pos, props);
+    pos.x_ = 27;
+    pos.y_ = 1;
+    drawPlayTime(player, pos);
     needsPlayTimeUpdate_ = false;
   }
 
@@ -464,7 +450,7 @@ void MixerView::AnimationUpdate() {
 }
 
 void MixerView::drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT> *levels, Player *player,
-                                    GUITextProperties props, bool forceRedraw) {
+                                    bool forceRedraw) {
 
   // Quick optimization: If not forcing redraw, check if any levels have changed
   // This saves CPU cycles by avoiding unnecessary drawing operations
@@ -490,7 +476,7 @@ void MixerView::drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT>
 
   // we start at the bottom of the VU meter and draw it growing upwards
   GUIPoint pos = GetAnchor();
-  pos._y += VU_METER_HEIGHT - 1; // -1 to align with song grid
+  pos.y_ += VU_METER_HEIGHT - 1; // -1 to align with song grid
 
   // draw vu meter for each bus
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
@@ -503,8 +489,8 @@ void MixerView::drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT>
     }
 
     // Use index i+1 for channel VU meters (index 0 is reserved for master)
-    drawVUMeter(leftBars, rightBars, pos, props, i + 1, forceRedraw);
-    pos._x += CHANNELS_X_OFFSET_;
+    drawVUMeter(leftBars, rightBars, pos, i + 1, forceRedraw);
+    pos.x_ += CHANNELS_X_OFFSET_;
   }
 }
 

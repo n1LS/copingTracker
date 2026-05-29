@@ -92,134 +92,123 @@ void View::Unlock() {
 
 void View::drawMap() {
   GUIPoint anchor = GetAnchor();
-  GUIPoint pos(View::margin_, anchor._y + View::songRowCount_ + 1);
-  GUITextProperties props;
+  GUIPoint pos(View::margin_, anchor.y_ + View::songRowCount_ + 1);
 
   // draw entire map
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
+  SetBackgroundColor(cBackground);
+  
   char buffer[5];
-  props.invert_ = false;
   // row1
-  strcpy(buffer, "D   ");
-  DrawString(pos._x, pos._y, buffer, props);
-  pos._y++;
+  DrawString(pos.x_, pos.y_, "D   ");
+  pos.y_++;
   // row2
-  strcpy(buffer, "P G ");
-  DrawString(pos._x, pos._y, buffer, props);
-  pos._y++;
+  DrawString(pos.x_, pos.y_, "P G ");
+  pos.y_++;
   // row3
-  strcpy(buffer, "SCPI");
-  DrawString(pos._x, pos._y, buffer, props);
-  pos._y++;
+  DrawString(pos.x_, pos.y_, "SCPI");
+  pos.y_++;
   // row4
-  strcpy(buffer, "M TT");
-  DrawString(pos._x, pos._y, buffer, props);
+  DrawString(pos.x_, pos.y_, "M TT");
 
   // draw current screen on map
-  SetColor(CD_HILITE2);
-  pos._y = anchor._y + View::songRowCount_ + 1;
+  SetColor(cBackground);
+  SetBackgroundColor(cHighlight2);
+  pos.y_ = anchor.y_ + View::songRowCount_ + 1;
   switch (viewType_) {
   case VT_CHAIN:
-    pos._x += 1;
-    pos._y += 2;
-    DrawString(pos._x, pos._y, "C", props);
+    pos.x_ += 1;
+    pos.y_ += 2;
+    DrawString(pos.x_, pos.y_, "C");
     break;
   case VT_PHRASE:
-    pos._x += 2;
-    pos._y += 2;
-    DrawString(pos._x, pos._y, "P", props);
+    pos.x_ += 2;
+    pos.y_ += 2;
+    DrawString(pos.x_, pos.y_, "P");
     break;
   case VT_DEVICE:
-    DrawString(pos._x, pos._y, "D", props);
+    DrawString(pos.x_, pos.y_, "D");
     break;
   case VT_PROJECT:
-    pos._y += 1;
-    DrawString(pos._x, pos._y, "P", props);
+    pos.y_ += 1;
+    DrawString(pos.x_, pos.y_, "P");
     break;
   case VT_INSTRUMENT:
-    pos._x += 3;
-    pos._y += 2;
-    DrawString(pos._x, pos._y, "I", props);
+    pos.x_ += 3;
+    pos.y_ += 2;
+    DrawString(pos.x_, pos.y_, "I");
     break;
   case VT_TABLE: // under phrase
-    pos._x += 2;
-    pos._y += 3;
-    DrawString(pos._x, pos._y, "T", props);
+    pos.x_ += 2;
+    pos.y_ += 3;
+    DrawString(pos.x_, pos.y_, "T");
     break;
   case VT_TABLE2: // under instrument
-    pos._x += 3;
-    pos._y += 3;
-    DrawString(pos._x, pos._y, "T", props);
+    pos.x_ += 3;
+    pos.y_ += 3;
+    DrawString(pos.x_, pos.y_, "T");
     break;
   case VT_GROOVE:
-    pos._x += 2;
-    pos._y += 1;
-    DrawString(pos._x, pos._y, "G", props);
+    pos.x_ += 2;
+    pos.y_ += 1;
+    DrawString(pos.x_, pos.y_, "G");
     break;
   case VT_MIXER:
-    pos._y += 3;
-    DrawString(pos._x, pos._y, "M", props);
+    pos.y_ += 3;
+    DrawString(pos.x_, pos.y_, "M");
     break;
   default: // VT_SONG
-    pos._y += 2;
-    DrawString(pos._x, pos._y, "S", props);
+    pos.y_ += 2;
+    DrawString(pos.x_, pos.y_, "S");
   }
 }
 
 void View::drawNotes() {
   GUIPoint anchor = GetAnchor();
   int initialX = View::margin_ + 5;
-  int initialY = anchor._y + View::songRowCount_ + 2;
+  int initialY = anchor.y_ + View::songRowCount_ + 2;
   GUIPoint pos(initialX, initialY);
-  GUITextProperties props;
 
   Player *player = Player::GetInstance();
 
-  props.invert_ = true;
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-    if (i == viewData_->songX_) {
-      SetColor(CD_HILITE2);
-    } else {
-      SetColor(CD_HILITE1);
-    }
+    bool highlighted = (i == viewData_->songX_);
+    SetBackgroundColor(highlighted ? cHighlight2 : cHighlight1);
+    SetColor(cBackground);
+    
     if (player->IsRunning() && viewData_->playMode_ != PM_AUDITION) {
       uint8_t sliceIndex = 0;
       if (player->GetPlayedSliceIndex(i, sliceIndex)) {
-        DrawString(pos._x, pos._y, "SL", props);
-        pos._y++;
+        DrawString(pos.x_, pos.y_, "SL");
+        pos.y_++;
         char sliceBuffer[3];
         sliceBuffer[0] = static_cast<char>('0' + (sliceIndex / 10));
         sliceBuffer[1] = static_cast<char>('0' + (sliceIndex % 10));
         sliceBuffer[2] = '\0';
-        DrawString(pos._x, pos._y, sliceBuffer, props);
-        pos._y++;
-        DrawString(pos._x, pos._y, player->GetPlayedInstrument(i),
-                   props); // draw instrument number
+        DrawString(pos.x_, pos.y_, sliceBuffer);
+        pos.y_++;
+        DrawString(pos.x_, pos.y_, player->GetPlayedInstrument(i)); // draw instrument number
       } else {
-        DrawString(pos._x, pos._y, player->GetPlayedNote(i),
-                   props); // row for the note values
-        pos._y++;
-        DrawString(pos._x, pos._y, player->GetPlayedOctive(i),
-                   props); // row for the octive values
-        pos._y++;
-        DrawString(pos._x, pos._y, player->GetPlayedInstrument(i),
-                   props); // draw instrument number
+        DrawString(pos.x_, pos.y_, player->GetPlayedNote(i)); // row for the note values
+        pos.y_++;
+        DrawString(pos.x_, pos.y_, player->GetPlayedOctive(i)); // row for the octive values
+        pos.y_++;
+        DrawString(pos.x_, pos.y_, player->GetPlayedInstrument(i)); // draw instrument number
       }
     } else {
-      DrawString(pos._x, pos._y, "  ", props); // row for the note
+      DrawString(pos.x_, pos.y_, "  "); // row for the note
                                                // values
-      pos._y++;
-      DrawString(pos._x, pos._y, "  ",
-                 props); // row for the octive values
-      pos._y++;
-      DrawString(pos._x, pos._y, "  ", props); // draw instrument number
+      pos.y_++;
+      DrawString(pos.x_, pos.y_, "  "); // row for the octive values
+      pos.y_++;
+      DrawString(pos.x_, pos.y_, "  "); // draw instrument number
     }
-    pos._y = initialY;
-    pos._x += 3;
+    pos.y_ = initialY;
+    pos.x_ += 3;
   }
 }
 
-void View::drawMasterVuMeter(Player *player, GUITextProperties props, bool forceRedraw, uint8_t xoffset) {
+void View::drawMasterVuMeter(Player *player, bool forceRedraw, uint8_t xoffset) {
   stereosample playerLevel = player->GetMasterLevel();
 
   // Convert amplitude to bar levels
@@ -228,14 +217,14 @@ void View::drawMasterVuMeter(Player *player, GUITextProperties props, bool force
 
   // we start at the bottom of the VU meter and draw it growing upwards
   GUIPoint pos = GetAnchor();
-  pos._x += xoffset;
-  pos._y += VU_METER_HEIGHT - 1; // -1 to align with song grid
+  pos.x_ += xoffset;
+  pos.y_ += VU_METER_HEIGHT - 1; // -1 to align with song grid
 
   // Use index 0 for the master VU meter
-  drawVUMeter(leftBars, rightBars, pos, props, 0, forceRedraw);
+  drawVUMeter(leftBars, rightBars, pos, 0, forceRedraw);
 }
 
-void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, GUITextProperties props, int vuIndex,
+void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex,
                        bool forceRedraw) {
 
   // Clamp the values to the maximum height
@@ -281,26 +270,25 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, GUITex
     // If forcing redraw or level changed, redraw the entire meter
 
     // Then draw the active cells with inversion enabled
-    props.invert_ = false;
 
     for (int i = 0; i < VU_METER_HEIGHT; i++) {
       // Set appropriate color based on level
       if (i == VU_METER_CLIP_LEVEL) {
-        SetColor(CD_ERROR);
+        SetColor(cError);
       } else if (i > VU_METER_WARN_LEVEL) {
-        SetColor(CD_WARN);
+        SetColor(cWarn);
       } else {
-        SetColor(CD_INFO);
+        SetColor(cInfo);
       }
 
       // draw left channel if changed
       if (leftChanged) {
-        DrawString(pos._x, pos._y - i, char_bargraph_s(leftBars - 10 * i), props);
+        DrawString(pos.x_, pos.y_ - i, char_bargraph_s(leftBars - 10 * i));
       }
 
       // draw right channel if changed
       if (rightChanged) {
-        DrawString(pos._x + 1, pos._y - i, char_bargraph_s(rightBars - 10 * i), props);
+        DrawString(pos.x_ + 1, pos.y_ - i, char_bargraph_s(rightBars - 10 * i));
       }
     }
   }
@@ -310,16 +298,16 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, GUITex
   prevRightVU_[vuIndex] = rightBars;
 }
 
-void View::drawPlayTime(Player *player, GUIPoint pos, GUITextProperties &props) {
+void View::drawPlayTime(Player *player, GUIPoint pos) {
   char strbuffer[10];
 
-  SetColor(CD_NORMAL);
-  props.invert_ = false;
+  SetBackgroundColor(cBackground);
+  SetColor(cNormal);
   int time = int(player->GetPlayTime());
   int mi = time / 60;
   int se = time - mi * 60;
   npf_snprintf(strbuffer, sizeof(strbuffer), "%2.2d:%2.2d", mi, se);
-  DrawString(pos._x, pos._y, strbuffer, props);
+  DrawString(pos.x_, pos.y_, strbuffer);
 }
 
 void View::DoModal(ModalView *view, ModalViewCallback cb) {
@@ -396,8 +384,16 @@ void View::ForceClear() {
   ((AppWindow &)w_).Clear(true);
 }
 
-void View::SetColor(ColorDefinition cd) {
+void View::SwapColors() {
+  ((AppWindow &)w_).SwapColors();
+}
+
+void View::SetColor(Color cd) {
   ((AppWindow &)w_).SetColor(cd);
+}
+
+void View::SetBackgroundColor(Color cd) {
+  ((AppWindow &)w_).SetBackgroundColor(cd);
 }
 
 void View::ClearTextRect(int x, int y, int w, int h) {
@@ -405,27 +401,26 @@ void View::ClearTextRect(int x, int y, int w, int h) {
   w_.ClearTextRect(rect);
 }
 
-void View::DrawString(int x, int y, const char *txt, const GUITextProperties &props) {
+void View::DrawString(int x, int y, const char *text) {
   GUIPoint pos(x, y);
-  w_.DrawString(txt, pos, props);
+  w_.DrawString(text, pos);
 }
 
-void View::DrawChar(int x, int y, const char character, const GUITextProperties &props) {
+void View::DrawChar(int x, int y, const char character) {
   GUIPoint pos(x, y);
-  w_.DrawChar(character, pos, props);
+  w_.DrawChar(character, pos);
 }
 
-void View::DrawRect(GUIRect &r, ColorDefinition color) {
-  w_.SetCurrentRectColor(AppWindow::GetColor(color));
+void View::DrawRect(GUIRect &r, Color color) {
+  w_.SetCurrentRectColor(AppWindow::GetGUIColor(color));
   w_.DrawRect(r);
 }
 
-void View::drawBattery(GUITextProperties &props) {
+void View::drawBattery() {
+  SetBackgroundColor(cBackground);
+
   const uint32_t frameCounter = AppWindow::GetAnimationFrameCounter();
   const bool sampleNow = (frameCounter % PICO_CLOCK_HZ) == 0;
-
-  // TODO: this logic is not needed on the Advance as it has accurate battery
-  // metering and so can be removed for the Advance in future
 
   // Sample the battery once per second.
   if (sampleNow) {
@@ -452,7 +447,7 @@ void View::drawBattery(GUITextProperties &props) {
   }
 
   GUIPoint battpos = GetAnchor();
-  battpos._y = 0;
+  battpos.y_ = 0;
 
 #if BATTERY_LEVEL_AS_PERCENTAGE
   uint8_t batteryPercent = batteryState_.percentage;
@@ -460,13 +455,13 @@ void View::drawBattery(GUITextProperties &props) {
     batteryPercent = 100;
   }
 
-  ColorDefinition batteryColor = CD_NORMAL;
+  Color batteryColor = CD_NORMAL;
   if (batteryPercent <= 5) {
-    batteryColor = CD_ERROR;
+    batteryColor = cError;
   } else if (batteryPercent < 20) {
-    batteryColor = CD_WARN;
+    batteryColor = cWarn;
   } else if (batteryState_.charging) {
-    batteryColor = CD_INFO;
+    batteryColor = cInfo;
   }
 
   SetColor(batteryColor);
@@ -475,27 +470,21 @@ void View::drawBattery(GUITextProperties &props) {
   char batteryText[4];
   npf_snprintf(batteryText, sizeof(batteryText), "%3u", batteryPercent);
 
-  GUITextProperties normalProps = props;
-  normalProps.invert_ = false;
-
-  GUITextProperties invertedProps = normalProps;
-  invertedProps.invert_ = true;
-
   constexpr int kBatteryWidgetWidth = 4; // 3 text chars + right-side symbol
   int startX = SCREEN_WIDTH - kBatteryWidgetWidth;
   ClearTextRect(startX, battpos._y, kBatteryWidgetWidth, 1);
 
-  DrawString(startX, battpos._y, batteryText, invertedProps);
+  DrawString(startX, battpos._y, batteryText);
   const char *rightSymbol = batteryState_.charging ? char_symbol_charging_s : char_battery_right_s;
-  DrawString(startX + 3, battpos._y, rightSymbol, normalProps);
+  DrawString(startX + 3, battpos._y, rightSymbol);
 #else
   // use define to choose between drawing battery percentage or battery level as
   // bars
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
   const char *battText = nullptr;
 
   if (batteryState_.charging) {
-    SetColor(CD_ACCENT);
+    SetColor(cAccent);
     battText = string_battery_charging;
   } else {
     if (batteryState_.percentage > 90) {
@@ -507,10 +496,10 @@ void View::drawBattery(GUITextProperties &props) {
     } else if (batteryState_.percentage > 35) {
       battText = string_battery_25_percent;
     } else if (batteryState_.percentage > 10) {
-      SetColor(CD_WARN);
+      SetColor(cWarn);
       battText = string_battery_0_percent;
     } else {
-      SetColor(CD_ERROR);
+      SetColor(cError);
       battText = string_battery_0_percent;
     }
   }
@@ -518,14 +507,14 @@ void View::drawBattery(GUITextProperties &props) {
   int battLen = (battText != nullptr) ? static_cast<int>(strlen(battText)) : 0;
   constexpr int kBattWidth = 6; // "[100%]" is the widest we render
   int startX = SCREEN_WIDTH - kBattWidth;
-  ClearTextRect(startX, battpos._y, kBattWidth, 1);
-  battpos._x = startX + (kBattWidth - battLen); // we want to right align the batt widget
-  DrawString(battpos._x, battpos._y, battText, props);
+  ClearTextRect(startX, battpos.y_, kBattWidth, 1);
+  battpos.x_ = startX + (kBattWidth - battLen); // we want to right align the batt widget
+  DrawString(battpos.x_, battpos.y_, battText);
 #endif
 }
 
 // Draw power button UI overlay
-void View::drawPowerButtonUI(GUITextProperties &props) {
+void View::drawPowerButtonUI() {
   // Only process and draw UI when power button is pressed
   if (powerButtonPressed_) {
     char countdownMessage[SCREEN_WIDTH];
@@ -547,22 +536,20 @@ void View::drawPowerButtonUI(GUITextProperties &props) {
     // Calculate center position for the message
     GUIPoint pos = GetAnchor();
     uint16_t mesgLen = strlen(countdownMessage);
-    pos._x = (SCREEN_WIDTH - mesgLen) / 2;
-    pos._y = SCREEN_HEIGHT / 2 - 1;
+    pos.x_ = (SCREEN_WIDTH - mesgLen) / 2;
+    pos.y_ = SCREEN_HEIGHT / 2 - 1;
 
     // Draw a background box
-    SetColor(CD_BACKGROUND);
-    for (int y = pos._y - 1; y <= pos._y + 1; y++) {
-      for (int x = pos._x - 1; x <= (uint16_t)(pos._x + mesgLen + 1); x++) {
-        GUITextProperties invProps = props;
-        invProps.invert_ = true;
-        DrawString(x, y, " ", invProps);
+    SetBackgroundColor(cBackground);
+    for (int y = pos.y_ - 1; y <= pos.y_ + 1; y++) {
+      for (int x = pos.x_ - 1; x <= (uint16_t)(pos.x_ + mesgLen + 1); x++) {
+        DrawString(x, y, " ");
       }
     }
 
     // Draw the message
-    SetColor(CD_EMPHASIS);
-    DrawString(pos._x, pos._y, countdownMessage, props);
+    SetColor(cEmphasis);
+    DrawString(pos.x_, pos.y_, countdownMessage);
   } else if (powerButtonHoldCount_ > 0) {
     // Reset hold counter when button is released
     powerButtonHoldCount_ = 0;
@@ -590,23 +577,22 @@ void View::switchToRecordView() {
 }
 
 void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height) {
-  GUITextProperties props;
   
-  DrawChar(x, y, GLYPH(char_border_single_topLeft_s), props);
-  DrawChar(x + width- 1, y, GLYPH(char_border_single_topRight_s), props);
-  DrawChar(x, y + height - 1, GLYPH(char_border_single_bottomLeft_s), props);
-  DrawChar(x + width - 1, y + height - 1, GLYPH(char_border_single_bottomRight_s), props);
+  DrawChar(x, y, GLYPH(char_border_single_topLeft_s));
+  DrawChar(x + width- 1, y, GLYPH(char_border_single_topRight_s));
+  DrawChar(x, y + height - 1, GLYPH(char_border_single_bottomLeft_s));
+  DrawChar(x + width - 1, y + height - 1, GLYPH(char_border_single_bottomRight_s));
 
   // horizontal borders
   for (int32_t i = x + 1; i < x + width - 1; i++) {
-    DrawChar(i, y, GLYPH(char_border_single_horizontal_s), props);
-    DrawChar(i, y + height - 1, GLYPH(char_border_single_horizontal_s), props);
+    DrawChar(i, y, GLYPH(char_border_single_horizontal_s));
+    DrawChar(i, y + height - 1, GLYPH(char_border_single_horizontal_s));
   }
   
   // left and right borders
   for (int32_t j = y + 1; j < y + height - 1; j++) {
-    DrawChar(x, j, GLYPH(char_border_single_vertical_s), props);
-    DrawChar(x + width - 1, j, GLYPH(char_border_single_vertical_s), props);
+    DrawChar(x, j, GLYPH(char_border_single_vertical_s));
+    DrawChar(x + width - 1, j, GLYPH(char_border_single_vertical_s));
   }
 }
 
@@ -615,8 +601,7 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
     return; // no scrollbar needed
   }
 
-  GUITextProperties props;
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   // Thumb size represents the ratio of visible items to total items
   uint16_t thumbSize = std::max(1, (height * height) / total);
@@ -630,6 +615,6 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
   for (int dy = 0; dy < height; dy++) {
     bool thumb = (dy >= thumbPos) && (dy < thumbPos + thumbSize);
     const char *str = thumb ? char_block_full_s : char_border_single_vertical_s;
-    DrawString(x, y + dy, str, props);
+    DrawString(x, y + dy, str);
   }
 }

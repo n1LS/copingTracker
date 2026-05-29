@@ -43,7 +43,8 @@ enum RemoteUICommand {
   CLEAR_CMD = 0x03,
   SETCOLOR_CMD = 0x04,
   SETFONT_CMD = 0x05,
-  DRAWRECT_CMD = 0x06
+  DRAWRECT_CMD = 0x06,
+  SETBACKGROUNDCOLOR_CMD = 0x07,
 };
 
 enum RemoteInputCommand {
@@ -66,7 +67,7 @@ static GUIEventPadButtonType eventMappingPico[11] = {
     EPBT_POWER   // Power button
   };
 
-#define to_rgb565(color) ((color._r & 0b11111000) << 8) | ((color._g & 0b11111100) << 3) | (color._b >> 3)
+#define to_rgb565(color) ((color.r_ & 0b11111000) << 8) | ((color.g_ & 0b11111100) << 3) | (color.b_ >> 3)
 
 void remoteUIFontCommand(uint8_t uifontIndex, char *buffer);
 
@@ -77,5 +78,6 @@ uint16_t remoteUIDrawRectCommand(int left, int top, int width, int height, char 
 void remoteUIClearCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer);
 
 uint16_t remoteUISetColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer);
+uint16_t remoteUISetBackgroundColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer);
 
 #endif

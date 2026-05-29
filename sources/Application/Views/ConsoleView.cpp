@@ -24,13 +24,12 @@ void ConsoleView::ProcessButtonMask(unsigned short mask, bool pressed) {};
 
 void ConsoleView::DrawView() {
 
-  GUITextProperties props;
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
   GUIPoint pos(0, 0);
   for (int i = 0; i < CONSOLE_HEIGHT; i++) {
-    w_.DrawString(lines_[(currentLine_ + i) % CONSOLE_HEIGHT], pos, props);
-    pos._y += 8;
+    w_.DrawString(lines_[(currentLine_ + i) % CONSOLE_HEIGHT], pos);
+    pos.y_ += 8;
   }
 }
 

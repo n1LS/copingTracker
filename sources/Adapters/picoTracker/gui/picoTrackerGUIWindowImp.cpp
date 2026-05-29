@@ -28,6 +28,7 @@ static uint16_t lastPaletteRGB[16] = {0};
 // index, used by DrawRect() to know which color to use when drawing to the
 // devices LCD
 static uint8_t lastRemoteColorIdx = 255;
+static uint8_t lastRemoteBackgroundColorIdx = 255;
 
 static GUIEventPadButtonType *eventMapping = eventMappingPico;
 
@@ -66,28 +67,26 @@ void picoTrackerGUIWindowImp::SendFont(uint8_t uifontIndex) {
   sendToUSBCDC(remoteUIBuffer, 3);
 }
 
-void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &p) {
-  //  Trace::Debug("Draw char \"%c\" at pos x:%ld (%ld), y:%ld (%ld) - invert:
-  //  %d", c, pos._x, pos._x / 8, pos._y, pos._y / 8, p.invert_);
-  chargfx_set_cursor(pos._x, pos._y);
-  chargfx_putc(c, p.invert_);
+void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos) {
+  chargfx_set_cursor(pos.x_, pos.y_);
+  chargfx_putc(c);
+
   if (remoteUIEnabled_) {
     char remoteUIBuffer[6];
-    remoteUIDrawCharCommand(c, pos._x, pos._y, p.invert_, remoteUIBuffer);
+    remoteUIDrawCharCommand(c, pos.x_, pos.y_, false, remoteUIBuffer);
     sendToUSBCDC(remoteUIBuffer, 6);
   }
 }
 
-void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props,
-                                         bool overlay) {
+void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos, bool overlay) {
   (void)overlay;
   if (!string) {
     return;
   }
 
   GUIPoint drawPos = pos;
-  for (const char *current = string; *current; ++current, ++drawPos._x) {
-    DrawChar(*current, drawPos, props);
+  for (const char *current = string; *current; ++current, ++drawPos.x_) {
+    DrawChar(*current, drawPos);
   }
 }
 
@@ -110,9 +109,9 @@ void picoTrackerGUIWindowImp::Clear(GUIColor &c, bool overlay) {
   chargfx_clear(backgroundColor);
   if (remoteUIEnabled_) {
     char remoteUIBuffer[5];
-    remoteUIClearCommand(c._r, c._g, c._b, remoteUIBuffer);
+    remoteUIClearCommand(c.r_, c.g_, c.b_, remoteUIBuffer);
     // log sent buffer values
-    Trace::Debug("sent clear command: %d,%d,%d", c._r, c._g, c._b);
+    Trace::Debug("sent clear command: %d,%d,%d", c.r_, c.g_, c.b_);
     sendToUSBCDC(remoteUIBuffer, 5);
   }
 };
@@ -123,38 +122,57 @@ void picoTrackerGUIWindowImp::ClearTextRect(GUIRect &r) {
 
 chargfx_color_t picoTrackerGUIWindowImp::GetColor(GUIColor &c) {
   // Palette index should always be < 16
-  if (c._paletteIndex >= 16) {
-    return CHARGFX_NORMAL; // Default to normal color if index is invalid
+  if (c.paletteIndex_ >= 16) {
+    return CHARGFX_WHITE; // Default to normal color if index is invalid
   }
 
   // Convert the color to RGB565 format
   uint16_t rgb565 = to_rgb565(c);
 
   // Only update the palette if the color has changed
-  if (lastPaletteRGB[c._paletteIndex] != rgb565) {
-    chargfx_set_palette_color(c._paletteIndex, rgb565);
-    lastPaletteRGB[c._paletteIndex] = rgb565;
+  if (lastPaletteRGB[c.paletteIndex_] != rgb565) {
+    chargfx_set_palette_color(c.paletteIndex_, rgb565);
+    lastPaletteRGB[c.paletteIndex_] = rgb565;
   }
 
-  return (chargfx_color_t)c._paletteIndex;
+  return (chargfx_color_t)c.paletteIndex_;
 }
 
-void picoTrackerGUIWindowImp::SetColor(GUIColor &c) {
-  chargfx_color_t color = GetColor(c);
-  lastRemoteColorIdx = color;
+void picoTrackerGUIWindowImp::SetColor(GUIColor &color) {
+  chargfx_color_t gColor = GetColor(color);
+  lastRemoteColorIdx = gColor;
 
-  NAssert(c._r < 255);
-  NAssert(c._g < 255);
-  NAssert(c._b < 255);
-  chargfx_set_foreground(color);
+  NAssert(c.r_ < 255);
+  NAssert(c.g_ < 255);
+  NAssert(c.b_ < 255);
+  chargfx_set_foreground(gColor);
+
   if (remoteUIEnabled_) {
     // Buffer must be large enough for the worst case where all 3 color bytes
     // are escaped. Header (2) + 3 color components * 2 bytes/escaped_component
     // = 8 bytes.
     char remoteUIBuffer[8];
-    auto bufferIndex = remoteUISetColorCommand(c._r, c._g, c._b, remoteUIBuffer);
+    auto bufferIndex = remoteUISetColorCommand(color.r_, color.g_, color.b_, remoteUIBuffer);
     sendToUSBCDC(remoteUIBuffer, bufferIndex);
-    // Trace::Debug("sent set color: %d,%d,%d", c._r, c._g, c._b);
+  }
+};
+
+void picoTrackerGUIWindowImp::SetBackgroundColor(GUIColor &color) {
+  chargfx_color_t gColor = GetColor(color);
+  lastRemoteBackgroundColorIdx = gColor;
+
+  NAssert(c.r_ < 255);
+  NAssert(c.g_ < 255);
+  NAssert(c.b_ < 255);
+  chargfx_set_background(gColor);
+
+  if (remoteUIEnabled_) {
+    // Buffer must be large enough for the worst case where all 3 color bytes
+    // are escaped. Header (2) + 3 color components * 2 bytes/escaped_component
+    // = 8 bytes.
+    char remoteUIBuffer[8];
+    auto bufferIndex = remoteUISetBackgroundColorCommand(color.r_, color.g_, color.b_, remoteUIBuffer);
+    sendToUSBCDC(remoteUIBuffer, bufferIndex);
   }
 };
 

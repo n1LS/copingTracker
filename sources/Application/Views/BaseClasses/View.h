@@ -64,28 +64,41 @@ enum ViewType {
   VT_RECORD             // Recording screen
 };
 
-enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
-
-enum ColorDefinition {
-  CD_BACKGROUND,
-  CD_NORMAL,
-  CD_HILITE1,
-  CD_HILITE2,
-  CD_CONSOLE,
-  CD_CURSOR,
-  CD_INFO,
-  CD_WARN,
-  CD_ERROR,
-  CD_ACCENT,
-  CD_ACCENTALT,
-  CD_EMPHASIS,
-  CD_RESERVED1,
-  CD_RESERVED2,
-  CD_RESERVED3,
-  CD_RESERVED4,
+enum ViewMode { 
+  VM_NORMAL, 
+  VM_NEW, 
+  VM_CLONE, 
+  VM_SELECTION, 
+  VM_MUTEON, 
+  VM_SOLOON 
 };
 
-enum ViewUpdateDirection { VUD_LEFT = 0, VUD_RIGHT, VUD_UP, VUD_DOWN };
+// todo: this enum's values should be index color values while the keys themselves are purely functional
+enum Color {
+  cBackground,
+  cNormal,
+  cHighlight1,
+  cHighlight2,
+  cConsole,
+  cCursor,
+  cInfo,
+  cWarn,
+  cError,
+  cAccent,
+  cAccentAlt,
+  cEmphasis,
+  cReserved1,
+  cReserved2,
+  cReserved3,
+  cReserved4,
+};
+
+enum ViewUpdateDirection { 
+  VUD_LEFT = 0, 
+  VUD_RIGHT, 
+  VUD_UP, 
+  VUD_DOWN 
+};
 
 class View;
 class ModalView;
@@ -151,11 +164,13 @@ public:
 
   // Char based draw routines
 
-  virtual void SetColor(ColorDefinition cd);
+  virtual void SwapColors();
+  virtual void SetColor(Color cd);
+  virtual void SetBackgroundColor(Color cd);
   virtual void ClearTextRect(int x, int y, int w, int h);
-  virtual void DrawString(int x, int y, const char *txt, const GUITextProperties &props);
-  virtual void DrawChar(int x, int y, const char character, const GUITextProperties &props);
-  virtual void DrawRect(GUIRect &r, ColorDefinition color);
+  virtual void DrawString(int x, int y, const char *text);
+  virtual void DrawChar(int x, int y, const char character);
+  virtual void DrawRect(GUIRect &r, Color color);
 
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
@@ -184,12 +199,12 @@ protected:
   void drawMap();
   void drawNotes();
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
-  void drawBattery(GUITextProperties &props);
-  void drawMasterVuMeter(Player *player, GUITextProperties props, bool forceRedraw = false, uint8_t xoffset = 24);
-  void drawPlayTime(Player *player, GUIPoint pos, GUITextProperties &props);
-  void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, GUITextProperties props, int vuIndex,
+  void drawBattery();
+  void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
+  void drawPlayTime(Player *player, GUIPoint pos);
+  void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex,
                    bool forceRedraw = false);
-  void drawPowerButtonUI(GUITextProperties &props);
+  void drawPowerButtonUI();
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height);
 
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {

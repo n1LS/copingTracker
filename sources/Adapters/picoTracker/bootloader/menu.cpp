@@ -48,12 +48,12 @@ static void render_text_padded(uint8_t x, uint8_t y, const char *s, uint8_t widt
 // to itself so it doesn't paint over the borders.
 static void draw_list_box(uint8_t top_y, uint8_t bot_y) {
   // Top border: ┌───...──┐
-  chargfx_set_foreground(CHARGFX_GRAY);
+  chargfx_set_foreground(CHARGFX_DARK_GRAY);
   chargfx_set_cursor(1, top_y);
   chargfx_putc(GLYPH(char_border_single_topLeft_s));
 
   uint8_t col = 2;
-  chargfx_set_foreground(CHARGFX_GRAY);
+  chargfx_set_foreground(CHARGFX_DARK_GRAY);
   while (col < TEXT_WIDTH - 2) {
     chargfx_set_cursor(col++, top_y);
     chargfx_putc(GLYPH(char_border_single_horizontal_s));
@@ -81,7 +81,7 @@ static void draw_list_box(uint8_t top_y, uint8_t bot_y) {
 }
 
 void menu_render_static(void) {
-  chargfx_clear(CHARGFX_BG);
+  chargfx_clear(CHARGFX_BLACK);
   chargfx_set_background(CHARGFX_BLUE);
   chargfx_set_foreground(CHARGFX_WHITE);
 
@@ -94,8 +94,8 @@ void menu_render_static(void) {
   render_text(0, 0, title);
 
   // Static labels.
-  chargfx_set_background(CHARGFX_BG);
-  chargfx_set_foreground(CHARGFX_GRAY);
+  chargfx_set_background(CHARGFX_BLACK);
+  chargfx_set_foreground(CHARGFX_DARK_GRAY);
   render_text(1, 2, "Installed:");
 
   // box around the firmware list. Box spans rows 4..23; the
@@ -103,7 +103,7 @@ void menu_render_static(void) {
   draw_list_box(4, 23);
 
   // Key legend at the bottom
-  chargfx_set_foreground(CHARGFX_GRAY);
+  chargfx_set_foreground(CHARGFX_DARK_GRAY);
   render_text(1, 25, "  ENTER " char_border_single_vertical_s " boot installed application");
   render_text(1, 26, "   PLAY " char_border_single_vertical_s " import selected firmware");
   render_text(1, 27, "DOWN,UP " char_border_single_vertical_s " select application");
@@ -147,7 +147,7 @@ void menu_render_main(const Uf2FileEntry *uf2_files, int uf2_count, int selected
         chargfx_set_background(CHARGFX_BLUE);
         chargfx_set_foreground(CHARGFX_WHITE);
       } else {
-        chargfx_set_background(CHARGFX_BG);
+        chargfx_set_background(CHARGFX_BLACK);
         chargfx_set_foreground(CHARGFX_WHITE);
       }
 
@@ -172,7 +172,7 @@ void menu_render_main(const Uf2FileEntry *uf2_files, int uf2_count, int selected
 
   // Auto-boot status row. Keep this on the display; menu_show_message()
   // currently writes to the serial console only.
-  chargfx_set_background(CHARGFX_BG);
+  chargfx_set_background(CHARGFX_BLACK);
   chargfx_set_foreground(CHARGFX_YELLOW);
 
   if (auto_boot_timeout > 0) {

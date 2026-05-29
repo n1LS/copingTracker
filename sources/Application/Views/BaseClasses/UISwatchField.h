@@ -17,7 +17,7 @@
 class UISwatchField : public UIField {
 
 public:
-  UISwatchField(const GUIPoint &position, const ColorDefinition color);
+  UISwatchField(const GUIPoint &position, const Color color);
   virtual ~UISwatchField() {};
   virtual void Draw(GUIWindow &w, int offset = 0);
   virtual void ProcessArrow(unsigned short mask);
@@ -27,7 +27,7 @@ public:
 
 protected:
 protected:
-  ColorDefinition color_;
+  Color color_;
 };
 
 #endif

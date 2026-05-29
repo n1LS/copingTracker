@@ -44,13 +44,13 @@ RecordView::RecordView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   v = config->FindVariable(FourCC::VarRecordLineGain);
   intVarField_.emplace_back(position, *v, "Line gain: %d dB", LINEIN_GAIN_MINDB, LINEIN_GAIN_MAXDB, 1, 2);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   v = config->FindVariable(FourCC::VarRecordMicGain);
   intVarField_.emplace_back(position, *v, "Mic gain: %d dB", MIC_GAIN_MINDB, MIC_GAIN_MAXDB, 1, 2);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
@@ -133,60 +133,57 @@ void RecordView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void RecordView::DrawView() {
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
-  SetColor(CD_NORMAL);
-  props.invert_ = true;
-  DrawString(pos._x, pos._y, "Record", props);
-  props.invert_ = false;
+  SetColor(cNormal);
+  DrawString(pos.x_, pos.y_, "Record");
 
   // Draw recording status and time
   pos = GetAnchor();
-  pos._y += 4;
+  pos.y_ += 4;
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   if (uiSavingActive_) {
-    SetColor(CD_ERROR);
-    DrawString(pos._x, pos._y, "SAVING", props);
-    SetColor(CD_NORMAL);
+    SetColor(cError);
+    DrawString(pos.x_, pos.y_, "SAVING");
+    SetColor(cNormal);
   } else if (uiRecordingActive_) {
-    SetColor(CD_ERROR);
-    DrawString(pos._x, pos._y, "[REC]", props);
-    SetColor(CD_NORMAL);
+    SetColor(cError);
+    DrawString(pos.x_, pos.y_, "[REC]");
+    SetColor(cNormal);
   } else {
-    DrawString(pos._x, pos._y, "[---]", props);
+    DrawString(pos.x_, pos.y_, "[---]");
   }
 
   // Draw time display
   if (uiRecordingActive_ || uiSavingActive_) {
-    SetColor(CD_ERROR);
+    SetColor(cError);
   }
-  pos._x += 7;
+  pos.x_ += 7;
   if (uiSavingActive_) {
     char percentBuffer[8];
     uint8_t percent = GetSavingProgressPercent();
     snprintf(percentBuffer, sizeof(percentBuffer), "%3u%%", percent);
-    DrawString(pos._x, pos._y, percentBuffer, props);
+    DrawString(pos.x_, pos.y_, percentBuffer);
   } else {
     char timeBuffer[16];
     formatTime(recordingDuration_, timeBuffer, sizeof(timeBuffer));
-    DrawString(pos._x, pos._y, timeBuffer, props);
+    DrawString(pos.x_, pos.y_, timeBuffer);
   }
 
   // Draw instructions
-  pos._y += 2;
-  pos._x = GetAnchor()._x;
-  SetColor(CD_NORMAL);
+  pos.y_ += 2;
+  pos.x_ = GetAnchor().x_;
+  SetColor(cNormal);
   const char *instruction = uiSavingActive_ ? "" : uiRecordingActive_ ? "PRESS PLAY TO STOP" : "PRESS PLAY TO RECORD";
-  DrawString(pos._x, pos._y, instruction, props);
+  DrawString(pos.x_, pos.y_, instruction);
 
   // Draw fields
   FieldView::Redraw();
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 }
 
 void RecordView::OnFocus() {
@@ -244,7 +241,6 @@ void RecordView::AnimationUpdate() {
   if (!player) {
     return;
   }
-  GUITextProperties props;
 }
 
 void RecordView::record() {

@@ -136,24 +136,21 @@ void DeleteProjectConfirmModal::ProcessButtonMask(unsigned short mask, bool pres
 void DeleteProjectConfirmModal::DrawView() {
   SetWindow(26, 6);
 
-  GUITextProperties props;
-  SetColor(CD_NORMAL);
-  props.invert_ = false;
+  SetColor(cNormal);
 
   const int projectLineX = (26 - projectLine_.size()) / 2;
-  DrawString(projectLineX, 0, projectLine_.c_str(), props);
-  DrawString(0, 1, "Press & hold ALT+PLAY+EDIT", props);
+  DrawString(projectLineX, 0, projectLine_.c_str());
+  DrawString(0, 1, "Press & hold ALT+PLAY+EDIT");
 
   if (holdingCombo_ || holdProgressMs_ > 0) {
     progressBar_t progressBar;
     fillProgressBar(holdProgressMs_, DELETE_HOLD_DURATION_MS, &progressBar);
-    DrawString((26 - 12) / 2, 3, progressBar, props);
+    DrawString((26 - 12) / 2, 3, progressBar);
   }
 
   const char *cancelButton = "Cancel";
-  SetColor(CD_HILITE2);
-  props.invert_ = true;
-  DrawString((26 - strlen(cancelButton)) / 2, 5, cancelButton, props);
+  SetColor(cHighlight2);
+  DrawString((26 - strlen(cancelButton)) / 2, 5, cancelButton);
 }
 
 static void LoadProjectCallback(View &v, ModalView &dialog) {
@@ -200,21 +197,20 @@ void SelectProjectView::Reset() {
 void SelectProjectView::DrawView() {
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   auto fs = FileSystem::GetInstance();
 
   // Draw title
   const char *title = "Browse Projects";
-  SetColor(CD_INFO);
-  DrawString(pos._x + 1, pos._y, title, props);
-  SetColor(CD_NORMAL);
+  SetColor(cInfo);
+  DrawString(pos.x_ + 1, pos.y_, title);
+  SetColor(cNormal);
 
   // Draw projects
   int x = 1;
-  int y = pos._y + 2;
+  int y = pos.y_ + 2;
 
   auto var = viewData_->project_->FindVariable(FourCC::VarProjectName);
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = var->GetString();
@@ -222,13 +218,9 @@ void SelectProjectView::DrawView() {
   size_t total = fileIndexList_.size();
 
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total); i++) {
-    if (i == currentIndex_) {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
-    } else {
-      SetColor(CD_NORMAL);
-      props.invert_ = false;
-    }
+    bool highlighted = (i == currentIndex_);
+    SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
+    SetColor(highlighted ? cBackground : cNormal);
 
     char buffer[MAX_PROJECT_NAME_LENGTH + 1];
     memset(buffer, '\0', sizeof(buffer));
@@ -245,10 +237,10 @@ void SelectProjectView::DrawView() {
 
     if (strcmp(buffer, currentProject) == 0) {
       // mark currently loaded project
-      DrawString(x - 1, y, "*", props);
+      DrawString(x - 1, y, "*");
     }
 
-    DrawString(x, y, buffer, props);
+    DrawString(x, y, buffer);
     y += 1;
   };
 
@@ -259,15 +251,15 @@ void SelectProjectView::DrawView() {
 
   for (int n = 0; n < numButtons_; n++) {
     bool selected = selectedButton_ == n;
-    props.invert_ = selected;
-    SetColor(selected ? CD_HILITE2 : CD_HILITE1);
-    DrawString(x, SCREEN_HEIGHT - 1, buttons[n], props);
+    SetColor(selected ? cBackground : cHighlight1);
+    SetBackgroundColor(selected ? cHighlight2 : cBackground);
+    DrawString(x, SCREEN_HEIGHT - 1, buttons[n]);
 
     x += 2 + strlen(buttons[n]);
   }
 
   // scroll bar
-  drawScrollBar(SCREEN_WIDTH - 1, pos._y + 2, LIST_PAGE_SIZE, topIndex_, total);
+  drawScrollBar(SCREEN_WIDTH - 1, pos.y_ + 2, LIST_PAGE_SIZE, topIndex_, total);
 }
 
 void SelectProjectView::OnPlayerUpdate(PlayerEventType, unsigned int currentTick) {};

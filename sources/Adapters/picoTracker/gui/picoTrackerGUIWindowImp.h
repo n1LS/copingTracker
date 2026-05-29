@@ -25,10 +25,11 @@ public:
   virtual ~picoTrackerGUIWindowImp();
 
 public: // I_GUIWindowImp implementation
-  virtual void SetColor(GUIColor &) override;
-  virtual void DrawRect(GUIRect &) override;
-  virtual void DrawChar(const char c, const GUIPoint &pos, const GUITextProperties &props) override;
-  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props,
+  virtual void SetColor(GUIColor &color) override;
+  virtual void SetBackgroundColor(GUIColor &color) override;
+  virtual void DrawRect(GUIRect &rect) override;
+  virtual void DrawChar(const char c, const GUIPoint &pos) override;
+  virtual void DrawString(const char *string, const GUIPoint &pos,
                           bool overlay = false) override;
   virtual GUIRect GetRect();
   virtual void Invalidate();

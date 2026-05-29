@@ -67,12 +67,12 @@ static void msd_draw_inner(int row, const char *str) {
   // Clear the row
   for (int i = 0; i < BOX_INNER_W; i++) {
     chargfx_set_cursor(BOX_INNER_X + i, y);
-    chargfx_putc(' ', false);
+    chargfx_putc(' ');
   }
   // Draw text
   for (int i = 0; i < len; i++) {
     chargfx_set_cursor(x + i, y);
-    chargfx_putc(str[i], false);
+    chargfx_putc(str[i]);
   }
 }
 
@@ -82,46 +82,46 @@ static void msd_draw_box() {
 
   // Top row
   chargfx_set_cursor(x0, y0);
-  chargfx_putc(char_border_single_topLeft_s[0], false);
+  chargfx_putc(char_border_single_topLeft_s[0]);
   for (int x = x0 + 1; x < x1; x++) {
     chargfx_set_cursor(x, y0);
-    chargfx_putc(char_border_single_horizontal_s[0], false);
+    chargfx_putc(char_border_single_horizontal_s[0]);
   }
   chargfx_set_cursor(x1, y0);
-  chargfx_putc(char_border_single_topRight_s[0], false);
+  chargfx_putc(char_border_single_topRight_s[0]);
 
   // Bottom row
   chargfx_set_cursor(x0, y1);
-  chargfx_putc(char_border_single_bottomLeft_s[0], false);
+  chargfx_putc(char_border_single_bottomLeft_s[0]);
   for (int x = x0 + 1; x < x1; x++) {
     chargfx_set_cursor(x, y1);
-    chargfx_putc(char_border_single_horizontal_s[0], false);
+    chargfx_putc(char_border_single_horizontal_s[0]);
   }
   chargfx_set_cursor(x1, y1);
-  chargfx_putc(char_border_single_bottomRight_s[0], false);
+  chargfx_putc(char_border_single_bottomRight_s[0]);
 
   // Side borders
   for (int y = y0 + 1; y < y1; y++) {
     chargfx_set_cursor(x0, y);
-    chargfx_putc(char_border_single_vertical_s[0], false);
+    chargfx_putc(char_border_single_vertical_s[0]);
     chargfx_set_cursor(x1, y);
-    chargfx_putc(char_border_single_vertical_s[0], false);
+    chargfx_putc(char_border_single_vertical_s[0]);
   }
 
   // Separator under title (interior row 1)
   int sep_y = y0 + 2;
   chargfx_set_cursor(x0, sep_y);
-  chargfx_putc(char_border_single_verticalRight_s[0], false);
+  chargfx_putc(char_border_single_verticalRight_s[0]);
   for (int x = x0 + 1; x < x1; x++) {
     chargfx_set_cursor(x, sep_y);
-    chargfx_putc(char_border_single_horizontal_s[0], false);
+    chargfx_putc(char_border_single_horizontal_s[0]);
   }
   chargfx_set_cursor(x1, sep_y);
-  chargfx_putc(char_border_single_verticalLeft_s[0], false);
+  chargfx_putc(char_border_single_verticalLeft_s[0]);
 }
 
 static void msd_draw_screen(const char *status) {
-  chargfx_clear(CHARGFX_GURU_BG);
+  chargfx_clear(CHARGFX_BLACK);
   msd_draw_box();
   msd_draw_inner(0, "USB STORAGE DEVICE MODE");
   msd_draw_inner(3, status);                   // center row of interior
@@ -133,10 +133,10 @@ void msd_mode_run() {
   // Initialize display
   chargfx_init();
   chargfx_set_font_index(2);
-  chargfx_set_palette_color(CHARGFX_GURU_BG, 0x000);  // black
-  chargfx_set_palette_color(CHARGFX_GURU_TXT, 0xFF0); // green
-  chargfx_set_background(CHARGFX_GURU_BG);
-  chargfx_set_foreground(CHARGFX_GURU_TXT);
+  chargfx_set_palette_color(CHARGFX_BLACK, 0x000);  // black
+  chargfx_set_palette_color(CHARGFX_GREEN, 0xFF0); // green
+  chargfx_set_background(CHARGFX_BLACK);
+  chargfx_set_foreground(CHARGFX_GREEN);
 
   msd_draw_screen("Initializing...");
 

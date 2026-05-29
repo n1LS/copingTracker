@@ -17,28 +17,28 @@
 class GUIPoint {
 public:
   GUIPoint(long x = 0, long y = 0) {
-    _x = x;
-    _y = y;
+    x_ = x;
+    y_ = y;
   };
   void Add(GUIPoint p) {
-    _x = _x + p._x;
-    _y = _y + p._y;
+    x_ = x_ + p.x_;
+    y_ = y_ + p.y_;
   };
   void Sub(GUIPoint p) {
-    _x = _x - p._x;
-    _y = _y - p._y;
+    x_ = x_ - p.x_;
+    y_ = y_ - p.y_;
   };
   bool operator==(const GUIPoint &p) const {
-    return _x == p._x && _y == p._y;
+    return x_ == p.x_ && y_ == p.y_;
   };
   bool operator!=(const GUIPoint &p) const {
-    return _x != p._x || _y != p._y;
+    return x_ != p.x_ || y_ != p.y_;
   };
 
   GUIPoint operator+(const GUIPoint &p) const {
-    return GUIPoint(_x + p._x, _y + p._y);
+    return GUIPoint(x_ + p.x_, y_ + p.y_);
   };
 
-  long _x, _y;
+  long x_, y_;
 };
 #endif

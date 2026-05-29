@@ -645,63 +645,54 @@ void ChainView::OnFocus() {
   }
 }
 
-void ChainView::setTextProps(GUITextProperties &props, int row, int col, bool restore) {
-
-  bool invert = false;
+void ChainView::setTextProps(int row, int col) {
+  bool highlighted = false;
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
     if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
-      invert = true;
+      highlighted = true;
     }
   } else {
     if ((viewData_->chainCol_ == row) && (viewData_->chainRow_ == col)) {
-      invert = true;
+      highlighted = true;
     }
   }
 
-  if (invert) {
-    if (restore) {
-      SetColor(CD_NORMAL);
-      props.invert_ = false;
-    } else {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
-    }
-  }
+  SetColor(highlighted ? cBackground : cNormal);
+  SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
 }
 
 void ChainView::DrawView() {
-
   Clear();
-
-  GUITextProperties props;
+  
   GUIPoint pos = GetTitlePosition();
-
+  
   // Draw title
-
+  
   char title[20];
-  SetColor(CD_NORMAL);
+  SetBackgroundColor(cBackground);
+  SetColor(cNormal);
   npf_snprintf(title, sizeof(title), "Chain %2.2X", viewData_->currentChain_);
-  DrawString(pos._x, pos._y, title, props);
+  DrawString(pos.x_, pos.y_, title);
 
   // Compute song grid location
 
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetColor(CD_HILITE1);
+  SetColor(cHighlight1);
   char row[3];
   pos = anchor;
-  pos._x -= 3;
+  pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(CD_ACCENT) : SetColor(CD_ACCENTALT);
+    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
     hex2char(j, row);
-    DrawString(pos._x, pos._y, row, props);
-    pos._y += 1;
+    DrawString(pos.x_, pos.y_, row);
+    pos.y_ += 1;
   }
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   pos = anchor;
 
@@ -713,31 +704,30 @@ void ChainView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = *data++;
-    setTextProps(props, 0, j, false);
+    setTextProps(0, j);
     if (d == 0xFF) {
-      DrawString(pos._x, pos._y, "--", props);
+      DrawString(pos.x_, pos.y_, "--");
     } else {
       hex2char(d, row);
-      DrawString(pos._x, pos._y, row, props);
+      DrawString(pos.x_, pos.y_, row);
     }
-    setTextProps(props, 0, j, true);
-    pos._y++;
+
+    pos.y_++;
   }
 
   // Draw Transpose
 
   pos = anchor;
-  pos._x += 3;
+  pos.x_ += 3;
 
   data = viewData_->song_->chain_.transpose_ + (16 * viewData_->currentChain_);
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = *data++;
     hex2char(d, row);
-    setTextProps(props, 1, j, false);
-    DrawString(pos._x, pos._y, row, props);
-    setTextProps(props, 1, j, true);
-    pos._y++;
+    setTextProps(1, j);
+    DrawString(pos.x_, pos.y_, row);
+    pos.y_++;
   }
   Player *player = Player::GetInstance();
 
@@ -762,7 +752,6 @@ void ChainView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 void ChainView::AnimationUpdate() {
   // First call the parent class implementation to draw the battery gauge
   ScreenView::AnimationUpdate();
-  GUITextProperties props;
 
   // Get player instance safely
   Player *player = Player::GetInstance();
@@ -775,7 +764,7 @@ void ChainView::AnimationUpdate() {
   }
 
   // Always update VU meter even if other parts of UI dont need updating
-  drawMasterVuMeter(player, props);
+  drawMasterVuMeter(player);
 
   // Handle any pending updates from OnPlayerUpdate
   // This ensures all UI drawing happens on the "main" thread (core0)
@@ -786,16 +775,17 @@ void ChainView::AnimationUpdate() {
     // Handle position updates
     GUIPoint anchor = GetAnchor();
     GUIPoint pos = anchor;
-    pos._x -= 1;
+    pos.x_ -= 1;
 
-    SetColor(CD_NORMAL);
+    SetBackgroundColor(cBackground);
+    SetColor(cNormal);
 
     // Clear last played & queued
-    pos._y = anchor._y + lastPlayingPos_;
-    DrawString(pos._x, pos._y, " ", props);
+    pos.y_ = anchor.y_ + lastPlayingPos_;
+    DrawString(pos.x_, pos.y_, " ");
 
-    pos._y = anchor._y + lastQueuedPos_;
-    DrawString(pos._x, pos._y, " ", props);
+    pos.y_ = anchor.y_ + lastQueuedPos_;
+    DrawString(pos.x_, pos.y_, " ");
 
     // Only update play position if player is running
     if (player->IsRunning()) {
@@ -803,13 +793,14 @@ void ChainView::AnimationUpdate() {
       for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
         if (player->IsChannelPlaying(i)) {
           if (viewData_->currentPlayChain_[i] == viewData_->currentChain_ && viewData_->playMode_ != PM_AUDITION) {
-            pos._y = anchor._y + viewData_->chainPlayPos_[i];
+            pos.y_ = anchor.y_ + viewData_->chainPlayPos_[i];
+            SetBackgroundColor(cBackground);
             if (!player->IsChannelMuted(i)) {
-              SetColor(CD_ACCENT);
-              DrawString(pos._x, pos._y, ">", props);
+              SetColor(cAccent);
+              DrawString(pos.x_, pos.y_, ">");
             } else {
-              SetColor(CD_ACCENTALT);
-              DrawString(pos._x, pos._y, "-", props);
+              SetColor(cAccentAlt);
+              DrawString(pos.x_, pos.y_, "-");
             }
             lastPlayingPos_ = viewData_->chainPlayPos_[i];
             break;
@@ -828,9 +819,9 @@ void ChainView::AnimationUpdate() {
           unsigned char *chain = viewData_->song_->data_ + i + SONG_CHANNEL_COUNT * songPos;
           if (*chain == viewData_->currentChain_) {
             unsigned char chainPos = player->GetQueueChainPosition(i);
-            pos._y = anchor._y + chainPos;
+            pos.y_ = anchor.y_ + chainPos;
             const char *indicator = player->GetLiveIndicator(i);
-            DrawString(pos._x, pos._y, indicator, props);
+            DrawString(pos.x_, pos.y_, indicator);
             lastQueuedPos_ = chainPos;
             break;
           }

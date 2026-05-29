@@ -1,10 +1,10 @@
 # What is this?
 
-Scripts and raw data to generate the font imports for picoTracker/Advance and picotracker_client
+Scripts and raw data to generate the font imports for picoTracker and picotracker_client.
 
 ## `font.svg`
 
-Vector graphics containing all special characters for both fonts. font_adv.svg contains all letters/numbers/.. in Courier Code Pro and Ubuntu Mono. font.svg contains the wide font letters/numbers/...
+Vector graphics containing all special characters for both fonts. font.svg contains the light, bold and block font letters, numbers, ... and special characters.
 
 ## `font.png`
 

@@ -22,7 +22,7 @@ GUIRect::GUIRect(GUIPoint &topLeft, GUIPoint &bottomRight) : _topLeft(topLeft), 
 // Returns true if the point is contained inside the specified rectangle
 
 bool GUIRect::Contains(GUIPoint &p) {
-  return p._x >= _topLeft._x && p._x <= _bottomRight._x && p._y >= _topLeft._y && p._y <= _bottomRight._y;
+  return p.x_ >= _topLeft.x_ && p.x_ <= _bottomRight.x_ && p.y_ >= _topLeft.y_ && p.y_ <= _bottomRight.y_;
 }
 
 // Returns the topLeft corner of the rectangle
@@ -35,8 +35,8 @@ GUIPoint GUIRect::GetPosition() {
 // the same size
 
 void GUIRect::SetPosition(GUIPoint &point) {
-  long w = _bottomRight._x - _topLeft._x;
-  long h = _bottomRight._y - _topLeft._y;
+  long w = _bottomRight.x_ - _topLeft.x_;
+  long h = _bottomRight.y_ - _topLeft.y_;
   _topLeft = point;
   _bottomRight = point;
   _bottomRight.Add(GUIPoint(w, h));
@@ -54,32 +54,32 @@ GUIRect GUIRect::Intersect(GUIRect &other) {
   other.Normalize();
 
   GUIPoint topLeft = _topLeft;
-  if (other.Left() > topLeft._x) {
-    topLeft._x = other.Left();
+  if (other.Left() > topLeft.x_) {
+    topLeft.x_ = other.Left();
   }
-  if (other.Top() > topLeft._y) {
-    topLeft._y = other.Top();
+  if (other.Top() > topLeft.y_) {
+    topLeft.y_ = other.Top();
   }
 
   GUIPoint bottomRight = _bottomRight;
-  if (other.Right() < bottomRight._x) {
-    bottomRight._x = other.Right();
+  if (other.Right() < bottomRight.x_) {
+    bottomRight.x_ = other.Right();
   }
-  if (other.Bottom() < bottomRight._y) {
-    bottomRight._y = other.Bottom();
+  if (other.Bottom() < bottomRight.y_) {
+    bottomRight.y_ = other.Bottom();
   }
   return GUIRect(topLeft, bottomRight);
 }
 
 void GUIRect::Normalize() {
-  if (_topLeft._x > _bottomRight._x) {
-    int x = _topLeft._x;
-    _topLeft._x = _bottomRight._x;
-    _bottomRight._x = x;
+  if (_topLeft.x_ > _bottomRight.x_) {
+    int x = _topLeft.x_;
+    _topLeft.x_ = _bottomRight.x_;
+    _bottomRight.x_ = x;
   }
-  if (_topLeft._y > _bottomRight._y) {
-    int y = _topLeft._y;
-    _topLeft._y = _bottomRight._y;
-    _bottomRight._y = y;
+  if (_topLeft.y_ > _bottomRight.y_) {
+    int y = _topLeft.y_;
+    _topLeft.y_ = _bottomRight.y_;
+    _bottomRight.y_ = y;
   }
 }

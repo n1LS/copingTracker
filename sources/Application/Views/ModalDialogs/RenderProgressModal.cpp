@@ -62,27 +62,25 @@ void RenderProgressModal::DrawView() {
   // Draw title
   int32_t y = 0;
   int32_t x = (width - title_.size()) / 2;
-  GUITextProperties props;
-  SetColor(CD_WARN);
-  DrawString(x, y, title_.c_str(), props);
+  SetColor(cWarn);
+  DrawString(x, y, title_.c_str());
 
   // Draw message
   y++;
   x = (width - message_.size()) / 2;
-  DrawString(x, y, message_.c_str(), props);
+  DrawString(x, y, message_.c_str());
 
   // Draw render progress
   y++;
   GUIPoint progressPos(width / 2 - 2, y); // Center the progress display
-  drawRenderProgress(progressPos, props);
+  drawRenderProgress(progressPos);
 
   // Draw action button
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
   y += 2;
-  props.invert_ = true;
   // Use a fixed-width label area to avoid stale characters when label shrinks.
   x = width / 2 - 3;
-  DrawString(x, y, renderComplete_ ? "  OK  " : "Cancel", props);
+  DrawString(x, y, renderComplete_ ? "  OK  " : "Cancel");
 }
 
 void RenderProgressModal::OnPlayerUpdate(PlayerEventType eventType, unsigned int currentTick) {
@@ -151,26 +149,24 @@ void RenderProgressModal::AnimationUpdate() {
 
   const uint32_t width = getDialogWidth();
   int32_t y = 2;
-  GUITextProperties props;
 
   if (renderComplete_) {
     ClearTextRect(0, y - 1, width, 1);
-    SetColor(CD_INFO);
+    SetColor(cInfo);
     int32_t x = (width - message_.size()) / 2;
-    DrawString(x, y - 1, message_.c_str(), props);
+    DrawString(x, y - 1, message_.c_str());
   }
 
   GUIPoint progressPos(width / 2 - 2, y);
-  SetColor(CD_NORMAL);
-  drawRenderProgress(progressPos, props);
+  SetColor(cNormal);
+  drawRenderProgress(progressPos);
 
   // Keep button label in sync with render state.
   ClearTextRect(0, y + 1, width, 1);
-  props.invert_ = true;
-  DrawString(width / 2 - 3, y + 2, renderComplete_ ? "  OK  " : "Cancel", props);
+  DrawString(width / 2 - 3, y + 2, renderComplete_ ? "  OK  " : "Cancel");
 }
 
-void RenderProgressModal::drawRenderProgress(GUIPoint &pos, GUITextProperties &props) {
+void RenderProgressModal::drawRenderProgress(GUIPoint &pos) {
   const char *spinnerchars = "|/-\\";
   char spinner = spinnerchars[spinner_++ % 4];
 
@@ -186,7 +182,7 @@ void RenderProgressModal::drawRenderProgress(GUIPoint &pos, GUITextProperties &p
     sprintf(buffer, "%02d:%02d %c", minutes, seconds, spinner);
   }
 
-  DrawString(pos._x, pos._y, buffer, props);
+  DrawString(pos.x_, pos.y_, buffer);
 }
 
 uint32_t RenderProgressModal::getDialogWidth() const {

@@ -18,22 +18,22 @@
 class GUIColor {
 public:
   GUIColor(unsigned short r, unsigned short g, unsigned short b) {
-    _r = r;
-    _g = g;
-    _b = b;
+    r_ = r;
+    g_ = g;
+    b_ = b;
   }
   GUIColor(unsigned short r, unsigned short g, unsigned short b, int idx) {
-    _r = r;
-    _g = g;
-    _b = b;
-    _paletteIndex = idx;
+    r_ = r;
+    g_ = g;
+    b_ = b;
+    paletteIndex_ = idx;
   }
-  unsigned short _r, _g, _b;
-  int _paletteIndex;
+  unsigned short r_, g_, b_;
+  int paletteIndex_;
 
   // Equality operator
   bool operator==(const GUIColor &other) const {
-    return _r == other._r && _g == other._g && _b == other._b;
+    return r_ == other.r_ && g_ == other.g_ && b_ == other.b_;
   }
 };
 #endif

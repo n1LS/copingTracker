@@ -40,7 +40,7 @@ public:
   virtual void DrawBitmap(GUIBitmap &, GUIPoint &p);
   virtual void StretchBitmap(GUIBitmap &, GUIRect &srcR, GUIRect &dstR);
   virtual void SelectFont(int type, int size);
-  virtual void DrawString(const char *string, const GUIPoint &pos, const GUITextProperties &props);
+  virtual void DrawString(const char *string, const GUIPoint &pos);
   virtual int GetStringWidth(char *string);
 
   virtual GUIRect GetRect();

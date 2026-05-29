@@ -50,22 +50,22 @@ public:
   // Accessor to the rectangle coordinates and size
 
   inline int Top() const {
-    return _topLeft._y;
+    return _topLeft.y_;
   }
   inline int Left() const {
-    return _topLeft._x;
+    return _topLeft.x_;
   }
   inline int Bottom() const {
-    return _bottomRight._y;
+    return _bottomRight.y_;
   }
   inline int Right() const {
-    return _bottomRight._x;
+    return _bottomRight.x_;
   }
   inline int Width() const {
-    return _bottomRight._x - _topLeft._x;
+    return _bottomRight.x_ - _topLeft.x_;
   }
   inline int Height() const {
-    return _bottomRight._y - _topLeft._y;
+    return _bottomRight.y_ - _topLeft.y_;
   }
 
 public:

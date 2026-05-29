@@ -66,7 +66,7 @@ SampleEditorView::SampleEditorView(GUIWindow &w, ViewData *data)
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight) {
   assignWorkingFilename();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(CD_HILITE1, CD_HILITE2);
+  graphField_.SetBorderColors(cHighlight1, cHighlight2);
 }
 
 SampleEditorView::~SampleEditorView() {
@@ -92,7 +92,7 @@ void SampleEditorView::Reset() {
   hasWorkingCopy_ = false;
   graphField_.Reset();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(CD_HILITE1, CD_HILITE2);
+  graphField_.SetBorderColors(cHighlight1, cHighlight2);
   selectedMarker_ = MarkerStart;
 
   fieldList_.clear();
@@ -308,8 +308,8 @@ void SampleEditorView::addAllFields() {
 
   GUIPoint position = GetAnchor();
 
-  position._y = 10; // offset enough for waveform display
-  position._x = 5;
+  position.y_ = 10; // offset enough for waveform display
+  position.x_ = 5;
 
   auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("name: ");
 
@@ -319,49 +319,49 @@ void SampleEditorView::addAllFields() {
   nameTextField_.emplace_back(filenameVar_, position, label, FourCC::InstrumentName, defaultRecName);
   fieldList_.insert(fieldList_.end(), &(*nameTextField_.rbegin()));
 
-  const uint16_t baseX = position._x;
+  const uint16_t baseX = position.x_;
 
-  position._y += 1;
+  position.y_ += 1;
   bigHexVarField_.emplace_back(position, startVar_, 7, "start: %7.7X", 0, tempSampleSize_ - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
   (*bigHexVarField_.rbegin()).AddObserver(*this);
 
   // Add end position control
-  position._y += 1;
+  position.y_ += 1;
   bigHexVarField_.emplace_back(position, endVar_, 7, "end: %7.7X", 0, tempSampleSize_ - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
   (*bigHexVarField_.rbegin()).AddObserver(*this);
 
   // Operation selector
-  position._y += 1;
-  position._x = baseX;
+  position.y_ += 1;
+  position.x_ = baseX;
   uint8_t maxOperationIndex = operationVar_.GetListSize() > 0 ? operationVar_.GetListSize() - 1 : 0;
   intVarField_.emplace_back(position, operationVar_, "op: %s", 0, maxOperationIndex, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   // Apply button
-  position._x = baseX + 20;
+  position.x_ = baseX + 20;
   actionField_.emplace_back("Apply", FourCC::ActionOK, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   // Save button row
-  position._y += 2; // want extra empty row between these buttons & prev Apply
-  position._x = baseX;
+  position.y_ += 2; // want extra empty row between these buttons & prev Apply
+  position.x_ = baseX;
   actionField_.emplace_back("Save", FourCC::ActionSave, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   // load & save button
-  position._x += 5;
+  position.x_ += 5;
   if (!viewData_->isShowingSampleEditorProjectPool) {
     actionField_.emplace_back("Save&Load", FourCC::ActionLoadAndSave, position);
     fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
     (*actionField_.rbegin()).AddObserver(*this);
-    position._x += 12;
+    position.x_ += 12;
   } else {
-    position._x += 7;
+    position.x_ += 7;
   }
 
   // discard button
@@ -566,15 +566,14 @@ void SampleEditorView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void SampleEditorView::DrawView() {
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
   char titleString[SCREEN_WIDTH];
   strcpy(titleString, "Sample Edit");
 
-  SetColor(CD_NORMAL);
-  DrawString(pos._x, pos._y, titleString, props);
+  SetColor(cNormal);
+  DrawString(pos.x_, pos.y_, titleString);
 
   if (HasModalView()) {
     // Modal rendering only clears text cells. Avoid redrawing the graph field
@@ -665,13 +664,13 @@ void SampleEditorView::updateGraphMarkers() {
   bool hasSample = tempSampleSize_ > 0;
 
   if (hasSample) {
-    ColorDefinition startColor = (selectedMarker_ == MarkerStart) ? CD_HILITE2 : CD_ACCENT;
-    ColorDefinition endColor = (selectedMarker_ == MarkerEnd) ? CD_HILITE2 : CD_ACCENT;
+    Color startColor = (selectedMarker_ == MarkerStart) ? cHighlight2 : cAccent;
+    Color endColor = (selectedMarker_ == MarkerEnd) ? cHighlight2 : cAccent;
     graphField_.SetMarker(0, start_, startColor, true);
     graphField_.SetMarker(1, end_, endColor, true);
   } else {
-    graphField_.SetMarker(0, 0, CD_ACCENT, false);
-    graphField_.SetMarker(1, 0, CD_ACCENT, false);
+    graphField_.SetMarker(0, 0, cAccent, false);
+    graphField_.SetMarker(1, 0, cAccent, false);
   }
 
   uint32_t playheadSample = 0;
@@ -683,7 +682,7 @@ void SampleEditorView::updateGraphMarkers() {
     }
     playheadVisible = true;
   }
-  graphField_.SetMarker(2, playheadSample, CD_NORMAL, playheadVisible);
+  graphField_.SetMarker(2, playheadSample, cNormal, playheadVisible);
 }
 
 void SampleEditorView::rebuildWaveform() {
@@ -825,9 +824,8 @@ void SampleEditorView::AnimationUpdate() {
     modalClearCount_--;
   }
 
-  GUITextProperties props;
-  drawBattery(props);
-  drawPowerButtonUI(props);
+  drawBattery();
+  drawPowerButtonUI();
 }
 
 void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
@@ -1450,5 +1448,5 @@ void SampleEditorView::clearWaveformRegion() {
   GUIRect rrect;
   rrect = GUIRect(GraphXOffset, GraphYOffset, GraphXOffset + GraphField::BitmapWidth,
                   GraphYOffset + GraphField::BitmapHeight);
-  DrawRect(rrect, CD_BACKGROUND);
+  DrawRect(rrect, cBackground);
 }

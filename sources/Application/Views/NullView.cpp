@@ -27,16 +27,16 @@ void NullView::DrawView() {
 
   Clear();
 
-  GUITextProperties props;
-  SetColor(CD_HILITE2);
+  SetColor(cHighlight2);
 
   char buildString[SCREEN_WIDTH + 1];
+  // todo: update and merge with instance from appwindow
   npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
                BUILD_COUNT);
   GUIPoint pos;
-  pos._y = 22;
-  pos._x = (32 - strlen(buildString)) / 2;
-  DrawString(pos._x, pos._y, buildString, props);
+  pos.y_ = 22;
+  pos.x_ = (32 - strlen(buildString)) / 2;
+  DrawString(pos.x_, pos.y_, buildString);
 }
 
 void NullView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {

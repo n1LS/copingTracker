@@ -71,19 +71,18 @@ void ThemeImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void ThemeImportView::DrawView() {
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   auto fs = FileSystem::GetInstance();
 
   // Draw title
   const char *title = "Import Theme";
-  SetColor(CD_INFO);
-  DrawString(pos._x + 1, pos._y, title, props);
+  SetColor(cInfo);
+  DrawString(pos.x_ + 1, pos.y_, title);
 
   // Draw theme files
   int x = 1;
-  int y = pos._y + 2;
+  int y = pos.y_ + 2;
 
   // need to use fullsize buffer as sdfat doesnt truncate if filename longer
   // than buffer but instead returns empty string in buffer :-(
@@ -91,11 +90,9 @@ void ThemeImportView::DrawView() {
   char buffer[PFILENAME_SIZE];
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total); i++) {
     if (i == currentIndex_) {
-      SetColor(CD_HILITE2);
-      props.invert_ = true;
+      SetColor(cHighlight2);
     } else {
-      SetColor(CD_NORMAL);
-      props.invert_ = false;
+      SetColor(cNormal);
     }
 
     memset(buffer, '\0', sizeof(buffer));
@@ -107,12 +104,12 @@ void ThemeImportView::DrawView() {
     if (dot) {
       *dot = '\0';
     }
-    DrawString(x, y, buffer, props);
+    DrawString(x, y, buffer);
 
     y++;
   }
 
-  drawScrollBar(SCREEN_WIDTH - 1, pos._y + 2, LIST_PAGE_SIZE, topIndex_, total);
+  drawScrollBar(SCREEN_WIDTH - 1, pos.y_ + 2, LIST_PAGE_SIZE, topIndex_, total);
 }
 
 void ThemeImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {

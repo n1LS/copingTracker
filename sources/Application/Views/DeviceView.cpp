@@ -54,50 +54,50 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   v = config->FindVariable(FourCC::VarMidiSync);
   // just hardcode max of 1, as only settings are "off" & "send"
   intVarField_.emplace_back(position, *v, "MIDI sync: %s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   v = config->FindVariable(FourCC::VarLineOut);
   intVarField_.emplace_back(position, *v, "Line Out Mode: %s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   v = config->FindVariable(FourCC::VarRemoteUI);
   intVarField_.emplace_back(position, *v, "Remote UI: %s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   v = config->FindVariable(FourCC::VarImportResampler);
   intVarField_.emplace_back(position, *v, "Import resampler: %s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-  position._y += 1;
+  position.y_ += 1;
   v = config->FindVariable(FourCC::VarBacklightLevel);
   // MIN brightness is 0xF (15)
   intVarField_.emplace_back(position, *v, "Display brightness: %2.2X", 0xF, 0xFF, 1, 16);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
-  position._y += 2;
+  position.y_ += 2;
   actionField_.emplace_back("Theme settings", FourCC::ActionShowTheme, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position._y += 2;
+  position.y_ += 2;
   actionField_.emplace_back("Update firmware", FourCC::ActionBootSelect, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
 #ifndef ADV
-  position._y += 2;
+  position.y_ += 2;
   actionField_.emplace_back("USB Storage", FourCC::ActionMassStorage, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
@@ -138,27 +138,28 @@ void DeviceView::DrawView() {
 
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
   char projectString[SCREEN_WIDTH];
   strcpy(projectString, "Device");
 
-  SetColor(CD_NORMAL);
-  DrawString(pos._x, pos._y, projectString, props);
+  SetColor(cNormal);
+  DrawString(pos.x_, pos.y_, projectString);
 
   FieldView::Redraw();
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
   drawMap();
 
-  pos._x = SCREEN_MAP_WIDTH + 1;
-  pos._y = SCREEN_HEIGHT - 1;
+  pos.x_ = SCREEN_MAP_WIDTH + 1;
+  pos.y_ = SCREEN_HEIGHT - 1;
 
+  // todo: also merge this with the other 2 instances in nullview and the other one
   npf_snprintf(projectString, sizeof(projectString), "Build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
-  SetColor(CD_NORMAL);
-  DrawString(pos._x, pos._y, projectString, props);
+  SetBackgroundColor(cBackground);
+  SetColor(cConsole);
+  DrawString(pos.x_, pos.y_, projectString);
 }
 
 void DeviceView::Update(Observable &, I_ObservableData *data) {
@@ -257,8 +258,8 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   isDirty_ = true;
 }
 
-void DeviceView::addSwatchField(ColorDefinition color, GUIPoint position) {
-  position._x -= 5;
+void DeviceView::addSwatchField(Color color, GUIPoint position) {
+  position.x_ -= 5;
   swatchField_.emplace_back(position, color);
   fieldList_.insert(fieldList_.end(), &(*swatchField_.rbegin()));
 }

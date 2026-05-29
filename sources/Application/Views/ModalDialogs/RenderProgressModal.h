@@ -19,7 +19,6 @@
 
 // Forward declarations
 class GUIPoint;
-class GUITextProperties;
 
 // Progress message box with render progress display
 class RenderProgressModal : public ModalView {
@@ -48,7 +47,7 @@ private:
   RenderProgressModal &operator=(const RenderProgressModal &) = delete;
 
   // Helper method to draw the render progress
-  void drawRenderProgress(GUIPoint &pos, GUITextProperties &props);
+  void drawRenderProgress(GUIPoint &pos);
   uint32_t getDialogWidth() const;
   int calculateSongRenderPercent() const;
   int getCurrentRenderedSongRow(bool *hasActive = nullptr) const;

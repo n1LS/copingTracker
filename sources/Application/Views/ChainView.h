@@ -49,7 +49,7 @@ protected:
 
   void processNormalButtonMask(unsigned short mask);
   void processSelectionButtonMask(unsigned short mask);
-  void setTextProps(GUITextProperties &props, int row, int col, bool restore);
+  void setTextProps(int row, int col);
 
 private:
   bool updatingPhrase_;      // .Tells if we're in the middle

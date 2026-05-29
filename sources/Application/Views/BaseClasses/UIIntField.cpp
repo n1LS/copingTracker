@@ -31,7 +31,6 @@ UIIntField::UIIntField(const GUIPoint &position, int *src, const char *format, i
 
 void UIIntField::Draw(GUIWindow &w) {
 
-  GUITextProperties props;
   GUIPoint position = GetPosition();
 
   // ensure max field length
@@ -40,9 +39,8 @@ void UIIntField::Draw(GUIWindow &w) {
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(CD_HILITE2);
-    props.invert_ = true;
-    w.DrawString(buffer, position, props);
+    ((AppWindow &)w).SetColor(cHighlight2);
+    w.DrawString(buffer, position);
   } else {
     DrawLabeledField(w, position, buffer);
   }

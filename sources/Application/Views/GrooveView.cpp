@@ -151,36 +151,35 @@ void GrooveView::DrawView() {
 
   Clear();
 
-  GUITextProperties props;
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
   char title[SCREEN_WIDTH + 1];
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   npf_snprintf(title, sizeof(title), "Groove: %2.2X", viewData_->currentGroove_);
-  DrawString(pos._x, pos._y, title, props);
+  DrawString(pos.x_, pos.y_, title);
 
   // Compute song grid location
 
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetColor(CD_HILITE1);
+  SetColor(cHighlight1);
   char buffer[6];
   pos = anchor;
-  pos._x -= 3;
+  pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(CD_ACCENT) : SetColor(CD_ACCENTALT);
+    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
     hex2char(j, buffer);
-    DrawString(pos._x, pos._y, buffer, props);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    pos.y_++;
   }
 
   // Display current groove
   pos = anchor;
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
   for (int j = 0; j < 16; j++) {
@@ -190,9 +189,8 @@ void GrooveView::DrawView() {
     } else {
       strcpy(buffer, "--");
     };
-    props.invert_ = (j == position_);
-    DrawString(pos._x, pos._y, buffer, props);
-    pos._y++;
+    DrawString(pos.x_, pos.y_, buffer);
+    pos.y_++;
   }
 
   drawMap();
@@ -201,13 +199,14 @@ void GrooveView::DrawView() {
 
 void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
 
-  GUITextProperties props;
   GUIPoint anchor = GetAnchor();
   GUIPoint pos;
 
-  pos._x = anchor._x - 1;
-  pos._y = anchor._y + lastPosition_;
-  DrawString(pos._x, pos._y, " ", props);
+  SetBackgroundColor(cBackground);
+  
+  pos.x_ = anchor.x_ - 1;
+  pos.y_ = anchor.y_ + lastPosition_;
+  DrawString(pos.x_, pos.y_, " ");
 
   Groove *gr = Groove::GetInstance();
   // Get current channel
@@ -220,11 +219,11 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
 
   if (groove == viewData_->currentGroove_ && viewData_->playMode_ != PM_AUDITION) {
     lastPosition_ = groovepos;
-    pos._x = anchor._x - 1;
-    pos._y = anchor._y + lastPosition_;
-    SetColor(CD_ACCENT);
-    DrawString(pos._x, pos._y, ">", props);
-    SetColor(CD_NORMAL);
+    pos.x_ = anchor.x_ - 1;
+    pos.y_ = anchor.y_ + lastPosition_;
+    SetColor(cAccent);
+    SetBackgroundColor(cBackground);
+    DrawString(pos.x_, pos.y_, ">");
   };
 
   drawNotes();

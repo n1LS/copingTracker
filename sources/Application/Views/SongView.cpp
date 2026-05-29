@@ -806,55 +806,51 @@ void SongView::processSelectionButtonMask(unsigned int mask) {
  ******************************************************/
 
 void SongView::DrawView() {
-
+  SetBackgroundColor(cHighlight1);
   Clear();
 
-  GUITextProperties props;
-  GUIPoint pos = GetTitlePosition();
-
   // Prepare selection related information
-
   GUIRect selRect;
   if (clipboard_.active_) {
     selRect = GUIRect(clipboard_.x_, clipboard_.y_ + clipboard_.offset_, viewData_->songX_,
-                      viewData_->songY_ + viewData_->songOffset_);
-
+      viewData_->songY_ + viewData_->songOffset_);
+      
     selRect.Normalize();
   }
-
+    
   // Draw title
-  SetColor(CD_NORMAL);
-
+  GUIPoint pos = GetTitlePosition();
   Player *player = Player::GetInstance();
+  
+  SetBackgroundColor(cNormal);
+  SetColor(cBackground);
 
-  props.invert_ = true;
-  const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song" : "Live");
-  DrawString(pos._x, pos._y, buffer, props);
-
-  props.invert_ = false;
+  const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song " : "Live ");
+  DrawString(pos.x_, pos.y_, buffer);
 
   Variable *v = viewData_->project_->FindVariable(FourCC::VarProjectName);
-
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = v->GetString();
-  DrawString(pos._x + 5, pos._y, projectName.c_str(), props);
+  DrawString(pos.x_ + 5, pos.y_, projectName.c_str());
 
   // Compute song grid location
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetColor(CD_HILITE1);
+  SetBackgroundColor(cBackground);
+  SetColor(cHighlight1);
+  
   char row[3];
   pos = anchor;
-  pos._x -= 3;
+  pos.x_ -= 3;
   for (int j = 0; j < View::songRowCount_; j++) {
     char p = j + viewData_->songOffset_;
-    ((p / ALT_ROW_NUMBER) % 2) ? SetColor(CD_ACCENT) : SetColor(CD_ACCENTALT);
+    ((p / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
     hex2char(p, row);
-    DrawString(pos._x, pos._y, row, props);
-    pos._y += 1;
+    DrawString(pos.x_, pos.y_, row);
+    pos.y_ += 1;
   }
 
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
 
   pos = anchor;
   unsigned char *data = viewData_->song_->data_ + (SONG_CHANNEL_COUNT * viewData_->songOffset_);
@@ -862,11 +858,11 @@ void SongView::DrawView() {
   short dy = 1;
   for (int j = 0; j < View::songRowCount_; j++) {
 
-    pos._x = anchor._x;
+    pos.x_ = anchor.x_;
 
     for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
 
-      bool invert = false;
+      bool highlighted = false;
 
       // see if we need to invert current step
       // if there's a selection or we are at cursor position
@@ -874,49 +870,49 @@ void SongView::DrawView() {
       if (clipboard_.active_) {
         if ((i >= selRect.Left()) && (i <= selRect.Right()) && (j + viewData_->songOffset_ >= selRect.Top()) &&
             (j + viewData_->songOffset_ <= selRect.Bottom())) {
-          invert = true;
+          highlighted = true;
         }
       } else {
         if (i == viewData_->songX_ && j == viewData_->songY_) {
-          invert = true;
+          highlighted = true;
         }
       }
 
       // draw current step
       unsigned char d = *data++;
       if (d == 0xFE) {
-        SetColor(CD_ACCENT);
+        SetColor(cAccent);
       } else if (d == 0x00) {
-        SetColor(CD_HILITE1);
+        SetColor(cHighlight1);
       } else {
-        SetColor(CD_NORMAL);
+        SetColor(cNormal);
       }
 
-      if (invert) {
-        SetColor(CD_HILITE2);
-        props.invert_ = true;
+      if (highlighted) {
+        SetColor(cHighlight2);
+        SwapColors();
       }
       if (d == 0xFF) {
-        DrawString(pos._x, pos._y, "--", props);
+        DrawString(pos.x_, pos.y_, "--");
       } else {
         hex2char(d, row);
-        DrawString(pos._x, pos._y, row, props);
+        DrawString(pos.x_, pos.y_, row);
       }
 
       // Put back drawing state
 
-      if (invert) {
-        SetColor(CD_NORMAL);
-        props.invert_ = false;
+      if (highlighted) {
+        SwapColors();
       }
 
       // Next step
 
-      pos._x += dx;
+      pos.x_ += dx;
     }
-    pos._y += dy;
+    pos.y_ += dy;
   }
-  SetColor(CD_NORMAL);
+  
+  SetColor(cNormal);
 
   drawMap();
   drawNotes();
@@ -967,10 +963,9 @@ void SongView::AnimationUpdate() {
 
   // Handle any pending updates from OnPlayerUpdate
   // This ensures all UI drawing happens on the "main" thread (core0)
-  GUITextProperties props;
 
   // Always update VU meter even if other parts of UI dont need updating
-  drawMasterVuMeter(player, props);
+  drawMasterVuMeter(player);
 
   // Use the consolidated flag for all UI updates
   if (needsUIUpdate_) {
@@ -979,34 +974,35 @@ void SongView::AnimationUpdate() {
     // Only handle play time updates if needed
     if (needsPlayTimeUpdate_) {
       GUIPoint timePos = 0;
-      timePos._x = 27;
-      timePos._y += 1;
-      SetColor(CD_NORMAL);
-      drawPlayTime(player, timePos, props);
+      timePos.x_ = 27;
+      timePos.y_ += 1;
+      SetColor(cNormal);
+      drawPlayTime(player, timePos);
       needsPlayTimeUpdate_ = false;
     }
 
     // Handle position updates
     GUIPoint anchor = GetAnchor();
     GUIPoint pos = anchor;
-    pos._x -= 1;
+    pos.x_ -= 1;
 
-    SetColor(CD_CURSOR);
+    SetColor(cCursor);
+    SetBackgroundColor(cBackground);
 
     // Loop on all channels
     for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
       // Clear all current positions
       int y = lastPlayedPosition_[i] - viewData_->songOffset_;
       if (y >= 0 && y < View::songRowCount_) {
-        pos._y = anchor._y + y;
-        DrawString(pos._x, pos._y, " ", props);
+        pos.y_ = anchor.y_ + y;
+        DrawString(pos.x_, pos.y_, " ");
       }
 
       // Clear all last queued positions
       y = lastQueuedPosition_[i] - viewData_->songOffset_;
       if (y >= 0 && y < View::songRowCount_) {
-        pos._y = anchor._y + y;
-        DrawString(pos._x, pos._y, " ", props);
+        pos.y_ = anchor.y_ + y;
+        DrawString(pos.x_, pos.y_, " ");
       }
 
       // For each playing position, draw current location
@@ -1014,15 +1010,16 @@ void SongView::AnimationUpdate() {
         if (viewData_->currentPlayChain_[i] != 0xFF) {
           int y = viewData_->songPlayPos_[i] - viewData_->songOffset_;
           if (y >= 0 && y < View::songRowCount_ && viewData_->playMode_ != PM_AUDITION) {
-            pos._y = anchor._y + y;
+            pos.y_ = anchor.y_ + y;
+            SetBackgroundColor(cBackground);
             if (!player->IsChannelMuted(i)) {
-              SetColor(CD_ACCENT);
-              DrawString(pos._x, pos._y, ">", props);
+              SetColor(cAccent);
+              DrawString(pos.x_, pos.y_, ">");
             } else {
-              SetColor(CD_ACCENTALT);
-              DrawString(pos._x, pos._y, "-", props);
+              SetColor(cAccentAlt);
+              DrawString(pos.x_, pos.y_, "-");
             }
-            SetColor(CD_CURSOR);
+            SetColor(cCursor);
             lastPlayedPosition_[i] = viewData_->songPlayPos_[i];
           }
         }
@@ -1033,14 +1030,14 @@ void SongView::AnimationUpdate() {
         if (player->GetQueueingMode(i) != QM_NONE) {
           int y = player->GetQueuePosition(i) - viewData_->songOffset_;
           if (y >= 0 && y < View::songRowCount_) {
-            pos._y = anchor._y + y;
+            pos.y_ = anchor.y_ + y;
             const char *indicator = player->GetLiveIndicator(i);
-            DrawString(pos._x, pos._y, indicator, props);
+            DrawString(pos.x_, pos.y_, indicator);
             lastQueuedPosition_[i] = player->GetQueuePosition(i);
           }
         }
       }
-      pos._x += 3;
+      pos.x_ += 3;
     }
 
     // Create a memory barrier to ensure proper synchronization between cores

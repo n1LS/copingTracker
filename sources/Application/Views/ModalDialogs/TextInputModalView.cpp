@@ -29,16 +29,16 @@ TextInputModalView::TextInputModalView(View &view, const char *title, const char
   selected_ = buttonCount_ - 1;
   NAssert(buttonCount_ != 0);
 
-  textFieldPos_._y += 2; // 2 lines below title
-  textFieldPos_._x += 6; // After "Name: " prompt
+  textFieldPos_.y_ += 2; // 2 lines below title
+  textFieldPos_.x_ += 6; // After "Name: " prompt
 
   textField_.SetPosition(textFieldPos_);
   textField_.AddObserver(*this);
 
   // Position the button
   GUIPoint position = textFieldPos_;
-  position._y += 2; // 2 lines below text field
-  position._x += 1; // Align roughly in middle of the dialog
+  position.y_ += 2; // 2 lines below text field
+  position.x_ += 1; // Align roughly in middle of the dialog
 
   // Set initial focus to text field
   SetFocus(&textField_);
@@ -62,27 +62,24 @@ void TextInputModalView::DrawView() {
   SetWindow(width, 5);
 
   // Draw title
-  GUITextProperties props;
-  props.invert_ = true;
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
   int x = (width - titleSize) / 2;
-  DrawString(x, 0, title_.c_str(), props);
+  DrawString(x, 0, title_.c_str());
 
   // Draw prompt
-  props.invert_ = false;
   x = 0;
-  DrawString(x, 2, prompt_.c_str(), props);
+  DrawString(x, 2, prompt_.c_str());
 
   // Draw text field
   if (focus_ == &textField_) {
-    SetColor(CD_HILITE1);
+    SetColor(cHighlight1);
   } else {
-    SetColor(CD_NORMAL);
+    SetColor(cNormal);
   }
   textField_.Draw(w_);
 
   // Draw buttons (similar to MessageBox)
-  SetColor(CD_NORMAL);
+  SetColor(cNormal);
   int y = 4; // Position for buttons
   int offset = width / (buttonCount_ + 1);
 
@@ -91,8 +88,8 @@ void TextInputModalView::DrawView() {
   for (int i = 0; i < buttonCount_; i++) {
     const char *text = buttonText[button_[i]];
     x = offset * (i + 1) - strlen(text) / 2;
-    props.invert_ = (focus_ == nullptr && i == selected_) ? true : false;
-    DrawString(x, y, text, props);
+    // highlighted == (focus_ == nullptr && i == selected_) ? true : false;
+    DrawString(x, y, text);
   }
   // Update editingText_ flag based on focus for backward compatibility
   editingText_ = (focus_ == &textField_);
