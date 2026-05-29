@@ -1,6 +1,6 @@
 # copingTracker
 
-copingTracker is a fork of picoTracker (https://www.github.com/xiphonics/picoTracker)
+copingTracker is a fork of picoTracker (https://www.github.com/xiphonics/picoTracker). Maybe a spoon. Or a spork. Yes, a spork.
 
 ## Features
 
