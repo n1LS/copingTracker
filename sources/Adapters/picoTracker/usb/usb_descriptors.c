@@ -213,7 +213,7 @@ char const *string_desc_arr[] = {
     "123456",                   // 3: Serials, should use chip ID
     "TinyUSB CDC",              // 4: CDC Interface
     "TinyUSB MSC",              // 5: MSC Interface
-  };
+};
 
 char id_out[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
 

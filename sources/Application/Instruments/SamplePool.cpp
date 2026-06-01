@@ -89,8 +89,7 @@ void SamplePool::Load(const char *projectName) {
       progressBar[11] = GLYPH(char_button_border_right_s);
       progressBar[12] = 0;
 
-      Status::Set("Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", name,
-                  (const char *)progressBar, progress);
+      Status::Set("Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", name, (const char *)progressBar, progress);
 
       updateStatus(importIndex, importCount, "Loading");
       loadSample(name);

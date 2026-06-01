@@ -75,8 +75,8 @@ GUIColor AppWindow::colorPalette_[16] = {
     GUIColor(0x00, 0x00, 0x80), // 4: dark blue
     GUIColor(0x80, 0x00, 0x80), // 5: dark magenta
     GUIColor(0x00, 0x80, 0x80), // 6: dark cyan
-    GUIColor(0x80, 0x80, 0x80), // 7: gray    
-    GUIColor(0xc6, 0xc6, 0xc6), // 8: light gray  
+    GUIColor(0x80, 0x80, 0x80), // 7: gray
+    GUIColor(0xc6, 0xc6, 0xc6), // 8: light gray
     GUIColor(0xFF, 0x00, 0x00), // 9: red
     GUIColor(0x00, 0xFF, 0x00), // 10: green
     GUIColor(0xFF, 0xFF, 0x00), // 11: yellow
@@ -85,7 +85,6 @@ GUIColor AppWindow::colorPalette_[16] = {
     GUIColor(0x00, 0xFF, 0xFF), // 14: cyan
     GUIColor(0xFF, 0xFF, 0xFF), // 15: white
 };
-
 
 // Initialize the animation frame counter
 uint32_t AppWindow::animationFrameCounter_ = 0;
@@ -260,11 +259,11 @@ void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
 }
 
 void AppWindow::Clear(bool all) {
-  color_t base = (color_t){ .fg = cNormal, .bg = cBackground };
-  
+  color_t base = (color_t){.fg = cNormal, .bg = cBackground};
+
   memset(_charScreen, ' ', SCREEN_CHARS);
   memset(_screenColor, base.byte, SCREEN_CHARS);
-  
+
   if (all) {
     memset(_preScreen, '\0', SCREEN_CHARS);
     memset(_preScreenColor, base.byte, SCREEN_CHARS);
@@ -279,11 +278,11 @@ void AppWindow::ClearTextRect(GUIRect &r) {
 
   // Clamp rectangle to screen bounds.
   if (x < 0) {
-    w += x;  // Reduce width by the amount we're off-screen
+    w += x; // Reduce width by the amount we're off-screen
     x = 0;
   }
   if (y < 0) {
-    h += y;  // Reduce height by the amount we're off-screen
+    h += y; // Reduce height by the amount we're off-screen
     y = 0;
   }
   if (x + w > SCREEN_WIDTH) {
@@ -303,7 +302,7 @@ void AppWindow::ClearTextRect(GUIRect &r) {
   for (int i = 0; i < h; i++) {
     for (int j = 0; j < w; j++) {
       *st++ = ' ';
-      *pr++ = { .byte = 0 };
+      *pr++ = {.byte = 0};
     }
     st += (SCREEN_WIDTH - w);
     pr += (SCREEN_WIDTH - w);
@@ -338,7 +337,7 @@ void AppWindow::Flush() {
   unsigned char *previous = _preScreen;
   color_t *currentColor = _screenColor;
   color_t *previousColor = _preScreenColor;
-  
+
   for (int y = 0; y < SCREEN_HEIGHT; y++) {
     for (int x = 0; x < SCREEN_WIDTH; x++) {
       if ((*current != *previous) || (currentColor->byte != previousColor->byte)) {
