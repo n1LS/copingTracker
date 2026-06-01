@@ -38,12 +38,7 @@ void UIIntField::Draw(GUIWindow &w) {
   int value = *src_;
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
-  if (false && focus_) {
-    ((AppWindow &)w).SetColor(cHighlight2);
-    w.DrawString(buffer, position);
-  } else {
-    DrawLabeledField(w, position, buffer, focus_);
-  }
+  DrawLabeledField(w, position, buffer, focus_);
 }
 
 void UIIntField::ProcessArrow(unsigned short mask) {
