@@ -33,28 +33,12 @@ void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
   int value = src_.GetInt();
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
-  if (focus_) {
-    ((AppWindow &)w).SetBackgroundColor(cHighlight2);
-    ((AppWindow &)w).SetColor(cBackground);
-    w.DrawString(buffer, position);
-    
-    int percentPos = -1;
-    for (unsigned int i = 0; i < strlen(format_); i++) {
-      if (format_[i] == '%') {
-        percentPos = i;
-        break;
-      };
-    };
-    if (percentPos >= 0) {
-      int offset = (precision_ - position_) + percentPos;
-      buffer[offset + 1] = 0;
-      position.x_ += offset;
-      ((AppWindow &)w).SetBackgroundColor(cNormal);
-      w.DrawString(buffer + offset, position);
-    }
-  } else {
-    DrawLabeledField(w, position, buffer);
+  int subSelectionOffset = -1;
+  int valueOffset = FindFormatValueOffset(format_);
+  if (valueOffset >= 0) {
+    subSelectionOffset = valueOffset + (precision_ - position_);
   }
+  DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
 }
 
 void UIBigHexVarField::ProcessArrow(unsigned short mask) {

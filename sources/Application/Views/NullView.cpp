@@ -20,7 +20,6 @@ NullView::~NullView() {
 }
 
 void NullView::ProcessButtonMask(unsigned short mask, bool pressed) {
-
 }
 
 void NullView::DrawView() {
@@ -40,7 +39,6 @@ void NullView::DrawView() {
 }
 
 void NullView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
-
 }
 
 void NullView::OnFocus() {};

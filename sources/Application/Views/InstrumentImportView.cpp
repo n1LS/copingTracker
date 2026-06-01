@@ -65,10 +65,7 @@ void InstrumentImportView::ProcessButtonMask(unsigned short mask, bool pressed) 
     warpToNextInstrument(false);
   } else if ((mask & EPBM_LEFT) && (mask & EPBM_NAV)) {
     // Go to back "left" to instrument screen
-    ViewType vt = VT_INSTRUMENT;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
+    Navigate(VT_INSTRUMENT);
     return;
   } else {
     // ENTER modifier
@@ -300,10 +297,7 @@ void InstrumentImportView::onImportSuccess(View &, ModalView &dialog) {
     instrument->NotifyObservers();
   }
 
-  ViewType vt = VT_INSTRUMENT;
-  ViewEvent ve(VET_SWITCH_VIEW, &vt);
-  SetChanged();
-  NotifyObservers(&ve);
+  Navigate(VT_INSTRUMENT);
 }
 
 void InstrumentImportView::setCurrentFolder(FileSystem *fs, const char *name) {

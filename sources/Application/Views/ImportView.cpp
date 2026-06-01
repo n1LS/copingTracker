@@ -287,10 +287,7 @@ void ImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
     viewData_->isShowingSampleEditorProjectPool = false;
 
     // Go back to the source view that opened the ImportView
-    ViewEvent ve(VET_SWITCH_VIEW, &sourceViewType_);
-    SetChanged();
-    NotifyObservers(&ve);
-    return;
+    Navigate(sourceViewType_);
   } else {
     // A modifier
   }
@@ -348,7 +345,8 @@ void ImportView::DrawView() {
 
       displayName += tempBuffer;
       // Format the display name with appropriate prefix
-      if (inProjectSampleDir_ && viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
+      if (inProjectSampleDir_ &&
+          viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
         SetColor(cAccent);
         DrawString(x, y, "*");
       } else if (isSingleCycle) {
@@ -398,14 +396,14 @@ void ImportView::DrawView() {
   }
 
   auto setColors = [&](bool selected) {
-    SetBackgroundColor(selected ? cHighlight2 : cBackground );
+    SetBackgroundColor(selected ? cHighlight2 : cBackground);
     SetColor(selected ? cBackground : cHighlight1);
-  }; 
+  };
 
   if (!inProjectSampleDir_) {
     setColors(selectedButton_ == kImportButtonImport);
     DrawString(x, y, "Import");
-    
+
     setColors(selectedButton_ == kImportButtonEdit);
     DrawString(x + 10, y, "Edit");
 
@@ -796,10 +794,7 @@ void ImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> fi
   SampleEditorView::sourceViewType_ = VT_IMPORT;
 
   // Switch to the SampleEditorView
-  ViewType vt = VT_SAMPLE_EDITOR;
-  ViewEvent ve(VET_SWITCH_VIEW, &vt);
-  SetChanged();
-  NotifyObservers(&ve);
+  Navigate(VT_SAMPLE_EDITOR);
 }
 
 void ImportView::removeProjectSample(uint8_t fileIndex, FileSystem *fs) {

@@ -30,27 +30,12 @@ void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
   int value = src_.GetInt();
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
-  if (focus_) {
-    ((AppWindow &)w).SetColor(cHighlight2);
-    w.DrawString(buffer, position);
-
-    int percentPos = -1;
-    for (unsigned int i = 0; i < strlen(format_); i++) {
-      if (format_[i] == '%') {
-        percentPos = i;
-        break;
-      };
-    };
-    if (percentPos >= 0) {
-      int offset = (len_ - position_) + percentPos;
-      buffer[offset + 1] = 0;
-      position.x_ += offset;
-      ((AppWindow &)w).SetColor(cNormal);
-      w.DrawString(buffer + offset, position);
-    }
-  } else {
-    DrawLabeledField(w, position, buffer);
+  int subSelectionOffset = -1;
+  int valueOffset = FindFormatValueOffset(format_);
+  if (valueOffset >= 0) {
+    subSelectionOffset = valueOffset + (len_ - position_);
   }
+  DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
 }
 
 void UIBitmaskVarField::ProcessArrow(unsigned short mask) {

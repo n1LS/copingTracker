@@ -1296,15 +1296,11 @@ void SampleEditorView::navigateToView(ViewType vt) {
   }
   // "clear" the prev screen by setting it to Song screen
   // now that we are leaving this screen
-  SampleEditorView::sourceViewType_ = VT_SONG;
-
   isPlaying_ = false;
   playKeyHeld_ = false;
   discardWorkingCopy();
 
-  ViewEvent ve(VET_SWITCH_VIEW, &vt);
-  SetChanged();
-  NotifyObservers(&ve);
+  Navigate(VT_SONG);
 }
 
 void SampleEditorView::updateSampleParameters() {

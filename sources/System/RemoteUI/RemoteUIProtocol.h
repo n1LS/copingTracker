@@ -65,7 +65,7 @@ static GUIEventPadButtonType eventMappingPico[11] = {
     EPBT_START,  // SW9
     EPBT_SELECT, // No SW
     EPBT_POWER   // Power button
-  };
+};
 
 #define to_rgb565(color) ((color.r_ & 0b11111000) << 8) | ((color.g_ & 0b11111100) << 3) | (color.b_ >> 3)
 

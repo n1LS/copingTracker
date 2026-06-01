@@ -43,7 +43,7 @@ static FourCC _all[] = {
     FourCC::InstrumentCommandVelocity,
     FourCC::InstrumentCommandVibrato,
     FourCC::InstrumentCommandVolume,
-  };
+};
 
 static char GetCommandGroupLetter(FourCC command) {
   const char *name = FourCC(command).c_str();

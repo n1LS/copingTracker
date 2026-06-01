@@ -167,19 +167,18 @@ void MixerView::ProcessButtonMask(unsigned short mask, bool pressed) {
   // Handle playback specific actions
   if (mask == EPBM_PLAY) {
     togglePlay();
-    return;
   }
   // NAV back to Song view
-  if ((mask & EPBM_NAV) && (mask & EPBM_UP)) {
-    ViewType vt = VT_SONG;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
-    return;
+  if (mask & EPBM_NAV) {
+    if (mask & EPBM_UP) {
+      Navigate(VT_SONG);
+    } else if (mask & EPBM_RIGHT) {
+      Navigate(VT_TABLE);
+    }
   }
-  if ((mask & EPBM_NAV) && (mask & EPBM_ALT)) {
+
+  if (mask == (EPBM_NAV & EPBM_ALT)) {
     unMuteAll();
-    return;
   }
 
   // Handle mixer-specific actions for normal mode, but only if we don't have
@@ -229,10 +228,7 @@ void MixerView::processNormalButtonMask(unsigned int mask) {
     }
   } else if (mask & EPBM_NAV) {
     if (mask & EPBM_UP) {
-      ViewType vt = VT_SONG;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_SONG);
     }
     if (mask & EPBM_ALT) {
       unMuteAll();

@@ -78,11 +78,9 @@ uint8_t chargfx_get_cursor_y() {
 
 void chargfx_putc(char c) {
   int idx = cursor_y * TEXT_WIDTH + cursor_x;
-  if (c >= 32) {
-    screen[idx] = c - 32;
-    SetBit(changed, idx);
-    colors[idx] = (screen_fg_color << 4) | screen_bg_color; // todo: use a color_t
-  }
+  screen[idx] = c;
+  SetBit(changed, idx);
+  colors[idx] = (screen_fg_color << 4) | screen_bg_color; // todo: use a color_t
 }
 
 void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
@@ -200,7 +198,7 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
         uint16_t fg_color = palette[colors[idx] >> 4];
         uint16_t bg_color = palette[colors[idx] & 0xf];
 
-        const uint16_t *pixel_data = (character < 96) ? (*font)[character] : FONT_SPECIAL_BITMAP[character - 96];
+        const uint16_t *pixel_data = (*font)[character];
 
         // draw the character into the buffer
         for (int j = CHAR_HEIGHT - 1; j >= 0; j--) {

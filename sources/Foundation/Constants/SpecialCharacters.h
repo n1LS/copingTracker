@@ -151,6 +151,8 @@
 #define char_border_double_verticalRight_s "\xCC"
 #define char_border_double_cross_s "\xCE"
 
+#define char_dotted_horizontal_s "\xC6"
+
 #define string_battery_charging                                                                                        \
   char_battery_left_s char_battery_charging1_s char_battery_charging2_s char_battery_right_s
 #define string_battery_100_percent char_battery_left_s char_battery_full_s char_battery_full_s char_battery_right_s

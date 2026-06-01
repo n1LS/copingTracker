@@ -25,7 +25,7 @@ static char **getHelpLegend(FourCC command) {
     break;
   case FourCC::InstrumentCommandLoopOfset:
     result[0] = (char *)("Loop OFset: aaaa");
-    result[1] = (char *)("Shift loop start & end values aaaa");
+    result[1] = (char *)("Shift loop start&end by aaaa");
     break;
   case FourCC::InstrumentCommandArpeggiator:
     result[0] = (char *)("ARPeggio: abcd");
@@ -44,27 +44,27 @@ static char **getHelpLegend(FourCC command) {
     result[1] = (char *)("speed aa, slide to pitch bb");
     break;
   case FourCC::InstrumentCommandHop:
-    result[0] = (char *)("Hop: aabb");
+    result[0] = (char *)("HOP: aabb");
     result[1] = (char *)("hop to bb aa times");
     break;
   case FourCC::InstrumentCommandLegato:
-    result[0] = (char *)("Legato: aabb");
+    result[0] = (char *)("LEGato: aabb");
     result[1] = (char *)("slide to pitch bb at speed aa");
     break;
   case FourCC::InstrumentCommandRetrigger:
-    result[0] = (char *)("Retrigger: aabb");
+    result[0] = (char *)("ReTriGger: aabb");
     result[1] = (char *)("SAMPL:bb loop+aa ofst, MIDI:bb");
     break;
   case FourCC::InstrumentCommandTempo:
-    result[0] = (char *)("Tempo: aabb");
+    result[0] = (char *)("TemPO: aabb");
     result[1] = (char *)("set tempo to hex value aabb");
     break;
   case FourCC::InstrumentCommandMidiCC:
-    result[0] = (char *)("MIDI CC: aabb");
+    result[0] = (char *)("Midi CC: aabb");
     result[1] = (char *)("CC message aa value bb");
     break;
   case FourCC::InstrumentCommandMidiPC:
-    result[0] = (char *)("MIDI Program Change: --bb");
+    result[0] = (char *)("Midi Program Change: --bb");
     result[1] = (char *)("send program change bb");
     break;
   case FourCC::InstrumentCommandPlayOfset:
@@ -72,11 +72,11 @@ static char **getHelpLegend(FourCC command) {
     result[1] = (char *)("jmp abs aa & mv rel signed bb");
     break;
   case FourCC::InstrumentCommandFilterResonance:
-    result[0] = (char *)("FiLTer&Res: aabb");
+    result[0] = (char *)("Filter & ReS: aabb");
     result[1] = (char *)("speed aa, resonance bb");
     break;
   case FourCC::InstrumentCommandLowPassFilter:
-    result[0] = (char *)("FiLTeR: aabb");
+    result[0] = (char *)("FiLTer: aabb");
     result[1] = (char *)("cutoff aa, resonance bb");
     break;
   case FourCC::InstrumentCommandTable:
@@ -84,11 +84,11 @@ static char **getHelpLegend(FourCC command) {
     result[1] = (char *)("run table bb");
     break;
   case FourCC::InstrumentCommandCrush:
-    result[0] = (char *)("drive&CruSH: aa-b");
+    result[0] = (char *)("drive & CruSH: aa-b");
     result[1] = (char *)("drive aa crush -b");
     break;
   case FourCC::InstrumentCommandFilterCut:
-    result[0] = (char *)("FilterCuToff: aabb");
+    result[0] = (char *)("Filter CuToff: aabb");
     result[1] = (char *)("speed aa, target cutoff bb");
     break;
   case FourCC::InstrumentCommandPan:
@@ -100,7 +100,7 @@ static char **getHelpLegend(FourCC command) {
     result[1] = (char *)("set bb (aa > 0,set all tracks)");
     break;
   case FourCC::InstrumentCommandInstrumentRetrigger:
-    result[0] = (char *)("InstrumentReTrig: --bb");
+    result[0] = (char *)("Instrument ReTrigger: --bb");
     result[1] = (char *)("retrigger & transpose by bb");
     break;
   case FourCC::InstrumentCommandPitchFineTune:
@@ -108,23 +108,23 @@ static char **getHelpLegend(FourCC command) {
     result[1] = (char *)("speed aa, tune bb (~+/-1 st)");
     break;
   case FourCC::InstrumentCommandDelay:
-    result[0] = (char *)("Delay: ---b");
+    result[0] = (char *)("DeLaY: ---b");
     result[1] = (char *)("delay b+1 ticks");
     break;
   case FourCC::InstrumentCommandSetInstrumentParameter:
-    result[0] = (char *)("SetInstrumentParameter");
+    result[0] = (char *)("Set Instrument Parameter");
     result[1] = (char *)("aabb: set param aa to value bb");
     break;
   case FourCC::InstrumentCommandStop:
-    result[0] = (char *)("Stop table playback");
+    result[0] = (char *)("Stop Table Playback");
     result[1] = (char *)("");
     break;
   case FourCC::InstrumentCommandGateOff:
-    result[0] = (char *)("GateOff (Synth only)");
+    result[0] = (char *)("GateOFf: Synth only");
     result[1] = (char *)("");
     break;
   case FourCC::InstrumentCommandMidiChord:
-    result[0] = (char *)("MIDI Chord:abcd");
+    result[0] = (char *)("Midi CHord:abcd");
     result[1] = (char *)("send rel notes:+a,+b,+c,+d");
     break;
   case FourCC::InstrumentCommandVibrato:

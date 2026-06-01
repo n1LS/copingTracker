@@ -191,7 +191,6 @@ bool OpalInstrument::GetTableAutomation() {
 }
 
 void OpalInstrument::GetTableState(TableSaveState &state) {
-
 }
 
 void OpalInstrument::SetTableState(TableSaveState &state) {};

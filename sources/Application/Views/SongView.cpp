@@ -652,26 +652,17 @@ void SongView::processNormalButtonMask(unsigned int mask) {
     if (mask & EPBM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentSongPointer();
       if (*data != 0xFF) {
-        ViewType vt = VT_CHAIN;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
         viewData_->currentChain_ = *data;
-        SetChanged();
-        NotifyObservers(&ve);
+        Navigate(VT_CHAIN);
       }
     }
 
     if (mask & EPBM_UP) {
-      ViewType vt = VT_PROJECT;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_PROJECT);
     }
 
     if (mask & EPBM_DOWN) {
-      ViewType vt = VT_MIXER;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_MIXER);
     }
 
     if (mask & EPBM_PLAY) {
@@ -758,26 +749,17 @@ void SongView::processSelectionButtonMask(unsigned int mask) {
     if (mask & EPBM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentSongPointer();
       if (*data != 0xFF) {
-        ViewType vt = VT_CHAIN;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
         viewData_->currentChain_ = *data;
-        SetChanged();
-        NotifyObservers(&ve);
+        Navigate(VT_CHAIN);
       }
     }
 
     if (mask & EPBM_UP) {
-      ViewType vt = VT_PROJECT;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_PROJECT);
     }
 
     if (mask & EPBM_DOWN) {
-      ViewType vt = VT_MIXER;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_MIXER);
     }
 
     if (mask & EPBM_PLAY) {
@@ -813,15 +795,15 @@ void SongView::DrawView() {
   GUIRect selRect;
   if (clipboard_.active_) {
     selRect = GUIRect(clipboard_.x_, clipboard_.y_ + clipboard_.offset_, viewData_->songX_,
-      viewData_->songY_ + viewData_->songOffset_);
-      
+                      viewData_->songY_ + viewData_->songOffset_);
+
     selRect.Normalize();
   }
-    
+
   // Draw title
   GUIPoint pos = GetTitlePosition();
   Player *player = Player::GetInstance();
-  
+
   SetBackgroundColor(cNormal);
   SetColor(cBackground);
 
@@ -838,7 +820,7 @@ void SongView::DrawView() {
   // Display row numbers
   SetBackgroundColor(cBackground);
   SetColor(cHighlight1);
-  
+
   char row[3];
   pos = anchor;
   pos.x_ -= 3;
@@ -911,7 +893,7 @@ void SongView::DrawView() {
     }
     pos.y_ += dy;
   }
-  
+
   SetColor(cNormal);
 
   drawMap();

@@ -12,6 +12,7 @@
 #include "View.h"
 #include "Application/AppWindow.h"
 #include "Application/Player/Player.h"
+#include "Application/Utils/HelpLegend.h"
 #include "Application/Utils/char.h"
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/RecordView.h"
@@ -97,19 +98,19 @@ void View::drawMap() {
   // draw entire map
   SetColor(cNormal);
   SetBackgroundColor(cBackground);
-  
+
   char buffer[5];
   // row1
   DrawString(pos.x_, pos.y_, "D   ");
   pos.y_++;
   // row2
-  DrawString(pos.x_, pos.y_, "P G ");
+  DrawString(pos.x_, pos.y_, "P" char_dotted_horizontal_s "G ");
   pos.y_++;
   // row3
   DrawString(pos.x_, pos.y_, "SCPI");
   pos.y_++;
   // row4
-  DrawString(pos.x_, pos.y_, "M TT");
+  DrawString(pos.x_, pos.y_, "M" char_dotted_horizontal_s "TT");
 
   // draw current screen on map
   SetColor(cBackground);
@@ -175,7 +176,7 @@ void View::drawNotes() {
     bool highlighted = (i == viewData_->songX_);
     SetBackgroundColor(highlighted ? cHighlight2 : cHighlight1);
     SetColor(cBackground);
-    
+
     if (player->IsRunning() && viewData_->playMode_ != PM_AUDITION) {
       uint8_t sliceIndex = 0;
       if (player->GetPlayedSliceIndex(i, sliceIndex)) {
@@ -197,7 +198,7 @@ void View::drawNotes() {
       }
     } else {
       DrawString(pos.x_, pos.y_, "  "); // row for the note
-                                               // values
+                                        // values
       pos.y_++;
       DrawString(pos.x_, pos.y_, "  "); // row for the octive values
       pos.y_++;
@@ -224,8 +225,7 @@ void View::drawMasterVuMeter(Player *player, bool forceRedraw, uint8_t xoffset) 
   drawVUMeter(leftBars, rightBars, pos, 0, forceRedraw);
 }
 
-void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex,
-                       bool forceRedraw) {
+void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw) {
 
   // Clamp the values to the maximum height
   leftBars = std::min<int32_t>(leftBars, VU_METER_MAX);
@@ -569,30 +569,33 @@ void View::switchToRecordView() {
   // if (!Player::GetInstance()->IsRunning()) {
   //   RecordView::SetSourceViewType(viewType_);
   //   SampleEditorView::SetSourceViewType(viewType_);
-  //   ViewType vt = VT_RECORD;
-  //   ViewEvent ve(VET_SWITCH_VIEW, &vt);
-  //   SetChanged();
-  //   NotifyObservers(&ve);
+  //   Navigate(VT_RECORD);
   // }
 }
 
-void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height) {
-  
-  DrawChar(x, y, GLYPH(char_border_single_topLeft_s));
-  DrawChar(x + width- 1, y, GLYPH(char_border_single_topRight_s));
-  DrawChar(x, y + height - 1, GLYPH(char_border_single_bottomLeft_s));
-  DrawChar(x + width - 1, y + height - 1, GLYPH(char_border_single_bottomRight_s));
+void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick = false) {
+  const char *thickChars = char_border_double_topLeft_s char_border_double_topRight_s char_border_double_bottomLeft_s
+      char_border_double_bottomRight_s char_border_double_horizontal_s char_border_double_vertical_s;
+  const char *thinChars = char_border_double_topLeft_s char_border_double_topRight_s char_border_double_bottomLeft_s
+      char_border_double_bottomRight_s char_border_double_horizontal_s char_border_double_vertical_s;
+
+  const char *chars = thick ? thickChars : thinChars;
+
+  DrawChar(x, y, chars[0]);
+  DrawChar(x + width - 1, y, chars[1]);
+  DrawChar(x, y + height - 1, chars[2]);
+  DrawChar(x + width - 1, y + height - 1, chars[3]);
 
   // horizontal borders
   for (int32_t i = x + 1; i < x + width - 1; i++) {
-    DrawChar(i, y, GLYPH(char_border_single_horizontal_s));
-    DrawChar(i, y + height - 1, GLYPH(char_border_single_horizontal_s));
+    DrawChar(i, y, chars[4]);
+    DrawChar(i, y + height - 1, chars[4]);
   }
-  
+
   // left and right borders
   for (int32_t j = y + 1; j < y + height - 1; j++) {
-    DrawChar(x, j, GLYPH(char_border_single_vertical_s));
-    DrawChar(x + width - 1, j, GLYPH(char_border_single_vertical_s));
+    DrawChar(x, j, chars[5]);
+    DrawChar(x + width - 1, j, chars[5]);
   }
 }
 
@@ -616,5 +619,42 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
     bool thumb = (dy >= thumbPos) && (dy < thumbPos + thumbSize);
     const char *str = thumb ? char_block_full_s : char_border_single_vertical_s;
     DrawString(x, y + dy, str);
+  }
+}
+
+void View::drawHelpLegend(FourCC command) {
+  if (command == FourCC::InstrumentCommandNone) {
+    // no command -> no help text
+    return;
+  }
+
+  char **helpLegend = getHelpLegend(command);
+  char line[SCREEN_WIDTH]; // -1 for 1char space start of line
+  strcpy(line, helpLegend[0]);
+
+  // highlight the letters that are the symbol for the command
+  SetBackgroundColor(cBackground);
+
+  bool preColon = true;
+  for (size_t x = 0; x < strlen(line); x++) {
+    unsigned char c = line[x];
+
+    if (c == ':') {
+      preColon = false;
+    }
+
+    if (preColon && c >= 'A' && c <= 'Z') {
+      SetColor(cHighlight1);
+    } else {
+      SetColor(cNormal);
+    }
+
+    DrawChar(x, 0, line[x]);
+  }
+
+  memset(line, ' ', 32);
+  if (helpLegend[1] != NULL) {
+    strcpy(line, helpLegend[1]);
+    DrawString(0, 1, line);
   }
 }
