@@ -37,7 +37,7 @@ void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
     ((AppWindow &)w).SetBackgroundColor(cHighlight2);
     ((AppWindow &)w).SetColor(cBackground);
     w.DrawString(buffer, position);
-    
+
     int percentPos = -1;
     for (unsigned int i = 0; i < strlen(format_); i++) {
       if (format_[i] == '%') {
@@ -53,7 +53,7 @@ void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
       w.DrawString(buffer + offset, position);
     }
   } else {
-    DrawLabeledField(w, position, buffer);
+    DrawLabeledField(w, position, buffer, focus_);
   }
 }
 

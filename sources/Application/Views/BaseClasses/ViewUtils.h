@@ -5,7 +5,7 @@ class GUIWindow;
 struct GUIPoint;
 class ViewData;
 
-void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer);
+void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused = false);
 
 bool goProjectSamplesDir(ViewData *viewData_);
 

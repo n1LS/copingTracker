@@ -11,8 +11,8 @@
 
 #include "MessageBox.h"
 #include "System/Console/n_assert.h"
-#include <Application/AppWindow.h>
 #include "System/Console/nanoprintf.h"
+#include <Application/AppWindow.h>
 #include <new>
 
 static const char *buttonText[MBL_LAST] = {"Ok", "Yes", "Cancel", "No"};
@@ -80,7 +80,7 @@ void MessageBox::Destroy() {
 
 void MessageBox::DrawView() {
   SetBackgroundColor(cBackground);
-  
+
   // message size
   int size1 = line1_.size();
   int size2 = line2_.size();

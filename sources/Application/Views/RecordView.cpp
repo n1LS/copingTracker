@@ -93,10 +93,7 @@ void RecordView::ProcessButtonMask(unsigned short mask, bool pressed) {
       uiSavingActive_ = false;
       autoSwitchPending_ = false;
 
-      ViewType vt = sourceViewType_;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(sourceViewType_);
       return;
     }
 
@@ -110,10 +107,7 @@ void RecordView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
   if (mask & EPBM_NAV) {
     if (mask & EPBM_LEFT) {
-      ViewType vt = sourceViewType_;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(sourceViewType_);
       StopMonitoring();
       return;
     }

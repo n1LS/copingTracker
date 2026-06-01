@@ -788,10 +788,7 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
             viewData_->importViewStartDir = SAMPLES_LIB_DIR;
 
             // Go to import sample
-            ViewType vt = VT_IMPORT;
-            ViewEvent ve(VET_SWITCH_VIEW, &vt);
-            SetChanged();
-            NotifyObservers(&ve);
+            Navigate(VT_IMPORT);
           }
         } else {
           MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
@@ -877,23 +874,16 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
   } else if (mask & EPBM_NAV) {
     // NAV Modifier
     if (mask & EPBM_LEFT) {
-      ViewType vt = VT_PHRASE;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-
       // remove listening when leaving this screen
       getInstrument()->RemoveObserver(*this);
       ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
 
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_PHRASE);
     }
 
     if (mask & EPBM_DOWN) {
 
       // Go to table view
-
-      ViewType vt = VT_TABLE2;
-
       int i = viewData_->currentInstrumentID_;
       InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
       I_Instrument *instr = bank->GetInstrument(i);
@@ -901,9 +891,7 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
       if (table != VAR_OFF) {
         viewData_->currentTable_ = table;
       }
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_TABLE2);
     }
 
     if (mask & EPBM_PLAY) {
@@ -1034,10 +1022,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
   } break;
   case FourCC::ActionImport: {
     // Switch to the InstrumentImportView
-    ViewType vt = VT_INSTRUMENT_IMPORT;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
+    Navigate(VT_INSTRUMENT_IMPORT);
   } break;
   case FourCC::SampleInstrumentSample: {
     I_Instrument *instr = getInstrument();
@@ -1082,10 +1067,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       DoModal(mb);
       break;
     }
-    ViewType vt = VT_SAMPLE_SLICES;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
+    Navigate(VT_SAMPLE_SLICES);
   } break;
   case FourCC::MidiInstrumentProgram: {
     // When program value changes, send a MIDI Program Change message during

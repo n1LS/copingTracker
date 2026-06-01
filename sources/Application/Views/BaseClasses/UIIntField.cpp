@@ -38,11 +38,11 @@ void UIIntField::Draw(GUIWindow &w) {
   int value = *src_;
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
-  if (focus_) {
+  if (false && focus_) {
     ((AppWindow &)w).SetColor(cHighlight2);
     w.DrawString(buffer, position);
   } else {
-    DrawLabeledField(w, position, buffer);
+    DrawLabeledField(w, position, buffer, focus_);
   }
 }
 

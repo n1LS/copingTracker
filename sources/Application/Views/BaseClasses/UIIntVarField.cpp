@@ -63,12 +63,12 @@ void UIIntVarField::Draw(GUIWindow &w, int offset) {
     strcpy(buffer, "++wtf++");
   }
 
-  if (focus_) {
+  if (false && focus_) {
     ((AppWindow &)w).SetColor(cBackground);
     ((AppWindow &)w).SetBackgroundColor(cHighlight2);
     w.DrawString(buffer, position);
   } else {
-    DrawLabeledField(w, position, buffer);
+    DrawLabeledField(w, position, buffer, focus_);
   }
 }
 

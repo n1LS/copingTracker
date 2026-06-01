@@ -130,10 +130,7 @@ void SampleSlicesView::ProcessButtonMask(unsigned short mask, bool pressed) {
     if (mask & EPBM_LEFT) {
       // Go back to sample browser NAV+LEFT
       stopPreview();
-      ViewType vt = VT_INSTRUMENT;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_INSTRUMENT);
       return;
     }
     // For other NAV combinations, let parent handle it

@@ -155,10 +155,7 @@ void ThemeView::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (mask & EPBM_NAV) {
     if (mask & EPBM_LEFT) {
       // Go back to Device view with NAV+LEFT
-      ViewType vt = VT_DEVICE;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_DEVICE);
     }
   } else if (mask & EPBM_PLAY) {
     Player *player = Player::GetInstance();
@@ -319,10 +316,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   // Handle theme import action
   case FourCC::ActionImport: {
     // Switch to the ThemeImportView
-    ViewType vt = VT_THEME_IMPORT;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
+    Navigate(VT_THEME_IMPORT);
     return;
   }
   // Handle theme export action
@@ -487,10 +481,7 @@ void ThemeView::exportTheme() {
 
 void ThemeView::importTheme() {
   // Switch to the theme import view
-  ViewType vt = VT_THEME_IMPORT;
-  ViewEvent ve(VET_SWITCH_VIEW, &vt);
-  SetChanged();
-  NotifyObservers(&ve);
+  Navigate(VT_THEME_IMPORT);
 }
 void ThemeView::AnimationUpdate() {
   if (_forceRedraw) {

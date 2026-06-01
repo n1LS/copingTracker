@@ -24,7 +24,6 @@ void ConsoleView::ProcessButtonMask(unsigned short mask, bool pressed) {};
 
 void ConsoleView::DrawView() {
 
-
   SetColor(cNormal);
   GUIPoint pos(0, 0);
   for (int i = 0; i < CONSOLE_HEIGHT; i++) {

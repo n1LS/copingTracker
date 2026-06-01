@@ -25,3 +25,9 @@ void ScreenView::AnimationUpdate() {
   drawBattery();
   drawPowerButtonUI();
 }
+
+void ScreenView::Navigate(ViewType target) {
+  ViewEvent ve(VET_SWITCH_VIEW, &target);
+  SetChanged();
+  NotifyObservers(&ve);
+}

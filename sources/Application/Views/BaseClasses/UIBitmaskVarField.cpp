@@ -30,7 +30,7 @@ void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
   int value = src_.GetInt();
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
-  if (focus_) {
+  if (false && focus_) {
     ((AppWindow &)w).SetColor(cHighlight2);
     w.DrawString(buffer, position);
 
@@ -49,7 +49,7 @@ void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
       w.DrawString(buffer + offset, position);
     }
   } else {
-    DrawLabeledField(w, position, buffer);
+    DrawLabeledField(w, position, buffer, focus_);
   }
 }
 

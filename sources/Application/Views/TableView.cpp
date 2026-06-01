@@ -631,38 +631,25 @@ void TableView::processNormalButtonMask(unsigned short mask) {
     // ENTER modifier
     if (mask & EPBM_DOWN)
       updateCursorValue(-0x10);
-    if (mask & EPBM_UP)
+    else if (mask & EPBM_UP)
       updateCursorValue(0x10);
-    if (mask & EPBM_LEFT)
+    else if (mask & EPBM_LEFT)
       updateCursorValue(-0x01);
-    if (mask & EPBM_RIGHT)
+    else if (mask & EPBM_RIGHT)
       updateCursorValue(0x01);
-    if (mask == EPBM_ENTER)
+    else if (mask == EPBM_ENTER)
       pasteLast();
-    if (mask & EPBM_ALT)
+    else if (mask & EPBM_ALT)
       pasteClipboard();
   } else if (mask & EPBM_NAV) {
     // NAV Modifier
     if (mask & EPBM_UP) {
-      ViewType vt = (viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT);
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
-    }
-    if (mask & EPBM_LEFT) {
-      if (viewType_ == VT_TABLE2) {
-        ViewType vt = VT_TABLE;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
-        SetChanged();
-        NotifyObservers(&ve);
-      }
-    }
-    if (mask & EPBM_RIGHT) {
+      Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT));
+    } else if (mask & EPBM_LEFT) {
+      Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE);
+    } else if (mask & EPBM_RIGHT) {
       if (viewType_ == VT_TABLE) {
-        ViewType vt = VT_TABLE2;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
-        SetChanged();
-        NotifyObservers(&ve);
+        Navigate(VT_TABLE2);
       }
     }
     if (mask & EPBM_PLAY) {
@@ -709,10 +696,7 @@ void TableView::processSelectionButtonMask(unsigned short mask) {
 
       if (mask & EPBM_NAV) {
         if (mask & EPBM_UP) {
-          ViewType vt = VT_PHRASE;
-          ViewEvent ve(VET_SWITCH_VIEW, &vt);
-          SetChanged();
-          NotifyObservers(&ve);
+          Navigate(VT_PHRASE);
         }
         if (mask & EPBM_PLAY) {
           player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
@@ -758,7 +742,7 @@ void TableView::setTextProps(int row, int col) {
     }
   }
 
-  SetBackgroundColor(highlighted ? cHighlight2: cBackground);
+  SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
   SetColor(highlighted ? cBackground : cNormal);
 }
 
@@ -936,7 +920,7 @@ void TableView::AnimationUpdate() {
   // Handle any pending updates from OnPlayerUpdate using the consolidated flag
   // This ensures all UI drawing happens on the "main" thread (core0)
   if (needsUIUpdate_) {
-  
+
     // Draw notes
     drawNotes();
 
@@ -946,7 +930,7 @@ void TableView::AnimationUpdate() {
 
     // Clear all cursor columns first (positions 0, 9, 18 from anchor)
     SetBackgroundColor(cBackground);
-    
+
     for (int i = 0; i < 3; i++) {
       pos.x_ = anchor.x_ - 1 + (i * 9);
       for (int row = 0; row < 16; row++) {

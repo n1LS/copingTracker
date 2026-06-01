@@ -297,10 +297,7 @@ void SelectProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
       // R Modifier
       if ((mask & EPBM_NAV) && (mask & EPBM_LEFT)) {
         // Go to back "left" to Project Screen
-        ViewType vt = VT_PROJECT;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
-        SetChanged();
-        NotifyObservers(&ve);
+        Navigate(VT_PROJECT);
         return;
       } else {
         // No modifier

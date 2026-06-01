@@ -32,11 +32,11 @@ void UINoteVarField::Draw(GUIWindow &w, int offset) {
   note[4] = 0;
   npf_snprintf(buffer, sizeof(buffer), format_, note);
 
-  if (focus_) {
+  if (false && focus_) {
     ((AppWindow &)w).SetBackgroundColor(cHighlight2);
     ((AppWindow &)w).SetColor(cBackground);
     w.DrawString(buffer, position);
   } else {
-    DrawLabeledField(w, position, buffer);
+    DrawLabeledField(w, position, buffer, focus_);
   }
 }

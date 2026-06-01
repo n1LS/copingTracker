@@ -60,10 +60,7 @@ void ThemeImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
     changeSelection(mask & EPBM_EDIT ? LIST_PAGE_SIZE : 1);
   } else if ((mask & EPBM_LEFT) && (mask & EPBM_NAV)) {
     // Go to back "left" to theme screen
-    ViewType vt = VT_THEME;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
+    Navigate(VT_THEME);
     return;
   }
 }
@@ -175,10 +172,7 @@ void ThemeImportView::onImportThemeModalDismiss(View &, ModalView &dialog) {
     return;
   }
 
-  ViewType vt = VT_THEME;
-  ViewEvent ve(VET_SWITCH_VIEW, &vt);
-  SetChanged();
-  NotifyObservers(&ve);
+  Navigate(VT_THEME);
 }
 
 void ThemeImportView::setCurrentFolder() {

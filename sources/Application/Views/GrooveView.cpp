@@ -127,12 +127,10 @@ void GrooveView::ProcessButtonMask(unsigned short mask, bool pressed) {
   } else if (mask & EPBM_NAV) {
     // NAV Modifier
     if (mask & EPBM_DOWN) {
-      ViewType vt = VT_PHRASE;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
-    }
-    if (mask & EPBM_PLAY) {
+      Navigate(VT_PHRASE);
+    } else if (mask & EPBM_LEFT) {
+      Navigate(VT_PROJECT);
+    } else if (mask & EPBM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
   } else {
@@ -207,7 +205,7 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
   GUIPoint pos;
 
   SetBackgroundColor(cBackground);
-  
+
   pos.x_ = anchor.x_ - 1;
   pos.y_ = anchor.y_ + lastPosition_;
   DrawString(pos.x_, pos.y_, " ");

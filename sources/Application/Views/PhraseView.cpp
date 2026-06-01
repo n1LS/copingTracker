@@ -956,12 +956,8 @@ void PhraseView::processNormalButtonMask(unsigned short mask) {
   } else if (mask & EPBM_NAV) {
     // NAV Modifier
     if (mask & EPBM_LEFT) {
-      ViewType vt = VT_CHAIN;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
-    }
-    if (mask & EPBM_RIGHT) {
+      Navigate(VT_CHAIN);
+    } else if (mask & EPBM_RIGHT) {
       unsigned char *c = phrase_->instr_ + (16 * viewData_->currentPhrase_ + row_);
       if (*c != 0xFF) {
         viewData_->currentInstrumentID_ = *c;
@@ -969,17 +965,10 @@ void PhraseView::processNormalButtonMask(unsigned short mask) {
         viewData_->currentInstrumentID_ = lastInstr_;
       }
       if (viewData_->currentInstrumentID_ != 0xFF) {
-        ViewType vt = VT_INSTRUMENT;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
-        SetChanged();
-        NotifyObservers(&ve);
+        Navigate(VT_INSTRUMENT);
       }
-    }
-    if (mask & EPBM_DOWN) {
+    } else if (mask & EPBM_DOWN) {
       // Go to table view
-
-      ViewType vt = VT_TABLE;
-
       FourCC *cmd = phrase_->cmd1_ + (16 * viewData_->currentPhrase_ + row_);
       ushort *param = phrase_->param1_ + (16 * viewData_->currentPhrase_ + row_);
 
@@ -990,19 +979,13 @@ void PhraseView::processNormalButtonMask(unsigned short mask) {
       if (*cmd == FourCC::InstrumentCommandTable) {
         viewData_->currentTable_ = (*param) & (TABLE_COUNT - 1);
       }
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
-    }
 
-    if (mask & EPBM_UP) {
+      Navigate(VT_TABLE);
+    } else if (mask & EPBM_UP) {
       // Go to groove view
       stopAudition();
 
-      ViewType vt = VT_GROOVE;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_GROOVE);
     }
 
     if (mask & EPBM_PLAY) {
@@ -1066,10 +1049,7 @@ void PhraseView::processSelectionButtonMask(unsigned short mask) {
 
       if (mask & EPBM_NAV) {
         if (mask & EPBM_LEFT) {
-          ViewType vt = VT_CHAIN;
-          ViewEvent ve(VET_SWITCH_VIEW, &vt);
-          SetChanged();
-          NotifyObservers(&ve);
+          Navigate(VT_CHAIN);
         }
         if (mask & EPBM_RIGHT) {
           unsigned char *c = phrase_->instr_ + (16 * viewData_->currentPhrase_ + row_);
@@ -1078,10 +1058,7 @@ void PhraseView::processSelectionButtonMask(unsigned short mask) {
           } else {
             viewData_->currentInstrumentID_ = lastInstr_;
           }
-          ViewType vt = VT_INSTRUMENT;
-          ViewEvent ve(VET_SWITCH_VIEW, &vt);
-          SetChanged();
-          NotifyObservers(&ve);
+          Navigate(VT_INSTRUMENT);
         }
         if (mask & EPBM_PLAY) {
           player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);

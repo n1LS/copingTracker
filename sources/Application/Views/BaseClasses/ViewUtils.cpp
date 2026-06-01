@@ -7,24 +7,45 @@
 #define LABEL_COLOR cNormal
 #define VALUE_COLOR cEmphasis
 
-void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer) {
+void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused) {
   ((AppWindow &)w).SetBackgroundColor(cBackground);
-  
+
+  // grab colon position
   char *colon = strchr(buffer, ':');
+
   if (colon) {
-    char *cut = colon + 1;
-    char value = *cut;
-    *cut = '\0';
+    int index = colon - buffer;
+    buffer[index] = 0;
 
     ((AppWindow &)w).SetColor(LABEL_COLOR);
     w.DrawString(buffer, position);
-    position.x_ += strlen(buffer);
 
-    *cut = value; // restore char
-    ((AppWindow &)w).SetColor(VALUE_COLOR);
-    w.DrawString(cut, position);
+    position.x_ += strlen(buffer) + 1;
+    buffer += strlen(buffer) + 1;
+  }
+
+  if (focused) {
+    ((AppWindow &)w).SetBackgroundColor(cHighlight2);
+    ((AppWindow &)w).SetColor(cBackground);
+
+    w.DrawString(buffer, position);
+    /* todo: reenable cuttoff thingie for preciosion
+    int percentPos = -1;
+    for (unsigned int i = 0; i < strlen(format_); i++) {
+      if (format_[i] == '%') {
+        percentPos = i;
+        break;
+      };
+    };
+    if (percentPos >= 0) {
+      int offset = ( 4 - position_) + percentPos; // todo: replace 4 with prevision_
+      buffer[offset + 1] = 0;
+      position.x_ += offset;
+      ((AppWindow &)w).SetColor(cCursor); // todo: where does this happen?
+      w.DrawString(buffer + offset, position);
+    }
+    */
   } else {
-    // Fields that don't have a colon are all value
     ((AppWindow &)w).SetColor(VALUE_COLOR);
     w.DrawString(buffer, position);
   }
