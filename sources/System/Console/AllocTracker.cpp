@@ -38,7 +38,8 @@ struct SpinLock {
   std::atomic_flag &flag;
 }
 
-inline void log_alloc(const char *op, size_t size, size_t current, size_t current_bytes, size_t peak_bytes) {
+inline void
+log_alloc(const char *op, size_t size, size_t current, size_t current_bytes, size_t peak_bytes) {
   if (g_inLog) {
     return;
   }

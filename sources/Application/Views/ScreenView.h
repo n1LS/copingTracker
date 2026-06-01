@@ -25,6 +25,8 @@ public:
   virtual void OnFocus() {};
   virtual void AnimationUpdate() override;
 
+  void Navigate(ViewType target);
+
 private:
 };
 #endif

@@ -23,7 +23,7 @@ void UISwatchField::Draw(GUIWindow &w, int offset) {
 
   position.x_ += 1;
 
-  ((AppWindow &)w).SetColor(color_);
+  ((AppWindow &)w).SetBackgroundColor(color_);
   w.DrawString("   ", position);
   ((AppWindow &)w).SetColor(cNormal);
 }

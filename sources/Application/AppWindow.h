@@ -86,8 +86,7 @@ protected: // GUIWindow implementation
 
   // override draw string to avoid going too far off
   // the screen.
-  virtual void DrawString(const char *string, const GUIPoint &pos,
-                          bool overlay = false);
+  virtual void DrawString(const char *string, const GUIPoint &pos, bool overlay = false);
   virtual void DrawChar(const char c, const GUIPoint &pos);
 
   // I_Observer implementation
@@ -129,7 +128,7 @@ private:
   static unsigned char _preScreen[SCREEN_CHARS];
   static color_t _preScreenColor[SCREEN_CHARS];
 
-  color_t color_ = { .fg = cNormal, .bg = cBackground };
+  color_t color_ = {.fg = cNormal, .bg = cBackground};
 
   static int charWidth_;
   static int charHeight_;

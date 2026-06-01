@@ -503,20 +503,12 @@ void ChainView::processNormalButtonMask(unsigned short mask) {
   } else if (mask & EPBM_NAV) {
     // NAV Modifier
     if (mask & EPBM_LEFT) {
-      ViewType vt = VT_SONG;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
-    }
-
-    if (mask & EPBM_RIGHT) {
+      Navigate(VT_SONG);
+    } else if (mask & EPBM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentChainPointer();
       if (*data != 0xFF) {
-        ViewType vt = VT_PHRASE;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
         viewData_->currentPhrase_ = *data;
-        SetChanged();
-        NotifyObservers(&ve);
+        Navigate(VT_PHRASE);
       }
     }
 
@@ -590,20 +582,16 @@ void ChainView::processSelectionButtonMask(unsigned short mask) {
       if (mask & EPBM_NAV) {
 
         if (mask & EPBM_LEFT) {
-          ViewType vt = VT_SONG;
-          ViewEvent ve(VET_SWITCH_VIEW, &vt);
-          SetChanged();
-          NotifyObservers(&ve);
+          Navigate(VT_SONG);
+          ;
+          ;
         }
 
         if (mask & EPBM_RIGHT) {
           unsigned char *data = viewData_->GetCurrentChainPointer();
           if (*data != 0xFF) {
-            ViewType vt = VT_PHRASE;
-            ViewEvent ve(VET_SWITCH_VIEW, &vt);
             viewData_->currentPhrase_ = *data;
-            SetChanged();
-            NotifyObservers(&ve);
+            Navigate(VT_PHRASE);
           }
         }
 
@@ -665,11 +653,11 @@ void ChainView::setTextProps(int row, int col) {
 
 void ChainView::DrawView() {
   Clear();
-  
+
   GUIPoint pos = GetTitlePosition();
-  
+
   // Draw title
-  
+
   char title[20];
   SetBackgroundColor(cBackground);
   SetColor(cNormal);

@@ -133,7 +133,7 @@ void msd_mode_run() {
   // Initialize display
   chargfx_init();
   chargfx_set_font_index(2);
-  chargfx_set_palette_color(CHARGFX_BLACK, 0x000);  // black
+  chargfx_set_palette_color(CHARGFX_BLACK, 0x000); // black
   chargfx_set_palette_color(CHARGFX_GREEN, 0xFF0); // green
   chargfx_set_background(CHARGFX_BLACK);
   chargfx_set_foreground(CHARGFX_GREEN);

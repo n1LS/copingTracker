@@ -50,39 +50,39 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   Variable *v;
 
   v = config->FindVariable(FourCC::VarMidiDevice);
-  intVarField_.emplace_back(position, *v, "MIDI device: %s", 0, 3, 1, 1);
+  intVarField_.emplace_back(position, *v, "MIDI device  :%s", 0, 3, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(FourCC::VarMidiSync);
   // just hardcode max of 1, as only settings are "off" & "send"
-  intVarField_.emplace_back(position, *v, "MIDI sync: %s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "MIDI sync    :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(FourCC::VarLineOut);
-  intVarField_.emplace_back(position, *v, "Line Out Mode: %s", 0, 2, 1, 1);
+  intVarField_.emplace_back(position, *v, "Line Out Mode:%s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(FourCC::VarRemoteUI);
-  intVarField_.emplace_back(position, *v, "Remote UI: %s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Remote UI    :%s", 0, 1, 1, 1);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  (*intVarField_.rbegin()).AddObserver(*this);
+
+  position.y_ += 2;
+  v = config->FindVariable(FourCC::VarBacklightLevel);
+  // MIN brightness is 0xF (15)
+  intVarField_.emplace_back(position, *v, "Display brightness: %2.2X", 0xF, 0xFF, 1, 16);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(FourCC::VarImportResampler);
-  intVarField_.emplace_back(position, *v, "Import resampler: %s", 0, v->GetListSize() - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
-
-  position.y_ += 1;
-  v = config->FindVariable(FourCC::VarBacklightLevel);
-  // MIN brightness is 0xF (15)
-  intVarField_.emplace_back(position, *v, "Display brightness: %2.2X", 0xF, 0xFF, 1, 16);
+  intVarField_.emplace_back(position, *v, "Import resampler  :%s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
@@ -123,10 +123,7 @@ void DeviceView::ProcessButtonMask(unsigned short mask, bool pressed) {
     }
   } else if (mask & EPBM_NAV) {
     if (mask & EPBM_DOWN) {
-      ViewType vt = VT_PROJECT;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_PROJECT);
     }
   } else if (mask & EPBM_PLAY) {
     Player *player = Player::GetInstance();
@@ -210,10 +207,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
     return;
   }
   case FourCC::ActionShowTheme: {
-    ViewType vt = VT_THEME;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
+    Navigate(VT_THEME);
     return;
   }
   case FourCC::VarLineOut: {

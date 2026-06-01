@@ -64,14 +64,7 @@ enum ViewType {
   VT_RECORD             // Recording screen
 };
 
-enum ViewMode { 
-  VM_NORMAL, 
-  VM_NEW, 
-  VM_CLONE, 
-  VM_SELECTION, 
-  VM_MUTEON, 
-  VM_SOLOON 
-};
+enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
 
 // todo: this enum's values should be index color values while the keys themselves are purely functional
 enum Color {
@@ -93,12 +86,7 @@ enum Color {
   cReserved4,
 };
 
-enum ViewUpdateDirection { 
-  VUD_LEFT = 0, 
-  VUD_RIGHT, 
-  VUD_UP, 
-  VUD_DOWN 
-};
+enum ViewUpdateDirection { VUD_LEFT = 0, VUD_RIGHT, VUD_UP, VUD_DOWN };
 
 class View;
 class ModalView;
@@ -198,14 +186,14 @@ protected:
 
   void drawMap();
   void drawNotes();
+  void drawHelpLegend(FourCC command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
   void drawPlayTime(Player *player, GUIPoint pos);
-  void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex,
-                   bool forceRedraw = false);
+  void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
   void drawPowerButtonUI();
-  void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height);
+  void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
 
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
     // Extract both channels

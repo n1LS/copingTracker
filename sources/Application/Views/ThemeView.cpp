@@ -20,7 +20,7 @@
 #include <Application/Model/ThemeConstants.h>
 #include <stdint.h>
 
-#define FONT_FIELD_LINE 3
+#define FONT_FIELD_LINE 4
 
 #define COLOR_LABEL_WIDTH 12
 #define COMPONENT_SPACING 3
@@ -49,7 +49,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   actionField_.emplace_back("Export", FourCC::ActionExport, actionPos);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
-  actionPos.y_ += 1;
+  actionPos.y_ += 2;
 
   // Font selection
   position.y_ = FONT_FIELD_LINE;
@@ -58,7 +58,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
                             ThemeConstants::THEME_FONT_COUNT - 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
-  position.y_ += 2;
+  position.y_ += 1;
 
   // Get the current theme name from Config
   Variable *configThemeVar = config->FindVariable(FourCC::VarThemeName);
@@ -155,10 +155,7 @@ void ThemeView::ProcessButtonMask(unsigned short mask, bool pressed) {
   if (mask & EPBM_NAV) {
     if (mask & EPBM_LEFT) {
       // Go back to Device view with NAV+LEFT
-      ViewType vt = VT_DEVICE;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_DEVICE);
     }
   } else if (mask & EPBM_PLAY) {
     Player *player = Player::GetInstance();
@@ -186,7 +183,9 @@ void ThemeView::DrawView() {
   FieldView::Redraw();
 
   // just draw the RGB column headings directly:
-  DrawString(17, 6, "R  G  B");
+  SetBackgroundColor(cBackground);
+  SetColor(cConsole);
+  DrawString(17, 7, "R  G  B");
 }
 
 void ThemeView::addSwatchField(Color color, GUIPoint position) {
@@ -317,10 +316,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   // Handle theme import action
   case FourCC::ActionImport: {
     // Switch to the ThemeImportView
-    ViewType vt = VT_THEME_IMPORT;
-    ViewEvent ve(VET_SWITCH_VIEW, &vt);
-    SetChanged();
-    NotifyObservers(&ve);
+    Navigate(VT_THEME_IMPORT);
     return;
   }
   // Handle theme export action
@@ -485,10 +481,7 @@ void ThemeView::exportTheme() {
 
 void ThemeView::importTheme() {
   // Switch to the theme import view
-  ViewType vt = VT_THEME_IMPORT;
-  ViewEvent ve(VET_SWITCH_VIEW, &vt);
-  SetChanged();
-  NotifyObservers(&ve);
+  Navigate(VT_THEME_IMPORT);
 }
 void ThemeView::AnimationUpdate() {
   if (_forceRedraw) {

@@ -14,7 +14,6 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Model/Scale.h"
 #include "Application/Model/Table.h"
-#include "Application/Utils/HelpLegend.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
@@ -674,10 +673,7 @@ void PhraseView::pasteClipboard() {
   // Get number of row to paste
 
   int height = clipboard_.height_;
-  /*    if (row_+height>16) {
-          height=16-row_ ;
-      }
-    */
+
   uchar *dst1 = viewData_->song_->phrase_.note_ + 16 * viewData_->currentPhrase_;
   uchar *src1 = clipboard_.note_;
   uchar *dst2 = viewData_->song_->phrase_.instr_ + 16 * viewData_->currentPhrase_;
@@ -960,12 +956,8 @@ void PhraseView::processNormalButtonMask(unsigned short mask) {
   } else if (mask & EPBM_NAV) {
     // NAV Modifier
     if (mask & EPBM_LEFT) {
-      ViewType vt = VT_CHAIN;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
-    }
-    if (mask & EPBM_RIGHT) {
+      Navigate(VT_CHAIN);
+    } else if (mask & EPBM_RIGHT) {
       unsigned char *c = phrase_->instr_ + (16 * viewData_->currentPhrase_ + row_);
       if (*c != 0xFF) {
         viewData_->currentInstrumentID_ = *c;
@@ -973,17 +965,10 @@ void PhraseView::processNormalButtonMask(unsigned short mask) {
         viewData_->currentInstrumentID_ = lastInstr_;
       }
       if (viewData_->currentInstrumentID_ != 0xFF) {
-        ViewType vt = VT_INSTRUMENT;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
-        SetChanged();
-        NotifyObservers(&ve);
+        Navigate(VT_INSTRUMENT);
       }
-    }
-    if (mask & EPBM_DOWN) {
+    } else if (mask & EPBM_DOWN) {
       // Go to table view
-
-      ViewType vt = VT_TABLE;
-
       FourCC *cmd = phrase_->cmd1_ + (16 * viewData_->currentPhrase_ + row_);
       ushort *param = phrase_->param1_ + (16 * viewData_->currentPhrase_ + row_);
 
@@ -994,19 +979,13 @@ void PhraseView::processNormalButtonMask(unsigned short mask) {
       if (*cmd == FourCC::InstrumentCommandTable) {
         viewData_->currentTable_ = (*param) & (TABLE_COUNT - 1);
       }
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
-    }
 
-    if (mask & EPBM_UP) {
+      Navigate(VT_TABLE);
+    } else if (mask & EPBM_UP) {
       // Go to groove view
       stopAudition();
 
-      ViewType vt = VT_GROOVE;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_GROOVE);
     }
 
     if (mask & EPBM_PLAY) {
@@ -1070,10 +1049,7 @@ void PhraseView::processSelectionButtonMask(unsigned short mask) {
 
       if (mask & EPBM_NAV) {
         if (mask & EPBM_LEFT) {
-          ViewType vt = VT_CHAIN;
-          ViewEvent ve(VET_SWITCH_VIEW, &vt);
-          SetChanged();
-          NotifyObservers(&ve);
+          Navigate(VT_CHAIN);
         }
         if (mask & EPBM_RIGHT) {
           unsigned char *c = phrase_->instr_ + (16 * viewData_->currentPhrase_ + row_);
@@ -1082,10 +1058,7 @@ void PhraseView::processSelectionButtonMask(unsigned short mask) {
           } else {
             viewData_->currentInstrumentID_ = lastInstr_;
           }
-          ViewType vt = VT_INSTRUMENT;
-          ViewEvent ve(VET_SWITCH_VIEW, &vt);
-          SetChanged();
-          NotifyObservers(&ve);
+          Navigate(VT_INSTRUMENT);
         }
         if (mask & EPBM_PLAY) {
           player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
@@ -1264,7 +1237,7 @@ void PhraseView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 2 || col_ == 3)) {
-      printHelpLegend(command);
+      drawHelpLegend(command);
     }
   }
 
@@ -1297,7 +1270,7 @@ void PhraseView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 4 || col_ == 5)) {
-      printHelpLegend(command);
+      drawHelpLegend(command);
     }
   }
 
@@ -1434,29 +1407,4 @@ void PhraseView::AnimationUpdate() {
 
   // Flush the window to ensure changes are displayed
   w_.Flush();
-}
-void PhraseView::printHelpLegend(FourCC command) {
-  if (command == FourCC::InstrumentCommandNone) {
-    // no command -> no help text
-    return;
-  }
-
-  char **helpLegend = getHelpLegend(command);
-  char line[32]; //-1 for 1char space start of line
-  // first clear top line upto battery gauge
-  
-  SetBackgroundColor(cBackground);
-  SetColor(cNormal);
-
-  // TODO: remove if the below worksDrawString(0, 0, "                           ");
-  // TODO: use ClearTextRect instead of DrawString() once it is implemented
-  ClearTextRect(0, 0, SCREEN_WIDTH - BATTERY_GAUGE_WIDTH, 0);
-  strcpy(line, " ");
-  strcpy(line, helpLegend[0]);
-  DrawString(0, 0, line);
-  memset(line, ' ', 32);
-  if (helpLegend[1] != NULL) {
-    strcpy(line, helpLegend[1]);
-    DrawString(0, 1, line);
-  }
 }

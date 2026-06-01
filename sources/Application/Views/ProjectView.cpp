@@ -127,19 +127,19 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   GUIPoint position = GetAnchor();
 
   Variable *v = project_->FindVariable(FourCC::VarTempo);
-  tempoField_.emplace_back(FourCC::ActionTempoChanged, position, *v, "tempo: %d [%2.2X]  ", MIN_TEMPO, MAX_TEMPO, 1,
+  tempoField_.emplace_back(FourCC::ActionTempoChanged, position, *v, "Tempo     :%d [%2.2X]  ", MIN_TEMPO, MAX_TEMPO, 1,
                            10);
   fieldList_.insert(fieldList_.end(), &(*tempoField_.rbegin()));
   (*tempoField_.rbegin()).AddObserver(*this);
 
   v = project_->FindVariable(FourCC::VarMasterVolume);
   position.y_ += 1;
-  intVarField_.emplace_back(position, *v, "master vol: %d%%", 0, 100, 1, 5);
+  intVarField_.emplace_back(position, *v, "Master vol:%d%%", 0, 100, 1, 5);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   v = project_->FindVariable(FourCC::VarTranspose);
   position.y_ += 1;
-  intVarField_.emplace_back(position, *v, "transpose: %3.2d", -48, 48, 0x1, 0xC);
+  intVarField_.emplace_back(position, *v, "Transpose :%3.2d", -48, 48, 0x1, 0xC);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   v = project_->FindVariable(FourCC::VarScale);
@@ -148,13 +148,13 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
     v->SetInt(0);
   }
   position.y_ += 1;
-  intVarField_.emplace_back(position, *v, "scale: %s", 0, numScales - 1, 1, 10);
+  intVarField_.emplace_back(position, *v, "Scale     :%s", 0, numScales - 1, 1, 10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   // Add Scale Root field
   position.y_ += 1;
   v = project_->FindVariable(FourCC::VarScaleRoot);
-  intVarField_.emplace_back(position, *v, "scale root: %s", 0, 11, 1, 1);
+  intVarField_.emplace_back(position, *v, "Scale root:%s", 0, 11, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
@@ -178,7 +178,7 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   int xalign = position.x_;
 
   v = project_->FindVariable(FourCC::VarProjectName);
-  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("project: ");
+  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Project   :");
   auto defaultName = etl::make_string_with_capacity<MAX_PROJECT_NAME_LENGTH>(UNNAMED_PROJECT_NAME);
   textField_.emplace_back(*v, position, label, FourCC::ActionProjectRename, defaultName);
   nameField_ = &(*textField_.rbegin());
@@ -186,7 +186,7 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   nameField_->AddObserver(*this);
   fieldList_.insert(fieldList_.end(), nameField_);
 
-  position.y_ += 1;
+  position.y_ += 2;
   actionField_.emplace_back("Browse", FourCC::ActionBrowse, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
@@ -252,16 +252,11 @@ void ProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
     }
 
     if (mask & EPBM_DOWN) {
-      ViewType vt = VT_SONG;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
-    }
-    if (mask & EPBM_UP) {
-      ViewType vt = VT_DEVICE;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_SONG);
+    } else if (mask & EPBM_RIGHT) {
+      Navigate(VT_GROOVE);
+    } else if (mask & EPBM_UP) {
+      Navigate(VT_DEVICE);
     }
   } else if (mask & EPBM_PLAY) {
     Player *player = Player::GetInstance();
@@ -374,10 +369,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
     break;
   case FourCC::ActionBrowse: {
     if (CanExit()) {
-      ViewType vt = VT_SELECTPROJECT;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
-      SetChanged();
-      NotifyObservers(&ve);
+      Navigate(VT_SELECTPROJECT);
     }
     break;
   }
@@ -449,10 +441,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
         viewData_->isShowingSampleEditorProjectPool = true;
 
         // Go to import sample
-        ViewType vt = VT_IMPORT;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
-        SetChanged();
-        NotifyObservers(&ve);
+        Navigate(VT_IMPORT);
       }
     } else {
       MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
