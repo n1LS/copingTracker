@@ -24,7 +24,7 @@ void ConsoleView::ProcessButtonMask(unsigned short mask, bool pressed) {};
 
 void ConsoleView::DrawView() {
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   GUIPoint pos(0, 0);
   for (int i = 0; i < CONSOLE_HEIGHT; i++) {
     w_.DrawString(lines_[(currentLine_ + i) % CONSOLE_HEIGHT], pos);

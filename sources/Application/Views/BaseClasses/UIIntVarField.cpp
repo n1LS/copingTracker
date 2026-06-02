@@ -113,3 +113,10 @@ FourCC UIIntVarField::GetVariableID() {
 Variable &UIIntVarField::GetVariable() {
   return src_;
 }
+
+void UIIntVarField::SetRange(int min, int max, int xOffset, int yOffset) {
+  min_ = min;
+  max_ = max;
+  xOffset_ = xOffset;
+  yOffset_ = yOffset;
+}

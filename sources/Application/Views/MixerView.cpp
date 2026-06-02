@@ -203,11 +203,11 @@ void MixerView::ProcessButtonMask(unsigned short mask, bool pressed) {
   processNormalButtonMask(mask);
 }
 
-/******************************************************
+/*******************************************************************************
  processNormalButtonMask:
         process button mask in the case there is no
         selection active
- ******************************************************/
+******************************************************************************/
 
 // This method is no longer needed as we're using FieldView's field navigation
 void MixerView::processNormalButtonMask(unsigned int mask) {
@@ -243,11 +243,11 @@ void MixerView::processNormalButtonMask(unsigned int mask) {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  processSelectionButtonMask:
         process button mask in the case there is a
         selection active
- ******************************************************/
+******************************************************************************/
 void MixerView::processSelectionButtonMask(unsigned int mask) {
 
   if (mask & EPBM_EDIT) {
@@ -340,8 +340,8 @@ void MixerView::DrawView() {
   Project *project = player->GetProject(); // Use Player's GetProject method
 
   const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song" : "Live");
-  SetColor(cBackground);
-  SetBackgroundColor(cNormal);
+  SetColor(cccccBackground);
+  SetBackgroundColor(cccccNormal);
   DrawString(pos.x_, pos.y_, buffer);
 
   // Now draw busses
@@ -362,8 +362,8 @@ void MixerView::DrawView() {
     state[1] = '\0';
 
     bool highlighted = (i == viewData_->songX_);
-    SetColor(highlighted ? cBackground : cNormal);
-    SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
+    SetColor(highlighted ? cccccBackground : cccccNormal);
+    SetBackgroundColor(highlighted ? cccccHighlight2 : cccccBackground);
     DrawString(pos.x_, pos.y_, state);
     pos.x_ += CHANNELS_X_OFFSET_;
   }
@@ -377,10 +377,10 @@ void MixerView::DrawView() {
   // Align with master volume control
   labelPos.x_ += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
   labelPos.y_ = SCREEN_HEIGHT - 3; // Position below the volume control
-  SetBackgroundColor(cHighlight2);
-  SetColor(cBackground);
+  SetBackgroundColor(cccccHighlight2);
+  SetColor(cccccBackground);
   DrawString(labelPos.x_, labelPos.y_, "MB");
-  SetColor(cNormal);
+  SetColor(cccccNormal);
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);

@@ -30,8 +30,8 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
   strncpy(buffer, name_, MAX_FIELD_WIDTH);
   buffer[MAX_FIELD_WIDTH] = '\0';
 
-  ((AppWindow &)w).SetBackgroundColor(focus_ ? cHighlight1 : cBackground);
-  ((AppWindow &)w).SetColor(focus_ ? cBackground : cNormal);
+  ((AppWindow &)w).SetBackgroundColor(Theme::Button::bg(focus_));
+  ((AppWindow &)w).SetColor(Theme::Button::fg(focus_));
   w.DrawString(buffer, position);
 
   // add button ends

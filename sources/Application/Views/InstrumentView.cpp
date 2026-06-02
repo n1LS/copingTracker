@@ -918,7 +918,7 @@ void InstrumentView::DrawView() {
   // Draw title
 
   char title[26];
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   npf_snprintf(title, sizeof(title), "Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_,
                project_->GetInstrumentBank()->UsedInstrumentCount(), MAX_INSTRUMENT_COUNT);
   DrawString(pos.x_, pos.y_, title);
@@ -931,14 +931,14 @@ void InstrumentView::DrawView() {
   if (instr) {
     InstrumentType type = instr->GetType();
     if (type == IT_SID || type == IT_OPAL || type == IT_CHIPTUNE) {
-      SetColor(cWarn);
-      SetBackgroundColor(cBackground);
+      SetColor(cccccWarn);
+      SetBackgroundColor(cccccBackground);
       DrawString(18, 1, char_button_border_left_s);
       SwapColors();
       DrawString(19, 1, "EXPERIMENTAL");
       SwapColors();
       DrawString(31, 1, char_button_border_right_s);
-      SetColor(cNormal);
+      SetColor(cccccNormal);
     }
   }
 }

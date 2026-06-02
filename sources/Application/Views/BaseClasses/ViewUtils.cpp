@@ -4,8 +4,8 @@
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
 #include <string.h>
 
-#define LABEL_COLOR cNormal
-#define VALUE_COLOR cEmphasis
+#define LABEL_COLOR cccccNormal
+#define VALUE_COLOR cccccEmphasis
 
 int FindFormatValueOffset(const char *format) {
   for (unsigned int i = 0; i < strlen(format); i++) {
@@ -18,9 +18,8 @@ int FindFormatValueOffset(const char *format) {
 
 void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused, int subSelectionOffset,
                       int subSelectionLength) {
-  ((AppWindow &)w).SetBackgroundColor(cBackground);
+  ((AppWindow &)w).SetBackgroundColor(cccccBackground);
 
-  // grab colon position
   char *colon = strchr(buffer, ':');
   int valueOffset = 0;
 
@@ -37,8 +36,8 @@ void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focuse
   }
 
   if (focused) {
-    ((AppWindow &)w).SetBackgroundColor(cHighlight2);
-    ((AppWindow &)w).SetColor(cBackground);
+    ((AppWindow &)w).SetBackgroundColor(cccccHighlight2);
+    ((AppWindow &)w).SetColor(cccccBackground);
 
     w.DrawString(buffer, position);
 
@@ -52,7 +51,7 @@ void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focuse
       char replaced = buffer[valueSubSelectionOffset + subSelectionLength];
       buffer[valueSubSelectionOffset + subSelectionLength] = 0;
       position.x_ += valueSubSelectionOffset;
-      ((AppWindow &)w).SetBackgroundColor(cNormal);
+      ((AppWindow &)w).SetBackgroundColor(cccccNormal);
       w.DrawString(buffer + valueSubSelectionOffset, position);
       buffer[valueSubSelectionOffset + subSelectionLength] = replaced;
     }

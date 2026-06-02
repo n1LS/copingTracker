@@ -29,6 +29,7 @@ public:
   void ProcessClear();
   FourCC GetVariableID();
   Variable &GetVariable();
+  void SetRange(int min, int max, int xOffset, int yOffset);
 
 protected:
   Variable &src_;

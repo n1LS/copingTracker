@@ -14,7 +14,7 @@
 #include "ViewUtils.h"
 #include <string.h>
 
-UIStaticField::UIStaticField(const GUIPoint &position, const char *string) : UIField(position), color_(cNormal) {
+UIStaticField::UIStaticField(const GUIPoint &position, const char *string) : UIField(position), color_(cccccNormal) {
   string_ = string;
 }
 
@@ -24,7 +24,7 @@ void UIStaticField::Draw(GUIWindow &w, int offset) {
   position.y_ += offset;
 
   ((AppWindow &)w).SetColor(color_);
-  ((AppWindow &)w).SetBackgroundColor(cBackground);
+  ((AppWindow &)w).SetBackgroundColor(cccccBackground);
   w.DrawString(string_, position);
 }
 

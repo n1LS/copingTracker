@@ -12,6 +12,8 @@
 #ifndef _VIEW_H_
 #define _VIEW_H_
 
+#include <stdint.h>
+
 #include "Application/Model/Config.h"
 #include "Application/Model/Project.h"
 #include "Application/Player/Player.h"
@@ -28,6 +30,8 @@
 #define VU_METER_WARN_LEVEL 8
 #define ALT_ROW_NUMBER 4 // for now const vs a user setting
 
+#define NUM_COLORS 16
+
 enum GUIEventPadButtonMasks {
   EPBM_LEFT = 1,
   EPBM_DOWN = 2,
@@ -43,6 +47,7 @@ enum GUIEventPadButtonMasks {
 };
 
 enum ViewType {
+  // first layer screens
   VT_SONG,
   VT_CHAIN,
   VT_PHRASE,
@@ -53,6 +58,7 @@ enum ViewType {
   VT_TABLE2, // Table screen under instrument
   VT_GROOVE,
   VT_MIXER,
+  // second layer screens
   VT_IMPORT,            // Sample file import
   VT_INSTRUMENT_IMPORT, // Instrument file import
   VT_SELECTPROJECT,     // Select project
@@ -66,24 +72,80 @@ enum ViewType {
 
 enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
 
-// todo: this enum's values should be index color values while the keys themselves are purely functional
-enum Color {
-  cBackground,
-  cNormal,
-  cHighlight1,
-  cHighlight2,
-  cConsole,
-  cCursor,
-  cInfo,
-  cWarn,
-  cError,
-  cAccent,
-  cAccentAlt,
-  cEmphasis,
-  cReserved1,
-  cReserved2,
-  cReserved3,
-  cReserved4,
+typedef uint8_t Color;
+
+// todo: move somewhere else
+enum colorIndex : uint8_t {
+  BLACK,
+  RED,
+  GREEN,
+  YELLOW,
+  BLUE,
+  MAGENTA,
+  CYAN,
+  LIGHT_GRAY,
+  DARK_GRAY,
+  LIGHT_RED,
+  LIGHT_GREEN,
+  LIGHT_YELLOW,
+  LIGHT_BLUE,
+  LIGHT_MAGENTA,
+  LIGHT_CYAN,
+  WHITE
+};
+
+// todo prune
+enum OldColors : Color {
+  cccccBackground = 0,
+  cccccNormal = WHITE,
+  cccccHighlight1 = 1,
+  cccccHighlight2 = 2,
+  cccccConsole = 3,
+  cccccCursor = 4,
+  cccccInfo = 5,
+  cccccWarn = 6,
+  cccccError = 7,
+  cccccAccent = 8,
+  cccccAccentAlt = 9,
+  cccccEmphasis = 10
+};
+
+struct Theme {
+
+  struct Input {
+    static constexpr Color bg = BLACK;
+    static constexpr Color fg = WHITE;
+  };
+
+  struct Button {
+    static constexpr Color bg(bool highlighted) {
+      return highlighted ? WHITE : BLACK;
+    }
+    static constexpr Color fg(bool highlighted) {
+      return highlighted ? BLACK : LIGHT_BLUE;
+    }
+  };
+
+  struct View {
+    static constexpr Color bg = BLACK;
+    static constexpr Color fg = WHITE;
+
+    static constexpr Color index(bool highlighted) {
+      return highlighted ? CYAN : LIGHT_CYAN;
+    }
+  };
+
+  struct Dialog {
+    static constexpr Color bg = BLACK;
+    static constexpr Color fg = WHITE;
+  };
+
+  struct Song {
+    static constexpr Color placeholder = DARK_GRAY;
+    static constexpr Color fg(bool highlighted) {
+      return highlighted ? WHITE : LIGHT_GRAY;
+    }
+  };
 };
 
 enum ViewUpdateDirection { VUD_LEFT = 0, VUD_RIGHT, VUD_UP, VUD_DOWN };

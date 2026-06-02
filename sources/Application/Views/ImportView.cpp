@@ -318,7 +318,7 @@ void ImportView::DrawView() {
   char titleBuffer[40];
   npf_snprintf(titleBuffer, sizeof(titleBuffer), "%s", baseTitle);
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   DrawString(pos.x_ + 1, pos.y_, titleBuffer);
 
   // Draw samples
@@ -329,7 +329,7 @@ void ImportView::DrawView() {
 
   // Loop through visible files in the list
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
-    SetBackgroundColor(cBackground);
+    SetBackgroundColor(cccccBackground);
 
     unsigned fileIndex = fileIndexList_[i];
     etl::string<PFILENAME_SIZE> displayName;
@@ -347,17 +347,17 @@ void ImportView::DrawView() {
       // Format the display name with appropriate prefix
       if (inProjectSampleDir_ &&
           viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
-        SetColor(cAccent);
+        SetColor(cccccAccent);
         DrawString(x, y, "*");
       } else if (isSingleCycle) {
-        SetColor(cAccent);
+        SetColor(cccccAccent);
         DrawString(x, y, "~");
       } else {
-        SetColor(cNormal);
+        SetColor(cccccNormal);
         DrawString(x, y, " ");
       }
     } else {
-      SetColor(cAccent);
+      SetColor(cccccAccent);
       // Handle directories
       char tempBuffer[PFILENAME_SIZE];
       displayName = "/";
@@ -373,13 +373,13 @@ void ImportView::DrawView() {
     }
 
     bool highlighted = (i == currentIndex_);
-    SetColor(highlighted ? cBackground : cNormal);
-    SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
+    SetColor(highlighted ? cccccBackground : cccccNormal);
+    SetBackgroundColor(highlighted ? cccccHighlight2 : cccccBackground);
     DrawString(x + 1, y, displayName.c_str());
     y += 1;
   };
 
-  SetColor(cHighlight1);
+  SetColor(cccccHighlight1);
   y = SCREEN_HEIGHT - 2;
   if (inProjectSampleDir_) {
     if (selectedButton_ < 0 || selectedButton_ >= kProjectPoolButtonCount) {
@@ -396,8 +396,8 @@ void ImportView::DrawView() {
   }
 
   auto setColors = [&](bool selected) {
-    SetBackgroundColor(selected ? cHighlight2 : cBackground);
-    SetColor(selected ? cBackground : cHighlight1);
+    SetBackgroundColor(selected ? cccccHighlight2 : cccccBackground);
+    SetColor(selected ? cccccBackground : cccccHighlight1);
   };
 
   if (!inProjectSampleDir_) {
@@ -414,7 +414,7 @@ void ImportView::DrawView() {
   } else {
     if (fileIndexList_.empty()) {
       // draw this a few lines down from *top* of screen
-      SetColor(cNormal);
+      SetColor(cccccNormal);
       DrawString(2, 3, "[pool empty]");
     } else {
       // we make edit the first button to make things easier
@@ -434,7 +434,7 @@ void ImportView::DrawView() {
   y += 1;
 
   // draw current selected file size and available storage indicator
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   y = 0;
   uint32_t filesize = 0;
   if (!fileIndexList_.empty()) {
@@ -444,7 +444,7 @@ void ImportView::DrawView() {
       filesize = fs->getFileSize(currentFileIndex);
       // if file size is larger than available space, set color to warning
       if (filesize > availableSpace) {
-        SetColor(cWarn);
+        SetColor(cccccWarn);
       }
     }
   }
@@ -465,8 +465,8 @@ void ImportView::DrawView() {
 
   x = 1;  // align with rest screen title & file list
   y = 23; // bottom line
-  SetBackgroundColor(cBackground);
-  SetColor(cNormal);
+  SetBackgroundColor(cccccBackground);
+  SetColor(cccccNormal);
   DrawString(x, y, tempBuffer);
 }
 

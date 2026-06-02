@@ -12,6 +12,7 @@
 #include "SongView.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/char.h"
+#include "Application/Views/BaseClasses/View.h"
 #include "Application/Views/SampleEditorView.h"
 #include "System/Console/Trace.h"
 #include "System/System/System.h"
@@ -20,9 +21,9 @@
 #include <stdlib.h>
 #include <string>
 
-/****************
+/******************************************************************************
  Constructor
- ****************/
+ ******************************************************************************/
 
 SongView::SongView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
 
@@ -37,16 +38,16 @@ SongView::SongView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
   clipboard_.data_ = nullptr;
 }
 
-/****************
+/******************************************************************************
  Destructor
- ****************/
+******************************************************************************/
 
 SongView::~SongView() {
 }
 
-/****************
+/******************************************************************************
  Reset
- ****************/
+******************************************************************************/
 
 void SongView::Reset() {
   updatingChain_ = false;
@@ -75,11 +76,11 @@ void SongView::Reset() {
   needsPlayTimeUpdate_ = false;
 }
 
-/******************************************************
+/*******************************************************************************
  updateChain:
         update current chain value by adding offset
         parameter
- ******************************************************/
+******************************************************************************/
 
 void SongView::updateChain(int offset) {
 
@@ -91,10 +92,10 @@ void SongView::updateChain(int offset) {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  updateChain:
         set current chain value to value parameter
- ******************************************************/
+******************************************************************************/
 
 void SongView::setChain(unsigned char value) {
   viewData_->SetSongChain(value);
@@ -102,33 +103,33 @@ void SongView::setChain(unsigned char value) {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  updateSongOffset:
         modify top of the page row in song view by
         adding offset parameter
- ******************************************************/
+******************************************************************************/
 
 void SongView::updateSongOffset(int offset) {
   viewData_->UpdateSongOffset(offset);
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  updateCursor:
         modify location of cursor in view by
         adding dx & dy parameters
- ******************************************************/
+******************************************************************************/
 
 void SongView::updateCursor(int dx, int dy) {
   viewData_->UpdateSongCursor(dx, dy);
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  cutPosition:
         copy current position content to clipboard &
         erase current position value
- ******************************************************/
+******************************************************************************/
 
 void SongView::cutPosition() {
 
@@ -145,11 +146,11 @@ void SongView::cutPosition() {
   cutSelection();
 }
 
-/******************************************************
+/*******************************************************************************
  pastePosition:
         set current position to last chain value if
         current step is empty
- ******************************************************/
+******************************************************************************/
 
 void SongView::pasteLast() {
 
@@ -166,10 +167,10 @@ void SongView::pasteLast() {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  clonePosition:
         slim clone current position
- ******************************************************/
+******************************************************************************/
 
 void SongView::clonePosition() {
 
@@ -222,10 +223,10 @@ void SongView::extendSelection() {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  OnFocus:
         called when current view is becoming active
- ******************************************************/
+******************************************************************************/
 
 void SongView::OnFocus() {
   clipboard_.active_ = false;
@@ -246,10 +247,10 @@ GUIRect SongView::getSelectionRect() {
   return selRect;
 }
 
-/******************************************************
+/*******************************************************************************
  fillClipboard:
         fill clipboard with current selection value
- ******************************************************/
+******************************************************************************/
 
 void SongView::fillClipboardData() {
 
@@ -277,10 +278,10 @@ void SongView::fillClipboardData() {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  copySelection:
         copy current selection to clipboard
- ******************************************************/
+******************************************************************************/
 
 void SongView::copySelection() {
 
@@ -293,10 +294,10 @@ void SongView::copySelection() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  cutSelection:
         cut current selection to clipboard
- ******************************************************/
+******************************************************************************/
 
 void SongView::cutSelection() {
 
@@ -337,10 +338,10 @@ void SongView::cutSelection() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  pasteSelection:
         paste clipboard content to song
- ******************************************************/
+******************************************************************************/
 
 void SongView::pasteClipboard() {
 
@@ -511,11 +512,11 @@ void SongView::jumpToNextSection(int direction) {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  ProcessButtonMask:
         process button mask even coming from the main
         application window
- ******************************************************/
+******************************************************************************/
 
 void SongView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
@@ -578,11 +579,11 @@ void SongView::ProcessButtonMask(unsigned short mask, bool pressed) {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  processNormalButtonMask:
         process button mask in the case there is no
         selection active
- ******************************************************/
+******************************************************************************/
 
 void SongView::processNormalButtonMask(unsigned int mask) {
 
@@ -652,17 +653,26 @@ void SongView::processNormalButtonMask(unsigned int mask) {
     if (mask & EPBM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentSongPointer();
       if (*data != 0xFF) {
+        ViewType vt = VT_CHAIN;
+        ViewEvent ve(VET_SWITCH_VIEW, &vt);
         viewData_->currentChain_ = *data;
-        Navigate(VT_CHAIN);
+        SetChanged();
+        NotifyObservers(&ve);
       }
     }
 
     if (mask & EPBM_UP) {
-      Navigate(VT_PROJECT);
+      ViewType vt = VT_PROJECT;
+      ViewEvent ve(VET_SWITCH_VIEW, &vt);
+      SetChanged();
+      NotifyObservers(&ve);
     }
 
     if (mask & EPBM_DOWN) {
-      Navigate(VT_MIXER);
+      ViewType vt = VT_MIXER;
+      ViewEvent ve(VET_SWITCH_VIEW, &vt);
+      SetChanged();
+      NotifyObservers(&ve);
     }
 
     if (mask & EPBM_PLAY) {
@@ -712,11 +722,11 @@ void SongView::processNormalButtonMask(unsigned int mask) {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  processSelectionButtonMask:
         process button mask in the case there is a
         selection active
- ******************************************************/
+******************************************************************************/
 
 void SongView::processSelectionButtonMask(unsigned int mask) {
 
@@ -749,17 +759,26 @@ void SongView::processSelectionButtonMask(unsigned int mask) {
     if (mask & EPBM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentSongPointer();
       if (*data != 0xFF) {
+        ViewType vt = VT_CHAIN;
+        ViewEvent ve(VET_SWITCH_VIEW, &vt);
         viewData_->currentChain_ = *data;
-        Navigate(VT_CHAIN);
+        SetChanged();
+        NotifyObservers(&ve);
       }
     }
 
     if (mask & EPBM_UP) {
-      Navigate(VT_PROJECT);
+      ViewType vt = VT_PROJECT;
+      ViewEvent ve(VET_SWITCH_VIEW, &vt);
+      SetChanged();
+      NotifyObservers(&ve);
     }
 
     if (mask & EPBM_DOWN) {
-      Navigate(VT_MIXER);
+      ViewType vt = VT_MIXER;
+      ViewEvent ve(VET_SWITCH_VIEW, &vt);
+      SetChanged();
+      NotifyObservers(&ve);
     }
 
     if (mask & EPBM_PLAY) {
@@ -782,13 +801,13 @@ void SongView::processSelectionButtonMask(unsigned int mask) {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  Redraw:
         redraw completely the song view
- ******************************************************/
+******************************************************************************/
 
 void SongView::DrawView() {
-  SetBackgroundColor(cHighlight1);
+  SetBackgroundColor(cccccHighlight1);
   Clear();
 
   // Prepare selection related information
@@ -804,8 +823,8 @@ void SongView::DrawView() {
   GUIPoint pos = GetTitlePosition();
   Player *player = Player::GetInstance();
 
-  SetBackgroundColor(cNormal);
-  SetColor(cBackground);
+  SetBackgroundColor(Theme::View::fg);
+  SetColor(Theme::View::bg);
 
   const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song " : "Live ");
   DrawString(pos.x_, pos.y_, buffer);
@@ -818,21 +837,21 @@ void SongView::DrawView() {
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetBackgroundColor(cBackground);
-  SetColor(cHighlight1);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(cccccHighlight1);
 
   char row[3];
   pos = anchor;
   pos.x_ -= 3;
   for (int j = 0; j < View::songRowCount_; j++) {
     char p = j + viewData_->songOffset_;
-    ((p / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
+    SetColor(Theme::View::index(p % ALT_ROW_NUMBER == 0));
     hex2char(p, row);
     DrawString(pos.x_, pos.y_, row);
     pos.y_ += 1;
   }
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
 
   pos = anchor;
   unsigned char *data = viewData_->song_->data_ + (SONG_CHANNEL_COUNT * viewData_->songOffset_);
@@ -843,7 +862,6 @@ void SongView::DrawView() {
     pos.x_ = anchor.x_;
 
     for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-
       bool highlighted = false;
 
       // see if we need to invert current step
@@ -862,18 +880,13 @@ void SongView::DrawView() {
 
       // draw current step
       unsigned char d = *data++;
-      if (d == 0xFE) {
-        SetColor(cAccent);
-      } else if (d == 0x00) {
-        SetColor(cHighlight1);
-      } else {
-        SetColor(cNormal);
-      }
+      // last possible value gets special color to be more visible (typically this is the empty placeholder)
+      SetColor(d == 0xFE ? Theme::Song::placeholder : Theme::Song::fg(highlighted));
 
       if (highlighted) {
-        SetColor(cHighlight2);
         SwapColors();
       }
+
       if (d == 0xFF) {
         DrawString(pos.x_, pos.y_, "--");
       } else {
@@ -883,9 +896,8 @@ void SongView::DrawView() {
 
       // Put back drawing state
 
-      if (highlighted) {
-        SwapColors();
-      }
+      SetColor(Theme::View::fg);
+      SetBackgroundColor(Theme::View::bg);
 
       // Next step
 
@@ -894,7 +906,7 @@ void SongView::DrawView() {
     pos.y_ += dy;
   }
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
 
   drawMap();
   drawNotes();
@@ -904,12 +916,12 @@ void SongView::DrawView() {
   };
 }
 
-/******************************************************
+/*******************************************************************************
  OnPlayterUpdate:
         Called when positions in player change. Should
         provide visual feedback of currently played
         position
- ******************************************************/
+******************************************************************************/
 
 void SongView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
   // Since this can be called from core1 via the Observer pattern,
@@ -958,7 +970,7 @@ void SongView::AnimationUpdate() {
       GUIPoint timePos = 0;
       timePos.x_ = 27;
       timePos.y_ += 1;
-      SetColor(cNormal);
+      SetColor(Theme::View::fg);
       drawPlayTime(player, timePos);
       needsPlayTimeUpdate_ = false;
     }
@@ -968,8 +980,8 @@ void SongView::AnimationUpdate() {
     GUIPoint pos = anchor;
     pos.x_ -= 1;
 
-    SetColor(cCursor);
-    SetBackgroundColor(cBackground);
+    SetColor(cccccCursor);
+    SetBackgroundColor(Theme::View::bg);
 
     // Loop on all channels
     for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
@@ -993,15 +1005,15 @@ void SongView::AnimationUpdate() {
           int y = viewData_->songPlayPos_[i] - viewData_->songOffset_;
           if (y >= 0 && y < View::songRowCount_ && viewData_->playMode_ != PM_AUDITION) {
             pos.y_ = anchor.y_ + y;
-            SetBackgroundColor(cBackground);
+            SetBackgroundColor(Theme::View::bg);
             if (!player->IsChannelMuted(i)) {
-              SetColor(cAccent);
+              SetColor(cccccAccent);
               DrawString(pos.x_, pos.y_, ">");
             } else {
-              SetColor(cAccentAlt);
+              SetColor(cccccAccentAlt);
               DrawString(pos.x_, pos.y_, "-");
             }
-            SetColor(cCursor);
+            SetColor(cccccCursor);
             lastPlayedPosition_[i] = viewData_->songPlayPos_[i];
           }
         }

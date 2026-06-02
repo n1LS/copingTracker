@@ -74,7 +74,7 @@ void ThemeImportView::DrawView() {
 
   // Draw title
   const char *title = "Import Theme";
-  SetColor(cInfo);
+  SetColor(cccccInfo);
   DrawString(pos.x_ + 1, pos.y_, title);
 
   // Draw theme files
@@ -87,9 +87,9 @@ void ThemeImportView::DrawView() {
   char buffer[PFILENAME_SIZE];
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total); i++) {
     if (i == currentIndex_) {
-      SetColor(cHighlight2);
+      SetColor(cccccHighlight2);
     } else {
-      SetColor(cNormal);
+      SetColor(cccccNormal);
     }
 
     memset(buffer, '\0', sizeof(buffer));

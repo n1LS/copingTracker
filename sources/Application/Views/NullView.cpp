@@ -26,7 +26,7 @@ void NullView::DrawView() {
 
   Clear();
 
-  SetColor(cHighlight2);
+  SetColor(cccccHighlight2);
 
   char buildString[SCREEN_WIDTH + 1];
   // todo: update and merge with instance from appwindow

@@ -96,8 +96,8 @@ void View::drawMap() {
   GUIPoint pos(View::margin_, anchor.y_ + View::songRowCount_ + 1);
 
   // draw entire map
-  SetColor(cNormal);
-  SetBackgroundColor(cBackground);
+  SetColor(cccccNormal);
+  SetBackgroundColor(cccccBackground);
 
   char buffer[5];
   // row1
@@ -113,8 +113,8 @@ void View::drawMap() {
   DrawString(pos.x_, pos.y_, "M" char_dotted_horizontal_s "TT");
 
   // draw current screen on map
-  SetColor(cBackground);
-  SetBackgroundColor(cHighlight2);
+  SetColor(cccccBackground);
+  SetBackgroundColor(cccccHighlight2);
   pos.y_ = anchor.y_ + View::songRowCount_ + 1;
   switch (viewType_) {
   case VT_CHAIN:
@@ -174,8 +174,8 @@ void View::drawNotes() {
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     bool highlighted = (i == viewData_->songX_);
-    SetBackgroundColor(highlighted ? cHighlight2 : cHighlight1);
-    SetColor(cBackground);
+    SetBackgroundColor(highlighted ? cccccHighlight2 : cccccHighlight1);
+    SetColor(cccccBackground);
 
     if (player->IsRunning() && viewData_->playMode_ != PM_AUDITION) {
       uint8_t sliceIndex = 0;
@@ -274,11 +274,11 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
     for (int i = 0; i < VU_METER_HEIGHT; i++) {
       // Set appropriate color based on level
       if (i == VU_METER_CLIP_LEVEL) {
-        SetColor(cError);
+        SetColor(cccccError);
       } else if (i > VU_METER_WARN_LEVEL) {
-        SetColor(cWarn);
+        SetColor(cccccWarn);
       } else {
-        SetColor(cInfo);
+        SetColor(cccccInfo);
       }
 
       // draw left channel if changed
@@ -301,8 +301,8 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 void View::drawPlayTime(Player *player, GUIPoint pos) {
   char strbuffer[10];
 
-  SetBackgroundColor(cBackground);
-  SetColor(cNormal);
+  SetBackgroundColor(cccccBackground);
+  SetColor(cccccNormal);
   int time = int(player->GetPlayTime());
   int mi = time / 60;
   int se = time - mi * 60;
@@ -417,7 +417,7 @@ void View::DrawRect(GUIRect &r, Color color) {
 }
 
 void View::drawBattery() {
-  SetBackgroundColor(cBackground);
+  SetBackgroundColor(cccccBackground);
 
   const uint32_t frameCounter = AppWindow::GetAnimationFrameCounter();
   const bool sampleNow = (frameCounter % PICO_CLOCK_HZ) == 0;
@@ -457,11 +457,11 @@ void View::drawBattery() {
 
   Color batteryColor = CD_NORMAL;
   if (batteryPercent <= 5) {
-    batteryColor = cError;
+    batteryColor = cccccError;
   } else if (batteryPercent < 20) {
-    batteryColor = cWarn;
+    batteryColor = cccccWarn;
   } else if (batteryState_.charging) {
-    batteryColor = cInfo;
+    batteryColor = cccccInfo;
   }
 
   SetColor(batteryColor);
@@ -480,11 +480,11 @@ void View::drawBattery() {
 #else
   // use define to choose between drawing battery percentage or battery level as
   // bars
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   const char *battText = nullptr;
 
   if (batteryState_.charging) {
-    SetColor(cAccent);
+    SetColor(cccccAccent);
     battText = string_battery_charging;
   } else {
     if (batteryState_.percentage > 90) {
@@ -496,10 +496,10 @@ void View::drawBattery() {
     } else if (batteryState_.percentage > 35) {
       battText = string_battery_25_percent;
     } else if (batteryState_.percentage > 10) {
-      SetColor(cWarn);
+      SetColor(cccccWarn);
       battText = string_battery_0_percent;
     } else {
-      SetColor(cError);
+      SetColor(cccccError);
       battText = string_battery_0_percent;
     }
   }
@@ -540,7 +540,7 @@ void View::drawPowerButtonUI() {
     pos.y_ = SCREEN_HEIGHT / 2 - 1;
 
     // Draw a background box
-    SetBackgroundColor(cBackground);
+    SetBackgroundColor(cccccBackground);
     for (int y = pos.y_ - 1; y <= pos.y_ + 1; y++) {
       for (int x = pos.x_ - 1; x <= (uint16_t)(pos.x_ + mesgLen + 1); x++) {
         DrawString(x, y, " ");
@@ -548,7 +548,7 @@ void View::drawPowerButtonUI() {
     }
 
     // Draw the message
-    SetColor(cEmphasis);
+    SetColor(cccccEmphasis);
     DrawString(pos.x_, pos.y_, countdownMessage);
   } else if (powerButtonHoldCount_ > 0) {
     // Reset hold counter when button is released
@@ -604,7 +604,7 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
     return; // no scrollbar needed
   }
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
 
   // Thumb size represents the ratio of visible items to total items
   uint16_t thumbSize = std::max(1, (height * height) / total);
@@ -633,7 +633,7 @@ void View::drawHelpLegend(FourCC command) {
   strcpy(line, helpLegend[0]);
 
   // highlight the letters that are the symbol for the command
-  SetBackgroundColor(cBackground);
+  SetBackgroundColor(cccccBackground);
 
   bool preColon = true;
   for (size_t x = 0; x < strlen(line); x++) {
@@ -644,9 +644,9 @@ void View::drawHelpLegend(FourCC command) {
     }
 
     if (preColon && c >= 'A' && c <= 'Z') {
-      SetColor(cHighlight1);
+      SetColor(cccccHighlight1);
     } else {
-      SetColor(cNormal);
+      SetColor(cccccNormal);
     }
 
     DrawChar(x, 0, line[x]);

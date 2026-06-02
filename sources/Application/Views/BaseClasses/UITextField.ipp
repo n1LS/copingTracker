@@ -19,12 +19,12 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
   position.y_ += offset;
 
   // Draw the label
-  ((AppWindow &)w).SetBackgroundColor(cBackground);
-  ((AppWindow &)w).SetColor(cNormal);
+  ((AppWindow &)w).SetBackgroundColor(cccccBackground);
+  ((AppWindow &)w).SetColor(cccccNormal);
   w.DrawString(label_.c_str(), position);
   position.x_ += label_.length();
 
-  ((AppWindow &)w).SetColor(cEmphasis);
+  ((AppWindow &)w).SetColor(cccccEmphasis);
 
   auto srcString = src_->GetString();
   const char *value;
@@ -35,18 +35,18 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
     value = defaultValue_.c_str();
     len = defaultValue_.length();
     // Use a different color for default values to indicate they're not set
-    ((AppWindow &)w).SetColor(cEmphasis);
+    ((AppWindow &)w).SetColor(cccccEmphasis);
   } else {
     value = srcString.c_str();
     len = srcString.length();
   }
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(cBackground);
+    ((AppWindow &)w).SetColor(cccccBackground);
 
     if (len == 0) {
       // For empty fields, draw a cursor at the beginning position
-      ((AppWindow &)w).SetBackgroundColor(cCursor);
+      ((AppWindow &)w).SetBackgroundColor(cccccCursor);
       w.DrawString(" ", position);
     } else {
       char buffer[2];
@@ -55,14 +55,14 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
       for (int i = 0; i < len; i++) {
         buffer[0] = value[i];
         bool active = currentChar_ == i;
-        ((AppWindow &)w).SetBackgroundColor(active ? cCursor : cHighlight2);
+        ((AppWindow &)w).SetBackgroundColor(active ? cccccCursor : cccccHighlight2);
         w.DrawString(buffer, position);
         position.x_ += 1;
       }
     }
   } else {
     if (len != 0) {
-      ((AppWindow &)w).SetColor(cEmphasis);
+      ((AppWindow &)w).SetColor(cccccEmphasis);
       w.DrawString(value, position);
     }
   }

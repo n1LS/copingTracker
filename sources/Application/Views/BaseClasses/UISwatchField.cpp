@@ -25,7 +25,7 @@ void UISwatchField::Draw(GUIWindow &w, int offset) {
 
   ((AppWindow &)w).SetBackgroundColor(color_);
   w.DrawString("   ", position);
-  ((AppWindow &)w).SetColor(cNormal);
+  ((AppWindow &)w).SetColor(cccccNormal);
 }
 
 void UISwatchField::ProcessArrow(unsigned short mask) {};

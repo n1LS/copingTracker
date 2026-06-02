@@ -79,7 +79,7 @@ void MessageBox::Destroy() {
 }
 
 void MessageBox::DrawView() {
-  SetBackgroundColor(cBackground);
+  SetBackgroundColor(Theme::Dialog::bg);
 
   // message size
   int size1 = line1_.size();
@@ -97,7 +97,7 @@ void MessageBox::DrawView() {
   // draw text
   int y = 0;
   int x = (width - size) / 2;
-  SetColor(cNormal);
+  SetColor(Theme::Dialog::fg);
   DrawString(x, y, line1_.c_str());
   if (line2_.size() > 0) {
     y++;
@@ -111,8 +111,8 @@ void MessageBox::DrawView() {
     bool sel = i == selected_;
     const char *text = buttonText[button_[i]];
     x = offset * (i + 1) - strlen(text) / 2;
-    SetColor(sel ? cBackground : cHighlight1);
-    SetBackgroundColor(sel ? cHighlight2 : cBackground);
+    SetColor(Theme::Button::fg(sel));
+    SetBackgroundColor(Theme::Button::bg(sel));
     DrawString(x, y, text);
 
     if (sel) {

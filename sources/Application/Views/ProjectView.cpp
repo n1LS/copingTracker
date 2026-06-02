@@ -277,7 +277,7 @@ void ProjectView::DrawView() {
 
   GUIPoint pos = GetTitlePosition();
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
 
   // Draw title
   const char *title = "Project ";

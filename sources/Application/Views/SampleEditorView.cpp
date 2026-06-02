@@ -66,7 +66,7 @@ SampleEditorView::SampleEditorView(GUIWindow &w, ViewData *data)
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight) {
   assignWorkingFilename();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(cHighlight1, cHighlight2);
+  graphField_.SetBorderColors(cccccHighlight1, cccccHighlight2);
 }
 
 SampleEditorView::~SampleEditorView() {
@@ -92,7 +92,7 @@ void SampleEditorView::Reset() {
   hasWorkingCopy_ = false;
   graphField_.Reset();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(cHighlight1, cHighlight2);
+  graphField_.SetBorderColors(cccccHighlight1, cccccHighlight2);
   selectedMarker_ = MarkerStart;
 
   fieldList_.clear();
@@ -572,7 +572,7 @@ void SampleEditorView::DrawView() {
   char titleString[SCREEN_WIDTH];
   strcpy(titleString, "Sample Edit");
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   DrawString(pos.x_, pos.y_, titleString);
 
   if (HasModalView()) {
@@ -664,13 +664,13 @@ void SampleEditorView::updateGraphMarkers() {
   bool hasSample = tempSampleSize_ > 0;
 
   if (hasSample) {
-    Color startColor = (selectedMarker_ == MarkerStart) ? cHighlight2 : cAccent;
-    Color endColor = (selectedMarker_ == MarkerEnd) ? cHighlight2 : cAccent;
+    Color startColor = (selectedMarker_ == MarkerStart) ? cccccHighlight2 : cccccAccent;
+    Color endColor = (selectedMarker_ == MarkerEnd) ? cccccHighlight2 : cccccAccent;
     graphField_.SetMarker(0, start_, startColor, true);
     graphField_.SetMarker(1, end_, endColor, true);
   } else {
-    graphField_.SetMarker(0, 0, cAccent, false);
-    graphField_.SetMarker(1, 0, cAccent, false);
+    graphField_.SetMarker(0, 0, cccccAccent, false);
+    graphField_.SetMarker(1, 0, cccccAccent, false);
   }
 
   uint32_t playheadSample = 0;
@@ -682,7 +682,7 @@ void SampleEditorView::updateGraphMarkers() {
     }
     playheadVisible = true;
   }
-  graphField_.SetMarker(2, playheadSample, cNormal, playheadVisible);
+  graphField_.SetMarker(2, playheadSample, cccccNormal, playheadVisible);
 }
 
 void SampleEditorView::rebuildWaveform() {
@@ -1444,5 +1444,5 @@ void SampleEditorView::clearWaveformRegion() {
   GUIRect rrect;
   rrect = GUIRect(GraphXOffset, GraphYOffset, GraphXOffset + GraphField::BitmapWidth,
                   GraphYOffset + GraphField::BitmapHeight);
-  DrawRect(rrect, cBackground);
+  DrawRect(rrect, cccccBackground);
 }

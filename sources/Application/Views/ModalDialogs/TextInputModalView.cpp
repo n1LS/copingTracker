@@ -62,7 +62,7 @@ void TextInputModalView::DrawView() {
   SetWindow(width, 5);
 
   // Draw title
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   int x = (width - titleSize) / 2;
   DrawString(x, 0, title_.c_str());
 
@@ -72,14 +72,14 @@ void TextInputModalView::DrawView() {
 
   // Draw text field
   if (focus_ == &textField_) {
-    SetColor(cHighlight1);
+    SetColor(cccccHighlight1);
   } else {
-    SetColor(cNormal);
+    SetColor(cccccNormal);
   }
   textField_.Draw(w_);
 
   // Draw buttons (similar to MessageBox)
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   int y = 4; // Position for buttons
   int offset = width / (buttonCount_ + 1);
 

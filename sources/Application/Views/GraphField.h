@@ -86,7 +86,7 @@ private:
 
   struct Marker {
     uint32_t sample = 0;
-    Color color = cNormal;
+    Color color = cccccNormal;
     bool visible = false;
   };
 

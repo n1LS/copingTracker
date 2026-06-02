@@ -229,10 +229,10 @@ void TableView::cutSelection() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  pasteClipboard:
         copies data in the clipboard to the current step
- ******************************************************/
+******************************************************************************/
 
 void TableView::pasteClipboard() {
 
@@ -742,8 +742,8 @@ void TableView::setTextProps(int row, int col) {
     }
   }
 
-  SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
-  SetColor(highlighted ? cBackground : cNormal);
+  SetColor(highlighted ? cccccBackground : cccccNormal);
+  SetBackgroundColor(highlighted ? cccccNormal : cccccBackground);
 }
 
 void TableView::DrawView() {
@@ -757,7 +757,7 @@ void TableView::DrawView() {
   // Draw title
 
   char title[20];
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   npf_snprintf(title, sizeof(title), "Table %2.2X", viewData_->currentTable_);
   DrawString(pos.x_, pos.y_, title);
 
@@ -766,18 +766,18 @@ void TableView::DrawView() {
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetColor(cHighlight1);
+  SetColor(cccccHighlight1);
   char buffer[6];
   pos = anchor;
   pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
+    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cccccAccent) : SetColor(cccccAccentAlt);
     hex2char(j, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
 
   // Draw command 1
 
@@ -929,7 +929,7 @@ void TableView::AnimationUpdate() {
     GUIPoint pos = anchor;
 
     // Clear all cursor columns first (positions 0, 9, 18 from anchor)
-    SetBackgroundColor(cBackground);
+    SetBackgroundColor(cccccBackground);
 
     for (int i = 0; i < 3; i++) {
       pos.x_ = anchor.x_ - 1 + (i * 9);
@@ -948,8 +948,8 @@ void TableView::AnimationUpdate() {
       Table &viewTable = th->GetTable(viewData_->currentTable_);
 
       if (viewData_->playMode_ != PM_AUDITION) {
-        SetBackgroundColor(cBackground);
-        SetColor(cAccent);
+        SetBackgroundColor(cccccBackground);
+        SetColor(cccccAccent);
         if (tpb.GetTable() == &viewTable) {
           for (int i = 0; i < 3; i++) {
             int yPos = tpb.GetPlaybackPosition(i);

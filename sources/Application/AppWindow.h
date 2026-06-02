@@ -128,7 +128,7 @@ private:
   static unsigned char _preScreen[SCREEN_CHARS];
   static color_t _preScreenColor[SCREEN_CHARS];
 
-  color_t color_ = {.fg = cNormal, .bg = cBackground};
+  color_t color_ = {.fg = cccccNormal, .bg = cccccBackground};
 
   static int charWidth_;
   static int charHeight_;

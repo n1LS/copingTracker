@@ -482,11 +482,11 @@ void PhraseView::warpToNeighbour(int offset) {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  getSelectionRect:
         gets the normalized rectangle of the current
         selection. Valid only while selection is drawn
- ******************************************************/
+******************************************************************************/
 
 GUIRect PhraseView::getSelectionRect() {
   GUIRect r(clipboard_.col_, clipboard_.row_, col_, row_);
@@ -494,7 +494,7 @@ GUIRect PhraseView::getSelectionRect() {
   return r;
 }
 
-/******************************************************
+/*******************************************************************************
  fillClipboardData:
 
         copies the necessary information from the
@@ -502,7 +502,7 @@ GUIRect PhraseView::getSelectionRect() {
         paste. We're copying data all across the row
         because we"re too lazy to try to figure a better
         procedure
- ******************************************************/
+******************************************************************************/
 
 void PhraseView::fillClipboardData() {
 
@@ -585,11 +585,11 @@ void PhraseView::extendSelection() {
     isDirty_ = true;
   }
 }
-/******************************************************
+/*******************************************************************************
  copySelection:
         copies data in the current selection to the
         clipboard & end selection process
- ******************************************************/
+******************************************************************************/
 
 void PhraseView::copySelection() {
 
@@ -606,11 +606,11 @@ void PhraseView::copySelection() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  cut:  copies data in the current selection to the
        clipboard, clear selection content & end selection
        process
- ******************************************************/
+******************************************************************************/
 
 void PhraseView::cutSelection() {
 
@@ -663,10 +663,10 @@ void PhraseView::cutSelection() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  pasteClipboard:
         copies data in the clipboard to the current step
- ******************************************************/
+******************************************************************************/
 
 void PhraseView::pasteClipboard() {
 
@@ -1090,7 +1090,7 @@ void PhraseView::processSelectionButtonMask(unsigned short mask) {
   }
 }
 
-void PhraseView::setTextProps(int row, int col, Color textColor = cNormal) {
+void PhraseView::setTextProps(int row, int col, Color textColor = cccccNormal) {
   bool highlighted = false;
 
   if (clipboard_.active_) {
@@ -1104,8 +1104,8 @@ void PhraseView::setTextProps(int row, int col, Color textColor = cNormal) {
     }
   }
 
-  SetColor(highlighted ? cBackground : textColor);
-  SetBackgroundColor(highlighted ? textColor : cBackground);
+  SetColor(highlighted ? cccccBackground : textColor);
+  SetBackgroundColor(highlighted ? textColor : cccccBackground);
 }
 
 void PhraseView::DrawView() {
@@ -1118,8 +1118,8 @@ void PhraseView::DrawView() {
 
   char title[SCREEN_WIDTH + 1];
 
-  SetBackgroundColor(cBackground);
-  SetColor(cNormal);
+  SetBackgroundColor(cccccBackground);
+  SetColor(cccccNormal);
   npf_snprintf(title, sizeof(title), "Phrase %2.2X", viewData_->currentPhrase_);
   DrawString(pos.x_, pos.y_, title);
 
@@ -1129,18 +1129,18 @@ void PhraseView::DrawView() {
 
   // Display row numbers
 
-  SetColor(cHighlight1);
+  SetColor(cccccHighlight1);
   char buffer[6];
   pos = anchor;
   pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
+    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cccccAccent) : SetColor(cccccAccentAlt);
     hex2char(j, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
 
   pos = anchor;
 
@@ -1158,7 +1158,7 @@ void PhraseView::DrawView() {
       lastInstr = instr;
     }
     unsigned char effectiveInstr = lastInstr;
-    Color textColor = (0 == j || 4 == j || 8 == j || 12 == j) ? cHighlight1 : cNormal;
+    Color textColor = (0 == j || 4 == j || 8 == j || 12 == j) ? cccccHighlight1 : cccccNormal;
     setTextProps(0, j, textColor);
     if (d == NO_NOTE) {
       DrawString(pos.x_, pos.y_, "----");
@@ -1346,8 +1346,8 @@ void PhraseView::AnimationUpdate() {
     GUIPoint pos = anchor;
     pos.x_ -= 1;
 
-    SetBackgroundColor(cBackground);
-    SetColor(cNormal);
+    SetBackgroundColor(cccccBackground);
+    SetColor(cccccNormal);
 
     // Clear last played position
     pos.y_ = anchor.y_ + lastPlayingPos_;
@@ -1360,15 +1360,15 @@ void PhraseView::AnimationUpdate() {
         if (player->IsChannelPlaying(i)) {
           if (viewData_->currentPlayPhrase_[i] == viewData_->currentPhrase_ && viewData_->playMode_ != PM_AUDITION) {
             pos.y_ = anchor.y_ + viewData_->phrasePlayPos_[i];
-            SetBackgroundColor(cBackground);
+            SetBackgroundColor(cccccBackground);
             if (!player->IsChannelMuted(i)) {
-              SetColor(cAccent);
+              SetColor(cccccAccent);
               DrawString(pos.x_, pos.y_, ">");
             } else {
-              SetColor(cAccentAlt);
+              SetColor(cccccAccentAlt);
               DrawString(pos.x_, pos.y_, "-");
             }
-            SetColor(cCursor);
+            SetColor(cccccCursor);
             lastPlayingPos_ = viewData_->phrasePlayPos_[i];
             break;
           }
@@ -1380,7 +1380,7 @@ void PhraseView::AnimationUpdate() {
     if (player->GetSequencerMode() == SM_LIVE) {
       pos = anchor;
       pos.x_ -= 1;
-      SetColor(cAccent);
+      SetColor(cccccAccent);
 
       for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
         if (player->GetQueueingMode(i) != QM_NONE) {

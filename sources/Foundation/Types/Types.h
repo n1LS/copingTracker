@@ -153,26 +153,29 @@ struct FourCC {
     VarProjectName = 99,
     VarMidiDevice = 40,
     VarLineOut = 17,
-    VarFGColor = 103,
-    VarBGColor = 104,
-    VarHI1Color = 105,
-    VarHI2Color = 106,
-    VarConsoleColor = 107,
-    VarCursorColor = 108,
-    VarInfoColor = 109,
-    VarWarnColor = 110,
-    VarErrorColor = 111,
-    VarAccentColor = 152,
-    VarAccentAltColor = 153,
-    VarEmphasisColor = 154,
-    VarReserved1Color = 155,
-    VarReserved2Color = 156,
-    VarReserved3Color = 157,
-    VarReserved4Color = 158,
+    // colors
+    VarColor_0_Black = 104,
+    VarColor_1_Maroon = 105,
+    VarColor_2_Green = 106,
+    VarColor_3_Olive = 111,
+    VarColor_4_Blue = 152,
+    VarColor_5_Purple = 153,
+    VarColor_6_Turqoise = 154,
+    VarColor_7_LightyGray = 155,
+    VarColor_8_Gray = 107,
+    VarColor_9_Red = 110,
+    VarColor_A_Lime = 156,
+    VarColor_B_Yellow = 108,
+    VarColor_C_LightBlue = 157,
+    VarColor_D_Magenta = 158,
+    VarColor_E_Cyan = 109,
+    VarColor_F_White = 103,
+
     VarMidiSync = 112,
     VarMidiClockSync = 151,
     VarRemoteUI = 140,
     VarUIFont = 141,
+
     // 142 is taken for SIDInstrumentOSCNumber
     // 143 is taken for InstrumentCommandMidiChord
     // 144 is taken for InstrumentMidiName
@@ -399,22 +402,23 @@ struct FourCC {
   ETL_ENUM_TYPE(OPALInstrumentOp2WaveShape, "OP2WAVESHAPE")
   ETL_ENUM_TYPE(OPALInstrumentOp2TremVibSusKSR, "OP2TREMVIBSUSKSR")
 
-  ETL_ENUM_TYPE(VarFGColor, "FOREGROUND")
-  ETL_ENUM_TYPE(VarBGColor, "BACKGROUND")
-  ETL_ENUM_TYPE(VarHI1Color, "HICOLOR1")
-  ETL_ENUM_TYPE(VarHI2Color, "HICOLOR2")
-  ETL_ENUM_TYPE(VarConsoleColor, "CONSOLECOLOR")
-  ETL_ENUM_TYPE(VarCursorColor, "CURSORCOLOR")
-  ETL_ENUM_TYPE(VarInfoColor, "INFOCOLOR")
-  ETL_ENUM_TYPE(VarWarnColor, "WARNCOLOR")
-  ETL_ENUM_TYPE(VarErrorColor, "ERRORCOLOR")
-  ETL_ENUM_TYPE(VarAccentColor, "ACCENTCOLOR")
-  ETL_ENUM_TYPE(VarAccentAltColor, "ACCENTALTCOLOR")
-  ETL_ENUM_TYPE(VarEmphasisColor, "EMPHASISCOLOR")
-  ETL_ENUM_TYPE(VarReserved1Color, "RESERVED1COLOR")
-  ETL_ENUM_TYPE(VarReserved2Color, "RESERVED2COLOR")
-  ETL_ENUM_TYPE(VarReserved3Color, "RESERVED3COLOR")
-  ETL_ENUM_TYPE(VarReserved4Color, "RESERVED4COLOR")
+  ETL_ENUM_TYPE(VarColor_0_Black, "COLOR0")
+  ETL_ENUM_TYPE(VarColor_1_Maroon, "COLOR1")
+  ETL_ENUM_TYPE(VarColor_2_Green, "COLOR2")
+  ETL_ENUM_TYPE(VarColor_3_Olive, "COLOR3")
+  ETL_ENUM_TYPE(VarColor_4_Blue, "COLOR4")
+  ETL_ENUM_TYPE(VarColor_5_Purple, "COLOR5")
+  ETL_ENUM_TYPE(VarColor_6_Turqoise, "COLOR6")
+  ETL_ENUM_TYPE(VarColor_7_LightyGray, "COLOR7")
+  ETL_ENUM_TYPE(VarColor_8_Gray, "COLOR8")
+  ETL_ENUM_TYPE(VarColor_9_Red, "COLOR9")
+  ETL_ENUM_TYPE(VarColor_A_Lime, "COLOR10")
+  ETL_ENUM_TYPE(VarColor_B_Yellow, "COLOR11")
+  ETL_ENUM_TYPE(VarColor_C_LightBlue, "COLOR12")
+  ETL_ENUM_TYPE(VarColor_D_Magenta, "COLOR13")
+  ETL_ENUM_TYPE(VarColor_E_Cyan, "COLOR14")
+  ETL_ENUM_TYPE(VarColor_F_White, "COLOR15")
+
   ETL_ENUM_TYPE(VarTempo, "tempo")
   ETL_ENUM_TYPE(VarMasterVolume, "master")
   ETL_ENUM_TYPE(VarPreviewVolume, "preview")

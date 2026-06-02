@@ -130,30 +130,30 @@ void RecordView::DrawView() {
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   DrawString(pos.x_, pos.y_, "Record");
 
   // Draw recording status and time
   pos = GetAnchor();
   pos.y_ += 4;
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
 
   if (uiSavingActive_) {
-    SetColor(cError);
+    SetColor(cccccError);
     DrawString(pos.x_, pos.y_, "SAVING");
-    SetColor(cNormal);
+    SetColor(cccccNormal);
   } else if (uiRecordingActive_) {
-    SetColor(cError);
+    SetColor(cccccError);
     DrawString(pos.x_, pos.y_, "[REC]");
-    SetColor(cNormal);
+    SetColor(cccccNormal);
   } else {
     DrawString(pos.x_, pos.y_, "[---]");
   }
 
   // Draw time display
   if (uiRecordingActive_ || uiSavingActive_) {
-    SetColor(cError);
+    SetColor(cccccError);
   }
   pos.x_ += 7;
   if (uiSavingActive_) {
@@ -170,14 +170,14 @@ void RecordView::DrawView() {
   // Draw instructions
   pos.y_ += 2;
   pos.x_ = GetAnchor().x_;
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   const char *instruction = uiSavingActive_ ? "" : uiRecordingActive_ ? "PRESS PLAY TO STOP" : "PRESS PLAY TO RECORD";
   DrawString(pos.x_, pos.y_, instruction);
 
   // Draw fields
   FieldView::Redraw();
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
 }
 
 void RecordView::OnFocus() {

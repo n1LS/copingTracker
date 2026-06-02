@@ -67,7 +67,7 @@ color_t AppWindow::_screenColor[SCREEN_CHARS];
 unsigned char AppWindow::_preScreen[SCREEN_CHARS];
 color_t AppWindow::_preScreenColor[SCREEN_CHARS];
 
-GUIColor AppWindow::colorPalette_[16] = {
+GUIColor AppWindow::colorPalette_[NUM_COLORS] = {
     GUIColor(0x00, 0x00, 0x00), // 0: black
     GUIColor(0x80, 0x00, 0x00), // 1: dark red
     GUIColor(0x00, 0x80, 0x00), // 2: dark green
@@ -168,7 +168,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   UpdateColorsFromConfig();
 
-  GUIWindow::Clear(colorPalette_[cBackground]);
+  GUIWindow::Clear(colorPalette_[cccccBackground]);
 
   static AppWindowViews views(*this, viewData_);
   views_ = &views;
@@ -259,7 +259,7 @@ void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
 }
 
 void AppWindow::Clear(bool all) {
-  color_t base = (color_t){.fg = cNormal, .bg = cBackground};
+  color_t base = (color_t){.fg = cccccNormal, .bg = cccccBackground};
 
   memset(_charScreen, ' ', SCREEN_CHARS);
   memset(_screenColor, base.byte, SCREEN_CHARS);
@@ -531,22 +531,22 @@ void AppWindow::SetDirty() {
 
 void AppWindow::UpdateColorsFromConfig() {
   // now assign custom colors if they have been set device config
-  defineColor(FourCC::VarBGColor, colorPalette_[cBackground], 0);
-  defineColor(FourCC::VarFGColor, colorPalette_[cNormal], 1);
-  defineColor(FourCC::VarHI1Color, colorPalette_[cHighlight1], 2);
-  defineColor(FourCC::VarHI2Color, colorPalette_[cHighlight2], 3);
-  defineColor(FourCC::VarCursorColor, colorPalette_[cCursor], 4);
-  defineColor(FourCC::VarConsoleColor, colorPalette_[cConsole], 5);
-  defineColor(FourCC::VarInfoColor, colorPalette_[cInfo], 6);
-  defineColor(FourCC::VarWarnColor, colorPalette_[cWarn], 7);
-  defineColor(FourCC::VarErrorColor, colorPalette_[cError], 8);
-  defineColor(FourCC::VarAccentColor, colorPalette_[cAccent], 9);
-  defineColor(FourCC::VarAccentAltColor, colorPalette_[cAccentAlt], 10);
-  defineColor(FourCC::VarEmphasisColor, colorPalette_[cEmphasis], 11);
-  defineColor(FourCC::VarReserved1Color, colorPalette_[cReserved1], 12);
-  defineColor(FourCC::VarReserved2Color, colorPalette_[cReserved2], 13);
-  defineColor(FourCC::VarReserved3Color, colorPalette_[cReserved3], 14);
-  defineColor(FourCC::VarReserved4Color, colorPalette_[cReserved4], 15);
+  defineColor(FourCC::VarColor_0_Black, colorPalette_[0], 0);
+  defineColor(FourCC::VarColor_1_Maroon, colorPalette_[1], 1);
+  defineColor(FourCC::VarColor_2_Green, colorPalette_[2], 2);
+  defineColor(FourCC::VarColor_3_Olive, colorPalette_[3], 3);
+  defineColor(FourCC::VarColor_4_Blue, colorPalette_[4], 4);
+  defineColor(FourCC::VarColor_5_Purple, colorPalette_[5], 5);
+  defineColor(FourCC::VarColor_6_Turqoise, colorPalette_[6], 6);
+  defineColor(FourCC::VarColor_7_LightyGray, colorPalette_[7], 7);
+  defineColor(FourCC::VarColor_8_Gray, colorPalette_[8], 8);
+  defineColor(FourCC::VarColor_9_Red, colorPalette_[9], 9);
+  defineColor(FourCC::VarColor_A_Lime, colorPalette_[10], 10);
+  defineColor(FourCC::VarColor_B_Yellow, colorPalette_[11], 11);
+  defineColor(FourCC::VarColor_C_LightBlue, colorPalette_[12], 12);
+  defineColor(FourCC::VarColor_D_Magenta, colorPalette_[13], 13);
+  defineColor(FourCC::VarColor_E_Cyan, colorPalette_[14], 14);
+  defineColor(FourCC::VarColor_F_White, colorPalette_[15], 15);
 }
 
 bool AppWindow::onEvent(GUIEvent &event) {
@@ -616,7 +616,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
 void AppWindow::onUpdate(bool redraw) {
   if (redraw) {
-    GUIWindow::Clear(colorPalette_[cBackground], true);
+    GUIWindow::Clear(colorPalette_[cccccBackground], true);
     Clear(true);
     // Mark as dirty to trigger redraw in AnimationUpdate
     SetDirty();
@@ -831,7 +831,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
     }
     _currentView->SetFocus(*vt);
     SetDirty();
-    GUIWindow::Clear(colorPalette_[cBackground], true);
+    GUIWindow::Clear(colorPalette_[cccccBackground], true);
     Clear(true);
     break;
   }
@@ -893,7 +893,7 @@ void AppWindow::Print(char *line) {
 
 void AppWindow::PrintMultiLine(char *line) {
   Clear();
-  SetColor(cNormal);
+  SetColor(cccccNormal);
 
   int current_y = 11; // Start near the middle of the screen
 

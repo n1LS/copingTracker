@@ -141,12 +141,12 @@ void DeviceView::DrawView() {
   char projectString[SCREEN_WIDTH];
   strcpy(projectString, "Device");
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   DrawString(pos.x_, pos.y_, projectString);
 
   FieldView::Redraw();
 
-  SetColor(cNormal);
+  SetColor(cccccNormal);
   drawMap();
 
   pos.x_ = SCREEN_MAP_WIDTH + 1;
@@ -154,8 +154,8 @@ void DeviceView::DrawView() {
 
   // todo: also merge this with the other 2 instances in nullview and the other one
   npf_snprintf(projectString, sizeof(projectString), "Build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
-  SetBackgroundColor(cBackground);
-  SetColor(cConsole);
+  SetBackgroundColor(cccccBackground);
+  SetColor(cccccConsole);
   DrawString(pos.x_, pos.y_, projectString);
 }
 

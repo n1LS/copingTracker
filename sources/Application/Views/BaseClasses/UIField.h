@@ -30,7 +30,7 @@ public:
   void SetFocus();
   void ClearFocus();
   bool HasFocus();
-  void SetPosition(GUIPoint &);
+  void SetPosition(const GUIPoint &);
   GUIPoint GetPosition();
   GUIColor GetColor();
 
