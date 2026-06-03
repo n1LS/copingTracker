@@ -275,12 +275,12 @@ void GraphField::DrawGraph(View &view) {
   if (needsFullRedraw_) {
     GUIRect area(static_cast<int32_t>(x_) + 1, static_cast<int32_t>(y_) + 1, static_cast<int32_t>(x_) + width_ - 1,
                  static_cast<int32_t>(y_) + height_ - 1);
-    view.DrawRect(area, cccccBackground);
+    view.DrawRect(area, Theme::View::bg);
 
     if (showBaseline_) {
       int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
       GUIRect baseline(static_cast<int32_t>(x_) + 1, centerY, static_cast<int32_t>(x_) + width_ - 1, centerY + 1);
-      view.DrawRect(baseline, cccccHighlight2);
+      view.DrawRect(baseline, Theme::Waveform::baseline);
     }
 
     if (waveformValid_ && hasValidWindow()) {
@@ -301,7 +301,7 @@ void GraphField::DrawGraph(View &view) {
           endY = static_cast<int32_t>(y_) + height_ - 2;
         }
         GUIRect column(static_cast<int32_t>(x_) + 1 + x, startY, static_cast<int32_t>(x_) + 2 + x, endY);
-        view.DrawRect(column, cccccNormal);
+        view.DrawRect(column, Theme::View::fg);
       }
     }
 
@@ -391,12 +391,12 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
     return;
   }
   GUIRect clearRect(x, static_cast<int32_t>(y_) + 1, x + 1, static_cast<int32_t>(y_) + height_ - 1);
-  view.DrawRect(clearRect, cccccBackground);
+  view.DrawRect(clearRect, Theme::View::bg);
 
   if (showBaseline_) {
     int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
     GUIRect baseline(x, centerY, x + 1, centerY + 1);
-    view.DrawRect(baseline, cccccHighlight2);
+    view.DrawRect(baseline, Theme::Waveform::baseline);
   }
 
   if (!waveformValid_ || !hasValidWindow()) {
@@ -420,7 +420,7 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
     endY = static_cast<int32_t>(y_) + height_ - 2;
   }
   GUIRect column(x, startY, x + 1, endY);
-  view.DrawRect(column, cccccNormal);
+  view.DrawRect(column, Theme::View::fg);
 }
 
 void GraphField::drawMarkersAt(View &view, int32_t x) {
@@ -444,10 +444,10 @@ void GraphField::drawMarkersAt(View &view, int32_t x) {
 void GraphField::resetMarkerCache() {
   for (size_t i = 0; i < MaxMarkers; ++i) {
     markerPixelCache_[i] = -1;
-    markerColorCache_[i] = cccccNormal;
+    markerColorCache_[i] = Theme::Waveform::marker;
     markerVisibleCache_[i] = false;
     markers_[i].sample = 0;
-    markers_[i].color = cccccNormal;
+    markers_[i].color = Theme::Waveform::marker;
     markers_[i].visible = false;
   }
 }

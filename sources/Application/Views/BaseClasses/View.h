@@ -128,6 +128,11 @@ struct Theme {
     FIXED(normal, GREEN)
   };
 
+  struct Waveform {
+    FIXED(baseline, DARK_GRAY)
+    FIXED(marker, LIGHT_GRAY)
+  };
+
   struct Input {
     FIXED(cursor, WHITE)
     FIXED(placeholder, LIGHT_GRAY)
