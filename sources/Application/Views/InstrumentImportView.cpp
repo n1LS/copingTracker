@@ -98,10 +98,11 @@ void InstrumentImportView::DrawView() {
 
   // Draw title
   const char *title = "Import Instrument";
-  SetColor(cccccInfo);
-  DrawString(pos.x_ + 1, pos.y_, title);
+  SetColor(Theme::View::fg);
+  SetColor(Theme::View::fg);
+  DrawString(pos.x_, pos.y_, title);
 
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
 
   // Draw instrument files
   int x = 1;
@@ -114,7 +115,7 @@ void InstrumentImportView::DrawView() {
     if (i == currentIndex_) {
       SetColor(cccccHighlight2);
     } else {
-      SetColor(cccccNormal);
+      SetColor(Theme::View::fg);
     }
 
     memset(buffer, '\0', sizeof(buffer));

@@ -937,7 +937,7 @@ void InstrumentView::DrawView() {
     InstrumentType type = instr->GetType();
     if (type == IT_SID || type == IT_OPAL || type == IT_CHIPTUNE) {
       SetColor(Theme::VU::warn);
-      SetBackgroundColor(cccccBackground);
+      SetBackgroundColor(Theme::View::bg);
       DrawString(18, 1, char_button_border_left_s);
       SwapColors();
       DrawString(19, 1, "EXPERIMENTAL");

@@ -762,7 +762,7 @@ void TableView::DrawView() {
   // Draw title
 
   char title[20];
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
   npf_snprintf(title, sizeof(title), "Table %2.2X", viewData_->currentTable_);
   DrawString(pos.x_, pos.y_, title);
 
@@ -782,7 +782,7 @@ void TableView::DrawView() {
   }
   
   // Draw command 1
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
   pos = anchor;
 
   FourCC *f = table.cmd1_;
@@ -931,7 +931,7 @@ void TableView::AnimationUpdate() {
     GUIPoint pos = anchor;
 
     // Clear all cursor columns first (positions 0, 9, 18 from anchor)
-    SetBackgroundColor(cccccBackground);
+    SetBackgroundColor(Theme::View::bg);
 
     for (int i = 0; i < 3; i++) {
       pos.x_ = anchor.x_ - 1 + (i * 9);
@@ -950,7 +950,7 @@ void TableView::AnimationUpdate() {
       Table &viewTable = th->GetTable(viewData_->currentTable_);
 
       if (viewData_->playMode_ != PM_AUDITION) {
-        SetBackgroundColor(cccccBackground);
+        SetBackgroundColor(Theme::View::bg);
         SetColor(cccccAccent);
         if (tpb.GetTable() == &viewTable) {
           for (int i = 0; i < 3; i++) {

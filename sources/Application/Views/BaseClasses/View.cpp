@@ -304,8 +304,8 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 void View::drawPlayTime(Player *player, GUIPoint pos) {
   char strbuffer[10];
 
-  SetBackgroundColor(cccccBackground);
-  SetColor(cccccNormal);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
   int time = int(player->GetPlayTime());
   int mi = time / 60;
   int se = time - mi * 60;
@@ -420,7 +420,7 @@ void View::DrawRect(GUIRect &r, Color color) {
 }
 
 void View::drawBattery() {
-  SetBackgroundColor(cccccBackground);
+  SetBackgroundColor(Theme::View::bg);
 
   const uint32_t frameCounter = AppWindow::GetAnimationFrameCounter();
   const bool sampleNow = (frameCounter % PICO_CLOCK_HZ) == 0;
@@ -483,7 +483,7 @@ void View::drawBattery() {
 #else
   // use define to choose between drawing battery percentage or battery level as
   // bars
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
   const char *battText = nullptr;
 
   if (batteryState_.charging) {
@@ -543,7 +543,7 @@ void View::drawPowerButtonUI() {
     pos.y_ = SCREEN_HEIGHT / 2 - 1;
 
     // Draw a background box
-    SetBackgroundColor(cccccBackground);
+    SetBackgroundColor(Theme::View::bg);
     for (int y = pos.y_ - 1; y <= pos.y_ + 1; y++) {
       for (int x = pos.x_ - 1; x <= (uint16_t)(pos.x_ + mesgLen + 1); x++) {
         DrawString(x, y, " ");
@@ -607,7 +607,7 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
     return; // no scrollbar needed
   }
 
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
 
   // Thumb size represents the ratio of visible items to total items
   uint16_t thumbSize = std::max(1, (height * height) / total);

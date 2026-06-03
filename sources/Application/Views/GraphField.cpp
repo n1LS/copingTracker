@@ -20,7 +20,7 @@ int32_t GraphField::rmsSumSquares_[CacheSize];
 uint16_t GraphField::rmsCounts_[CacheSize];
 
 GraphField::GraphField(GUIPoint &position, int32_t width, int32_t height)
-    : UIField(position), width_(width), height_(height), showBaseline_(false), borderNormal_(cccccBackground),
+    : UIField(position), width_(width), height_(height), showBaseline_(false), borderNormal_(Theme::View::bg),
       borderFocused_(cccccHighlight2), waveformValid_(false), needsFullRedraw_(true), sampleSize_(0), zoomLevel_(0),
       maxZoomLevel_(0), viewStart_(0), viewEnd_(0), markerCount_(0) {
   std::memset(waveformCache_, 0, sizeof(waveformCache_));
@@ -43,13 +43,13 @@ void GraphField::Draw(GUIWindow &w, int offset) {
   w.DrawRect(bottomLine);
   w.DrawRect(left);
   w.DrawRect(rightLine);
-  w.SetCurrentRectColor(AppWindow::GetGUIColor(cccccNormal));
+  w.SetCurrentRectColor(AppWindow::GetGUIColor(Theme::View::fg));
 }
 
 void GraphField::Reset() {
   showBaseline_ = false;
-  borderNormal_ = cccccBackground;
-  borderFocused_ = cccccHighlight2;
+  borderNormal_ = Theme::View::bg;
+  borderFocused_ = Theme::View::fg;
   waveformValid_ = false;
   needsFullRedraw_ = true;
   sampleSize_ = 0;

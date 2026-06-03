@@ -146,8 +146,8 @@ void ThemeView::DrawView() {
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
-  SetBackgroundColor(cccccBackground);
-  SetColor(cccccNormal);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
   DrawString(pos.x_, pos.y_, "Theme Settings");
 
   // bit of a hack needed for font change as going from "standard" to "bold"
@@ -159,7 +159,7 @@ void ThemeView::DrawView() {
   FieldView::Redraw();
 
   // just draw the RGB column headings directly:
-  SetBackgroundColor(cccccBackground);
+  SetBackgroundColor(Theme::View::bg);
   SetColor(cccccConsole);
   DrawString(21, 7, "R  G  B");
 }
@@ -228,8 +228,8 @@ void ThemeView::updateColorComponentField() {
 }
 
 void ThemeView::drawColorComponentValues() {
-  SetBackgroundColor(cccccBackground);
-  SetColor(cccccNormal);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
 
   for (uint8_t colorIndex = 0; colorIndex < COLOR_COUNT; ++colorIndex) {
     for (uint8_t componentIndex = 0; componentIndex < COLOR_COMPONENT_COUNT; ++componentIndex) {

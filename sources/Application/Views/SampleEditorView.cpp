@@ -572,7 +572,7 @@ void SampleEditorView::DrawView() {
   char titleString[SCREEN_WIDTH];
   strcpy(titleString, "Sample Edit");
 
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
   DrawString(pos.x_, pos.y_, titleString);
 
   if (HasModalView()) {

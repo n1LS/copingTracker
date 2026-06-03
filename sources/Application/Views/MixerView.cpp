@@ -380,7 +380,7 @@ void MixerView::DrawView() {
   SetBackgroundColor(cccccHighlight2);
   SetColor(cccccBackground);
   DrawString(labelPos.x_, labelPos.y_, "MB");
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);

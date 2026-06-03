@@ -136,7 +136,7 @@ void DeleteProjectConfirmModal::ProcessButtonMask(unsigned short mask, bool pres
 void DeleteProjectConfirmModal::DrawView() {
   SetWindow(26, 6);
 
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
 
   const int projectLineX = (26 - projectLine_.size()) / 2;
   DrawString(projectLineX, 0, projectLine_.c_str());
@@ -198,7 +198,7 @@ void SelectProjectView::DrawView() {
   Clear();
 
   GUIPoint pos = GetTitlePosition();
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
 
   auto fs = FileSystem::GetInstance();
 
@@ -206,7 +206,7 @@ void SelectProjectView::DrawView() {
   const char *title = "Browse Projects";
   SetColor(cccccInfo);
   DrawString(pos.x_ + 1, pos.y_, title);
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
 
   // Draw projects
   int x = 1;

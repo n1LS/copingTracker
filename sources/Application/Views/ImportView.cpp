@@ -318,7 +318,7 @@ void ImportView::DrawView() {
   char titleBuffer[40];
   npf_snprintf(titleBuffer, sizeof(titleBuffer), "%s", baseTitle);
 
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
   DrawString(pos.x_ + 1, pos.y_, titleBuffer);
 
   // Draw samples
@@ -329,7 +329,7 @@ void ImportView::DrawView() {
 
   // Loop through visible files in the list
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
-    SetBackgroundColor(cccccBackground);
+    SetBackgroundColor(Theme::View::bg);
 
     unsigned fileIndex = fileIndexList_[i];
     etl::string<PFILENAME_SIZE> displayName;
@@ -353,7 +353,7 @@ void ImportView::DrawView() {
         SetColor(cccccAccent);
         DrawString(x, y, "~");
       } else {
-        SetColor(cccccNormal);
+        SetColor(Theme::View::fg);
         DrawString(x, y, " ");
       }
     } else {
@@ -414,7 +414,7 @@ void ImportView::DrawView() {
   } else {
     if (fileIndexList_.empty()) {
       // draw this a few lines down from *top* of screen
-      SetColor(cccccNormal);
+      SetColor(Theme::View::fg);
       DrawString(2, 3, "[pool empty]");
     } else {
       // we make edit the first button to make things easier
@@ -434,7 +434,7 @@ void ImportView::DrawView() {
   y += 1;
 
   // draw current selected file size and available storage indicator
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
   y = 0;
   uint32_t filesize = 0;
   if (!fileIndexList_.empty()) {
@@ -465,8 +465,8 @@ void ImportView::DrawView() {
 
   x = 1;  // align with rest screen title & file list
   y = 23; // bottom line
-  SetBackgroundColor(cccccBackground);
-  SetColor(cccccNormal);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
   DrawString(x, y, tempBuffer);
 }
 
