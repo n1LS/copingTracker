@@ -148,9 +148,11 @@ struct Theme {
     SWITCHABLE(index, LIGHT_CYAN, CYAN)
     SWITCHABLE(help, WHITE, LIGHT_GRAY)
 
+    // states
     FIXED(warning, LIGHT_YELLOW)
     FIXED(error, LIGHT_RED)
     FIXED(info, YELLOW)
+    FIXED(charging, GREEN)
 
     struct Map {
       SWITCHABLE(bg, LIGHT_GREEN, BLACK)

@@ -160,7 +160,7 @@ void ThemeView::DrawView() {
 
   // just draw the RGB column headings directly:
   SetBackgroundColor(Theme::View::bg);
-  SetColor(cccccConsole);
+  SetColor(Theme::View::inactive);
   DrawString(21, 7, "R  G  B");
 }
 

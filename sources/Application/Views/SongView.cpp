@@ -836,7 +836,6 @@ void SongView::DrawView() {
 
   // Display row numbers
   SetBackgroundColor(Theme::View::bg);
-  SetColor(cccccHighlight1);
 
   char row[3];
   pos = anchor;
@@ -974,7 +973,6 @@ void SongView::AnimationUpdate() {
     GUIPoint pos = anchor;
     pos.x_ -= 1;
 
-    SetColor(cccccCursor);
     SetBackgroundColor(Theme::View::bg);
 
     // Loop on all channels
@@ -1001,13 +999,12 @@ void SongView::AnimationUpdate() {
             pos.y_ = anchor.y_ + y;
             SetBackgroundColor(Theme::View::bg);
             if (!player->IsChannelMuted(i)) {
-              SetColor(cccccAccent);
+              SetColor(Theme::Song::Playback::active);
               DrawString(pos.x_, pos.y_, ">");
             } else {
-              SetColor(cccccAccentAlt);
+              SetColor(Theme::Song::Playback::muted);
               DrawString(pos.x_, pos.y_, "-");
             }
-            SetColor(cccccCursor);
             lastPlayedPosition_[i] = viewData_->songPlayPos_[i];
           }
         }
@@ -1020,6 +1017,7 @@ void SongView::AnimationUpdate() {
           if (y >= 0 && y < View::songRowCount_) {
             pos.y_ = anchor.y_ + y;
             const char *indicator = player->GetLiveIndicator(i);
+            SetColor(Theme::Song::Playback::active);
             DrawString(pos.x_, pos.y_, indicator);
             lastQueuedPosition_[i] = player->GetQueuePosition(i);
           }

@@ -747,8 +747,8 @@ void TableView::setTextProps(int row, int col) {
     }
   }
 
-  SetColor(highlighted ? cccccBackground : cccccNormal);
-  SetBackgroundColor(highlighted ? cccccNormal : cccccBackground);
+  SetColor(highlighted ? Theme::View::bg : Theme::View::fg);
+  SetBackgroundColor(highlighted ? Theme::View::fg : Theme::View::bg);
 }
 
 void TableView::DrawView() {
@@ -951,7 +951,8 @@ void TableView::AnimationUpdate() {
 
       if (viewData_->playMode_ != PM_AUDITION) {
         SetBackgroundColor(Theme::View::bg);
-        SetColor(cccccAccent);
+        SetColor(Theme::Song::Playback::active);
+        
         if (tpb.GetTable() == &viewTable) {
           for (int i = 0; i < 3; i++) {
             int yPos = tpb.GetPlaybackPosition(i);

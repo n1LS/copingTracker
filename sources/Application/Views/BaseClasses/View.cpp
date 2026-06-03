@@ -460,11 +460,11 @@ void View::drawBattery() {
 
   Color batteryColor = CD_NORMAL;
   if (batteryPercent <= 5) {
-    batteryColor = cccccError;
+    batteryColor = Theme::View::error;
   } else if (batteryPercent < 20) {
-    batteryColor = cccccWarn;
+    batteryColor = Theme::View::war ;
   } else if (batteryState_.charging) {
-    batteryColor = cccccInfo;
+    batteryColor = Theme::View::fg;
   }
 
   SetColor(batteryColor);
@@ -487,7 +487,7 @@ void View::drawBattery() {
   const char *battText = nullptr;
 
   if (batteryState_.charging) {
-    SetColor(cccccAccent);
+    SetColor(Theme::View::charging);
     battText = string_battery_charging;
   } else {
     if (batteryState_.percentage > 90) {
@@ -499,10 +499,10 @@ void View::drawBattery() {
     } else if (batteryState_.percentage > 35) {
       battText = string_battery_25_percent;
     } else if (batteryState_.percentage > 10) {
-      SetColor(cccccWarn);
+      SetColor(Theme::View::warning);
       battText = string_battery_0_percent;
     } else {
-      SetColor(cccccError);
+      SetColor(Theme::View::error);
       battText = string_battery_0_percent;
     }
   }
@@ -551,7 +551,7 @@ void View::drawPowerButtonUI() {
     }
 
     // Draw the message
-    SetColor(cccccEmphasis);
+    SetColor(Theme::View::info);
     DrawString(pos.x_, pos.y_, countdownMessage);
   } else if (powerButtonHoldCount_ > 0) {
     // Reset hold counter when button is released
