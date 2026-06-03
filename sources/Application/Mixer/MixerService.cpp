@@ -184,20 +184,20 @@ void MixerService::setRenderingMode(MixerServiceMode mode) {
   }
 
   switch (mode) {
-  case MSM_AUDIO:
-    out_->EnableRendering(false);
-    for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-      bus_[i].EnableRendering(false);
-    };
-    break;
-  case MSM_FILE:
-    out_->EnableRendering(true);
-    break;
-  case MSM_FILESPLIT:
-    for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-      bus_[i].EnableRendering(true);
-    };
-    break;
+    case MSM_AUDIO:
+      out_->EnableRendering(false);
+      for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+        bus_[i].EnableRendering(false);
+      };
+      break;
+    case MSM_FILE:
+      out_->EnableRendering(true);
+      break;
+    case MSM_FILESPLIT:
+      for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+        bus_[i].EnableRendering(true);
+      };
+      break;
   }
 }
 
@@ -240,14 +240,14 @@ void MixerService::Execute(FourCC id, float value) {
     Audio *audio = Audio::GetInstance();
     int volume = audio->GetMixerVolume();
     switch (id) {
-    case FourCC::TrigVolumeIncrease:
-      if (volume < 100)
-        volume += 1;
-      break;
-    case FourCC::TrigVolumeDecrease:
-      if (volume > 0)
-        volume -= 1;
-      break;
+      case FourCC::TrigVolumeIncrease:
+        if (volume < 100)
+          volume += 1;
+        break;
+      case FourCC::TrigVolumeDecrease:
+        if (volume > 0)
+          volume -= 1;
+        break;
     };
     audio->SetMixerVolume(volume);
   };

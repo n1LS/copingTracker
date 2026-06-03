@@ -14,7 +14,6 @@
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
-#include "Application/Views/ModalDialogs/TextInputModalView.h"
 #include "System/Console/Trace.h"
 #include "System/FileSystem/FileSystem.h"
 #include <Application/Model/ThemeConstants.h>
@@ -323,79 +322,84 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   }
 
   switch (fourcc) {
-  // Handle theme import action
-  case FourCC::ActionImport: {
-    // Switch to the ThemeImportView
-    Navigate(VT_THEME_IMPORT);
-    return;
-  }
-  // Handle theme export action
-  case FourCC::ActionExport: {
-    // Get the theme name from the text field
-    exportThemeName_ = themeNameField_->GetString();
+    // Handle theme import action
+    case FourCC::ActionImport:
+      {
+        // Switch to the ThemeImportView
+        Navigate(VT_THEME_IMPORT);
+        return;
+      }
+    // Handle theme export action
+    case FourCC::ActionExport:
+      {
+        // Get the theme name from the text field
+        exportThemeName_ = themeNameField_->GetString();
 
-    // Check if the theme name is empty
-    if (exportThemeName_.empty()) {
-      exportThemeName_ = ThemeConstants::DEFAULT_THEME_NAME;
-      themeNameVar_.SetString(exportThemeName_.c_str());
-      themeNameField_->SetVariable(themeNameVar_);
-    }
+        // Check if the theme name is empty
+        if (exportThemeName_.empty()) {
+          exportThemeName_ = ThemeConstants::DEFAULT_THEME_NAME;
+          themeNameVar_.SetString(exportThemeName_.c_str());
+          themeNameField_->SetVariable(themeNameVar_);
+        }
 
-    // Export the theme
-    handleThemeExport();
-    return;
-  }
-  // Handle theme name field
-  case FourCC::ActionThemeName: {
-    // Update the export theme name
-    exportThemeName_ = themeNameField_->GetString();
+        // Export the theme
+        handleThemeExport();
+        return;
+      }
+    // Handle theme name field
+    case FourCC::ActionThemeName:
+      {
+        // Update the export theme name
+        exportThemeName_ = themeNameField_->GetString();
 
-    // Update the theme name in the Config
-    Config *config = Config::GetInstance();
-    Variable *themeNameVar = config->FindVariable(FourCC::VarThemeName);
-    if (themeNameVar) {
-      themeNameVar->SetString(exportThemeName_.c_str());
-      configDirty_ = true;
-    }
-    themeNameVar_.SetString(exportThemeName_.c_str());
-    return;
-  }
-  // if font changes call redraw all fields
-  case FourCC::VarUIFont: {
-    // need to force redraw of entire screen to update for font change
-    ForceClear();
-    DrawView();
-    configDirty_ = true;
-    break;
-  }
-  // Handle color variable changes
-  case FourCC::VarColor_0_Black:
-  case FourCC::VarColor_1_Maroon:
-  case FourCC::VarColor_2_Green:
-  case FourCC::VarColor_3_Olive:
-  case FourCC::VarColor_4_Blue:
-  case FourCC::VarColor_5_Purple:
-  case FourCC::VarColor_6_Turqoise:
-  case FourCC::VarColor_7_LightyGray:
-  case FourCC::VarColor_A_Lime:
-  case FourCC::VarColor_8_Gray:
-  case FourCC::VarColor_9_Red:
-  case FourCC::VarColor_B_Yellow:
-  case FourCC::VarColor_C_LightBlue:
-  case FourCC::VarColor_D_Magenta:
-  case FourCC::VarColor_E_Cyan:
-  case FourCC::VarColor_F_White: {
-    // Update the AppWindow's color values from Config
-    ((AppWindow &)w_).UpdateColorsFromConfig();
+        // Update the theme name in the Config
+        Config *config = Config::GetInstance();
+        Variable *themeNameVar = config->FindVariable(FourCC::VarThemeName);
+        if (themeNameVar) {
+          themeNameVar->SetString(exportThemeName_.c_str());
+          configDirty_ = true;
+        }
+        themeNameVar_.SetString(exportThemeName_.c_str());
+        return;
+      }
+    // if font changes call redraw all fields
+    case FourCC::VarUIFont:
+      {
+        // need to force redraw of entire screen to update for font change
+        ForceClear();
+        DrawView();
+        configDirty_ = true;
+        break;
+      }
+    // Handle color variable changes
+    case FourCC::VarColor_0_Black:
+    case FourCC::VarColor_1_Maroon:
+    case FourCC::VarColor_2_Green:
+    case FourCC::VarColor_3_Olive:
+    case FourCC::VarColor_4_Blue:
+    case FourCC::VarColor_5_Purple:
+    case FourCC::VarColor_6_Turqoise:
+    case FourCC::VarColor_7_LightyGray:
+    case FourCC::VarColor_A_Lime:
+    case FourCC::VarColor_8_Gray:
+    case FourCC::VarColor_9_Red:
+    case FourCC::VarColor_B_Yellow:
+    case FourCC::VarColor_C_LightBlue:
+    case FourCC::VarColor_D_Magenta:
+    case FourCC::VarColor_E_Cyan:
+    case FourCC::VarColor_F_White:
+      {
+        // Update the AppWindow's color values from Config
+        ((AppWindow &)w_).UpdateColorsFromConfig();
 
-    // Force a redraw of the entire screen to update all colors
-    forceRedraw_ = true;
-    configDirty_ = true;
-    break;
-  }
-  default:
-    NInvalid;
-    break;
+        // Force a redraw of the entire screen to update all colors
+        forceRedraw_ = true;
+        configDirty_ = true;
+        break;
+      }
+    default:
+      NInvalid;
+      break;
   };
 }
 

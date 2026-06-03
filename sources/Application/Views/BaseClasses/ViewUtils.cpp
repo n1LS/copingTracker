@@ -4,9 +4,6 @@
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
 #include <string.h>
 
-#define LABEL_COLOR cccccNormal
-#define VALUE_COLOR cccccEmphasis
-
 int FindFormatValueOffset(const char *format) {
   for (unsigned int i = 0; i < strlen(format); i++) {
     if (format[i] == '%') {
@@ -17,8 +14,9 @@ int FindFormatValueOffset(const char *format) {
 }
 
 void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused, int subSelectionOffset,
-                      int subSelectionLength) {
-  ((AppWindow &)w).SetBackgroundColor(cccccBackground);
+  int subSelectionLength) {
+  ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
+  ((AppWindow &)w).SetColor(Theme::View::fg);
 
   char *colon = strchr(buffer, ':');
   int valueOffset = 0;
@@ -28,16 +26,16 @@ void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focuse
     buffer[index] = 0;
     valueOffset = index + 1;
 
-    ((AppWindow &)w).SetColor(LABEL_COLOR);
+    ((AppWindow &)w).SetColor(Theme::Input::label);
     w.DrawString(buffer, position);
 
-    position.x_ += strlen(buffer) + 1;
-    buffer += strlen(buffer) + 1;
+    position.x_ += index + 1;
+    buffer += index + 1;
   }
 
   if (focused) {
-    ((AppWindow &)w).SetBackgroundColor(cccccHighlight2);
-    ((AppWindow &)w).SetColor(cccccBackground);
+    ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(true));
+    ((AppWindow &)w).SetColor(Theme::Input::fg(true));
 
     w.DrawString(buffer, position);
 
@@ -51,12 +49,13 @@ void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focuse
       char replaced = buffer[valueSubSelectionOffset + subSelectionLength];
       buffer[valueSubSelectionOffset + subSelectionLength] = 0;
       position.x_ += valueSubSelectionOffset;
-      ((AppWindow &)w).SetBackgroundColor(cccccNormal);
+      ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
+      ((AppWindow &)w).SetColor(Theme::Input::fg(true));
       w.DrawString(buffer + valueSubSelectionOffset, position);
       buffer[valueSubSelectionOffset + subSelectionLength] = replaced;
     }
   } else {
-    ((AppWindow &)w).SetColor(VALUE_COLOR);
+    ((AppWindow &)w).SetColor(Theme::Input::fg(false));
     w.DrawString(buffer, position);
   }
 }

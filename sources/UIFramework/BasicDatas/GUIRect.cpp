@@ -21,7 +21,7 @@ GUIRect::GUIRect(GUIPoint &topLeft, GUIPoint &bottomRight) : _topLeft(topLeft), 
 
 // Returns true if the point is contained inside the specified rectangle
 
-bool GUIRect::Contains(GUIPoint &p) {
+bool GUIRect::Contains(const GUIPoint &p) {
   return p.x_ >= _topLeft.x_ && p.x_ <= _bottomRight.x_ && p.y_ >= _topLeft.y_ && p.y_ <= _bottomRight.y_;
 }
 

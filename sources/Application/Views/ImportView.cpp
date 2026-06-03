@@ -542,19 +542,19 @@ void ImportView::preview(char *name) {
   if (!wavRes) {
     auto error = wavRes.error();
     switch (error) {
-    case INVALID_FILE:
-      mb = MessageBox::Create(*this, "Preview Failed", "Could not open file", MBBF_OK);
-      break;
-    case UNSUPPORTED_FILE_FORMAT:
-    case INVALID_HEADER:
-    case UNSUPPORTED_WAV_FORMAT:
-      mb = MessageBox::Create(*this, "Preview Failed", "Invalid file", MBBF_OK);
-      break;
-    case UNSUPPORTED_AUDIO_FORMAT:
-    case UNSUPPORTED_BITDEPTH:
-    case UNSUPPORTED_SAMPLERATE:
-      mb = MessageBox::Create(*this, "Preview Failed", "Unsupported format", MBBF_OK);
-      break;
+      case INVALID_FILE:
+        mb = MessageBox::Create(*this, "Preview Failed", "Could not open file", MBBF_OK);
+        break;
+      case UNSUPPORTED_FILE_FORMAT:
+      case INVALID_HEADER:
+      case UNSUPPORTED_WAV_FORMAT:
+        mb = MessageBox::Create(*this, "Preview Failed", "Invalid file", MBBF_OK);
+        break;
+      case UNSUPPORTED_AUDIO_FORMAT:
+      case UNSUPPORTED_BITDEPTH:
+      case UNSUPPORTED_SAMPLERATE:
+        mb = MessageBox::Create(*this, "Preview Failed", "Unsupported format", MBBF_OK);
+        break;
     }
   } else {
     wav.Close();
@@ -642,19 +642,19 @@ void ImportView::import() {
   if (!wavRes) {
     auto error = wavRes.error();
     switch (error) {
-    case INVALID_FILE:
-      mb = MessageBox::Create(*this, "Import Failed", "Could not open file", MBBF_OK);
-      break;
-    case UNSUPPORTED_FILE_FORMAT:
-    case INVALID_HEADER:
-    case UNSUPPORTED_WAV_FORMAT:
-      mb = MessageBox::Create(*this, "Import Failed", "invalid file", MBBF_OK);
-      break;
-    case UNSUPPORTED_AUDIO_FORMAT:
-    case UNSUPPORTED_BITDEPTH:
-    case UNSUPPORTED_SAMPLERATE:
-      mb = MessageBox::Create(*this, "Import Failed", "unsupported format", MBBF_OK);
-      break;
+      case INVALID_FILE:
+        mb = MessageBox::Create(*this, "Import Failed", "Could not open file", MBBF_OK);
+        break;
+      case UNSUPPORTED_FILE_FORMAT:
+      case INVALID_HEADER:
+      case UNSUPPORTED_WAV_FORMAT:
+        mb = MessageBox::Create(*this, "Import Failed", "invalid file", MBBF_OK);
+        break;
+      case UNSUPPORTED_AUDIO_FORMAT:
+      case UNSUPPORTED_BITDEPTH:
+      case UNSUPPORTED_SAMPLERATE:
+        mb = MessageBox::Create(*this, "Import Failed", "unsupported format", MBBF_OK);
+        break;
     }
   } else {
     wav.Close();

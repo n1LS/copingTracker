@@ -268,21 +268,21 @@ void Config::WriteColorVariables(tinyxml2::XMLPrinter *printer) {
     FourCC id = var->GetID();
 
     // Check if this is a color variable
-    if (id == FourCC::VarColor_0_Black || 
-        id == FourCC::VarColor_1_Maroon || 
+    if (id == FourCC::VarColor_0_Black ||
+        id == FourCC::VarColor_1_Maroon ||
         id == FourCC::VarColor_2_Green ||
-        id == FourCC::VarColor_3_Olive || 
+        id == FourCC::VarColor_3_Olive ||
         id == FourCC::VarColor_4_Blue ||
-        id == FourCC::VarColor_5_Purple || 
+        id == FourCC::VarColor_5_Purple ||
         id == FourCC::VarColor_6_Turqoise ||
-        id == FourCC::VarColor_7_LightyGray || 
-        id == FourCC::VarColor_8_Gray || 
+        id == FourCC::VarColor_7_LightyGray ||
+        id == FourCC::VarColor_8_Gray ||
         id == FourCC::VarColor_9_Red ||
         id == FourCC::VarColor_A_Lime ||
         id == FourCC::VarColor_B_Yellow ||
-        id == FourCC::VarColor_C_LightBlue || 
+        id == FourCC::VarColor_C_LightBlue ||
         id == FourCC::VarColor_D_Magenta ||
-        id == FourCC::VarColor_E_Cyan || 
+        id == FourCC::VarColor_E_Cyan ||
         id == FourCC::VarColor_F_White) {
 
       // Open a Color element

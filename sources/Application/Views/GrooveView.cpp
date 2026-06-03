@@ -169,7 +169,7 @@ void GrooveView::DrawView() {
   pos = anchor;
   pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cccccAccent) : SetColor(cccccAccentAlt);
+    SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
     hex2char(j, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;

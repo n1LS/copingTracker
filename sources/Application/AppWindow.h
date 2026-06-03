@@ -38,8 +38,8 @@ typedef union color_t {
 #define SCREEN_MAP_HEIGHT 4
 #define SCREEN_MAP_WIDTH 4
 #define BATTERY_GAUGE_WIDTH 5
-#define SCREEN_CHARS SCREEN_WIDTH *SCREEN_HEIGHT
-#define MAX_FIELD_WIDTH 26
+#define SCREEN_CHARS SCREEN_WIDTH * SCREEN_HEIGHT
+#define MAX_FIELD_WIDTH 32
 #define SCREEN_REDRAW_RATE PICO_CLOCK_HZ
 
 class View;
@@ -86,7 +86,7 @@ protected: // GUIWindow implementation
 
   // override draw string to avoid going too far off
   // the screen.
-  virtual void DrawString(const char *string, const GUIPoint &pos, bool overlay = false);
+  virtual void DrawString(const char *string, const GUIPoint &pos);
   virtual void DrawChar(const char c, const GUIPoint &pos);
 
   // I_Observer implementation

@@ -33,7 +33,7 @@ struct FourCC {
     InstrumentCommandInstrumentRetrigger = 29,     // IRT
     InstrumentCommandKill = 30,                    // KIL
     InstrumentCommandLegato = 31,                  // LEG
-    InstrumentCommandLoopOfset = 36,               // LOF
+    InstrumentCommandLoopOffset = 36,               // LOF
     InstrumentCommandMidiCC = 38,                  // MCC
     InstrumentCommandMidiPC = 39,                  // MPG
     InstrumentCommandPan = 42,                     // PAN
@@ -296,7 +296,7 @@ struct FourCC {
   ETL_ENUM_TYPE(InstrumentCommandArpeggiator, "ARP")
   ETL_ENUM_TYPE(InstrumentCommandCrush, "CSH")
   ETL_ENUM_TYPE(InstrumentCommandKill, "KIL")
-  ETL_ENUM_TYPE(InstrumentCommandLoopOfset, "LOF")
+  ETL_ENUM_TYPE(InstrumentCommandLoopOffset, "LOF")
   ETL_ENUM_TYPE(InstrumentCommandVelocity, "VEL")
   ETL_ENUM_TYPE(InstrumentCommandVolume, "VOL")
   ETL_ENUM_TYPE(InstrumentCommandPitchSlide, "PSL")

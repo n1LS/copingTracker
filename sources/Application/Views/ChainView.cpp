@@ -322,12 +322,12 @@ void ChainView::cutSelection() {
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
       switch (i + clipboard_.col_) {
-      case 0:
-        dst1[j + clipboard_.row_] = 0xFF;
-        break;
-      case 1:
-        dst2[j + clipboard_.row_] = 00;
-        break;
+        case 0:
+          dst1[j + clipboard_.row_] = 0xFF;
+          break;
+        case 1:
+          dst2[j + clipboard_.row_] = 00;
+          break;
       }
     }
   }
@@ -363,12 +363,12 @@ void ChainView::pasteClipboard() {
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
-      case 0:
-        dst1[j + viewData_->chainRow_] = src1[j];
-        break;
-      case 1:
-        dst2[j + viewData_->chainRow_] = src2[j];
-        break;
+        case 0:
+          dst1[j + viewData_->chainRow_] = src1[j];
+          break;
+        case 1:
+          dst2[j + viewData_->chainRow_] = src2[j];
+          break;
       }
     }
   }
@@ -633,22 +633,26 @@ void ChainView::OnFocus() {
   }
 }
 
-void ChainView::setTextProps(int row, int col) {
+void ChainView::setTextProps(int col, int row) {
   bool highlighted = false;
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
-    if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
+    if (selRect.Contains(GUIPoint(col, row))) {
       highlighted = true;
     }
   } else {
-    if ((viewData_->chainCol_ == row) && (viewData_->chainRow_ == col)) {
+    if ((viewData_->chainCol_ == col) && (viewData_->chainRow_ == row)) {
       highlighted = true;
     }
   }
 
-  SetColor(highlighted ? cccccBackground : cccccNormal);
-  SetBackgroundColor(highlighted ? cccccHighlight2 : cccccBackground);
+  SetColor(Theme::Song::fg(row % ALT_ROW_NUMBER == 0));
+  SetBackgroundColor(Theme::View::bg);
+
+  if (highlighted) {
+    SwapColors();
+  }
 }
 
 void ChainView::DrawView() {
@@ -666,46 +670,32 @@ void ChainView::DrawView() {
 
   // Compute song grid location
 
-  GUIPoint anchor = GetAnchor();
+  pos = GetAnchor();
 
   // Display row numbers
-  SetColor(cccccHighlight1);
   char row[3];
-  pos = anchor;
-  pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cccccAccent) : SetColor(cccccAccentAlt);
+    SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
     hex2char(j, row);
-    DrawString(pos.x_, pos.y_, row);
-    pos.y_ += 1;
+    DrawString(pos.x_ - 3, pos.y_ + j, row);
   }
 
-  SetColor(cccccNormal);
-
-  pos = anchor;
-
   // Display phrases
-
-  pos = anchor;
-
   unsigned char *data = viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_);
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = *data++;
     setTextProps(0, j);
-    if (d == 0xFF) {
-      DrawString(pos.x_, pos.y_, "--");
+    if (d == EMPTY_CHAIN_VALUE) {
+      DrawString(pos.x_, pos.y_ + j, "--");
     } else {
       hex2char(d, row);
-      DrawString(pos.x_, pos.y_, row);
+      DrawString(pos.x_, pos.y_ + j, row);
     }
-
-    pos.y_++;
   }
 
   // Draw Transpose
 
-  pos = anchor;
   pos.x_ += 3;
 
   data = viewData_->song_->chain_.transpose_ + (16 * viewData_->currentChain_);

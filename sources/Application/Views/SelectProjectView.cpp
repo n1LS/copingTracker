@@ -285,13 +285,13 @@ void SelectProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
     // A modifier
     if (mask & EPBM_ENTER) {
       switch (selectedButton_) {
-      case 0:
-        // load project
-        AttemptLoadingProject();
-        break;
-      case 1:
-        AttemptDeletingSelectedProject();
-        break;
+        case 0:
+          // load project
+          AttemptLoadingProject();
+          break;
+        case 1:
+          AttemptDeletingSelectedProject();
+          break;
       }
     } else {
       // R Modifier

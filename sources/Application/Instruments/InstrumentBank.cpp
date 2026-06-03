@@ -141,27 +141,27 @@ InstrumentAssignResult InstrumentBank::AssignInstrumentToSlot(InstrumentType typ
   I_Instrument *current = nullptr;
 
   switch (type) {
-  case IT_SAMPLE:
-    current = instrumentPool_.create<SampleInstrument>();
-    break;
-  case IT_MIDI:
-    current = instrumentPool_.create<MidiInstrument>();
-    break;
-  case IT_SID:
-    // TODO need to figure out how to properly manage sid oc count
-    current = instrumentPool_.create<SIDInstrument>(SID1);
-    break;
-  case IT_OPAL:
-    current = instrumentPool_.create<OpalInstrument>();
-    break;
-  case IT_CHIPTUNE:
-    current = instrumentPool_.create<ChiptuneInstrument>();
-    break;
-  case IT_NONE:
-    instruments_[id] = &none_;
-    return InstrumentAssignResult::Success;
-  default:
-    break;
+    case IT_SAMPLE:
+      current = instrumentPool_.create<SampleInstrument>();
+      break;
+    case IT_MIDI:
+      current = instrumentPool_.create<MidiInstrument>();
+      break;
+    case IT_SID:
+      // TODO need to figure out how to properly manage sid oc count
+      current = instrumentPool_.create<SIDInstrument>(SID1);
+      break;
+    case IT_OPAL:
+      current = instrumentPool_.create<OpalInstrument>();
+      break;
+    case IT_CHIPTUNE:
+      current = instrumentPool_.create<ChiptuneInstrument>();
+      break;
+    case IT_NONE:
+      instruments_[id] = &none_;
+      return InstrumentAssignResult::Success;
+    default:
+      break;
   }
 
   if (current == nullptr) {
@@ -181,26 +181,26 @@ InstrumentAssignResult InstrumentBank::AssignInstrumentToSlot(InstrumentType typ
 
 void InstrumentBank::purgeInstrument(I_Instrument *instrument) {
   switch (instrument->GetType()) {
-  case IT_SAMPLE:
-    instrumentPool_.destroy(static_cast<SampleInstrument *>(instrument));
-    break;
-  case IT_MIDI:
-    instrumentPool_.destroy(static_cast<MidiInstrument *>(instrument));
-    break;
-  case IT_SID:
-    instrumentPool_.destroy(static_cast<SIDInstrument *>(instrument));
-    break;
-  case IT_OPAL:
-    instrumentPool_.destroy(static_cast<OpalInstrument *>(instrument));
-    break;
-  case IT_CHIPTUNE:
-    instrumentPool_.destroy(static_cast<ChiptuneInstrument *>(instrument));
-    break;
-  case IT_NONE:
-    // NA: None is a "singleton" so no need to release from pool
-    // BUT it can be assigned to any number of slots
-  default:
-    break;
+    case IT_SAMPLE:
+      instrumentPool_.destroy(static_cast<SampleInstrument *>(instrument));
+      break;
+    case IT_MIDI:
+      instrumentPool_.destroy(static_cast<MidiInstrument *>(instrument));
+      break;
+    case IT_SID:
+      instrumentPool_.destroy(static_cast<SIDInstrument *>(instrument));
+      break;
+    case IT_OPAL:
+      instrumentPool_.destroy(static_cast<OpalInstrument *>(instrument));
+      break;
+    case IT_CHIPTUNE:
+      instrumentPool_.destroy(static_cast<ChiptuneInstrument *>(instrument));
+      break;
+    case IT_NONE:
+      // NA: None is a "singleton" so no need to release from pool
+      // BUT it can be assigned to any number of slots
+    default:
+      break;
   }
 }
 

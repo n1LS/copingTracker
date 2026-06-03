@@ -35,13 +35,14 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
   w.DrawString(buffer, position);
 
   // add button ends
+  // draw highlight button ends
   if (focus_) {
-    // draw highlight button ends
-    GUIPoint pos(x_ - 1, y_);
+    ((AppWindow &)w).SetColor(Theme::View::bg);
     ((AppWindow &)w).SwapColors();
-    w.DrawChar(GLYPH(char_button_border_left_s), pos);
-    pos.x_ += strlen(buffer) + 1;
-    w.DrawChar(GLYPH(char_button_border_right_s), pos);
+    position.x_ -= 1;
+    w.DrawChar(GLYPH(char_button_border_left_s), position);
+    position.x_ += strlen(buffer) + 1;
+    w.DrawChar(GLYPH(char_button_border_right_s), position);
   }
 }
 

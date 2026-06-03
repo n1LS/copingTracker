@@ -118,6 +118,7 @@ void MessageBox::DrawView() {
     if (sel) {
       // draw highlight button ends
       SwapColors();
+      SetBackgroundColor(Theme::Dialog::bg);
       DrawChar(x - 1, y, GLYPH(char_button_border_left_s));
       DrawChar(x + strlen(text), y, GLYPH(char_button_border_right_s));
     }

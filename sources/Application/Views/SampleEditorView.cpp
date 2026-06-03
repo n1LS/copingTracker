@@ -839,55 +839,59 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
   uintptr_t fourcc = (uintptr_t)d;
 
   switch (fourcc) {
-  case FourCC::ActionOK: {
-    // Stop playback if active before applying any destructive operation
-    if (Player::GetInstance()->IsPlaying()) {
-      Player::GetInstance()->StopStreaming();
-    }
-    isPlaying_ = false;
-    playKeyHeld_ = false;
-
-    auto opName = operationVar_.GetString();
-    etl::string<SCREEN_WIDTH - 2> confirmLine("Apply ");
-    confirmLine.append(opName.c_str());
-    confirmLine.append("?");
-
-    MessageBox *mb = MessageBox::Create(*this, confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
-
-    // Modal cannot properly draw over the waveform gfx area because text
-    // drawing doesn't know the area because ClearTextRect() is not yet
-    // implemented so we need to manually clear the waveform drawing
-    clearWaveformRegion();
-
-    DoModal(mb, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onConfirmApplyOperation>(*this));
-    return;
-  }
-  case FourCC::ActionSave: {
-    attemptSave(false);
-    return;
-  }
-  case FourCC::ActionLoadAndSave: {
-    attemptSave(true);
-    return;
-  }
-  case FourCC::ActionCancel: {
-    discardWorkingCopy();
-
-    const auto &originalFilename = viewData_->sampleEditorFilename;
-    if (originalFilename.compare(RECORDING_FILENAME) == 0 && !viewData_->isShowingSampleEditorProjectPool) {
-      auto fs = FileSystem::GetInstance();
-      if (fs) {
-        if (!fs->DeleteFile(originalFilename.c_str())) {
-          Trace::Error("SampleEditorView: Failed to discard recording %s", originalFilename.c_str());
+    case FourCC::ActionOK:
+      {
+        // Stop playback if active before applying any destructive operation
+        if (Player::GetInstance()->IsPlaying()) {
+          Player::GetInstance()->StopStreaming();
         }
-      } else {
-        Trace::Error("SampleEditorView: Failed to get FS to delete: %s", originalFilename.c_str());
+        isPlaying_ = false;
+        playKeyHeld_ = false;
+
+        auto opName = operationVar_.GetString();
+        etl::string<SCREEN_WIDTH - 2> confirmLine("Apply ");
+        confirmLine.append(opName.c_str());
+        confirmLine.append("?");
+
+        MessageBox *mb = MessageBox::Create(*this, confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
+
+        // Modal cannot properly draw over the waveform gfx area because text
+        // drawing doesn't know the area because ClearTextRect() is not yet
+        // implemented so we need to manually clear the waveform drawing
+        clearWaveformRegion();
+
+        DoModal(mb, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onConfirmApplyOperation>(*this));
+        return;
       }
-    }
-    ViewType vt = SampleEditorView::sourceViewType_;
-    navigateToView(vt);
-    return;
-  }
+    case FourCC::ActionSave:
+      {
+        attemptSave(false);
+        return;
+      }
+    case FourCC::ActionLoadAndSave:
+      {
+        attemptSave(true);
+        return;
+      }
+    case FourCC::ActionCancel:
+      {
+        discardWorkingCopy();
+
+        const auto &originalFilename = viewData_->sampleEditorFilename;
+        if (originalFilename.compare(RECORDING_FILENAME) == 0 && !viewData_->isShowingSampleEditorProjectPool) {
+          auto fs = FileSystem::GetInstance();
+          if (fs) {
+            if (!fs->DeleteFile(originalFilename.c_str())) {
+              Trace::Error("SampleEditorView: Failed to discard recording %s", originalFilename.c_str());
+            }
+          } else {
+            Trace::Error("SampleEditorView: Failed to get FS to delete: %s", originalFilename.c_str());
+          }
+        }
+        ViewType vt = SampleEditorView::sourceViewType_;
+        navigateToView(vt);
+        return;
+      }
   }
 }
 
@@ -941,15 +945,17 @@ bool SampleEditorView::applySelectedOperation() {
 
   auto op = static_cast<SampleEditOperation>(opIndex);
   switch (op) {
-  case SampleEditOperation::Trim: {
-    return applyTrimOperation(static_cast<uint32_t>(start_), static_cast<uint32_t>(end_));
-  }
-  case SampleEditOperation::Normalize: {
-    return applyNormalizeOperation();
-  }
-  default:
-    Trace::Error("SampleEditorView: Unsupported operation %d", opIndex);
-    break;
+    case SampleEditOperation::Trim:
+      {
+        return applyTrimOperation(static_cast<uint32_t>(start_), static_cast<uint32_t>(end_));
+      }
+    case SampleEditOperation::Normalize:
+      {
+        return applyNormalizeOperation();
+      }
+    default:
+      Trace::Error("SampleEditorView: Unsupported operation %d", opIndex);
+      break;
   }
   return false;
 }

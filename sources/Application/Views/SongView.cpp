@@ -596,12 +596,12 @@ void SongView::processNormalButtonMask(unsigned int mask) {
       updateSongOffset(-View::songRowCount_);
     if (mask & (EPBM_RIGHT | EPBM_LEFT)) {
       switch (player->GetSequencerMode()) {
-      case SM_SONG:
-        player->SetSequencerMode(SM_LIVE);
-        break;
-      case SM_LIVE:
-        player->SetSequencerMode(SM_SONG);
-        break;
+        case SM_SONG:
+          player->SetSequencerMode(SM_LIVE);
+          break;
+        case SM_LIVE:
+          player->SetSequencerMode(SM_SONG);
+          break;
       }
       isDirty_ = true;
     }
@@ -851,37 +851,34 @@ void SongView::DrawView() {
     pos.y_ += 1;
   }
 
-  SetColor(Theme::View::fg);
-
   pos = anchor;
   unsigned char *data = viewData_->song_->data_ + (SONG_CHANNEL_COUNT * viewData_->songOffset_);
   short dx = 3;
   short dy = 1;
+
   for (int j = 0; j < View::songRowCount_; j++) {
+    char p = j + viewData_->songOffset_;
+    bool isAlt = (p % ALT_ROW_NUMBER == 0);
 
     pos.x_ = anchor.x_;
 
     for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-      bool highlighted = false;
+      bool highlighted;
 
       // see if we need to invert current step
       // if there's a selection or we are at cursor position
 
       if (clipboard_.active_) {
-        if ((i >= selRect.Left()) && (i <= selRect.Right()) && (j + viewData_->songOffset_ >= selRect.Top()) &&
-            (j + viewData_->songOffset_ <= selRect.Bottom())) {
-          highlighted = true;
-        }
+        highlighted = (i >= selRect.Left()) && (i <= selRect.Right()) &&
+                      (j + viewData_->songOffset_ >= selRect.Top()) && (j + viewData_->songOffset_ <= selRect.Bottom());
       } else {
-        if (i == viewData_->songX_ && j == viewData_->songY_) {
-          highlighted = true;
-        }
+        highlighted = (i == viewData_->songX_ && j == viewData_->songY_);
       }
 
       // draw current step
       unsigned char d = *data++;
       // last possible value gets special color to be more visible (typically this is the empty placeholder)
-      SetColor(d == 0xFE ? Theme::Song::placeholder : Theme::Song::fg(highlighted));
+      SetColor(d == 0xFE ? Theme::Song::placeholder : Theme::Song::fg(isAlt));
 
       if (highlighted) {
         SwapColors();
@@ -895,7 +892,6 @@ void SongView::DrawView() {
       }
 
       // Put back drawing state
-
       SetColor(Theme::View::fg);
       SetBackgroundColor(Theme::View::bg);
 
@@ -913,7 +909,7 @@ void SongView::DrawView() {
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
-  };
+  }
 }
 
 /*******************************************************************************
@@ -1048,11 +1044,11 @@ void SongView::AnimationUpdate() {
 void SongView::nudgeTempo(int direction) {
   ApplicationCommandDispatcher *dispatcher = ApplicationCommandDispatcher::GetInstance();
   switch (direction) {
-  case -1:
-    dispatcher->OnNudgeDown();
-    break;
-  case 1:
-    dispatcher->OnNudgeUp();
-    break;
+    case -1:
+      dispatcher->OnNudgeDown();
+      break;
+    case 1:
+      dispatcher->OnNudgeUp();
+      break;
   }
 }

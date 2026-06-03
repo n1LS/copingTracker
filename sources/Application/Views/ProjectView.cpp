@@ -311,146 +311,154 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   Player *player = Player::GetInstance();
 
   switch (fourcc) {
-  case FourCC::ActionPurge: {
-    MessageBox *mb = MessageBox::Create(*this, "Remove unused samples?", MBBF_YES | MBBF_NO);
-    DoModal(mb, ModalViewCallback::create<&PurgeCallback>());
-    break;
-  }
-  case FourCC::ActionPurgeInstrument: {
-    MessageBox *mb = MessageBox::Create(*this, "Remove unused instruments?", MBBF_YES | MBBF_NO);
-    DoModal(mb, ModalViewCallback::create<&PurgeInstrumentsCallback>());
-    break;
-  }
-  case FourCC::ActionRandomName: {
-    char name[10];
-    System *sys = System::GetInstance();
-    uint32_t randNum = sys->GetRandomNumber();
-    getNamesByIndex(name, randNum, 10);
-    printf("random:%s", name);
-    project_->SetProjectName(name);
-    saveAsFlag_ = true;
-    break;
-  }
-  case FourCC::ActionSave: {
-    PersistencyService *persist = PersistencyService::GetInstance();
-    char projName[MAX_PROJECT_NAME_LENGTH + 1];
-    project_->GetProjectName(projName);
-
-    if (saveAsFlag_) {
-      // first need to check if project with this name already exists
-      if (persist->Exists(projName)) {
-        Trace::Error("project already exists ask user to confirm overwrite");
-        MessageBox *mb = MessageBox::Create(*this, "Overwrite EXISTING project?", MBBF_OK | MBBF_CANCEL);
-        DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
-        return;
-      }
-      if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) != PERSIST_SAVED) {
-        Trace::Error("failed to save project state");
-        MessageBox *mb = MessageBox::Create(*this, "Error saving Project", MBBF_OK);
-        DoModal(mb);
-        return;
-      }
-      clearSaveAsFlag();
-    } else {
-      if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) != PERSIST_SAVED) {
-        Trace::Error("failed to save project state");
-        MessageBox *mb = MessageBox::Create(*this, "Error saving Project", MBBF_OK);
-        DoModal(mb);
-        return;
-      }
-    }
-    // all good so now persist the new project name in project state
-    persist->SaveProjectState(projName);
-    break;
-  }
-  case FourCC::ActionProjectRename:
-    Trace::Log("PROJECTVIEW", "Project renamed! prev name:%s", nameField_->GetString().c_str());
-    saveAsFlag_ = true;
-    break;
-  case FourCC::ActionBrowse: {
-    if (CanExit()) {
-      Navigate(VT_SELECTPROJECT);
-    }
-    break;
-  }
-  case FourCC::ActionNewProject: {
-    MessageBox *mb = MessageBox::Create(*this, "Create a new project and", "   lose all changes?", MBBF_YES | MBBF_NO);
-    DoModal(mb, ModalViewCallback::create<&CreateNewProjectCallback>());
-    break;
-  }
-  case FourCC::ActionBootSelect: {
-    if (!player->IsRunning()) {
-      MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
-      DoModal(mb, ModalViewCallback::create<&BootselCallback>());
-    } else {
-      MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-      DoModal(mb);
-    }
-    break;
-  }
-
-  case FourCC::ActionTempoChanged:
-    break;
-  case FourCC::ActionRenderMixdown:
-    if (!player->IsRunning()) {
-      if (!canRenderFromFirstSongRow()) {
-        MessageBox *mb = MessageBox::Create(*this, "      Render failed", "Song row 00 has no phrases", MBBF_OK);
-        DoModal(mb);
+    case FourCC::ActionPurge:
+      {
+        MessageBox *mb = MessageBox::Create(*this, "Remove unused samples?", MBBF_YES | MBBF_NO);
+        DoModal(mb, ModalViewCallback::create<&PurgeCallback>());
         break;
       }
-      // Show a dialog with a Stop button during rendering
-      RenderProgressModal *renderDialog =
-          RenderProgressModal::Create(*this, "Rendering", "", RenderProgressModal::ProgressDisplayMode::SongPercent);
-      DoModal(renderDialog, ModalViewCallback::create<&RenderStopCallback>());
-
-      // Start playback in rendering mode with MSM_FILE
-      player->Start(PM_SONG, true, MSM_FILE, true);
-    }
-    break;
-  case FourCC::ActionRenderStems:
-    if (!player->IsRunning()) {
-      if (!canRenderFromFirstSongRow()) {
-        MessageBox *mb = MessageBox::Create(*this, "      Render failed", "Song row 00 has no phrases", MBBF_OK);
-        DoModal(mb);
+    case FourCC::ActionPurgeInstrument:
+      {
+        MessageBox *mb = MessageBox::Create(*this, "Remove unused instruments?", MBBF_YES | MBBF_NO);
+        DoModal(mb, ModalViewCallback::create<&PurgeInstrumentsCallback>());
         break;
       }
-      // Show a dialog with a Stop button during rendering
-      RenderProgressModal *renderDialog = RenderProgressModal::Create(
-          *this, "Stems Rendering", "", RenderProgressModal::ProgressDisplayMode::SongPercent);
-      DoModal(renderDialog, ModalViewCallback::create<&RenderStopCallback>());
+    case FourCC::ActionRandomName:
+      {
+        char name[10];
+        System *sys = System::GetInstance();
+        uint32_t randNum = sys->GetRandomNumber();
+        getNamesByIndex(name, randNum, 10);
+        printf("random:%s", name);
+        project_->SetProjectName(name);
+        saveAsFlag_ = true;
+        break;
+      }
+    case FourCC::ActionSave:
+      {
+        PersistencyService *persist = PersistencyService::GetInstance();
+        char projName[MAX_PROJECT_NAME_LENGTH + 1];
+        project_->GetProjectName(projName);
 
-      // Start playback in rendering mode with MSM_FILESPLIT
-      player->Start(PM_SONG, true, MSM_FILESPLIT, true);
-    }
-    break;
-  case FourCC::ActionShowRecordView:
-    switchToRecordView();
-    break;
-  case FourCC::ActionImport:
-    // Switch to the ImportView **BUT** to show the Project Pool by default
-    if (!player->IsRunning()) {
-      // First check if the samplelib exists
-      bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
+        if (saveAsFlag_) {
+          // first need to check if project with this name already exists
+          if (persist->Exists(projName)) {
+            Trace::Error("project already exists ask user to confirm overwrite");
+            MessageBox *mb = MessageBox::Create(*this, "Overwrite EXISTING project?", MBBF_OK | MBBF_CANCEL);
+            DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
+            return;
+          }
+          if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) != PERSIST_SAVED) {
+            Trace::Error("failed to save project state");
+            MessageBox *mb = MessageBox::Create(*this, "Error saving Project", MBBF_OK);
+            DoModal(mb);
+            return;
+          }
+          clearSaveAsFlag();
+        } else {
+          if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) != PERSIST_SAVED) {
+            Trace::Error("failed to save project state");
+            MessageBox *mb = MessageBox::Create(*this, "Error saving Project", MBBF_OK);
+            DoModal(mb);
+            return;
+          }
+        }
+        // all good so now persist the new project name in project state
+        persist->SaveProjectState(projName);
+        break;
+      }
+    case FourCC::ActionProjectRename:
+      Trace::Log("PROJECTVIEW", "Project renamed! prev name:%s", nameField_->GetString().c_str());
+      saveAsFlag_ = true;
+      break;
+    case FourCC::ActionBrowse:
+      {
+        if (CanExit()) {
+          Navigate(VT_SELECTPROJECT);
+        }
+        break;
+      }
+    case FourCC::ActionNewProject:
+      {
+        MessageBox *mb =
+            MessageBox::Create(*this, "Create a new project and", "   lose all changes?", MBBF_YES | MBBF_NO);
+        DoModal(mb, ModalViewCallback::create<&CreateNewProjectCallback>());
+        break;
+      }
+    case FourCC::ActionBootSelect:
+      {
+        if (!player->IsRunning()) {
+          MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
+          DoModal(mb, ModalViewCallback::create<&BootselCallback>());
+        } else {
+          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
+          DoModal(mb);
+        }
+        break;
+      }
 
-      if (!samplelibExists) {
-        MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
-        DoModal(mb);
+    case FourCC::ActionTempoChanged:
+      break;
+    case FourCC::ActionRenderMixdown:
+      if (!player->IsRunning()) {
+        if (!canRenderFromFirstSongRow()) {
+          MessageBox *mb = MessageBox::Create(*this, "      Render failed", "Song row 00 has no phrases", MBBF_OK);
+          DoModal(mb);
+          break;
+        }
+        // Show a dialog with a Stop button during rendering
+        RenderProgressModal *renderDialog =
+            RenderProgressModal::Create(*this, "Rendering", "", RenderProgressModal::ProgressDisplayMode::SongPercent);
+        DoModal(renderDialog, ModalViewCallback::create<&RenderStopCallback>());
+
+        // Start playback in rendering mode with MSM_FILE
+        player->Start(PM_SONG, true, MSM_FILE, true);
+      }
+      break;
+    case FourCC::ActionRenderStems:
+      if (!player->IsRunning()) {
+        if (!canRenderFromFirstSongRow()) {
+          MessageBox *mb = MessageBox::Create(*this, "      Render failed", "Song row 00 has no phrases", MBBF_OK);
+          DoModal(mb);
+          break;
+        }
+        // Show a dialog with a Stop button during rendering
+        RenderProgressModal *renderDialog = RenderProgressModal::Create(
+            *this, "Stems Rendering", "", RenderProgressModal::ProgressDisplayMode::SongPercent);
+        DoModal(renderDialog, ModalViewCallback::create<&RenderStopCallback>());
+
+        // Start playback in rendering mode with MSM_FILESPLIT
+        player->Start(PM_SONG, true, MSM_FILESPLIT, true);
+      }
+      break;
+    case FourCC::ActionShowRecordView:
+      switchToRecordView();
+      break;
+    case FourCC::ActionImport:
+      // Switch to the ImportView **BUT** to show the Project Pool by default
+      if (!player->IsRunning()) {
+        // First check if the samplelib exists
+        bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
+
+        if (!samplelibExists) {
+          MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
+          DoModal(mb);
+        } else {
+          ImportView::SetSourceViewType(VT_PROJECT);
+          // Set to show project pool dir in ImportView
+          viewData_->isShowingSampleEditorProjectPool = true;
+
+          // Go to import sample
+          Navigate(VT_IMPORT);
+        }
       } else {
-        ImportView::SetSourceViewType(VT_PROJECT);
-        // Set to show project pool dir in ImportView
-        viewData_->isShowingSampleEditorProjectPool = true;
-
-        // Go to import sample
-        Navigate(VT_IMPORT);
+        MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
+        DoModal(mb);
       }
-    } else {
-      MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-      DoModal(mb);
-    }
-    break;
-  default:
-    NInvalid;
-    break;
+      break;
+    default:
+      NInvalid;
+      break;
   };
   focus->Draw(w_);
   isDirty_ = true;

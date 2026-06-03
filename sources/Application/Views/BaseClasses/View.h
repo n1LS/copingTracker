@@ -110,41 +110,72 @@ enum OldColors : Color {
   cccccEmphasis = 10
 };
 
+#define SWITCHABLE(Y, A, B)                                                                                            \
+  static constexpr Color Y(bool selected) {                                                                            \
+    return selected ? A : B;                                                                                           \
+  }
+#define FIXED(Y, A) static constexpr Color Y = A;
 struct Theme {
 
+  struct Notes {
+    SWITCHABLE(bg, LIGHT_BLUE, BLUE)
+    SWITCHABLE(fg, BLACK, BLACK)
+  };
+
+  struct VU {
+    FIXED(clip, LIGHT_RED)
+    FIXED(warn, LIGHT_YELLOW)
+    FIXED(normal, GREEN)
+  };
+
   struct Input {
-    static constexpr Color bg = BLACK;
-    static constexpr Color fg = WHITE;
+    FIXED(cursor, WHITE)
+    FIXED(placeholder, LIGHT_GRAY)
+    FIXED(label, WHITE)
+    SWITCHABLE(bg, LIGHT_GREEN, BLACK)
+    SWITCHABLE(fg, BLACK, GREEN)
   };
 
   struct Button {
-    static constexpr Color bg(bool highlighted) {
-      return highlighted ? WHITE : BLACK;
-    }
-    static constexpr Color fg(bool highlighted) {
-      return highlighted ? BLACK : LIGHT_BLUE;
-    }
+    SWITCHABLE(bg, LIGHT_BLUE, BLACK)
+    SWITCHABLE(fg, WHITE, LIGHT_BLUE)
   };
 
   struct View {
-    static constexpr Color bg = BLACK;
-    static constexpr Color fg = WHITE;
+    FIXED(bg, BLACK)
+    FIXED(fg, WHITE)
+    FIXED(inactive, LIGHT_GRAY)
+    SWITCHABLE(index, LIGHT_CYAN, CYAN)
+    SWITCHABLE(help, WHITE, LIGHT_GRAY)
 
-    static constexpr Color index(bool highlighted) {
-      return highlighted ? CYAN : LIGHT_CYAN;
-    }
+    struct Map {
+      SWITCHABLE(bg, LIGHT_GREEN, BLACK)
+      SWITCHABLE(fg, BLACK, WHITE)
+    };
   };
 
   struct Dialog {
-    static constexpr Color bg = BLACK;
-    static constexpr Color fg = WHITE;
+    FIXED(bg, BLACK)
+    FIXED(fg, WHITE)
+    FIXED(border, WHITE);
+  };
+
+  struct Phrase {
+    SWITCHABLE(note, LIGHT_RED, RED)
+    SWITCHABLE(instrument, LIGHT_BLUE, BLUE)
+    SWITCHABLE(command1, LIGHT_YELLOW, YELLOW)
+    SWITCHABLE(command2, LIGHT_GREEN, GREEN)
   };
 
   struct Song {
-    static constexpr Color placeholder = DARK_GRAY;
-    static constexpr Color fg(bool highlighted) {
-      return highlighted ? WHITE : LIGHT_GRAY;
-    }
+    struct Playback {
+      FIXED(active, LIGHT_GREEN)
+      FIXED(muted, LIGHT_RED)
+      FIXED(live, LIGHT_YELLOW)
+    };
+
+    FIXED(placeholder, DARK_GRAY)
+    SWITCHABLE(fg, WHITE, LIGHT_GRAY)
   };
 };
 

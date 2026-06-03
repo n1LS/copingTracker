@@ -200,11 +200,11 @@ void RecordView::Update(Observable &o, I_ObservableData *data) {
   auto config = Config::GetInstance();
 
   switch (fourcc) {
-  case FourCC::VarRecordSource:
-    StopMonitoring();
-    updateRecordingSource();
-    StartMonitoring();
-    break;
+    case FourCC::VarRecordSource:
+      StopMonitoring();
+      updateRecordingSource();
+      StartMonitoring();
+      break;
   }
 }
 

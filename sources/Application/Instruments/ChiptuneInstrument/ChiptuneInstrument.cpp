@@ -75,51 +75,51 @@ bool ChiptuneInstrument::Render(int channel, fixed *buffer, int size, bool updat
 
 void ChiptuneInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
   switch (cc) {
-  case FourCC::InstrumentCommandSetInstrumentParameter:
-    voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
-    break;
+    case FourCC::InstrumentCommandSetInstrumentParameter:
+      voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
+      break;
 
-  case FourCC::InstrumentCommandArpeggiator:
-    voices_[channel].command_init_arp(value);
-    break;
+    case FourCC::InstrumentCommandArpeggiator:
+      voices_[channel].command_init_arp(value);
+      break;
 
-  case FourCC::InstrumentCommandKill:
-  case FourCC::InstrumentCommandGateOff:
-    voices_[channel].stop();
-    break;
+    case FourCC::InstrumentCommandKill:
+    case FourCC::InstrumentCommandGateOff:
+      voices_[channel].stop();
+      break;
 
-  case FourCC::InstrumentCommandCrush:
-    voices_[channel].bitcrush = value && 0x0f;
-    voices_[channel].drive = value >> 8;
-    break;
+    case FourCC::InstrumentCommandCrush:
+      voices_[channel].bitcrush = value && 0x0f;
+      voices_[channel].drive = value >> 8;
+      break;
 
-  case FourCC::InstrumentCommandVibrato:
-    voices_[channel].command_init_vibrato(value >> 8, value & 0xFF);
-    break;
+    case FourCC::InstrumentCommandVibrato:
+      voices_[channel].command_init_vibrato(value >> 8, value & 0xFF);
+      break;
 
-  case FourCC::InstrumentCommandPan:
-    voices_[channel].command_init_pan(value >> 8, value & 0xFF);
-    break;
+    case FourCC::InstrumentCommandPan:
+      voices_[channel].command_init_pan(value >> 8, value & 0xFF);
+      break;
 
-  case FourCC::InstrumentCommandPitchSlide:
-    voices_[channel].command_init_pitch_shift(value >> 8, value & 0xFF);
-    break;
+    case FourCC::InstrumentCommandPitchSlide:
+      voices_[channel].command_init_pitch_shift(value >> 8, value & 0xFF);
+      break;
 
-  case FourCC::InstrumentCommandLegato:
-    voices_[channel].command_init_legato(value >> 8, (int8_t)(value & 0xFF));
-    break;
+    case FourCC::InstrumentCommandLegato:
+      voices_[channel].command_init_legato(value >> 8, (int8_t)(value & 0xFF));
+      break;
 
-  case FourCC::InstrumentCommandVolume:
-    voices_[channel].command_init_volume(value >> 8, value & 0xFF);
-    break;
+    case FourCC::InstrumentCommandVolume:
+      voices_[channel].command_init_volume(value >> 8, value & 0xFF);
+      break;
 
-  case FourCC::InstrumentCommandPitchFineTune:
-    voices_[channel].command_init_finetune(value >> 8, (int8_t)(value & 0xFF));
-    break;
+    case FourCC::InstrumentCommandPitchFineTune:
+      voices_[channel].command_init_finetune(value >> 8, (int8_t)(value & 0xFF));
+      break;
 
-  case FourCC::InstrumentCommandInstrumentRetrigger:
-    voices_[channel].command_init_instrument_retrigger(value >> 8, (int8_t)(value & 0xff));
-    break;
+    case FourCC::InstrumentCommandInstrumentRetrigger:
+      voices_[channel].command_init_instrument_retrigger(value >> 8, (int8_t)(value & 0xff));
+      break;
   }
 }
 

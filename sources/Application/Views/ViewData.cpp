@@ -102,16 +102,16 @@ unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
   bool wrap = false;
 
   switch (chainCol_ + dx) {
-  case 0:
-    c = song_->chain_.data_ + (16 * currentChain_ + chainRow_ + dy);
-    limit = PHRASE_COUNT - 1;
-    wrap = false;
-    break;
-  case 1:
-    c = song_->chain_.transpose_ + (16 * currentChain_ + chainRow_ + dy);
-    limit = 0xFF;
-    wrap = true;
-    break;
+    case 0:
+      c = song_->chain_.data_ + (16 * currentChain_ + chainRow_ + dy);
+      limit = PHRASE_COUNT - 1;
+      wrap = false;
+      break;
+    case 1:
+      c = song_->chain_.transpose_ + (16 * currentChain_ + chainRow_ + dy);
+      limit = 0xFF;
+      wrap = true;
+      break;
   }
   updateData(c, offset, limit, wrap);
   return *c;

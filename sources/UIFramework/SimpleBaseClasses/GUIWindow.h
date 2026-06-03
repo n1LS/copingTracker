@@ -42,7 +42,7 @@ public: // I_GUIGraphics implementation
   virtual void SetBackgroundColor(GUIColor &color);
   virtual void ClearTextRect(GUIRect &rect);
   virtual void DrawChar(const char c, const GUIPoint &pos);
-  virtual void DrawString(const char *string, const GUIPoint &pos, bool overlay = false);
+  virtual void DrawString(const char *string, const GUIPoint &pos);
   virtual void DrawRect(GUIRect &rect);
   virtual void SetCurrentRectColor(GUIColor color);
   virtual GUIRect GetRect();
@@ -57,7 +57,7 @@ public: // I_GUIGraphics implementation
   //	virtual void Save() ;
   //	virtual void Restore() ;
   void PushEvent(GUIEvent &event);
-  void Clear(GUIColor &, bool overlay = false);
+  void Clear(GUIColor &color);
   I_GUIWindowImp *GetImpWindow() {
     return _imp;
   };

@@ -226,14 +226,11 @@ void appwindow_set_sdcard_present(bool present) {
   }
 }
 
-void AppWindow::DrawString(const char *string, const GUIPoint &pos, bool force) {
-
+void AppWindow::DrawString(const char *string, const GUIPoint &pos) {
   // Safety check for null string
   if (!string) {
     return;
   }
-
-  (void)force;
 
   // DrawString and DrawChar share the same cache staging logic.
   int x = pos.x_;
@@ -244,10 +241,7 @@ void AppWindow::DrawString(const char *string, const GUIPoint &pos, bool force) 
 }
 
 void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
-  if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT) {
-    return;
-  }
-  if (pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
+  if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT || pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
     return;
   }
 
@@ -565,39 +559,39 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
   switch (event.GetType()) {
 
-  case ET_PADBUTTONDOWN:
+    case ET_PADBUTTONDOWN:
 
-    _mask |= v;
-    if (_currentView)
-      _currentView->ProcessButton(_mask, true);
-    break;
+      _mask |= v;
+      if (_currentView)
+        _currentView->ProcessButton(_mask, true);
+      break;
 
-  case ET_PADBUTTONUP:
+    case ET_PADBUTTONUP:
 
-    _mask &= (0xFFFF - v);
-    if (_currentView)
-      _currentView->ProcessButton(_mask, false);
-    break;
+      _mask &= (0xFFFF - v);
+      if (_currentView)
+        _currentView->ProcessButton(_mask, false);
+      break;
 
-  case ET_SYSQUIT:
-    _shouldQuit = true;
-    break;
+    case ET_SYSQUIT:
+      _shouldQuit = true;
+      break;
 
-    /*		case ET_KEYDOWN:
-            if
-       (event.GetValue()==EKT_ESCAPE&&!Player::GetInstance()->IsRunning()) {
-       if
-       (_currentView!=_listView) {
-       CloseProject() ;
-       _currentView->SetDirty(true) ;
-       } else {
-                            System::GetInstance()->PostQuitMessage() ;
-                    };
-            } ;
-                */
+      /*		case ET_KEYDOWN:
+              if
+         (event.GetValue()==EKT_ESCAPE&&!Player::GetInstance()->IsRunning()) {
+         if
+         (_currentView!=_listView) {
+         CloseProject() ;
+         _currentView->SetDirty(true) ;
+         } else {
+                              System::GetInstance()->PostQuitMessage() ;
+                      };
+              } ;
+                  */
 
-  default:
-    break;
+    default:
+      break;
   }
   //  ms->Unlock();
 
@@ -616,7 +610,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
 void AppWindow::onUpdate(bool redraw) {
   if (redraw) {
-    GUIWindow::Clear(colorPalette_[cccccBackground], true);
+    GUIWindow::Clear(colorPalette_[cccccBackground]);
     Clear(true);
     // Mark as dirty to trigger redraw in AnimationUpdate
     SetDirty();
@@ -762,119 +756,124 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
 
   switch (ve->GetType()) {
 
-  case VET_SWITCH_VIEW: {
-    ViewType *vt = (ViewType *)ve->GetData();
-    if (_currentView) {
-      _currentView->LooseFocus();
-    }
+    case VET_SWITCH_VIEW:
+      {
+        ViewType *vt = (ViewType *)ve->GetData();
+        if (_currentView) {
+          _currentView->LooseFocus();
+        }
 
-    switch (*vt) {
-    case VT_SONG:
-      _currentView = &views_->songView;
-      break;
-    case VT_CHAIN:
-      _currentView = &views_->chainView;
-      break;
-    case VT_PHRASE:
-      _currentView = &views_->phraseView;
-      break;
-    case VT_DEVICE:
-      _currentView = &views_->deviceView;
-      break;
-    case VT_PROJECT:
-      _currentView = &views_->projectView;
-      break;
-    case VT_INSTRUMENT:
-      _currentView = &views_->instrumentView;
-      break;
-    case VT_TABLE:
-      _currentView = &views_->tableView;
-      break;
-    case VT_TABLE2:
-      _currentView = &views_->tableView;
-      break;
-    case VT_GROOVE:
-      _currentView = &views_->grooveView;
-      break;
-    case VT_IMPORT:
-      _currentView = &views_->importView;
-      break;
-    case VT_INSTRUMENT_IMPORT:
-      _currentView = &views_->instrumentImportView;
-      break;
-    case VT_SELECTPROJECT:
-      _currentView = &views_->selectProjectView;
-      break;
-    case VT_MIXER:
-      _currentView = &views_->mixerView;
-      break;
-    case VT_THEME:
-      _currentView = &views_->themeView;
-      break;
-    case VT_THEME_IMPORT:
-      _currentView = &views_->themeImportView;
-      break;
-    case VT_SELECTTHEME:
-      _currentView = &views_->themeView;
-      break;
-    case VT_SAMPLE_EDITOR:
-      _currentView = &views_->sampleEditorView;
-      break;
-    case VT_SAMPLE_SLICES:
-      _currentView = &views_->sampleSlicesView;
-      break;
-    case VT_RECORD:
-      _currentView = &views_->recordView;
-      break;
-    default:
-      break;
-    }
-    _currentView->SetFocus(*vt);
-    SetDirty();
-    GUIWindow::Clear(colorPalette_[cccccBackground], true);
-    Clear(true);
-    break;
-  }
-
-  case VET_PLAYER_POSITION_UPDATE: {
-    PlayerEvent *pt = (PlayerEvent *)ve;
-    if (_currentView) {
-      // Check if the current view has a modal view
-      const bool hasModal = _currentView->HasModalView();
-      if (hasModal) {
-        _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
-      } else {
-        _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+        switch (*vt) {
+          case VT_SONG:
+            _currentView = &views_->songView;
+            break;
+          case VT_CHAIN:
+            _currentView = &views_->chainView;
+            break;
+          case VT_PHRASE:
+            _currentView = &views_->phraseView;
+            break;
+          case VT_DEVICE:
+            _currentView = &views_->deviceView;
+            break;
+          case VT_PROJECT:
+            _currentView = &views_->projectView;
+            break;
+          case VT_INSTRUMENT:
+            _currentView = &views_->instrumentView;
+            break;
+          case VT_TABLE:
+            _currentView = &views_->tableView;
+            break;
+          case VT_TABLE2:
+            _currentView = &views_->tableView;
+            break;
+          case VT_GROOVE:
+            _currentView = &views_->grooveView;
+            break;
+          case VT_IMPORT:
+            _currentView = &views_->importView;
+            break;
+          case VT_INSTRUMENT_IMPORT:
+            _currentView = &views_->instrumentImportView;
+            break;
+          case VT_SELECTPROJECT:
+            _currentView = &views_->selectProjectView;
+            break;
+          case VT_MIXER:
+            _currentView = &views_->mixerView;
+            break;
+          case VT_THEME:
+            _currentView = &views_->themeView;
+            break;
+          case VT_THEME_IMPORT:
+            _currentView = &views_->themeImportView;
+            break;
+          case VT_SELECTTHEME:
+            _currentView = &views_->themeView;
+            break;
+          case VT_SAMPLE_EDITOR:
+            _currentView = &views_->sampleEditorView;
+            break;
+          case VT_SAMPLE_SLICES:
+            _currentView = &views_->sampleSlicesView;
+            break;
+          case VT_RECORD:
+            _currentView = &views_->recordView;
+            break;
+          default:
+            break;
+        }
+        _currentView->SetFocus(*vt);
+        SetDirty();
+        GUIWindow::Clear(colorPalette_[cccccBackground]);
+        Clear(true);
+        break;
       }
-    }
-    break;
-  }
 
-  case VET_LOAD_PROJECT: {
-    const char *name = static_cast<const char *>(ve->GetData());
-    if (name && name[0] != '\0') {
-      npf_snprintf(projectName_, sizeof(projectName_), "%s", name);
-      createProjectOnLoad_ = false;
-      loadProject_ = true;
-    }
-    break;
-  }
-  case VET_NEW_PROJECT: {
-    npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
-    createProjectOnLoad_ = true;
-    loadProject_ = true;
-    break;
-  }
-  case VET_QUIT_PROJECT: {
-    // defer event to after we got out of the view
-    _closeProject = true;
-    break;
-  }
-  case VET_QUIT_APP:
-    _shouldQuit = true;
-    break;
-  default: // VET_LIST_SELECT, VET_UPDATE
-    break;
+    case VET_PLAYER_POSITION_UPDATE:
+      {
+        PlayerEvent *pt = (PlayerEvent *)ve;
+        if (_currentView) {
+          // Check if the current view has a modal view
+          const bool hasModal = _currentView->HasModalView();
+          if (hasModal) {
+            _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+          } else {
+            _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+          }
+        }
+        break;
+      }
+
+    case VET_LOAD_PROJECT:
+      {
+        const char *name = static_cast<const char *>(ve->GetData());
+        if (name && name[0] != '\0') {
+          npf_snprintf(projectName_, sizeof(projectName_), "%s", name);
+          createProjectOnLoad_ = false;
+          loadProject_ = true;
+        }
+        break;
+      }
+    case VET_NEW_PROJECT:
+      {
+        npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
+        createProjectOnLoad_ = true;
+        loadProject_ = true;
+        break;
+      }
+    case VET_QUIT_PROJECT:
+      {
+        // defer event to after we got out of the view
+        _closeProject = true;
+        break;
+      }
+    case VET_QUIT_APP:
+      _shouldQuit = true;
+      break;
+    default: // VET_LIST_SELECT, VET_UPDATE
+      break;
   }
 }
 

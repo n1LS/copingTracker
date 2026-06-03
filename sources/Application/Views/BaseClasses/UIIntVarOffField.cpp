@@ -26,27 +26,27 @@ void UIIntVarOffField::ProcessArrow(unsigned short mask) {
 
   if (value == VAR_OFF) { // Off state
     switch (mask) {
-    case EPBM_UP:
-      value = min_ + yOffset_;
-      break;
-    case EPBM_RIGHT:
-      value = min_;
-      break;
+      case EPBM_UP:
+        value = min_ + yOffset_;
+        break;
+      case EPBM_RIGHT:
+        value = min_;
+        break;
     };
   } else {
     switch (mask) {
-    case EPBM_UP:
-      value += yOffset_;
-      break;
-    case EPBM_DOWN:
-      value -= yOffset_;
-      break;
-    case EPBM_LEFT:
-      value -= xOffset_;
-      break;
-    case EPBM_RIGHT:
-      value += xOffset_;
-      break;
+      case EPBM_UP:
+        value += yOffset_;
+        break;
+      case EPBM_DOWN:
+        value -= yOffset_;
+        break;
+      case EPBM_LEFT:
+        value -= xOffset_;
+        break;
+      case EPBM_RIGHT:
+        value += xOffset_;
+        break;
     };
     if (value < min_) {
       value = VAR_OFF;
@@ -69,34 +69,36 @@ void UIIntVarOffField::Draw(GUIWindow &w, int offset) {
   Variable::Type type = src_.GetType();
   char buffer[MAX_FIELD_WIDTH + 1];
   switch (type) {
-  case Variable::INT: {
-    int ivalue = src_.GetInt();
-    if (ivalue != VAR_OFF) {
-      npf_snprintf(buffer, sizeof(buffer), format_, ivalue, ivalue);
-    } else {
-      char format[64];
-      strcpy(format, format_);
-      char *location = strchr(format, '%');
-      if (location) {
-        while ((*location != 0) && (*location != 'x') && (*location != 'X') && (*location != 'd')) {
-          location++;
-        }
-        if (*location != 0) {
-          *location = 's';
+    case Variable::INT:
+      {
+        int ivalue = src_.GetInt();
+        if (ivalue != VAR_OFF) {
+          npf_snprintf(buffer, sizeof(buffer), format_, ivalue, ivalue);
         } else {
-          location = 0;
+          char format[64];
+          strcpy(format, format_);
+          char *location = strchr(format, '%');
+          if (location) {
+            while ((*location != 0) && (*location != 'x') && (*location != 'X') && (*location != 'd')) {
+              location++;
+            }
+            if (*location != 0) {
+              *location = 's';
+            } else {
+              location = 0;
+            }
+          }
+          if (location) {
+            npf_snprintf(buffer, sizeof(buffer), format, "--");
+          } else {
+            strcpy(buffer, "++wtf++");
+          }
         }
       }
-      if (location) {
-        npf_snprintf(buffer, sizeof(buffer), format, "--");
-      } else {
-        strcpy(buffer, "++wtf++");
-      }
-    }
-  } break;
+      break;
 
-  default:
-    strcpy(buffer, "++wtf++");
+    default:
+      strcpy(buffer, "++wtf++");
   }
 
   DrawLabeledField(w, position, buffer, focus_);

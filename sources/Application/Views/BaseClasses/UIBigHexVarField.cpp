@@ -50,23 +50,23 @@ void UIBigHexVarField::ProcessArrow(unsigned short mask) {
   }
 
   switch (mask) {
-  case EPBM_LEFT:
-    if (position_ < precision_) {
-      position_++;
-    };
-    break;
-  case EPBM_RIGHT:
-    if (position_ > 0) {
-      position_--;
-    };
-    break;
-  case EPBM_UP:
-    value += offset;
-    break;
+    case EPBM_LEFT:
+      if (position_ < precision_) {
+        position_++;
+      };
+      break;
+    case EPBM_RIGHT:
+      if (position_ > 0) {
+        position_--;
+      };
+      break;
+    case EPBM_UP:
+      value += offset;
+      break;
 
-  case EPBM_DOWN:
-    value -= offset;
-    break;
+    case EPBM_DOWN:
+      value -= offset;
+      break;
   };
   if (value > max_) {
     value = (wrap_) ? value - max_ + min_ - 1 : max_;

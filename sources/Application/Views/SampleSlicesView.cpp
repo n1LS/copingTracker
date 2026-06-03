@@ -300,30 +300,30 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
   uintptr_t fourcc = (uintptr_t)d;
 
   switch (fourcc) {
-  case FourCC::SampleInstrumentSlices:
-    handleSliceSelectionChange();
-    ((AppWindow &)w_).SetDirty();
-    break;
-  case FourCC::SampleInstrumentStart:
-    applySliceStart(static_cast<uint32_t>(sliceStartVar_.GetInt()));
-    isDirty_ = true;
-    ((AppWindow &)w_).SetDirty();
-    break;
-  case FourCC::ActionAutoSlice:
-    if (instrument_ && instrument_->HasSlicesForPlayback()) {
-      MessageBox *mb = MessageBox::Create(*this, "Replace current slices?", MBBF_YES | MBBF_NO);
-      modalClearCount_ = 0;
-      clearWaveformRegion();
-      // Reopening the same modal can reuse identical text, so invalidate only
-      // the previous text cache and let the next redraw resend the full dialog.
-      ((AppWindow &)w_).InvalidateTextCache();
-      DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
-    } else {
-      autoSliceEvenly();
-    }
-    break;
-  default:
-    break;
+    case FourCC::SampleInstrumentSlices:
+      handleSliceSelectionChange();
+      ((AppWindow &)w_).SetDirty();
+      break;
+    case FourCC::SampleInstrumentStart:
+      applySliceStart(static_cast<uint32_t>(sliceStartVar_.GetInt()));
+      isDirty_ = true;
+      ((AppWindow &)w_).SetDirty();
+      break;
+    case FourCC::ActionAutoSlice:
+      if (instrument_ && instrument_->HasSlicesForPlayback()) {
+        MessageBox *mb = MessageBox::Create(*this, "Replace current slices?", MBBF_YES | MBBF_NO);
+        modalClearCount_ = 0;
+        clearWaveformRegion();
+        // Reopening the same modal can reuse identical text, so invalidate only
+        // the previous text cache and let the next redraw resend the full dialog.
+        ((AppWindow &)w_).InvalidateTextCache();
+        DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
+      } else {
+        autoSliceEvenly();
+      }
+      break;
+    default:
+      break;
   }
 }
 

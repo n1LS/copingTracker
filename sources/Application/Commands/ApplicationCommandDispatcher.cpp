@@ -20,14 +20,14 @@ ApplicationCommandDispatcher::~ApplicationCommandDispatcher() {};
 
 void ApplicationCommandDispatcher::Execute(FourCC id, float value) {
   switch (id) {
-  case FourCC::TrigTempoTap:
-    if (value > 0.5)
-      OnTempoTap();
-    break;
-  case FourCC::TrigSeqQueueRow:
-    if (value > 0.5)
-      OnQueueRow();
-    break;
+    case FourCC::TrigTempoTap:
+      if (value > 0.5)
+        OnTempoTap();
+      break;
+    case FourCC::TrigSeqQueueRow:
+      if (value > 0.5)
+        OnQueueRow();
+      break;
   }
 }
 
