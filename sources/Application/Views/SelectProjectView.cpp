@@ -251,8 +251,13 @@ void SelectProjectView::DrawView() {
 
   for (int n = 0; n < numButtons_; n++) {
     bool selected = selectedButton_ == n;
-    SetColor(selected ? cccccBackground : cccccHighlight1);
-    SetBackgroundColor(selected ? cccccHighlight2 : cccccBackground);
+    SetColor(Theme::View::fg);
+    SetBackgroundColor(Theme::View::bg);
+
+    if (selected) {
+      SwapColors();
+    }
+
     DrawString(x, SCREEN_HEIGHT - 1, buttons[n]);
 
     x += 2 + strlen(buttons[n]);

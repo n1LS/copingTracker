@@ -398,8 +398,12 @@ void ImportView::DrawView() {
   }
 
   auto setColors = [&](bool selected) {
-    SetBackgroundColor(selected ? cccccHighlight2 : cccccBackground);
-    SetColor(selected ? cccccBackground : cccccHighlight1);
+    SetBackgroundColor(Theme::View::bg);
+    SetColor(Theme::View::fg);
+
+    if (selected) {
+      SwapColors();
+    }
   };
 
   if (!inProjectSampleDir_) {

@@ -362,8 +362,12 @@ void MixerView::DrawView() {
     state[1] = '\0';
 
     bool highlighted = (i == viewData_->songX_);
-    SetColor(highlighted ? cccccBackground : cccccNormal);
-    SetBackgroundColor(highlighted ? cccccHighlight2 : cccccBackground);
+    SetBackgroundColor(Theme::View::bg);
+    SetColor(Theme::View::fg);
+
+    if (highlighted) {
+      SwapColors();
+    }
     DrawString(pos.x_, pos.y_, state);
     pos.x_ += CHANNELS_X_OFFSET_;
   }
