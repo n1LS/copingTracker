@@ -26,11 +26,12 @@ void NullView::DrawView() {
 
   Clear();
 
-  SetColor(cccccHighlight2);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::inactive);
 
   char buildString[SCREEN_WIDTH + 1];
   // todo: update and merge with instance from appwindow
-  npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
+  npf_snprintf(buildString, sizeof(buildString), "copingTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
                BUILD_COUNT);
   GUIPoint pos;
   pos.y_ = 22;

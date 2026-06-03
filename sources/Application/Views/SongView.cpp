@@ -807,7 +807,6 @@ void SongView::processSelectionButtonMask(unsigned int mask) {
 ******************************************************************************/
 
 void SongView::DrawView() {
-  SetBackgroundColor(cccccHighlight1);
   Clear();
 
   // Prepare selection related information
@@ -815,7 +814,6 @@ void SongView::DrawView() {
   if (clipboard_.active_) {
     selRect = GUIRect(clipboard_.x_, clipboard_.y_ + clipboard_.offset_, viewData_->songX_,
                       viewData_->songY_ + viewData_->songOffset_);
-
     selRect.Normalize();
   }
 

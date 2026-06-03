@@ -930,7 +930,7 @@ void AppWindow::PrintMultiLine(char *line) {
   // Preserve the build string at the bottom of the screen
   // todo: update and merge with instance from nullview
   char buildString[SCREEN_WIDTH + 1];
-  npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
+  npf_snprintf(buildString, sizeof(buildString), "copingTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
                BUILD_COUNT);
   GUIPoint pos(0, 22);
   pos.x_ = (32 - strlen(buildString)) / 2;

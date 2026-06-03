@@ -67,15 +67,15 @@ void ThemeImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
 void ThemeImportView::DrawView() {
   Clear();
-
+  
   GUIPoint pos = GetTitlePosition();
-
   auto fs = FileSystem::GetInstance();
 
   // Draw title
   const char *title = "Import Theme";
-  SetColor(cccccInfo);
-  DrawString(pos.x_ + 1, pos.y_, title);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
+  DrawString(pos.x_, pos.y_, title);
 
   // Draw theme files
   int x = 1;
@@ -87,9 +87,7 @@ void ThemeImportView::DrawView() {
   char buffer[PFILENAME_SIZE];
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total); i++) {
     if (i == currentIndex_) {
-      SetColor(cccccHighlight2);
-    } else {
-      SetColor(cccccNormal);
+      SwapColors();
     }
 
     memset(buffer, '\0', sizeof(buffer));
@@ -102,6 +100,10 @@ void ThemeImportView::DrawView() {
       *dot = '\0';
     }
     DrawString(x, y, buffer);
+
+    if (i == currentIndex_) {
+      SwapColors();
+    } 
 
     y++;
   }
