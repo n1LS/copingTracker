@@ -347,13 +347,12 @@ void ImportView::DrawView() {
       // Format the display name with appropriate prefix
       if (inProjectSampleDir_ &&
           viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
-        SetColor(cccccAccent);
+        SetColor(Theme::View::info);
         DrawString(x, y, "*");
       } else if (isSingleCycle) {
-        SetColor(cccccAccent);
+        SetColor(Theme::View::info);
         DrawString(x, y, "~");
       } else {
-        SetColor(Theme::View::fg);
         DrawString(x, y, " ");
       }
     } else {
@@ -373,8 +372,11 @@ void ImportView::DrawView() {
     }
 
     bool highlighted = (i == currentIndex_);
-    SetColor(highlighted ? cccccBackground : cccccNormal);
-    SetBackgroundColor(highlighted ? cccccHighlight2 : cccccBackground);
+    SetColor(Theme::View::fg);
+    SetBackgroundColor(Theme::View::bg);
+    if (highlighted) {
+      SwapColors();
+    }
     DrawString(x + 1, y, displayName.c_str());
     y += 1;
   };

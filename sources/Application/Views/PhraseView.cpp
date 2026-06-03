@@ -1090,7 +1090,7 @@ void PhraseView::processSelectionButtonMask(unsigned short mask) {
   }
 }
 
-void PhraseView::setTextProps(int row, int col, Color textColor = cccccNormal) {
+void PhraseView::setTextProps(int row, int col, Color textColor = Theme::View::fg) {
   bool highlighted = false;
 
   if (clipboard_.active_) {
@@ -1104,8 +1104,8 @@ void PhraseView::setTextProps(int row, int col, Color textColor = cccccNormal) {
     }
   }
 
-  SetColor(highlighted ? cccccBackground : textColor);
-  SetBackgroundColor(highlighted ? textColor : cccccBackground);
+  SetColor(highlighted ? Theme::View::bg : textColor);
+  SetBackgroundColor(highlighted ? textColor : Theme::View::bg);
 }
 
 void PhraseView::DrawView() {

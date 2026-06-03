@@ -565,17 +565,6 @@ void View::drawPowerButtonUI() {
   }
 }
 
-void View::switchToRecordView() {
-  // recording view only not yet supported on pico
-  return;
-
-  // if (!Player::GetInstance()->IsRunning()) {
-  //   RecordView::SetSourceViewType(viewType_);
-  //   SampleEditorView::SetSourceViewType(viewType_);
-  //   Navigate(VT_RECORD);
-  // }
-}
-
 void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick = false) {
   const char *thickChars = char_border_double_topLeft_s char_border_double_topRight_s char_border_double_bottomLeft_s
       char_border_double_bottomRight_s char_border_double_horizontal_s char_border_double_vertical_s;

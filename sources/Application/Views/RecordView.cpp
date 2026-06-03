@@ -140,11 +140,11 @@ void RecordView::DrawView() {
   SetColor(Theme::View::fg);
 
   if (uiSavingActive_) {
-    SetColor(cccccError);
+    SetColor(Theme::View::error);
     DrawString(pos.x_, pos.y_, "SAVING");
     SetColor(Theme::View::fg);
   } else if (uiRecordingActive_) {
-    SetColor(cccccError);
+    SetColor(Theme::View::error);
     DrawString(pos.x_, pos.y_, "[REC]");
     SetColor(Theme::View::fg);
   } else {
