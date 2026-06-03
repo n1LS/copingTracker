@@ -19,7 +19,6 @@
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ChainView.h"
-#include "Application/Views/ConsoleView.h"
 #include "Application/Views/DeviceView.h"
 #include "Application/Views/GrooveView.h"
 #include "Application/Views/ImportView.h"
