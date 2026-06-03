@@ -345,8 +345,7 @@ void ImportView::DrawView() {
 
       displayName += tempBuffer;
       // Format the display name with appropriate prefix
-      if (inProjectSampleDir_ &&
-          viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
+      if (inProjectSampleDir_ && viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
         SetColor(Theme::View::info);
         DrawString(x, y, "*");
       } else if (isSingleCycle) {
@@ -356,7 +355,7 @@ void ImportView::DrawView() {
         DrawString(x, y, " ");
       }
     } else {
-      SetColor(cccccAccent);
+      SetColor(Theme::FileList::directory);
       // Handle directories
       char tempBuffer[PFILENAME_SIZE];
       displayName = "/";
@@ -381,7 +380,6 @@ void ImportView::DrawView() {
     y += 1;
   };
 
-  SetColor(cccccHighlight1);
   y = SCREEN_HEIGHT - 2;
   if (inProjectSampleDir_) {
     if (selectedButton_ < 0 || selectedButton_ >= kProjectPoolButtonCount) {
@@ -450,7 +448,7 @@ void ImportView::DrawView() {
       filesize = fs->getFileSize(currentFileIndex);
       // if file size is larger than available space, set color to warning
       if (filesize > availableSpace) {
-        SetColor(cccccWarn);
+        SetColor(Theme::View::warning);
       }
     }
   }

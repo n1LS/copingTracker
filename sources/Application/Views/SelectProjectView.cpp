@@ -149,16 +149,14 @@ void DeleteProjectConfirmModal::DrawView() {
   }
 
   const char *cancelButton = "Cancel";
-  SetColor(cccccHighlight2);
+  SetColor(Theme::Button::fg(false));
   DrawString((26 - strlen(cancelButton)) / 2, 5, cancelButton);
 }
 
 static void LoadProjectCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
-
     // User accepted losing changes; clear autosave for the current project.
     ((SelectProjectView &)v).ClearAutoSave();
-
     ((SelectProjectView &)v).LoadProject();
   }
 }
@@ -204,7 +202,6 @@ void SelectProjectView::DrawView() {
 
   // Draw title
   const char *title = "Browse Projects";
-  SetColor(cccccInfo);
   DrawString(pos.x_ + 1, pos.y_, title);
   SetColor(Theme::View::fg);
 
@@ -219,8 +216,12 @@ void SelectProjectView::DrawView() {
 
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total); i++) {
     bool highlighted = (i == currentIndex_);
-    SetBackgroundColor(highlighted ? cccccHighlight2 : cccccBackground);
-    SetColor(highlighted ? cccccBackground : cccccNormal);
+    SetBackgroundColor(Theme::View::bg);
+    SetColor(Theme::View::fg);
+
+    if (highlighted) {
+      SwapColors();
+    }
 
     char buffer[MAX_PROJECT_NAME_LENGTH + 1];
     memset(buffer, '\0', sizeof(buffer));

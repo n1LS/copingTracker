@@ -116,7 +116,7 @@ enum OldColors : Color {
   }
 #define FIXED(Y, A) static constexpr Color Y = A;
 struct Theme {
-
+  
   struct Notes {
     SWITCHABLE(bg, LIGHT_BLUE, BLUE)
     SWITCHABLE(fg, BLACK, BLACK)
@@ -158,6 +158,11 @@ struct Theme {
       SWITCHABLE(bg, LIGHT_GREEN, BLACK)
       SWITCHABLE(fg, BLACK, WHITE)
     };
+  };
+
+  struct FileList {
+    FIXED(directory, LIGHT_YELLOW)
+    FIXED(file, Theme::View::fg)
   };
 
   struct Dialog {

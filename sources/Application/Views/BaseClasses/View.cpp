@@ -167,6 +167,9 @@ void View::drawMap() {
   }
 }
 
+void View::switchToRecordView() {
+}
+
 void View::drawNotes() {
   GUIPoint anchor = GetAnchor();
   int initialX = View::margin_ + 5;

@@ -340,8 +340,8 @@ void MixerView::DrawView() {
   Project *project = player->GetProject(); // Use Player's GetProject method
 
   const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song" : "Live");
-  SetColor(cccccBackground);
-  SetBackgroundColor(cccccNormal);
+  SetColor(Theme::View::fg);
+  SetBackgroundColor(Theme::View::bg);
   DrawString(pos.x_, pos.y_, buffer);
 
   // Now draw busses
@@ -381,10 +381,14 @@ void MixerView::DrawView() {
   // Align with master volume control
   labelPos.x_ += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
   labelPos.y_ = SCREEN_HEIGHT - 3; // Position below the volume control
-  SetBackgroundColor(cccccHighlight2);
-  SetColor(cccccBackground);
+  
+  bool active = (viewData_->songX_ == SONG_CHANNEL_COUNT);
+
+  SetBackgroundColor(Theme::Notes::bg(active));
+  SetColor(Theme::Notes::fg(active));
   DrawString(labelPos.x_, labelPos.y_, "MB");
-  SetColor(Theme::View::fg);
+  DrawString(labelPos.x_, labelPos.y_ + 1, "  ");
+  DrawString(labelPos.x_, labelPos.y_ + 2, "  ");
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
