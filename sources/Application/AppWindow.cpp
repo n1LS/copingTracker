@@ -167,7 +167,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   UpdateColorsFromConfig();
 
-  GUIWindow::Clear(colorPalette_[cccccBackground]);
+  GUIWindow::Clear(colorPalette_[Theme::View::bg]);
 
   static AppWindowViews views(*this, viewData_);
   views_ = &views;
@@ -252,7 +252,7 @@ void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
 }
 
 void AppWindow::Clear(bool all) {
-  color_t base = (color_t){.fg = cccccNormal, .bg = cccccBackground};
+  color_t base = (color_t){.fg = Theme::View::fg, .bg = Theme::View::bg};
 
   memset(_charScreen, ' ', SCREEN_CHARS);
   memset(_screenColor, base.byte, SCREEN_CHARS);
@@ -609,7 +609,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
 void AppWindow::onUpdate(bool redraw) {
   if (redraw) {
-    GUIWindow::Clear(colorPalette_[cccccBackground]);
+    GUIWindow::Clear(colorPalette_[Theme::View::bg]);
     Clear(true);
     // Mark as dirty to trigger redraw in AnimationUpdate
     SetDirty();
@@ -825,7 +825,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         }
         _currentView->SetFocus(*vt);
         SetDirty();
-        GUIWindow::Clear(colorPalette_[cccccBackground]);
+        GUIWindow::Clear(colorPalette_[Theme::View::bg]);
         Clear(true);
         break;
       }
@@ -890,8 +890,10 @@ void AppWindow::Print(char *line) {
 }
 
 void AppWindow::PrintMultiLine(char *line) {
-  Clear();
-  SetColor(cccccNormal);
+  Clear();\
+  
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
 
   int current_y = 11; // Start near the middle of the screen
 
