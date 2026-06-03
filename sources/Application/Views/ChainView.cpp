@@ -663,8 +663,8 @@ void ChainView::DrawView() {
   // Draw title
 
   char title[20];
-  SetBackgroundColor(cccccBackground);
-  SetColor(cccccNormal);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
   npf_snprintf(title, sizeof(title), "Chain %2.2X", viewData_->currentChain_);
   DrawString(pos.x_, pos.y_, title);
 
@@ -755,8 +755,8 @@ void ChainView::AnimationUpdate() {
     GUIPoint pos = anchor;
     pos.x_ -= 1;
 
-    SetBackgroundColor(cccccBackground);
-    SetColor(cccccNormal);
+    SetBackgroundColor(Theme::View::bg);
+    SetColor(Theme::View::fg);
 
     // Clear last played & queued
     pos.y_ = anchor.y_ + lastPlayingPos_;
@@ -772,12 +772,12 @@ void ChainView::AnimationUpdate() {
         if (player->IsChannelPlaying(i)) {
           if (viewData_->currentPlayChain_[i] == viewData_->currentChain_ && viewData_->playMode_ != PM_AUDITION) {
             pos.y_ = anchor.y_ + viewData_->chainPlayPos_[i];
-            SetBackgroundColor(cccccBackground);
+            SetBackgroundColor(Theme::View::bg);
             if (!player->IsChannelMuted(i)) {
-              SetColor(cccccAccent);
+              SetColor(Theme::Song::Playback::active);
               DrawString(pos.x_, pos.y_, ">");
             } else {
-              SetColor(cccccAccentAlt);
+              SetColor(Theme::Song::Playback::muted);
               DrawString(pos.x_, pos.y_, "-");
             }
             lastPlayingPos_ = viewData_->chainPlayPos_[i];

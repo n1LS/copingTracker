@@ -146,7 +146,6 @@ void GrooveView::ProcessButtonMask(unsigned short mask, bool pressed) {
 }
 
 void GrooveView::DrawView() {
-
   Clear();
 
   GUIPoint pos = GetTitlePosition();
@@ -154,7 +153,7 @@ void GrooveView::DrawView() {
   // Draw title
   char title[SCREEN_WIDTH + 1];
 
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
 
   npf_snprintf(title, sizeof(title), "Groove: %2.2X", viewData_->currentGroove_);
   DrawString(pos.x_, pos.y_, title);
@@ -164,7 +163,6 @@ void GrooveView::DrawView() {
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetColor(cccccHighlight1);
   char buffer[6];
   pos = anchor;
   pos.x_ -= 3;
@@ -177,10 +175,12 @@ void GrooveView::DrawView() {
 
   // Display current groove
   pos = anchor;
-  SetColor(cccccNormal);
+  SetColor(Theme::View::fg);
 
   unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
   for (int j = 0; j < 16; j++) {
+    bool highlighted = (j == position_);
+
     if (grooveData[j] != NO_GROOVE_DATA) {
       hex2char(grooveData[j], buffer);
       buffer[3] = 0;
@@ -188,9 +188,13 @@ void GrooveView::DrawView() {
       strcpy(buffer, "--");
     };
 
-    bool highlighted = (j == position_);
-    SetBackgroundColor(highlighted ? cccccHighlight2 : cccccBackground);
-    SetColor(highlighted ? cccccBackground : cccccNormal);
+    SetBackgroundColor(Theme::View::bg);
+    SetColor(Theme::View::fg);
+    
+    if (highlighted) {
+      SwapColors();
+    }
+
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
@@ -204,7 +208,7 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
   GUIPoint anchor = GetAnchor();
   GUIPoint pos;
 
-  SetBackgroundColor(cccccBackground);
+  SetBackgroundColor(Theme::View::bg);
 
   pos.x_ = anchor.x_ - 1;
   pos.y_ = anchor.y_ + lastPosition_;
@@ -223,8 +227,8 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
     lastPosition_ = groovepos;
     pos.x_ = anchor.x_ - 1;
     pos.y_ = anchor.y_ + lastPosition_;
-    SetColor(cccccAccent);
-    SetBackgroundColor(cccccBackground);
+    SetColor(Theme::Song::Playback::live);
+    SetBackgroundColor(Theme::View::bg);
     DrawString(pos.x_, pos.y_, ">");
   };
 
