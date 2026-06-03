@@ -59,15 +59,19 @@ void FullScreenBox::DrawView() {
   SetWindow(SCREEN_WIDTH, SCREEN_HEIGHT);
 
   // draw text
+  SetColor(Theme::View::error);
+  SetBackgroundColor(Theme::View::bg);
+
   int x1 = ((SCREEN_WIDTH - line1_width) / 2) - 2;
   int y1 = (SCREEN_HEIGHT / 2) - 4;
-  SetColor(cccccError);
+  
   DrawString(x1, y1, line1_.c_str());
+
   if (line2_.size() > 0) {
     int line2_width = line2_.size();
     int x2 = ((SCREEN_WIDTH - line2_width) / 2) - 2;
     int y2 = y1 + 2;
     DrawString(x2, y2, line2_.c_str());
   }
-  SetColor(cccccNormal);
+
 }

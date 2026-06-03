@@ -17,15 +17,10 @@ UISwatchField::UISwatchField(const GUIPoint &position, const Color color) : UIFi
 }
 
 void UISwatchField::Draw(GUIWindow &w, int offset) {
-
-  GUIPoint position = GetPosition();
-  position.y_ += offset;
-
-  position.x_ += 1;
+  GUIPoint position = GetPosition() + GUIPoint(1, offset);
 
   ((AppWindow &)w).SetBackgroundColor(color_);
   w.DrawString("   ", position);
-  ((AppWindow &)w).SetColor(cccccNormal);
 }
 
 void UISwatchField::ProcessArrow(unsigned short mask) {};

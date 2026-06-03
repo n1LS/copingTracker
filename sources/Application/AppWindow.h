@@ -128,7 +128,7 @@ private:
   static unsigned char _preScreen[SCREEN_CHARS];
   static color_t _preScreenColor[SCREEN_CHARS];
 
-  color_t color_ = {.fg = cccccNormal, .bg = cccccBackground};
+  color_t color_ = {.fg = Theme::View::fg, .bg = Theme::View::bg};
 
   static int charWidth_;
   static int charHeight_;
