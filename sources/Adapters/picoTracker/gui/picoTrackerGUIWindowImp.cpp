@@ -103,7 +103,7 @@ void picoTrackerGUIWindowImp::DrawRect(GUIRect &r) {
 };
 
 void picoTrackerGUIWindowImp::Clear(GUIColor &c) {
-  chargfx_color_t backgroundColor = GetColor(c);
+  Color backgroundColor = GetColor(c);
   chargfx_set_background(backgroundColor);
   chargfx_clear(backgroundColor);
   if (remoteUIEnabled_) {
@@ -119,10 +119,10 @@ void picoTrackerGUIWindowImp::ClearTextRect(GUIRect &r) {
   Trace::Debug("GUI ClearTextRect call");
 };
 
-chargfx_color_t picoTrackerGUIWindowImp::GetColor(GUIColor &c) {
+Color picoTrackerGUIWindowImp::GetColor(GUIColor &c) {
   // Palette index should always be < 16
   if (c.paletteIndex_ >= 16) {
-    return CHARGFX_WHITE; // Default to normal color if index is invalid
+    return WHITE; // Default to normal color if index is invalid
   }
 
   // Convert the color to RGB565 format
@@ -134,11 +134,11 @@ chargfx_color_t picoTrackerGUIWindowImp::GetColor(GUIColor &c) {
     lastPaletteRGB[c.paletteIndex_] = rgb565;
   }
 
-  return (chargfx_color_t)c.paletteIndex_;
+  return (Color)c.paletteIndex_;
 }
 
 void picoTrackerGUIWindowImp::SetColor(GUIColor &color) {
-  chargfx_color_t gColor = GetColor(color);
+  Color gColor = GetColor(color);
   lastRemoteColorIdx = gColor;
 
   NAssert(c.r_ < 255);
@@ -157,7 +157,7 @@ void picoTrackerGUIWindowImp::SetColor(GUIColor &color) {
 };
 
 void picoTrackerGUIWindowImp::SetBackgroundColor(GUIColor &color) {
-  chargfx_color_t gColor = GetColor(color);
+  Color gColor = GetColor(color);
   lastRemoteBackgroundColorIdx = gColor;
 
   NAssert(c.r_ < 255);

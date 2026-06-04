@@ -23,6 +23,7 @@
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
 #include "ViewEvent.h"
+#include "Foundation/Types/Colors.h"
 
 #define VU_METER_HEIGHT 16
 #define VU_METER_MAX 159
@@ -71,28 +72,6 @@ enum ViewType {
 };
 
 enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
-
-typedef uint8_t Color;
-
-// todo: move somewhere else
-enum colorIndex : uint8_t {
-  BLACK,
-  RED,
-  GREEN,
-  YELLOW,
-  BLUE,
-  MAGENTA,
-  CYAN,
-  LIGHT_GRAY,
-  DARK_GRAY,
-  LIGHT_RED,
-  LIGHT_GREEN,
-  LIGHT_YELLOW,
-  LIGHT_BLUE,
-  LIGHT_MAGENTA,
-  LIGHT_CYAN,
-  WHITE
-};
 
 #define SWITCHABLE(Y, A, B)                                                                                            \
   static constexpr Color Y(bool selected) {                                                                            \
@@ -311,7 +290,7 @@ protected:
     *right = std::clamp<int32_t>(((rightDb + 60) * 678) >> 8, 0, VU_METER_MAX);
   }
 
-public: // temp hack for modl windo constructors
+public: // temp hack for modal window constructors
   GUIWindow &w_;
   ViewData *viewData_;
   bool needsRedraw_;

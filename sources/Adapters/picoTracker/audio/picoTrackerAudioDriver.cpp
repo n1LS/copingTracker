@@ -66,7 +66,7 @@ void picoTrackerAudioDriver::BufferNeeded() {
   // Audio tick processes MIDI among other things
   // TODO: understand tick and buffer size relationship. currently not constant
   // probably not right
-  // TODO: This could (should?) go into the main thread. If done tho, we geat a
+  // TODO: This could (should?) go into the main thread. If done tho, we get a
   // deadlock in malloc mutex due to malloc being called from core1 and isr
   // simultaneously
   instance_->onAudioBufferTick();

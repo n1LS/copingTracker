@@ -121,7 +121,7 @@ static void msd_draw_box() {
 }
 
 static void msd_draw_screen(const char *status) {
-  chargfx_clear(CHARGFX_BLACK);
+  chargfx_clear(BLACK);
   msd_draw_box();
   msd_draw_inner(0, "USB STORAGE DEVICE MODE");
   msd_draw_inner(3, status);                   // center row of interior
@@ -133,10 +133,10 @@ void msd_mode_run() {
   // Initialize display
   chargfx_init();
   chargfx_set_font_index(2);
-  chargfx_set_palette_color(CHARGFX_BLACK, 0x000); // black
-  chargfx_set_palette_color(CHARGFX_GREEN, 0xFF0); // green
-  chargfx_set_background(CHARGFX_BLACK);
-  chargfx_set_foreground(CHARGFX_GREEN);
+  chargfx_set_palette_color(BLACK, 0x000); // black
+  chargfx_set_palette_color(GREEN, 0xFF0); // green
+  chargfx_set_background(BLACK);
+  chargfx_set_foreground(GREEN);
 
   msd_draw_screen("Initializing...");
 

@@ -46,6 +46,7 @@ target_compile_options(picoTrackerBootloader PRIVATE
 target_link_options(picoTrackerBootloader PRIVATE
   -Wl,--wrap=_ZN5Trace5DebugEPKcz
   -Wl,--wrap=_ZN5Trace3LogEPKcS1_z
+  -Wl,--print-memory-usage
 )
 
 target_compile_definitions(picoTrackerBootloader PUBLIC

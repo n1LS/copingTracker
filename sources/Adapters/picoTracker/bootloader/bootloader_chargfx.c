@@ -19,8 +19,8 @@
 
 #define SWAP_BYTES(color) ((uint16_t)(color >> 8) | (uint16_t)(color << 8))
 #define BUFFER_CHARS 15
-static chargfx_color_t screen_bg_color = CHARGFX_BLACK;
-static chargfx_color_t screen_fg_color = CHARGFX_WHITE;
+static Color screen_bg_color = BLACK;
+static Color screen_fg_color = WHITE;
 static int cursor_x = 0;
 static int cursor_y = 0;
 uint8_t screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};
@@ -40,19 +40,19 @@ uint16_t palette[16] = {SWAP_BYTES(0x0000), SWAP_BYTES(0x49E5), SWAP_BYTES(0xB92
                         SWAP_BYTES(0xffff), SWAP_BYTES(0x1926), SWAP_BYTES(0x2A49), SWAP_BYTES(0x4443),
                         SWAP_BYTES(0xA664), SWAP_BYTES(0x02B0), SWAP_BYTES(0x351E), SWAP_BYTES(0xB6FD)};
 
-void chargfx_clear(chargfx_color_t color) {
-  int size = TEXT_WIDTH * TEXT_HEIGHT;
+void chargfx_clear(Color color) {
+  int size = TEXT_HEIGHT * TEXT_WIDTH;
   memset(screen, 0, size);
   memset(colors, color, size);
   chargfx_set_cursor(0, 0);
   chargfx_draw_screen();
 }
 
-void chargfx_set_foreground(chargfx_color_t color) {
+void chargfx_set_foreground(Color color) {
   screen_fg_color = color;
 }
 
-void chargfx_set_background(chargfx_color_t color) {
+void chargfx_set_background(Color color) {
   screen_bg_color = color;
 }
 
