@@ -171,10 +171,10 @@ bool OpalInstrument::IsInitialized() {
 
 void OpalInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
   switch (cc) {
-  case FourCC::InstrumentCommandGateOff:
-    uint8_t stop = BitClr(breg, 5);
-    opl_.Port(OCTAVE_BASE_REG, stop);
-    break;
+    case FourCC::InstrumentCommandGateOff:
+      uint8_t stop = BitClr(breg, 5);
+      opl_.Port(OCTAVE_BASE_REG, stop);
+      break;
   }
 }
 

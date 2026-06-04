@@ -27,7 +27,7 @@ static FourCC _all[] = {
     FourCC::InstrumentCommandInstrumentRetrigger,
     FourCC::InstrumentCommandKill,
     FourCC::InstrumentCommandLegato,
-    FourCC::InstrumentCommandLoopOfset,
+    FourCC::InstrumentCommandLoopOffset,
     FourCC::InstrumentCommandMidiCC,
     FourCC::InstrumentCommandMidiChord,
     FourCC::InstrumentCommandMidiPC,

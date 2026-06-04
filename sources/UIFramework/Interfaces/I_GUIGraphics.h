@@ -21,11 +21,11 @@
 class I_GUIGraphics {
 public:
   virtual ~I_GUIGraphics() {};
-  virtual void Clear(GUIColor &color, bool overlay = false) = 0;
+  virtual void Clear(GUIColor &color) = 0;
   virtual void SetColor(GUIColor &color) = 0;
   virtual void SetBackgroundColor(GUIColor &color) = 0;
   virtual void ClearTextRect(GUIRect &) = 0;
-  virtual void DrawString(const char *string, const GUIPoint &pos, bool overlay) = 0;
+  virtual void DrawString(const char *string, const GUIPoint &pos) = 0;
   virtual void DrawChar(const char c, const GUIPoint &pos) = 0;
 
   virtual GUIRect GetRect() = 0;

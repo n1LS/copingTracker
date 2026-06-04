@@ -17,28 +17,27 @@
 // Define default color values to be used across the application
 namespace ThemeConstants {
 // Color constants
-const uint32_t DEFAULT_BACKGROUND = 0x000000;
-const uint32_t DEFAULT_FOREGROUND = 0xD8D8D8;
-const uint32_t DEFAULT_HICOLOR1 = 0x005080;
-const uint32_t DEFAULT_HICOLOR2 = 0x307090;
-const uint32_t DEFAULT_CONSOLECOLOR = 0x000000;
-const uint32_t DEFAULT_CURSORCOLOR = 0x000000;
-const uint32_t DEFAULT_INFOCOLOR = 0x00E470;
-const uint32_t DEFAULT_WARNCOLOR = 0xE8EC00;
-const uint32_t DEFAULT_ERRORCOLOR = 0xF85050;
-const uint32_t DEFAULT_ACCENT = 0xF08400;
-const uint32_t DEFAULT_ACCENT_ALT = 0xF8B800;
-const uint32_t DEFAULT_EMPHASIS = 0x787878;
-// const uint32_t DEFAULT_RESERVED1 = 0x0000FF;
-// const uint32_t DEFAULT_RESERVED2 = 0x555555;
-// const uint32_t DEFAULT_RESERVED3 = 0x777777;
-// const uint32_t DEFAULT_RESERVED4 = 0xFFFF00;
+const uint32_t DEFAULT_COLOR0 = 0x000000;
+const uint32_t DEFAULT_COLOR1 = 0x800000;
+const uint32_t DEFAULT_COLOR2 = 0x008000;
+const uint32_t DEFAULT_COLOR3 = 0x808000;
+const uint32_t DEFAULT_COLOR4 = 0x000080;
+const uint32_t DEFAULT_COLOR5 = 0x800080;
+const uint32_t DEFAULT_COLOR6 = 0x008080;
+const uint32_t DEFAULT_COLOR7 = 0x808080;
+const uint32_t DEFAULT_COLOR8 = 0xc6c6c6;
+const uint32_t DEFAULT_COLOR9 = 0xFF0000;
+const uint32_t DEFAULT_COLOR10 = 0x00FF00;
+const uint32_t DEFAULT_COLOR11 = 0xFFFF00;
+const uint32_t DEFAULT_COLOR12 = 0x0000FF;
+const uint32_t DEFAULT_COLOR13 = 0xFF00FF;
+const uint32_t DEFAULT_COLOR14 = 0x00FFFF;
+const uint32_t DEFAULT_COLOR15 = 0xFFFFFF;
 
 // Font constants
 const int DEFAULT_UIFONT = 0x0;
 inline const int THEME_FONT_COUNT = FONT_COUNT;
 inline const char *THEME_FONT_NAMES[THEME_FONT_COUNT] = {"Regular", "Bold", "Block"};
-
 inline const char *DEFAULT_THEME_NAME = "Default";
 } // namespace ThemeConstants
 

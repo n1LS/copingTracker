@@ -34,9 +34,11 @@ public:
   bool operator!=(const GUIPoint &p) const {
     return x_ != p.x_ || y_ != p.y_;
   };
-
   GUIPoint operator+(const GUIPoint &p) const {
     return GUIPoint(x_ + p.x_, y_ + p.y_);
+  };
+  GUIPoint operator-(const GUIPoint &p) const {
+    return GUIPoint(x_ - p.x_, y_ - p.y_);
   };
 
   long x_, y_;

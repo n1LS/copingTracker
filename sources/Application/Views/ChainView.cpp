@@ -203,11 +203,11 @@ void ChainView::clonePosition() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  getSelectionRect:
         gets the normalized rectangle of the current
         selection. Valid only while selection is drawn
- ******************************************************/
+******************************************************************************/
 
 GUIRect ChainView::getSelectionRect() {
   GUIRect r(clipboard_.col_, clipboard_.row_, viewData_->chainCol_, viewData_->chainRow_);
@@ -215,7 +215,7 @@ GUIRect ChainView::getSelectionRect() {
   return r;
 }
 
-/******************************************************
+/*******************************************************************************
  fillClipboardData:
 
         copies the necessary information from the
@@ -223,7 +223,7 @@ GUIRect ChainView::getSelectionRect() {
         paste. We're copying data all across the row
         because we"re too lazy to try to figure a better
         procedure
- ******************************************************/
+******************************************************************************/
 
 void ChainView::fillClipboardData() {
 
@@ -275,11 +275,11 @@ void ChainView::extendSelection() {
   }
 }
 
-/******************************************************
+/*******************************************************************************
  copySelection:
         copies data in the current selection to the
         clipboard & end selection process
- ******************************************************/
+******************************************************************************/
 
 void ChainView::copySelection() {
 
@@ -299,11 +299,11 @@ void ChainView::copySelection() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  cut:  copies data in the current selection to the
        clipboard, clear selection content & end selection
        process
- ******************************************************/
+******************************************************************************/
 
 void ChainView::cutSelection() {
 
@@ -322,12 +322,12 @@ void ChainView::cutSelection() {
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
       switch (i + clipboard_.col_) {
-      case 0:
-        dst1[j + clipboard_.row_] = 0xFF;
-        break;
-      case 1:
-        dst2[j + clipboard_.row_] = 00;
-        break;
+        case 0:
+          dst1[j + clipboard_.row_] = 0xFF;
+          break;
+        case 1:
+          dst2[j + clipboard_.row_] = 00;
+          break;
       }
     }
   }
@@ -341,10 +341,10 @@ void ChainView::cutSelection() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  pasteClipboard:
         copies data in the clipboard to the current step
- ******************************************************/
+******************************************************************************/
 
 void ChainView::pasteClipboard() {
 
@@ -363,12 +363,12 @@ void ChainView::pasteClipboard() {
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
-      case 0:
-        dst1[j + viewData_->chainRow_] = src1[j];
-        break;
-      case 1:
-        dst2[j + viewData_->chainRow_] = src2[j];
-        break;
+        case 0:
+          dst1[j + viewData_->chainRow_] = src1[j];
+          break;
+        case 1:
+          dst2[j + viewData_->chainRow_] = src2[j];
+          break;
       }
     }
   }
@@ -633,22 +633,26 @@ void ChainView::OnFocus() {
   }
 }
 
-void ChainView::setTextProps(int row, int col) {
+void ChainView::setTextProps(int col, int row) {
   bool highlighted = false;
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
-    if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
+    if (selRect.Contains(GUIPoint(col, row))) {
       highlighted = true;
     }
   } else {
-    if ((viewData_->chainCol_ == row) && (viewData_->chainRow_ == col)) {
+    if ((viewData_->chainCol_ == col) && (viewData_->chainRow_ == row)) {
       highlighted = true;
     }
   }
 
-  SetColor(highlighted ? cBackground : cNormal);
-  SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
+  SetColor(Theme::Song::fg(row % ALT_ROW_NUMBER == 0));
+  SetBackgroundColor(Theme::View::bg);
+
+  if (highlighted) {
+    SwapColors();
+  }
 }
 
 void ChainView::DrawView() {
@@ -659,53 +663,39 @@ void ChainView::DrawView() {
   // Draw title
 
   char title[20];
-  SetBackgroundColor(cBackground);
-  SetColor(cNormal);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
   npf_snprintf(title, sizeof(title), "Chain %2.2X", viewData_->currentChain_);
   DrawString(pos.x_, pos.y_, title);
 
   // Compute song grid location
 
-  GUIPoint anchor = GetAnchor();
+  pos = GetAnchor();
 
   // Display row numbers
-  SetColor(cHighlight1);
   char row[3];
-  pos = anchor;
-  pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
+    SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
     hex2char(j, row);
-    DrawString(pos.x_, pos.y_, row);
-    pos.y_ += 1;
+    DrawString(pos.x_ - 3, pos.y_ + j, row);
   }
 
-  SetColor(cNormal);
-
-  pos = anchor;
-
   // Display phrases
-
-  pos = anchor;
-
   unsigned char *data = viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_);
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = *data++;
     setTextProps(0, j);
-    if (d == 0xFF) {
-      DrawString(pos.x_, pos.y_, "--");
+    if (d == EMPTY_CHAIN_VALUE) {
+      DrawString(pos.x_, pos.y_ + j, "--");
     } else {
       hex2char(d, row);
-      DrawString(pos.x_, pos.y_, row);
+      DrawString(pos.x_, pos.y_ + j, row);
     }
-
-    pos.y_++;
   }
 
   // Draw Transpose
 
-  pos = anchor;
   pos.x_ += 3;
 
   data = viewData_->song_->chain_.transpose_ + (16 * viewData_->currentChain_);
@@ -765,8 +755,8 @@ void ChainView::AnimationUpdate() {
     GUIPoint pos = anchor;
     pos.x_ -= 1;
 
-    SetBackgroundColor(cBackground);
-    SetColor(cNormal);
+    SetBackgroundColor(Theme::View::bg);
+    SetColor(Theme::View::fg);
 
     // Clear last played & queued
     pos.y_ = anchor.y_ + lastPlayingPos_;
@@ -782,12 +772,12 @@ void ChainView::AnimationUpdate() {
         if (player->IsChannelPlaying(i)) {
           if (viewData_->currentPlayChain_[i] == viewData_->currentChain_ && viewData_->playMode_ != PM_AUDITION) {
             pos.y_ = anchor.y_ + viewData_->chainPlayPos_[i];
-            SetBackgroundColor(cBackground);
+            SetBackgroundColor(Theme::View::bg);
             if (!player->IsChannelMuted(i)) {
-              SetColor(cAccent);
+              SetColor(Theme::Song::Playback::active);
               DrawString(pos.x_, pos.y_, ">");
             } else {
-              SetColor(cAccentAlt);
+              SetColor(Theme::Song::Playback::muted);
               DrawString(pos.x_, pos.y_, "-");
             }
             lastPlayingPos_ = viewData_->chainPlayPos_[i];

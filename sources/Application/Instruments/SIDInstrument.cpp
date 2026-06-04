@@ -80,22 +80,22 @@ bool SIDInstrument::Init() {
 
   Trace::Debug("SID instrument chip is %i and osc is %i", chip_, GetOsc());
   switch (chip_) {
-  case 1:
-    sid_ = &sid1_;
-    fltcut_ = &fltcut1_;
-    fltres_ = &fltres1_;
-    fltmode_ = &fltmode1_;
-    vol_ = &vol1_;
-    break;
-  case 2:
-    sid_ = &sid2_;
-    fltcut_ = &fltcut2_;
-    fltres_ = &fltres2_;
-    fltmode_ = &fltmode2_;
-    vol_ = &vol2_;
-    break;
-  default:
-    return false;
+    case 1:
+      sid_ = &sid1_;
+      fltcut_ = &fltcut1_;
+      fltres_ = &fltres1_;
+      fltmode_ = &fltmode1_;
+      vol_ = &vol1_;
+      break;
+    case 2:
+      sid_ = &sid2_;
+      fltcut_ = &fltcut2_;
+      fltres_ = &fltres2_;
+      fltmode_ = &fltmode2_;
+      vol_ = &vol2_;
+      break;
+    default:
+      return false;
   }
 
   return true;
@@ -123,24 +123,24 @@ bool SIDInstrument::Start(int c, unsigned char note, bool retrigger) {
   // are set before rendering and to only render once per chip)
   // I *think* that this could be done only on retrigger and would work fine
   switch (chip_) {
-  case SID1:
-    if (SID1RenderMaster) {
-      SID1RenderMaster->SetRender(false);
-      Trace::Debug("Previous renderer for SID1 was %s", SID1RenderMaster->GetName().c_str());
-    }
-    SID1RenderMaster = this;
-    SID1RenderMaster->SetRender(true);
-    Trace::Debug("New renderer for SID1 is %s", SID1RenderMaster->GetName().c_str());
-    break;
-  case SID2:
-    if (SID2RenderMaster) {
-      SID2RenderMaster->SetRender(false);
-      Trace::Debug("Previous renderer for SID2 was %s", SID2RenderMaster->GetName().c_str());
-    }
-    SID2RenderMaster = this;
-    SID2RenderMaster->SetRender(true);
-    Trace::Debug("New renderer for SID2 is %s", SID2RenderMaster->GetName().c_str());
-    break;
+    case SID1:
+      if (SID1RenderMaster) {
+        SID1RenderMaster->SetRender(false);
+        Trace::Debug("Previous renderer for SID1 was %s", SID1RenderMaster->GetName().c_str());
+      }
+      SID1RenderMaster = this;
+      SID1RenderMaster->SetRender(true);
+      Trace::Debug("New renderer for SID1 is %s", SID1RenderMaster->GetName().c_str());
+      break;
+    case SID2:
+      if (SID2RenderMaster) {
+        SID2RenderMaster->SetRender(false);
+        Trace::Debug("Previous renderer for SID2 was %s", SID2RenderMaster->GetName().c_str());
+      }
+      SID2RenderMaster = this;
+      SID2RenderMaster->SetRender(true);
+      Trace::Debug("New renderer for SID2 is %s", SID2RenderMaster->GetName().c_str());
+      break;
   }
 
   int osc = GetOsc();
@@ -167,18 +167,18 @@ bool SIDInstrument::Start(int c, unsigned char note, bool retrigger) {
 
   int8_t mode = 0;
   switch (fltmode_->GetInt()) {
-  case DFM_LP:
-    mode = 1;
-    break;
-  case DFM_BP:
-    mode = 2;
-    break;
-  case DFM_HP:
-    mode = 4;
-    break;
-  case DFM_NOTCH:
-    mode = 5;
-    break;
+    case DFM_LP:
+      mode = 1;
+      break;
+    case DFM_BP:
+      mode = 2;
+      break;
+    case DFM_HP:
+      mode = 4;
+      break;
+    case DFM_NOTCH:
+      mode = 5;
+      break;
   }
   // TODO: implement v3off
   //  sid_->Register[24] =
@@ -223,11 +223,11 @@ bool SIDInstrument::IsInitialized() {
 
 void SIDInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
   switch (cc) {
-  case FourCC::InstrumentCommandGateOff:
-    int osc = GetOsc();
-    sid_->Register[4 + osc * 7] &= ~1; // Set gate bit off
-    gate_ = false;
-    break;
+    case FourCC::InstrumentCommandGateOff:
+      int osc = GetOsc();
+      sid_->Register[4 + osc * 7] &= ~1; // Set gate bit off
+      gate_ = false;
+      break;
   }
 }
 

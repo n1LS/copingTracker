@@ -70,24 +70,24 @@ bool PersistencyDocument::FirstChild() {
   while ((c = fp_->GetC()) != EOF) {
     r_ = yxml_parse(state_, c);
     switch (r_) {
-    case YXML_ELEMSTART:
-      return true;
-    case YXML_ELEMEND:
-      return false;
-    case YXML_EEOF:
-    case YXML_EREF:
-    case YXML_ECLOSE:
-    case YXML_ESTACK:
-    case YXML_ESYN:
-      Trace::Error("FirstChild parse error: %d", r_);
-      return false;
-    case YXML_CONTENT:
-    case YXML_ATTRSTART:
-    case YXML_ATTRVAL:
-    case YXML_ATTREND:
-    default:
-      // Any other values we skip, including YXML_OK
-      break;
+      case YXML_ELEMSTART:
+        return true;
+      case YXML_ELEMEND:
+        return false;
+      case YXML_EEOF:
+      case YXML_EREF:
+      case YXML_ECLOSE:
+      case YXML_ESTACK:
+      case YXML_ESYN:
+        Trace::Error("FirstChild parse error: %d", r_);
+        return false;
+      case YXML_CONTENT:
+      case YXML_ATTRSTART:
+      case YXML_ATTRVAL:
+      case YXML_ATTREND:
+      default:
+        // Any other values we skip, including YXML_OK
+        break;
     }
   }
   return false;
@@ -106,51 +106,51 @@ bool PersistencyDocument::NextSibling() {
     // Print additional debug info about the parser state
     const char *stateStr = "unknown";
     switch (r_) {
-    case YXML_OK:
-      stateStr = "YXML_OK";
-      break;
-    case YXML_ELEMSTART:
-      stateStr = "YXML_ELEMSTART";
-      break;
-    case YXML_CONTENT:
-      stateStr = "YXML_CONTENT";
-      break;
-    case YXML_ELEMEND:
-      stateStr = "YXML_ELEMEND";
-      break;
-    case YXML_ATTRSTART:
-      stateStr = "YXML_ATTRSTART";
-      break;
-    case YXML_ATTRVAL:
-      stateStr = "YXML_ATTRVAL";
-      break;
-    case YXML_ATTREND:
-      stateStr = "YXML_ATTREND";
-      break;
-    case YXML_PISTART:
-      stateStr = "YXML_PISTART";
-      break;
-    case YXML_PICONTENT:
-      stateStr = "YXML_PICONTENT";
-      break;
-    case YXML_PIEND:
-      stateStr = "YXML_PIEND";
-      break;
-    case YXML_EEOF:
-      stateStr = "YXML_EEOF";
-      break;
-    case YXML_EREF:
-      stateStr = "YXML_EREF";
-      break;
-    case YXML_ECLOSE:
-      stateStr = "YXML_ECLOSE";
-      break;
-    case YXML_ESTACK:
-      stateStr = "YXML_ESTACK";
-      break;
-    case YXML_ESYN:
-      stateStr = "YXML_ESYN";
-      break;
+      case YXML_OK:
+        stateStr = "YXML_OK";
+        break;
+      case YXML_ELEMSTART:
+        stateStr = "YXML_ELEMSTART";
+        break;
+      case YXML_CONTENT:
+        stateStr = "YXML_CONTENT";
+        break;
+      case YXML_ELEMEND:
+        stateStr = "YXML_ELEMEND";
+        break;
+      case YXML_ATTRSTART:
+        stateStr = "YXML_ATTRSTART";
+        break;
+      case YXML_ATTRVAL:
+        stateStr = "YXML_ATTRVAL";
+        break;
+      case YXML_ATTREND:
+        stateStr = "YXML_ATTREND";
+        break;
+      case YXML_PISTART:
+        stateStr = "YXML_PISTART";
+        break;
+      case YXML_PICONTENT:
+        stateStr = "YXML_PICONTENT";
+        break;
+      case YXML_PIEND:
+        stateStr = "YXML_PIEND";
+        break;
+      case YXML_EEOF:
+        stateStr = "YXML_EEOF";
+        break;
+      case YXML_EREF:
+        stateStr = "YXML_EREF";
+        break;
+      case YXML_ECLOSE:
+        stateStr = "YXML_ECLOSE";
+        break;
+      case YXML_ESTACK:
+        stateStr = "YXML_ESTACK";
+        break;
+      case YXML_ESYN:
+        stateStr = "YXML_ESYN";
+        break;
     }
     Trace::Error("XML Parser state: %s, current path: %s", stateStr, state_->elem ? state_->elem : "<none>");
     return false;
@@ -160,26 +160,26 @@ bool PersistencyDocument::NextSibling() {
   while ((c = fp_->GetC()) != EOF) {
     r_ = yxml_parse(state_, c);
     switch (r_) {
-    case YXML_ELEMSTART:
-      return true;
-    case YXML_ELEMEND:
-      return false;
-    case YXML_CONTENT:
-    case YXML_ATTRSTART:
-    case YXML_ATTRVAL:
-    case YXML_ATTREND:
-      break;
-    case YXML_EEOF:
-    case YXML_EREF:
-    case YXML_ECLOSE:
-    case YXML_ESTACK:
-    case YXML_ESYN:
-      // Error
-      Trace::Error("NextSibling encountered error: %d", r_);
-      break;
-    default:
-      // Any other values we skip, including YXML_OK
-      break;
+      case YXML_ELEMSTART:
+        return true;
+      case YXML_ELEMEND:
+        return false;
+      case YXML_CONTENT:
+      case YXML_ATTRSTART:
+      case YXML_ATTRVAL:
+      case YXML_ATTREND:
+        break;
+      case YXML_EEOF:
+      case YXML_EREF:
+      case YXML_ECLOSE:
+      case YXML_ESTACK:
+      case YXML_ESYN:
+        // Error
+        Trace::Error("NextSibling encountered error: %d", r_);
+        break;
+      default:
+        // Any other values we skip, including YXML_OK
+        break;
     }
   }
 
@@ -218,46 +218,46 @@ bool PersistencyDocument::NextAttribute() {
   while ((c = fp_->GetC()) != EOF) {
     r_ = yxml_parse(state_, c);
     switch (r_) {
-    case YXML_ELEMSTART:
-      return false;
-      break;
-    case YXML_ELEMEND:
-      return false;
-      break;
-    case YXML_CONTENT:
-      return false;
-      break;
-    case YXML_ATTRSTART:
-      npf_snprintf(attrname_, sizeof(attrname_), "%s", state_->attr);
-      break;
-    case YXML_ATTRVAL:
-      if (cur < int(sizeof(attrval_) - 1)) {
-        attrval_[cur] = state_->data[0];
-        cur++;
-      } else {
-        Trace::Error("NextAttribute overflow for attr '%s'", attrname_);
-        // we use r_ = YXML_EREF to signal that the xml parsing had a fatal
-        // error
-        r_ = YXML_EREF;
-        attrval_[0] = '\0';
+      case YXML_ELEMSTART:
         return false;
-      }
-      break;
-    case YXML_ATTREND:
-      attrval_[cur] = '\0';
-      return true;
-      break;
-    case YXML_EEOF:
-    case YXML_EREF:
-    case YXML_ECLOSE:
-    case YXML_ESTACK:
-    case YXML_ESYN:
-      // Error
-      Trace::Error("NextAttribute encountered error: %d", r_);
-      break;
-    default:
-      // Any other values we skip, including YXML_OK
-      break;
+        break;
+      case YXML_ELEMEND:
+        return false;
+        break;
+      case YXML_CONTENT:
+        return false;
+        break;
+      case YXML_ATTRSTART:
+        npf_snprintf(attrname_, sizeof(attrname_), "%s", state_->attr);
+        break;
+      case YXML_ATTRVAL:
+        if (cur < int(sizeof(attrval_) - 1)) {
+          attrval_[cur] = state_->data[0];
+          cur++;
+        } else {
+          Trace::Error("NextAttribute overflow for attr '%s'", attrname_);
+          // we use r_ = YXML_EREF to signal that the xml parsing had a fatal
+          // error
+          r_ = YXML_EREF;
+          attrval_[0] = '\0';
+          return false;
+        }
+        break;
+      case YXML_ATTREND:
+        attrval_[cur] = '\0';
+        return true;
+        break;
+      case YXML_EEOF:
+      case YXML_EREF:
+      case YXML_ECLOSE:
+      case YXML_ESTACK:
+      case YXML_ESYN:
+        // Error
+        Trace::Error("NextAttribute encountered error: %d", r_);
+        break;
+      default:
+        // Any other values we skip, including YXML_OK
+        break;
     }
   }
   return false;
@@ -290,39 +290,39 @@ bool PersistencyDocument::HasContent() {
   while ((c = fp_->GetC()) != EOF) {
     r_ = yxml_parse(state_, c);
     switch (r_) {
-    case YXML_ELEMSTART:
-      return false;
-      break;
-    case YXML_ELEMEND:
-      if (found) {
-        content_[cur] = '\0';
-        return true;
-      }
-      return false;
-      break;
-    case YXML_CONTENT:
-      if (cur < int(sizeof(content_) - 1)) {
-        content_[cur] = state_->data[0];
-        cur++;
-        found = true;
-      } else {
-        Trace::Error("HasContent truncating content for element '%s'", state_->elem);
-        r_ = YXML_EREF;
+      case YXML_ELEMSTART:
         return false;
-      }
-      break;
-    case YXML_ATTRSTART:
-    case YXML_ATTRVAL:
-    case YXML_ATTREND:
-    case YXML_EEOF:
-    case YXML_EREF:
-    case YXML_ECLOSE:
-    case YXML_ESTACK:
-    case YXML_ESYN:
-      // Error
-    default:
-      // Any other values we skip, including YXML_OK
-      break;
+        break;
+      case YXML_ELEMEND:
+        if (found) {
+          content_[cur] = '\0';
+          return true;
+        }
+        return false;
+        break;
+      case YXML_CONTENT:
+        if (cur < int(sizeof(content_) - 1)) {
+          content_[cur] = state_->data[0];
+          cur++;
+          found = true;
+        } else {
+          Trace::Error("HasContent truncating content for element '%s'", state_->elem);
+          r_ = YXML_EREF;
+          return false;
+        }
+        break;
+      case YXML_ATTRSTART:
+      case YXML_ATTRVAL:
+      case YXML_ATTREND:
+      case YXML_EEOF:
+      case YXML_EREF:
+      case YXML_ECLOSE:
+      case YXML_ESTACK:
+      case YXML_ESYN:
+        // Error
+      default:
+        // Any other values we skip, including YXML_OK
+        break;
     }
   }
   return false;

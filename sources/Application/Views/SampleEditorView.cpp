@@ -66,7 +66,7 @@ SampleEditorView::SampleEditorView(GUIWindow &w, ViewData *data)
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight) {
   assignWorkingFilename();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(cHighlight1, cHighlight2);
+  graphField_.SetBorderColors(Theme::Waveform::border(false), Theme::Waveform::border(true));
 }
 
 SampleEditorView::~SampleEditorView() {
@@ -92,7 +92,7 @@ void SampleEditorView::Reset() {
   hasWorkingCopy_ = false;
   graphField_.Reset();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(cHighlight1, cHighlight2);
+  graphField_.SetBorderColors(Theme::Waveform::border(false), Theme::Waveform::border(true));
   selectedMarker_ = MarkerStart;
 
   fieldList_.clear();
@@ -309,9 +309,9 @@ void SampleEditorView::addAllFields() {
   GUIPoint position = GetAnchor();
 
   position.y_ = 10; // offset enough for waveform display
-  position.x_ = 5;
+  position.x_ = 0;
 
-  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("name: ");
+  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Name      :");
 
   auto defaultRecName = etl::make_string_with_capacity<MAX_INSTRUMENT_NAME_LENGTH>(RECORDING_FILENAME)
                             .substr(0, strlen(RECORDING_FILENAME) - 4);
@@ -322,13 +322,13 @@ void SampleEditorView::addAllFields() {
   const uint16_t baseX = position.x_;
 
   position.y_ += 1;
-  bigHexVarField_.emplace_back(position, startVar_, 7, "start: %7.7X", 0, tempSampleSize_ - 1, 16);
+  bigHexVarField_.emplace_back(position, startVar_, 7, "Start     :%7.7X", 0, tempSampleSize_ - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
   (*bigHexVarField_.rbegin()).AddObserver(*this);
 
   // Add end position control
   position.y_ += 1;
-  bigHexVarField_.emplace_back(position, endVar_, 7, "end: %7.7X", 0, tempSampleSize_ - 1, 16);
+  bigHexVarField_.emplace_back(position, endVar_, 7, "End       :%7.7X", 0, tempSampleSize_ - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
   (*bigHexVarField_.rbegin()).AddObserver(*this);
 
@@ -336,7 +336,7 @@ void SampleEditorView::addAllFields() {
   position.y_ += 1;
   position.x_ = baseX;
   uint8_t maxOperationIndex = operationVar_.GetListSize() > 0 ? operationVar_.GetListSize() - 1 : 0;
-  intVarField_.emplace_back(position, operationVar_, "op: %s", 0, maxOperationIndex, 1, 1);
+  intVarField_.emplace_back(position, operationVar_, "Op        :%s", 0, maxOperationIndex, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
@@ -572,7 +572,7 @@ void SampleEditorView::DrawView() {
   char titleString[SCREEN_WIDTH];
   strcpy(titleString, "Sample Edit");
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
   DrawString(pos.x_, pos.y_, titleString);
 
   if (HasModalView()) {
@@ -664,13 +664,13 @@ void SampleEditorView::updateGraphMarkers() {
   bool hasSample = tempSampleSize_ > 0;
 
   if (hasSample) {
-    Color startColor = (selectedMarker_ == MarkerStart) ? cHighlight2 : cAccent;
-    Color endColor = (selectedMarker_ == MarkerEnd) ? cHighlight2 : cAccent;
+    Color startColor = Theme::Waveform::marker(selectedMarker_ == MarkerStart);
+    Color endColor = Theme::Waveform::marker(selectedMarker_ == MarkerEnd);
     graphField_.SetMarker(0, start_, startColor, true);
     graphField_.SetMarker(1, end_, endColor, true);
   } else {
-    graphField_.SetMarker(0, 0, cAccent, false);
-    graphField_.SetMarker(1, 0, cAccent, false);
+    graphField_.SetMarker(0, 0, Theme::Waveform::marker(false), false);
+    graphField_.SetMarker(1, 0, Theme::Waveform::marker(false), false);
   }
 
   uint32_t playheadSample = 0;
@@ -682,7 +682,7 @@ void SampleEditorView::updateGraphMarkers() {
     }
     playheadVisible = true;
   }
-  graphField_.SetMarker(2, playheadSample, cNormal, playheadVisible);
+  graphField_.SetMarker(2, playheadSample, Theme::Waveform::normal, playheadVisible);
 }
 
 void SampleEditorView::rebuildWaveform() {
@@ -839,55 +839,59 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
   uintptr_t fourcc = (uintptr_t)d;
 
   switch (fourcc) {
-  case FourCC::ActionOK: {
-    // Stop playback if active before applying any destructive operation
-    if (Player::GetInstance()->IsPlaying()) {
-      Player::GetInstance()->StopStreaming();
-    }
-    isPlaying_ = false;
-    playKeyHeld_ = false;
-
-    auto opName = operationVar_.GetString();
-    etl::string<SCREEN_WIDTH - 2> confirmLine("Apply ");
-    confirmLine.append(opName.c_str());
-    confirmLine.append("?");
-
-    MessageBox *mb = MessageBox::Create(*this, confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
-
-    // Modal cannot properly draw over the waveform gfx area because text
-    // drawing doesn't know the area because ClearTextRect() is not yet
-    // implemented so we need to manually clear the waveform drawing
-    clearWaveformRegion();
-
-    DoModal(mb, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onConfirmApplyOperation>(*this));
-    return;
-  }
-  case FourCC::ActionSave: {
-    attemptSave(false);
-    return;
-  }
-  case FourCC::ActionLoadAndSave: {
-    attemptSave(true);
-    return;
-  }
-  case FourCC::ActionCancel: {
-    discardWorkingCopy();
-
-    const auto &originalFilename = viewData_->sampleEditorFilename;
-    if (originalFilename.compare(RECORDING_FILENAME) == 0 && !viewData_->isShowingSampleEditorProjectPool) {
-      auto fs = FileSystem::GetInstance();
-      if (fs) {
-        if (!fs->DeleteFile(originalFilename.c_str())) {
-          Trace::Error("SampleEditorView: Failed to discard recording %s", originalFilename.c_str());
+    case FourCC::ActionOK:
+      {
+        // Stop playback if active before applying any destructive operation
+        if (Player::GetInstance()->IsPlaying()) {
+          Player::GetInstance()->StopStreaming();
         }
-      } else {
-        Trace::Error("SampleEditorView: Failed to get FS to delete: %s", originalFilename.c_str());
+        isPlaying_ = false;
+        playKeyHeld_ = false;
+
+        auto opName = operationVar_.GetString();
+        etl::string<SCREEN_WIDTH - 2> confirmLine("Apply ");
+        confirmLine.append(opName.c_str());
+        confirmLine.append("?");
+
+        MessageBox *mb = MessageBox::Create(*this, confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
+
+        // Modal cannot properly draw over the waveform gfx area because text
+        // drawing doesn't know the area because ClearTextRect() is not yet
+        // implemented so we need to manually clear the waveform drawing
+        clearWaveformRegion();
+
+        DoModal(mb, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onConfirmApplyOperation>(*this));
+        return;
       }
-    }
-    ViewType vt = SampleEditorView::sourceViewType_;
-    navigateToView(vt);
-    return;
-  }
+    case FourCC::ActionSave:
+      {
+        attemptSave(false);
+        return;
+      }
+    case FourCC::ActionLoadAndSave:
+      {
+        attemptSave(true);
+        return;
+      }
+    case FourCC::ActionCancel:
+      {
+        discardWorkingCopy();
+
+        const auto &originalFilename = viewData_->sampleEditorFilename;
+        if (originalFilename.compare(RECORDING_FILENAME) == 0 && !viewData_->isShowingSampleEditorProjectPool) {
+          auto fs = FileSystem::GetInstance();
+          if (fs) {
+            if (!fs->DeleteFile(originalFilename.c_str())) {
+              Trace::Error("SampleEditorView: Failed to discard recording %s", originalFilename.c_str());
+            }
+          } else {
+            Trace::Error("SampleEditorView: Failed to get FS to delete: %s", originalFilename.c_str());
+          }
+        }
+        ViewType vt = SampleEditorView::sourceViewType_;
+        navigateToView(vt);
+        return;
+      }
   }
 }
 
@@ -941,15 +945,17 @@ bool SampleEditorView::applySelectedOperation() {
 
   auto op = static_cast<SampleEditOperation>(opIndex);
   switch (op) {
-  case SampleEditOperation::Trim: {
-    return applyTrimOperation(static_cast<uint32_t>(start_), static_cast<uint32_t>(end_));
-  }
-  case SampleEditOperation::Normalize: {
-    return applyNormalizeOperation();
-  }
-  default:
-    Trace::Error("SampleEditorView: Unsupported operation %d", opIndex);
-    break;
+    case SampleEditOperation::Trim:
+      {
+        return applyTrimOperation(static_cast<uint32_t>(start_), static_cast<uint32_t>(end_));
+      }
+    case SampleEditOperation::Normalize:
+      {
+        return applyNormalizeOperation();
+      }
+    default:
+      Trace::Error("SampleEditorView: Unsupported operation %d", opIndex);
+      break;
   }
   return false;
 }
@@ -1441,8 +1447,7 @@ void SampleEditorView::loadSample(const etl::string<MAX_INSTRUMENT_FILENAME_LENG
 
 void SampleEditorView::clearWaveformRegion() {
   // Clear the entire waveform area
-  GUIRect rrect;
-  rrect = GUIRect(GraphXOffset, GraphYOffset, GraphXOffset + GraphField::BitmapWidth,
-                  GraphYOffset + GraphField::BitmapHeight);
-  DrawRect(rrect, cBackground);
+  GUIRect rect = GUIRect(GraphXOffset, GraphYOffset, GraphXOffset + GraphField::BitmapWidth,
+                         GraphYOffset + GraphField::BitmapHeight);
+  DrawRect(rect, Theme::View::bg);
 }

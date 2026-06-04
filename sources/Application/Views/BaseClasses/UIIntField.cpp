@@ -46,18 +46,18 @@ void UIIntField::ProcessArrow(unsigned short mask) {
   int value = *src_;
 
   switch (mask) {
-  case EPBM_UP:
-    value += yOffset_;
-    break;
-  case EPBM_DOWN:
-    value -= yOffset_;
-    break;
-  case EPBM_LEFT:
-    value -= xOffset_;
-    break;
-  case EPBM_RIGHT:
-    value += xOffset_;
-    break;
+    case EPBM_UP:
+      value += yOffset_;
+      break;
+    case EPBM_DOWN:
+      value -= yOffset_;
+      break;
+    case EPBM_LEFT:
+      value -= xOffset_;
+      break;
+    case EPBM_RIGHT:
+      value += xOffset_;
+      break;
   };
   if (value < min_) {
     value = min_;

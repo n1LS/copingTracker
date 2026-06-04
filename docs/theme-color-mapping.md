@@ -2,41 +2,9 @@
 
 This document maps theme color **names** (as configured in Device -> Theme settings) to where they are used in the UI.
 
-## Theme Color Names -> Internal Tokens
-
-| Theme name (config/UI) | Internal `Definition` | Default RGB |
-|---|---|---|
-| `BACKGROUND` / `Background` | `cBackground` | `0x0F0F0F` |
-| `FOREGROUND` / `Foreground` | `CD_NORMAL` | `0xADADAD` |
-| `HICOLOR1` / `HiColor1` | `cHighlight1` | `0x846F94` |
-| `HICOLOR2` / `HiColor2` | `cHighlight2` | `0x6B316B` |
-| `CONSOLECOLOR` / `Console` | `cConsole` | `0xFF00FF` |
-| `CURSORCOLOR` / `Cursor` | `cCursor` | `0x776B56` |
-| `INFOCOLOR` / `Info` | `cInfo` | `0x29EE3D` |
-| `WARNCOLOR` / `Warn` | `cWarn` | `0xEFFA52` |
-| `ERRORCOLOR` / `Error` | `cError` | `0xE84D15` |
-
-Notes:
-- If `CURSORCOLOR` is not set, cursor color is initialized from `FOREGROUND`.
-- `BACKGROUND` is used as clear color for the full screen buffer, not as normal text color.
-
 ## Shared UI Rules (Used Across Multiple Screens)
 
-- Screen background clear: `BACKGROUND`.
-- Screen map letters:
-  - map baseline letters (`D P G S C P I T T`): `FOREGROUND`
-  - current-screen letter highlight: `HICOLOR2`
-- Battery gauge:
-  - charging/high battery (`[CHG]`, `[+++]`, `[++ ]`): `INFO`
-  - low battery (`[+  ]`): `WARN`
-  - critical battery (`[   ]`): `ERROR`
-- Generic field widgets (`UIIntVarField`, `UIBigHexVarField`, `UINoteVarField`, etc.):
-  - non-focused field text: `FOREGROUND`
-  - focused field text: `HICOLOR2` + inverted
-- Action buttons (`UIActionField`):
-  - non-focused: `FOREGROUND`
-  - focused: `HICOLOR2` + inverted
-- Project name text field (`UITextField`) value text: `INFO`.
+- tbd
 
 ## Per-Screen Mapping
 
@@ -186,7 +154,7 @@ The instrument screen’s specific fields depend on instrument type (Macro/Sampl
 
 ## Currently Unused Or Indirect
 
-- `CONSOLE` (`cConsole`):
+- `CONSOLE` (`cccccConsole`):
   - available and fully theme-configurable
   - currently used directly in this UI path for Device screen color swatch preview
   - not currently used for standard text rendering in the main application views

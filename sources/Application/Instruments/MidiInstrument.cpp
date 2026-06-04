@@ -233,101 +233,119 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
 
   switch (cc) {
 
-  case FourCC::InstrumentCommandRetrigger: {
-    unsigned char loop = (value & 0xFF); // number of ticks before repeat
-    if (loop != 0) {
-      retrig_ = true;
-      retrigLoop_ = loop;
-      remainingTicks_ = loop;
-    } else {
-      retrig_ = false;
-    }
-  } break;
-
-  case FourCC::InstrumentCommandLegato: {
-    pitchBendTarget_ = uint8_t(value & 0xFF);
-    pitchBendSpeed_ = uint8_t(value >> 8);
-    pitchBend_ = true;
-    useLogCurve_ = true;
-
-    // Convert to interpolation alpha using a nonlinear curve.
-    float growthFactor = PB_MIN_GROWTH_FACTOR +
-                         (PB_MAX_GROWTH_FACTOR - PB_MIN_GROWTH_FACTOR) * (1.0f - ((pitchBendSpeed_ - 1) / 253.0f));
-    float normalized = (growthFactor - 1.0f) / (PB_MAX_GROWTH_FACTOR - 1.0f);
-    interpolationAlpha_ = powf(normalized, PB_CURVE_SHAPE) * PB_MAX_ALPHA;
-  } break;
-
-  case FourCC::InstrumentCommandPitchSlide: {
-    pitchBendTarget_ = uint8_t(value & 0xFF);
-    pitchBendSpeed_ = uint8_t(value >> 8);
-    pitchBend_ = true;
-    pitchBendStep_ = 1.0f;
-    useLogCurve_ = false;
-  } break;
-
-  case FourCC::InstrumentCommandVelocity: {
-    // VELM cmds set velocity for MIDI steps
-    // Ensure velocity doesn't exceed 127 (MIDI spec maximum)
-    velocity_ = value & 0x7F;
-  }; break;
-
-  case FourCC::InstrumentCommandVolume: {
-    MidiMessage msg;
-    msg.status_ = MidiMessage::MIDI_CONTROL_CHANGE + mchannel;
-    msg.data1_ = MidiCC::CC_VOLUME;
-    msg.data2_ = value / 2;
-    svc_->QueueMessage(msg);
-  }; break;
-
-  case FourCC::InstrumentCommandMidiCC: {
-    MidiMessage msg;
-    msg.status_ = MidiMessage::MIDI_CONTROL_CHANGE + mchannel;
-    msg.data1_ = (value & 0x7F00) >> 8;
-    msg.data2_ = (value & 0x7F);
-    svc_->QueueMessage(msg);
-  }; break;
-
-  case FourCC::InstrumentCommandMidiPC: {
-    SendProgramChange(mchannel, value & 0x7F);
-  }; break;
-
-  case FourCC::InstrumentCommandMidiChord: {
-    // split into 4 note offsets
-    for (int i = 0; i < MAX_MIDI_CHORD_NOTES; i++) {
-      uint8_t noteOffset = (value >> (i * 4)) & 0xF;
-      if (noteOffset == 0) {
-        continue;
+    case FourCC::InstrumentCommandRetrigger:
+      {
+        unsigned char loop = (value & 0xFF); // number of ticks before repeat
+        if (loop != 0) {
+          retrig_ = true;
+          retrigLoop_ = loop;
+          remainingTicks_ = loop;
+        } else {
+          retrig_ = false;
+        }
       }
+      break;
 
-      // fit the offset into nearest valid note of the currently selected scale
-      // Add/remove from offset to match selected scale
-      uint8_t rootNote = lastNotes_[channel][0];
-      int scale = Player::GetInstance()->GetProject()->GetScale();
-      int scaleRoot = Player::GetInstance()->GetProject()->GetScaleRoot();
-      // apply current scale to offset, taking into account the scale root
-      uint8_t scaledOffset = getSemitonesOffset(scale, noteOffset, scaleRoot);
+    case FourCC::InstrumentCommandLegato:
+      {
+        pitchBendTarget_ = uint8_t(value & 0xFF);
+        pitchBendSpeed_ = uint8_t(value >> 8);
+        pitchBend_ = true;
+        useLogCurve_ = true;
 
-      // use the existing steps note to calculate each notes offset
-      uint8_t note = rootNote + scaledOffset;
-      // Trace::Debug("MIDI SCALE note:%d root:%d offset: %d", note, rootNote,
-      //              noteOffset);
+        // Convert to interpolation alpha using a nonlinear curve.
+        float growthFactor = PB_MIN_GROWTH_FACTOR +
+                             (PB_MAX_GROWTH_FACTOR - PB_MIN_GROWTH_FACTOR) * (1.0f - ((pitchBendSpeed_ - 1) / 253.0f));
+        float normalized = (growthFactor - 1.0f) / (PB_MAX_GROWTH_FACTOR - 1.0f);
+        interpolationAlpha_ = powf(normalized, PB_CURVE_SHAPE) * PB_MAX_ALPHA;
+      }
+      break;
 
-      // save the chord note for sending a note off later
-      lastNotes_[channel][i + 1] = note;
+    case FourCC::InstrumentCommandPitchSlide:
+      {
+        pitchBendTarget_ = uint8_t(value & 0xFF);
+        pitchBendSpeed_ = uint8_t(value >> 8);
+        pitchBend_ = true;
+        pitchBendStep_ = 1.0f;
+        useLogCurve_ = false;
+      }
+      break;
 
-      if (noteOffset != 0) {
+    case FourCC::InstrumentCommandVelocity:
+      {
+        // VELM cmds set velocity for MIDI steps
+        // Ensure velocity doesn't exceed 127 (MIDI spec maximum)
+        velocity_ = value & 0x7F;
+      };
+      break;
+
+    case FourCC::InstrumentCommandVolume:
+      {
         MidiMessage msg;
-        msg.status_ = MidiMessage::MIDI_NOTE_ON + mchannel;
-        msg.data1_ = note;
-        msg.data2_ = velocity_;
-        // Trace::Debug("MIDI chord note ON[%d]: %d", i, msg.data1_);
+        msg.status_ = MidiMessage::MIDI_CONTROL_CHANGE + mchannel;
+        msg.data1_ = MidiCC::CC_VOLUME;
+        msg.data2_ = value / 2;
         svc_->QueueMessage(msg);
-      }
-    }
-  }; break;
-  case FourCC::InstrumentCommandKill: {
-    Stop(channel);
-  }; break;
+      };
+      break;
+
+    case FourCC::InstrumentCommandMidiCC:
+      {
+        MidiMessage msg;
+        msg.status_ = MidiMessage::MIDI_CONTROL_CHANGE + mchannel;
+        msg.data1_ = (value & 0x7F00) >> 8;
+        msg.data2_ = (value & 0x7F);
+        svc_->QueueMessage(msg);
+      };
+      break;
+
+    case FourCC::InstrumentCommandMidiPC:
+      {
+        SendProgramChange(mchannel, value & 0x7F);
+      };
+      break;
+
+    case FourCC::InstrumentCommandMidiChord:
+      {
+        // split into 4 note offsets
+        for (int i = 0; i < MAX_MIDI_CHORD_NOTES; i++) {
+          uint8_t noteOffset = (value >> (i * 4)) & 0xF;
+          if (noteOffset == 0) {
+            continue;
+          }
+
+          // fit the offset into nearest valid note of the currently selected scale
+          // Add/remove from offset to match selected scale
+          uint8_t rootNote = lastNotes_[channel][0];
+          int scale = Player::GetInstance()->GetProject()->GetScale();
+          int scaleRoot = Player::GetInstance()->GetProject()->GetScaleRoot();
+          // apply current scale to offset, taking into account the scale root
+          uint8_t scaledOffset = getSemitonesOffset(scale, noteOffset, scaleRoot);
+
+          // use the existing steps note to calculate each notes offset
+          uint8_t note = rootNote + scaledOffset;
+          // Trace::Debug("MIDI SCALE note:%d root:%d offset: %d", note, rootNote,
+          //              noteOffset);
+
+          // save the chord note for sending a note off later
+          lastNotes_[channel][i + 1] = note;
+
+          if (noteOffset != 0) {
+            MidiMessage msg;
+            msg.status_ = MidiMessage::MIDI_NOTE_ON + mchannel;
+            msg.data1_ = note;
+            msg.data2_ = velocity_;
+            // Trace::Debug("MIDI chord note ON[%d]: %d", i, msg.data1_);
+            svc_->QueueMessage(msg);
+          }
+        }
+      };
+      break;
+    case FourCC::InstrumentCommandKill:
+      {
+        Stop(channel);
+      };
+      break;
   }
 }
 

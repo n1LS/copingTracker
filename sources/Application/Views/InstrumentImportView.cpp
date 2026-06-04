@@ -98,10 +98,9 @@ void InstrumentImportView::DrawView() {
 
   // Draw title
   const char *title = "Import Instrument";
-  SetColor(cInfo);
-  DrawString(pos.x_ + 1, pos.y_, title);
-
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
+  SetBackgroundColor(Theme::View::bg);
+  DrawString(pos.x_, pos.y_, title);
 
   // Draw instrument files
   int x = 1;
@@ -111,10 +110,11 @@ void InstrumentImportView::DrawView() {
   // than buffer but instead returns empty string in buffer :-(
   char buffer[PFILENAME_SIZE];
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
+    SetColor(Theme::View::fg);
+    SetBackgroundColor(Theme::View::bg);
+
     if (i == currentIndex_) {
-      SetColor(cHighlight2);
-    } else {
-      SetColor(cNormal);
+      SwapColors();
     }
 
     memset(buffer, '\0', sizeof(buffer));

@@ -116,21 +116,25 @@ void MidiService::Update(Observable &o, I_ObservableData *d) {
   }
   WatchedVariable &v = (WatchedVariable &)o;
   switch (v.GetID()) {
-    // need braces inside case statements due to:
-    // https://stackoverflow.com/a/11578973/85472
-  case FourCC::VarMidiDevice: {
-    auto activeDeviceConfig = v.GetInt();
-    // note deviceID has 0 == OFF
-    Trace::Debug("midi device var changed:%d", activeDeviceConfig);
+      // need braces inside case statements due to:
+      // https://stackoverflow.com/a/11578973/85472
+    case FourCC::VarMidiDevice:
+      {
+        auto activeDeviceConfig = v.GetInt();
+        // note deviceID has 0 == OFF
+        Trace::Debug("midi device var changed:%d", activeDeviceConfig);
 
-    stopDevice();
-    updateActiveDevicesList(activeDeviceConfig);
-    startDevice();
-  } break;
-  case FourCC::VarMidiSync: {
-    auto sync = v.GetInt();
-    sendSync_ = sync != 0;
-  } break;
+        stopDevice();
+        updateActiveDevicesList(activeDeviceConfig);
+        startDevice();
+      }
+      break;
+    case FourCC::VarMidiSync:
+      {
+        auto sync = v.GetInt();
+        sendSync_ = sync != 0;
+      }
+      break;
   }
 }
 
@@ -175,16 +179,16 @@ void MidiService::updateActiveDevicesList(unsigned short config) {
   activeOutDevices_.clear();
 
   switch (config) {
-  case 1:
-    activeOutDevices_.insert(activeOutDevices_.end(), outList_[0]);
-    break;
-  case 2:
-    activeOutDevices_.insert(activeOutDevices_.end(), outList_[1]);
-    break;
-  case 3:
-    activeOutDevices_.insert(activeOutDevices_.end(), outList_[0]);
-    activeOutDevices_.insert(activeOutDevices_.end(), outList_[1]);
-    break;
+    case 1:
+      activeOutDevices_.insert(activeOutDevices_.end(), outList_[0]);
+      break;
+    case 2:
+      activeOutDevices_.insert(activeOutDevices_.end(), outList_[1]);
+      break;
+    case 3:
+      activeOutDevices_.insert(activeOutDevices_.end(), outList_[0]);
+      activeOutDevices_.insert(activeOutDevices_.end(), outList_[1]);
+      break;
   }
 }
 

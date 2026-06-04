@@ -14,7 +14,7 @@ void InstrumentView::addIndexToLine(uint8_t index, uint8_t line) {
                                          "8", "9", "A", "B", "C", "D", "E", "F"};
 
   staticField_.emplace_back(GUIPoint(31, line), hexIndexLabels[index & 0x0F]);
-  staticField_.back().color_ = cConsole;
+  staticField_.back().color_ = Theme::View::info;
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 }
 

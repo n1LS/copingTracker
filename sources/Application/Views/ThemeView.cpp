@@ -14,23 +14,24 @@
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
-#include "Application/Views/ModalDialogs/TextInputModalView.h"
 #include "System/Console/Trace.h"
 #include "System/FileSystem/FileSystem.h"
 #include <Application/Model/ThemeConstants.h>
+#include <System/Console/nanoprintf.h>
 #include <stdint.h>
 
 #define FONT_FIELD_LINE 4
 
-#define COLOR_LABEL_WIDTH 12
-#define COMPONENT_SPACING 3
+#define COLOR_LABEL_WIDTH 16
+#define COMPONENT_WIDTH 3
 
 constexpr uint8_t COLOR_COMPONENT_X_COL_POS[COLOR_COMPONENT_COUNT] = {16, 8, 0};
 constexpr uint8_t COLOR_COMPONENT_X_OFFSETS[COLOR_COMPONENT_COUNT] = {
-    COLOR_LABEL_WIDTH, COLOR_LABEL_WIDTH + COMPONENT_SPACING, COLOR_LABEL_WIDTH + 2 * COMPONENT_SPACING};
+    COLOR_LABEL_WIDTH, COLOR_LABEL_WIDTH + COMPONENT_WIDTH, COLOR_LABEL_WIDTH + 2 * COMPONENT_WIDTH};
 
 ThemeView::ThemeView(GUIWindow &w, ViewData *data)
-    : FieldView(w, data), themeNameVar_(FourCC::ActionThemeName, ThemeConstants::DEFAULT_THEME_NAME) {
+    : FieldView(w, data), colorComponentVar_(FourCC::VarColor_0_Black, 0),
+      themeNameVar_(FourCC::ActionThemeName, ThemeConstants::DEFAULT_THEME_NAME) {
 
   GUIPoint position = GetAnchor();
 
@@ -54,7 +55,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   // Font selection
   position.y_ = FONT_FIELD_LINE;
   Variable *fontVar = config->FindVariable(FourCC::VarUIFont);
-  intVarField_.emplace_back(position, *fontVar, "Font: %s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
+  intVarField_.emplace_back(position, *fontVar, "Font :%s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
                             ThemeConstants::THEME_FONT_COUNT - 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
@@ -70,7 +71,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   }
 
   // Create the label and default value as variables to avoid temporary objects
-  auto label = etl::string<MAX_UITEXTFIELD_LABEL_LENGTH>("Theme: ");
+  auto label = etl::string<MAX_UITEXTFIELD_LABEL_LENGTH>("Theme ");
   auto defaultValue = etl::string<MAX_THEME_NAME_LENGTH>(currentThemeName);
 
   themeNameVar_.SetString(currentThemeName.c_str(), false);
@@ -87,53 +88,46 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   // Initialize the export theme name
   exportThemeName_ = currentThemeName;
 
-  // Foreground color
+  // Colors 0..15
   position.y_ += 3;
-  addColorField("Foreground", config->FindVariable(FourCC::VarFGColor), cNormal, position);
-
-  // Background color
+  addColorField("Black", config->FindVariable(FourCC::VarColor_0_Black), BLACK, position);
   position.y_ += 1;
-  addColorField("Background", config->FindVariable(FourCC::VarBGColor), cBackground, position);
-
-  // Highlight color
+  addColorField("Maroon", config->FindVariable(FourCC::VarColor_1_Maroon), RED, position);
   position.y_ += 1;
-  addColorField("Highlight1", config->FindVariable(FourCC::VarHI1Color), cHighlight1, position);
-
-  // Highlight2 color
+  addColorField("Green", config->FindVariable(FourCC::VarColor_2_Green), GREEN, position);
   position.y_ += 1;
-  addColorField("Highlight2", config->FindVariable(FourCC::VarHI2Color), cHighlight2, position);
-
-  // Console color
+  addColorField("Olive", config->FindVariable(FourCC::VarColor_3_Olive), YELLOW, position);
   position.y_ += 1;
-  addColorField("Console", config->FindVariable(FourCC::VarConsoleColor), cConsole, position);
-
-  // Cursor color
+  addColorField("Blue", config->FindVariable(FourCC::VarColor_4_Blue), BLUE, position);
   position.y_ += 1;
-  addColorField("Cursor", config->FindVariable(FourCC::VarCursorColor), cCursor, position);
-
-  // Info color
+  addColorField("Purple", config->FindVariable(FourCC::VarColor_5_Purple), MAGENTA, position);
   position.y_ += 1;
-  addColorField("Info", config->FindVariable(FourCC::VarInfoColor), cInfo, position);
-
-  // Warning color
+  addColorField("Turqoise", config->FindVariable(FourCC::VarColor_6_Turqoise), CYAN, position);
   position.y_ += 1;
-  addColorField("Warning", config->FindVariable(FourCC::VarWarnColor), cWarn, position);
-
-  // Error color
+  addColorField("Silver", config->FindVariable(FourCC::VarColor_7_LightyGray), LIGHT_GRAY, position);
   position.y_ += 1;
-  addColorField("Error", config->FindVariable(FourCC::VarErrorColor), cError, position);
-
-  // Play color
+  addColorField("Gray", config->FindVariable(FourCC::VarColor_8_Gray), DARK_GRAY, position);
   position.y_ += 1;
-  addColorField("Accent", config->FindVariable(FourCC::VarAccentColor), cAccent, position);
-
-  // Mute color
+  addColorField("Red", config->FindVariable(FourCC::VarColor_9_Red), LIGHT_RED, position);
   position.y_ += 1;
-  addColorField("AccentAlt", config->FindVariable(FourCC::VarAccentAltColor), cAccentAlt, position);
-
-  // Emphasis color
+  addColorField("Lime", config->FindVariable(FourCC::VarColor_A_Lime), LIGHT_GREEN, position);
   position.y_ += 1;
-  addColorField("Emphasis", config->FindVariable(FourCC::VarEmphasisColor), cEmphasis, position);
+  addColorField("Yellow", config->FindVariable(FourCC::VarColor_B_Yellow), LIGHT_YELLOW, position);
+  position.y_ += 1;
+  addColorField("Light Blue", config->FindVariable(FourCC::VarColor_C_LightBlue), LIGHT_BLUE, position);
+  position.y_ += 1;
+  addColorField("Magenta", config->FindVariable(FourCC::VarColor_D_Magenta), LIGHT_MAGENTA, position);
+  position.y_ += 1;
+  addColorField("Cyan", config->FindVariable(FourCC::VarColor_E_Cyan), LIGHT_CYAN, position);
+  position.y_ += 1;
+  addColorField("White", config->FindVariable(FourCC::VarColor_F_White), WHITE, position);
+
+  updateColorComponentField();
+  intVarField_.emplace_back(colorComponentTargets_[0].position, colorComponentVar_, "%2.2X", 0, 248, 8, 16, 0);
+  colorComponentField_ = &(*intVarField_.rbegin());
+  fieldList_.insert(fieldList_.end(), colorComponentField_);
+  colorComponentField_->AddObserver(*this);
+  colorComponentField_->SetPosition({0, SCREEN_HEIGHT});
 }
 
 ThemeView::~ThemeView() {
@@ -142,25 +136,8 @@ ThemeView::~ThemeView() {
 void ThemeView::Reset() {
   exportThemeName_.clear();
   themeNameEditMode_ = false;
-  _forceRedraw = false;
+  forceRedraw_ = false;
   configDirty_ = false;
-}
-
-void ThemeView::ProcessButtonMask(unsigned short mask, bool pressed) {
-  if (!pressed)
-    return;
-
-  FieldView::ProcessButtonMask(mask, pressed);
-
-  if (mask & EPBM_NAV) {
-    if (mask & EPBM_LEFT) {
-      // Go back to Device view with NAV+LEFT
-      Navigate(VT_DEVICE);
-    }
-  } else if (mask & EPBM_PLAY) {
-    Player *player = Player::GetInstance();
-    player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
-  }
 }
 
 void ThemeView::DrawView() {
@@ -169,23 +146,22 @@ void ThemeView::DrawView() {
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
-  char titleString[SCREEN_WIDTH];
-  strcpy(titleString, "Theme Settings");
-
-  SetColor(cNormal);
-  DrawString(pos.x_, pos.y_, titleString);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
+  DrawString(pos.x_, pos.y_, "Theme Settings");
 
   // bit of a hack needed for font change as going from "standard" to "bold"
   // will leave behind partial characters due to different width of those string
   // labels
   DrawString(5, FONT_FIELD_LINE, "                            ");
 
+  drawColorComponentValues();
   FieldView::Redraw();
 
   // just draw the RGB column headings directly:
-  SetBackgroundColor(cBackground);
-  SetColor(cConsole);
-  DrawString(17, 7, "R  G  B");
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::inactive);
+  DrawString(21, 7, "R  G  B");
 }
 
 void ThemeView::addSwatchField(Color color, GUIPoint position) {
@@ -200,63 +176,100 @@ void ThemeView::addColorField(const char *label, Variable *colorVar, Color color
   UIStaticField &labelField = *staticField_.rbegin();
   fieldList_.insert(fieldList_.end(), &labelField);
 
-  uint32_t colorValue = static_cast<uint32_t>(colorVar->GetInt());
-
   for (uint8_t i = 0; i < COLOR_COMPONENT_COUNT; ++i) {
     GUIPoint componentPosition = position;
     componentPosition.x_ += COLOR_COMPONENT_X_OFFSETS[i];
 
-    colorComponentVars_.emplace_back(colorVar->GetID(), static_cast<int>((colorValue >> COLOR_COMPONENT_X_COL_POS[i]) &
-                                                                         static_cast<uint32_t>(0xFF)));
-    Variable &componentVar = *colorComponentVars_.rbegin();
-
-    // bigger steps and set limits because we use RGB565 for colors
-    if (i == 0 || i == 2) {
-      intVarField_.emplace_back(componentPosition, componentVar, "%2.2X", 0, 248, 8, 16, 0);
-    } else {
-      intVarField_.emplace_back(componentPosition, componentVar, "%2.2X", 0, 252, 4, 16, 0);
-    }
-    UIIntVarField &componentField = *intVarField_.rbegin();
-    fieldList_.insert(fieldList_.end(), &componentField);
-    componentField.AddObserver(*this);
-
-    colorComponentFields_.emplace_back();
-    auto &fieldInfo = colorComponentFields_.back();
-    fieldInfo.observable = &componentField;
-    fieldInfo.componentVar = &componentVar;
-    fieldInfo.colorVar = colorVar;
-    fieldInfo.shift = COLOR_COMPONENT_X_COL_POS[i];
+    colorComponentTargets_.emplace_back();
+    auto &target = colorComponentTargets_.back();
+    target.colorVar = colorVar;
+    target.position = componentPosition;
+    target.shift = COLOR_COMPONENT_X_COL_POS[i];
   }
 
   addSwatchField(color, position);
 }
 
-ThemeView::ColorComponentField *ThemeView::findColorComponentField(Observable *observable) {
-  for (auto &entry : colorComponentFields_) {
-    if (entry.observable == observable) {
-      return &entry;
+ThemeView::ColorComponentTarget *ThemeView::selectedColorComponentTarget() {
+  uint8_t targetIndex = selectedColor_ * COLOR_COMPONENT_COUNT + selectedColorComponent_;
+  if (targetIndex >= colorComponentTargets_.size()) {
+    return nullptr;
+  }
+  return &colorComponentTargets_[targetIndex];
+}
+
+bool ThemeView::isColorComponentFocus() {
+  return colorComponentField_ != nullptr && FieldView::GetFocus() == colorComponentField_;
+}
+
+void ThemeView::updateColorComponentField() {
+  ColorComponentTarget *target = selectedColorComponentTarget();
+  if (target == nullptr || target->colorVar == nullptr) {
+    return;
+  }
+
+  uint32_t colorValue = static_cast<uint32_t>(target->colorVar->GetInt());
+  uint32_t componentValue = (colorValue >> target->shift) & static_cast<uint32_t>(0xFF);
+  colorComponentVar_.SetInt(static_cast<int>(componentValue), false);
+
+  if (colorComponentField_ == nullptr) {
+    return;
+  }
+
+  GUIPoint position = target->position;
+  colorComponentField_->SetPosition(position);
+
+  // update ranges and steps to cleanly map for RGB565
+  if (selectedColorComponent_ == 1) {
+    colorComponentField_->SetRange(0, 252, 4, 16);
+  } else {
+    colorComponentField_->SetRange(0, 248, 8, 16);
+  }
+}
+
+void ThemeView::drawColorComponentValues() {
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
+
+  for (uint8_t colorIndex = 0; colorIndex < COLOR_COUNT; ++colorIndex) {
+    for (uint8_t componentIndex = 0; componentIndex < COLOR_COMPONENT_COUNT; ++componentIndex) {
+      uint8_t targetIndex = colorIndex * COLOR_COMPONENT_COUNT + componentIndex;
+      ColorComponentTarget &target = colorComponentTargets_[targetIndex];
+      uint32_t colorValue = static_cast<uint32_t>(target.colorVar->GetInt());
+      uint32_t componentValue = (colorValue >> target.shift) & static_cast<uint32_t>(0xFF);
+      char buffer[3];
+      npf_snprintf(buffer, sizeof(buffer), "%2.2X", static_cast<unsigned>(componentValue));
+      DrawString(target.position.x_, target.position.y_, buffer);
     }
   }
-  return nullptr;
+}
+
+void ThemeView::moveColorComponentFocus(int8_t colorDelta, int8_t componentDelta) {
+  if (colorDelta != 0) {
+    selectedColor_ = static_cast<uint8_t>((selectedColor_ + COLOR_COUNT + colorDelta) % COLOR_COUNT);
+  }
+  if (componentDelta != 0) {
+    selectedColorComponent_ = static_cast<uint8_t>((selectedColorComponent_ + COLOR_COMPONENT_COUNT + componentDelta) %
+                                                   COLOR_COMPONENT_COUNT);
+  }
+  updateColorComponentField();
+  SetDirty(true);
 }
 
 void ThemeView::syncColorComponentVars(Variable *colorVar) {
   if (colorVar == nullptr) {
     return;
   }
-  uint32_t colorValue = static_cast<uint32_t>(colorVar->GetInt());
-  for (auto &entry : colorComponentFields_) {
-    if (entry.colorVar != colorVar) {
-      continue;
-    }
-    uint32_t componentValue = (colorValue >> entry.shift) & static_cast<uint32_t>(0xFF);
-    entry.componentVar->SetInt(static_cast<int>(componentValue), false);
 
-    if (entry.colorVar->GetID() == FourCC::VarBGColor) {
-      // If the background or foreground color changed, we need to force a
-      // redraw to update all the colors on the screen
-      _forceRedraw = true;
-    }
+  ColorComponentTarget *target = selectedColorComponentTarget();
+  if (target != nullptr && target->colorVar == colorVar) {
+    updateColorComponentField();
+  }
+
+  if (colorVar->GetID() == FourCC::VarColor_0_Black) {
+    // If the background color changed, we need to force a
+    // redraw to update all the colors on the screen
+    forceRedraw_ = true;
   }
 }
 
@@ -275,15 +288,7 @@ void ThemeView::syncFieldsFromConfig() {
     exportThemeName_ = themeName;
   }
 
-  for (auto &entry : colorComponentFields_) {
-    if (entry.colorVar == nullptr || entry.componentVar == nullptr) {
-      continue;
-    }
-
-    uint32_t colorValue = entry.colorVar->GetInt();
-    uint32_t componentValue = (colorValue >> entry.shift) & static_cast<uint32_t>(0xFF);
-    entry.componentVar->SetInt(componentValue, false);
-  }
+  updateColorComponentField();
 }
 
 void ThemeView::Update(Observable &o, I_ObservableData *d) {
@@ -300,11 +305,15 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
 
   uintptr_t fourcc = (uintptr_t)d;
 
-  ColorComponentField *componentField = findColorComponentField(&o);
-  if (componentField != nullptr) {
+  if (&o == colorComponentField_) {
+    ColorComponentTarget *componentField = selectedColorComponentTarget();
+    if (componentField == nullptr || componentField->colorVar == nullptr) {
+      return;
+    }
+
     Variable *colorVar = componentField->colorVar;
     uint32_t colorValue = colorVar->GetInt();
-    uint32_t newComponentValue = componentField->componentVar->GetInt() & 0xFF;
+    uint32_t newComponentValue = colorComponentVar_.GetInt() & 0xFF;
     colorValue &= ~(static_cast<uint32_t>(0xFF) << componentField->shift);
     colorValue |= newComponentValue << componentField->shift;
     colorVar->SetInt(static_cast<int>(colorValue));
@@ -313,81 +322,131 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   }
 
   switch (fourcc) {
-  // Handle theme import action
-  case FourCC::ActionImport: {
-    // Switch to the ThemeImportView
-    Navigate(VT_THEME_IMPORT);
-    return;
-  }
-  // Handle theme export action
-  case FourCC::ActionExport: {
-    // Get the theme name from the text field
-    exportThemeName_ = themeNameField_->GetString();
+    // Handle theme import action
+    case FourCC::ActionImport:
+      {
+        // Switch to the ThemeImportView
+        Navigate(VT_THEME_IMPORT);
+        return;
+      }
+    // Handle theme export action
+    case FourCC::ActionExport:
+      {
+        // Get the theme name from the text field
+        exportThemeName_ = themeNameField_->GetString();
 
-    // Check if the theme name is empty
-    if (exportThemeName_.empty()) {
-      exportThemeName_ = ThemeConstants::DEFAULT_THEME_NAME;
-      themeNameVar_.SetString(exportThemeName_.c_str());
-      themeNameField_->SetVariable(themeNameVar_);
-    }
+        // Check if the theme name is empty
+        if (exportThemeName_.empty()) {
+          exportThemeName_ = ThemeConstants::DEFAULT_THEME_NAME;
+          themeNameVar_.SetString(exportThemeName_.c_str());
+          themeNameField_->SetVariable(themeNameVar_);
+        }
 
-    // Export the theme
-    handleThemeExport();
-    return;
-  }
-  // Handle theme name field
-  case FourCC::ActionThemeName: {
-    // Update the export theme name
-    exportThemeName_ = themeNameField_->GetString();
+        // Export the theme
+        handleThemeExport();
+        return;
+      }
+    // Handle theme name field
+    case FourCC::ActionThemeName:
+      {
+        // Update the export theme name
+        exportThemeName_ = themeNameField_->GetString();
 
-    // Update the theme name in the Config
-    Config *config = Config::GetInstance();
-    Variable *themeNameVar = config->FindVariable(FourCC::VarThemeName);
-    if (themeNameVar) {
-      themeNameVar->SetString(exportThemeName_.c_str());
-      configDirty_ = true;
-    }
-    themeNameVar_.SetString(exportThemeName_.c_str());
-    return;
-  }
-  // if font changes call redraw all fields
-  case FourCC::VarUIFont: {
-    // need to force redraw of entire screen to update for font change
-    ForceClear();
-    DrawView();
-    configDirty_ = true;
-    break;
-  }
-  // Handle color variable changes
-  case FourCC::VarBGColor:
-  case FourCC::VarFGColor:
-  case FourCC::VarHI1Color:
-  case FourCC::VarHI2Color:
-  case FourCC::VarConsoleColor:
-  case FourCC::VarCursorColor:
-  case FourCC::VarInfoColor:
-  case FourCC::VarWarnColor:
-  case FourCC::VarErrorColor:
-  case FourCC::VarAccentColor:
-  case FourCC::VarAccentAltColor:
-  case FourCC::VarEmphasisColor:
-    // case FourCC::VarReserved1Color:
-    // case FourCC::VarReserved2Color:
-    // case FourCC::VarReserved3Color:
-    // case FourCC::VarReserved4Color:
-    {
-      // Update the AppWindow's color values from Config
-      ((AppWindow &)w_).UpdateColorsFromConfig();
+        // Update the theme name in the Config
+        Config *config = Config::GetInstance();
+        Variable *themeNameVar = config->FindVariable(FourCC::VarThemeName);
+        if (themeNameVar) {
+          themeNameVar->SetString(exportThemeName_.c_str());
+          configDirty_ = true;
+        }
+        themeNameVar_.SetString(exportThemeName_.c_str());
+        return;
+      }
+    // if font changes call redraw all fields
+    case FourCC::VarUIFont:
+      {
+        // need to force redraw of entire screen to update for font change
+        ForceClear();
+        DrawView();
+        configDirty_ = true;
+        break;
+      }
+    // Handle color variable changes
+    case FourCC::VarColor_0_Black:
+    case FourCC::VarColor_1_Maroon:
+    case FourCC::VarColor_2_Green:
+    case FourCC::VarColor_3_Olive:
+    case FourCC::VarColor_4_Blue:
+    case FourCC::VarColor_5_Purple:
+    case FourCC::VarColor_6_Turqoise:
+    case FourCC::VarColor_7_LightyGray:
+    case FourCC::VarColor_A_Lime:
+    case FourCC::VarColor_8_Gray:
+    case FourCC::VarColor_9_Red:
+    case FourCC::VarColor_B_Yellow:
+    case FourCC::VarColor_C_LightBlue:
+    case FourCC::VarColor_D_Magenta:
+    case FourCC::VarColor_E_Cyan:
+    case FourCC::VarColor_F_White:
+      {
+        // Update the AppWindow's color values from Config
+        ((AppWindow &)w_).UpdateColorsFromConfig();
 
-      // Force a redraw of the entire screen to update all colors
-      _forceRedraw = true;
-      configDirty_ = true;
+        // Force a redraw of the entire screen to update all colors
+        forceRedraw_ = true;
+        configDirty_ = true;
+        break;
+      }
+    default:
+      NInvalid;
       break;
-    }
-  default:
-    NInvalid;
-    break;
   };
+}
+
+void ThemeView::ProcessButtonMask(unsigned short mask, bool pressed) {
+  if (!pressed)
+    return;
+
+  bool wasColorComponentFocus = isColorComponentFocus();
+
+  if (wasColorComponentFocus && !(mask & (EPBM_ENTER | EPBM_EDIT | EPBM_ALT | EPBM_NAV | EPBM_SELECT | EPBM_PLAY))) {
+    if (mask & EPBM_DOWN) {
+      if (selectedColor_ < COLOR_COUNT - 1) {
+        moveColorComponentFocus(1, 0);
+        return;
+      }
+    } else if (mask & EPBM_UP) {
+      if (selectedColor_ > 0) {
+        moveColorComponentFocus(-1, 0);
+        return;
+      }
+    } else if (mask & EPBM_RIGHT) {
+      moveColorComponentFocus(0, 1);
+      return;
+    } else if (mask & EPBM_LEFT) {
+      moveColorComponentFocus(0, -1);
+      return;
+    }
+  }
+
+  FieldView::ProcessButtonMask(mask, pressed);
+
+  if (mask & EPBM_NAV) {
+    if (mask & EPBM_LEFT) {
+      // Go back to Device view with NAV+LEFT
+      Navigate(VT_DEVICE);
+    }
+  } else if (mask & EPBM_PLAY) {
+    Player *player = Player::GetInstance();
+    player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
+  }
+
+  if (!isColorComponentFocus()) {
+    colorComponentField_->SetPosition({0, SCREEN_HEIGHT}); // move off screen when not focused
+  } else if (!wasColorComponentFocus) {
+    colorComponentField_->SetPosition(selectedColorComponentTarget()->position);
+    colorComponentField_->SetChanged();
+  }
 }
 
 void ThemeView::handleThemeExport() {
@@ -452,7 +511,7 @@ void ThemeView::exportThemeWithName(const char *themeName, bool overwrite) {
 void ThemeView::OnFocus() {
   // Refresh local field state from Config when returning from theme import.
   syncFieldsFromConfig();
-  _forceRedraw = true;
+  forceRedraw_ = true;
   isDirty_ = true;
 }
 
@@ -484,10 +543,10 @@ void ThemeView::importTheme() {
   Navigate(VT_THEME_IMPORT);
 }
 void ThemeView::AnimationUpdate() {
-  if (_forceRedraw) {
+  if (forceRedraw_) {
     ForceClear();
     DrawView();
-    _forceRedraw = false;
+    forceRedraw_ = false;
   }
   drawBattery();
   drawPowerButtonUI();

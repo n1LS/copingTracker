@@ -59,15 +59,15 @@ FileHandle picoTrackerFileSystem::Open(const char *name, const char *mode) {
 
   oflag_t rmode = 0;
   switch (*mode) {
-  case 'r':
-    rmode = hasPlus ? O_RDWR : O_RDONLY;
-    break;
-  case 'w':
-    rmode = (hasPlus ? O_RDWR : O_WRONLY) | O_CREAT | O_TRUNC;
-    break;
-  default:
-    Trace::Error("Invalid mode: %s", mode);
-    return FileHandle();
+    case 'r':
+      rmode = hasPlus ? O_RDWR : O_RDONLY;
+      break;
+    case 'w':
+      rmode = (hasPlus ? O_RDWR : O_WRONLY) | O_CREAT | O_TRUNC;
+      break;
+    default:
+      Trace::Error("Invalid mode: %s", mode);
+      return FileHandle();
   }
   FsBaseFile cwd;
   if (!cwd.openCwd()) {
@@ -323,17 +323,17 @@ int picoTrackerFile::Read(void *ptr, int size) {
 void picoTrackerFile::Seek(long offset, int whence) {
   std::lock_guard<Mutex> lock(mutex);
   switch (whence) {
-  case SEEK_SET:
-    file_.seek(offset);
-    break;
-  case SEEK_CUR:
-    file_.seekCur(offset);
-    break;
-  case SEEK_END:
-    file_.seekEnd(offset);
-    break;
-  default:
-    Trace::Error("Invalid seek whence: %s", whence);
+    case SEEK_SET:
+      file_.seek(offset);
+      break;
+    case SEEK_CUR:
+      file_.seekCur(offset);
+      break;
+    case SEEK_END:
+      file_.seekEnd(offset);
+      break;
+    default:
+      Trace::Error("Invalid seek whence: %s", whence);
   }
 }
 

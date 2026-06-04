@@ -223,7 +223,7 @@ PersistencyResult PersistencyService::SaveProjectData(const char *projectName, b
   Trace::Log("PERSISTENCYSERVICE", "Opened Proj File: %s", pathBufferA.c_str());
   tinyxml2::XMLPrinter printer(fp.get());
 
-  printer.OpenElement("PICOTRACKER");
+  printer.OpenElement("COPINGTRACKER");
 
   // Loop on all registered persistable subservices
   for (auto *sub : SubServices()) {
@@ -284,7 +284,7 @@ PersistencyResult PersistencyService::Load(const char *projectName) {
     return PERSIST_LOAD_FAILED;
 
   bool elem = doc.FirstChild(); // advance to first child
-  if (!elem || strcmp(doc.ElemName(), "PICOTRACKER")) {
+  if (!elem || strcmp(doc.ElemName(), "COPINGTRACKER")) {
     Trace::Error("could not find master node");
     return PERSIST_LOAD_FAILED;
   }

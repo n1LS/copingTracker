@@ -132,7 +132,6 @@ void DeviceView::ProcessButtonMask(unsigned short mask, bool pressed) {
 }
 
 void DeviceView::DrawView() {
-
   Clear();
 
   GUIPoint pos = GetTitlePosition();
@@ -141,12 +140,12 @@ void DeviceView::DrawView() {
   char projectString[SCREEN_WIDTH];
   strcpy(projectString, "Device");
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
+  SetBackgroundColor(Theme::View::bg);
   DrawString(pos.x_, pos.y_, projectString);
 
   FieldView::Redraw();
 
-  SetColor(cNormal);
   drawMap();
 
   pos.x_ = SCREEN_MAP_WIDTH + 1;
@@ -154,8 +153,8 @@ void DeviceView::DrawView() {
 
   // todo: also merge this with the other 2 instances in nullview and the other one
   npf_snprintf(projectString, sizeof(projectString), "Build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
-  SetBackgroundColor(cBackground);
-  SetColor(cConsole);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
   DrawString(pos.x_, pos.y_, projectString);
 }
 
@@ -186,67 +185,73 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   Player *player = Player::GetInstance();
 
   switch (fourcc) {
-  case FourCC::ActionBootSelect: {
-    if (!player->IsRunning()) {
-      MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
-      DoModal(mb, ModalViewCallback::create<&BootselCallback>());
-    } else {
-      MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-      DoModal(mb);
-    }
-    return;
-  }
-  case FourCC::ActionMassStorage: {
-    if (!player->IsRunning()) {
-      MessageBox *mb = MessageBox::Create(*this, "Reboot to USB storage?", MBBF_YES | MBBF_NO);
-      DoModal(mb, ModalViewCallback::create<&MassStorageCallback>());
-    } else {
-      MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-      DoModal(mb);
-    }
-    return;
-  }
-  case FourCC::ActionShowTheme: {
-    Navigate(VT_THEME);
-    return;
-  }
-  case FourCC::VarLineOut: {
-    MessageBox *mb = MessageBox::Create(*this, "Reboot for new Audio Level!", MBBF_OK);
-    DoModal(mb);
-    Config *config = Config::GetInstance();
-    if (!config->Save()) {
-      Trace::Error("DEVICEVIEW", "Failed to save device config after line out change");
-      configDirty_ = true;
-    } else {
-      Trace::Log("DEVICEVIEW", "Saved device config after line out change");
-      configDirty_ = false;
-    }
-    break;
-  }
-  case FourCC::VarMidiDevice:
-  case FourCC::VarMidiSync:
-  case FourCC::VarRemoteUI:
-  case FourCC::VarImportResampler: {
-    configDirty_ = true;
-    break;
-  }
-  case FourCC::VarOutputVolume: {
-    Config *config = Config::GetInstance();
-    Variable *v = config->FindVariable(FourCC::VarOutputVolume);
-    if (v) {
-      Audio *audio = Audio::GetInstance();
-      if (audio) {
-        // This unfortunate name may get confused with the actual audio pipeline
-        // mixer. It's not, this sets the driver output volume
-        audio->SetMixerVolume(v->GetInt());
+    case FourCC::ActionBootSelect:
+      {
+        if (!player->IsRunning()) {
+          MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
+          DoModal(mb, ModalViewCallback::create<&BootselCallback>());
+        } else {
+          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
+          DoModal(mb);
+        }
+        return;
       }
-    }
-    configDirty_ = true;
-    break;
-  }
-  default:
-    NInvalid;
-    break;
+    case FourCC::ActionMassStorage:
+      {
+        if (!player->IsRunning()) {
+          MessageBox *mb = MessageBox::Create(*this, "Reboot to USB storage?", MBBF_YES | MBBF_NO);
+          DoModal(mb, ModalViewCallback::create<&MassStorageCallback>());
+        } else {
+          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
+          DoModal(mb);
+        }
+        return;
+      }
+    case FourCC::ActionShowTheme:
+      {
+        Navigate(VT_THEME);
+        return;
+      }
+    case FourCC::VarLineOut:
+      {
+        MessageBox *mb = MessageBox::Create(*this, "Reboot for new Audio Level!", MBBF_OK);
+        DoModal(mb);
+        Config *config = Config::GetInstance();
+        if (!config->Save()) {
+          Trace::Error("DEVICEVIEW", "Failed to save device config after line out change");
+          configDirty_ = true;
+        } else {
+          Trace::Log("DEVICEVIEW", "Saved device config after line out change");
+          configDirty_ = false;
+        }
+        break;
+      }
+    case FourCC::VarMidiDevice:
+    case FourCC::VarMidiSync:
+    case FourCC::VarRemoteUI:
+    case FourCC::VarImportResampler:
+      {
+        configDirty_ = true;
+        break;
+      }
+    case FourCC::VarOutputVolume:
+      {
+        Config *config = Config::GetInstance();
+        Variable *v = config->FindVariable(FourCC::VarOutputVolume);
+        if (v) {
+          Audio *audio = Audio::GetInstance();
+          if (audio) {
+            // This unfortunate name may get confused with the actual audio pipeline
+            // mixer. It's not, this sets the driver output volume
+            audio->SetMixerVolume(v->GetInt());
+          }
+        }
+        configDirty_ = true;
+        break;
+      }
+    default:
+      NInvalid;
+      break;
   };
   focus->Draw(w_);
   isDirty_ = true;

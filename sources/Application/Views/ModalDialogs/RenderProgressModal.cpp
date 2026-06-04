@@ -62,7 +62,7 @@ void RenderProgressModal::DrawView() {
   // Draw title
   int32_t y = 0;
   int32_t x = (width - title_.size()) / 2;
-  SetColor(cWarn);
+  SetColor(Theme::View::warning);
   DrawString(x, y, title_.c_str());
 
   // Draw message
@@ -76,7 +76,8 @@ void RenderProgressModal::DrawView() {
   drawRenderProgress(progressPos);
 
   // Draw action button
-  SetColor(cNormal);
+  // todo: drawing with button ends
+  SetColor(Theme::Button::fg(false));
   y += 2;
   // Use a fixed-width label area to avoid stale characters when label shrinks.
   x = width / 2 - 3;
@@ -152,13 +153,13 @@ void RenderProgressModal::AnimationUpdate() {
 
   if (renderComplete_) {
     ClearTextRect(0, y - 1, width, 1);
-    SetColor(cInfo);
+    SetColor(Theme::View::info);
     int32_t x = (width - message_.size()) / 2;
     DrawString(x, y - 1, message_.c_str());
   }
 
   GUIPoint progressPos(width / 2 - 2, y);
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
   drawRenderProgress(progressPos);
 
   // Keep button label in sync with render state.

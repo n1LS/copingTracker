@@ -15,6 +15,7 @@
 // Source of scales in original release:
 // https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/PitchConstellations.svg/1280px-PitchConstellations.svg.png
 
+// todo: shorten names to 16 chars
 const char *scaleNames[numScales] = {
     "None (Chromatic)",
     "Acoustic",

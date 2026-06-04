@@ -25,7 +25,7 @@ public:
   // Returns true if the specified point is contained in the rectangle.
   // Include completely the rectangle's border
 
-  bool Contains(GUIPoint &);
+  bool Contains(const GUIPoint &);
 
   // Moves the rectangle top-left position keeping its width/height
 

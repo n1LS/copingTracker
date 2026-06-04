@@ -208,8 +208,8 @@ uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
 // array of pointer to string descriptors
 char const *string_desc_arr[] = {
     (const char[]){0x09, 0x04}, // 0: is supported language is English (0x0409)
-    "xiphonics, inc",           // 1: Manufacturer
-    "PicoTracker",              // 2: Product
+    "props north audio",        // 1: Manufacturer
+    "CopingTracker",            // 2: Product
     "123456",                   // 3: Serials, should use chip ID
     "TinyUSB CDC",              // 4: CDC Interface
     "TinyUSB MSC",              // 5: MSC Interface

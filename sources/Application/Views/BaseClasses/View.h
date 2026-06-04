@@ -12,6 +12,8 @@
 #ifndef _VIEW_H_
 #define _VIEW_H_
 
+#include <stdint.h>
+
 #include "Application/Model/Config.h"
 #include "Application/Model/Project.h"
 #include "Application/Player/Player.h"
@@ -28,6 +30,8 @@
 #define VU_METER_WARN_LEVEL 8
 #define ALT_ROW_NUMBER 4 // for now const vs a user setting
 
+#define NUM_COLORS 16
+
 enum GUIEventPadButtonMasks {
   EPBM_LEFT = 1,
   EPBM_DOWN = 2,
@@ -43,6 +47,7 @@ enum GUIEventPadButtonMasks {
 };
 
 enum ViewType {
+  // first layer screens
   VT_SONG,
   VT_CHAIN,
   VT_PHRASE,
@@ -53,6 +58,7 @@ enum ViewType {
   VT_TABLE2, // Table screen under instrument
   VT_GROOVE,
   VT_MIXER,
+  // second layer screens
   VT_IMPORT,            // Sample file import
   VT_INSTRUMENT_IMPORT, // Instrument file import
   VT_SELECTPROJECT,     // Select project
@@ -66,24 +72,113 @@ enum ViewType {
 
 enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
 
-// todo: this enum's values should be index color values while the keys themselves are purely functional
-enum Color {
-  cBackground,
-  cNormal,
-  cHighlight1,
-  cHighlight2,
-  cConsole,
-  cCursor,
-  cInfo,
-  cWarn,
-  cError,
-  cAccent,
-  cAccentAlt,
-  cEmphasis,
-  cReserved1,
-  cReserved2,
-  cReserved3,
-  cReserved4,
+typedef uint8_t Color;
+
+// todo: move somewhere else
+enum colorIndex : uint8_t {
+  BLACK,
+  RED,
+  GREEN,
+  YELLOW,
+  BLUE,
+  MAGENTA,
+  CYAN,
+  LIGHT_GRAY,
+  DARK_GRAY,
+  LIGHT_RED,
+  LIGHT_GREEN,
+  LIGHT_YELLOW,
+  LIGHT_BLUE,
+  LIGHT_MAGENTA,
+  LIGHT_CYAN,
+  WHITE
+};
+
+#define SWITCHABLE(Y, A, B)                                                                                            \
+  static constexpr Color Y(bool selected) {                                                                            \
+    return selected ? A : B;                                                                                           \
+  }
+#define FIXED(Y, A) static constexpr Color Y = A;
+struct Theme {
+
+  struct Notes {
+    SWITCHABLE(bg, LIGHT_BLUE, BLUE)
+    SWITCHABLE(fg, BLACK, BLACK)
+  };
+
+  struct VU {
+    FIXED(clip, LIGHT_RED)
+    FIXED(warn, LIGHT_YELLOW)
+    FIXED(normal, GREEN)
+  };
+
+  struct Waveform {
+    FIXED(normal, LIGHT_GRAY)
+    FIXED(baseline, DARK_GRAY)
+    SWITCHABLE(marker, LIGHT_CYAN, CYAN)
+    SWITCHABLE(border, LIGHT_BLUE, BLUE)
+  };
+
+  struct Input {
+    FIXED(cursor, WHITE)
+    FIXED(placeholder, LIGHT_GRAY)
+    FIXED(label, WHITE)
+    SWITCHABLE(bg, LIGHT_GREEN, BLACK)
+    SWITCHABLE(fg, BLACK, GREEN)
+  };
+
+  struct Button {
+    SWITCHABLE(bg, LIGHT_BLUE, BLACK)
+    SWITCHABLE(fg, WHITE, LIGHT_BLUE)
+  };
+
+  struct View {
+    FIXED(bg, BLACK)
+    FIXED(fg, WHITE)
+    FIXED(inactive, LIGHT_GRAY)
+    SWITCHABLE(index, LIGHT_CYAN, CYAN)
+    SWITCHABLE(help, WHITE, LIGHT_GRAY)
+
+    // states
+    FIXED(warning, LIGHT_YELLOW)
+    FIXED(error, LIGHT_RED)
+    FIXED(info, YELLOW)
+    FIXED(charging, GREEN)
+
+    struct Map {
+      SWITCHABLE(bg, LIGHT_GREEN, BLACK)
+      SWITCHABLE(fg, BLACK, WHITE)
+    };
+  };
+
+  struct FileList {
+    FIXED(directory, LIGHT_YELLOW)
+    FIXED(file, Theme::View::fg)
+  };
+
+  struct Dialog {
+    FIXED(bg, BLACK)
+    FIXED(fg, WHITE)
+    FIXED(border, WHITE);
+  };
+
+  struct Phrase {
+    SWITCHABLE(note, LIGHT_RED, RED)
+    SWITCHABLE(instrument, LIGHT_BLUE, BLUE)
+    SWITCHABLE(command1, LIGHT_YELLOW, YELLOW)
+    SWITCHABLE(command2, LIGHT_GREEN, GREEN)
+  };
+
+  struct Song {
+    struct Playback {
+      FIXED(active, LIGHT_GREEN)
+      FIXED(muted, LIGHT_RED)
+      FIXED(live, LIGHT_YELLOW)
+    };
+
+    FIXED(placeholder, DARK_GRAY)
+    SWITCHABLE(fg, WHITE, LIGHT_GRAY)
+  };
 };
 
 enum ViewUpdateDirection { VUD_LEFT = 0, VUD_RIGHT, VUD_UP, VUD_DOWN };
