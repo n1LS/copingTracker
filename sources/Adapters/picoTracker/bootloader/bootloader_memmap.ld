@@ -1,15 +1,14 @@
 /* picoTracker Bootloader Memory Layout
  * 
- * Stage 3 Bootloader (0x10000100 - 0x10040000 = 256 KB)
- * Firmware Slot A (0x10040000 - 0x107A0000 = 7.5 MB)
- * Firmware Slot B (0x107A0000 - 0x10B00000 = 7.5 MB)
+ * Stage 3 Bootloader (0x10000100 - 0x10010000 = 64 KB)
+ * Firmware Slot A (0x10010000 - 0x10800000 = ~8 MB)
  * 
  * Based on GCC ARM embedded samples.
  */
 
 MEMORY
 {
-    FLASH(rx) : ORIGIN = 0x10000100, LENGTH = (256k - 256)
+    FLASH(rx) : ORIGIN = 0x10000100, LENGTH = (64k - 256)
     RAM(rwx) : ORIGIN = 0x20000000, LENGTH = 256k
     SCRATCH_X(rwx) : ORIGIN = 0x20040000, LENGTH = 4k
     SCRATCH_Y(rwx) : ORIGIN = 0x20041000, LENGTH = 4k

@@ -21,7 +21,7 @@ constexpr uint32_t UF2_MAGIC_START0 = 0x0A324655u;
 constexpr uint32_t UF2_MAGIC_START1 = 0x9E5D5157u;
 constexpr uint32_t UF2_MAGIC_END = 0x0AB16F30u;
 constexpr uint32_t UF2_BLOCK_SIZE = 512u;
-constexpr uint32_t APP_SLOT_SIZE = 0x007C0000u;
+constexpr uint32_t APP_SLOT_SIZE = 0x007F0000u;
 constexpr uint32_t kFillChunkSize = 256u;
 static SdFs g_sd;
 static FsFile g_file;

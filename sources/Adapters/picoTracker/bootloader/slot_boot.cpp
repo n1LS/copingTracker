@@ -20,7 +20,7 @@ namespace {
 constexpr uint32_t kVectorTableOffset = 0x100u;
 constexpr uint32_t kVectorTableOffsetMid = 0x110u;
 constexpr uint32_t kVectorTableOffsetAlt = 0x000u;
-constexpr uint32_t kSlotSize = 0x007C0000u;
+constexpr uint32_t kSlotSize = 0x007F0000u;
 constexpr uint32_t kRamStart = 0x20000000u;
 constexpr uint32_t kRamEnd = 0x20042000u;
 

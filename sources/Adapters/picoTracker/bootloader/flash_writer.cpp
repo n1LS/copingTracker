@@ -10,8 +10,8 @@
 #include "hardware/sync.h"
 #include <cstdint>
 
-#define APP_SLOT_ADDR 0x10040000u
-#define APP_SLOT_SIZE 0x007C0000u
+#define APP_SLOT_ADDR 0x10010000u
+#define APP_SLOT_SIZE 0x007F0000u
 
 static bool is_in_slot_range(uint32_t absolute_address, uint32_t length) {
   if (length == 0) {

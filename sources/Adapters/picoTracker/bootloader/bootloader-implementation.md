@@ -15,8 +15,8 @@ The active design is single-slot app boot (no multi-slot policy).
 
 ## Flash Layout
 
-- App slot base: 0x10040000
-- App slot size: 0x007C0000
+- App slot base: 0x10010000
+- App slot size: 0x007F0000
 
 Bootloader constants and range checks are implemented in:
 
