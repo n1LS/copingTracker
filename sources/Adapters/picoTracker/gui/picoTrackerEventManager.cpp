@@ -197,14 +197,14 @@ void picoTrackerEventManager::ProcessInputEvent() {
       return;
     }
     switch (inBuffer[1]) {
-    case FULL_REFRESH_CMD:
-      Trace::Debug("Full refresh requested!");
-      queue = picoTrackerEventQueue::GetInstance();
-      queue->push(picoTrackerEvent(PICO_REDRAW));
-      break;
+      case FULL_REFRESH_CMD:
+        Trace::Debug("Full refresh requested!");
+        queue = picoTrackerEventQueue::GetInstance();
+        queue->push(picoTrackerEvent(PICO_REDRAW));
+        break;
 
-    default:
-      break;
+      default:
+        break;
     }
   }
 }

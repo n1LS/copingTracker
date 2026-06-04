@@ -161,116 +161,130 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
 
   // Process channel messages using GetType()
   switch (event.GetType()) {
-  case MidiMessage::MIDI_NOTE_OFF: {
-    int note = event.data1_ & MIDI_DATA_MASK;
+    case MidiMessage::MIDI_NOTE_OFF:
+      {
+        int note = event.data1_ & MIDI_DATA_MASK;
 
-    // Map MIDI channel directly to instrument index
-    short instrumentIndex = midiChannel;
+        // Map MIDI channel directly to instrument index
+        short instrumentIndex = midiChannel;
 
-    Player *player = Player::GetInstance();
-    if (player) {
-      // Check if this specific note is active on this MIDI channel
-      if (noteTracker_.isNoteActiveOnChannel(note, midiChannel)) {
-        // Get the audio channel this note is playing on
-        int audioChannel = noteTracker_.unregisterNote(note, midiChannel);
-        if (audioChannel >= 0) {
-          Trace::Debug("Stopping note %d on MIDI channel %d, audio channel %d", note, midiChannel, audioChannel);
-          player->StopNote(instrumentIndex, audioChannel);
-        }
-      } else {
-        Trace::Debug("Note %d not active on MIDI channel %d, not stopping", note, midiChannel);
-      }
-    }
-  } break;
-
-  case MidiMessage::MIDI_NOTE_ON: {
-    int note = event.data1_ & MIDI_DATA_MASK;
-    int value = event.data2_ & MIDI_DATA_MASK;
-
-    // Map MIDI channel directly to instrument index
-    short instrumentIndex = midiChannel;
-
-    Player *player = Player::GetInstance();
-    if (player) {
-      // If velocity is 0, it's actually a note off in MIDI
-      if (value == 0) {
-        // Handle as note off - only stop if this note is active on this channel
-        if (noteTracker_.isNoteActiveOnChannel(note, midiChannel)) {
-          int audioChannel = noteTracker_.unregisterNote(note, midiChannel);
-          if (audioChannel >= 0) {
-            Trace::Debug("Note off (vel=0): Stopping note %d on MIDI channel "
-                         "%d, audio channel %d",
-                         note, midiChannel, audioChannel);
-            player->StopNote(instrumentIndex, audioChannel);
-          }
-        } else {
-          Trace::Debug("Note off (vel=0): Note %d not active on MIDI channel "
-                       "%d, not stopping",
-                       note, midiChannel);
-        }
-      } else {
-        // Get the next available audio channel for this note
-        int audioChannel = noteTracker_.getNextAvailableChannel();
-
-        if (audioChannel >= 0) {
-          // Register the note with the tracker
-          if (noteTracker_.registerNote(note, midiChannel, audioChannel, value)) {
-            Trace::Debug("Playing note %d on MIDI channel %d (instrument %d), "
-                         "audio channel %d",
-                         note, midiChannel, instrumentIndex, audioChannel);
-            player->PlayNote(instrumentIndex, audioChannel, note, value);
+        Player *player = Player::GetInstance();
+        if (player) {
+          // Check if this specific note is active on this MIDI channel
+          if (noteTracker_.isNoteActiveOnChannel(note, midiChannel)) {
+            // Get the audio channel this note is playing on
+            int audioChannel = noteTracker_.unregisterNote(note, midiChannel);
+            if (audioChannel >= 0) {
+              Trace::Debug("Stopping note %d on MIDI channel %d, audio channel %d", note, midiChannel, audioChannel);
+              player->StopNote(instrumentIndex, audioChannel);
+            }
           } else {
-            Trace::Debug("Failed to register note %d", note);
+            Trace::Debug("Note %d not active on MIDI channel %d, not stopping", note, midiChannel);
           }
-        } else {
-          Trace::Debug("No available audio channels for note %d", note);
         }
       }
-    }
-  } break;
+      break;
 
-  case MidiMessage::MIDI_AFTERTOUCH: {
-    int note = event.data1_ & MIDI_DATA_MASK;
-    int data = event.data2_ & MIDI_DATA_MASK;
+    case MidiMessage::MIDI_NOTE_ON:
+      {
+        int note = event.data1_ & MIDI_DATA_MASK;
+        int value = event.data2_ & MIDI_DATA_MASK;
 
-    // TODO: handle aftertouch
-  } break;
+        // Map MIDI channel directly to instrument index
+        short instrumentIndex = midiChannel;
 
-  case MidiMessage::MIDI_CONTROL_CHANGE: {
-    int cc = event.data1_ & MIDI_DATA_MASK;
-    int data = event.data2_ & MIDI_DATA_MASK;
+        Player *player = Player::GetInstance();
+        if (player) {
+          // If velocity is 0, it's actually a note off in MIDI
+          if (value == 0) {
+            // Handle as note off - only stop if this note is active on this channel
+            if (noteTracker_.isNoteActiveOnChannel(note, midiChannel)) {
+              int audioChannel = noteTracker_.unregisterNote(note, midiChannel);
+              if (audioChannel >= 0) {
+                Trace::Debug("Note off (vel=0): Stopping note %d on MIDI channel "
+                             "%d, audio channel %d",
+                             note, midiChannel, audioChannel);
+                player->StopNote(instrumentIndex, audioChannel);
+              }
+            } else {
+              Trace::Debug("Note off (vel=0): Note %d not active on MIDI channel "
+                           "%d, not stopping",
+                           note, midiChannel);
+            }
+          } else {
+            // Get the next available audio channel for this note
+            int audioChannel = noteTracker_.getNextAvailableChannel();
 
-    if (dumpEvents_) {
-      Trace::Log("EVENT", "midi:cc:%d:%d", cc, data);
-    }
-    // TODO: handle CC
-  } break;
+            if (audioChannel >= 0) {
+              // Register the note with the tracker
+              if (noteTracker_.registerNote(note, midiChannel, audioChannel, value)) {
+                Trace::Debug("Playing note %d on MIDI channel %d (instrument %d), "
+                             "audio channel %d",
+                             note, midiChannel, instrumentIndex, audioChannel);
+                player->PlayNote(instrumentIndex, audioChannel, note, value);
+              } else {
+                Trace::Debug("Failed to register note %d", note);
+              }
+            } else {
+              Trace::Debug("No available audio channels for note %d", note);
+            }
+          }
+        }
+      }
+      break;
 
-  case MidiMessage::MIDI_PROGRAM_CHANGE: {
-    int data = event.data1_ & MIDI_DATA_MASK;
+    case MidiMessage::MIDI_AFTERTOUCH:
+      {
+        int note = event.data1_ & MIDI_DATA_MASK;
+        int data = event.data2_ & MIDI_DATA_MASK;
 
-    // TODO: handle program change
-  } break;
+        // TODO: handle aftertouch
+      }
+      break;
 
-  case MidiMessage::MIDI_CHANNEL_AFTERTOUCH: {
-    int data = event.data1_ & MIDI_DATA_MASK;
+    case MidiMessage::MIDI_CONTROL_CHANGE:
+      {
+        int cc = event.data1_ & MIDI_DATA_MASK;
+        int data = event.data2_ & MIDI_DATA_MASK;
 
-    // TODO: handle channel aftertouch
-  } break;
+        if (dumpEvents_) {
+          Trace::Log("EVENT", "midi:cc:%d:%d", cc, data);
+        }
+        // TODO: handle CC
+      }
+      break;
 
-  case MidiMessage::MIDI_PITCH_BEND: {
-    // TODO: handle pitch bend
-  } break;
+    case MidiMessage::MIDI_PROGRAM_CHANGE:
+      {
+        int data = event.data1_ & MIDI_DATA_MASK;
 
-  // Handle any other MIDI message types
-  case MidiMessage::MIDI_CLOCK:
-  case MidiMessage::MIDI_START:
-  case MidiMessage::MIDI_CONTINUE:
-  case MidiMessage::MIDI_STOP:
-  case MidiMessage::MIDI_ACTIVE_SENSING:
-  case MidiMessage::MIDI_SYSTEM_RESET:
-  default:
-    break;
+        // TODO: handle program change
+      }
+      break;
+
+    case MidiMessage::MIDI_CHANNEL_AFTERTOUCH:
+      {
+        int data = event.data1_ & MIDI_DATA_MASK;
+
+        // TODO: handle channel aftertouch
+      }
+      break;
+
+    case MidiMessage::MIDI_PITCH_BEND:
+      {
+        // TODO: handle pitch bend
+      }
+      break;
+
+    // Handle any other MIDI message types
+    case MidiMessage::MIDI_CLOCK:
+    case MidiMessage::MIDI_START:
+    case MidiMessage::MIDI_CONTINUE:
+    case MidiMessage::MIDI_STOP:
+    case MidiMessage::MIDI_ACTIVE_SENSING:
+    case MidiMessage::MIDI_SYSTEM_RESET:
+    default:
+      break;
   };
 }
 
@@ -319,29 +333,29 @@ void MidiInDevice::processMidiData(uint8_t data) {
     if (data >= 0xF0) {
       // System Common messages
       switch (data) {
-      case 0xF1: // MIDI Time Code Quarter Frame
-      case 0xF3: // Song Select
-        midiDataBytes = 1;
-        break;
-      case 0xF2: // Song Position Pointer
-        midiDataBytes = 2;
-        break;
-      case 0xF0: // Start of System Exclusive
-        // SysEx messages are variable length and end with 0xF7
-        // For simplicity, we're not fully handling SysEx here
-        midiDataBytes = 0; // Special case, handled differently
-        break;
-      default:
-        // All other System Common messages have no data bytes
-        midiDataBytes = 0;
+        case 0xF1: // MIDI Time Code Quarter Frame
+        case 0xF3: // Song Select
+          midiDataBytes = 1;
+          break;
+        case 0xF2: // Song Position Pointer
+          midiDataBytes = 2;
+          break;
+        case 0xF0: // Start of System Exclusive
+          // SysEx messages are variable length and end with 0xF7
+          // For simplicity, we're not fully handling SysEx here
+          midiDataBytes = 0; // Special case, handled differently
+          break;
+        default:
+          // All other System Common messages have no data bytes
+          midiDataBytes = 0;
 
-        // For messages with no data bytes, send them immediately
-        MidiMessage msg;
-        msg.status_ = midiStatus;
-        msg.data1_ = MidiMessage::UNUSED_BYTE;
-        msg.data2_ = MidiMessage::UNUSED_BYTE;
-        onDriverMessage(msg);
-        break;
+          // For messages with no data bytes, send them immediately
+          MidiMessage msg;
+          msg.status_ = midiStatus;
+          msg.data1_ = MidiMessage::UNUSED_BYTE;
+          msg.data2_ = MidiMessage::UNUSED_BYTE;
+          onDriverMessage(msg);
+          break;
       }
     } else {
       // Channel messages - determine bytes by status byte range

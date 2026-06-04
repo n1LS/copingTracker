@@ -130,30 +130,30 @@ void RecordView::DrawView() {
   GUIPoint pos = GetTitlePosition();
 
   // Draw title
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
   DrawString(pos.x_, pos.y_, "Record");
 
   // Draw recording status and time
   pos = GetAnchor();
   pos.y_ += 4;
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
 
   if (uiSavingActive_) {
-    SetColor(cError);
+    SetColor(Theme::View::error);
     DrawString(pos.x_, pos.y_, "SAVING");
-    SetColor(cNormal);
+    SetColor(Theme::View::fg);
   } else if (uiRecordingActive_) {
-    SetColor(cError);
+    SetColor(Theme::View::error);
     DrawString(pos.x_, pos.y_, "[REC]");
-    SetColor(cNormal);
+    SetColor(Theme::View::fg);
   } else {
     DrawString(pos.x_, pos.y_, "[---]");
   }
 
   // Draw time display
   if (uiRecordingActive_ || uiSavingActive_) {
-    SetColor(cError);
+    SetColor(Theme::View::error);
   }
   pos.x_ += 7;
   if (uiSavingActive_) {
@@ -170,14 +170,14 @@ void RecordView::DrawView() {
   // Draw instructions
   pos.y_ += 2;
   pos.x_ = GetAnchor().x_;
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
   const char *instruction = uiSavingActive_ ? "" : uiRecordingActive_ ? "PRESS PLAY TO STOP" : "PRESS PLAY TO RECORD";
   DrawString(pos.x_, pos.y_, instruction);
 
   // Draw fields
   FieldView::Redraw();
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
 }
 
 void RecordView::OnFocus() {
@@ -200,11 +200,11 @@ void RecordView::Update(Observable &o, I_ObservableData *data) {
   auto config = Config::GetInstance();
 
   switch (fourcc) {
-  case FourCC::VarRecordSource:
-    StopMonitoring();
-    updateRecordingSource();
-    StartMonitoring();
-    break;
+    case FourCC::VarRecordSource:
+      StopMonitoring();
+      updateRecordingSource();
+      StartMonitoring();
+      break;
   }
 }
 

@@ -19,50 +19,50 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
   position.y_ += offset;
 
   // Draw the label
-  ((AppWindow &)w).SetBackgroundColor(cBackground);
-  ((AppWindow &)w).SetColor(cNormal);
+  ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
+  ((AppWindow &)w).SetColor(Theme::Input::label);
   w.DrawString(label_.c_str(), position);
   position.x_ += label_.length();
-
-  ((AppWindow &)w).SetColor(cEmphasis);
-
+  
   auto srcString = src_->GetString();
   const char *value;
   int len;
-
+  
   // If the variable's value is empty, use the default value for display
   if (srcString.empty()) {
     value = defaultValue_.c_str();
     len = defaultValue_.length();
     // Use a different color for default values to indicate they're not set
-    ((AppWindow &)w).SetColor(cEmphasis);
+    ((AppWindow &)w).SetColor(Theme::Input::placeholder);
   } else {
     value = srcString.c_str();
     len = srcString.length();
+    ((AppWindow &)w).SetColor(Theme::Input::fg(focus_));
   }
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(cBackground);
-
     if (len == 0) {
       // For empty fields, draw a cursor at the beginning position
-      ((AppWindow &)w).SetBackgroundColor(cCursor);
+      ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
       w.DrawString(" ", position);
     } else {
+      ((AppWindow &)w).SetColor(Theme::Input::fg(true));
+
       char buffer[2];
       buffer[1] = 0;
 
       for (int i = 0; i < len; i++) {
         buffer[0] = value[i];
         bool active = currentChar_ == i;
-        ((AppWindow &)w).SetBackgroundColor(active ? cCursor : cHighlight2);
+        ((AppWindow &)w).SetBackgroundColor(active ? Theme::Input::cursor : Theme::Input::bg(true));
         w.DrawString(buffer, position);
         position.x_ += 1;
       }
     }
   } else {
     if (len != 0) {
-      ((AppWindow &)w).SetColor(cEmphasis);
+      ((AppWindow &)w).SetColor(Theme::Input::fg(false));
+      ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(false));
       w.DrawString(value, position);
     }
   }

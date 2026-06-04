@@ -96,72 +96,78 @@ void View::drawMap() {
   GUIPoint pos(View::margin_, anchor.y_ + View::songRowCount_ + 1);
 
   // draw entire map
-  SetColor(cNormal);
-  SetBackgroundColor(cBackground);
+  SetColor(Theme::View::Map::fg(false));
+  SetBackgroundColor(Theme::View::Map::bg(false));
 
   char buffer[5];
   // row1
   DrawString(pos.x_, pos.y_, "D   ");
-  pos.y_++;
   // row2
-  DrawString(pos.x_, pos.y_, "P" char_dotted_horizontal_s "G ");
-  pos.y_++;
+  DrawString(pos.x_, pos.y_ + 1, "P" char_dotted_horizontal_s "G ");
   // row3
-  DrawString(pos.x_, pos.y_, "SCPI");
-  pos.y_++;
+  DrawString(pos.x_, pos.y_ + 2, "SCPI");
   // row4
-  DrawString(pos.x_, pos.y_, "M" char_dotted_horizontal_s "TT");
+  DrawString(pos.x_, pos.y_ + 3, "M" char_dotted_horizontal_s "TT");
+
+  // dotted fast forward symbols
+  SetColor(Theme::View::inactive);
+  DrawString(pos.x_ + 1, pos.y_ + 1, char_dotted_horizontal_s);
+  DrawString(pos.x_ + 1, pos.y_ + 3, char_dotted_horizontal_s);
 
   // draw current screen on map
-  SetColor(cBackground);
-  SetBackgroundColor(cHighlight2);
+  SetColor(Theme::View::Map::fg(true));
+  SetBackgroundColor(Theme::View::Map::bg(true));
+
   pos.y_ = anchor.y_ + View::songRowCount_ + 1;
   switch (viewType_) {
-  case VT_CHAIN:
-    pos.x_ += 1;
-    pos.y_ += 2;
-    DrawString(pos.x_, pos.y_, "C");
-    break;
-  case VT_PHRASE:
-    pos.x_ += 2;
-    pos.y_ += 2;
-    DrawString(pos.x_, pos.y_, "P");
-    break;
-  case VT_DEVICE:
-    DrawString(pos.x_, pos.y_, "D");
-    break;
-  case VT_PROJECT:
-    pos.y_ += 1;
-    DrawString(pos.x_, pos.y_, "P");
-    break;
-  case VT_INSTRUMENT:
-    pos.x_ += 3;
-    pos.y_ += 2;
-    DrawString(pos.x_, pos.y_, "I");
-    break;
-  case VT_TABLE: // under phrase
-    pos.x_ += 2;
-    pos.y_ += 3;
-    DrawString(pos.x_, pos.y_, "T");
-    break;
-  case VT_TABLE2: // under instrument
-    pos.x_ += 3;
-    pos.y_ += 3;
-    DrawString(pos.x_, pos.y_, "T");
-    break;
-  case VT_GROOVE:
-    pos.x_ += 2;
-    pos.y_ += 1;
-    DrawString(pos.x_, pos.y_, "G");
-    break;
-  case VT_MIXER:
-    pos.y_ += 3;
-    DrawString(pos.x_, pos.y_, "M");
-    break;
-  default: // VT_SONG
-    pos.y_ += 2;
-    DrawString(pos.x_, pos.y_, "S");
+    case VT_CHAIN:
+      pos.x_ += 1;
+      pos.y_ += 2;
+      DrawString(pos.x_, pos.y_, "C");
+      break;
+    case VT_PHRASE:
+      pos.x_ += 2;
+      pos.y_ += 2;
+      DrawString(pos.x_, pos.y_, "P");
+      break;
+    case VT_DEVICE:
+      DrawString(pos.x_, pos.y_, "D");
+      break;
+    case VT_PROJECT:
+      pos.y_ += 1;
+      DrawString(pos.x_, pos.y_, "P");
+      break;
+    case VT_INSTRUMENT:
+      pos.x_ += 3;
+      pos.y_ += 2;
+      DrawString(pos.x_, pos.y_, "I");
+      break;
+    case VT_TABLE: // under phrase
+      pos.x_ += 2;
+      pos.y_ += 3;
+      DrawString(pos.x_, pos.y_, "T");
+      break;
+    case VT_TABLE2: // under instrument
+      pos.x_ += 3;
+      pos.y_ += 3;
+      DrawString(pos.x_, pos.y_, "T");
+      break;
+    case VT_GROOVE:
+      pos.x_ += 2;
+      pos.y_ += 1;
+      DrawString(pos.x_, pos.y_, "G");
+      break;
+    case VT_MIXER:
+      pos.y_ += 3;
+      DrawString(pos.x_, pos.y_, "M");
+      break;
+    default: // VT_SONG
+      pos.y_ += 2;
+      DrawString(pos.x_, pos.y_, "S");
   }
+}
+
+void View::switchToRecordView() {
 }
 
 void View::drawNotes() {
@@ -174,8 +180,8 @@ void View::drawNotes() {
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     bool highlighted = (i == viewData_->songX_);
-    SetBackgroundColor(highlighted ? cHighlight2 : cHighlight1);
-    SetColor(cBackground);
+    SetBackgroundColor(Theme::Notes::bg(highlighted));
+    SetColor(Theme::Notes::fg(highlighted));
 
     if (player->IsRunning() && viewData_->playMode_ != PM_AUDITION) {
       uint8_t sliceIndex = 0;
@@ -274,11 +280,11 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
     for (int i = 0; i < VU_METER_HEIGHT; i++) {
       // Set appropriate color based on level
       if (i == VU_METER_CLIP_LEVEL) {
-        SetColor(cError);
+        SetColor(Theme::VU::clip);
       } else if (i > VU_METER_WARN_LEVEL) {
-        SetColor(cWarn);
+        SetColor(Theme::VU::warn);
       } else {
-        SetColor(cInfo);
+        SetColor(Theme::VU::normal);
       }
 
       // draw left channel if changed
@@ -301,8 +307,8 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 void View::drawPlayTime(Player *player, GUIPoint pos) {
   char strbuffer[10];
 
-  SetBackgroundColor(cBackground);
-  SetColor(cNormal);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
   int time = int(player->GetPlayTime());
   int mi = time / 60;
   int se = time - mi * 60;
@@ -417,7 +423,7 @@ void View::DrawRect(GUIRect &r, Color color) {
 }
 
 void View::drawBattery() {
-  SetBackgroundColor(cBackground);
+  SetBackgroundColor(Theme::View::bg);
 
   const uint32_t frameCounter = AppWindow::GetAnimationFrameCounter();
   const bool sampleNow = (frameCounter % PICO_CLOCK_HZ) == 0;
@@ -457,11 +463,11 @@ void View::drawBattery() {
 
   Color batteryColor = CD_NORMAL;
   if (batteryPercent <= 5) {
-    batteryColor = cError;
+    batteryColor = Theme::View::error;
   } else if (batteryPercent < 20) {
-    batteryColor = cWarn;
+    batteryColor = Theme::View::war;
   } else if (batteryState_.charging) {
-    batteryColor = cInfo;
+    batteryColor = Theme::View::fg;
   }
 
   SetColor(batteryColor);
@@ -480,11 +486,11 @@ void View::drawBattery() {
 #else
   // use define to choose between drawing battery percentage or battery level as
   // bars
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
   const char *battText = nullptr;
 
   if (batteryState_.charging) {
-    SetColor(cAccent);
+    SetColor(Theme::View::charging);
     battText = string_battery_charging;
   } else {
     if (batteryState_.percentage > 90) {
@@ -496,10 +502,10 @@ void View::drawBattery() {
     } else if (batteryState_.percentage > 35) {
       battText = string_battery_25_percent;
     } else if (batteryState_.percentage > 10) {
-      SetColor(cWarn);
+      SetColor(Theme::View::warning);
       battText = string_battery_0_percent;
     } else {
-      SetColor(cError);
+      SetColor(Theme::View::error);
       battText = string_battery_0_percent;
     }
   }
@@ -540,7 +546,7 @@ void View::drawPowerButtonUI() {
     pos.y_ = SCREEN_HEIGHT / 2 - 1;
 
     // Draw a background box
-    SetBackgroundColor(cBackground);
+    SetBackgroundColor(Theme::View::bg);
     for (int y = pos.y_ - 1; y <= pos.y_ + 1; y++) {
       for (int x = pos.x_ - 1; x <= (uint16_t)(pos.x_ + mesgLen + 1); x++) {
         DrawString(x, y, " ");
@@ -548,7 +554,7 @@ void View::drawPowerButtonUI() {
     }
 
     // Draw the message
-    SetColor(cEmphasis);
+    SetColor(Theme::View::info);
     DrawString(pos.x_, pos.y_, countdownMessage);
   } else if (powerButtonHoldCount_ > 0) {
     // Reset hold counter when button is released
@@ -560,17 +566,6 @@ void View::drawPowerButtonUI() {
 
     Trace::Debug("Power button released! View redrawn.");
   }
-}
-
-void View::switchToRecordView() {
-  // recording view only not yet supported on pico
-  return;
-
-  // if (!Player::GetInstance()->IsRunning()) {
-  //   RecordView::SetSourceViewType(viewType_);
-  //   SampleEditorView::SetSourceViewType(viewType_);
-  //   Navigate(VT_RECORD);
-  // }
 }
 
 void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick = false) {
@@ -604,7 +599,7 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
     return; // no scrollbar needed
   }
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
 
   // Thumb size represents the ratio of visible items to total items
   uint16_t thumbSize = std::max(1, (height * height) / total);
@@ -628,33 +623,23 @@ void View::drawHelpLegend(FourCC command) {
     return;
   }
 
-  char **helpLegend = getHelpLegend(command);
-  char line[SCREEN_WIDTH]; // -1 for 1char space start of line
-  strcpy(line, helpLegend[0]);
+  HelpLegend help = getHelpLegend(command);
 
   // highlight the letters that are the symbol for the command
-  SetBackgroundColor(cBackground);
+  SetBackgroundColor(Theme::View::bg);
 
   bool preColon = true;
-  for (size_t x = 0; x < strlen(line); x++) {
-    unsigned char c = line[x];
+  for (size_t x = 0; x < strlen(help.line1); x++) {
+    unsigned char c = help.line1[x];
 
     if (c == ':') {
       preColon = false;
     }
 
-    if (preColon && c >= 'A' && c <= 'Z') {
-      SetColor(cHighlight1);
-    } else {
-      SetColor(cNormal);
-    }
-
-    DrawChar(x, 0, line[x]);
+    SetColor(Theme::View::help(preColon && c >= 'A' && c <= 'Z'));
+    DrawChar(x, 0, help.line1[x]);
   }
 
-  memset(line, ' ', 32);
-  if (helpLegend[1] != NULL) {
-    strcpy(line, helpLegend[1]);
-    DrawString(0, 1, line);
-  }
+  SetColor(Theme::View::help(false));
+  DrawString(0, 1, help.line2);
 }

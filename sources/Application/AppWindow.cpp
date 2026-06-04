@@ -19,7 +19,6 @@
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ChainView.h"
-#include "Application/Views/ConsoleView.h"
 #include "Application/Views/DeviceView.h"
 #include "Application/Views/GrooveView.h"
 #include "Application/Views/ImportView.h"
@@ -67,7 +66,7 @@ color_t AppWindow::_screenColor[SCREEN_CHARS];
 unsigned char AppWindow::_preScreen[SCREEN_CHARS];
 color_t AppWindow::_preScreenColor[SCREEN_CHARS];
 
-GUIColor AppWindow::colorPalette_[16] = {
+GUIColor AppWindow::colorPalette_[NUM_COLORS] = {
     GUIColor(0x00, 0x00, 0x00), // 0: black
     GUIColor(0x80, 0x00, 0x00), // 1: dark red
     GUIColor(0x00, 0x80, 0x00), // 2: dark green
@@ -168,7 +167,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   UpdateColorsFromConfig();
 
-  GUIWindow::Clear(colorPalette_[cBackground]);
+  GUIWindow::Clear(colorPalette_[Theme::View::bg]);
 
   static AppWindowViews views(*this, viewData_);
   views_ = &views;
@@ -226,14 +225,11 @@ void appwindow_set_sdcard_present(bool present) {
   }
 }
 
-void AppWindow::DrawString(const char *string, const GUIPoint &pos, bool force) {
-
+void AppWindow::DrawString(const char *string, const GUIPoint &pos) {
   // Safety check for null string
   if (!string) {
     return;
   }
-
-  (void)force;
 
   // DrawString and DrawChar share the same cache staging logic.
   int x = pos.x_;
@@ -244,10 +240,7 @@ void AppWindow::DrawString(const char *string, const GUIPoint &pos, bool force) 
 }
 
 void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
-  if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT) {
-    return;
-  }
-  if (pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
+  if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT || pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
     return;
   }
 
@@ -259,7 +252,7 @@ void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
 }
 
 void AppWindow::Clear(bool all) {
-  color_t base = (color_t){.fg = cNormal, .bg = cBackground};
+  color_t base = (color_t){.fg = Theme::View::fg, .bg = Theme::View::bg};
 
   memset(_charScreen, ' ', SCREEN_CHARS);
   memset(_screenColor, base.byte, SCREEN_CHARS);
@@ -531,22 +524,22 @@ void AppWindow::SetDirty() {
 
 void AppWindow::UpdateColorsFromConfig() {
   // now assign custom colors if they have been set device config
-  defineColor(FourCC::VarBGColor, colorPalette_[cBackground], 0);
-  defineColor(FourCC::VarFGColor, colorPalette_[cNormal], 1);
-  defineColor(FourCC::VarHI1Color, colorPalette_[cHighlight1], 2);
-  defineColor(FourCC::VarHI2Color, colorPalette_[cHighlight2], 3);
-  defineColor(FourCC::VarCursorColor, colorPalette_[cCursor], 4);
-  defineColor(FourCC::VarConsoleColor, colorPalette_[cConsole], 5);
-  defineColor(FourCC::VarInfoColor, colorPalette_[cInfo], 6);
-  defineColor(FourCC::VarWarnColor, colorPalette_[cWarn], 7);
-  defineColor(FourCC::VarErrorColor, colorPalette_[cError], 8);
-  defineColor(FourCC::VarAccentColor, colorPalette_[cAccent], 9);
-  defineColor(FourCC::VarAccentAltColor, colorPalette_[cAccentAlt], 10);
-  defineColor(FourCC::VarEmphasisColor, colorPalette_[cEmphasis], 11);
-  defineColor(FourCC::VarReserved1Color, colorPalette_[cReserved1], 12);
-  defineColor(FourCC::VarReserved2Color, colorPalette_[cReserved2], 13);
-  defineColor(FourCC::VarReserved3Color, colorPalette_[cReserved3], 14);
-  defineColor(FourCC::VarReserved4Color, colorPalette_[cReserved4], 15);
+  defineColor(FourCC::VarColor_0_Black, colorPalette_[0], 0);
+  defineColor(FourCC::VarColor_1_Maroon, colorPalette_[1], 1);
+  defineColor(FourCC::VarColor_2_Green, colorPalette_[2], 2);
+  defineColor(FourCC::VarColor_3_Olive, colorPalette_[3], 3);
+  defineColor(FourCC::VarColor_4_Blue, colorPalette_[4], 4);
+  defineColor(FourCC::VarColor_5_Purple, colorPalette_[5], 5);
+  defineColor(FourCC::VarColor_6_Turqoise, colorPalette_[6], 6);
+  defineColor(FourCC::VarColor_7_LightyGray, colorPalette_[7], 7);
+  defineColor(FourCC::VarColor_8_Gray, colorPalette_[8], 8);
+  defineColor(FourCC::VarColor_9_Red, colorPalette_[9], 9);
+  defineColor(FourCC::VarColor_A_Lime, colorPalette_[10], 10);
+  defineColor(FourCC::VarColor_B_Yellow, colorPalette_[11], 11);
+  defineColor(FourCC::VarColor_C_LightBlue, colorPalette_[12], 12);
+  defineColor(FourCC::VarColor_D_Magenta, colorPalette_[13], 13);
+  defineColor(FourCC::VarColor_E_Cyan, colorPalette_[14], 14);
+  defineColor(FourCC::VarColor_F_White, colorPalette_[15], 15);
 }
 
 bool AppWindow::onEvent(GUIEvent &event) {
@@ -565,39 +558,39 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
   switch (event.GetType()) {
 
-  case ET_PADBUTTONDOWN:
+    case ET_PADBUTTONDOWN:
 
-    _mask |= v;
-    if (_currentView)
-      _currentView->ProcessButton(_mask, true);
-    break;
+      _mask |= v;
+      if (_currentView)
+        _currentView->ProcessButton(_mask, true);
+      break;
 
-  case ET_PADBUTTONUP:
+    case ET_PADBUTTONUP:
 
-    _mask &= (0xFFFF - v);
-    if (_currentView)
-      _currentView->ProcessButton(_mask, false);
-    break;
+      _mask &= (0xFFFF - v);
+      if (_currentView)
+        _currentView->ProcessButton(_mask, false);
+      break;
 
-  case ET_SYSQUIT:
-    _shouldQuit = true;
-    break;
+    case ET_SYSQUIT:
+      _shouldQuit = true;
+      break;
 
-    /*		case ET_KEYDOWN:
-            if
-       (event.GetValue()==EKT_ESCAPE&&!Player::GetInstance()->IsRunning()) {
-       if
-       (_currentView!=_listView) {
-       CloseProject() ;
-       _currentView->SetDirty(true) ;
-       } else {
-                            System::GetInstance()->PostQuitMessage() ;
-                    };
-            } ;
-                */
+      /*		case ET_KEYDOWN:
+              if
+         (event.GetValue()==EKT_ESCAPE&&!Player::GetInstance()->IsRunning()) {
+         if
+         (_currentView!=_listView) {
+         CloseProject() ;
+         _currentView->SetDirty(true) ;
+         } else {
+                              System::GetInstance()->PostQuitMessage() ;
+                      };
+              } ;
+                  */
 
-  default:
-    break;
+    default:
+      break;
   }
   //  ms->Unlock();
 
@@ -616,7 +609,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
 void AppWindow::onUpdate(bool redraw) {
   if (redraw) {
-    GUIWindow::Clear(colorPalette_[cBackground], true);
+    GUIWindow::Clear(colorPalette_[Theme::View::bg]);
     Clear(true);
     // Mark as dirty to trigger redraw in AnimationUpdate
     SetDirty();
@@ -762,119 +755,124 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
 
   switch (ve->GetType()) {
 
-  case VET_SWITCH_VIEW: {
-    ViewType *vt = (ViewType *)ve->GetData();
-    if (_currentView) {
-      _currentView->LooseFocus();
-    }
+    case VET_SWITCH_VIEW:
+      {
+        ViewType *vt = (ViewType *)ve->GetData();
+        if (_currentView) {
+          _currentView->LooseFocus();
+        }
 
-    switch (*vt) {
-    case VT_SONG:
-      _currentView = &views_->songView;
-      break;
-    case VT_CHAIN:
-      _currentView = &views_->chainView;
-      break;
-    case VT_PHRASE:
-      _currentView = &views_->phraseView;
-      break;
-    case VT_DEVICE:
-      _currentView = &views_->deviceView;
-      break;
-    case VT_PROJECT:
-      _currentView = &views_->projectView;
-      break;
-    case VT_INSTRUMENT:
-      _currentView = &views_->instrumentView;
-      break;
-    case VT_TABLE:
-      _currentView = &views_->tableView;
-      break;
-    case VT_TABLE2:
-      _currentView = &views_->tableView;
-      break;
-    case VT_GROOVE:
-      _currentView = &views_->grooveView;
-      break;
-    case VT_IMPORT:
-      _currentView = &views_->importView;
-      break;
-    case VT_INSTRUMENT_IMPORT:
-      _currentView = &views_->instrumentImportView;
-      break;
-    case VT_SELECTPROJECT:
-      _currentView = &views_->selectProjectView;
-      break;
-    case VT_MIXER:
-      _currentView = &views_->mixerView;
-      break;
-    case VT_THEME:
-      _currentView = &views_->themeView;
-      break;
-    case VT_THEME_IMPORT:
-      _currentView = &views_->themeImportView;
-      break;
-    case VT_SELECTTHEME:
-      _currentView = &views_->themeView;
-      break;
-    case VT_SAMPLE_EDITOR:
-      _currentView = &views_->sampleEditorView;
-      break;
-    case VT_SAMPLE_SLICES:
-      _currentView = &views_->sampleSlicesView;
-      break;
-    case VT_RECORD:
-      _currentView = &views_->recordView;
-      break;
-    default:
-      break;
-    }
-    _currentView->SetFocus(*vt);
-    SetDirty();
-    GUIWindow::Clear(colorPalette_[cBackground], true);
-    Clear(true);
-    break;
-  }
-
-  case VET_PLAYER_POSITION_UPDATE: {
-    PlayerEvent *pt = (PlayerEvent *)ve;
-    if (_currentView) {
-      // Check if the current view has a modal view
-      const bool hasModal = _currentView->HasModalView();
-      if (hasModal) {
-        _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
-      } else {
-        _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+        switch (*vt) {
+          case VT_SONG:
+            _currentView = &views_->songView;
+            break;
+          case VT_CHAIN:
+            _currentView = &views_->chainView;
+            break;
+          case VT_PHRASE:
+            _currentView = &views_->phraseView;
+            break;
+          case VT_DEVICE:
+            _currentView = &views_->deviceView;
+            break;
+          case VT_PROJECT:
+            _currentView = &views_->projectView;
+            break;
+          case VT_INSTRUMENT:
+            _currentView = &views_->instrumentView;
+            break;
+          case VT_TABLE:
+            _currentView = &views_->tableView;
+            break;
+          case VT_TABLE2:
+            _currentView = &views_->tableView;
+            break;
+          case VT_GROOVE:
+            _currentView = &views_->grooveView;
+            break;
+          case VT_IMPORT:
+            _currentView = &views_->importView;
+            break;
+          case VT_INSTRUMENT_IMPORT:
+            _currentView = &views_->instrumentImportView;
+            break;
+          case VT_SELECTPROJECT:
+            _currentView = &views_->selectProjectView;
+            break;
+          case VT_MIXER:
+            _currentView = &views_->mixerView;
+            break;
+          case VT_THEME:
+            _currentView = &views_->themeView;
+            break;
+          case VT_THEME_IMPORT:
+            _currentView = &views_->themeImportView;
+            break;
+          case VT_SELECTTHEME:
+            _currentView = &views_->themeView;
+            break;
+          case VT_SAMPLE_EDITOR:
+            _currentView = &views_->sampleEditorView;
+            break;
+          case VT_SAMPLE_SLICES:
+            _currentView = &views_->sampleSlicesView;
+            break;
+          case VT_RECORD:
+            _currentView = &views_->recordView;
+            break;
+          default:
+            break;
+        }
+        _currentView->SetFocus(*vt);
+        SetDirty();
+        GUIWindow::Clear(colorPalette_[Theme::View::bg]);
+        Clear(true);
+        break;
       }
-    }
-    break;
-  }
 
-  case VET_LOAD_PROJECT: {
-    const char *name = static_cast<const char *>(ve->GetData());
-    if (name && name[0] != '\0') {
-      npf_snprintf(projectName_, sizeof(projectName_), "%s", name);
-      createProjectOnLoad_ = false;
-      loadProject_ = true;
-    }
-    break;
-  }
-  case VET_NEW_PROJECT: {
-    npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
-    createProjectOnLoad_ = true;
-    loadProject_ = true;
-    break;
-  }
-  case VET_QUIT_PROJECT: {
-    // defer event to after we got out of the view
-    _closeProject = true;
-    break;
-  }
-  case VET_QUIT_APP:
-    _shouldQuit = true;
-    break;
-  default: // VET_LIST_SELECT, VET_UPDATE
-    break;
+    case VET_PLAYER_POSITION_UPDATE:
+      {
+        PlayerEvent *pt = (PlayerEvent *)ve;
+        if (_currentView) {
+          // Check if the current view has a modal view
+          const bool hasModal = _currentView->HasModalView();
+          if (hasModal) {
+            _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+          } else {
+            _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+          }
+        }
+        break;
+      }
+
+    case VET_LOAD_PROJECT:
+      {
+        const char *name = static_cast<const char *>(ve->GetData());
+        if (name && name[0] != '\0') {
+          npf_snprintf(projectName_, sizeof(projectName_), "%s", name);
+          createProjectOnLoad_ = false;
+          loadProject_ = true;
+        }
+        break;
+      }
+    case VET_NEW_PROJECT:
+      {
+        npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
+        createProjectOnLoad_ = true;
+        loadProject_ = true;
+        break;
+      }
+    case VET_QUIT_PROJECT:
+      {
+        // defer event to after we got out of the view
+        _closeProject = true;
+        break;
+      }
+    case VET_QUIT_APP:
+      _shouldQuit = true;
+      break;
+    default: // VET_LIST_SELECT, VET_UPDATE
+      break;
   }
 }
 
@@ -893,7 +891,9 @@ void AppWindow::Print(char *line) {
 
 void AppWindow::PrintMultiLine(char *line) {
   Clear();
-  SetColor(cNormal);
+
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
 
   int current_y = 11; // Start near the middle of the screen
 
@@ -932,7 +932,7 @@ void AppWindow::PrintMultiLine(char *line) {
   // Preserve the build string at the bottom of the screen
   // todo: update and merge with instance from nullview
   char buildString[SCREEN_WIDTH + 1];
-  npf_snprintf(buildString, sizeof(buildString), "picoTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
+  npf_snprintf(buildString, sizeof(buildString), "copingTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
                BUILD_COUNT);
   GUIPoint pos(0, 22);
   pos.x_ = (32 - strlen(buildString)) / 2;

@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
   picoTrackerSystem::Boot(argc, argv);
 
   GUICreateWindowParams params;
-  params.title = "picoTracker";
+  params.title = "copingTracker";
 
   Application::GetInstance()->Init(params);
 

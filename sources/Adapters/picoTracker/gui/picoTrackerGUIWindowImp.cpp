@@ -78,8 +78,7 @@ void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos) {
   }
 }
 
-void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos, bool overlay) {
-  (void)overlay;
+void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos) {
   if (!string) {
     return;
   }
@@ -103,7 +102,7 @@ void picoTrackerGUIWindowImp::DrawRect(GUIRect &r) {
   }
 };
 
-void picoTrackerGUIWindowImp::Clear(GUIColor &c, bool overlay) {
+void picoTrackerGUIWindowImp::Clear(GUIColor &c) {
   chargfx_color_t backgroundColor = GetColor(c);
   chargfx_set_background(backgroundColor);
   chargfx_clear(backgroundColor);
@@ -201,24 +200,24 @@ GUIRect picoTrackerGUIWindowImp::GetRect() {
 
 void picoTrackerGUIWindowImp::ProcessEvent(picoTrackerEvent &event) {
   switch (event.type_) {
-  case PICO_REDRAW:
-    instance_->_window->Update(true);
-    // send font update
-    if (instance_->remoteUIEnabled_) {
-      Config *config = Config::GetInstance();
-      auto uiFontVar = config->FindVariable(FourCC::VarUIFont);
-      int uifontIndex = uiFontVar->GetInt();
-      instance_->SendFont(uifontIndex);
-    }
-    break;
-  case PICO_FLUSH:
-    instance_->_window->Update(false);
-    break;
-  case PICO_CLOCK:
-    instance_->_window->ClockTick();
-    break;
-  case LAST:
-    break;
+    case PICO_REDRAW:
+      instance_->_window->Update(true);
+      // send font update
+      if (instance_->remoteUIEnabled_) {
+        Config *config = Config::GetInstance();
+        auto uiFontVar = config->FindVariable(FourCC::VarUIFont);
+        int uifontIndex = uiFontVar->GetInt();
+        instance_->SendFont(uifontIndex);
+      }
+      break;
+    case PICO_FLUSH:
+      instance_->_window->Update(false);
+      break;
+    case PICO_CLOCK:
+      instance_->_window->ClockTick();
+      break;
+    case LAST:
+      break;
   }
 }
 
@@ -240,16 +239,20 @@ void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t 
 void picoTrackerGUIWindowImp::Update(Observable &o, I_ObservableData *d) {
   WatchedVariable &v = (WatchedVariable &)o;
   switch (v.GetID()) {
-  case FourCC::VarRemoteUI: {
-    auto remoteui = v.GetInt();
-    remoteUIEnabled_ = remoteui != 0;
-  } break;
-  case FourCC::VarUIFont: {
-    auto uifont = v.GetInt();
-    chargfx_set_font_index(uifont);
-    if (remoteUIEnabled_) {
-      SendFont(uifont);
-    }
-  } break;
+    case FourCC::VarRemoteUI:
+      {
+        auto remoteui = v.GetInt();
+        remoteUIEnabled_ = remoteui != 0;
+      }
+      break;
+    case FourCC::VarUIFont:
+      {
+        auto uifont = v.GetInt();
+        chargfx_set_font_index(uifont);
+        if (remoteUIEnabled_) {
+          SendFont(uifont);
+        }
+      }
+      break;
   }
 }

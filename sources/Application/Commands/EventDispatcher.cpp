@@ -47,34 +47,34 @@ void EventDispatcher::Execute(FourCC id, float value) {
   if (window_) {
     GUIEventPadButtonType mapping = EPBT_INVALID;
     switch (id) {
-    case FourCC::TrigEventEnter:
-      mapping = EPBT_A;
-      break;
-    case FourCC::TrigEventEdit:
-      mapping = EPBT_B;
-      break;
-    case FourCC::TrigEventLeft:
-      mapping = EPBT_LEFT;
-      break;
-    case FourCC::TrigEventRight:
-      mapping = EPBT_RIGHT;
-      break;
-    case FourCC::TrigEventUp:
-      mapping = EPBT_UP;
-      break;
-    case FourCC::TrigEventDown:
-      mapping = EPBT_DOWN;
-      break;
-    case FourCC::TrigEventAlt:
-      mapping = EPBT_L;
-      break;
-    case FourCC::TrigEventNav:
-      mapping = EPBT_R;
-      break;
-    case FourCC::TrigEventPlay:
-      mapping = EPBT_START;
-      break;
-      //	EPBT_SELECT
+      case FourCC::TrigEventEnter:
+        mapping = EPBT_A;
+        break;
+      case FourCC::TrigEventEdit:
+        mapping = EPBT_B;
+        break;
+      case FourCC::TrigEventLeft:
+        mapping = EPBT_LEFT;
+        break;
+      case FourCC::TrigEventRight:
+        mapping = EPBT_RIGHT;
+        break;
+      case FourCC::TrigEventUp:
+        mapping = EPBT_UP;
+        break;
+      case FourCC::TrigEventDown:
+        mapping = EPBT_DOWN;
+        break;
+      case FourCC::TrigEventAlt:
+        mapping = EPBT_L;
+        break;
+      case FourCC::TrigEventNav:
+        mapping = EPBT_R;
+        break;
+      case FourCC::TrigEventPlay:
+        mapping = EPBT_START;
+        break;
+        //	EPBT_SELECT
     }
 
     // Compute mask and repeat if needed

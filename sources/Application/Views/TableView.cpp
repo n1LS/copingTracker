@@ -197,24 +197,24 @@ void TableView::cutSelection() {
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
       switch (i + clipboard_.col_) {
-      case 0:
-        dst1[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
-        break;
-      case 1:
-        dst2[j + clipboard_.row_] = 0x0000;
-        break;
-      case 2:
-        dst3[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
-        break;
-      case 3:
-        dst4[j + clipboard_.row_] = 0x0000;
-        break;
-      case 4:
-        dst5[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
-        break;
-      case 5:
-        dst6[j + clipboard_.row_] = 0x0000;
-        break;
+        case 0:
+          dst1[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
+          break;
+        case 1:
+          dst2[j + clipboard_.row_] = 0x0000;
+          break;
+        case 2:
+          dst3[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
+          break;
+        case 3:
+          dst4[j + clipboard_.row_] = 0x0000;
+          break;
+        case 4:
+          dst5[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
+          break;
+        case 5:
+          dst6[j + clipboard_.row_] = 0x0000;
+          break;
       }
     }
   }
@@ -229,10 +229,10 @@ void TableView::cutSelection() {
   isDirty_ = true;
 }
 
-/******************************************************
+/*******************************************************************************
  pasteClipboard:
         copies data in the clipboard to the current step
- ******************************************************/
+******************************************************************************/
 
 void TableView::pasteClipboard() {
 
@@ -261,24 +261,24 @@ void TableView::pasteClipboard() {
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
-      case 0:
-        dst1[(j + row_) % 16] = src1[j];
-        break;
-      case 1:
-        dst2[(j + row_) % 16] = src2[j];
-        break;
-      case 2:
-        dst3[(j + row_) % 16] = src3[j];
-        break;
-      case 3:
-        dst4[(j + row_) % 16] = src4[j];
-        break;
-      case 4:
-        dst5[(j + row_) % 16] = src5[j];
-        break;
-      case 5:
-        dst6[(j + row_) % 16] = src6[j];
-        break;
+        case 0:
+          dst1[(j + row_) % 16] = src1[j];
+          break;
+        case 1:
+          dst2[(j + row_) % 16] = src2[j];
+          break;
+        case 2:
+          dst3[(j + row_) % 16] = src3[j];
+          break;
+        case 3:
+          dst4[(j + row_) % 16] = src4[j];
+          break;
+        case 4:
+          dst5[(j + row_) % 16] = src5[j];
+          break;
+        case 5:
+          dst6[(j + row_) % 16] = src6[j];
+          break;
       }
     }
   }
@@ -307,24 +307,24 @@ void TableView::updateCursor(int dx, int dy) {
   GUIPoint anchor = GetAnchor();
   GUIPoint p(anchor);
   switch (col_) {
-  case 1:
-    p.x_ += 4;
-    p.y_ += row_;
-    cmdEditField_.SetPosition(p);
-    cmdEdit_.SetInt(*(table.param1_ + row_));
-    break;
-  case 3:
-    p.x_ += 13;
-    p.y_ += row_;
-    cmdEditField_.SetPosition(p);
-    cmdEdit_.SetInt(*(table.param2_ + row_));
-    break;
-  case 5:
-    p.x_ += 22;
-    p.y_ += row_;
-    cmdEditField_.SetPosition(p);
-    cmdEdit_.SetInt(*(table.param3_ + row_));
-    break;
+    case 1:
+      p.x_ += 4;
+      p.y_ += row_;
+      cmdEditField_.SetPosition(p);
+      cmdEdit_.SetInt(*(table.param1_ + row_));
+      break;
+    case 3:
+      p.x_ += 13;
+      p.y_ += row_;
+      cmdEditField_.SetPosition(p);
+      cmdEdit_.SetInt(*(table.param2_ + row_));
+      break;
+    case 5:
+      p.x_ += 22;
+      p.y_ += row_;
+      cmdEditField_.SetPosition(p);
+      cmdEdit_.SetInt(*(table.param3_ + row_));
+      break;
   };
 
   isDirty_ = true;
@@ -355,184 +355,189 @@ void TableView::updateCursorValue(int offset) {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   switch (col_) {
-  case 0:
-    cc = table.cmd1_ + row_;
-    switch (offset) {
-    case 0x01:
-      *cc = CommandList::GetNext(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetNext(*cc);
+    case 0:
+      cc = table.cmd1_ + row_;
+      switch (offset) {
+        case 0x01:
+          *cc = CommandList::GetNext(*cc);
+          if (*cc == FourCC::InstrumentCommandTable) {
+            *cc = CommandList::GetNext(*cc);
+          }
+          break;
+        case 0x10:
+          *cc = CommandList::GetNextAlpha(*cc);
+          if (*cc == FourCC::InstrumentCommandTable) {
+            *cc = CommandList::GetNextAlpha(*cc);
+          }
+          break;
+        case -0x01:
+          *cc = CommandList::GetPrev(*cc);
+          if (*cc == FourCC::InstrumentCommandTable) {
+            *cc = CommandList::GetPrev(*cc);
+          }
+          break;
+        case -0x10:
+          *cc = CommandList::GetPrevAlpha(*cc);
+          if (*cc == FourCC::InstrumentCommandTable) {
+            *cc = CommandList::GetPrevAlpha(*cc);
+          }
+          break;
       }
+      lastCmd_ = *cc;
       break;
-    case 0x10:
-      *cc = CommandList::GetNextAlpha(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetNextAlpha(*cc);
-      }
-      break;
-    case -0x01:
-      *cc = CommandList::GetPrev(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetPrev(*cc);
-      }
-      break;
-    case -0x10:
-      *cc = CommandList::GetPrevAlpha(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetPrevAlpha(*cc);
-      }
-      break;
-    }
-    lastCmd_ = *cc;
-    break;
 
-  case 1: {
-    switch (offset) {
-    case 0x01:
-      cmdEditField_.ProcessArrow(EPBM_RIGHT);
-      break;
-    case 0x10:
-      cmdEditField_.ProcessArrow(EPBM_UP);
-      break;
-    case -0x01:
-      cmdEditField_.ProcessArrow(EPBM_LEFT);
-      break;
-    case -0x10:
-      cmdEditField_.ProcessArrow(EPBM_DOWN);
-      break;
-    }
-    // Sanitize MIDI velocity values if needed
-    FourCC currentCmd = *(table.cmd1_ + row_);
-    ushort paramValue = cmdEdit_.GetInt();
-    paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-    cmdEdit_.SetInt(paramValue);
-    *(table.param1_ + row_) = paramValue;
-    lastParam_ = paramValue;
-    break;
-  }
-  case 2: {
-    cc = table.cmd2_ + row_;
-    switch (offset) {
-    case 0x01:
-      *cc = CommandList::GetNext(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetNext(*cc);
+    case 1:
+      {
+        switch (offset) {
+          case 0x01:
+            cmdEditField_.ProcessArrow(EPBM_RIGHT);
+            break;
+          case 0x10:
+            cmdEditField_.ProcessArrow(EPBM_UP);
+            break;
+          case -0x01:
+            cmdEditField_.ProcessArrow(EPBM_LEFT);
+            break;
+          case -0x10:
+            cmdEditField_.ProcessArrow(EPBM_DOWN);
+            break;
+        }
+        // Sanitize MIDI velocity values if needed
+        FourCC currentCmd = *(table.cmd1_ + row_);
+        ushort paramValue = cmdEdit_.GetInt();
+        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
+        cmdEdit_.SetInt(paramValue);
+        *(table.param1_ + row_) = paramValue;
+        lastParam_ = paramValue;
+        break;
       }
-      break;
-    case 0x10:
-      *cc = CommandList::GetNextAlpha(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetNextAlpha(*cc);
+    case 2:
+      {
+        cc = table.cmd2_ + row_;
+        switch (offset) {
+          case 0x01:
+            *cc = CommandList::GetNext(*cc);
+            if (*cc == FourCC::InstrumentCommandTable) {
+              *cc = CommandList::GetNext(*cc);
+            }
+            break;
+          case 0x10:
+            *cc = CommandList::GetNextAlpha(*cc);
+            if (*cc == FourCC::InstrumentCommandTable) {
+              *cc = CommandList::GetNextAlpha(*cc);
+            }
+            break;
+          case -0x01:
+            *cc = CommandList::GetPrev(*cc);
+            if (*cc == FourCC::InstrumentCommandTable) {
+              *cc = CommandList::GetPrev(*cc);
+            }
+            break;
+          case -0x10:
+            *cc = CommandList::GetPrevAlpha(*cc);
+            if (*cc == FourCC::InstrumentCommandTable) {
+              *cc = CommandList::GetPrevAlpha(*cc);
+            }
+            break;
+        }
+        lastCmd_ = *cc;
+        break;
       }
-      break;
-    case -0x01:
-      *cc = CommandList::GetPrev(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetPrev(*cc);
+    case 3:
+      {
+        switch (offset) {
+          case 0x01:
+            cmdEditField_.ProcessArrow(EPBM_RIGHT);
+            break;
+          case 0x10:
+            cmdEditField_.ProcessArrow(EPBM_UP);
+            break;
+          case -0x01:
+            cmdEditField_.ProcessArrow(EPBM_LEFT);
+            break;
+          case -0x10:
+            cmdEditField_.ProcessArrow(EPBM_DOWN);
+            break;
+        }
+        // Sanitize MIDI velocity values if needed
+        FourCC currentCmd = *(table.cmd2_ + row_);
+        ushort paramValue = cmdEdit_.GetInt();
+        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
+        cmdEdit_.SetInt(paramValue);
+        *(table.param2_ + row_) = paramValue;
+        lastParam_ = paramValue;
+        break;
       }
-      break;
-    case -0x10:
-      *cc = CommandList::GetPrevAlpha(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetPrevAlpha(*cc);
+    case 4:
+      {
+        cc = table.cmd3_ + row_;
+        switch (offset) {
+          case 0x01:
+            *cc = CommandList::GetNext(*cc);
+            if (*cc == FourCC::InstrumentCommandTable) {
+              *cc = CommandList::GetNext(*cc);
+            }
+            break;
+          case 0x10:
+            *cc = CommandList::GetNextAlpha(*cc);
+            if (*cc == FourCC::InstrumentCommandTable) {
+              *cc = CommandList::GetNextAlpha(*cc);
+            }
+            break;
+          case -0x01:
+            *cc = CommandList::GetPrev(*cc);
+            if (*cc == FourCC::InstrumentCommandTable) {
+              *cc = CommandList::GetPrev(*cc);
+            }
+            break;
+          case -0x10:
+            *cc = CommandList::GetPrevAlpha(*cc);
+            if (*cc == FourCC::InstrumentCommandTable) {
+              *cc = CommandList::GetPrevAlpha(*cc);
+            }
+            break;
+        }
+        lastCmd_ = *cc;
+        break;
       }
-      break;
-    }
-    lastCmd_ = *cc;
-    break;
-  }
-  case 3: {
-    switch (offset) {
-    case 0x01:
-      cmdEditField_.ProcessArrow(EPBM_RIGHT);
-      break;
-    case 0x10:
-      cmdEditField_.ProcessArrow(EPBM_UP);
-      break;
-    case -0x01:
-      cmdEditField_.ProcessArrow(EPBM_LEFT);
-      break;
-    case -0x10:
-      cmdEditField_.ProcessArrow(EPBM_DOWN);
-      break;
-    }
-    // Sanitize MIDI velocity values if needed
-    FourCC currentCmd = *(table.cmd2_ + row_);
-    ushort paramValue = cmdEdit_.GetInt();
-    paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-    cmdEdit_.SetInt(paramValue);
-    *(table.param2_ + row_) = paramValue;
-    lastParam_ = paramValue;
-    break;
-  }
-  case 4: {
-    cc = table.cmd3_ + row_;
-    switch (offset) {
-    case 0x01:
-      *cc = CommandList::GetNext(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetNext(*cc);
+    case 5:
+      {
+        switch (offset) {
+          case 0x01:
+            cmdEditField_.ProcessArrow(EPBM_RIGHT);
+            break;
+          case 0x10:
+            cmdEditField_.ProcessArrow(EPBM_UP);
+            break;
+          case -0x01:
+            cmdEditField_.ProcessArrow(EPBM_LEFT);
+            break;
+          case -0x10:
+            cmdEditField_.ProcessArrow(EPBM_DOWN);
+            break;
+        }
+        // Sanitize MIDI velocity values if needed
+        FourCC currentCmd = *(table.cmd3_ + row_);
+        ushort paramValue = cmdEdit_.GetInt();
+        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
+        cmdEdit_.SetInt(paramValue);
+        *(table.param3_ + row_) = paramValue;
+        lastParam_ = paramValue;
+        break;
       }
-      break;
-    case 0x10:
-      *cc = CommandList::GetNextAlpha(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetNextAlpha(*cc);
-      }
-      break;
-    case -0x01:
-      *cc = CommandList::GetPrev(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetPrev(*cc);
-      }
-      break;
-    case -0x10:
-      *cc = CommandList::GetPrevAlpha(*cc);
-      if (*cc == FourCC::InstrumentCommandTable) {
-        *cc = CommandList::GetPrevAlpha(*cc);
-      }
-      break;
-    }
-    lastCmd_ = *cc;
-    break;
-  }
-  case 5: {
-    switch (offset) {
-    case 0x01:
-      cmdEditField_.ProcessArrow(EPBM_RIGHT);
-      break;
-    case 0x10:
-      cmdEditField_.ProcessArrow(EPBM_UP);
-      break;
-    case -0x01:
-      cmdEditField_.ProcessArrow(EPBM_LEFT);
-      break;
-    case -0x10:
-      cmdEditField_.ProcessArrow(EPBM_DOWN);
-      break;
-    }
-    // Sanitize MIDI velocity values if needed
-    FourCC currentCmd = *(table.cmd3_ + row_);
-    ushort paramValue = cmdEdit_.GetInt();
-    paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-    cmdEdit_.SetInt(paramValue);
-    *(table.param3_ + row_) = paramValue;
-    lastParam_ = paramValue;
-    break;
-  }
   }
   if (c) {
     updateData(c, offset, limit, wrap);
     switch (col_) {
-    case 0:
-      lastVol_ = *c;
-      break;
-    case 1:
-      lastTick_ = *c;
-      break;
-    case 2:
-      lastTsp_ = *c;
-      break;
+      case 0:
+        lastVol_ = *c;
+        break;
+      case 1:
+        lastTick_ = *c;
+        break;
+      case 2:
+        lastTsp_ = *c;
+        break;
     }
   }
   isDirty_ = true;
@@ -544,44 +549,44 @@ void TableView::pasteLast() {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   switch (col_) {
-  case 0:
-    c = (unsigned char *)table.cmd1_ + row_;
-    if (*c == FourCC::InstrumentCommandNone) {
-      *c = lastCmd_;
-      isDirty_ = true;
-    } else {
-      lastCmd_ = *c;
-    }
-    break;
+    case 0:
+      c = (unsigned char *)table.cmd1_ + row_;
+      if (*c == FourCC::InstrumentCommandNone) {
+        *c = lastCmd_;
+        isDirty_ = true;
+      } else {
+        lastCmd_ = *c;
+      }
+      break;
 
-  case 1:
-    break;
+    case 1:
+      break;
 
-  case 2:
-    c = (unsigned char *)table.cmd2_ + row_;
-    if (*c == FourCC::InstrumentCommandNone) {
-      *c = lastCmd_;
-      isDirty_ = true;
-    } else {
-      lastCmd_ = *c;
-    }
-    break;
+    case 2:
+      c = (unsigned char *)table.cmd2_ + row_;
+      if (*c == FourCC::InstrumentCommandNone) {
+        *c = lastCmd_;
+        isDirty_ = true;
+      } else {
+        lastCmd_ = *c;
+      }
+      break;
 
-  case 3:
-    break;
+    case 3:
+      break;
 
-  case 4:
-    c = (unsigned char *)table.cmd3_ + row_;
-    if (*c == FourCC::InstrumentCommandNone) {
-      *c = lastCmd_;
-      isDirty_ = true;
-    } else {
-      lastCmd_ = *c;
-    }
-    break;
+    case 4:
+      c = (unsigned char *)table.cmd3_ + row_;
+      if (*c == FourCC::InstrumentCommandNone) {
+        *c = lastCmd_;
+        isDirty_ = true;
+      } else {
+        lastCmd_ = *c;
+      }
+      break;
 
-  case 5:
-    break;
+    case 5:
+      break;
   }
 }
 
@@ -742,8 +747,8 @@ void TableView::setTextProps(int row, int col) {
     }
   }
 
-  SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
-  SetColor(highlighted ? cBackground : cNormal);
+  SetColor(highlighted ? Theme::View::bg : Theme::View::fg);
+  SetBackgroundColor(highlighted ? Theme::View::fg : Theme::View::bg);
 }
 
 void TableView::DrawView() {
@@ -757,7 +762,7 @@ void TableView::DrawView() {
   // Draw title
 
   char title[20];
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
   npf_snprintf(title, sizeof(title), "Table %2.2X", viewData_->currentTable_);
   DrawString(pos.x_, pos.y_, title);
 
@@ -766,21 +771,18 @@ void TableView::DrawView() {
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetColor(cHighlight1);
   char buffer[6];
   pos = anchor;
   pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
-    ((j / ALT_ROW_NUMBER) % 2) ? SetColor(cAccent) : SetColor(cAccentAlt);
+    SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
     hex2char(j, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
 
-  SetColor(cNormal);
-
   // Draw command 1
-
+  SetColor(Theme::View::fg);
   pos = anchor;
 
   FourCC *f = table.cmd1_;
@@ -929,7 +931,7 @@ void TableView::AnimationUpdate() {
     GUIPoint pos = anchor;
 
     // Clear all cursor columns first (positions 0, 9, 18 from anchor)
-    SetBackgroundColor(cBackground);
+    SetBackgroundColor(Theme::View::bg);
 
     for (int i = 0; i < 3; i++) {
       pos.x_ = anchor.x_ - 1 + (i * 9);
@@ -948,8 +950,9 @@ void TableView::AnimationUpdate() {
       Table &viewTable = th->GetTable(viewData_->currentTable_);
 
       if (viewData_->playMode_ != PM_AUDITION) {
-        SetBackgroundColor(cBackground);
-        SetColor(cAccent);
+        SetBackgroundColor(Theme::View::bg);
+        SetColor(Theme::Song::Playback::active);
+
         if (tpb.GetTable() == &viewTable) {
           for (int i = 0; i < 3; i++) {
             int yPos = tpb.GetPlaybackPosition(i);

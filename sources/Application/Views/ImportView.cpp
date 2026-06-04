@@ -318,7 +318,7 @@ void ImportView::DrawView() {
   char titleBuffer[40];
   npf_snprintf(titleBuffer, sizeof(titleBuffer), "%s", baseTitle);
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
   DrawString(pos.x_ + 1, pos.y_, titleBuffer);
 
   // Draw samples
@@ -329,7 +329,7 @@ void ImportView::DrawView() {
 
   // Loop through visible files in the list
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
-    SetBackgroundColor(cBackground);
+    SetBackgroundColor(Theme::View::bg);
 
     unsigned fileIndex = fileIndexList_[i];
     etl::string<PFILENAME_SIZE> displayName;
@@ -347,17 +347,16 @@ void ImportView::DrawView() {
       // Format the display name with appropriate prefix
       if (inProjectSampleDir_ &&
           viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
-        SetColor(cAccent);
+        SetColor(Theme::View::info);
         DrawString(x, y, "*");
       } else if (isSingleCycle) {
-        SetColor(cAccent);
+        SetColor(Theme::View::info);
         DrawString(x, y, "~");
       } else {
-        SetColor(cNormal);
         DrawString(x, y, " ");
       }
     } else {
-      SetColor(cAccent);
+      SetColor(Theme::FileList::directory);
       // Handle directories
       char tempBuffer[PFILENAME_SIZE];
       displayName = "/";
@@ -373,13 +372,15 @@ void ImportView::DrawView() {
     }
 
     bool highlighted = (i == currentIndex_);
-    SetColor(highlighted ? cBackground : cNormal);
-    SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
+    SetColor(Theme::View::fg);
+    SetBackgroundColor(Theme::View::bg);
+    if (highlighted) {
+      SwapColors();
+    }
     DrawString(x + 1, y, displayName.c_str());
     y += 1;
   };
 
-  SetColor(cHighlight1);
   y = SCREEN_HEIGHT - 2;
   if (inProjectSampleDir_) {
     if (selectedButton_ < 0 || selectedButton_ >= kProjectPoolButtonCount) {
@@ -396,8 +397,12 @@ void ImportView::DrawView() {
   }
 
   auto setColors = [&](bool selected) {
-    SetBackgroundColor(selected ? cHighlight2 : cBackground);
-    SetColor(selected ? cBackground : cHighlight1);
+    SetBackgroundColor(Theme::View::bg);
+    SetColor(Theme::View::fg);
+
+    if (selected) {
+      SwapColors();
+    }
   };
 
   if (!inProjectSampleDir_) {
@@ -414,7 +419,7 @@ void ImportView::DrawView() {
   } else {
     if (fileIndexList_.empty()) {
       // draw this a few lines down from *top* of screen
-      SetColor(cNormal);
+      SetColor(Theme::View::fg);
       DrawString(2, 3, "[pool empty]");
     } else {
       // we make edit the first button to make things easier
@@ -434,7 +439,7 @@ void ImportView::DrawView() {
   y += 1;
 
   // draw current selected file size and available storage indicator
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
   y = 0;
   uint32_t filesize = 0;
   if (!fileIndexList_.empty()) {
@@ -444,7 +449,7 @@ void ImportView::DrawView() {
       filesize = fs->getFileSize(currentFileIndex);
       // if file size is larger than available space, set color to warning
       if (filesize > availableSpace) {
-        SetColor(cWarn);
+        SetColor(Theme::View::warning);
       }
     }
   }
@@ -465,8 +470,8 @@ void ImportView::DrawView() {
 
   x = 1;  // align with rest screen title & file list
   y = 23; // bottom line
-  SetBackgroundColor(cBackground);
-  SetColor(cNormal);
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
   DrawString(x, y, tempBuffer);
 }
 
@@ -542,19 +547,19 @@ void ImportView::preview(char *name) {
   if (!wavRes) {
     auto error = wavRes.error();
     switch (error) {
-    case INVALID_FILE:
-      mb = MessageBox::Create(*this, "Preview Failed", "Could not open file", MBBF_OK);
-      break;
-    case UNSUPPORTED_FILE_FORMAT:
-    case INVALID_HEADER:
-    case UNSUPPORTED_WAV_FORMAT:
-      mb = MessageBox::Create(*this, "Preview Failed", "Invalid file", MBBF_OK);
-      break;
-    case UNSUPPORTED_AUDIO_FORMAT:
-    case UNSUPPORTED_BITDEPTH:
-    case UNSUPPORTED_SAMPLERATE:
-      mb = MessageBox::Create(*this, "Preview Failed", "Unsupported format", MBBF_OK);
-      break;
+      case INVALID_FILE:
+        mb = MessageBox::Create(*this, "Preview Failed", "Could not open file", MBBF_OK);
+        break;
+      case UNSUPPORTED_FILE_FORMAT:
+      case INVALID_HEADER:
+      case UNSUPPORTED_WAV_FORMAT:
+        mb = MessageBox::Create(*this, "Preview Failed", "Invalid file", MBBF_OK);
+        break;
+      case UNSUPPORTED_AUDIO_FORMAT:
+      case UNSUPPORTED_BITDEPTH:
+      case UNSUPPORTED_SAMPLERATE:
+        mb = MessageBox::Create(*this, "Preview Failed", "Unsupported format", MBBF_OK);
+        break;
     }
   } else {
     wav.Close();
@@ -642,19 +647,19 @@ void ImportView::import() {
   if (!wavRes) {
     auto error = wavRes.error();
     switch (error) {
-    case INVALID_FILE:
-      mb = MessageBox::Create(*this, "Import Failed", "Could not open file", MBBF_OK);
-      break;
-    case UNSUPPORTED_FILE_FORMAT:
-    case INVALID_HEADER:
-    case UNSUPPORTED_WAV_FORMAT:
-      mb = MessageBox::Create(*this, "Import Failed", "invalid file", MBBF_OK);
-      break;
-    case UNSUPPORTED_AUDIO_FORMAT:
-    case UNSUPPORTED_BITDEPTH:
-    case UNSUPPORTED_SAMPLERATE:
-      mb = MessageBox::Create(*this, "Import Failed", "unsupported format", MBBF_OK);
-      break;
+      case INVALID_FILE:
+        mb = MessageBox::Create(*this, "Import Failed", "Could not open file", MBBF_OK);
+        break;
+      case UNSUPPORTED_FILE_FORMAT:
+      case INVALID_HEADER:
+      case UNSUPPORTED_WAV_FORMAT:
+        mb = MessageBox::Create(*this, "Import Failed", "invalid file", MBBF_OK);
+        break;
+      case UNSUPPORTED_AUDIO_FORMAT:
+      case UNSUPPORTED_BITDEPTH:
+      case UNSUPPORTED_SAMPLERATE:
+        mb = MessageBox::Create(*this, "Import Failed", "unsupported format", MBBF_OK);
+        break;
     }
   } else {
     wav.Close();

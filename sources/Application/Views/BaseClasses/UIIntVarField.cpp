@@ -39,28 +39,32 @@ void UIIntVarField::Draw(GUIWindow &w, int offset) {
   Variable::Type type = src_.GetType();
   char buffer[MAX_FIELD_WIDTH + 1];
   switch (type) {
-  case Variable::INT: {
-    int ivalue = src_.GetInt() + displayOffset_;
-    npf_snprintf(buffer, sizeof(buffer), format_, ivalue, ivalue);
-  } break;
-  case Variable::CHAR_LIST:
-    // if no value initialize with "NONE"
-    if (src_.GetInt() < 0) {
-      npf_snprintf(buffer, sizeof(buffer), format_, "NONE");
-    } else {
-      auto value = src_.GetString();
-      const char *cvalue = value.c_str();
-      npf_snprintf(buffer, sizeof(buffer), format_, cvalue);
-    }
-    break;
-  case Variable::BOOL: {
-    auto value = src_.GetString();
-    const char *cvalue = value.c_str();
-    npf_snprintf(buffer, sizeof(buffer), format_, cvalue);
-  } break;
+    case Variable::INT:
+      {
+        int ivalue = src_.GetInt() + displayOffset_;
+        npf_snprintf(buffer, sizeof(buffer), format_, ivalue, ivalue);
+      }
+      break;
+    case Variable::CHAR_LIST:
+      // if no value initialize with "NONE"
+      if (src_.GetInt() < 0) {
+        npf_snprintf(buffer, sizeof(buffer), format_, "None");
+      } else {
+        auto value = src_.GetString();
+        const char *cvalue = value.c_str();
+        npf_snprintf(buffer, sizeof(buffer), format_, cvalue);
+      }
+      break;
+    case Variable::BOOL:
+      {
+        auto value = src_.GetString();
+        const char *cvalue = value.c_str();
+        npf_snprintf(buffer, sizeof(buffer), format_, cvalue);
+      }
+      break;
 
-  default:
-    strcpy(buffer, "++wtf++");
+    default:
+      strcpy(buffer, "++wtf++");
   }
 
   DrawLabeledField(w, position, buffer, focus_);
@@ -70,18 +74,18 @@ void UIIntVarField::ProcessArrow(unsigned short mask) {
   int value = src_.GetInt();
 
   switch (mask) {
-  case EPBM_UP:
-    value += yOffset_;
-    break;
-  case EPBM_DOWN:
-    value -= yOffset_;
-    break;
-  case EPBM_LEFT:
-    value -= xOffset_;
-    break;
-  case EPBM_RIGHT:
-    value += xOffset_;
-    break;
+    case EPBM_UP:
+      value += yOffset_;
+      break;
+    case EPBM_DOWN:
+      value -= yOffset_;
+      break;
+    case EPBM_LEFT:
+      value -= xOffset_;
+      break;
+    case EPBM_RIGHT:
+      value += xOffset_;
+      break;
   };
   if (value < min_) {
     value = min_;
@@ -112,4 +116,11 @@ FourCC UIIntVarField::GetVariableID() {
 
 Variable &UIIntVarField::GetVariable() {
   return src_;
+}
+
+void UIIntVarField::SetRange(int min, int max, int xOffset, int yOffset) {
+  min_ = min;
+  max_ = max;
+  xOffset_ = xOffset;
+  yOffset_ = yOffset;
 }

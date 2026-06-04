@@ -136,7 +136,7 @@ void DeleteProjectConfirmModal::ProcessButtonMask(unsigned short mask, bool pres
 void DeleteProjectConfirmModal::DrawView() {
   SetWindow(26, 6);
 
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
 
   const int projectLineX = (26 - projectLine_.size()) / 2;
   DrawString(projectLineX, 0, projectLine_.c_str());
@@ -149,16 +149,14 @@ void DeleteProjectConfirmModal::DrawView() {
   }
 
   const char *cancelButton = "Cancel";
-  SetColor(cHighlight2);
+  SetColor(Theme::Button::fg(false));
   DrawString((26 - strlen(cancelButton)) / 2, 5, cancelButton);
 }
 
 static void LoadProjectCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
-
     // User accepted losing changes; clear autosave for the current project.
     ((SelectProjectView &)v).ClearAutoSave();
-
     ((SelectProjectView &)v).LoadProject();
   }
 }
@@ -198,15 +196,14 @@ void SelectProjectView::DrawView() {
   Clear();
 
   GUIPoint pos = GetTitlePosition();
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
 
   auto fs = FileSystem::GetInstance();
 
   // Draw title
   const char *title = "Browse Projects";
-  SetColor(cInfo);
   DrawString(pos.x_ + 1, pos.y_, title);
-  SetColor(cNormal);
+  SetColor(Theme::View::fg);
 
   // Draw projects
   int x = 1;
@@ -219,8 +216,12 @@ void SelectProjectView::DrawView() {
 
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < total); i++) {
     bool highlighted = (i == currentIndex_);
-    SetBackgroundColor(highlighted ? cHighlight2 : cBackground);
-    SetColor(highlighted ? cBackground : cNormal);
+    SetBackgroundColor(Theme::View::bg);
+    SetColor(Theme::View::fg);
+
+    if (highlighted) {
+      SwapColors();
+    }
 
     char buffer[MAX_PROJECT_NAME_LENGTH + 1];
     memset(buffer, '\0', sizeof(buffer));
@@ -251,8 +252,13 @@ void SelectProjectView::DrawView() {
 
   for (int n = 0; n < numButtons_; n++) {
     bool selected = selectedButton_ == n;
-    SetColor(selected ? cBackground : cHighlight1);
-    SetBackgroundColor(selected ? cHighlight2 : cBackground);
+    SetColor(Theme::View::fg);
+    SetBackgroundColor(Theme::View::bg);
+
+    if (selected) {
+      SwapColors();
+    }
+
     DrawString(x, SCREEN_HEIGHT - 1, buttons[n]);
 
     x += 2 + strlen(buttons[n]);
@@ -285,13 +291,13 @@ void SelectProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
     // A modifier
     if (mask & EPBM_ENTER) {
       switch (selectedButton_) {
-      case 0:
-        // load project
-        AttemptLoadingProject();
-        break;
-      case 1:
-        AttemptDeletingSelectedProject();
-        break;
+        case 0:
+          // load project
+          AttemptLoadingProject();
+          break;
+        case 1:
+          AttemptDeletingSelectedProject();
+          break;
       }
     } else {
       // R Modifier

@@ -24,7 +24,7 @@ GUIPoint UIField::GetPosition() {
   return point;
 }
 
-void UIField::SetPosition(GUIPoint &p) {
+void UIField::SetPosition(const GUIPoint &p) {
   x_ = p.x_;
   y_ = p.y_;
 }

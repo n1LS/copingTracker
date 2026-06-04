@@ -138,22 +138,23 @@ bool TablePlayback::ProcessLocalCommand(int row, FourCC *commandList, ushort *pa
   // First process any positional command
 
   switch (command) {
-  case FourCC::InstrumentCommandHop: {
-    int count = param >> 8;
-    if (hopCount_[position_[row]][row] == 0) {
-      hopCount_[position_[row]][row] = count;
-    } else {
-      hopCount_[position_[row]][row]--;
-    };
-    if ((hopCount_[position_[row]][row] != 0) || (count == 0)) {
-      position_[row] = param & 0xF;
-      hopped = true;
-    } else {
-      position_[row] = (position_[row] + 1) % 16;
-      hopped = true;
-    };
-    break;
-  }
+    case FourCC::InstrumentCommandHop:
+      {
+        int count = param >> 8;
+        if (hopCount_[position_[row]][row] == 0) {
+          hopCount_[position_[row]][row] = count;
+        } else {
+          hopCount_[position_[row]][row]--;
+        };
+        if ((hopCount_[position_[row]][row] != 0) || (count == 0)) {
+          position_[row] = param & 0xF;
+          hopped = true;
+        } else {
+          position_[row] = (position_[row] + 1) % 16;
+          hopped = true;
+        };
+        break;
+      }
   }
 
   // Update values if needed
@@ -166,21 +167,21 @@ bool TablePlayback::ProcessLocalCommand(int row, FourCC *commandList, ushort *pa
   // Now process local command on possibly hopped row
 
   switch (command) {
-  case FourCC::InstrumentCommandKill:
-    tpc.timeToLive_ = (param & 0xFF) + 1;
-    break;
-  case FourCC::InstrumentCommandInstrumentRetrigger:
-    tpc.instrRetrigger_ = (param & 0xFF);
-    break;
-  case FourCC::InstrumentCommandGroove:
-    param = param & 0x1F;
-    groove_.groove_ = (unsigned char)param;
-    groove_.position_ = 0;
-    groove_.ticks_ = 0;
-    break;
-  case FourCC::InstrumentCommandStop:
-    Stop();
-    break;
+    case FourCC::InstrumentCommandKill:
+      tpc.timeToLive_ = (param & 0xFF) + 1;
+      break;
+    case FourCC::InstrumentCommandInstrumentRetrigger:
+      tpc.instrRetrigger_ = (param & 0xFF);
+      break;
+    case FourCC::InstrumentCommandGroove:
+      param = param & 0x1F;
+      groove_.groove_ = (unsigned char)param;
+      groove_.position_ = 0;
+      groove_.ticks_ = 0;
+      break;
+    case FourCC::InstrumentCommandStop:
+      Stop();
+      break;
   }
   return hopped;
 }

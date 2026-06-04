@@ -27,7 +27,7 @@
 #include "ViewData.h"
 
 #define COLOR_COMPONENT_COUNT 3
-#define COLOR_COUNT 12
+#define COLOR_COUNT 16
 #define COLOR_SUB_FIELDS_COUNT (COLOR_COMPONENT_COUNT * COLOR_COUNT)
 
 class ThemeView : public FieldView, public I_Observer {
@@ -48,7 +48,7 @@ public:
   void AnimationUpdate() override;
 
   // For storing export theme name during modal callbacks
-  etl::string<MAX_INSTRUMENT_NAME_LENGTH> exportThemeName_;
+  etl::string<MAX_THEME_NAME_LENGTH> exportThemeName_;
 
 protected:
 private:
@@ -58,21 +58,26 @@ private:
   void addColorField(const char *label, Variable *colorVar, Color color, GUIPoint position);
   void syncFieldsFromConfig();
   void syncColorComponentVars(Variable *colorVar);
+  void updateColorComponentField();
+  void drawColorComponentValues();
+  bool isColorComponentFocus();
+  void moveColorComponentFocus(int8_t colorDelta, int8_t componentDelta);
 
-  struct ColorComponentField {
-    Observable *observable = nullptr;
-    Variable *componentVar = nullptr;
+  struct ColorComponentTarget {
     Variable *colorVar = nullptr;
+    GUIPoint position;
     uint8_t shift = 0;
   };
 
-  ColorComponentField *findColorComponentField(Observable *observable);
-
-  etl::vector<UIIntVarField, (COLOR_SUB_FIELDS_COUNT + 1)> intVarField_; // for colors + 1 for font selector
+  ColorComponentTarget *selectedColorComponentTarget();
+  etl::vector<UIIntVarField, 2> intVarField_; // font selector + selected color component
   etl::vector<UISwatchField, COLOR_COUNT> swatchField_;
   etl::vector<UIStaticField, COLOR_COUNT> staticField_;
-  etl::vector<Variable, COLOR_SUB_FIELDS_COUNT> colorComponentVars_;
-  etl::vector<ColorComponentField, COLOR_SUB_FIELDS_COUNT> colorComponentFields_;
+  Variable colorComponentVar_;
+  UIIntVarField *colorComponentField_ = nullptr;
+  etl::vector<ColorComponentTarget, COLOR_SUB_FIELDS_COUNT> colorComponentTargets_;
+  uint8_t selectedColor_ = 0;
+  uint8_t selectedColorComponent_ = 0;
   etl::vector<UIActionField, 2> actionField_;                     // For Import/Export buttons
   etl::vector<UITextField<MAX_THEME_NAME_LENGTH>, 1> textFields_; // For theme name input
   StringVariable<MAX_THEME_NAME_LENGTH> themeNameVar_;
@@ -89,7 +94,7 @@ private:
 
   // need separate flag for force because isDirty_ won't work for this because
   // it gets reset before AnimationUpdate is called in ThemeViews case
-  bool _forceRedraw = false;
+  bool forceRedraw_ = false;
   // use to flag pending theme data changes to be persisted to file
   bool configDirty_ = false;
 };

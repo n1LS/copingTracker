@@ -300,30 +300,30 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
   uintptr_t fourcc = (uintptr_t)d;
 
   switch (fourcc) {
-  case FourCC::SampleInstrumentSlices:
-    handleSliceSelectionChange();
-    ((AppWindow &)w_).SetDirty();
-    break;
-  case FourCC::SampleInstrumentStart:
-    applySliceStart(static_cast<uint32_t>(sliceStartVar_.GetInt()));
-    isDirty_ = true;
-    ((AppWindow &)w_).SetDirty();
-    break;
-  case FourCC::ActionAutoSlice:
-    if (instrument_ && instrument_->HasSlicesForPlayback()) {
-      MessageBox *mb = MessageBox::Create(*this, "Replace current slices?", MBBF_YES | MBBF_NO);
-      modalClearCount_ = 0;
-      clearWaveformRegion();
-      // Reopening the same modal can reuse identical text, so invalidate only
-      // the previous text cache and let the next redraw resend the full dialog.
-      ((AppWindow &)w_).InvalidateTextCache();
-      DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
-    } else {
-      autoSliceEvenly();
-    }
-    break;
-  default:
-    break;
+    case FourCC::SampleInstrumentSlices:
+      handleSliceSelectionChange();
+      ((AppWindow &)w_).SetDirty();
+      break;
+    case FourCC::SampleInstrumentStart:
+      applySliceStart(static_cast<uint32_t>(sliceStartVar_.GetInt()));
+      isDirty_ = true;
+      ((AppWindow &)w_).SetDirty();
+      break;
+    case FourCC::ActionAutoSlice:
+      if (instrument_ && instrument_->HasSlicesForPlayback()) {
+        MessageBox *mb = MessageBox::Create(*this, "Replace current slices?", MBBF_YES | MBBF_NO);
+        modalClearCount_ = 0;
+        clearWaveformRegion();
+        // Reopening the same modal can reuse identical text, so invalidate only
+        // the previous text cache and let the next redraw resend the full dialog.
+        ((AppWindow &)w_).InvalidateTextCache();
+        DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
+      } else {
+        autoSliceEvenly();
+      }
+      break;
+    default:
+      break;
   }
 }
 
@@ -433,28 +433,28 @@ void SampleSlicesView::drawWaveform() {
   if (instrument_ && sampleSize_ > 0) {
     for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
       if (!instrument_->IsSliceDefined(i)) {
-        graphField_.SetMarker(i, 0, cAccent, false);
+        graphField_.SetMarker(i, 0, Theme::Waveform::marker(false), false);
         continue;
       }
       uint32_t start = instrument_->GetSlicePoint(i);
       if (i == 0 && start == 0 && !instrument_->HasSlicesForPlayback()) {
-        graphField_.SetMarker(i, 0, cAccent, false);
+        graphField_.SetMarker(i, 0, Theme::Waveform::marker(true), false);
         continue;
       }
-      Color color = (static_cast<int32_t>(i) == sliceIndexVar_.GetInt()) ? cHighlight2 : cAccent;
+      Color color = Theme::Waveform::marker((int)i == sliceIndexVar_.GetInt());
       graphField_.SetMarker(i, start, color, true);
     }
   } else {
     for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
-      graphField_.SetMarker(i, 0, cAccent, false);
+      graphField_.SetMarker(i, 0, Theme::Waveform::marker(false), false);
     }
   }
 
   size_t playheadIndex = SampleInstrument::MaxSlices;
   if (previewCursorVisible_) {
-    graphField_.SetMarker(playheadIndex, previewPlayheadSample_, cNormal, true);
+    graphField_.SetMarker(playheadIndex, previewPlayheadSample_, Theme::Waveform::normal, true);
   } else {
-    graphField_.SetMarker(playheadIndex, 0, cNormal, false);
+    graphField_.SetMarker(playheadIndex, 0, Theme::Waveform::normal, false);
   }
 
   graphField_.DrawGraph(*this);
@@ -463,7 +463,7 @@ void SampleSlicesView::drawWaveform() {
 void SampleSlicesView::clearWaveformRegion() {
   GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, graphFieldPos_.x_ + GraphField::BitmapWidth,
                graphFieldPos_.y_ + GraphField::BitmapHeight);
-  DrawRect(rect, cBackground);
+  DrawRect(rect, Theme::View::bg);
 }
 
 SampleInstrument *SampleSlicesView::currentInstrument() {

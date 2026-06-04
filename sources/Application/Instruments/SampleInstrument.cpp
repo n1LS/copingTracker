@@ -445,62 +445,63 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
   float driverRate = float(Audio::GetInstance()->GetSampleRate());
 
   switch (loopmode) {
-  case SILM_ONESHOT:
-  case SILM_LOOP:
-  case SILM_LOOP_PINGPONG:
+    case SILM_ONESHOT:
+    case SILM_LOOP:
+    case SILM_LOOP_PINGPONG:
 
-    // Compute speed factor
-    // if instrument sampled below 44.1Khz, should
-    // travel slower in sample
+      // Compute speed factor
+      // if instrument sampled below 44.1Khz, should
+      // travel slower in sample
 
-    rp->rendFirst_ = start_.GetInt();
-    rp->position_ = float(rp->rendFirst_);
-    rp->baseSpeed_ = fl2fp(source_->GetSampleRate(rp->midiNote_) / driverRate);
-    rp->reverse_ = (rp->rendLoopEnd_ < rp->position_);
-
-    break;
-
-  case SILM_OSC:
-    //		case SILM_OSCFINE:
-    {
-
-      float freq = 261.6255653006f; // C3
-                                    /*			if (loopmode==SILM_OSCFINE) {
-                                                                    freq=float(pow(2.0,-0.75))*440; // C3
-                                                            }*/
-      int length = rp->rendLoopEnd_ - rp->rendLoopStart_;
-      if (length == 0)
-        length = 1;
-      if (length < 0) {
-        rp->reverse_ = true;
-        length = -length;
-      };
-      rp->baseSpeed_ = fl2fp((freq * length) / driverRate);
-      rp->rendFirst_ = rp->rendLoopStart_;
-      if (cleanstart) {
-        rp->position_ = float(rp->rendFirst_);
-      }
-      break;
-    }
-  case SILM_LOOPSYNC: {
-    int length = rp->rendLoopEnd_ - rp->rendLoopStart_;
-    if (length < 0) {
-      rp->reverse_ = true;
-      length = -length;
-    };
-    SyncMaster *sm = SyncMaster::GetInstance();
-    int sampleCount = int(sm->GetTickSampleCount());
-    sampleCount *= (6 * 16);
-    rp->baseSpeed_ = fl2fp(length / float(sampleCount));
-    rp->rendFirst_ = rp->rendLoopStart_;
-    if (cleanstart) {
+      rp->rendFirst_ = start_.GetInt();
       rp->position_ = float(rp->rendFirst_);
-    }
-    break;
-  }
-  case SILM_LAST:
-    NAssert(0);
-    break;
+      rp->baseSpeed_ = fl2fp(source_->GetSampleRate(rp->midiNote_) / driverRate);
+      rp->reverse_ = (rp->rendLoopEnd_ < rp->position_);
+
+      break;
+
+    case SILM_OSC:
+      //		case SILM_OSCFINE:
+      {
+
+        float freq = 261.6255653006f; // C3
+                                      /*			if (loopmode==SILM_OSCFINE) {
+                                                                      freq=float(pow(2.0,-0.75))*440; // C3
+                                                              }*/
+        int length = rp->rendLoopEnd_ - rp->rendLoopStart_;
+        if (length == 0)
+          length = 1;
+        if (length < 0) {
+          rp->reverse_ = true;
+          length = -length;
+        };
+        rp->baseSpeed_ = fl2fp((freq * length) / driverRate);
+        rp->rendFirst_ = rp->rendLoopStart_;
+        if (cleanstart) {
+          rp->position_ = float(rp->rendFirst_);
+        }
+        break;
+      }
+    case SILM_LOOPSYNC:
+      {
+        int length = rp->rendLoopEnd_ - rp->rendLoopStart_;
+        if (length < 0) {
+          rp->reverse_ = true;
+          length = -length;
+        };
+        SyncMaster *sm = SyncMaster::GetInstance();
+        int sampleCount = int(sm->GetTickSampleCount());
+        sampleCount *= (6 * 16);
+        rp->baseSpeed_ = fl2fp(length / float(sampleCount));
+        rp->rendFirst_ = rp->rendLoopStart_;
+        if (cleanstart) {
+          rp->position_ = float(rp->rendFirst_);
+        }
+        break;
+      }
+    case SILM_LAST:
+      NAssert(0);
+      break;
   }
 
   if (sliceActive) {
@@ -771,95 +772,95 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
       if (!rpReverse) {
         if (input >= lastSample /*-((loopMode==SILM_OSCFINE)?1:0)*/) {
           switch (loopMode) {
-          case SILM_ONESHOT:
-            *rpFinished = true;
-            break;
-          case SILM_LOOP:
-          case SILM_OSC:
-          case SILM_LOOPSYNC:
-            input = loopPosition;
-            rpReverse = (loopPosition > lastSample);
-            if (rpReverse) {
-              fpSpeed = -rp->speed_;
-            } else {
-              fpSpeed = rp->speed_;
-            }
-            break;
-          case SILM_LOOP_PINGPONG:
-            if ((loopPosition > lastSample)) {
-              if (input <= lastSample || input >= loopPosition) {
-                rpReverse = !rpReverse;
-                fpSpeed = -fpSpeed;
+            case SILM_ONESHOT:
+              *rpFinished = true;
+              break;
+            case SILM_LOOP:
+            case SILM_OSC:
+            case SILM_LOOPSYNC:
+              input = loopPosition;
+              rpReverse = (loopPosition > lastSample);
+              if (rpReverse) {
+                fpSpeed = -rp->speed_;
+              } else {
+                fpSpeed = rp->speed_;
               }
-            } else {
-              if (input >= lastSample || input <= loopPosition) {
-                rpReverse = !rpReverse;
-                fpSpeed = -fpSpeed;
+              break;
+            case SILM_LOOP_PINGPONG:
+              if ((loopPosition > lastSample)) {
+                if (input <= lastSample || input >= loopPosition) {
+                  rpReverse = !rpReverse;
+                  fpSpeed = -fpSpeed;
+                }
+              } else {
+                if (input >= lastSample || input <= loopPosition) {
+                  rpReverse = !rpReverse;
+                  fpSpeed = -fpSpeed;
+                }
               }
-            }
-            break;
-            /*						case
-               SILM_OSCFINE:
-                                                            {
-                                                                    int
-               offset=(input-lastSample)/channelCount ;
-                                                                    rpReverse=(loopPosition>lastSample)
-               ; if (rpReverse) { fpSpeed=-rp->speed_ ;
-                                                                            input=loopPosition-offset
-               ; } else { fpSpeed=rp->speed_ ; input=loopPosition+offset ;
-                                                                    }
-                                                                    break ;
-                                                            }*/
-          case SILM_LAST:
-            NAssert(0);
-            break;
+              break;
+              /*						case
+                 SILM_OSCFINE:
+                                                              {
+                                                                      int
+                 offset=(input-lastSample)/channelCount ;
+                                                                      rpReverse=(loopPosition>lastSample)
+                 ; if (rpReverse) { fpSpeed=-rp->speed_ ;
+                                                                              input=loopPosition-offset
+                 ; } else { fpSpeed=rp->speed_ ; input=loopPosition+offset ;
+                                                                      }
+                                                                      break ;
+                                                              }*/
+            case SILM_LAST:
+              NAssert(0);
+              break;
           };
         }
       } else {
         if (input < lastSample) {
           switch (loopMode) {
-          case SILM_ONESHOT:
-            *rpFinished = true;
-            break;
-          case SILM_LOOP:
-          case SILM_OSC:
-          case SILM_LOOPSYNC:
-            input = loopPosition;
-            rpReverse = (loopPosition > lastSample);
-            if (rpReverse) {
-              fpSpeed = -rp->speed_;
-            } else {
-              fpSpeed = rp->speed_;
-            }
-            break;
-          case SILM_LOOP_PINGPONG:
-            if ((loopPosition > lastSample)) {
-              if (input <= lastSample || input >= loopPosition) {
-                rpReverse = !rpReverse;
-                fpSpeed = -fpSpeed;
+            case SILM_ONESHOT:
+              *rpFinished = true;
+              break;
+            case SILM_LOOP:
+            case SILM_OSC:
+            case SILM_LOOPSYNC:
+              input = loopPosition;
+              rpReverse = (loopPosition > lastSample);
+              if (rpReverse) {
+                fpSpeed = -rp->speed_;
+              } else {
+                fpSpeed = rp->speed_;
               }
-            } else {
-              if (input >= lastSample || input <= loopPosition) {
-                rpReverse = !rpReverse;
-                fpSpeed = -fpSpeed;
+              break;
+            case SILM_LOOP_PINGPONG:
+              if ((loopPosition > lastSample)) {
+                if (input <= lastSample || input >= loopPosition) {
+                  rpReverse = !rpReverse;
+                  fpSpeed = -fpSpeed;
+                }
+              } else {
+                if (input >= lastSample || input <= loopPosition) {
+                  rpReverse = !rpReverse;
+                  fpSpeed = -fpSpeed;
+                }
               }
-            }
-            break;
-            /*						case
-               SILM_OSCFINE:
-                                                            {
-                                                                    int
-               offset=(lastSample-input)/channelCount ;
-                                                                    rpReverse=(loopPosition>lastSample)
-               ; if (rpReverse) { fpSpeed=-rp->speed_ ;
-                                                                            input=loopPosition-offset
-               ; } else { fpSpeed=rp->speed_ ; input=loopPosition+offset ;
-                                                                    }
-                                                                    break ;
-                                                            }*/
-          case SILM_LAST:
-            NAssert(0);
-            break;
+              break;
+              /*						case
+                 SILM_OSCFINE:
+                                                              {
+                                                                      int
+                 offset=(lastSample-input)/channelCount ;
+                                                                      rpReverse=(loopPosition>lastSample)
+                 ; if (rpReverse) { fpSpeed=-rp->speed_ ;
+                                                                              input=loopPosition-offset
+                 ; } else { fpSpeed=rp->speed_ ; input=loopPosition+offset ;
+                                                                      }
+                                                                      break ;
+                                                              }*/
+            case SILM_LAST:
+              NAssert(0);
+              break;
           };
         }
       };
@@ -942,27 +943,27 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
           switch (interpol) {
 
-          case 0: // Linear interpolation
+            case 0: // Linear interpolation
 
-            eta = fpPos;
-            inveta = fp_sub(FP_ONE, eta);
+              eta = fpPos;
+              inveta = fp_sub(FP_ONE, eta);
 
-            // interpolate
+              // interpolate
 
-            s1 = fp_mul(s1, inveta);
-            s2 = fp_mul(s2, eta);
+              s1 = fp_mul(s1, inveta);
+              s2 = fp_mul(s2, eta);
 
-            // Compute interpolated sample
+              // Compute interpolated sample
 
-            s1 += s2;
-            break;
+              s1 += s2;
+              break;
 
-          case 1: // Nearest neighbor
+            case 1: // Nearest neighbor
 
-            if (fpPos > zerofive) {
-              s1 = s2;
-            };
-            break;
+              if (fpPos > zerofive) {
+                s1 = s2;
+              };
+              break;
           }
 
           // crush predrive
@@ -1130,20 +1131,22 @@ void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
   FourCC id = v.GetID();
 
   switch (id) {
-  case FourCC::SampleInstrumentSample: {
-    if (running_) {
-      dirty_ = true; // we'll update later, when instrument gets re-triggered
-    } else {
-      updateInstrumentData(true);
-      SetChanged();
-      NotifyObservers();
-    };
-  } break;
+    case FourCC::SampleInstrumentSample:
+      {
+        if (running_) {
+          dirty_ = true; // we'll update later, when instrument gets re-triggered
+        } else {
+          updateInstrumentData(true);
+          SetChanged();
+          NotifyObservers();
+        };
+      }
+      break;
 
-  default:
-    //         Trace::Dump("Got notification from
-    //         %c%c%c%c",fourcc[0],fourcc[1],fourcc[2],fourcc[3]) ;
-    break;
+    default:
+      //         Trace::Dump("Got notification from
+      //         %c%c%c%c",fourcc[0],fourcc[1],fourcc[2],fourcc[3]) ;
+      break;
   };
 }
 
@@ -1154,260 +1157,284 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
     return;
 
   switch (cc) {
-  case FourCC::InstrumentCommandLoopOfset:
+    case FourCC::InstrumentCommandLoopOffset:
 
-    if (value > 0x8000) {
-      value = 0x10000 - value;
-      if (rp->rendLoopStart_ > value) {
-        rp->rendLoopEnd_ -= value;
-        rp->rendLoopStart_ -= value;
+      if (value > 0x8000) {
+        value = 0x10000 - value;
+        if (rp->rendLoopStart_ > value) {
+          rp->rendLoopEnd_ -= value;
+          rp->rendLoopStart_ -= value;
+        }
+      } else {
+        if (rp->rendLoopEnd_ + value < source_->GetSize(rp->midiNote_)) {
+          rp->rendLoopEnd_ += value;
+          rp->rendLoopStart_ += value;
+        };
       }
-    } else {
-      if (rp->rendLoopEnd_ + value < source_->GetSize(rp->midiNote_)) {
-        rp->rendLoopEnd_ += value;
-        rp->rendLoopStart_ += value;
+      break;
+
+    case FourCC::InstrumentCommandPlayOfset:
+      {
+        if (!source_)
+          return;
+        int wavSize = source_->GetSize(rp->midiNote_);
+        float chkSize = wavSize / 256.0f;
+        int absShft = value >> 8;
+        if (absShft != 0) {
+          rp->position_ = chkSize * absShft;
+        };
+        int relSfht = value & 0xFF;
+        if (relSfht > 127)
+          relSfht = relSfht - 256;
+        rp->position_ += relSfht * chkSize;
+        while (rp->position_ < 0) {
+          rp->position_ = wavSize + rp->position_;
+        };
+        while (rp->position_ >= wavSize) {
+          rp->position_ -= wavSize;
+        };
+        rp->couldClick_ = SHOULD_KILL_CLICKS;
+      }
+      break;
+
+    case FourCC::InstrumentCommandArpeggiator:
+      {
+        rp->arp_.SetData(value);
+        if (!rp->arp_.Enabled()) {
+          rp->arp_.Enable();
+          rp->activeUpdaters_.push_back(&rp->arp_);
+        }
+      }
+      break;
+
+    case FourCC::InstrumentCommandVolume:
+      {
+        float targetVolume = float(value & 0xFF);
+        float speed = float(value >> 8);
+        float startVolume = fp2fl(rp->volume_);
+        float baseVolume = fp2fl(rp->baseVolume_);
+
+        int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
+        speed = (speed == 0) ? 0 : fabs(targetVolume - startVolume) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
+        rp->volumeRamp_.SetData(targetVolume - baseVolume, speed, startVolume - baseVolume);
+        if (!rp->volumeRamp_.Enabled()) {
+          rp->volumeRamp_.Enable();
+          rp->activeUpdaters_.push_back(&rp->volumeRamp_);
+        }
+      }
+      break;
+
+    case FourCC::InstrumentCommandPan:
+      {
+        float targetPan = float(value & 0xFF);
+        if (targetPan == 0xFF) {
+          targetPan = 0xFE;
+        }
+        float basePan = fp2fl(rp->basePan_);
+        float speed = float(value >> 8);
+        float startPan = fp2fl(rp->pan_);
+        int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
+        speed = (speed == 0) ? 0 : fabs(targetPan - startPan) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
+        rp->panner_.SetData(targetPan - basePan, speed, startPan - basePan);
+        if (!rp->panner_.Enabled()) {
+          rp->panner_.Enable();
+          rp->activeUpdaters_.push_back(&rp->panner_);
+        }
+      }
+      break;
+
+    case FourCC::InstrumentCommandFilterCut:
+      {
+        float target = float(value & 0xFF) / 255.0f;
+        float speed = float(value >> 8);
+        float start = fp2fl(rp->cutoff_);
+        float baseCut = fp2fl(rp->baseFCut_);
+        int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
+        speed = (speed == 0) ? 0 : fabs(target - start) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
+        rp->cutRamp_.SetData(target - baseCut, speed, start - baseCut);
+        if (!rp->cutRamp_.Enabled()) {
+          rp->cutRamp_.Enable();
+          rp->activeUpdaters_.push_back(&rp->cutRamp_);
+        }
+      }
+      break;
+
+    case FourCC::InstrumentCommandFilterResonance:
+      {
+        float target = float(value & 0xFF) / 255.0f;
+        float speed = float(value >> 8);
+        float start = fp2fl(rp->reso_);
+        float baseRes = fp2fl(rp->baseFRes_);
+        int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
+        speed = (speed == 0) ? 0 : fabs(target - start) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
+        rp->resRamp_.SetData(target - baseRes, speed, start - baseRes);
+        if (!rp->resRamp_.Enabled()) {
+          rp->resRamp_.Enable();
+          rp->activeUpdaters_.push_back(&rp->resRamp_);
+        }
+      }
+      break;
+    case FourCC::InstrumentCommandPitchSlide:
+      {
+        int pitch = (char)(value & 0xFF); // number of semi tones
+        float speed = float(value >> 8);  // get speed parameter
+        if (pitch > 127)
+          pitch = pitch - 256;
+
+        // Target speed for the ramp
+
+        float targetSpeed = float(pow(2.0, (pitch) / 12.0));
+        float srcSpeed = fp2fl(rp->speed_) / fp2fl(rp->baseSpeed_);
+
+        // speed of ramp
+
+        speed = (speed == 0) ? 0.0f : fp2fl(rp->speed_) * 255.0f / speed / KRATE_SAMPLE_COUNT / 32.0f;
+
+        // Fill ramp data & enable
+
+        rp->speedRamp_.SetData(targetSpeed, speed, srcSpeed);
+        if (!rp->speedRamp_.Enabled()) {
+          rp->speedRamp_.Enable();
+          rp->activeUpdaters_.push_back(&rp->speedRamp_);
+        }
       };
-    }
-    break;
+      break;
 
-  case FourCC::InstrumentCommandPlayOfset: {
-    if (!source_)
-      return;
-    int wavSize = source_->GetSize(rp->midiNote_);
-    float chkSize = wavSize / 256.0f;
-    int absShft = value >> 8;
-    if (absShft != 0) {
-      rp->position_ = chkSize * absShft;
-    };
-    int relSfht = value & 0xFF;
-    if (relSfht > 127)
-      relSfht = relSfht - 256;
-    rp->position_ += relSfht * chkSize;
-    while (rp->position_ < 0) {
-      rp->position_ = wavSize + rp->position_;
-    };
-    while (rp->position_ >= wavSize) {
-      rp->position_ -= wavSize;
-    };
-    rp->couldClick_ = SHOULD_KILL_CLICKS;
-  } break;
+    case FourCC::InstrumentCommandLegato:
+      {
+        int pitch = (char)(value & 0xFF); // number of semi tones
+        float speed = float(value >> 8);  // get speed parameter
 
-  case FourCC::InstrumentCommandArpeggiator: {
-    rp->arp_.SetData(value);
-    if (!rp->arp_.Enabled()) {
-      rp->arp_.Enable();
-      rp->activeUpdaters_.push_back(&rp->arp_);
-    }
-  } break;
+        if (pitch > 127)
+          pitch = pitch - 256;
 
-  case FourCC::InstrumentCommandVolume: {
-    float targetVolume = float(value & 0xFF);
-    float speed = float(value >> 8);
-    float startVolume = fp2fl(rp->volume_);
-    float baseVolume = fp2fl(rp->baseVolume_);
+        // Target speed for the ramp, taken from channel' last note
+        // if no pitch is given
 
-    int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
-    speed = (speed == 0) ? 0 : fabs(targetVolume - startVolume) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
-    rp->volumeRamp_.SetData(targetVolume - baseVolume, speed, startVolume - baseVolume);
-    if (!rp->volumeRamp_.Enabled()) {
-      rp->volumeRamp_.Enable();
-      rp->activeUpdaters_.push_back(&rp->volumeRamp_);
-    }
-  } break;
-
-  case FourCC::InstrumentCommandPan: {
-    float targetPan = float(value & 0xFF);
-    if (targetPan == 0xFF) {
-      targetPan = 0xFE;
-    }
-    float basePan = fp2fl(rp->basePan_);
-    float speed = float(value >> 8);
-    float startPan = fp2fl(rp->pan_);
-    int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
-    speed = (speed == 0) ? 0 : fabs(targetPan - startPan) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
-    rp->panner_.SetData(targetPan - basePan, speed, startPan - basePan);
-    if (!rp->panner_.Enabled()) {
-      rp->panner_.Enable();
-      rp->activeUpdaters_.push_back(&rp->panner_);
-    }
-  } break;
-
-  case FourCC::InstrumentCommandFilterCut: {
-    float target = float(value & 0xFF) / 255.0f;
-    float speed = float(value >> 8);
-    float start = fp2fl(rp->cutoff_);
-    float baseCut = fp2fl(rp->baseFCut_);
-    int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
-    speed = (speed == 0) ? 0 : fabs(target - start) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
-    rp->cutRamp_.SetData(target - baseCut, speed, start - baseCut);
-    if (!rp->cutRamp_.Enabled()) {
-      rp->cutRamp_.Enable();
-      rp->activeUpdaters_.push_back(&rp->cutRamp_);
-    }
-  } break;
-
-  case FourCC::InstrumentCommandFilterResonance: {
-    float target = float(value & 0xFF) / 255.0f;
-    float speed = float(value >> 8);
-    float start = fp2fl(rp->reso_);
-    float baseRes = fp2fl(rp->baseFRes_);
-    int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
-    speed = (speed == 0) ? 0 : fabs(target - start) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
-    rp->resRamp_.SetData(target - baseRes, speed, start - baseRes);
-    if (!rp->resRamp_.Enabled()) {
-      rp->resRamp_.Enable();
-      rp->activeUpdaters_.push_back(&rp->resRamp_);
-    }
-  } break;
-  case FourCC::InstrumentCommandPitchSlide: {
-    int pitch = (char)(value & 0xFF); // number of semi tones
-    float speed = float(value >> 8);  // get speed parameter
-    if (pitch > 127)
-      pitch = pitch - 256;
-
-    // Target speed for the ramp
-
-    float targetSpeed = float(pow(2.0, (pitch) / 12.0));
-    float srcSpeed = fp2fl(rp->speed_) / fp2fl(rp->baseSpeed_);
-
-    // speed of ramp
-
-    speed = (speed == 0) ? 0.0f : fp2fl(rp->speed_) * 255.0f / speed / KRATE_SAMPLE_COUNT / 32.0f;
-
-    // Fill ramp data & enable
-
-    rp->speedRamp_.SetData(targetSpeed, speed, srcSpeed);
-    if (!rp->speedRamp_.Enabled()) {
-      rp->speedRamp_.Enable();
-      rp->activeUpdaters_.push_back(&rp->speedRamp_);
-    }
-  }; break;
-
-  case FourCC::InstrumentCommandLegato: {
-    int pitch = (char)(value & 0xFF); // number of semi tones
-    float speed = float(value >> 8);  // get speed parameter
-
-    if (pitch > 127)
-      pitch = pitch - 256;
-
-    // Target speed for the ramp, taken from channel' last note
-    // if no pitch is given
-
-    float targetSpeed, initSpeed;
-    if (pitch == 0) {
-      pitch = lastMidiNote_[channel] - rp->midiNote_;
-      targetSpeed = 1.0;
-      initSpeed = float(pow(2.0f, pitch / 12.0f));
-    } else {
-      initSpeed = fp2fl(rp->speed_) / fp2fl(rp->baseSpeed_);
-      targetSpeed = float(pow(2.0f, pitch / 12.0f));
-    }
-
-    // speed of ramp
-
-    speed = (speed == 0) ? 0.0f : float(1 + 50.0 / KRATE_SAMPLE_COUNT / speed);
-
-    // Fill ramp data & enable
-
-    rp->legato_.SetData(targetSpeed, speed, initSpeed);
-    if (!rp->legato_.Enabled()) {
-      rp->legato_.Enable();
-      rp->activeUpdaters_.push_back(&rp->legato_);
-    }
-  }; break;
-
-  case FourCC::InstrumentCommandPitchFineTune: {
-
-    float semi = (value & 0xFF) / float(0x80); // number of semi tones
-    if (semi > 1)
-      semi = semi - 2;
-
-    float speed = float(value >> 8); // get speed parameter
-
-    float initSpeed = rp->pfin_.Enabled() ? rp->pfin_.GetCurrent() : 1;
-    float targetSpeed = float(pow(2.0f, semi / 12.0f));
-
-    // speed of ramp
-
-    speed = (speed == 0) ? 0.0f : float(1 + 50.0 / KRATE_SAMPLE_COUNT / speed);
-
-    // Fill ramp data & enable
-
-    rp->pfin_.SetData(targetSpeed, speed, initSpeed);
-
-    if (!rp->pfin_.Enabled()) {
-      rp->pfin_.Enable();
-      rp->activeUpdaters_.push_back(&rp->pfin_);
-    }
-  }; break;
-
-  case FourCC::InstrumentCommandRetrigger: {
-    unsigned char loop = (value & 0xFF); // number of ticks before repeat
-    unsigned char offset = (value >> 8); // number of ticks to offset at each repeat
-    if (loop != 0) {
-      rp->retrig_ = true;
-      rp->retrigLoop_ = loop;
-      rp->retrigCount_ = loop;
-      rp->retrigOffset_ = offset;
-      rp->couldClick_ = SHOULD_KILL_CLICKS;
-    } else {
-      rp->retrig_ = false;
-    }
-  } break;
-  case FourCC::InstrumentCommandLowPassFilter: {
-    float cut = (value >> 8) / 255.0f;   // cutoff frequency (FF=all pass, 0=none pass)
-    float res = (value & 0xFF) / 255.0f; // resonance, aka Q (0=none) so default is FF00
-    rp->cutoff_ = rp->baseFCut_ = fl2fp(cut);
-    rp->reso_ = rp->baseFRes_ = fl2fp(res);
-    if (rp->cutRamp_.Enabled()) {
-      rp->cutRamp_.Disable();
-      auto it = rp->activeUpdaters_.begin();
-      while (it != rp->activeUpdaters_.end()) {
-        if (*it == &rp->cutRamp_) {
-          (*it)->Disable();
-          it = rp->activeUpdaters_.erase(it);
-          break;
+        float targetSpeed, initSpeed;
+        if (pitch == 0) {
+          pitch = lastMidiNote_[channel] - rp->midiNote_;
+          targetSpeed = 1.0;
+          initSpeed = float(pow(2.0f, pitch / 12.0f));
+        } else {
+          initSpeed = fp2fl(rp->speed_) / fp2fl(rp->baseSpeed_);
+          targetSpeed = float(pow(2.0f, pitch / 12.0f));
         }
-        it++;
-      }
-    }
-    if (rp->resRamp_.Enabled()) {
-      rp->resRamp_.Disable();
-      auto it = rp->activeUpdaters_.begin();
-      while (it != rp->activeUpdaters_.end()) {
-        if (*it == &rp->resRamp_) {
-          (*it)->Disable();
-          it = rp->activeUpdaters_.erase(it);
-          break;
+
+        // speed of ramp
+
+        speed = (speed == 0) ? 0.0f : float(1 + 50.0 / KRATE_SAMPLE_COUNT / speed);
+
+        // Fill ramp data & enable
+
+        rp->legato_.SetData(targetSpeed, speed, initSpeed);
+        if (!rp->legato_.Enabled()) {
+          rp->legato_.Enable();
+          rp->activeUpdaters_.push_back(&rp->legato_);
         }
-        it++;
+      };
+      break;
+
+    case FourCC::InstrumentCommandPitchFineTune:
+      {
+
+        float semi = (value & 0xFF) / float(0x80); // number of semi tones
+        if (semi > 1)
+          semi = semi - 2;
+
+        float speed = float(value >> 8); // get speed parameter
+
+        float initSpeed = rp->pfin_.Enabled() ? rp->pfin_.GetCurrent() : 1;
+        float targetSpeed = float(pow(2.0f, semi / 12.0f));
+
+        // speed of ramp
+
+        speed = (speed == 0) ? 0.0f : float(1 + 50.0 / KRATE_SAMPLE_COUNT / speed);
+
+        // Fill ramp data & enable
+
+        rp->pfin_.SetData(targetSpeed, speed, initSpeed);
+
+        if (!rp->pfin_.Enabled()) {
+          rp->pfin_.Enable();
+          rp->activeUpdaters_.push_back(&rp->pfin_);
+        }
+      };
+      break;
+
+    case FourCC::InstrumentCommandRetrigger:
+      {
+        unsigned char loop = (value & 0xFF); // number of ticks before repeat
+        unsigned char offset = (value >> 8); // number of ticks to offset at each repeat
+        if (loop != 0) {
+          rp->retrig_ = true;
+          rp->retrigLoop_ = loop;
+          rp->retrigCount_ = loop;
+          rp->retrigOffset_ = offset;
+          rp->couldClick_ = SHOULD_KILL_CLICKS;
+        } else {
+          rp->retrig_ = false;
+        }
       }
-    }
+      break;
+    case FourCC::InstrumentCommandLowPassFilter:
+      {
+        float cut = (value >> 8) / 255.0f;   // cutoff frequency (FF=all pass, 0=none pass)
+        float res = (value & 0xFF) / 255.0f; // resonance, aka Q (0=none) so default is FF00
+        rp->cutoff_ = rp->baseFCut_ = fl2fp(cut);
+        rp->reso_ = rp->baseFRes_ = fl2fp(res);
+        if (rp->cutRamp_.Enabled()) {
+          rp->cutRamp_.Disable();
+          auto it = rp->activeUpdaters_.begin();
+          while (it != rp->activeUpdaters_.end()) {
+            if (*it == &rp->cutRamp_) {
+              (*it)->Disable();
+              it = rp->activeUpdaters_.erase(it);
+              break;
+            }
+            it++;
+          }
+        }
+        if (rp->resRamp_.Enabled()) {
+          rp->resRamp_.Disable();
+          auto it = rp->activeUpdaters_.begin();
+          while (it != rp->activeUpdaters_.end()) {
+            if (*it == &rp->resRamp_) {
+              (*it)->Disable();
+              it = rp->activeUpdaters_.erase(it);
+              break;
+            }
+            it++;
+          }
+        }
+      }
+      break;
+    case FourCC::InstrumentCommandCrush:
+      {
+        unsigned char drive = (value >> 8);
+        unsigned char crush = (value & 0x0F);
+        if (drive > 0)
+          rp->drive_ = drive;
+        if (crush > 0)
+          rp->crush_ = crush;
+      }
 
-  } break;
-  case FourCC::InstrumentCommandCrush: {
-    unsigned char drive = (value >> 8);
-    unsigned char crush = (value & 0x0F);
-    if (drive > 0)
-      rp->drive_ = drive;
-    if (crush > 0)
-      rp->crush_ = crush;
-  }
+    case FourCC::InstrumentCommandVibrato:
+      {
+        uint8_t rate = value >> 8;
+        uint8_t depth = value & 0xFF;
+        // setup the vibrato
+        rp->vibrato_.SetData(rate, depth);
+        if (!rp->vibrato_.Enabled()) {
+          // enable and add to active updaters
+          rp->vibrato_.Enable();
+          rp->activeUpdaters_.push_back(&rp->vibrato_);
+        }
+      }
+      break;
 
-  case FourCC::InstrumentCommandVibrato: {
-    uint8_t rate = value >> 8;
-    uint8_t depth = value & 0xFF;
-    // setup the vibrato
-    rp->vibrato_.SetData(rate, depth);
-    if (!rp->vibrato_.Enabled()) {
-      // enable and add to active updaters
-      rp->vibrato_.Enable();
-      rp->activeUpdaters_.push_back(&rp->vibrato_);
-    }
-  } break;
-
-  default:
-    break;
+    default:
+      break;
   };
 }
 

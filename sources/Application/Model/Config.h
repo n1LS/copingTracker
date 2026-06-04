@@ -38,20 +38,25 @@ public:
   bool ImportTheme(const char *themeName);
 
 private:
-  etl::list<Variable *, 26> variables_;
+  etl::list<Variable *, 28> variables_;
   // Config variables (kept as members to avoid heap allocation)
-  WatchedVariable background_;
-  WatchedVariable foreground_;
-  WatchedVariable hiColor1_;
-  WatchedVariable hiColor2_;
-  WatchedVariable consoleColor_;
-  WatchedVariable cursorColor_;
-  WatchedVariable infoColor_;
-  WatchedVariable warnColor_;
-  WatchedVariable errorColor_;
-  WatchedVariable accentColor_;
-  WatchedVariable accentAltColor_;
-  WatchedVariable emphasisColor_;
+  WatchedVariable color0_;
+  WatchedVariable color1_;
+  WatchedVariable color2_;
+  WatchedVariable color3_;
+  WatchedVariable color4_;
+  WatchedVariable color5_;
+  WatchedVariable color6_;
+  WatchedVariable color7_;
+  WatchedVariable color8_;
+  WatchedVariable color9_;
+  WatchedVariable color10_;
+  WatchedVariable color11_;
+  WatchedVariable color12_;
+  WatchedVariable color13_;
+  WatchedVariable color14_;
+  WatchedVariable color15_;
+
   WatchedVariable lineOut_;
   WatchedVariable midiDevice_;
   WatchedVariable midiSync_;

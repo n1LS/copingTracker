@@ -30,18 +30,19 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
   strncpy(buffer, name_, MAX_FIELD_WIDTH);
   buffer[MAX_FIELD_WIDTH] = '\0';
 
-  ((AppWindow &)w).SetBackgroundColor(focus_ ? cHighlight1 : cBackground);
-  ((AppWindow &)w).SetColor(focus_ ? cBackground : cNormal);
+  ((AppWindow &)w).SetBackgroundColor(Theme::Button::bg(focus_));
+  ((AppWindow &)w).SetColor(Theme::Button::fg(focus_));
   w.DrawString(buffer, position);
 
   // add button ends
+  // draw highlight button ends
   if (focus_) {
-    // draw highlight button ends
-    GUIPoint pos(x_ - 1, y_);
+    ((AppWindow &)w).SetColor(Theme::View::bg);
     ((AppWindow &)w).SwapColors();
-    w.DrawChar(GLYPH(char_button_border_left_s), pos);
-    pos.x_ += strlen(buffer) + 1;
-    w.DrawChar(GLYPH(char_button_border_right_s), pos);
+    position.x_ -= 1;
+    w.DrawChar(GLYPH(char_button_border_left_s), position);
+    position.x_ += strlen(buffer) + 1;
+    w.DrawChar(GLYPH(char_button_border_right_s), position);
   }
 }
 

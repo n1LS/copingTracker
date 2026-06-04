@@ -21,16 +21,16 @@ extern const char *noteNames[12];
 inline void hex2char(const unsigned char c, char *s) {
   char *dest__ = s;
   *dest__++ = h2c__[(c & 0xF0) >> 4];
-  *dest__++ = h2c__[c & 0x0F];
+  *dest__++ = h2c__[(c & 0x0F) >> 0];
   *dest__ = 0;
 }
 
 inline void hexshort2char(const ushort c, char *s) {
   char *dest__ = s;
   *dest__++ = h2c__[(c & 0xF000) >> 12];
-  *dest__++ = h2c__[(c & 0xF00) >> 8];
-  *dest__++ = h2c__[(c & 0xF0) >> 4];
-  *dest__++ = h2c__[c & 0x0F];
+  *dest__++ = h2c__[(c & 0x0F00) >> 8];
+  *dest__++ = h2c__[(c & 0x00F0) >> 4];
+  *dest__++ = h2c__[(c & 0x000F) >> 0];
   *dest__ = 0;
 }
 

@@ -47,7 +47,7 @@ bool Application::Init(GUICreateWindowParams &params) {
     if (v) {
       unsigned char brightness = (unsigned char)v->GetInt();
       System::GetInstance()->SetDisplayBrightness(brightness);
-      Trace::Log("PICOTRACKERSYSTEM", "Set display brightness to %d", brightness);
+      Trace::Log("COPINGTRACKERSYSTEM", "Set display brightness to %d", brightness);
     }
   }
 
