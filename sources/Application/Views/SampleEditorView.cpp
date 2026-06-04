@@ -819,8 +819,7 @@ void SampleEditorView::AnimationUpdate() {
     modalClearCount_--;
   }
 
-  drawBattery();
-  drawPowerButtonUI();
+  ScreenView::AnimationUpdate();
 }
 
 void SampleEditorView::Update(Observable &o, I_ObservableData *d) {

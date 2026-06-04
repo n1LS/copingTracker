@@ -271,8 +271,7 @@ void SampleSlicesView::AnimationUpdate() {
     }
   }
 
-  drawBattery();
-  drawPowerButtonUI();
+  ScreenView::AnimationUpdate();
   bool hasModal = HasModalView();
   if (modalWasOpen_ && !hasModal) {
     graphField_.RequestFullRedraw();

@@ -545,6 +545,6 @@ void ThemeView::AnimationUpdate() {
     DrawView();
     forceRedraw_ = false;
   }
-  drawBattery();
-  drawPowerButtonUI();
+
+  ScreenView::AnimationUpdate();
 }
