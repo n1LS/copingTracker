@@ -33,7 +33,7 @@ struct FourCC {
     InstrumentCommandInstrumentRetrigger = 29,     // IRT
     InstrumentCommandKill = 30,                    // KIL
     InstrumentCommandLegato = 31,                  // LEG
-    InstrumentCommandLoopOffset = 36,               // LOF
+    InstrumentCommandLoopOffset = 36,              // LOF
     InstrumentCommandMidiCC = 38,                  // MCC
     InstrumentCommandMidiPC = 39,                  // MPG
     InstrumentCommandPan = 42,                     // PAN

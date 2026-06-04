@@ -17,7 +17,9 @@ struct HelpLegend {
   const char line2[33]; // 28 + '\0'
 };
 
-#define LEGEND(N, A, B) static constexpr HelpLegend legend_##N = {A, B}; return legend_##N;
+#define LEGEND(N, A, B)                                                                                                \
+  static constexpr HelpLegend legend_##N = {A, B};                                                                     \
+  return legend_##N;
 
 // CAUTION: all strings must fit in the line length limits!
 // First line is max 32 - battery gauge (4) = 28
@@ -81,6 +83,6 @@ HelpLegend getHelpLegend(FourCC command) {
     case FourCC::InstrumentCommandVibrato:
       LEGEND(27, "VIBrato:aabb                ", "rate aa, depth bb               ");
   }
-    
+
   LEGEND(28, "Unknown Command: This should", "not happen. Report bug #1334. ");
 }

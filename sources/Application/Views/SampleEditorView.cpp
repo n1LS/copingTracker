@@ -66,7 +66,7 @@ SampleEditorView::SampleEditorView(GUIWindow &w, ViewData *data)
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight) {
   assignWorkingFilename();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(cccccHighlight1, cccccHighlight2);
+  graphField_.SetBorderColors(Theme::Waveform::border(false), Theme::Waveform::border(true));
 }
 
 SampleEditorView::~SampleEditorView() {
@@ -92,7 +92,7 @@ void SampleEditorView::Reset() {
   hasWorkingCopy_ = false;
   graphField_.Reset();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(cccccHighlight1, cccccHighlight2);
+  graphField_.SetBorderColors(Theme::Waveform::border(false), Theme::Waveform::border(true));
   selectedMarker_ = MarkerStart;
 
   fieldList_.clear();
@@ -664,13 +664,13 @@ void SampleEditorView::updateGraphMarkers() {
   bool hasSample = tempSampleSize_ > 0;
 
   if (hasSample) {
-    Color startColor = (selectedMarker_ == MarkerStart) ? cccccHighlight2 : cccccAccent;
-    Color endColor = (selectedMarker_ == MarkerEnd) ? cccccHighlight2 : cccccAccent;
+    Color startColor = Theme::Waveform::marker(selectedMarker_ == MarkerStart);
+    Color endColor = Theme::Waveform::marker(selectedMarker_ == MarkerEnd);
     graphField_.SetMarker(0, start_, startColor, true);
     graphField_.SetMarker(1, end_, endColor, true);
   } else {
-    graphField_.SetMarker(0, 0, cccccAccent, false);
-    graphField_.SetMarker(1, 0, cccccAccent, false);
+    graphField_.SetMarker(0, 0, Theme::Waveform::marker(false), false);
+    graphField_.SetMarker(1, 0, Theme::Waveform::marker(false), false);
   }
 
   uint32_t playheadSample = 0;
@@ -682,7 +682,7 @@ void SampleEditorView::updateGraphMarkers() {
     }
     playheadVisible = true;
   }
-  graphField_.SetMarker(2, playheadSample, cccccNormal, playheadVisible);
+  graphField_.SetMarker(2, playheadSample, Theme::Waveform::normal, playheadVisible);
 }
 
 void SampleEditorView::rebuildWaveform() {
@@ -1447,8 +1447,7 @@ void SampleEditorView::loadSample(const etl::string<MAX_INSTRUMENT_FILENAME_LENG
 
 void SampleEditorView::clearWaveformRegion() {
   // Clear the entire waveform area
-  GUIRect rrect;
-  rrect = GUIRect(GraphXOffset, GraphYOffset, GraphXOffset + GraphField::BitmapWidth,
-                  GraphYOffset + GraphField::BitmapHeight);
-  DrawRect(rrect, cccccBackground);
+  GUIRect rect = GUIRect(GraphXOffset, GraphYOffset, GraphXOffset + GraphField::BitmapWidth,
+                         GraphYOffset + GraphField::BitmapHeight);
+  DrawRect(rect, Theme::View::bg);
 }

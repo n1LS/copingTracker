@@ -447,19 +447,21 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentStart);
-  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_verticalRight_s " start     :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_verticalRight_s " start     :%7.7X", 0,
+                               instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentLoopStart);
-  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_verticalRight_s " loop start:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_verticalRight_s " loop start:%7.7X", 0,
+                               instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentEnd);
-  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_bottomLeft_s " loop end  :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_bottomLeft_s " loop end  :%7.7X", 0,
+                               instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
-
 }
 
 void InstrumentView::fillSIDParameters() {
@@ -603,12 +605,12 @@ void InstrumentView::fillMidiParameters() {
   v = instrument->FindVariable(FourCC::MidiInstrumentTable);
   intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Table       :%2.2X", 0, 0x7F, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
-  
+
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentTableAutomation);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Automation  :%s", 0, 1, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-}  
+}
 
 void InstrumentView::fillOpalParameters() {
   int i = viewData_->currentInstrumentID_;
@@ -927,7 +929,7 @@ void InstrumentView::DrawView() {
 
   // Draw fields
   FieldView::Redraw();
-  
+
   // draw the map
   drawMap();
 

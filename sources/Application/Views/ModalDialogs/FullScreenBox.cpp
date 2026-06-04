@@ -64,7 +64,7 @@ void FullScreenBox::DrawView() {
 
   int x1 = ((SCREEN_WIDTH - line1_width) / 2) - 2;
   int y1 = (SCREEN_HEIGHT / 2) - 4;
-  
+
   DrawString(x1, y1, line1_.c_str());
 
   if (line2_.size() > 0) {
@@ -73,5 +73,4 @@ void FullScreenBox::DrawView() {
     int y2 = y1 + 2;
     DrawString(x2, y2, line2_.c_str());
   }
-
 }

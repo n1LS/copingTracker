@@ -190,7 +190,7 @@ void GrooveView::DrawView() {
 
     SetBackgroundColor(Theme::View::bg);
     SetColor(Theme::View::fg);
-    
+
     if (highlighted) {
       SwapColors();
     }

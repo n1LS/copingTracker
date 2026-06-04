@@ -94,29 +94,13 @@ enum colorIndex : uint8_t {
   WHITE
 };
 
-// todo prune
-enum OldColors : Color {
-  cccccBackground = 0,
-  cccccNormal = WHITE,
-  cccccHighlight1 = 1,
-  cccccHighlight2 = 2,
-  cccccConsole = 3,
-  cccccCursor = 4,
-  cccccInfo = 5,
-  cccccWarn = 6,
-  cccccError = 7,
-  cccccAccent = 8,
-  cccccAccentAlt = 9,
-  cccccEmphasis = 10
-};
-
 #define SWITCHABLE(Y, A, B)                                                                                            \
   static constexpr Color Y(bool selected) {                                                                            \
     return selected ? A : B;                                                                                           \
   }
 #define FIXED(Y, A) static constexpr Color Y = A;
 struct Theme {
-  
+
   struct Notes {
     SWITCHABLE(bg, LIGHT_BLUE, BLUE)
     SWITCHABLE(fg, BLACK, BLACK)
@@ -132,6 +116,7 @@ struct Theme {
     FIXED(normal, LIGHT_GRAY)
     FIXED(baseline, DARK_GRAY)
     SWITCHABLE(marker, LIGHT_CYAN, CYAN)
+    SWITCHABLE(border, LIGHT_BLUE, BLUE)
   };
 
   struct Input {

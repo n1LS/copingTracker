@@ -115,7 +115,7 @@ void InstrumentImportView::DrawView() {
 
     if (i == currentIndex_) {
       SwapColors();
-    } 
+    }
 
     memset(buffer, '\0', sizeof(buffer));
     unsigned fileIndex = fileIndexList_[i];

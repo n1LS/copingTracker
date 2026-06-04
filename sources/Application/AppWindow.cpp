@@ -890,8 +890,8 @@ void AppWindow::Print(char *line) {
 }
 
 void AppWindow::PrintMultiLine(char *line) {
-  Clear();\
-  
+  Clear();
+
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);
 

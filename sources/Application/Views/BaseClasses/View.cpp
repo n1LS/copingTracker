@@ -465,7 +465,7 @@ void View::drawBattery() {
   if (batteryPercent <= 5) {
     batteryColor = Theme::View::error;
   } else if (batteryPercent < 20) {
-    batteryColor = Theme::View::war ;
+    batteryColor = Theme::View::war;
   } else if (batteryState_.charging) {
     batteryColor = Theme::View::fg;
   }

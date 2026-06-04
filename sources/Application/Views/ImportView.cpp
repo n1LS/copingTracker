@@ -345,7 +345,8 @@ void ImportView::DrawView() {
 
       displayName += tempBuffer;
       // Format the display name with appropriate prefix
-      if (inProjectSampleDir_ && viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
+      if (inProjectSampleDir_ &&
+          viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
         SetColor(Theme::View::info);
         DrawString(x, y, "*");
       } else if (isSingleCycle) {

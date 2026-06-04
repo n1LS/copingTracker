@@ -75,7 +75,7 @@ void RenderProgressModal::DrawView() {
   GUIPoint progressPos(width / 2 - 2, y); // Center the progress display
   drawRenderProgress(progressPos);
 
-  // Draw action button 
+  // Draw action button
   // todo: drawing with button ends
   SetColor(Theme::Button::fg(false));
   y += 2;

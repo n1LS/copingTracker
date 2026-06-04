@@ -134,7 +134,6 @@ void DeviceView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void DeviceView::DrawView() {
   Clear();
 
-  
   GUIPoint pos = GetTitlePosition();
 
   // Draw title

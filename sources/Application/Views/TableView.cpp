@@ -780,7 +780,7 @@ void TableView::DrawView() {
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
-  
+
   // Draw command 1
   SetColor(Theme::View::fg);
   pos = anchor;
@@ -952,7 +952,7 @@ void TableView::AnimationUpdate() {
       if (viewData_->playMode_ != PM_AUDITION) {
         SetBackgroundColor(Theme::View::bg);
         SetColor(Theme::Song::Playback::active);
-        
+
         if (tpb.GetTable() == &viewTable) {
           for (int i = 0; i < 3; i++) {
             int yPos = tpb.GetPlaybackPosition(i);

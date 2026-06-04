@@ -67,7 +67,7 @@ void ThemeImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
 void ThemeImportView::DrawView() {
   Clear();
-  
+
   GUIPoint pos = GetTitlePosition();
   auto fs = FileSystem::GetInstance();
 
@@ -103,7 +103,7 @@ void ThemeImportView::DrawView() {
 
     if (i == currentIndex_) {
       SwapColors();
-    } 
+    }
 
     y++;
   }

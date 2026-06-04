@@ -14,7 +14,8 @@
 #include "ViewUtils.h"
 #include <string.h>
 
-UIStaticField::UIStaticField(const GUIPoint &position, const char *string) : UIField(position), color_(Theme::View::fg) {
+UIStaticField::UIStaticField(const GUIPoint &position, const char *string)
+    : UIField(position), color_(Theme::View::fg) {
   string_ = string;
 }
 

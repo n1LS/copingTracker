@@ -153,7 +153,7 @@ void RecordView::DrawView() {
 
   // Draw time display
   if (uiRecordingActive_ || uiSavingActive_) {
-    SetColor(cccccError);
+    SetColor(Theme::View::error);
   }
   pos.x_ += 7;
   if (uiSavingActive_) {

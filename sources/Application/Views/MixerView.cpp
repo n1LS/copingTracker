@@ -381,7 +381,7 @@ void MixerView::DrawView() {
   // Align with master volume control
   labelPos.x_ += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
   labelPos.y_ = SCREEN_HEIGHT - 3; // Position below the volume control
-  
+
   bool active = (viewData_->songX_ == SONG_CHANNEL_COUNT);
 
   SetBackgroundColor(Theme::Notes::bg(active));
