@@ -1,0 +1,106 @@
+name: Mirror picoTracker Issues
+
+on:
+  schedule:
+    - cron: "0 */8 * * *"
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Mirror upstream issues
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const upstreamOwner = "xiphonics";
+            const upstreamRepo = "picoTracker";
+
+            const markerPrefix = "Upstream Issue:";
+
+            // fetch open upstream issues
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: upstreamOwner,
+                repo: upstreamRepo,
+                state: "open",
+                per_page: 100,
+              }
+            );
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+
+              const marker = `${markerPrefix} #${issue.number}`;
+
+              // check if already mirrored
+              const search = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${context.repo.owner}/${context.repo.repo} "${marker}"`
+              });
+
+              if (search.data.total_count > 0) {
+                continue;
+              }
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `[Upstream #${issue.number}] ${issue.title}`,
+                body: [
+                  `Upstream Issue: #${issue.number}`,
+                  `Upstream URL: ${issue.html_url}`,
+                  ``,
+                  `Author: ${issue.user?.login ?? "unknown"}`,
+                  ``,
+                  `---`,
+                  issue.body || ""
+                ].join("\n"),
+                labels: ["upstream", "picotracker"]
+              });
+            }
+
+            // now check closed upstream issues to comment on mirrored ones
+            const closedIssues = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: upstreamOwner,
+                repo: upstreamRepo,
+                state: "closed",
+                per_page: 100,
+              }
+            );
+
+            for (const issue of closedIssues) {
+              const marker = `${markerPrefix} #${issue.number}`;
+
+              const search = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${context.repo.owner}/${context.repo.repo} "${marker}"`
+              });
+
+              if (search.data.total_count === 0) continue;
+
+              const mirrored = search.data.items[0];
+
+              // check if we already commented about closure
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: mirrored.number
+              });
+
+              const alreadyNotified = comments.data.some(c =>
+                c.body.includes("Upstream issue has been closed")
+              );
+
+              if (alreadyNotified) continue;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: mirrored.number,
+                body: `Upstream issue has been closed: ${issue.html_url}`
+              });
+            }
