@@ -129,8 +129,9 @@ struct Theme {
   };
 
   struct Waveform {
+    FIXED(normal, LIGHT_GRAY)
     FIXED(baseline, DARK_GRAY)
-    FIXED(marker, LIGHT_GRAY)
+    SWITCHABLE(marker, LIGHT_CYAN, CYAN)
   };
 
   struct Input {

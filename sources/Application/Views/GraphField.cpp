@@ -444,10 +444,10 @@ void GraphField::drawMarkersAt(View &view, int32_t x) {
 void GraphField::resetMarkerCache() {
   for (size_t i = 0; i < MaxMarkers; ++i) {
     markerPixelCache_[i] = -1;
-    markerColorCache_[i] = Theme::Waveform::marker;
+    markerColorCache_[i] = Theme::Waveform::marker(false);
     markerVisibleCache_[i] = false;
     markers_[i].sample = 0;
-    markers_[i].color = Theme::Waveform::marker;
+    markers_[i].color = Theme::Waveform::marker(false);
     markers_[i].visible = false;
   }
 }

@@ -433,28 +433,28 @@ void SampleSlicesView::drawWaveform() {
   if (instrument_ && sampleSize_ > 0) {
     for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
       if (!instrument_->IsSliceDefined(i)) {
-        graphField_.SetMarker(i, 0, cccccAccent, false);
+        graphField_.SetMarker(i, 0, Theme::Waveform::marker(false), false);
         continue;
       }
       uint32_t start = instrument_->GetSlicePoint(i);
       if (i == 0 && start == 0 && !instrument_->HasSlicesForPlayback()) {
-        graphField_.SetMarker(i, 0, cccccAccent, false);
+        graphField_.SetMarker(i, 0, Theme::Waveform::marker(true), false);
         continue;
       }
-      Color color = (static_cast<int32_t>(i) == sliceIndexVar_.GetInt()) ? cccccHighlight2 : cccccAccent;
+      Color color = Theme::Waveform::marker((int)i == sliceIndexVar_.GetInt());
       graphField_.SetMarker(i, start, color, true);
     }
   } else {
     for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
-      graphField_.SetMarker(i, 0, cccccAccent, false);
+      graphField_.SetMarker(i, 0, Theme::Waveform::marker(false), false);
     }
   }
 
   size_t playheadIndex = SampleInstrument::MaxSlices;
   if (previewCursorVisible_) {
-    graphField_.SetMarker(playheadIndex, previewPlayheadSample_, cccccNormal, true);
+    graphField_.SetMarker(playheadIndex, previewPlayheadSample_, Theme::Waveform::normal, true);
   } else {
-    graphField_.SetMarker(playheadIndex, 0, cccccNormal, false);
+    graphField_.SetMarker(playheadIndex, 0, Theme::Waveform::normal, false);
   }
 
   graphField_.DrawGraph(*this);
@@ -463,7 +463,7 @@ void SampleSlicesView::drawWaveform() {
 void SampleSlicesView::clearWaveformRegion() {
   GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, graphFieldPos_.x_ + GraphField::BitmapWidth,
                graphFieldPos_.y_ + GraphField::BitmapHeight);
-  DrawRect(rect, cccccBackground);
+  DrawRect(rect, Theme::View::bg);
 }
 
 SampleInstrument *SampleSlicesView::currentInstrument() {
