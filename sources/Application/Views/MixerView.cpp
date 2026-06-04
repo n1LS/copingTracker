@@ -332,21 +332,16 @@ void MixerView::initChannelVolumeFields() {
 void MixerView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-  GUIPoint anchor = GetAnchor();
-
   // Draw title
+  
   Player *player = Player::GetInstance();
   Project *project = player->GetProject(); // Use Player's GetProject method
-
-  const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song" : "Live");
-  SetColor(Theme::View::fg);
-  SetBackgroundColor(Theme::View::bg);
-  DrawString(pos.x_, pos.y_, buffer);
-
+  DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song" : "Live");
+  
   // Now draw busses
   // we start at the bottom of the VU meter and draw it growing upwards
-  pos = anchor;
+  GUIPoint anchor = GetAnchor();
+  GUIPoint pos = anchor;
   pos.y_ += VU_METER_HEIGHT - 1; // -1 to align with song grid
 
   // Draw all fields (channel volume fields)

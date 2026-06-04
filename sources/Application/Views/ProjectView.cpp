@@ -272,21 +272,14 @@ void ProjectView::Reset() {
 }
 
 void ProjectView::DrawView() {
-
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
-  SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::View::fg);
-
   // Draw title
-  const char *title = "Project ";
-  DrawString(pos.x_, pos.y_, title);
 
   Variable *v = viewData_->project_->FindVariable(FourCC::VarProjectName);
-  etl::string<MAX_PROJECT_NAME_LENGTH> projectName = v->GetString();
-  DrawString(pos.x_ + strlen(title), pos.y_, projectName.c_str());
+  DrawTitle("Project %s", v->GetString().c_str());
+
+  // Draw fields and map
 
   FieldView::Redraw();
   drawMap();

@@ -148,19 +148,14 @@ void GrooveView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void GrooveView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
   // Draw title
-  char title[SCREEN_WIDTH + 1];
 
-  SetColor(Theme::View::fg);
-
-  npf_snprintf(title, sizeof(title), "Groove: %2.2X", viewData_->currentGroove_);
-  DrawString(pos.x_, pos.y_, title);
+  DrawTitle("Groove: %2.2X", viewData_->currentGroove_);
 
   // Compute song grid location
 
   GUIPoint anchor = GetAnchor();
+  GUIPoint pos = anchor;
 
   // Display row numbers
   char buffer[6];

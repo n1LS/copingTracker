@@ -658,19 +658,13 @@ void ChainView::setTextProps(int col, int row) {
 void ChainView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
   // Draw title
 
-  char title[20];
-  SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::View::fg);
-  npf_snprintf(title, sizeof(title), "Chain %2.2X", viewData_->currentChain_);
-  DrawString(pos.x_, pos.y_, title);
+  DrawTitle("Chain %2.2X", viewData_->currentChain_);
 
   // Compute song grid location
 
-  pos = GetAnchor();
+  GUIPoint pos = GetAnchor();
 
   // Display row numbers
   char row[3];

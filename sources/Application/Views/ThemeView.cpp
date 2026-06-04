@@ -143,17 +143,11 @@ void ThemeView::Reset() {
 void ThemeView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
   // Draw title
-  SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::View::fg);
-  DrawString(pos.x_, pos.y_, "Theme Settings");
 
-  // bit of a hack needed for font change as going from "standard" to "bold"
-  // will leave behind partial characters due to different width of those string
-  // labels
-  DrawString(5, FONT_FIELD_LINE, "                            ");
+  DrawTitle("Theme Settings");
+
+  // Draw view contents
 
   drawColorComponentValues();
   FieldView::Redraw();
@@ -548,6 +542,6 @@ void ThemeView::AnimationUpdate() {
     DrawView();
     forceRedraw_ = false;
   }
-  drawBattery();
-  drawPowerButtonUI();
+
+  ScreenView::AnimationUpdate();
 }

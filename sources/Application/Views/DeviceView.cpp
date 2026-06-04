@@ -134,28 +134,21 @@ void DeviceView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void DeviceView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
   // Draw title
-  char projectString[SCREEN_WIDTH];
-  strcpy(projectString, "Device");
+  
+  DrawTitle("Device");
 
-  SetColor(Theme::View::fg);
-  SetBackgroundColor(Theme::View::bg);
-  DrawString(pos.x_, pos.y_, projectString);
+  // redraw fields
 
   FieldView::Redraw();
-
   drawMap();
 
-  pos.x_ = SCREEN_MAP_WIDTH + 1;
-  pos.y_ = SCREEN_HEIGHT - 1;
-
   // todo: also merge this with the other 2 instances in nullview and the other one
-  npf_snprintf(projectString, sizeof(projectString), "Build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
+  char buffer[33];
+  npf_snprintf(buffer, sizeof(buffer), "Build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);
-  DrawString(pos.x_, pos.y_, projectString);
+  DrawString(SCREEN_MAP_WIDTH + 1, SCREEN_HEIGHT - 1, buffer);
 }
 
 void DeviceView::Update(Observable &, I_ObservableData *data) {

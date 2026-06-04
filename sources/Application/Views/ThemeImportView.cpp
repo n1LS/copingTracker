@@ -68,18 +68,15 @@ void ThemeImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void ThemeImportView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
+  // Draw title
+
+  DrawTitle("Import Theme");
+  
+  // Draw theme files
   auto fs = FileSystem::GetInstance();
 
-  // Draw title
-  const char *title = "Import Theme";
-  SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::View::fg);
-  DrawString(pos.x_, pos.y_, title);
-
-  // Draw theme files
   int x = 1;
-  int y = pos.y_ + 2;
+  int y = 2;
 
   // need to use fullsize buffer as sdfat doesnt truncate if filename longer
   // than buffer but instead returns empty string in buffer :-(
@@ -108,7 +105,7 @@ void ThemeImportView::DrawView() {
     y++;
   }
 
-  drawScrollBar(SCREEN_WIDTH - 1, pos.y_ + 2, LIST_PAGE_SIZE, topIndex_, total);
+  drawScrollBar(SCREEN_WIDTH - 1, 2, LIST_PAGE_SIZE, topIndex_, total);
 }
 
 void ThemeImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {

@@ -12,9 +12,11 @@
 #include "Adapters/picoTracker/midi/picoTrackerMidiService.h"
 #include "Adapters/picoTracker/system/input.h"
 #include "Adapters/picoTracker/utils/utils.h"
+#include "Application/AppWindow.h"
 #include "Application/Application.h"
 #include "Application/Model/Config.h"
 #include "Services/Midi/MidiService.h"
+#include "System/FileSystem/FileSystem.h"
 #include "picoRemoteUI.h"
 #include "picoTrackerGUIWindowImp.h"
 #include "usb_utils.h"
@@ -104,6 +106,13 @@ int picoTrackerEventManager::MainLoop() {
       if (ptMidiService) {
         ptMidiService->poll();
       }
+    }
+
+    // Poll SD card presence once per second (1.024 seconds...)
+    if ((gTime_ & 0x3ff) == 0) {
+      FileSystem *fs = FileSystem::GetInstance();
+      bool present = fs && fs->chdir("/");
+      appwindow_set_sdcard_present(present);
     }
 
     ProcessInputEvent();

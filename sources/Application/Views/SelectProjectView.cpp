@@ -194,20 +194,16 @@ void SelectProjectView::Reset() {
 
 void SelectProjectView::DrawView() {
   Clear();
-
-  GUIPoint pos = GetTitlePosition();
-  SetColor(Theme::View::fg);
-
+  
+  // Draw title
+  
+  DrawTitle("Browse Projects");
+  
+  // Draw projects
   auto fs = FileSystem::GetInstance();
 
-  // Draw title
-  const char *title = "Browse Projects";
-  DrawString(pos.x_ + 1, pos.y_, title);
-  SetColor(Theme::View::fg);
-
-  // Draw projects
   int x = 1;
-  int y = pos.y_ + 2;
+  int y = 2;
 
   auto var = viewData_->project_->FindVariable(FourCC::VarProjectName);
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = var->GetString();
@@ -265,7 +261,7 @@ void SelectProjectView::DrawView() {
   }
 
   // scroll bar
-  drawScrollBar(SCREEN_WIDTH - 1, pos.y_ + 2, LIST_PAGE_SIZE, topIndex_, total);
+  drawScrollBar(SCREEN_WIDTH - 1, 2, LIST_PAGE_SIZE, topIndex_, total);
 }
 
 void SelectProjectView::OnPlayerUpdate(PlayerEventType, unsigned int currentTick) {};

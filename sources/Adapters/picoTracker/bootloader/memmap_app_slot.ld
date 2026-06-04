@@ -1,11 +1,11 @@
 /* App-slot linker map for persistent bootloader mode.
- * FLASH app slot: 0x10040000 .. 0x10800000 (0x007C0000 bytes)
+ * FLASH app slot: 0x10010000 .. 0x10800000 (0x007F0000 bytes)
  * Based on pico-sdk rp2040 memmap_default.ld with adjusted FLASH region.
  */
 
 MEMORY
 {
-    FLASH(rx) : ORIGIN = 0x10040000, LENGTH = 0x007C0000
+    FLASH(rx) : ORIGIN = 0x10010000, LENGTH = 0x007F0000
     RAM(rwx) : ORIGIN =  0x20000000, LENGTH = 256k
     SCRATCH_X(rwx) : ORIGIN = 0x20040000, LENGTH = 4k
     SCRATCH_Y(rwx) : ORIGIN = 0x20041000, LENGTH = 4k

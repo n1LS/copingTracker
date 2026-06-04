@@ -92,19 +92,16 @@ void InstrumentImportView::ProcessButtonMask(unsigned short mask, bool pressed) 
 void InstrumentImportView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
-  auto fs = FileSystem::GetInstance();
-
   // Draw title
-  const char *title = "Import Instrument";
-  SetColor(Theme::View::fg);
-  SetBackgroundColor(Theme::View::bg);
-  DrawString(pos.x_, pos.y_, title);
-
+  
+  DrawTitle("Import Instrument");
+  
   // Draw instrument files
+  
+  auto fs = FileSystem::GetInstance();
+  
   int x = 1;
-  int y = pos.y_ + 2;
+  int y = 2;
 
   // need to use fullsize buffer as sdfat doesnt truncate if filename longer
   // than buffer but instead returns empty string in buffer :-(

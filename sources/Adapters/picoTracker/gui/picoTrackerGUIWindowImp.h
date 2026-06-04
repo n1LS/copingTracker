@@ -45,7 +45,7 @@ public: // I_GUIWindowImp implementation
   static picoTrackerGUIWindowImp *instance_;
 
 protected:
-  static chargfx_color_t GetColor(GUIColor &c);
+  static Color GetColor(GUIColor &c);
 
   virtual void Update(Observable &o, I_ObservableData *d);
 

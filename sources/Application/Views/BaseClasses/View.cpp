@@ -63,6 +63,7 @@ View::View(GUIWindow &w, ViewData *viewData)
     prevRightVU_[i] = 0;
   }
 }
+
 GUIPoint View::GetAnchor() {
   // Original code had a dynamic anchor point dending on song count, but
   // changing the song count didn't work anyway given that there are many places
@@ -423,7 +424,7 @@ void View::DrawRect(GUIRect &r, Color color) {
 }
 
 void View::drawBattery() {
-  SetBackgroundColor(Theme::View::bg);
+  SetBackgroundColor(Theme::View::Title::bg);
 
   const uint32_t frameCounter = AppWindow::GetAnimationFrameCounter();
   const bool sampleNow = (frameCounter % PICO_CLOCK_HZ) == 0;
@@ -452,14 +453,10 @@ void View::drawBattery() {
     }
   }
 
-  GUIPoint battpos = GetAnchor();
-  battpos.y_ = 0;
+  GUIPoint battpos = GUIPoint(SCREEN_WIDTH - 4, 0); // battery gauge is consistently 4 chars
 
 #if BATTERY_LEVEL_AS_PERCENTAGE
-  uint8_t batteryPercent = batteryState_.percentage;
-  if (batteryPercent > 100) {
-    batteryPercent = 100;
-  }
+  uint8_t batteryPercent = std::max(batteryState_.percentage, 99);
 
   Color batteryColor = CD_NORMAL;
   if (batteryPercent <= 5) {
@@ -473,17 +470,11 @@ void View::drawBattery() {
   SetColor(batteryColor);
 
   // Keep percentage branch compact: 3 digits + right battery cap.
-  char batteryText[4];
-  npf_snprintf(batteryText, sizeof(batteryText), "%3u", batteryPercent);
-
-  constexpr int kBatteryWidgetWidth = 4; // 3 text chars + right-side symbol
-  int startX = SCREEN_WIDTH - kBatteryWidgetWidth;
-  ClearTextRect(startX, battpos._y, kBatteryWidgetWidth, 1);
-
-  DrawString(startX, battpos._y, batteryText);
-  const char *rightSymbol = batteryState_.charging ? char_symbol_charging_s : char_battery_right_s;
-  DrawString(startX + 3, battpos._y, rightSymbol);
-#else
+  char batteryText[5];
+  char endCap = batteryState_.charging ? char_symbol_charging_s : char_battery_right_s;
+  npf_snprintf(batteryText, sizeof(batteryText), char_battery_left_s "%2u%c", batteryPercent, endCap);
+  DrawString(battpos.x_, battpos.y_, , batteryText);
+ #else
   // use define to choose between drawing battery percentage or battery level as
   // bars
   SetColor(Theme::View::fg);
@@ -510,11 +501,10 @@ void View::drawBattery() {
     }
   }
 
-  int battLen = (battText != nullptr) ? static_cast<int>(strlen(battText)) : 0;
-  constexpr int kBattWidth = 6; // "[100%]" is the widest we render
+  int battLen = static_cast<int>(strlen(battText));
+  constexpr int kBattWidth = 4;
   int startX = SCREEN_WIDTH - kBattWidth;
-  ClearTextRect(startX, battpos.y_, kBattWidth, 1);
-  battpos.x_ = startX + (kBattWidth - battLen); // we want to right align the batt widget
+  battpos.x_ = startX + (kBattWidth - battLen);
   DrawString(battpos.x_, battpos.y_, battText);
 #endif
 }
@@ -642,4 +632,31 @@ void View::drawHelpLegend(FourCC command) {
 
   SetColor(Theme::View::help(false));
   DrawString(0, 1, help.line2);
+}
+
+void View::DrawTitle(const char *format, ...) {
+  GUIPoint pos = GetTitlePosition();
+  
+  SetBackgroundColor(Theme::View::Title::bg);
+  SetColor(Theme::View::Title::fg);
+  
+  constexpr size_t maxLength = SCREEN_WIDTH - BATTERY_GAUGE_WIDTH;
+  
+  va_list val;
+  va_start(val, format);
+  static char buffer[maxLength + 1];
+  npf_vsnprintf(buffer, sizeof(buffer), format, val);
+  va_end(val);
+  
+  // make sure we extend the length to fill the entire screen -  battery gauge
+  size_t len = strlen(buffer);
+
+  if (len <= maxLength) {
+      memset(buffer + len, ' ', 28 - len);
+      buffer[maxLength] = '\0';
+  } else {
+      buffer[maxLength] = '\0';
+  }
+
+  DrawString(pos.x_, pos.y_, buffer);
 }

@@ -24,7 +24,7 @@
 #include "slot_boot.h"
 #include <cstring>
 
-#define APP_SLOT_ADDR 0x10040000u
+#define APP_SLOT_ADDR 0x10010000u
 #define FIRMWARE_DIR "/firmwares"
 #define FIRMWARE_INFO_FILE "/firmwares/firmware_info.txt"
 

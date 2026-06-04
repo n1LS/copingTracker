@@ -13,6 +13,7 @@
 #define _APP_WINDOW_H_
 
 #include "Application/Views/BaseClasses/View.h"
+#include "Application/Views/BaseClasses/View.h"
 
 typedef union color_t {
   struct {
@@ -37,7 +38,7 @@ typedef union color_t {
 #define SCREEN_HEIGHT 24
 #define SCREEN_MAP_HEIGHT 4
 #define SCREEN_MAP_WIDTH 4
-#define BATTERY_GAUGE_WIDTH 5
+#define BATTERY_GAUGE_WIDTH 4
 #define SCREEN_CHARS SCREEN_WIDTH *SCREEN_HEIGHT
 #define MAX_FIELD_WIDTH 32
 #define SCREEN_REDRAW_RATE PICO_CLOCK_HZ
@@ -149,5 +150,8 @@ public:
     return animationFrameCounter_;
   }
 };
+
+// C interface for use from the hardware adapter layer
+void appwindow_set_sdcard_present(bool present);
 
 #endif

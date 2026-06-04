@@ -1112,17 +1112,12 @@ void PhraseView::DrawView() {
   Clear();
 
   // Draw title
-  GUIPoint pos = GetTitlePosition();
-  char title[SCREEN_WIDTH + 1];
 
-  SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::View::fg);
-  npf_snprintf(title, sizeof(title), "Phrase %2.2X", viewData_->currentPhrase_);
-  DrawString(pos.x_, pos.y_, title);
+  DrawTitle("Phrase %2.2X", viewData_->currentPhrase_);
 
   // Compute song grid location
 
-  pos = GetAnchor();
+  GUIPoint pos = GetAnchor();
 
   // Display row numbers
   char buffer[6];
@@ -1201,7 +1196,7 @@ void PhraseView::DrawView() {
       // todo: move outside of the loop
       if (j == row_) {
         npf_snprintf(buffer, sizeof(buffer), "I%2.2X:", d);
-        etl::string<32 - BATTERY_GAUGE_WIDTH> instrLine = buffer;
+        etl::string<SCREEN_WIDTH - BATTERY_GAUGE_WIDTH> instrLine = buffer;
         GUIPoint location = GetTitlePosition();
         location.x_ += 10; // make space for "Phrase %2.2x"
         InstrumentBank *bank = viewData_->project_->GetInstrumentBank();

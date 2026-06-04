@@ -752,27 +752,20 @@ void TableView::setTextProps(int row, int col) {
 }
 
 void TableView::DrawView() {
-
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
-  Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
-
   // Draw title
-
-  char title[20];
-  SetColor(Theme::View::fg);
-  npf_snprintf(title, sizeof(title), "Table %2.2X", viewData_->currentTable_);
-  DrawString(pos.x_, pos.y_, title);
+  
+  Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
+  DrawTitle("Table %2.2X", viewData_->currentTable_);
 
   // Compute song grid location
 
   GUIPoint anchor = GetAnchor();
-
+ 
   // Display row numbers
   char buffer[6];
-  pos = anchor;
+  GUIPoint pos = anchor;
   pos.x_ -= 3;
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));

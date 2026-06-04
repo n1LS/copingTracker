@@ -1,13 +1,13 @@
 add_executable(picoTrackerBootloader
   bootloader_main.cpp
+  bootloader_chargfx.c
   bootlog.cpp
-  uf2_parser.cpp
   flash_writer.cpp
   menu.cpp
   path_utils.cpp
   slot_boot.cpp
-  bootloader_chargfx.c
   trace_wrap.cpp
+  uf2_parser.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/picoTracker/display/ili9341.c
   ${PROJECT_SOURCE_DIR}/Adapters/picoTracker/platform/platform.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/picoTracker/mutex/picoTrackerMutex.cpp
@@ -46,6 +46,7 @@ target_compile_options(picoTrackerBootloader PRIVATE
 target_link_options(picoTrackerBootloader PRIVATE
   -Wl,--wrap=_ZN5Trace5DebugEPKcz
   -Wl,--wrap=_ZN5Trace3LogEPKcS1_z
+  -Wl,--print-memory-usage
 )
 
 target_compile_definitions(picoTrackerBootloader PUBLIC
