@@ -309,9 +309,9 @@ void SampleEditorView::addAllFields() {
   GUIPoint position = GetAnchor();
 
   position.y_ = 10; // offset enough for waveform display
-  position.x_ = 5;
+  position.x_ = 0;
 
-  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("name: ");
+  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Name      :");
 
   auto defaultRecName = etl::make_string_with_capacity<MAX_INSTRUMENT_NAME_LENGTH>(RECORDING_FILENAME)
                             .substr(0, strlen(RECORDING_FILENAME) - 4);
@@ -322,13 +322,13 @@ void SampleEditorView::addAllFields() {
   const uint16_t baseX = position.x_;
 
   position.y_ += 1;
-  bigHexVarField_.emplace_back(position, startVar_, 7, "start: %7.7X", 0, tempSampleSize_ - 1, 16);
+  bigHexVarField_.emplace_back(position, startVar_, 7, "Start     :%7.7X", 0, tempSampleSize_ - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
   (*bigHexVarField_.rbegin()).AddObserver(*this);
 
   // Add end position control
   position.y_ += 1;
-  bigHexVarField_.emplace_back(position, endVar_, 7, "end: %7.7X", 0, tempSampleSize_ - 1, 16);
+  bigHexVarField_.emplace_back(position, endVar_, 7, "End       :%7.7X", 0, tempSampleSize_ - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
   (*bigHexVarField_.rbegin()).AddObserver(*this);
 
@@ -336,7 +336,7 @@ void SampleEditorView::addAllFields() {
   position.y_ += 1;
   position.x_ = baseX;
   uint8_t maxOperationIndex = operationVar_.GetListSize() > 0 ? operationVar_.GetListSize() - 1 : 0;
-  intVarField_.emplace_back(position, operationVar_, "op: %s", 0, maxOperationIndex, 1, 1);
+  intVarField_.emplace_back(position, operationVar_, "Op        :%s", 0, maxOperationIndex, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
