@@ -127,14 +127,12 @@ void RecordView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void RecordView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
   // Draw title
-  SetColor(Theme::View::fg);
-  DrawString(pos.x_, pos.y_, "Record");
+  
+  DrawTitle("Record");
 
   // Draw recording status and time
-  pos = GetAnchor();
+  GUIPoint pos = GetAnchor();
   pos.y_ += 4;
 
   SetColor(Theme::View::fg);

@@ -916,16 +916,9 @@ void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void InstrumentView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
   // Draw title
-  char title[26];
-  SetColor(Theme::View::fg);
-  SetBackgroundColor(Theme::View::bg);
 
-  npf_snprintf(title, sizeof(title), "Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_,
-               project_->GetInstrumentBank()->UsedInstrumentCount(), MAX_INSTRUMENT_COUNT);
-  DrawString(pos.x_, pos.y_, title);
+  DrawTitle("Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_, project_->GetInstrumentBank()->UsedInstrumentCount(), MAX_INSTRUMENT_COUNT);
 
   // Draw fields
   FieldView::Redraw();

@@ -149,6 +149,11 @@ struct Theme {
       SWITCHABLE(bg, LIGHT_GREEN, BLACK)
       SWITCHABLE(fg, BLACK, WHITE)
     };
+
+    struct Title {
+      FIXED(bg, BLUE)
+      FIXED(fg, WHITE)
+    };
   };
 
   struct FileList {
@@ -260,6 +265,8 @@ public:
 
 protected:
   virtual void ProcessButtonMask(unsigned short mask, bool pressed) = 0;
+
+  void DrawTitle(const char *format, ...);
 
   // to remove once everything got to viewdata
 

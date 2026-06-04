@@ -566,14 +566,9 @@ void SampleEditorView::ProcessButtonMask(unsigned short mask, bool pressed) {
 void SampleEditorView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
   // Draw title
-  char titleString[SCREEN_WIDTH];
-  strcpy(titleString, "Sample Edit");
 
-  SetColor(Theme::View::fg);
-  DrawString(pos.x_, pos.y_, titleString);
+  DrawTitle("Sample Editor");
 
   if (HasModalView()) {
     // Modal rendering only clears text cells. Avoid redrawing the graph field

@@ -143,12 +143,9 @@ void ThemeView::Reset() {
 void ThemeView::DrawView() {
   Clear();
 
-  GUIPoint pos = GetTitlePosition();
-
   // Draw title
-  SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::View::fg);
-  DrawString(pos.x_, pos.y_, "Theme Settings");
+
+  DrawTitle("Theme Settings");
 
   // bit of a hack needed for font change as going from "standard" to "bold"
   // will leave behind partial characters due to different width of those string

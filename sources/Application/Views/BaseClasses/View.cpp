@@ -63,6 +63,7 @@ View::View(GUIWindow &w, ViewData *viewData)
     prevRightVU_[i] = 0;
   }
 }
+
 GUIPoint View::GetAnchor() {
   // Original code had a dynamic anchor point dending on song count, but
   // changing the song count didn't work anyway given that there are many places
@@ -642,4 +643,31 @@ void View::drawHelpLegend(FourCC command) {
 
   SetColor(Theme::View::help(false));
   DrawString(0, 1, help.line2);
+}
+
+void View::DrawTitle(const char *format, ...) {
+  GUIPoint pos = GetTitlePosition();
+  
+  SetBackgroundColor(Theme::View::Title::bg);
+  SetColor(Theme::View::Title::fg);
+  
+  constexpr size_t maxLength = SCREEN_WIDTH - BATTERY_GAUGE_WIDTH;
+  
+  va_list val;
+  va_start(val, format);
+  static char buffer[maxLength + 1];
+  npf_vsnprintf(buffer, sizeof(buffer), format, val);
+  va_end(val);
+  
+  // make sure we extend the length to fill the entire screen -  battery gauge
+  size_t len = strlen(buffer);
+
+  if (len <= maxLength) {
+      memset(buffer + len, ' ', 28 - len);
+      buffer[maxLength] = '\0';
+  } else {
+      buffer[maxLength] = '\0';
+  }
+
+  DrawString(pos.x_, pos.y_, buffer);
 }

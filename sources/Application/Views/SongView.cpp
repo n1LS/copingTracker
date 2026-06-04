@@ -818,18 +818,10 @@ void SongView::DrawView() {
   }
 
   // Draw title
-  GUIPoint pos = GetTitlePosition();
+
   Player *player = Player::GetInstance();
-
-  SetBackgroundColor(Theme::View::fg);
-  SetColor(Theme::View::bg);
-
-  const char *buffer = ((player->GetSequencerMode() == SM_SONG) ? "Song " : "Live ");
-  DrawString(pos.x_, pos.y_, buffer);
-
   Variable *v = viewData_->project_->FindVariable(FourCC::VarProjectName);
-  etl::string<MAX_PROJECT_NAME_LENGTH> projectName = v->GetString();
-  DrawString(pos.x_ + 5, pos.y_, projectName.c_str());
+  DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song %s" : "Live %s", v->GetString().c_str());
 
   // Compute song grid location
   GUIPoint anchor = GetAnchor();
@@ -838,8 +830,9 @@ void SongView::DrawView() {
   SetBackgroundColor(Theme::View::bg);
 
   char row[3];
-  pos = anchor;
+  GUIPoint pos = anchor;
   pos.x_ -= 3;
+
   for (int j = 0; j < View::songRowCount_; j++) {
     char p = j + viewData_->songOffset_;
     SetColor(Theme::View::index(p % ALT_ROW_NUMBER == 0));
@@ -866,8 +859,7 @@ void SongView::DrawView() {
       // if there's a selection or we are at cursor position
 
       if (clipboard_.active_) {
-        highlighted = (i >= selRect.Left()) && (i <= selRect.Right()) &&
-                      (j + viewData_->songOffset_ >= selRect.Top()) && (j + viewData_->songOffset_ <= selRect.Bottom());
+        highlighted = selRect.Contains({i, j + viewData_->songOffset_});
       } else {
         highlighted = (i == viewData_->songX_ && j == viewData_->songY_);
       }
