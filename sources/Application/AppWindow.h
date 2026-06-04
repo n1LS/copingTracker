@@ -150,4 +150,7 @@ public:
   }
 };
 
+// C interface for use from the hardware adapter layer
+void appwindow_set_sdcard_present(bool present);
+
 #endif
