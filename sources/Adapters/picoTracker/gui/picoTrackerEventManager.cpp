@@ -109,7 +109,7 @@ int picoTrackerEventManager::MainLoop() {
     }
 
     // Poll SD card presence once per second (1.024 seconds...)
-    if (gTime_ & 0x3ff == 0) {
+    if ((gTime_ & 0x3ff) == 0) {
       FileSystem *fs = FileSystem::GetInstance();
       bool present = fs && fs->chdir("/");
       appwindow_set_sdcard_present(present);

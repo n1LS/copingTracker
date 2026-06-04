@@ -147,10 +147,7 @@ void ThemeView::DrawView() {
 
   DrawTitle("Theme Settings");
 
-  // bit of a hack needed for font change as going from "standard" to "bold"
-  // will leave behind partial characters due to different width of those string
-  // labels
-  DrawString(5, FONT_FIELD_LINE, "                            ");
+  // Draw view contents
 
   drawColorComponentValues();
   FieldView::Redraw();
