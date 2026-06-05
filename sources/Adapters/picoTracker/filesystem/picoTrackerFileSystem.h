@@ -47,6 +47,9 @@ public:
   virtual bool CopyFile(const char *srcFilename, const char *destFilename) override;
   virtual bool MoveFile(const char *srcFilename, const char *destFilename) override;
   virtual bool isExFat();
+  // Low-level card presence probe via CMD13 (readOCR). Does NOT mutate
+  // filesystem state (no chdir, no open), so it is safe to call at any time.
+  virtual bool isCardPresent();
 
 private:
   SdFs sd;

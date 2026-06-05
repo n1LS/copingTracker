@@ -9,6 +9,7 @@
  */
 
 #include "picoTrackerEventManager.h"
+#include "Adapters/picoTracker/filesystem/picoTrackerFileSystem.h"
 #include "Adapters/picoTracker/midi/picoTrackerMidiService.h"
 #include "Adapters/picoTracker/system/input.h"
 #include "Adapters/picoTracker/utils/utils.h"
@@ -110,8 +111,8 @@ int picoTrackerEventManager::MainLoop() {
 
     // Poll SD card presence once per second (1.024 seconds...)
     if ((gTime_ & 0x3ff) == 0) {
-      FileSystem *fs = FileSystem::GetInstance();
-      bool present = fs && fs->chdir("/");
+      picoTrackerFileSystem *fs = static_cast<picoTrackerFileSystem *>(FileSystem::GetInstance());
+      bool present = fs && fs->isCardPresent();
       appwindow_set_sdcard_present(present);
     }
 

@@ -48,15 +48,6 @@ int picoTrackerSystem::MainLoop() {
   return eventManager_->MainLoop();
 }
 
-enum SdCardStatus { SD_OK, SD_MISSING };
-
-static SdCardStatus checkSDCard(FileSystem *fs) {
-  if (!fs->chdir("/")) {
-    return SD_MISSING;
-  }
-  return SD_OK;
-}
-
 static bool pollForValidSDCard() {
   drawInputTester();
 
@@ -64,7 +55,7 @@ static bool pollForValidSDCard() {
   FileSystem::Install(new (fsMemBuf) picoTrackerFileSystem());
 
   auto fs = FileSystem::GetInstance();
-  return checkSDCard(fs) == SD_OK;
+  return ((picoTrackerFileSystem *)fs)->isCardPresent();
 }
 
 void picoTrackerSystem::Boot(int argc, char **argv) {
@@ -86,9 +77,8 @@ void picoTrackerSystem::Boot(int argc, char **argv) {
   FileSystem::Install(new (fsMemBuf) picoTrackerFileSystem());
 
   // First check for SDCard
-  auto fs = FileSystem::GetInstance();
-  SdCardStatus sdStatus = checkSDCard(fs);
-  if (sdStatus == SD_MISSING || scanKeys()) {
+  picoTrackerFileSystem *fs = (picoTrackerFileSystem *)FileSystem::GetInstance();
+    if (!fs->isCardPresent() || scanKeys()) {
     Trace::Log("COPINGTRACKERSYSTEM", "SDCARD MISSING!!");
     critical_error_message("SDCARD MISSING", 0x01, pollForValidSDCard);
   }
