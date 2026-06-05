@@ -8,7 +8,7 @@
  * This file is part of the copingTracker firmware
  */
 
-#include "bootloader_chargfx.h"
+#include "bootloader_gfx.h"
 #include "bootloader_font.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
@@ -17,7 +17,6 @@
 
 /* Character graphics mode */
 
-#define SWAP_BYTES(color) ((uint16_t)(color >> 8) | (uint16_t)(color << 8))
 #define BUFFER_CHARS 15
 static Color screen_bg_color = BLACK;
 static Color screen_fg_color = WHITE;
@@ -25,51 +24,59 @@ static int cursor_x = 0;
 static int cursor_y = 0;
 uint8_t screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 uint8_t colors[TEXT_HEIGHT * TEXT_WIDTH] = {0};
+uint8_t changed[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 uint16_t buffer[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
 
-// Using a bit array in order to save memory, there is a slight performance
-// hit in doing so vs a bool array
-static uint8_t changed[TEXT_HEIGHT * TEXT_WIDTH / 8] = {0};
-#define SetBit(A, k) (A[(k) / 8] |= (1 << ((k) % 8)))
-#define ClearBit(A, k) (A[(k) / 8] &= ~(1 << ((k) % 8)))
-#define TestBit(A, k) (A[(k) / 8] & (1 << ((k) % 8)))
+// Default VGA/PC terminal palette, swapped bytes
+uint16_t palette[16] = {
+  0x0000, // BLACK         (0,   0,   0)
+  0x00A8, // RED           (170, 0,   0)
+  0x4005, // GREEN         (0,   170, 0)
+  0x40AD, // YELLOW        (170, 85,  0)
+  0x1500, // BLUE          (0,   0,   170)
+  0x15A8, // MAGENTA       (170, 0,   170)
+  0x5505, // CYAN          (0,   170, 170)
+  0x55AD, // LIGHT_GRAY    (170, 170, 170)
+  0xAA52, // DARK_GRAY     (85,  85,  85)
+  0x00F8, // LIGHT_RED     (255, 85,  85)
+  0xE057, // LIGHT_GREEN   (85,  255, 85)
+  0xE0FF, // LIGHT_YELLOW  (255, 255, 85)
+  0x9F52, // LIGHT_BLUE    (85,  85,  255)
+  0x9FFA, // LIGHT_MAGENTA (255, 85,  255)
+  0xFF57, // LIGHT_CYAN    (85,  255, 255)
+  0xFFFF  // WHITE         (255, 255, 255)
+};
 
-// Default palette, can be redefined
-uint16_t palette[16] = {SWAP_BYTES(0x0000), SWAP_BYTES(0x49E5), SWAP_BYTES(0xB926), SWAP_BYTES(0xE371),
-                        SWAP_BYTES(0x9CF3), SWAP_BYTES(0xA324), SWAP_BYTES(0xEC46), SWAP_BYTES(0xF70D),
-                        SWAP_BYTES(0xffff), SWAP_BYTES(0x1926), SWAP_BYTES(0x2A49), SWAP_BYTES(0x4443),
-                        SWAP_BYTES(0xA664), SWAP_BYTES(0x02B0), SWAP_BYTES(0x351E), SWAP_BYTES(0xB6FD)};
-
-void chargfx_clear(Color color) {
+void gfx_clear(Color color) {
   int size = TEXT_HEIGHT * TEXT_WIDTH;
   memset(screen, 0, size);
   memset(colors, color, size);
-  chargfx_set_cursor(0, 0);
-  chargfx_draw_screen();
+  gfx_set_cursor(0, 0);
+  gfx_draw_screen();
 }
 
-void chargfx_set_foreground(Color color) {
+void gfx_set_foreground(Color color) {
   screen_fg_color = color;
 }
 
-void chargfx_set_background(Color color) {
+void gfx_set_background(Color color) {
   screen_bg_color = color;
 }
 
-void chargfx_set_cursor(uint8_t x, uint8_t y) {
+void gfx_set_cursor(uint8_t x, uint8_t y) {
   cursor_x = x;
   cursor_y = y;
 }
 
-uint8_t chargfx_get_cursor_x() {
+uint8_t gfx_get_cursor_x() {
   return cursor_x;
 }
 
-uint8_t chargfx_get_cursor_y() {
+uint8_t gfx_get_cursor_y() {
   return cursor_y;
 }
 
-void chargfx_putc(char c) {
+void gfx_putc(char c) {
   if (cursor_x < 0 || cursor_x >= TEXT_WIDTH || cursor_y < 0 || cursor_y >= TEXT_HEIGHT) {
     return;
   }
@@ -77,7 +84,7 @@ void chargfx_putc(char c) {
   int idx = cursor_y * TEXT_WIDTH + cursor_x;
   if (c >= 32) {
     screen[idx] = c - 32;
-    SetBit(changed, idx);
+    changed[idx] = true;
     colors[idx] = ((screen_fg_color & 0xf) << 4) | (screen_bg_color & 0xf);
   }
 
@@ -86,7 +93,7 @@ void chargfx_putc(char c) {
   }
 }
 
-static inline void chargfx_set_window_for_region(uint16_t screen_x, uint16_t screen_y, uint16_t screen_width,
+static inline void gfx_set_window_for_region(uint16_t screen_x, uint16_t screen_y, uint16_t screen_width,
                                                  uint16_t screen_height) {
   // column address set
   ili9341_set_command(ILI9341_CASET);
@@ -102,7 +109,7 @@ static inline void chargfx_set_window_for_region(uint16_t screen_x, uint16_t scr
   ili9341_set_command(ILI9341_RAMWR);
 }
 
-static inline void chargfx_rasterize_char_column(uint8_t char_col, uint8_t row_start, uint8_t row_count,
+static inline void gfx_rasterize_char_column(uint8_t char_col, uint8_t row_start, uint8_t row_count,
                                                  uint16_t *dst) {
   for (int glyph_bit = CHAR_WIDTH - 1; glyph_bit >= 0; glyph_bit--) {
     uint16_t glyph_mask = 1 << (CHAR_WIDTH - 1 - glyph_bit);
@@ -124,13 +131,13 @@ static inline void chargfx_rasterize_char_column(uint8_t char_col, uint8_t row_s
   }
 }
 
-void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+void gfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   int remaining_rows = height;
   while (remaining_rows) {
     int chunk_rows = (remaining_rows > BUFFER_CHARS) ? BUFFER_CHARS : remaining_rows;
     uint8_t chunk_y = y + height - remaining_rows;
     remaining_rows -= chunk_rows;
-    chargfx_draw_sub_region(x, chunk_y, width, chunk_rows);
+    gfx_draw_sub_region(x, chunk_y, width, chunk_rows);
   }
 }
 
@@ -141,7 +148,7 @@ void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
 // mounted rotated 90deg clockwise, ie. the "bottom" of the LCD with the flex
 // pcb connector is actually on the left instead of its normal orientation of
 // being mounted on the bottom of the LCD
-void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
+void gfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
   // Get the RGB565 color from the current foreground palette index
   uint16_t color = palette[color_index];
 
@@ -202,7 +209,7 @@ void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t wid
   ili9341_command_param(LCD_MADCTL_DEFAULT);
 }
 
-inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+inline void gfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   assert(height <= BUFFER_CHARS);
 
   uint16_t screen_x = x * CHAR_WIDTH;
@@ -210,7 +217,7 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
   uint16_t screen_width = width * CHAR_WIDTH;
   uint16_t screen_height = height * CHAR_HEIGHT;
 
-  chargfx_set_window_for_region(screen_x, screen_y, screen_width, screen_height);
+  gfx_set_window_for_region(screen_x, screen_y, screen_width, screen_height);
 
   ili9341_start_writing();
 
@@ -218,17 +225,17 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
     // create one column of screen information
     uint16_t *buffer_idx = buffer;
 
-    chargfx_rasterize_char_column(char_col, y, height, buffer_idx);
+    gfx_rasterize_char_column(char_col, y, height, buffer_idx);
 
     ili9341_write_data_continuous(buffer, CHAR_WIDTH * screen_height * sizeof(int16_t));
   }
   ili9341_stop_writing();
 }
 
-void chargfx_draw_changed() {
+void gfx_draw_changed() {
   for (int idx = 0; idx < TEXT_HEIGHT * TEXT_WIDTH; idx++) {
-    if (TestBit(changed, idx)) {
-      ClearBit(changed, idx);
+    if (changed[idx]) {
+      changed[idx] = false;
       // check adjacent in order to find bigger rectangle
       uint16_t y = idx / TEXT_WIDTH;
       uint16_t x = idx - (TEXT_WIDTH * y);
@@ -237,8 +244,8 @@ void chargfx_draw_changed() {
       // first pass tests the height
       for (int probe_y = y + 1; probe_y < TEXT_HEIGHT; probe_y++) {
         int probe_idx = probe_y * TEXT_WIDTH + x;
-        if (TestBit(changed, probe_idx)) {
-          ClearBit(changed, probe_idx);
+        if (changed[idx]) {
+          changed[idx] = false;
           height++;
           continue;
         }
@@ -251,44 +258,46 @@ void chargfx_draw_changed() {
         for (int probe_y = y; probe_y < y + height; probe_y++) {
           // if we don't get to max height, then abort
           int probe_idx = probe_y * TEXT_WIDTH + probe_x;
-          if (!TestBit(changed, probe_idx)) {
+          
+          if (!changed[probe_idx]) {
             // undo last column
             for (int undo_y = y; undo_y < probe_y; undo_y++) {
-              SetBit(changed, undo_y * TEXT_WIDTH + probe_x);
+              changed[undo_y * TEXT_WIDTH + probe_x] = true;
             }
             goto end;
           }
-          ClearBit(changed, probe_idx);
+
+          changed[probe_idx] = false;
         }
         width++;
       }
     end:
-      chargfx_draw_region(x, y, width, height);
+      gfx_draw_region(x, y, width, height);
     }
   }
 }
 
-void chargfx_draw_changed_simple() {
+void gfx_draw_changed_simple() {
   // This method is better (faster) for fewer characters changed
   for (int idx = 0; idx < TEXT_HEIGHT * TEXT_WIDTH; idx++) {
-    if (TestBit(changed, idx)) {
-      ClearBit(changed, idx);
+    if (changed[idx]) {
+      changed[idx] = false;
       uint16_t y = idx / TEXT_WIDTH;
       uint16_t x = idx - (TEXT_WIDTH * y);
-      chargfx_draw_region(x, y, 1, 1);
+      gfx_draw_region(x, y, 1, 1);
     }
   }
 }
 
-void chargfx_draw_screen() {
+void gfx_draw_screen() {
   // draw the whole screen
-  chargfx_draw_region(0, 0, TEXT_WIDTH, TEXT_HEIGHT);
+  gfx_draw_region(0, 0, TEXT_WIDTH, TEXT_HEIGHT);
 }
 
-void chargfx_set_palette_color(int idx, uint16_t rgb565_color) {
-  palette[idx] = SWAP_BYTES(rgb565_color);
+void gfx_set_palette_color(int idx, uint16_t rgb565_color) {
+  palette[idx] = rgb565_color;
 }
 
-void chargfx_init() {
+void gfx_init() {
   ili9341_init();
 }

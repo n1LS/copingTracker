@@ -3,10 +3,10 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker Boot Manager
+ * This file is part of the copingTracker Boot Manager
  */
 
-#include "Adapters/picoTracker/bootloader/bootlog.h"
+#include "Adapters/picoTracker/bootloader/bootloader_log.h"
 #include "Adapters/picoTracker/sdcard/sdcard.h"
 #include "Externals/SdFat/src/SdFat.h"
 #include "flash_writer.h"
@@ -131,7 +131,7 @@ int flash_derived_bin_to_slot(const char *bin_path, uint32_t target_slot) {
 
 // Parse UF2 from SD, validate slot range, write derived .bin, and
 // optionally flash app slot.
-int parse_uf2_and_write_to_flash(const char *filename, uint32_t target_slot, const char *derived_output_path,
+int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *derived_output_path,
                                  bool do_flash) {
   if (do_flash) {
     return flash_derived_bin_to_slot(derived_output_path, target_slot);

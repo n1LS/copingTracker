@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker Boot Manager
+ * This file is part of the copingTracker Boot Manager
  */
 
 #include "path_utils.h"
@@ -93,6 +93,21 @@ bool bl_replace_extension_ci(char *path, size_t path_size, const char *extension
   std::memcpy(tail, replacement, repl_len);
   tail[repl_len] = 0;
   return true;
+}
+
+bool bl_str_equals_ci(const char *a, const char *b) {
+  if (a == nullptr && b == nullptr) {
+    return true;
+  }
+  if (a == nullptr || b == nullptr) {
+    return false;
+  }
+  while (*a && *b) {
+    if (lower_ascii(*a++) != lower_ascii(*b++)) {
+      return false;
+    }
+  }
+  return *a == *b;
 }
 
 bool bl_strip_extension_ci(char *path, const char *extension) {

@@ -3,11 +3,11 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker Boot Manager
+ * This file is part of the copingTracker Boot Manager
  */
 
-#ifndef PICOTRACKER_BOOTLOADER_BOOTLOG_H
-#define PICOTRACKER_BOOTLOADER_BOOTLOG_H
+#ifndef BOOTLOADER_LOG_H
+#define BOOTLOADER_LOG_H
 
 #ifdef __cplusplus
 extern "C" {

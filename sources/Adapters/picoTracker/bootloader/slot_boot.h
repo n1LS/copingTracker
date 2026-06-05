@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker Boot Manager
+ * This file is part of the copingTracker Boot Manager
  */
 
 #ifndef PICOTRACKER_BOOTLOADER_SLOT_BOOT_H
