@@ -293,15 +293,10 @@ const char *Player::GetLiveIndicator(int channel) {
       case QM_CHAINSTART:
       case QM_PHRASESTART:
       case QM_TICKSTART:
-        if (!IsChannelMuted(channel)) {
-          return (">");
-        } else {
-          return ("-");
-        }
-        break;
+        return IsChannelMuted(channel) ? char_indicator_positionMuted_s : char_indicator_position_s;
       case QM_CHAINSTOP:
       case QM_PHRASESTOP:
-        return "_";
+        return char_playback_pause_s;
         break;
       case QM_NONE:
         break;

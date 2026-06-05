@@ -166,7 +166,7 @@ void GrooveView::DrawView() {
   SetColor(Theme::View::fg);
 
   char buffer[6];
-  
+
   unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
   for (int j = 0; j < 16; j++) {
     bool highlighted = (j == position_);
@@ -219,7 +219,7 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
     pos.y_ = anchor.y_ + lastPosition_;
     SetColor(Theme::Song::Playback::live);
     SetBackgroundColor(Theme::View::bg);
-    DrawString(pos.x_, pos.y_, ">");
+    DrawString(pos.x_, pos.y_, char_indicator_position_s);
   };
 
   drawNotes();

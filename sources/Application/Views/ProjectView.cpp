@@ -24,7 +24,6 @@
 #include "BaseClasses/View.h"
 #include "BaseClasses/ViewEvent.h"
 #include "Services/Midi/MidiService.h"
-#include "System/System/System.h"
 #include <nanoprintf.h>
 
 static void CreateNewProjectCallback(View &v, ModalView &dialog) {
@@ -320,10 +319,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
     case FourCC::ActionRandomName:
       {
         char name[10];
-        System *sys = System::GetInstance();
-        uint32_t randNum = sys->GetRandomNumber();
-        getNamesByIndex(name, randNum, 10);
-        printf("random:%s", name);
+        getRandomName(name, 10);
         project_->SetProjectName(name);
         saveAsFlag_ = true;
         break;

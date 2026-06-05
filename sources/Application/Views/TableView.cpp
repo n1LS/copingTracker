@@ -945,7 +945,7 @@ void TableView::AnimationUpdate() {
             if (yPos >= 0 && yPos < 16) {
               pos.x_ = anchor.x_ - 1 + (i * 9);
               pos.y_ = anchor.y_ + yPos;
-              DrawString(pos.x_, pos.y_, ">");
+              DrawString(pos.x_, pos.y_, char_indicator_position_s);
             }
           }
         }
@@ -955,7 +955,7 @@ void TableView::AnimationUpdate() {
             if (yPos >= 0 && yPos < 16) {
               pos.x_ = anchor.x_ - 1 + (i * 9);
               pos.y_ = anchor.y_ + yPos;
-              DrawString(pos.x_, pos.y_, ">");
+              DrawString(pos.x_, pos.y_, char_indicator_position_s);
             }
           }
         }

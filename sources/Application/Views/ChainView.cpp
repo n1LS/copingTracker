@@ -766,10 +766,10 @@ void ChainView::AnimationUpdate() {
             SetBackgroundColor(Theme::View::bg);
             if (!player->IsChannelMuted(i)) {
               SetColor(Theme::Song::Playback::active);
-              DrawString(pos.x_, pos.y_, ">");
+              DrawString(pos.x_, pos.y_, char_indicator_position_s);
             } else {
               SetColor(Theme::Song::Playback::muted);
-              DrawString(pos.x_, pos.y_, "-");
+              DrawString(pos.x_, pos.y_, char_indicator_positionMuted_s);
             }
             lastPlayingPos_ = viewData_->chainPlayPos_[i];
             break;

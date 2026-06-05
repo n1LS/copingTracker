@@ -1195,19 +1195,15 @@ void PhraseView::DrawView() {
       DrawString(pos.x_, pos.y_, buffer);
       // todo: move outside of the loop
       if (j == row_) {
-        SetBackgroundColor(Theme::View::Title::bg);
-        SetBackgroundColor(Theme::View::Title::fg);
-
         npf_snprintf(buffer, sizeof(buffer), "I%2.2X:", d);
         etl::string<SCREEN_WIDTH - BATTERY_GAUGE_WIDTH> instrLine = buffer;
         GUIPoint location = GetTitlePosition();
-        location.x_ += 10; // make space for "Phrase %2.2x"
-        InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-        I_Instrument *instr = bank->GetInstrument(d);
+        I_Instrument *instr = viewData_->project_->GetInstrumentBank()->GetInstrument(d);
         instrLine += instr->GetDisplayName();
-        SetBackgroundColor(Theme::View::bg);
-        SetColor(Theme::View::fg);
-        DrawString(location.x_, location.y_, instrLine.c_str());
+
+        SetBackgroundColor(Theme::View::Title::bg);
+        SetBackgroundColor(Theme::View::Title::fg);
+        DrawString(location.x_ + 10, location.y_, instrLine.c_str());
       }
     }
     pos.y_++;
@@ -1353,10 +1349,10 @@ void PhraseView::AnimationUpdate() {
 
             if (!player->IsChannelMuted(i)) {
               SetColor(Theme::Song::Playback::active);
-              DrawString(pos.x_, pos.y_, ">");
+              DrawString(pos.x_, pos.y_, char_indicator_position_s);
             } else {
               SetColor(Theme::Song::Playback::muted);
-              DrawString(pos.x_, pos.y_, "-");
+              DrawString(pos.x_, pos.y_, char_indicator_positionMuted_s);
             }
 
             lastPlayingPos_ = viewData_->phrasePlayPos_[i];
