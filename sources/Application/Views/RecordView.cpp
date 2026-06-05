@@ -128,7 +128,7 @@ void RecordView::DrawView() {
   Clear();
 
   // Draw title
-  
+
   DrawTitle("Record");
 
   // Draw recording status and time

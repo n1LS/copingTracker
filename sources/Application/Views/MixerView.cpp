@@ -333,11 +333,11 @@ void MixerView::DrawView() {
   Clear();
 
   // Draw title
-  
+
   Player *player = Player::GetInstance();
   Project *project = player->GetProject(); // Use Player's GetProject method
   DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song" : "Live");
-  
+
   // Now draw busses
   // we start at the bottom of the VU meter and draw it growing upwards
   GUIPoint anchor = GetAnchor();

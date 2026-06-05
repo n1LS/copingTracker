@@ -474,7 +474,7 @@ void View::drawBattery() {
   char endCap = batteryState_.charging ? char_symbol_charging_s : char_battery_right_s;
   npf_snprintf(batteryText, sizeof(batteryText), char_battery_left_s "%2u%c", batteryPercent, endCap);
   DrawString(battpos.x_, battpos.y_, , batteryText);
- #else
+#else
   // use define to choose between drawing battery percentage or battery level as
   // bars
   SetColor(Theme::View::fg);
@@ -636,26 +636,26 @@ void View::drawHelpLegend(FourCC command) {
 
 void View::DrawTitle(const char *format, ...) {
   GUIPoint pos = GetTitlePosition();
-  
+
   SetBackgroundColor(Theme::View::Title::bg);
   SetColor(Theme::View::Title::fg);
-  
+
   constexpr size_t maxLength = SCREEN_WIDTH - BATTERY_GAUGE_WIDTH;
-  
+
   va_list val;
   va_start(val, format);
   static char buffer[maxLength + 1];
   npf_vsnprintf(buffer, sizeof(buffer), format, val);
   va_end(val);
-  
+
   // make sure we extend the length to fill the entire screen -  battery gauge
   size_t len = strlen(buffer);
 
   if (len <= maxLength) {
-      memset(buffer + len, ' ', 28 - len);
-      buffer[maxLength] = '\0';
+    memset(buffer + len, ' ', 28 - len);
+    buffer[maxLength] = '\0';
   } else {
-      buffer[maxLength] = '\0';
+    buffer[maxLength] = '\0';
   }
 
   DrawString(pos.x_, pos.y_, buffer);

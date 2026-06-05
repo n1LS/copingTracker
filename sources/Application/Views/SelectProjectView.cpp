@@ -194,11 +194,11 @@ void SelectProjectView::Reset() {
 
 void SelectProjectView::DrawView() {
   Clear();
-  
+
   // Draw title
-  
+
   DrawTitle("Browse Projects");
-  
+
   // Draw projects
   auto fs = FileSystem::GetInstance();
 

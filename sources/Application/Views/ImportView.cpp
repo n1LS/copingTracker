@@ -295,7 +295,7 @@ void ImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
 void ImportView::DrawView() {
   // todo: is this really the correct way to handle an empty state?
-  
+
   if (fileIndexList_.empty()) {
     return;
   }
@@ -312,14 +312,13 @@ void ImportView::DrawView() {
   auto fs = FileSystem::GetInstance();
 
   // Draw title with available storage space
-  
+
   uint32_t availableSpace = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
   DrawTitle("%s (%d)", inProjectSampleDir_ ? "Project Pool" : "Import Sample", availableSpace);
 
   // Draw samples
   int x = 1;
   int y = 2;
-
 
   // Loop through visible files in the list
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {

@@ -19,11 +19,11 @@
 #include "Application/Player/Player.h"
 #include "Application/Utils/mathutils.h"
 #include "Externals/etl/include/etl/delegate.h"
+#include "Foundation/Types/Colors.h"
 #include "I_Action.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
 #include "ViewEvent.h"
-#include "Foundation/Types/Colors.h"
 
 #define VU_METER_HEIGHT 16
 #define VU_METER_MAX 159
