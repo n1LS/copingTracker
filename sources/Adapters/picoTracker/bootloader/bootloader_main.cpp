@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
     selected_file = 0;
     if (installed_bin[0]) {
       for (int i = 0; i < uf2_count; ++i) {
-        if (strcasecmp(uf2_files[i].path, installed_bin)) {
+        if (bl_str_equals_ci(uf2_files[i].path, installed_bin)) {
           selected_file = i;
           break;
         }
@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
         const char *base = bl_path_basename(bin_path);
 
         // If the selected firmware is already in the app slot, boot directly.
-        if (installed_bin[0] && strcasecmp(bin_path, installed_bin)) {
+        if (installed_bin[0] && bl_str_equals_ci(bin_path, installed_bin)) {
           menu_show_message("Booting selected firmware...");
           bootlog("BOOTDBG[%s]: enter->boot(installed) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag,
                   APP_SLOT_ADDR);
