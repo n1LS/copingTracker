@@ -13,7 +13,6 @@
 #define _APP_WINDOW_H_
 
 #include "Application/Views/BaseClasses/View.h"
-#include "Application/Views/BaseClasses/View.h"
 
 typedef union color_t {
   struct {

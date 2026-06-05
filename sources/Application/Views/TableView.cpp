@@ -755,14 +755,14 @@ void TableView::DrawView() {
   Clear();
 
   // Draw title
-  
+
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
   DrawTitle("Table %2.2X", viewData_->currentTable_);
 
   // Compute song grid location
 
   GUIPoint anchor = GetAnchor();
- 
+
   // Display row numbers
   char buffer[6];
   GUIPoint pos = anchor;

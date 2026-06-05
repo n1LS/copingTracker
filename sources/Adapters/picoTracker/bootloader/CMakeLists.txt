@@ -1,9 +1,9 @@
 add_executable(picoTrackerBootloader
   bootloader_main.cpp
-  bootloader_chargfx.c
-  bootlog.cpp
+  bootloader_gfx.c
+  bootloader_log.cpp
   flash_writer.cpp
-  menu.cpp
+  bootloader_menu.cpp
   path_utils.cpp
   slot_boot.cpp
   trace_wrap.cpp

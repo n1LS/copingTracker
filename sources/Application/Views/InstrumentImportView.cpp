@@ -93,13 +93,13 @@ void InstrumentImportView::DrawView() {
   Clear();
 
   // Draw title
-  
+
   DrawTitle("Import Instrument");
-  
+
   // Draw instrument files
-  
+
   auto fs = FileSystem::GetInstance();
-  
+
   int x = 1;
   int y = 2;
 

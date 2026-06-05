@@ -135,7 +135,7 @@ void DeviceView::DrawView() {
   Clear();
 
   // Draw title
-  
+
   DrawTitle("Device");
 
   // redraw fields

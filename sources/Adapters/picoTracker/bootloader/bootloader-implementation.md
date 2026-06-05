@@ -50,7 +50,7 @@ Startup sequence:
 
 1. board_init()
 2. platform_init()
-3. chargfx_init()
+3. gfx_init()
 4. menu_render_static()
 5. SD mount
 6. Read persisted firmware metadata from /firmwares/firmware_info.txt
@@ -128,15 +128,15 @@ Handoff checks and actions:
 
 Text UI and list/menu rendering:
 
-- sources/Adapters/picoTracker/bootloader/menu.cpp
+- sources/Adapters/picoTracker/bootloader/bootloader_menu.cpp
 
 Character graphics implementation:
 
-- sources/Adapters/picoTracker/bootloader/bootloader_chargfx.c
+- sources/Adapters/picoTracker/bootloader/bootloader_gfx.c
 
 Current rendering details:
 
-- chargfx_putc advances cursor x.
+- gfx_putc advances cursor x.
 - Dirty-region rendering retained.
 - Sub-region rendering was refactored into helpers for clarity.
 - BUFFER_CHARS currently set to 15.
@@ -169,6 +169,6 @@ This confirms the bootloader is currently under the 64 KB cap.
 - sources/Adapters/picoTracker/bootloader/slot_boot.cpp
 - sources/Adapters/picoTracker/bootloader/uf2_parser.cpp
 - sources/Adapters/picoTracker/bootloader/flash_writer.cpp
-- sources/Adapters/picoTracker/bootloader/menu.cpp
-- sources/Adapters/picoTracker/bootloader/bootloader_chargfx.c
+- sources/Adapters/picoTracker/bootloader/bootloader_menu.cpp
+- sources/Adapters/picoTracker/bootloader/bootloader_gfx.c
 - sources/Adapters/picoTracker/bootloader/CMakeLists.txt

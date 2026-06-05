@@ -71,7 +71,7 @@ void ThemeImportView::DrawView() {
   // Draw title
 
   DrawTitle("Import Theme");
-  
+
   // Draw theme files
   auto fs = FileSystem::GetInstance();
 

@@ -256,7 +256,7 @@ void SampleSlicesView::DrawView() {
 
 void SampleSlicesView::AnimationUpdate() {
   ScreenView::AnimationUpdate();
-  
+
   if (previewActive_ && previewCursorVisible_ && previewDurationMs_ > 0.0f) {
     uint32_t nowMs = sys_ ? sys_->Millis() : 0;
     uint32_t elapsedMs = nowMs - previewStartMs_;

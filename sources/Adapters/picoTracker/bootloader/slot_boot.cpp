@@ -3,11 +3,11 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker Boot Manager
+ * This file is part of the copingTracker Boot Manager
  */
 
 #include "slot_boot.h"
-#include "Adapters/picoTracker/bootloader/bootlog.h"
+#include "Adapters/picoTracker/bootloader/bootloader_log.h"
 #include "hardware/structs/nvic.h"
 #include "hardware/structs/scb.h"
 #include "hardware/structs/systick.h"
@@ -17,25 +17,25 @@
 #include <cstdio>
 
 namespace {
-constexpr uint32_t kVectorTableOffset = 0x100u;
-constexpr uint32_t kVectorTableOffsetMid = 0x110u;
-constexpr uint32_t kVectorTableOffsetAlt = 0x000u;
-constexpr uint32_t kSlotSize = 0x007F0000u;
-constexpr uint32_t kRamStart = 0x20000000u;
-constexpr uint32_t kRamEnd = 0x20042000u;
+  constexpr uint32_t kVectorTableOffset = 0x100u;
+  constexpr uint32_t kVectorTableOffsetMid = 0x110u;
+  constexpr uint32_t kVectorTableOffsetAlt = 0x000u;
+  constexpr uint32_t kSlotSize = 0x007F0000u;
+  constexpr uint32_t kRamStart = 0x20000000u;
+  constexpr uint32_t kRamEnd = 0x20042000u;
 
-bool is_valid_stack_ptr(uint32_t stack_ptr) {
-  return stack_ptr >= kRamStart && stack_ptr <= kRamEnd;
-}
-
-bool is_valid_reset_handler(uint32_t reset_handler, uint32_t slot_base_address) {
-  if ((reset_handler & 1u) == 0u) {
-    return false;
+  bool is_valid_stack_ptr(uint32_t stack_ptr) {
+    return stack_ptr >= kRamStart && stack_ptr <= kRamEnd;
   }
 
-  const uint32_t reset_handler_addr = reset_handler & ~1u;
-  return reset_handler_addr >= slot_base_address && reset_handler_addr < (slot_base_address + kSlotSize);
-}
+  bool is_valid_reset_handler(uint32_t reset_handler, uint32_t slot_base_address) {
+    if ((reset_handler & 1u) == 0u) {
+      return false;
+    }
+
+    const uint32_t reset_handler_addr = reset_handler & ~1u;
+    return reset_handler_addr >= slot_base_address && reset_handler_addr < (slot_base_address + kSlotSize);
+  }
 } // namespace
 
 bool boot_firmware_slot(uint32_t slot_base_address) {

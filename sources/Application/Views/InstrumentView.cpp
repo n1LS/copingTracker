@@ -918,7 +918,8 @@ void InstrumentView::DrawView() {
 
   // Draw title
 
-  DrawTitle("Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_, project_->GetInstrumentBank()->UsedInstrumentCount(), MAX_INSTRUMENT_COUNT);
+  DrawTitle("Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_,
+            project_->GetInstrumentBank()->UsedInstrumentCount(), MAX_INSTRUMENT_COUNT);
 
   // Draw fields
   FieldView::Redraw();

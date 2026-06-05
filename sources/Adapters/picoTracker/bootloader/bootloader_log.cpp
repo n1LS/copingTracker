@@ -3,10 +3,10 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker Boot Manager
+ * This file is part of the copingTracker Boot Manager
  */
 
-#include "bootlog.h"
+#include "bootloader_log.h"
 
 #include "Adapters/picoTracker/sdcard/sdcard.h"
 #include "Externals/SdFat/src/SdFat.h"
