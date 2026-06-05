@@ -667,14 +667,11 @@ void ChainView::DrawView() {
   GUIPoint pos = GetAnchor();
 
   // Display row numbers
-  char row[3];
-  for (int j = 0; j < 16; j++) {
-    SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
-    hex2char(j, row);
-    DrawString(pos.x_ - 3, pos.y_ + j, row);
-  }
 
+  drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
+  
   // Display phrases
+  char row[3];
   unsigned char *data = viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_);
 
   for (int j = 0; j < 16; j++) {

@@ -233,6 +233,7 @@ void View::drawMasterVuMeter(Player *player, bool forceRedraw, uint8_t xoffset) 
 }
 
 void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw) {
+  SetBackgroundColor(Theme::View::bg);
 
   // Clamp the values to the maximum height
   leftBars = std::min<int32_t>(leftBars, VU_METER_MAX);
@@ -660,3 +661,16 @@ void View::DrawTitle(const char *format, ...) {
 
   DrawString(pos.x_, pos.y_, buffer);
 }
+
+void View::drawRowNumbers(int x, int y, int start, int numRows) {
+  SetBackgroundColor(Theme::View::bg);
+  
+  char row[3];
+  
+  for (int j = 0; j < numRows; j++) {
+    SetColor(Theme::View::index((j + start) % ALT_ROW_NUMBER == 0));
+    hex2char(j, row);
+    DrawString(x, y + j, row);
+  }
+}
+

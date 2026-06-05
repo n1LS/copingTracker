@@ -827,21 +827,10 @@ void SongView::DrawView() {
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  SetBackgroundColor(Theme::View::bg);
+  drawRowNumbers(anchor.x_ - 3, anchor.y_, viewData_->songOffset_, 16);
 
   char row[3];
   GUIPoint pos = anchor;
-  pos.x_ -= 3;
-
-  for (int j = 0; j < View::songRowCount_; j++) {
-    char p = j + viewData_->songOffset_;
-    SetColor(Theme::View::index(p % ALT_ROW_NUMBER == 0));
-    hex2char(p, row);
-    DrawString(pos.x_, pos.y_, row);
-    pos.y_ += 1;
-  }
-
-  pos = anchor;
   unsigned char *data = viewData_->song_->data_ + (SONG_CHANNEL_COUNT * viewData_->songOffset_);
   short dx = 3;
   short dy = 1;

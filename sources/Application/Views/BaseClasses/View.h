@@ -267,6 +267,7 @@ protected:
 
   void drawMap();
   void drawNotes();
+  void drawRowNumbers(int x, int y, int start, int numRows);
   void drawHelpLegend(FourCC command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
