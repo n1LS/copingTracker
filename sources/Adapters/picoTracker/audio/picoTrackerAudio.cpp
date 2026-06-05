@@ -58,3 +58,11 @@ int picoTrackerAudio::GetMixerVolume() {
   }
   return 0;
 }
+
+void picoTrackerAudio::SetAudioLevel(int level) {
+  AudioOutDriver *out = (AudioOutDriver *)GetFirstOutput();
+  if (out) {
+    picoTrackerAudioDriver *drv = (picoTrackerAudioDriver *)out->GetDriver();
+    drv->SetAudioLevel(level);
+  }
+}
