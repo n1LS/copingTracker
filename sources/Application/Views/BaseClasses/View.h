@@ -91,6 +91,11 @@ struct Theme {
     FIXED(normal, GREEN)
   };
 
+  struct Data {
+    FIXED(negative, RED)
+    FIXED(positive, GREEN)
+  };
+
   struct Waveform {
     FIXED(normal, LIGHT_GRAY)
     FIXED(baseline, DARK_GRAY)
@@ -159,6 +164,8 @@ struct Theme {
       FIXED(muted, LIGHT_RED)
       FIXED(live, LIGHT_YELLOW)
     };
+
+    SWITCHABLE(preview, LIGHT_GRAY, DARK_GRAY)
 
     FIXED(placeholder, DARK_GRAY)
     SWITCHABLE(fg, WHITE, LIGHT_GRAY)

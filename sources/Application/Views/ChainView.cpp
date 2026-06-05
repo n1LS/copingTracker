@@ -671,7 +671,7 @@ void ChainView::DrawView() {
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
   
   // Display phrases
-  char row[3];
+  char row[6];
   unsigned char *data = viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_);
 
   for (int j = 0; j < 16; j++) {
@@ -692,13 +692,35 @@ void ChainView::DrawView() {
   data = viewData_->song_->chain_.transpose_ + (16 * viewData_->currentChain_);
 
   for (int j = 0; j < 16; j++) {
-    unsigned char d = *data++;
+    uint8_t d = *data++;
     hex2char(d, row);
     setTextProps(1, j);
     DrawString(pos.x_, pos.y_, row);
+
+    // also draw signed decimal display
+    int8_t transpose = (int8_t)d;
+
+    SetBackgroundColor(Theme::View::bg);
+
+    if (transpose > 0) {
+      npf_snprintf(row, sizeof(row), "+%3d", transpose);
+      SetColor(Theme::Data::positive);
+      DrawString(pos.x_ + 3, pos.y_, row);
+    } else if (transpose < 0) {
+      npf_snprintf(row, sizeof(row), "-%3d", -transpose);
+      SetColor(Theme::Data::negative);
+      DrawString(pos.x_ + 3, pos.y_, row);
+    }
+
     pos.y_++;
   }
+
   Player *player = Player::GetInstance();
+
+  unsigned char phrase = *(viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_ + viewData_->chainRow_));
+  if (phrase != EMPTY_CHAIN_VALUE) {
+    drawPhrasePreview(phrase);
+  }
 
   drawMap();
   drawNotes();
@@ -804,4 +826,78 @@ void ChainView::AnimationUpdate() {
 
   // Flush the window to ensure changes are displayed
   w_.Flush();
+}
+
+void ChainView::drawPhrasePreview(uint8_t phrase) {
+  GUIPoint pos = GetAnchor();
+  pos.x_ += 12;
+
+  // Display notes
+  unsigned char *data = viewData_->song_->phrase_.note_ + (16 * phrase);
+  unsigned char *instrData = viewData_->song_->phrase_.instr_ + (16 * phrase);  
+  unsigned char lastInstr = NO_INSTRUMENT;
+  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  
+  char buffer[6];
+  buffer[4] = 0;
+  for (int j = 0; j < 16; j++) {
+    SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
+    unsigned char d = *data++;
+    unsigned char instr = *instrData++;
+
+    if (d == NO_NOTE) {
+      DrawString(pos.x_, pos.y_, "----");
+    } else if (d == NOTE_OFF) {
+      DrawString(pos.x_, pos.y_, "off ");
+    } else {
+      bool showSlice = false;
+      bool invalidSlice = false;
+      uint8_t sliceIndex = 0;
+      if (instr != 0xFF && bank) {
+        I_Instrument *instrObj = bank->GetInstrument(instr);
+        if (instrObj && instrObj->GetType() == IT_SAMPLE) {
+          SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instrObj);
+          if (sampleInstr->HasSlicesForPlayback()) {
+            if (sampleInstr->ShouldDisplaySliceForNote(d)) {
+              showSlice = true;
+              sliceIndex = static_cast<uint8_t>(d - SampleInstrument::SliceNoteBase);
+            } else {
+              invalidSlice = true;
+            }
+          }
+        }
+      }
+      if (showSlice) {
+        npf_snprintf(buffer, sizeof(buffer), "SL%02u", static_cast<unsigned>(sliceIndex));
+      } else if (invalidSlice) {
+        npf_snprintf(buffer, sizeof(buffer), "SL**");
+      } else {
+        note2char(d, buffer);
+      }
+      DrawString(pos.x_, pos.y_, buffer);
+    }
+    pos.y_++;
+  }
+
+  // Draw instruments
+  pos = GetAnchor();
+  pos.x_ += 17;
+
+  data = viewData_->song_->phrase_.instr_ + (16 * viewData_->currentPhrase_);
+  buffer[0] = 'I';
+  buffer[3] = 0;
+
+  for (int j = 0; j < 16; j++) {
+    SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
+
+    unsigned char d = *data++;
+    
+    if (d == NO_INSTRUMENT) {
+      DrawString(pos.x_, pos.y_, "I--");
+    } else {
+      hex2char(d, buffer + 1);
+      DrawString(pos.x_, pos.y_, buffer);
+    }
+    pos.y_++;
+  }
 }
