@@ -53,7 +53,13 @@ bool picoTrackerFileSystem::isCardPresent() {
     return false;
   }
   uint32_t dummy;
-  return card->readOCR(&dummy);
+  if (card->readOCR(&dummy)) {
+    return true;
+  }
+  // readOCR failed: card may have been removed and reinserted.
+  // Attempt remount — succeeds if card is back and fixes the filesystem state.
+  std::lock_guard<Mutex> lock(mutex);
+  return sd.begin(SD_CONFIG);
 }
 
 FileHandle picoTrackerFileSystem::Open(const char *name, const char *mode) {

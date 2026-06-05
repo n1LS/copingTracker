@@ -213,9 +213,6 @@ AppWindow::~AppWindow() {
 
 void AppWindow::SetSdCardPresent(bool present) {
   sdCardMissing_ = !present;
-  if (!present) {
-    sdCardMessageShown_ = false;
-  }
   SetDirty();
 }
 
@@ -684,7 +681,7 @@ void AppWindow::AnimationUpdate() {
   }
 
   if (sdCardMissing_ && !sdCardMessageShown_) {
-    if (_currentView) {
+    if (_currentView && !_currentView->HasModalView()) {
       FullScreenBox *mb = FullScreenBox::Create(*_currentView, "SD Card Missing", "Insert SD Card", 0);
       _currentView->DoModal(mb);
       sdCardMessageShown_ = true;
@@ -697,6 +694,12 @@ void AppWindow::AnimationUpdate() {
       _currentView->DismissModal();
     }
     sdCardMessageShown_ = false;
+    // reinserted SD card means we need to either leave the view or reload the current directory in all views
+    if (_currentView ) {
+      // todo: change this to just back out as little as possible, but for now just jump to the song view
+      _currentView = &views_->songView; 
+      _currentView->OnFocus();
+    }
     SetDirty();
   }
 
