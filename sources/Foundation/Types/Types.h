@@ -223,6 +223,7 @@ struct FourCC {
     // 186 is taken for ActionAutoSlice
     // 187 is taken for ActionShowRecordView
     // 188 is taken for InstrumentCommandSetInstrumentParameter
+    // 189 is taken for VarOutputVolume
 
     VarChannel1Volume = 163,
     VarChannel2Volume = 164,
@@ -266,12 +267,10 @@ struct FourCC {
     VarSampleEditOperation = 181,
     VarRecordLineGain = 182,
     VarRecordMicGain = 183,
-    VarOutputVolume = 184,
     VarImportResampler = 185,
     ActionAutoSlice = 186,
     ActionShowRecordView = 187,
-    // 188 is taken for ActionMassStorage
-    ActionMassStorage = 188,
+
 
     ChiptuneInstrumentWaveform = 200,
     ChiptuneInstrumentAttack = 201,
@@ -286,6 +285,9 @@ struct FourCC {
     ChiptuneInstrumentSweepTime = 210,
     ChiptuneInstrumentSweepAmount = 211,
     ChiptuneInstrumentArpSpeed = 212,
+
+    ActionMassStorage = 50,
+    VarOutputVolume = 74,
 
     Default = 255, // "    "
   };
