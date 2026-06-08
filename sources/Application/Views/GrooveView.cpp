@@ -158,19 +158,14 @@ void GrooveView::DrawView() {
   GUIPoint pos = anchor;
 
   // Display row numbers
-  char buffer[6];
   pos = anchor;
-  pos.x_ -= 3;
-  for (int j = 0; j < 16; j++) {
-    SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
-    hex2char(j, buffer);
-    DrawString(pos.x_, pos.y_, buffer);
-    pos.y_++;
-  }
+  drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
 
   // Display current groove
   pos = anchor;
   SetColor(Theme::View::fg);
+
+  char buffer[6];
 
   unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
   for (int j = 0; j < 16; j++) {
@@ -224,7 +219,7 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
     pos.y_ = anchor.y_ + lastPosition_;
     SetColor(Theme::Song::Playback::live);
     SetBackgroundColor(Theme::View::bg);
-    DrawString(pos.x_, pos.y_, ">");
+    DrawString(pos.x_, pos.y_, char_indicator_position_s);
   };
 
   drawNotes();

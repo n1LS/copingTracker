@@ -1120,19 +1120,16 @@ void PhraseView::DrawView() {
   GUIPoint pos = GetAnchor();
 
   // Display row numbers
-  char buffer[6];
-  for (int j = 0; j < 16; j++) {
-    SetColor(Theme::View::index((j % ALT_ROW_NUMBER) == 0));
-    hex2char(j, buffer);
-    DrawString(pos.x_ - 3, pos.y_ + j, buffer);
-  }
-
+  
+  drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
+  
   // Display notes
   unsigned char *data = phrase_->note_ + (16 * viewData_->currentPhrase_);
   unsigned char *instrData = phrase_->instr_ + (16 * viewData_->currentPhrase_);
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-
+  
+  char buffer[6];
   buffer[4] = 0;
   for (int j = 0; j < 16; j++) {
     unsigned char d = *data++;
@@ -1186,8 +1183,11 @@ void PhraseView::DrawView() {
   buffer[3] = 0;
 
   for (int j = 0; j < 16; j++) {
+    SetBackgroundColor(Theme::View::bg);
+
     unsigned char d = *data++;
     setTextProps(1, j, Theme::Phrase::instrument(j % ALT_ROW_NUMBER == 0));
+    
     if (d == NO_INSTRUMENT) {
       DrawString(pos.x_, pos.y_, "I--");
     } else {
@@ -1198,13 +1198,12 @@ void PhraseView::DrawView() {
         npf_snprintf(buffer, sizeof(buffer), "I%2.2X:", d);
         etl::string<SCREEN_WIDTH - BATTERY_GAUGE_WIDTH> instrLine = buffer;
         GUIPoint location = GetTitlePosition();
-        location.x_ += 10; // make space for "Phrase %2.2x"
-        InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-        I_Instrument *instr = bank->GetInstrument(d);
+        I_Instrument *instr = viewData_->project_->GetInstrumentBank()->GetInstrument(d);
         instrLine += instr->GetDisplayName();
-        SetBackgroundColor(Theme::View::bg);
-        SetColor(Theme::View::fg);
-        DrawString(location.x_, location.y_, instrLine.c_str());
+
+        SetBackgroundColor(Theme::View::Title::bg);
+        SetBackgroundColor(Theme::View::Title::fg);
+        DrawString(location.x_ + 10, location.y_, instrLine.c_str());
       }
     }
     pos.y_++;
@@ -1350,10 +1349,10 @@ void PhraseView::AnimationUpdate() {
 
             if (!player->IsChannelMuted(i)) {
               SetColor(Theme::Song::Playback::active);
-              DrawString(pos.x_, pos.y_, ">");
+              DrawString(pos.x_, pos.y_, char_indicator_position_s);
             } else {
               SetColor(Theme::Song::Playback::muted);
-              DrawString(pos.x_, pos.y_, "-");
+              DrawString(pos.x_, pos.y_, char_indicator_positionMuted_s);
             }
 
             lastPlayingPos_ = viewData_->phrasePlayPos_[i];

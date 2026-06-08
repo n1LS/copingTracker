@@ -91,6 +91,11 @@ struct Theme {
     FIXED(normal, GREEN)
   };
 
+  struct Data {
+    FIXED(negative, RED)
+    FIXED(positive, GREEN)
+  };
+
   struct Waveform {
     FIXED(normal, LIGHT_GRAY)
     FIXED(baseline, DARK_GRAY)
@@ -159,6 +164,8 @@ struct Theme {
       FIXED(muted, LIGHT_RED)
       FIXED(live, LIGHT_YELLOW)
     };
+
+    SWITCHABLE(preview, LIGHT_GRAY, DARK_GRAY)
 
     FIXED(placeholder, DARK_GRAY)
     SWITCHABLE(fg, WHITE, LIGHT_GRAY)
@@ -267,6 +274,7 @@ protected:
 
   void drawMap();
   void drawNotes();
+  void drawRowNumbers(int x, int y, int start, int numRows);
   void drawHelpLegend(FourCC command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();

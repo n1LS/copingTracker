@@ -764,22 +764,14 @@ void TableView::DrawView() {
   GUIPoint anchor = GetAnchor();
 
   // Display row numbers
-  char buffer[6];
-  GUIPoint pos = anchor;
-  pos.x_ -= 3;
-  for (int j = 0; j < 16; j++) {
-    SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
-    hex2char(j, buffer);
-    DrawString(pos.x_, pos.y_, buffer);
-    pos.y_++;
-  }
-
+  drawRowNumbers(anchor.x_ - 3, anchor.y_, 0, 16);
+  
   // Draw command 1
   SetColor(Theme::View::fg);
-  pos = anchor;
-
+  GUIPoint pos = anchor;
+  
   FourCC *f = table.cmd1_;
-
+  
   for (int j = 0; j < 16; j++) {
     FourCC command = *f++;
     setTextProps(0, j);
@@ -789,13 +781,14 @@ void TableView::DrawView() {
       drawHelpLegend(command);
     }
   }
-
+  
   // Draw commands params 1
-
+  
   pos = anchor;
   pos.x_ += 4;
-
+  
   ushort *param = table.param1_;
+  char buffer[6];
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
@@ -952,7 +945,7 @@ void TableView::AnimationUpdate() {
             if (yPos >= 0 && yPos < 16) {
               pos.x_ = anchor.x_ - 1 + (i * 9);
               pos.y_ = anchor.y_ + yPos;
-              DrawString(pos.x_, pos.y_, ">");
+              DrawString(pos.x_, pos.y_, char_indicator_position_s);
             }
           }
         }
@@ -962,7 +955,7 @@ void TableView::AnimationUpdate() {
             if (yPos >= 0 && yPos < 16) {
               pos.x_ = anchor.x_ - 1 + (i * 9);
               pos.y_ = anchor.y_ + yPos;
-              DrawString(pos.x_, pos.y_, ">");
+              DrawString(pos.x_, pos.y_, char_indicator_position_s);
             }
           }
         }

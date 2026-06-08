@@ -51,6 +51,8 @@ protected:
   void processSelectionButtonMask(unsigned short mask);
   void setTextProps(int col, int row);
 
+  void drawPhrasePreview(uint8_t phrase);
+
 private:
   bool updatingPhrase_;      // .Tells if we're in the middle
                              //  of updating a phrase to avoid
