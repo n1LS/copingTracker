@@ -18,11 +18,11 @@
 #include <nanoprintf.h>
 
 namespace {
-inline uchar encodeCommand(FourCC command) {
-  return static_cast<uchar>(static_cast<char>(command));
+inline uint8_t encodeCommand(FourCC command) {
+  return static_cast<uint8_t>(static_cast<char>(command));
 }
 
-inline uchar &getCmdRef(Table &table, int row, int col) {
+inline uint8_t &getCmdRef(Table &table, int row, int col) {
   switch (col) {
     case 0:
       return table.steps_[row].cmd1;
@@ -33,7 +33,7 @@ inline uchar &getCmdRef(Table &table, int row, int col) {
   }
 }
 
-inline ushort &getParamRef(Table &table, int row, int col) {
+inline uint16_t &getParamRef(Table &table, int row, int col) {
   switch (col) {
     case 0:
       return table.steps_[row].param1;
@@ -406,7 +406,7 @@ void TableView::updateCursorValue(int offset) {
         }
         const int commandColumn = col_ / 2;
         FourCC currentCmd = table.getCmd(row_, commandColumn);
-        ushort paramValue = cmdEdit_.GetInt();
+        uint16_t paramValue = cmdEdit_.GetInt();
         paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
         cmdEdit_.SetInt(paramValue);
         getParamRef(table, row_, commandColumn) = paramValue;
@@ -426,9 +426,9 @@ void TableView::pasteLast() {
     case 4:
       {
         const int commandColumn = col_ / 2;
-        uchar &command = getCmdRef(table, row_, commandColumn);
+        uint8_t &command = getCmdRef(table, row_, commandColumn);
         if (command == encodeCommand(FourCC::InstrumentCommandNone)) {
-          command = static_cast<uchar>(lastCmd_);
+          command = static_cast<uint8_t>(lastCmd_);
           isDirty_ = true;
         } else {
           lastCmd_ = table.getCmd(row_, commandColumn);
@@ -643,7 +643,7 @@ void TableView::DrawView() {
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    ushort p = table.getParam(j, 0);
+    uint16_t p = table.getParam(j, 0);
     setTextProps(1, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
@@ -672,7 +672,7 @@ void TableView::DrawView() {
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    ushort p = table.getParam(j, 1);
+    uint16_t p = table.getParam(j, 1);
     setTextProps(3, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
@@ -701,7 +701,7 @@ void TableView::DrawView() {
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    ushort p = table.getParam(j, 2);
+    uint16_t p = table.getParam(j, 2);
     setTextProps(5, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);

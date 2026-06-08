@@ -76,12 +76,12 @@ private:
     int row_;
     int width_;
     int height_;
-    uchar note_[16];
-    uchar instr_[16];
-    uchar cmd1_[16];
-    ushort param1_[16];
-    uchar cmd2_[16];
-    ushort param2_[16];
+    uint8_t note_[16];
+    uint8_t instr_[16];
+    uint8_t cmd1_[16];
+    uint16_t param1_[16];
+    uint8_t cmd2_[16];
+    uint16_t param2_[16];
   } clipboard_;
 
   int saveCol_;

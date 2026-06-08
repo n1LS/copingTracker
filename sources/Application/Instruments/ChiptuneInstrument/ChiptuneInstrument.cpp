@@ -73,7 +73,7 @@ bool ChiptuneInstrument::Render(int channel, fixed *buffer, int size, bool updat
   return true;
 }
 
-void ChiptuneInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
+void ChiptuneInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
   switch (cc) {
     case FourCC::InstrumentCommandSetInstrumentParameter:
       voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);

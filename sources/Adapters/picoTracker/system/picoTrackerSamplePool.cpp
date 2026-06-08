@@ -42,7 +42,7 @@ uint32_t picoTrackerSamplePool::flashLimit_ = 0;
 #define FLASH_RUID_DATA_BYTES 8
 #define FLASH_RUID_TOTAL_BYTES (1 + FLASH_RUID_DUMMY_BYTES + FLASH_RUID_DATA_BYTES)
 
-uint storage_get_flash_capacity() {
+uint32_t storage_get_flash_capacity() {
   uint8_t txbuf[FLASH_RUID_TOTAL_BYTES] = {0x9f};
   uint8_t rxbuf[FLASH_RUID_TOTAL_BYTES] = {0};
   flash_do_cmd(txbuf, rxbuf, FLASH_RUID_TOTAL_BYTES);

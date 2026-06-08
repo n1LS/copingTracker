@@ -110,7 +110,7 @@ void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
 
       InstrumentType instrType = IT_SAMPLE; // default if no type in project XML
       if (instype[0] != '\0') {
-        for (uint i = 0; i < IT_LAST; i++) {
+        for (uint32_t i = 0; i < IT_LAST; i++) {
           if (!strcasecmp(instype, InstrumentTypeNames[i])) {
             instrType = (InstrumentType)i;
             break;

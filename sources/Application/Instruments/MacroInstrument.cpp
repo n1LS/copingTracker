@@ -138,7 +138,7 @@ bool MacroInstrument::IsInitialized() { /*return (source_ != 0); */
 
 void MacroInstrument::Update(Observable &o, I_ObservableData *d) {};
 
-void MacroInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {};
+void MacroInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {};
 
 bool MacroInstrument::IsEmpty() {
   return false;

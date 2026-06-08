@@ -684,7 +684,7 @@ void Player::ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT]) {
   };
 }
 
-bool Player::ProcessChannelCommand(int channel, FourCC cmd, ushort param) {
+bool Player::ProcessChannelCommand(int channel, FourCC cmd, uint16_t param) {
 
   I_Instrument *instr = mixer_.GetInstrument(channel);
 

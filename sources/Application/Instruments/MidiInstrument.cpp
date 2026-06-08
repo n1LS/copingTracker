@@ -226,7 +226,7 @@ bool MidiInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void MidiInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
+void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
 
   Variable *v = FindVariable(FourCC::MidiInstrumentChannel);
   int mchannel = v->GetInt();
@@ -370,13 +370,13 @@ bool MidiInstrument::GetTableAutomation() {
 }
 
 void MidiInstrument::GetTableState(TableSaveState &state) {
-  memcpy(state.hopCount_, tableState_.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(state.hopCount_, tableState_.hopCount_, sizeof(uint8_t) * TABLE_STEPS * 3);
   memcpy(state.position_, tableState_.position_, sizeof(int) * 3);
   state.groove_ = tableState_.groove_;
 }
 
 void MidiInstrument::SetTableState(TableSaveState &state) {
-  memcpy(tableState_.hopCount_, state.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(tableState_.hopCount_, state.hopCount_, sizeof(uint8_t) * TABLE_STEPS * 3);
   memcpy(tableState_.position_, state.position_, sizeof(int) * 3);
   tableState_.groove_ = state.groove_;
 }

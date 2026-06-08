@@ -133,7 +133,7 @@ bool TablePlayback::ProcessLocalCommand(int row, const Table &table, TablePlayer
   bool hopped = false;
 
   FourCC command = table.getCmd(position_[row], row);
-  ushort param = table.getParam(position_[row], row);
+  uint16_t param = table.getParam(position_[row], row);
 
   // First process any positional command
 
@@ -202,7 +202,7 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
         if (automated_) {
           TableSaveState state;
           instrument_->GetTableState(state);
-          memcpy(hopCount_, state.hopCount_, sizeof(uchar) * TABLE_STEPS * TABLE_COLUMNS);
+          memcpy(hopCount_, state.hopCount_, sizeof(uint8_t) * TABLE_STEPS * TABLE_COLUMNS);
           memcpy(position_, state.position_, sizeof(int) * TABLE_COLUMNS);
           groove_ = state.groove_;
         }
@@ -242,7 +242,7 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
 
         if (automated_) {
           TableSaveState state;
-          memcpy(state.hopCount_, hopCount_, sizeof(uchar) * TABLE_STEPS * TABLE_COLUMNS);
+          memcpy(state.hopCount_, hopCount_, sizeof(uint8_t) * TABLE_STEPS * TABLE_COLUMNS);
           memcpy(state.position_, position_, sizeof(int) * TABLE_COLUMNS);
           state.groove_ = groove_;
           instrument_->SetTableState(state);

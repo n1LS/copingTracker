@@ -51,7 +51,7 @@ static char GetCommandGroupLetter(FourCC command) {
 }
 
 // Applies command-specific range limits to parameter values
-ushort CommandList::RangeLimitCommandParam(FourCC command, ushort paramValue) {
+uint16_t CommandList::RangeLimitCommandParam(FourCC command, uint16_t paramValue) {
   // Each command type can have its own specific range limits
   if (command == FourCC::InstrumentCommandVelocity) {
     // For VEL command, limit the bb part to 0x7F (127) while preserving the aa
@@ -70,7 +70,7 @@ ushort CommandList::RangeLimitCommandParam(FourCC command, ushort paramValue) {
 }
 
 FourCC CommandList::GetNext(FourCC current) {
-  for (uint i = 0; i < sizeof(_all) / sizeof(FourCC) - 1; i++) {
+  for (uint32_t i = 0; i < sizeof(_all) / sizeof(FourCC) - 1; i++) {
     if (_all[i] == current) {
       return _all[i + 1];
     };
@@ -79,8 +79,8 @@ FourCC CommandList::GetNext(FourCC current) {
 }
 
 FourCC CommandList::GetPrev(FourCC current) {
-  uint count = sizeof(_all) / sizeof(FourCC);
-  for (uint i = 2; i < count; i++) {
+  uint32_t count = sizeof(_all) / sizeof(FourCC);
+  for (uint32_t i = 2; i < count; i++) {
     if (_all[i] == current) {
       return _all[i - 1];
     };
@@ -91,7 +91,7 @@ FourCC CommandList::GetPrev(FourCC current) {
 FourCC CommandList::GetNextAlpha(FourCC current) {
   char letter = GetCommandGroupLetter(current);
   bool found = false;
-  for (uint i = 0; i < sizeof(_all) / sizeof(FourCC); i++) {
+  for (uint32_t i = 0; i < sizeof(_all) / sizeof(FourCC); i++) {
     char tLetter = GetCommandGroupLetter(_all[i]);
     if (!found) {
       if (tLetter == letter) {
@@ -111,9 +111,9 @@ FourCC CommandList::GetPrevAlpha(FourCC current) {
   char letter = GetCommandGroupLetter(current);
   bool found = false;
   FourCC tReturn = FourCC::Default;
-  uint count = sizeof(_all) / sizeof(FourCC);
+  uint32_t count = sizeof(_all) / sizeof(FourCC);
 
-  for (uint i = count - 1; i > 0; i--) {
+  for (uint32_t i = count - 1; i > 0; i--) {
     char tLetter = GetCommandGroupLetter(_all[i]);
     if (!found) {
       if (tLetter == letter) {

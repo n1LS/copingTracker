@@ -75,7 +75,7 @@ public:
   }
 
   void ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT] = nullptr);
-  bool ProcessChannelCommand(int channel, FourCC cmd, ushort param);
+  bool ProcessChannelCommand(int channel, FourCC cmd, uint16_t param);
 
   void StartStreaming(const char *name, int startSample = 0);
   void StartLoopingStreaming(const char *name);
@@ -144,7 +144,7 @@ protected:
   void SetAudioActive(bool active);
 
   bool isPlayable(int row, int col, int chainPos = 0);
-  bool findPlayable(uchar *row, int col, uchar chainPos = 0);
+  bool findPlayable(uint8_t *row, int col, uint8_t chainPos = 0);
 
 private:
   PlayerMixer mixer_;

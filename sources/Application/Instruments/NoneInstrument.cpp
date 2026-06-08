@@ -38,7 +38,7 @@ bool NoneInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void NoneInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {};
+void NoneInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {};
 
 int NoneInstrument::GetTable() {
   return 0;
