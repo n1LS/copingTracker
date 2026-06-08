@@ -869,9 +869,21 @@ void SongView::DrawView() {
 
   drawMap();
   drawNotes();
+  drawChainPreview();
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
+  }
+}
+
+void SongView::drawChainPreview() {
+  char buffer[3];
+  buffer[2] = 0;
+
+  for (int i = 0; i < PHRASES_PER_CHAIN; i++) {
+    SetColor(Theme::Song::preview(i & ALT_ROW_NUMBER == 0));
+    hex2char(X, buffer);
+    DrawString(30, i, buffer);
   }
 }
 

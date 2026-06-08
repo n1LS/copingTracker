@@ -661,14 +661,14 @@ void ChainView::DrawView() {
     SetBackgroundColor(Theme::View::bg);
 
     if (transpose > 0) {
-      npf_snprintf(row, sizeof(row), "+%3d", transpose);
+      npf_snprintf(row, sizeof(row), "+%2d", transpose);
       SetColor(Theme::Data::positive);
-      DrawString(pos.x_ + 3, pos.y_, row);
     } else if (transpose < 0) {
-      npf_snprintf(row, sizeof(row), "-%3d", -transpose);
+      npf_snprintf(row, sizeof(row), "-%2d", -transpose);
       SetColor(Theme::Data::negative);
-      DrawString(pos.x_ + 3, pos.y_, row);
     }
+
+    DrawString(pos.x_ + 3, pos.y_, row);
 
     pos.y_++;
   }
@@ -788,7 +788,7 @@ void ChainView::AnimationUpdate() {
 
 void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
-  pos.x_ += 12;
+  pos.x_ += 15;
 
   // Display notes
   PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];
