@@ -128,12 +128,12 @@ bool TablePlayback::GetAutomation() {
   return automated_;
 }
 
-bool TablePlayback::ProcessLocalCommand(int row, FourCC *commandList, ushort *paramList, TablePlayerChange &tpc) {
+bool TablePlayback::ProcessLocalCommand(int row, const Table &table, TablePlayerChange &tpc) {
 
   bool hopped = false;
 
-  FourCC command = commandList[position_[row]];
-  ushort param = paramList[position_[row]];
+  FourCC command = table.getCmd(position_[row], row);
+  ushort param = table.getParam(position_[row], row);
 
   // First process any positional command
 
@@ -160,8 +160,8 @@ bool TablePlayback::ProcessLocalCommand(int row, FourCC *commandList, ushort *pa
   // Update values if needed
 
   if (hopped) {
-    command = commandList[position_[row]];
-    param = paramList[position_[row]];
+    command = table.getCmd(position_[row], row);
+    param = table.getParam(position_[row], row);
   }
 
   // Now process local command on possibly hopped row
@@ -209,13 +209,13 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
 
         // try local processing for if it changes current table or position
 
-        hopped_[0] = ProcessLocalCommand(0, table_->cmd1_, table_->param1_, tpc);
-        hopped_[1] = ProcessLocalCommand(1, table_->cmd2_, table_->param2_, tpc);
-        hopped_[2] = ProcessLocalCommand(2, table_->cmd3_, table_->param3_, tpc);
+        hopped_[0] = ProcessLocalCommand(0, *table_, tpc);
+        hopped_[1] = ProcessLocalCommand(1, *table_, tpc);
+        hopped_[2] = ProcessLocalCommand(2, *table_, tpc);
 
-        instrument_->ProcessCommand(channel_, table_->cmd1_[position_[0]], table_->param1_[position_[0]]);
-        instrument_->ProcessCommand(channel_, table_->cmd2_[position_[1]], table_->param2_[position_[1]]);
-        instrument_->ProcessCommand(channel_, table_->cmd3_[position_[2]], table_->param3_[position_[2]]);
+        instrument_->ProcessCommand(channel_, table_->getCmd(position_[0], 0), table_->getParam(position_[0], 0));
+        instrument_->ProcessCommand(channel_, table_->getCmd(position_[1], 1), table_->getParam(position_[1], 1));
+        instrument_->ProcessCommand(channel_, table_->getCmd(position_[2], 2), table_->getParam(position_[2], 2));
 
         previous_[0] = position_[0];
         previous_[1] = position_[1];
@@ -226,13 +226,13 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
 
       if (gs->UpdateGroove(groove_, true)) {
 
-        if ((table_->cmd1_[position_[0]] != FourCC::InstrumentCommandHop) || (!hopped_[0])) {
+        if ((table_->getCmd(position_[0], 0) != FourCC::InstrumentCommandHop) || (!hopped_[0])) {
           position_[0] = (position_[0] + 1) % 16;
         }
-        if ((table_->cmd2_[position_[1]] != FourCC::InstrumentCommandHop) || (!hopped_[1])) {
+        if ((table_->getCmd(position_[1], 1) != FourCC::InstrumentCommandHop) || (!hopped_[1])) {
           position_[1] = (position_[1] + 1) % 16;
         }
-        if ((table_->cmd3_[position_[2]] != FourCC::InstrumentCommandHop) || (!hopped_[2])) {
+        if ((table_->getCmd(position_[2], 2) != FourCC::InstrumentCommandHop) || (!hopped_[2])) {
           position_[2] = (position_[2] + 1) % 16;
         }
 

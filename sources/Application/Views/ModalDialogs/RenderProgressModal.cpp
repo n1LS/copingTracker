@@ -232,14 +232,14 @@ int RenderProgressModal::getChainPhraseCount(int songRow, int channel) const {
   }
 
   const Song *song = viewData_->song_;
-  const unsigned char chain = song->data_[songRow * SONG_CHANNEL_COUNT + channel];
+  const unsigned char chain = song->rows_[songRow].chains[channel];
   if (chain == EMPTY_SONG_VALUE) {
     return 0;
   }
 
   int phraseCount = 0;
   for (int i = 0; i < PHRASES_PER_CHAIN; i++) {
-    if (song->chain_.data_[chain * PHRASES_PER_CHAIN + i] == EMPTY_SONG_VALUE) {
+    if (song->chain_.steps_[chain * PHRASES_PER_CHAIN + i].phrase == EMPTY_SONG_VALUE) {
       break;
     }
     phraseCount++;

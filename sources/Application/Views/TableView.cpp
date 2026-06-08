@@ -17,6 +17,34 @@
 #include "ViewData.h"
 #include <nanoprintf.h>
 
+namespace {
+inline uchar encodeCommand(FourCC command) {
+  return static_cast<uchar>(static_cast<char>(command));
+}
+
+inline uchar &getCmdRef(Table &table, int row, int col) {
+  switch (col) {
+    case 0:
+      return table.steps_[row].cmd1;
+    case 1:
+      return table.steps_[row].cmd2;
+    default:
+      return table.steps_[row].cmd3;
+  }
+}
+
+inline ushort &getParamRef(Table &table, int row, int col) {
+  switch (col) {
+    case 0:
+      return table.steps_[row].param1;
+    case 1:
+      return table.steps_[row].param2;
+    default:
+      return table.steps_[row].param3;
+  }
+}
+} // namespace
+
 TableView::TableView(GUIWindow &w, ViewData *viewData)
     : ScreenView(w, viewData), cmdEdit_(FourCC::ActionEdit, 0), cmdEditPos_(0, 10),
       cmdEditField_(cmdEditPos_, cmdEdit_, 4, "%4.4X", 0, 0xFFFF, 16, true) {
@@ -115,27 +143,15 @@ void TableView::fillClipboardData() {
 
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
-  uchar *src1 = (unsigned char *)table.cmd1_;
-  uchar *dst1 = clipboard_.cmd1_;
-  ushort *src2 = table.param1_;
-  ushort *dst2 = clipboard_.param1_;
-  uchar *src3 = (unsigned char *)table.cmd2_;
-  uchar *dst3 = clipboard_.cmd2_;
-  ushort *src4 = table.param2_;
-  ushort *dst4 = clipboard_.param2_;
-  uchar *src5 = (unsigned char *)table.cmd3_;
-  uchar *dst5 = clipboard_.cmd3_;
-  ushort *src6 = table.param3_;
-  ushort *dst6 = clipboard_.param3_;
-
   for (int i = 0; i < clipboard_.height_; i++) {
-    dst1[i] = src1[clipboard_.row_ + i];
-    dst2[i] = src2[clipboard_.row_ + i];
-    dst3[i] = src3[clipboard_.row_ + i];
-    dst4[i] = src4[clipboard_.row_ + i];
-    dst5[i] = src5[clipboard_.row_ + i];
-    dst6[i] = src6[clipboard_.row_ + i];
-  };
+    const TableStep &step = table.steps_[clipboard_.row_ + i];
+    clipboard_.cmd1_[i] = step.cmd1;
+    clipboard_.param1_[i] = step.param1;
+    clipboard_.cmd2_[i] = step.cmd2;
+    clipboard_.param2_[i] = step.param2;
+    clipboard_.cmd3_[i] = step.cmd3;
+    clipboard_.param3_[i] = step.param3;
+  }
   updateCursor(0, 0);
 }
 
@@ -187,33 +203,28 @@ void TableView::cutSelection() {
   // Loop over selection col, row & clear data inside it
 
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
-  uchar *dst1 = (unsigned char *)table.cmd1_;
-  ushort *dst2 = table.param1_;
-  uchar *dst3 = (unsigned char *)table.cmd2_;
-  ushort *dst4 = table.param2_;
-  uchar *dst5 = (unsigned char *)table.cmd3_;
-  ushort *dst6 = table.param3_;
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
+      const int row = j + clipboard_.row_;
       switch (i + clipboard_.col_) {
         case 0:
-          dst1[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
+          table.steps_[row].cmd1 = encodeCommand(FourCC::InstrumentCommandNone);
           break;
         case 1:
-          dst2[j + clipboard_.row_] = 0x0000;
+          table.steps_[row].param1 = 0x0000;
           break;
         case 2:
-          dst3[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
+          table.steps_[row].cmd2 = encodeCommand(FourCC::InstrumentCommandNone);
           break;
         case 3:
-          dst4[j + clipboard_.row_] = 0x0000;
+          table.steps_[row].param2 = 0x0000;
           break;
         case 4:
-          dst5[j + clipboard_.row_] = FourCC::InstrumentCommandNone;
+          table.steps_[row].cmd3 = encodeCommand(FourCC::InstrumentCommandNone);
           break;
         case 5:
-          dst6[j + clipboard_.row_] = 0x0000;
+          table.steps_[row].param3 = 0x0000;
           break;
       }
     }
@@ -245,39 +256,27 @@ void TableView::pasteClipboard() {
     */
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
-  uchar *dst1 = (unsigned char *)table.cmd1_;
-  uchar *src1 = clipboard_.cmd1_;
-  ushort *dst2 = table.param1_;
-  ushort *src2 = clipboard_.param1_;
-  uchar *dst3 = (unsigned char *)table.cmd2_;
-  uchar *src3 = clipboard_.cmd2_;
-  ushort *dst4 = table.param2_;
-  ushort *src4 = clipboard_.param2_;
-  uchar *dst5 = (unsigned char *)table.cmd3_;
-  uchar *src5 = clipboard_.cmd3_;
-  ushort *dst6 = table.param3_;
-  ushort *src6 = clipboard_.param3_;
-
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
+      const int row = (j + row_) % 16;
       switch (i + clipboard_.col_) {
         case 0:
-          dst1[(j + row_) % 16] = src1[j];
+          table.steps_[row].cmd1 = clipboard_.cmd1_[j];
           break;
         case 1:
-          dst2[(j + row_) % 16] = src2[j];
+          table.steps_[row].param1 = clipboard_.param1_[j];
           break;
         case 2:
-          dst3[(j + row_) % 16] = src3[j];
+          table.steps_[row].cmd2 = clipboard_.cmd2_[j];
           break;
         case 3:
-          dst4[(j + row_) % 16] = src4[j];
+          table.steps_[row].param2 = clipboard_.param2_[j];
           break;
         case 4:
-          dst5[(j + row_) % 16] = src5[j];
+          table.steps_[row].cmd3 = clipboard_.cmd3_[j];
           break;
         case 5:
-          dst6[(j + row_) % 16] = src6[j];
+          table.steps_[row].param3 = clipboard_.param3_[j];
           break;
       }
     }
@@ -311,19 +310,19 @@ void TableView::updateCursor(int dx, int dy) {
       p.x_ += 4;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
-      cmdEdit_.SetInt(*(table.param1_ + row_));
+      cmdEdit_.SetInt(table.steps_[row_].param1);
       break;
     case 3:
       p.x_ += 13;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
-      cmdEdit_.SetInt(*(table.param2_ + row_));
+      cmdEdit_.SetInt(table.steps_[row_].param2);
       break;
     case 5:
       p.x_ += 22;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
-      cmdEdit_.SetInt(*(table.param3_ + row_));
+      cmdEdit_.SetInt(table.steps_[row_].param3);
       break;
   };
 
@@ -347,159 +346,48 @@ void TableView::warpToNeighbour(int dir) {
 
 void TableView::updateCursorValue(int offset) {
 
-  unsigned char *c = 0;
-  unsigned char limit = 0;
-  bool wrap = false;
-  FourCC *cc;
-
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   switch (col_) {
     case 0:
-      cc = table.cmd1_ + row_;
-      switch (offset) {
-        case 0x01:
-          *cc = CommandList::GetNext(*cc);
-          if (*cc == FourCC::InstrumentCommandTable) {
-            *cc = CommandList::GetNext(*cc);
-          }
-          break;
-        case 0x10:
-          *cc = CommandList::GetNextAlpha(*cc);
-          if (*cc == FourCC::InstrumentCommandTable) {
-            *cc = CommandList::GetNextAlpha(*cc);
-          }
-          break;
-        case -0x01:
-          *cc = CommandList::GetPrev(*cc);
-          if (*cc == FourCC::InstrumentCommandTable) {
-            *cc = CommandList::GetPrev(*cc);
-          }
-          break;
-        case -0x10:
-          *cc = CommandList::GetPrevAlpha(*cc);
-          if (*cc == FourCC::InstrumentCommandTable) {
-            *cc = CommandList::GetPrevAlpha(*cc);
-          }
-          break;
-      }
-      lastCmd_ = *cc;
-      break;
-
-    case 1:
-      {
-        switch (offset) {
-          case 0x01:
-            cmdEditField_.ProcessArrow(EPBM_RIGHT);
-            break;
-          case 0x10:
-            cmdEditField_.ProcessArrow(EPBM_UP);
-            break;
-          case -0x01:
-            cmdEditField_.ProcessArrow(EPBM_LEFT);
-            break;
-          case -0x10:
-            cmdEditField_.ProcessArrow(EPBM_DOWN);
-            break;
-        }
-        // Sanitize MIDI velocity values if needed
-        FourCC currentCmd = *(table.cmd1_ + row_);
-        ushort paramValue = cmdEdit_.GetInt();
-        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-        cmdEdit_.SetInt(paramValue);
-        *(table.param1_ + row_) = paramValue;
-        lastParam_ = paramValue;
-        break;
-      }
     case 2:
-      {
-        cc = table.cmd2_ + row_;
-        switch (offset) {
-          case 0x01:
-            *cc = CommandList::GetNext(*cc);
-            if (*cc == FourCC::InstrumentCommandTable) {
-              *cc = CommandList::GetNext(*cc);
-            }
-            break;
-          case 0x10:
-            *cc = CommandList::GetNextAlpha(*cc);
-            if (*cc == FourCC::InstrumentCommandTable) {
-              *cc = CommandList::GetNextAlpha(*cc);
-            }
-            break;
-          case -0x01:
-            *cc = CommandList::GetPrev(*cc);
-            if (*cc == FourCC::InstrumentCommandTable) {
-              *cc = CommandList::GetPrev(*cc);
-            }
-            break;
-          case -0x10:
-            *cc = CommandList::GetPrevAlpha(*cc);
-            if (*cc == FourCC::InstrumentCommandTable) {
-              *cc = CommandList::GetPrevAlpha(*cc);
-            }
-            break;
-        }
-        lastCmd_ = *cc;
-        break;
-      }
-    case 3:
-      {
-        switch (offset) {
-          case 0x01:
-            cmdEditField_.ProcessArrow(EPBM_RIGHT);
-            break;
-          case 0x10:
-            cmdEditField_.ProcessArrow(EPBM_UP);
-            break;
-          case -0x01:
-            cmdEditField_.ProcessArrow(EPBM_LEFT);
-            break;
-          case -0x10:
-            cmdEditField_.ProcessArrow(EPBM_DOWN);
-            break;
-        }
-        // Sanitize MIDI velocity values if needed
-        FourCC currentCmd = *(table.cmd2_ + row_);
-        ushort paramValue = cmdEdit_.GetInt();
-        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-        cmdEdit_.SetInt(paramValue);
-        *(table.param2_ + row_) = paramValue;
-        lastParam_ = paramValue;
-        break;
-      }
     case 4:
       {
-        cc = table.cmd3_ + row_;
+        const int commandColumn = col_ / 2;
+        FourCC command = table.getCmd(row_, commandColumn);
         switch (offset) {
           case 0x01:
-            *cc = CommandList::GetNext(*cc);
-            if (*cc == FourCC::InstrumentCommandTable) {
-              *cc = CommandList::GetNext(*cc);
+            command = CommandList::GetNext(command);
+            if (command == FourCC::InstrumentCommandTable) {
+              command = CommandList::GetNext(command);
             }
             break;
           case 0x10:
-            *cc = CommandList::GetNextAlpha(*cc);
-            if (*cc == FourCC::InstrumentCommandTable) {
-              *cc = CommandList::GetNextAlpha(*cc);
+            command = CommandList::GetNextAlpha(command);
+            if (command == FourCC::InstrumentCommandTable) {
+              command = CommandList::GetNextAlpha(command);
             }
             break;
           case -0x01:
-            *cc = CommandList::GetPrev(*cc);
-            if (*cc == FourCC::InstrumentCommandTable) {
-              *cc = CommandList::GetPrev(*cc);
+            command = CommandList::GetPrev(command);
+            if (command == FourCC::InstrumentCommandTable) {
+              command = CommandList::GetPrev(command);
             }
             break;
           case -0x10:
-            *cc = CommandList::GetPrevAlpha(*cc);
-            if (*cc == FourCC::InstrumentCommandTable) {
-              *cc = CommandList::GetPrevAlpha(*cc);
+            command = CommandList::GetPrevAlpha(command);
+            if (command == FourCC::InstrumentCommandTable) {
+              command = CommandList::GetPrevAlpha(command);
             }
             break;
         }
-        lastCmd_ = *cc;
+        getCmdRef(table, row_, commandColumn) = encodeCommand(command);
+        lastCmd_ = command;
         break;
       }
+
+    case 1:
+    case 3:
     case 5:
       {
         switch (offset) {
@@ -516,75 +404,40 @@ void TableView::updateCursorValue(int offset) {
             cmdEditField_.ProcessArrow(EPBM_DOWN);
             break;
         }
-        // Sanitize MIDI velocity values if needed
-        FourCC currentCmd = *(table.cmd3_ + row_);
+        const int commandColumn = col_ / 2;
+        FourCC currentCmd = table.getCmd(row_, commandColumn);
         ushort paramValue = cmdEdit_.GetInt();
         paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
         cmdEdit_.SetInt(paramValue);
-        *(table.param3_ + row_) = paramValue;
+        getParamRef(table, row_, commandColumn) = paramValue;
         lastParam_ = paramValue;
         break;
       }
-  }
-  if (c) {
-    updateData(c, offset, limit, wrap);
-    switch (col_) {
-      case 0:
-        lastVol_ = *c;
-        break;
-      case 1:
-        lastTick_ = *c;
-        break;
-      case 2:
-        lastTsp_ = *c;
-        break;
-    }
   }
   isDirty_ = true;
 }
 
 void TableView::pasteLast() {
-  uchar *c = 0;
-
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   switch (col_) {
     case 0:
-      c = (unsigned char *)table.cmd1_ + row_;
-      if (*c == FourCC::InstrumentCommandNone) {
-        *c = lastCmd_;
-        isDirty_ = true;
-      } else {
-        lastCmd_ = *c;
+    case 2:
+    case 4:
+      {
+        const int commandColumn = col_ / 2;
+        uchar &command = getCmdRef(table, row_, commandColumn);
+        if (command == encodeCommand(FourCC::InstrumentCommandNone)) {
+          command = static_cast<uchar>(lastCmd_);
+          isDirty_ = true;
+        } else {
+          lastCmd_ = table.getCmd(row_, commandColumn);
+        }
+        break;
       }
-      break;
 
     case 1:
-      break;
-
-    case 2:
-      c = (unsigned char *)table.cmd2_ + row_;
-      if (*c == FourCC::InstrumentCommandNone) {
-        *c = lastCmd_;
-        isDirty_ = true;
-      } else {
-        lastCmd_ = *c;
-      }
-      break;
-
     case 3:
-      break;
-
-    case 4:
-      c = (unsigned char *)table.cmd3_ + row_;
-      if (*c == FourCC::InstrumentCommandNone) {
-        *c = lastCmd_;
-        isDirty_ = true;
-      } else {
-        lastCmd_ = *c;
-      }
-      break;
-
     case 5:
       break;
   }
@@ -768,12 +621,12 @@ void TableView::DrawView() {
   
   // Draw command 1
   SetColor(Theme::View::fg);
-  GUIPoint pos = anchor;
-  
+
   FourCC *f = table.cmd1_;
-  
+  pos = anchor;
+
   for (int j = 0; j < 16; j++) {
-    FourCC command = *f++;
+    FourCC command = table.getCmd(j, 0);
     setTextProps(0, j);
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
@@ -786,13 +639,11 @@ void TableView::DrawView() {
   
   pos = anchor;
   pos.x_ += 4;
-  
-  ushort *param = table.param1_;
   char buffer[6];
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    ushort p = *param++;
+    ushort p = table.getParam(j, 0);
     setTextProps(1, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
@@ -804,10 +655,8 @@ void TableView::DrawView() {
   pos = anchor;
   pos.x_ += 9;
 
-  f = table.cmd2_;
-
   for (int j = 0; j < 16; j++) {
-    FourCC command = *f++;
+    FourCC command = table.getCmd(j, 1);
     setTextProps(2, j);
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
@@ -820,12 +669,10 @@ void TableView::DrawView() {
 
   pos = anchor;
   pos.x_ += 13;
-
-  param = table.param2_;
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    ushort p = *param++;
+    ushort p = table.getParam(j, 1);
     setTextProps(3, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
@@ -837,10 +684,8 @@ void TableView::DrawView() {
   pos = anchor;
   pos.x_ += 18;
 
-  f = table.cmd3_;
-
   for (int j = 0; j < 16; j++) {
-    FourCC command = *f++;
+    FourCC command = table.getCmd(j, 2);
     setTextProps(4, j);
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
@@ -853,12 +698,10 @@ void TableView::DrawView() {
 
   pos = anchor;
   pos.x_ += 22;
-
-  param = table.param3_;
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    ushort p = *param++;
+    ushort p = table.getParam(j, 2);
     setTextProps(5, j);
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);

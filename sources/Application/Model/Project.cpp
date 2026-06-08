@@ -232,60 +232,43 @@ void Project::Purge() {
   song_.chain_.ClearAllocation();
   song_.phrase_.ClearAllocation();
 
-  unsigned char *data = song_.data_;
-  for (int i = 0; i < 256 * SONG_CHANNEL_COUNT; i++) {
-    if (*data != DATA_UNUSED_VALUE) {
-      song_.chain_.SetUsed(*data);
+  for (int i = 0; i < SONG_ROW_COUNT; i++) {
+    for (int j = 0; j < SONG_CHANNEL_COUNT; j++) {
+      uint8_t v = song_.rows_[i].chains[j];
+      if (v != DATA_UNUSED_VALUE) {
+        song_.chain_.SetUsed(v);
+      }
     }
-    data++;
   }
-
-  data = song_.chain_.data_;
-  unsigned char *data2 = song_.chain_.transpose_;
 
   for (int i = 0; i < CHAIN_COUNT; i++) {
-
     if (song_.chain_.IsUsed(i)) {
-      for (int j = 0; j < 16; j++) {
-        if (*data != DATA_UNUSED_VALUE) {
-          song_.phrase_.SetUsed(*data);
+      for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
+        uint8_t p = song_.chain_.steps_[i * PHRASES_PER_CHAIN + j].phrase;
+        if (p != DATA_UNUSED_VALUE) {
+          song_.phrase_.SetUsed(p);
         }
-        data++;
-        data2++;
       }
     } else {
-
-      for (int j = 0; j < 16; j++) {
-        *data++ = DATA_UNUSED_VALUE;
-        *data2++ = 0x00;
+      for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
+        song_.chain_.steps_[i * PHRASES_PER_CHAIN + j].phrase    = DATA_UNUSED_VALUE;
+        song_.chain_.steps_[i * PHRASES_PER_CHAIN + j].transpose = 0x00;
       }
     }
   }
 
-  data = song_.phrase_.note_;
-  data2 = song_.phrase_.instr_;
-
-  FourCC *cmd1 = song_.phrase_.cmd1_;
-  ushort *param1 = song_.phrase_.param1_;
-  FourCC *cmd2 = song_.phrase_.cmd2_;
-  ushort *param2 = song_.phrase_.param2_;
-
+  static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(FourCC::InstrumentCommandNone));
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
       if (!song_.phrase_.IsUsed(i)) {
-        *data = DATA_UNUSED_VALUE;
-        *data2 = DATA_UNUSED_VALUE;
-        *cmd1 = FourCC::InstrumentCommandNone;
-        *param1 = 0;
-        *cmd2 = FourCC::InstrumentCommandNone;
-        *param2 = 0;
+        PhraseStep *step = &(song_.phrase_.steps_[i * STEPS_PER_PHRASE + j]);
+        step->note   = DATA_UNUSED_VALUE;
+        step->instr  = DATA_UNUSED_VALUE;
+        step->cmd1   = kNone;
+        step->param1 = 0;
+        step->cmd2   = kNone;
+        step->param2 = 0;
       }
-      data++;
-      data2++;
-      cmd1++;
-      param1++;
-      cmd2++;
-      param2++;
     };
   }
 }
@@ -343,15 +326,13 @@ void Project::PurgeSamples() {
 void Project::PurgeInstruments() {
 
   bool used[MAX_INSTRUMENT_COUNT] = {false};
-  unsigned char *data = song_.phrase_.instr_;
-
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
-      if (*data != DATA_UNUSED_VALUE) {
-        NAssert(*data < MAX_INSTRUMENT_COUNT);
-        used[*data] = true;
+      uint8_t instr = song_.phrase_.steps_[i * STEPS_PER_PHRASE + j].instr;
+      if (instr != DATA_UNUSED_VALUE) {
+        NAssert(instr < MAX_INSTRUMENT_COUNT);
+        used[instr] = true;
       }
-      data++;
     }
   }
 

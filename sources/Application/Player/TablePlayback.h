@@ -28,7 +28,7 @@ struct TablePlayback {
 public:
   void Init(int i);
   void ProcessStep(TablePlayerChange &tpc);
-  bool ProcessLocalCommand(int row, FourCC *commandList, ushort *paramList, TablePlayerChange &tpc);
+  bool ProcessLocalCommand(int row, const Table &table, TablePlayerChange &tpc);
   void Start(I_Instrument *, Table &, bool automated);
   void Stop();
   int GetPlaybackPosition(int channel);

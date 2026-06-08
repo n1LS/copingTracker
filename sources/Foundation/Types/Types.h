@@ -291,7 +291,13 @@ struct FourCC {
 
     Default = 255, // "    "
   };
-  ETL_DECLARE_ENUM_TYPE(FourCC, char)
+
+  uint8_t raw() {
+    return static_cast<uint8_t>(*this);
+  }
+
+  ETL_DECLARE_ENUM_TYPE(FourCC, uint8_t)
+
   // Not all enums need reflection. Only cases where we need reflection is the
   // FourCC codes that need to be converted to text in order to display on
   // screen
@@ -468,10 +474,12 @@ struct FourCC {
   ETL_END_ENUM_TYPE
 };
 
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned char uchar;
-
 typedef uint32_t stereosample;
+
+typedef unsigned int uint;
+
+typedef unsigned short ushort;
+
+typedef unsigned char uchar;
 
 #endif

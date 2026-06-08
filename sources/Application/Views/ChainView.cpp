@@ -163,40 +163,10 @@ void ChainView::clonePosition() {
   if (next == NO_MORE_PHRASE)
     return;
 
-  unsigned char *src = viewData_->song_->phrase_.note_ + 16 * current;
-  unsigned char *dst = viewData_->song_->phrase_.note_ + 16 * next;
+  PhraseStep *src = &viewData_->song_->phrase_.steps_[current];
+  PhraseStep *dst = &viewData_->song_->phrase_.steps_[next];
   for (int i = 0; i < 16; i++) {
     *dst++ = *src++;
-  };
-
-  src = viewData_->song_->phrase_.instr_ + 16 * current;
-  dst = viewData_->song_->phrase_.instr_ + 16 * next;
-  for (int i = 0; i < 16; i++) {
-    *dst++ = *src++;
-  };
-
-  src = (unsigned char *)viewData_->song_->phrase_.cmd1_ + 16 * current;
-  dst = (unsigned char *)viewData_->song_->phrase_.cmd1_ + 16 * next;
-  for (int i = 0; i < 16; i++) {
-    *dst++ = *src++;
-  };
-
-  ushort *ssrc = viewData_->song_->phrase_.param1_ + 16 * current;
-  ushort *sdst = viewData_->song_->phrase_.param1_ + 16 * next;
-  for (int i = 0; i < 16; i++) {
-    *sdst++ = *ssrc++;
-  };
-
-  src = (unsigned char *)viewData_->song_->phrase_.cmd2_ + 16 * current;
-  dst = (unsigned char *)viewData_->song_->phrase_.cmd2_ + 16 * next;
-  for (int i = 0; i < 16; i++) {
-    *dst++ = *src++;
-  };
-
-  ssrc = viewData_->song_->phrase_.param2_ + 16 * current;
-  sdst = viewData_->song_->phrase_.param2_ + 16 * next;
-  for (int i = 0; i < 16; i++) {
-    *sdst++ = *ssrc++;
   };
 
   setPhrase((unsigned char)next);
@@ -241,14 +211,11 @@ void ChainView::fillClipboardData() {
 
   // Copy the data
 
-  unsigned char *src1 = viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
-  unsigned char *dst1 = clipboard_.phrase_;
-  unsigned char *src2 = viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
-  unsigned char *dst2 = clipboard_.transpose_;
+  ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
 
   for (int i = 0; i < clipboard_.height_; i++) {
-    dst1[i] = src1[clipboard_.row_ + i];
-    dst2[i] = src2[clipboard_.row_ + i];
+    clipboard_.phrase_[i]    = base[clipboard_.row_ + i].phrase;
+    clipboard_.transpose_[i] = base[clipboard_.row_ + i].transpose;
   };
 }
 
@@ -316,17 +283,16 @@ void ChainView::cutSelection() {
 
   // Loop over selection col, row & clear data inside it
 
-  unsigned char *dst1 = viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
-  unsigned char *dst2 = viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
+  ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          dst1[j + clipboard_.row_] = 0xFF;
+          base[j + clipboard_.row_].phrase    = 0xFF;
           break;
         case 1:
-          dst2[j + clipboard_.row_] = 00;
+          base[j + clipboard_.row_].transpose = 0x00;
           break;
       }
     }
@@ -355,19 +321,16 @@ void ChainView::pasteClipboard() {
     height = 16 - viewData_->chainRow_;
   }
 
-  unsigned char *dst1 = viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_;
-  unsigned char *src1 = clipboard_.phrase_;
-  unsigned char *dst2 = viewData_->song_->chain_.transpose_ + 16 * viewData_->currentChain_;
-  unsigned char *src2 = clipboard_.transpose_;
+  ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          dst1[j + viewData_->chainRow_] = src1[j];
+          base[j + viewData_->chainRow_].phrase    = clipboard_.phrase_[j];
           break;
         case 1:
-          dst2[j + viewData_->chainRow_] = src2[j];
+          base[j + viewData_->chainRow_].transpose = clipboard_.transpose_[j];
           break;
       }
     }
@@ -536,8 +499,8 @@ void ChainView::processNormalButtonMask(unsigned short mask) {
   }
 
   if ((!(mask & EPBM_ENTER)) && updatingPhrase_) {
-    unsigned char *c = viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_ + updateRow_);
-    viewData_->song_->phrase_.SetUsed(*c);
+    uint8_t p = viewData_->song_->chain_.steps_[16 * viewData_->currentChain_ + updateRow_].phrase;
+    viewData_->song_->phrase_.SetUsed(p);
     updatingPhrase_ = false;
   }
 }
@@ -627,8 +590,8 @@ void ChainView::OnFocus() {
   clipboard_.active_ = false;
 
   // reset the cursor position to within the range with data
-  uint8_t *c = viewData_->song_->chain_.data_ + 16 * viewData_->currentChain_ + viewData_->chainRow_;
-  while (viewData_->chainRow_ > 0 && *c-- == 0xFF) {
+  while (viewData_->chainRow_ > 0 &&
+         viewData_->song_->chain_.steps_[16 * viewData_->currentChain_ + viewData_->chainRow_].phrase == 0xFF) {
     viewData_->chainRow_--;
   }
 }
@@ -671,11 +634,10 @@ void ChainView::DrawView() {
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
   
   // Display phrases
-  char row[6];
-  unsigned char *data = viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_);
+  ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
 
   for (int j = 0; j < 16; j++) {
-    unsigned char d = *data++;
+    unsigned char d = base[j].phrase;
     setTextProps(0, j);
     if (d == EMPTY_CHAIN_VALUE) {
       DrawString(pos.x_, pos.y_ + j, "--");
@@ -689,10 +651,8 @@ void ChainView::DrawView() {
 
   pos.x_ += 3;
 
-  data = viewData_->song_->chain_.transpose_ + (16 * viewData_->currentChain_);
-
   for (int j = 0; j < 16; j++) {
-    uint8_t d = *data++;
+    unsigned char d = base[j].transpose;
     hex2char(d, row);
     setTextProps(1, j);
     DrawString(pos.x_, pos.y_, row);
@@ -807,7 +767,7 @@ void ChainView::AnimationUpdate() {
         if (player->GetQueueingMode(i) != QM_NONE) {
           // find the chain queued in channel
           unsigned char songPos = player->GetQueuePosition(i);
-          unsigned char *chain = viewData_->song_->data_ + i + SONG_CHANNEL_COUNT * songPos;
+          unsigned char *chain = viewData_->song_->rows_[songPos].chains + i;
           if (*chain == viewData_->currentChain_) {
             unsigned char chainPos = player->GetQueueChainPosition(i);
             pos.y_ = anchor.y_ + chainPos;

@@ -25,31 +25,21 @@ Song::Song() : Persistent("SONG"), chain_(), phrase_() { Reset(); };
 Song::~Song() {};
 
 void Song::Reset() {
-  for (int i = 0; i < SONG_CHANNEL_COUNT * SONG_ROW_COUNT; i++) {
-    data_[i] = EMPTY_SONG_VALUE;
+  for (int i = 0; i < SONG_ROW_COUNT; i++) {
+    for (int j = 0; j < SONG_CHANNEL_COUNT; j++) {
+      rows_[i].chains[j] = EMPTY_SONG_VALUE;
+    }
   }
   chain_.Reset();
   phrase_.Reset();
 }
 
 void Song::SaveContent(tinyxml2::XMLPrinter *printer) {
-  saveHexBuffer(printer, "SONG", data_, SONG_ROW_COUNT * SONG_CHANNEL_COUNT);
-  saveHexBuffer(printer, "CHAINS", chain_.data_,
-                CHAIN_COUNT * PHRASES_PER_CHAIN);
-  saveHexBuffer(printer, "TRANSPOSES", chain_.transpose_,
-                CHAIN_COUNT * PHRASES_PER_CHAIN);
-  saveHexBuffer(printer, "NOTES", phrase_.note_,
-                PHRASE_COUNT * STEPS_PER_PHRASE);
-  saveHexBuffer(printer, "INSTRUMENTS", phrase_.instr_,
-                PHRASE_COUNT * STEPS_PER_PHRASE);
-  saveHexBuffer(printer, "COMMAND1", phrase_.cmd1_,
-                PHRASE_COUNT * STEPS_PER_PHRASE);
-  saveHexBuffer(printer, "PARAM1", phrase_.param1_,
-                PHRASE_COUNT * STEPS_PER_PHRASE);
-  saveHexBuffer(printer, "COMMAND2", phrase_.cmd2_,
-                PHRASE_COUNT * STEPS_PER_PHRASE);
-  saveHexBuffer(printer, "PARAM2", phrase_.param2_,
-                PHRASE_COUNT * STEPS_PER_PHRASE);
+  saveHexBuffer(printer, "SONG",         (uint8_t *)rows_,        SONG_ROW_COUNT * SONG_CHANNEL_COUNT);
+  saveHexBuffer(printer, "CHAIN_STEPS",  (uint8_t *)chain_.steps_,
+                CHAIN_COUNT * PHRASES_PER_CHAIN * sizeof(ChainStep));
+  saveHexBuffer(printer, "PHRASE_STEPS", (uint8_t *)phrase_.steps_,
+                PHRASE_COUNT * STEPS_PER_PHRASE * sizeof(PhraseStep));
 }
 
 void Song::RestoreContent(PersistencyDocument *doc) {
@@ -57,31 +47,13 @@ void Song::RestoreContent(PersistencyDocument *doc) {
 
   while (elem) {
     if (!strcmp("SONG", doc->ElemName())) {
-      restoreHexBuffer(doc, data_);
+      restoreHexBuffer(doc, (uint8_t *)rows_);
     };
-    if (!strcmp("CHAINS", doc->ElemName())) {
-      restoreHexBuffer(doc, chain_.data_);
+    if (!strcmp("CHAIN_STEPS", doc->ElemName())) {
+      restoreHexBuffer(doc, (uint8_t *)chain_.steps_);
     };
-    if (!strcmp("TRANSPOSES", doc->ElemName())) {
-      restoreHexBuffer(doc, chain_.transpose_);
-    };
-    if (!strcmp("NOTES", doc->ElemName())) {
-      restoreHexBuffer(doc, phrase_.note_);
-    };
-    if (!strcmp("INSTRUMENTS", doc->ElemName())) {
-      restoreHexBuffer(doc, phrase_.instr_);
-    };
-    if (!strcmp("COMMAND1", doc->ElemName())) {
-      restoreHexBuffer(doc, (uchar *)phrase_.cmd1_);
-    };
-    if (!strcmp("PARAM1", doc->ElemName())) {
-      restoreHexBuffer(doc, (uchar *)phrase_.param1_);
-    };
-    if (!strcmp("COMMAND2", doc->ElemName())) {
-      restoreHexBuffer(doc, (uchar *)phrase_.cmd2_);
-    };
-    if (!strcmp("PARAM2", doc->ElemName())) {
-      restoreHexBuffer(doc, (uchar *)phrase_.param2_);
+    if (!strcmp("PHRASE_STEPS", doc->ElemName())) {
+      restoreHexBuffer(doc, (uint8_t *)phrase_.steps_);
     };
     elem = doc->NextSibling();
   }
@@ -90,56 +62,41 @@ void Song::RestoreContent(PersistencyDocument *doc) {
 
   // Restore chain & phrase allocation table
 
-  unsigned char *data = data_;
-  for (int i = 0; i < SONG_ROW_COUNT * SONG_CHANNEL_COUNT; i++) {
-    if (*data != 0xFF) {
-      if (*data < 0x80) {
-        chain_.SetUsed(*data);
+  for (int i = 0; i < SONG_ROW_COUNT; i++) {
+    for (int j = 0; j < SONG_CHANNEL_COUNT; j++) {
+      uint8_t v = rows_[i].chains[j];
+      if (v != 0xFF && v < 0x80) {
+        chain_.SetUsed(v);
       }
     }
-    data++;
   }
-
-  data = chain_.data_;
 
   for (int i = 0; i < CHAIN_COUNT; i++) {
     for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
-      if (*data != 0xFF) {
+      uint8_t p = chain_.steps_[i * PHRASES_PER_CHAIN + j].phrase;
+      if (p != 0xFF) {
         chain_.SetUsed(i);
-        phrase_.SetUsed(*data);
+        phrase_.SetUsed(p);
       }
-      data++;
     };
   }
-
-  data = phrase_.note_;
-
-  FourCC *table1 = phrase_.cmd1_;
-  FourCC *table2 = phrase_.cmd2_;
-
-  ushort *param1 = phrase_.param1_;
-  ushort *param2 = phrase_.param2_;
 
   TableHolder *th = TableHolder::GetInstance();
 
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < STEPS_PER_PHRASE; j++) {
-      if (*data != 0xFF) {
+      PhraseStep &step = phrase_.steps_[i * STEPS_PER_PHRASE + j];
+      if (step.note != 0xFF) {
         phrase_.SetUsed(i);
       }
-      if (*table1 == FourCC::InstrumentCommandTable) {
-        *param1 &= 0x7F;
-        th->SetUsed((*param1));
-      };
-      if (*table2 == FourCC::InstrumentCommandTable) {
-        *param2 &= 0x7F;
-        th->SetUsed((*param2));
-      };
-      table1++;
-      table2++;
-      param1++;
-      param2++;
-      data++;
+      if (FourCC::enum_type(step.cmd1) == FourCC::InstrumentCommandTable) {
+        step.param1 &= 0x7F;
+        th->SetUsed(step.param1);
+      }
+      if (FourCC::enum_type(step.cmd2) == FourCC::InstrumentCommandTable) {
+        step.param2 &= 0x7F;
+        th->SetUsed(step.param2);
+      }
     };
   }
 }

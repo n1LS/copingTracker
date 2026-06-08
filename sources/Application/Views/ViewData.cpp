@@ -49,13 +49,13 @@ void ViewData::Load(Project *project) {
 }
 
 unsigned char ViewData::UpdateSongChain(int offset) {
-  unsigned char *c = song_->data_ + songX_ + SONG_CHANNEL_COUNT * (songOffset_ + songY_);
+  unsigned char *c = &song_->rows_[songOffset_ + songY_].chains[songX_];
   updateData(c, offset, CHAIN_COUNT - 1, false);
   return *c;
 }
 
 void ViewData::SetSongChain(unsigned char value) {
-  unsigned char *c = song_->data_ + songX_ + SONG_CHANNEL_COUNT * (songOffset_ + songY_);
+  unsigned char *c = &song_->rows_[songOffset_ + songY_].chains[songX_];
   *c = value;
 }
 
@@ -92,7 +92,7 @@ void ViewData::checkSongBoundaries() {
 }
 
 unsigned char *ViewData::GetCurrentSongPointer() {
-  return song_->data_ + songX_ + SONG_CHANNEL_COUNT * (songOffset_ + songY_);
+  return &song_->rows_[songOffset_ + songY_].chains[songX_];
 }
 
 unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
@@ -103,12 +103,12 @@ unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
 
   switch (chainCol_ + dx) {
     case 0:
-      c = song_->chain_.data_ + (16 * currentChain_ + chainRow_ + dy);
+      c = &song_->chain_.steps_[16 * currentChain_ + chainRow_ + dy].phrase;
       limit = PHRASE_COUNT - 1;
       wrap = false;
       break;
     case 1:
-      c = song_->chain_.transpose_ + (16 * currentChain_ + chainRow_ + dy);
+      c = &song_->chain_.steps_[16 * currentChain_ + chainRow_ + dy].transpose;
       limit = 0xFF;
       wrap = true;
       break;
@@ -131,10 +131,9 @@ void ViewData::UpdateChainCursor(int dx, int dy) {
 }
 
 void ViewData::SetChainPhrase(unsigned char value) {
-  unsigned char *c = song_->chain_.data_ + (16 * currentChain_ + chainRow_);
-  *c = value;
+  song_->chain_.steps_[currentChain_ * PHRASES_PER_CHAIN + chainRow_].phrase = value;
 }
 
 unsigned char *ViewData::GetCurrentChainPointer() {
-  return song_->chain_.data_ + (16 * currentChain_ + chainRow_);
+  return &song_->chain_.steps_[currentChain_ * PHRASES_PER_CHAIN + chainRow_].phrase;
 }

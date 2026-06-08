@@ -20,47 +20,29 @@ Table::Table() { Reset(); };
 
 void Table::Reset() {
   for (int i = 0; i < TABLE_STEPS; i++) {
-    cmd1_[i] = FourCC::InstrumentCommandNone;
-    param1_[i] = 0;
-    cmd2_[i] = FourCC::InstrumentCommandNone;
-    param2_[i] = 0;
-    cmd3_[i] = FourCC::InstrumentCommandNone;
-    param3_[i] = 0;
+    steps_[i].cmd1   = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
+    steps_[i].cmd2   = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
+    steps_[i].cmd3   = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
+    steps_[i]._pad   = 0;
+    steps_[i].param1 = 0;
+    steps_[i].param2 = 0;
+    steps_[i].param3 = 0;
   }
 }
 
 void Table::Copy(const Table &other) {
   for (int i = 0; i < TABLE_STEPS; i++) {
-    cmd1_[i] = *(other.cmd1_ + i);
-    param1_[i] = *(other.param1_ + i);
-    cmd2_[i] = *(other.cmd2_ + i);
-    param2_[i] = *(other.param2_ + i);
-    cmd3_[i] = *(other.cmd3_ + i);
-    param3_[i] = *(other.param3_ + i);
+    steps_[i] = other.steps_[i];
   }
 }
 
 bool Table::IsEmpty() {
-
+  const uint8_t none = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
   for (int i = 0; i < TABLE_STEPS; i++) {
-    if (cmd1_[i] != FourCC::InstrumentCommandNone) {
+    if (steps_[i].cmd1 != none || steps_[i].cmd2 != none || steps_[i].cmd3 != none)
       return false;
-    };
-    if (cmd2_[i] != FourCC::InstrumentCommandNone) {
+    if (steps_[i].param1 != 0 || steps_[i].param2 != 0 || steps_[i].param3 != 0)
       return false;
-    };
-    if (cmd3_[i] != FourCC::InstrumentCommandNone) {
-      return false;
-    };
-    if (param1_[i] != 0) {
-      return false;
-    };
-    if (param2_[i] != 0) {
-      return false;
-    };
-    if (param3_[i] != 0) {
-      return false;
-    };
   }
   return true;
 }
@@ -93,13 +75,22 @@ void TableHolder::SaveContent(tinyxml2::XMLPrinter *printer) {
 
     Table &table = table_[i];
     if (!table.IsEmpty()) {
-      //      TiXmlNode *dataNode = node->InsertEndChild(data);
-      saveHexBuffer(printer, "CMD1", table.cmd1_, TABLE_STEPS);
-      saveHexBuffer(printer, "PARAM1", table.param1_, TABLE_STEPS);
-      saveHexBuffer(printer, "CMD2", table.cmd2_, TABLE_STEPS);
-      saveHexBuffer(printer, "PARAM2", table.param2_, TABLE_STEPS);
-      saveHexBuffer(printer, "CMD3", table.cmd3_, TABLE_STEPS);
-      saveHexBuffer(printer, "PARAM3", table.param3_, TABLE_STEPS);
+      uint8_t  cmd1[TABLE_STEPS], cmd2[TABLE_STEPS], cmd3[TABLE_STEPS];
+      uint16_t param1[TABLE_STEPS], param2[TABLE_STEPS], param3[TABLE_STEPS];
+      for (int j = 0; j < TABLE_STEPS; j++) {
+        cmd1[j]   = table.steps_[j].cmd1;
+        cmd2[j]   = table.steps_[j].cmd2;
+        cmd3[j]   = table.steps_[j].cmd3;
+        param1[j] = table.steps_[j].param1;
+        param2[j] = table.steps_[j].param2;
+        param3[j] = table.steps_[j].param3;
+      }
+      saveHexBuffer(printer, "CMD1",   cmd1,   TABLE_STEPS);
+      saveHexBuffer(printer, "PARAM1", param1, TABLE_STEPS);
+      saveHexBuffer(printer, "CMD2",   cmd2,   TABLE_STEPS);
+      saveHexBuffer(printer, "PARAM2", param2, TABLE_STEPS);
+      saveHexBuffer(printer, "CMD3",   cmd3,   TABLE_STEPS);
+      saveHexBuffer(printer, "PARAM3", param3, TABLE_STEPS);
     }
     printer->CloseElement();
   }
@@ -129,23 +120,31 @@ void TableHolder::RestoreContent(PersistencyDocument *doc) {
 
       bool subelem = doc->FirstChild();
       while (subelem) {
+        uint8_t  cbuf[TABLE_STEPS];
+        uint16_t pbuf[TABLE_STEPS];
         if (!strcmp("CMD1", doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)table.cmd1_);
+          restoreHexBuffer(doc, cbuf);
+          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].cmd1 = cbuf[j];
         };
         if (!strcmp("PARAM1", doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)table.param1_);
+          restoreHexBuffer(doc, (unsigned char *)pbuf);
+          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].param1 = pbuf[j];
         };
         if (!strcmp("CMD2", doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)table.cmd2_);
+          restoreHexBuffer(doc, cbuf);
+          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].cmd2 = cbuf[j];
         };
         if (!strcmp("PARAM2", doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)table.param2_);
+          restoreHexBuffer(doc, (unsigned char *)pbuf);
+          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].param2 = pbuf[j];
         };
         if (!strcmp("CMD3", doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)table.cmd3_);
+          restoreHexBuffer(doc, cbuf);
+          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].cmd3 = cbuf[j];
         };
         if (!strcmp("PARAM3", doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)table.param3_);
+          restoreHexBuffer(doc, (unsigned char *)pbuf);
+          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].param3 = pbuf[j];
         };
         subelem = doc->NextSibling();
       }
