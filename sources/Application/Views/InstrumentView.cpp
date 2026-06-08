@@ -1216,13 +1216,14 @@ void InstrumentView::onConfirmResetInstrument(View &, ModalView &dialog) {
 
 void InstrumentView::onConfirmSampleChange(View &, ModalView &dialog) {
   SampleInstrument *sampleInstr = pendingSampleChangeInstrument_;
-  int newIndex = pendingSampleChangeNewIndex_;
-  pendingSampleChangeInstrument_ = nullptr;
-  pendingSampleChangeNewIndex_ = -1;
 
   if (!sampleInstr) {
     return;
   }
+
+  int newIndex = pendingSampleChangeNewIndex_;
+  pendingSampleChangeInstrument_ = nullptr;
+  pendingSampleChangeNewIndex_ = -1;
 
   if (dialog.GetReturnCode() == MBL_YES) {
     sampleInstr->ClearSlices();

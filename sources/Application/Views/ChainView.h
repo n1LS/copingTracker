@@ -12,6 +12,7 @@
 #ifndef _CHAIN_VIEW_H_
 #define _CHAIN_VIEW_H_
 
+#include "Application/Model/Chain.h"
 #include "ScreenView.h"
 #include "ViewData.h"
 
@@ -70,8 +71,7 @@ private:
     int height_;
     //		int saverow_ ;
     //		int savecol_ ;
-    unsigned char phrase_[16];
-    unsigned char transpose_[16];
+    ChainStep steps_[16];
   } clipboard_;
 
   int saveRow_;

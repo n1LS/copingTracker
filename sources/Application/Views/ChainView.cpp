@@ -29,8 +29,7 @@ ChainView::ChainView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData)
   clipboard_.height_ = 0;
 
   for (int i = 0; i < 16; i++) {
-    clipboard_.phrase_[i] = 0xFF;
-    clipboard_.transpose_[i] = 0;
+    clipboard_.steps_[i] = {0xFF, 0};
   };
 }
 
@@ -46,8 +45,7 @@ void ChainView::Reset() {
   clipboard_.col_ = 0;
   clipboard_.row_ = 0;
   for (int i = 0; i < 16; i++) {
-    clipboard_.phrase_[i] = 0xFF;
-    clipboard_.transpose_[i] = 0;
+    clipboard_.steps_[i] = {0xFF, 0};
   }
 
   saveRow_ = 0;
@@ -214,8 +212,7 @@ void ChainView::fillClipboardData() {
   ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
 
   for (int i = 0; i < clipboard_.height_; i++) {
-    clipboard_.phrase_[i]    = base[clipboard_.row_ + i].phrase;
-    clipboard_.transpose_[i] = base[clipboard_.row_ + i].transpose;
+    clipboard_.steps_[i] = base[clipboard_.row_ + i];
   };
 }
 
@@ -327,10 +324,10 @@ void ChainView::pasteClipboard() {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          base[j + viewData_->chainRow_].phrase    = clipboard_.phrase_[j];
+          base[j + viewData_->chainRow_].phrase    = clipboard_.steps_[j].phrase;
           break;
         case 1:
-          base[j + viewData_->chainRow_].transpose = clipboard_.transpose_[j];
+          base[j + viewData_->chainRow_].transpose = clipboard_.steps_[j].transpose;
           break;
       }
     }
