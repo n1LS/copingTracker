@@ -28,7 +28,7 @@
 #include <string.h>
 
 // mini blank buffer for underrun, initialized to 0
-const char picoTrackerAudioDriver::miniBlank_[MINI_BLANK_SIZE * 2 * sizeof(short)] = {0};
+const char picoTrackerAudioDriver::miniBlank_[MINI_BLANK_SIZE * 2 * sizeof(int16_t)] = {0};
 
 picoTrackerAudioDriver *picoTrackerAudioDriver::instance_ = NULL;
 semaphore_t core1_audio;

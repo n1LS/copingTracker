@@ -443,7 +443,7 @@ void TableView::pasteLast() {
   }
 }
 
-void TableView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void TableView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed) {
     return;
@@ -462,7 +462,7 @@ void TableView::ProcessButtonMask(unsigned short mask, bool pressed) {
   };
 }
 
-void TableView::processNormalButtonMask(unsigned short mask) {
+void TableView::processNormalButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
@@ -530,7 +530,7 @@ void TableView::processNormalButtonMask(unsigned short mask) {
   }
 }
 
-void TableView::processSelectionButtonMask(unsigned short mask) {
+void TableView::processSelectionButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 

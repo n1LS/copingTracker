@@ -25,7 +25,7 @@ public:
 
   virtual ~UITextField();
   void Draw(GUIWindow &w, int offset = 0);
-  void ProcessArrow(unsigned short mask);
+  void ProcessArrow(uint16_t mask);
   void OnClick();
   void OnEditClick();
   etl::string<MaxLength> GetString();

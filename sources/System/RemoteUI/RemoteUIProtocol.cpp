@@ -45,7 +45,7 @@ uint16_t remoteUIDrawRectCommand(int left, int top, int width, int height, char 
   return bufferIndex;
 }
 
-void remoteUIClearCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer) {
+void remoteUIClearCommand(uint16_t r, uint16_t g, uint16_t b, char *buffer) {
   buffer[0] = REMOTE_UI_CMD_MARKER;
   buffer[1] = CLEAR_CMD;
   buffer[2] = r;
@@ -54,7 +54,7 @@ void remoteUIClearCommand(unsigned short r, unsigned short g, unsigned short b, 
 }
 
 // todo: cleanup and make these a single function
-uint16_t remoteUISetColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer) {
+uint16_t remoteUISetColorCommand(uint16_t r, uint16_t g, uint16_t b, char *buffer) {
   uint16_t bufferIndex = 0;
   buffer[bufferIndex++] = REMOTE_UI_CMD_MARKER;
   buffer[bufferIndex++] = SETCOLOR_CMD;
@@ -64,7 +64,7 @@ uint16_t remoteUISetColorCommand(unsigned short r, unsigned short g, unsigned sh
   return bufferIndex;
 }
 
-uint16_t remoteUISetBackgroundColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer) {
+uint16_t remoteUISetBackgroundColorCommand(uint16_t r, uint16_t g, uint16_t b, char *buffer) {
   uint16_t bufferIndex = 0;
   buffer[bufferIndex++] = REMOTE_UI_CMD_MARKER;
   buffer[bufferIndex++] = SETBACKGROUNDCOLOR_CMD;

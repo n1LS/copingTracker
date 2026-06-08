@@ -103,12 +103,12 @@ unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
 
   switch (chainCol_ + dx) {
     case 0:
-      c = &song_->chain_.steps_[16 * currentChain_ + chainRow_ + dy].phrase;
+      c = &song_->chain_.steps_[currentChain_][chainRow_ + dy].phrase;
       limit = PHRASE_COUNT - 1;
       wrap = false;
       break;
     case 1:
-      c = &song_->chain_.steps_[16 * currentChain_ + chainRow_ + dy].transpose;
+      c = &song_->chain_.steps_[currentChain_][chainRow_ + dy].transpose;
       limit = 0xFF;
       wrap = true;
       break;
@@ -131,9 +131,9 @@ void ViewData::UpdateChainCursor(int dx, int dy) {
 }
 
 void ViewData::SetChainPhrase(unsigned char value) {
-  song_->chain_.steps_[currentChain_ * PHRASES_PER_CHAIN + chainRow_].phrase = value;
+  song_->chain_.steps_[currentChain_][chainRow_].phrase = value;
 }
 
 unsigned char *ViewData::GetCurrentChainPointer() {
-  return &song_->chain_.steps_[currentChain_ * PHRASES_PER_CHAIN + chainRow_].phrase;
+  return &song_->chain_.steps_[currentChain_][chainRow_].phrase;
 }

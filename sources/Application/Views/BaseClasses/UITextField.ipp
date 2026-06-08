@@ -87,7 +87,7 @@ template <uint8_t MaxLength> void UITextField<MaxLength>::OnEditClick() {
 }
 
 template <uint8_t MaxLength>
-void UITextField<MaxLength>::ProcessArrow(unsigned short mask) {
+void UITextField<MaxLength>::ProcessArrow(uint16_t mask) {
   etl::string<MAX_VARIABLE_STRING_LENGTH> buffer(src_->GetString());
   auto applyAndNotify = [&]() {
     src_->SetString(buffer.c_str(), true);

@@ -73,7 +73,7 @@ void RecordView::SetSourceViewType(ViewType vt) {
   sourceViewType_ = vt;
 }
 
-void RecordView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void RecordView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed) {
     return;

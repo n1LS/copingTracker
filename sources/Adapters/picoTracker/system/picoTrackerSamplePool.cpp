@@ -145,7 +145,7 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
   }
 
   // Set wave base
-  wave->SetSampleBuffer((short *)(XIP_BASE + flashWriteOffset_));
+  wave->SetSampleBuffer((int16_t *)(XIP_BASE + flashWriteOffset_));
 
   // Any operation on the flash need to ensure that nothing else reads or writes
   // on it We disable IRQs and ensure that we don't have multiprocessing on

@@ -175,12 +175,12 @@ void SongView::clonePosition() {
   if (current == 255)
     return;
 
-  unsigned short next = viewData_->song_->chain_.GetNext();
+  uint16_t next = viewData_->song_->chain_.GetNext();
   if (next == NO_MORE_CHAIN)
     return;
 
-  ChainStep *src = &viewData_->song_->chain_.steps_[16 * current];
-  ChainStep *dst = &viewData_->song_->chain_.steps_[16 * next];
+  ChainStep *src = viewData_->song_->chain_.steps_[current];
+  ChainStep *dst = viewData_->song_->chain_.steps_[next];
 
   for (int i = 0; i < 16; i++) {
     *dst++ = *src++;
@@ -507,7 +507,7 @@ void SongView::jumpToNextSection(int direction) {
         application window
 ******************************************************************************/
 
-void SongView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void SongView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
@@ -525,7 +525,7 @@ void SongView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
   if (viewMode_ == VM_NEW) {
     if (mask == EPBM_ENTER) {
-      unsigned short next = viewData_->song_->chain_.GetNext();
+      uint16_t next = viewData_->song_->chain_.GetNext();
       if (next != NO_MORE_CHAIN) {
         setChain((unsigned char)next);
         isDirty_ = true;
@@ -817,8 +817,8 @@ void SongView::DrawView() {
 
   unsigned char *data = viewData_->song_->rows_[viewData_->songOffset_].chains;
 
-  short dx = 3;
-  short dy = 1;
+  int16_t dx = 3;
+  int16_t dy = 1;
 
   for (int j = 0; j < View::songRowCount_; j++) {
     char p = j + viewData_->songOffset_;

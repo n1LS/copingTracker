@@ -29,12 +29,12 @@ public:
   Chain();
   ~Chain();
   void Reset();
-  unsigned short GetNext();
+  uint16_t GetNext();
   bool IsUsed(unsigned char i) { return isUsed_[i]; };
   void SetUsed(unsigned char c);
   void ClearAllocation();
 
-  ChainStep steps_[CHAIN_COUNT * PHRASES_PER_CHAIN];
+  ChainStep steps_[CHAIN_COUNT][PHRASES_PER_CHAIN];
 
 private:
   std::bitset<CHAIN_COUNT> isUsed_;

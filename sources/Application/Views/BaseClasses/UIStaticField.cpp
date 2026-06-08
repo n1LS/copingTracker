@@ -28,7 +28,7 @@ void UIStaticField::Draw(GUIWindow &w, int offset) {
   w.DrawString(string_, position);
 }
 
-void UIStaticField::ProcessArrow(unsigned short mask) {
+void UIStaticField::ProcessArrow(uint16_t mask) {
 }
 
 bool UIStaticField::IsStatic() {

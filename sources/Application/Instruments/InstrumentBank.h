@@ -43,9 +43,9 @@ public:
   void Init();
   void OnStart();
   InstrumentAssignResult AssignInstrumentToSlot(InstrumentType type, unsigned char id);
-  void releaseInstrument(unsigned short id);
-  unsigned short Clone(unsigned short i);
-  unsigned short GetNextFreeInstrumentSlotId();
+  void releaseInstrument(uint16_t id);
+  uint16_t Clone(uint16_t i);
+  uint16_t GetNextFreeInstrumentSlotId();
   uint32_t UsedInstrumentCount() const;
 
   const etl::array<I_Instrument *, MAX_INSTRUMENT_COUNT> &InstrumentsList() const {
@@ -58,7 +58,7 @@ private:
                     ChiptuneInstrument>
       instrumentPool_;
   NoneInstrument none_ = NoneInstrument();
-  unsigned short sidOscCount = 0;
+  uint16_t sidOscCount = 0;
   void purgeInstrument(I_Instrument *instrument);
 };
 

@@ -69,8 +69,8 @@ void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned
   saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(int));
 }
 
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned short *src, unsigned len) {
-  saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(short));
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, uint16_t *src, unsigned len) {
+  saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(uint16_t));
 }
 
 void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, FourCC *src, unsigned len) {

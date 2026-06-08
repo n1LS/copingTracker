@@ -73,7 +73,7 @@ void Song::RestoreContent(PersistencyDocument *doc) {
 
   for (int i = 0; i < CHAIN_COUNT; i++) {
     for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
-      uint8_t p = chain_.steps_[i * PHRASES_PER_CHAIN + j].phrase;
+      uint8_t p = chain_.steps_[i][j].phrase;
       if (p != 0xFF) {
         chain_.SetUsed(i);
         phrase_.SetUsed(p);
@@ -85,7 +85,7 @@ void Song::RestoreContent(PersistencyDocument *doc) {
 
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < STEPS_PER_PHRASE; j++) {
-      PhraseStep &step = phrase_.steps_[i * STEPS_PER_PHRASE + j];
+      PhraseStep &step = phrase_.steps_[i][j];
       if (step.note != 0xFF) {
         phrase_.SetUsed(i);
       }

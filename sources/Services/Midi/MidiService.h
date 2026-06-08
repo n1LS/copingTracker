@@ -69,7 +69,7 @@ protected:
 
 private:
   void flushOutQueue();
-  void updateActiveDevicesList(unsigned short config);
+  void updateActiveDevicesList(uint16_t config);
 
 private:
   uint16_t activeMidiChannelMask_;

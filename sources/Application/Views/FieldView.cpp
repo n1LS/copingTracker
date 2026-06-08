@@ -56,7 +56,7 @@ void FieldView::Redraw() {
   };
 }
 
-void FieldView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (focus_ == 0) {
     focus_ = *fieldList_.begin();

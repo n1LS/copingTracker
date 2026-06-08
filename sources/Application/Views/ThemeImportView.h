@@ -22,7 +22,7 @@ public:
   ThemeImportView(GUIWindow &w, ViewData *viewData);
   ~ThemeImportView();
   void Reset();
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed);
+  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();

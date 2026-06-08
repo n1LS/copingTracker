@@ -21,7 +21,7 @@
 #include <vector>
 
 // Initialize the static buffer for single cycle waveforms
-short AudioFileStreamer::singleCycleBuffer_[SINGLE_CYCLE_MAX_SAMPLE_SIZE] = {0};
+int16_t AudioFileStreamer::singleCycleBuffer_[SINGLE_CYCLE_MAX_SAMPLE_SIZE] = {0};
 
 AudioFileStreamer::AudioFileStreamer() {
   mode_ = AFSM_STOPPED;
@@ -120,13 +120,13 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
       }
 
       // Copy the data to our static buffer
-      short *srcBuffer = (short *)wav_.GetSampleBuffer(-1);
+      int16_t *srcBuffer = (int16_t *)wav_.GetSampleBuffer(-1);
       if (srcBuffer) {
         // Calculate destination position in our buffer
-        short *destPos = singleCycleBuffer_ + (currentPos * channels);
+        int16_t *destPos = singleCycleBuffer_ + (currentPos * channels);
 
         // Copy this chunk to our static buffer
-        int bytesToCopy = chunkSize * channels * sizeof(short);
+        int bytesToCopy = chunkSize * channels * sizeof(uint16_t);
         memcpy(destPos, srcBuffer, bytesToCopy);
         // Trace::Debug(
         //     "Loaded chunk of single cycle waveform: pos=%d, size = % d "
@@ -223,7 +223,7 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
     }
 
     // Use the static buffer as our source
-    short *src = singleCycleData_;
+    int16_t *src = singleCycleData_;
 
     // Process each output sample
     float pos = position_;
@@ -237,7 +237,7 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
       }
 
       // Get the current sample
-      short *currentSample = src + (sourcePos * channelCount);
+      int16_t *currentSample = src + (sourcePos * channelCount);
 
       // Use linear interpolation between samples for smoother playback
       // Calculate the fractional part for interpolation
@@ -250,7 +250,7 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
         nextPos = 0; // Wrap around to the beginning of the cycle
       }
 
-      short *nextSample = src + (nextPos * channelCount);
+      int16_t *nextSample = src + (nextPos * channelCount);
 
       if (channelCount == 2) {
         // Stereo sample with interpolation
@@ -310,7 +310,7 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
   }
 
   // Get the sample buffer
-  short *src = (short *)wav_.GetSampleBuffer(-1);
+  int16_t *src = (int16_t *)wav_.GetSampleBuffer(-1);
   if (!src) {
     Trace::Error("AudioFileStreamer: GetSampleBuffer returned null");
     mode_ = AFSM_STOPPED;
@@ -340,7 +340,7 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
       }
 
       // Update the source pointer
-      src = (short *)wav_.GetSampleBuffer(-1);
+      src = (int16_t *)wav_.GetSampleBuffer(-1);
       if (!src) {
         Trace::Error("AudioFileStreamer: GetSampleBuffer returned null");
         mode_ = AFSM_STOPPED;
@@ -356,8 +356,8 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
     float frac = pos - (position_ + sourcePos);
 
     // Get the current and next sample for interpolation
-    short *currentSample = src + (sourcePos * channelCount);
-    short *nextSample = currentSample + channelCount;
+    int16_t *currentSample = src + (sourcePos * channelCount);
+    int16_t *nextSample = currentSample + channelCount;
 
     // Linear interpolation between samples
     fixed fpFrac = fl2fp(frac);

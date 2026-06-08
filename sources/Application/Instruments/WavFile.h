@@ -33,7 +33,7 @@ public:
   etl::expected<void, WAVEFILE_ERROR> Open(const char *);
   bool IsOpen() const;
   virtual void *GetSampleBuffer(int note);
-  void SetSampleBuffer(short *ptr);
+  void SetSampleBuffer(int16_t *ptr);
   virtual int GetSize(int note);
   virtual int GetSampleRate(int note);
   virtual int GetChannelCount(int note);
@@ -57,7 +57,7 @@ protected:
 private:
   FileHandle file_;    // File
   int readBufferSize_; // Read buffer size
-  short *samples_;     // sample buffer size (16 bits)
+  int16_t *samples_;     // sample buffer size (16 bits)
   int sampleBufferSize_;
   int size_;             // number of samples
   int sampleRate_;       // sample rate

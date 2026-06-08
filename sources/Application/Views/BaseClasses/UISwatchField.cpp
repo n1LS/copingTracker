@@ -23,7 +23,7 @@ void UISwatchField::Draw(GUIWindow &w, int offset) {
   w.DrawString("   ", position);
 }
 
-void UISwatchField::ProcessArrow(unsigned short mask) {};
+void UISwatchField::ProcessArrow(uint16_t mask) {};
 
 bool UISwatchField::IsStatic() {
   return true;

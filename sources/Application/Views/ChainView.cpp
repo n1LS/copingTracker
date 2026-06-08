@@ -159,12 +159,12 @@ void ChainView::clonePosition() {
   if (current == 255)
     return;
 
-  unsigned short next = viewData_->song_->phrase_.GetNext();
+  uint16_t next = viewData_->song_->phrase_.GetNext();
   if (next == NO_MORE_PHRASE)
     return;
 
-  PhraseStep *src = &viewData_->song_->phrase_.steps_[current];
-  PhraseStep *dst = &viewData_->song_->phrase_.steps_[next];
+  PhraseStep *src = viewData_->song_->phrase_.steps_[current];
+  PhraseStep *dst = viewData_->song_->phrase_.steps_[next];
   for (int i = 0; i < 16; i++) {
     *dst++ = *src++;
   };
@@ -211,7 +211,7 @@ void ChainView::fillClipboardData() {
 
   // Copy the data
 
-  ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
+  ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
 
   for (int i = 0; i < clipboard_.height_; i++) {
     clipboard_.phrase_[i]    = base[clipboard_.row_ + i].phrase;
@@ -283,7 +283,7 @@ void ChainView::cutSelection() {
 
   // Loop over selection col, row & clear data inside it
 
-  ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
+  ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
@@ -321,7 +321,7 @@ void ChainView::pasteClipboard() {
     height = 16 - viewData_->chainRow_;
   }
 
-  ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
+  ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
@@ -360,7 +360,7 @@ void ChainView::switchSoloMode() {
   isDirty_ = true;
 }
 
-void ChainView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
@@ -378,7 +378,7 @@ void ChainView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
   if (viewMode_ == VM_NEW) {
     if (mask == EPBM_ENTER) {
-      unsigned short next = viewData_->song_->phrase_.GetNext();
+      uint16_t next = viewData_->song_->phrase_.GetNext();
       if (next != NO_MORE_PHRASE) {
         setPhrase((unsigned char)next);
         isDirty_ = true;
@@ -417,7 +417,7 @@ void ChainView::ProcessButtonMask(unsigned short mask, bool pressed) {
   }
 }
 
-void ChainView::processNormalButtonMask(unsigned short mask) {
+void ChainView::processNormalButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
@@ -499,13 +499,13 @@ void ChainView::processNormalButtonMask(unsigned short mask) {
   }
 
   if ((!(mask & EPBM_ENTER)) && updatingPhrase_) {
-    uint8_t p = viewData_->song_->chain_.steps_[16 * viewData_->currentChain_ + updateRow_].phrase;
+    uint8_t p = viewData_->song_->chain_.steps_[viewData_->currentChain_][updateRow_].phrase;
     viewData_->song_->phrase_.SetUsed(p);
     updatingPhrase_ = false;
   }
 }
 
-void ChainView::processSelectionButtonMask(unsigned short mask) {
+void ChainView::processSelectionButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
@@ -591,7 +591,7 @@ void ChainView::OnFocus() {
 
   // reset the cursor position to within the range with data
   while (viewData_->chainRow_ > 0 &&
-         viewData_->song_->chain_.steps_[16 * viewData_->currentChain_ + viewData_->chainRow_].phrase == 0xFF) {
+         viewData_->song_->chain_.steps_[viewData_->currentChain_][viewData_->chainRow_].phrase == 0xFF) {
     viewData_->chainRow_--;
   }
 }
@@ -634,7 +634,7 @@ void ChainView::DrawView() {
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
   
   // Display phrases
-  ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
+  ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
 
   char row[6];
   row[5] = 0;
@@ -680,7 +680,7 @@ void ChainView::DrawView() {
 
   Player *player = Player::GetInstance();
 
-  unsigned char phrase = viewData_->song_->chain_.steps_[viewData_->currentChain_ * 16 + viewData_->chainRow_].phrase;
+  unsigned char phrase = viewData_->song_->chain_.steps_[viewData_->currentChain_][viewData_->chainRow_].phrase;
   if (phrase != EMPTY_CHAIN_VALUE) {
     drawPhrasePreview(phrase);
   }
@@ -796,7 +796,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   pos.x_ += 12;
 
   // Display notes
-  PhraseStep *steps = viewData_->song_->phrase_.steps_ + (16 * phrase);
+  PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   
@@ -845,7 +845,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   pos = GetAnchor();
   pos.x_ += 17;
 
-  PhraseStep *instrSteps = viewData_->song_->phrase_.steps_ + (16 * viewData_->currentPhrase_);
+  PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
   buffer[0] = 'I';
   buffer[3] = 0;
 

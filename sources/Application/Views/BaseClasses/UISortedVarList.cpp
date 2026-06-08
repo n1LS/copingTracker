@@ -16,7 +16,7 @@ UISortedVarList::UISortedVarList(const GUIPoint &position, Variable &v, const ch
   NAssert(v.GetType() == Variable::CHAR_LIST);
 }
 
-void UISortedVarList::ProcessArrow(unsigned short mask) {
+void UISortedVarList::ProcessArrow(uint16_t mask) {
   int value = src_.GetInt();
 
   switch (mask) {

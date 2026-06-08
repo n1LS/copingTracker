@@ -131,7 +131,7 @@ void MessageBox::OnPlayerUpdate(PlayerEventType, unsigned int currentTick) {
 void MessageBox::OnFocus() {
 }
 
-void MessageBox::ProcessButtonMask(unsigned short mask, bool pressed) {
+void MessageBox::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (mask & EPBM_LEFT) {
     selected_ = (selected_ + 1);
     if (selected_ >= buttonCount_) {

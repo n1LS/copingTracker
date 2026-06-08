@@ -22,20 +22,20 @@ Phrase::~Phrase() {};
 void Phrase::Reset() {
   static const uint8_t NO_COMMAND = static_cast<uint8_t>(static_cast<char>(FourCC::InstrumentCommandNone));
 
-  for (int i = 0; i < PHRASE_COUNT * STEPS_PER_PHRASE; i++) {
-    steps_[i].note   = NO_NOTE;
-    steps_[i].instr  = NO_INSTRUMENT;
-    steps_[i].cmd1   = NO_COMMAND;
-    steps_[i].param1 = 0x00;
-    steps_[i].cmd2   = NO_COMMAND;
-    steps_[i].param2 = 0x00;
-  }
   for (int i = 0; i < PHRASE_COUNT; i++) {
+    for (int j = 0; j < STEPS_PER_PHRASE; j++) {
+      steps_[i][j].note   = NO_NOTE;
+      steps_[i][j].instr  = NO_INSTRUMENT;
+      steps_[i][j].cmd1   = NO_COMMAND;
+      steps_[i][j].param1 = 0x00;
+      steps_[i][j].cmd2   = NO_COMMAND;
+      steps_[i][j].param2 = 0x00;
+    }
     isUsed_[i] = false;
   }
 }
 
-unsigned short Phrase::GetNext() {
+uint16_t Phrase::GetNext() {
   for (int i = 0; i < PHRASE_COUNT; i++) {
     if (!isUsed_[i]) {
       isUsed_[i] = true;

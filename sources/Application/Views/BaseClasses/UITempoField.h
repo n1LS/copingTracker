@@ -21,8 +21,8 @@ public:
                int xOffset, int yOffset);
   virtual void OnEditClick();
   void Update(Observable &, I_ObservableData *);
-  void ProcessArrow(unsigned short mask);
-  void ProcessEditArrow(unsigned short mask);
+  void ProcessArrow(uint16_t mask);
+  void ProcessEditArrow(uint16_t mask);
 
 private:
   FourCC action_;

@@ -70,7 +70,7 @@ void UIIntVarField::Draw(GUIWindow &w, int offset) {
   DrawLabeledField(w, position, buffer, focus_);
 }
 
-void UIIntVarField::ProcessArrow(unsigned short mask) {
+void UIIntVarField::ProcessArrow(uint16_t mask) {
   int value = src_.GetInt();
 
   switch (mask) {

@@ -17,18 +17,18 @@
 
 class GUIColor {
 public:
-  GUIColor(unsigned short r, unsigned short g, unsigned short b) {
+  GUIColor(uint16_t r, uint16_t g, uint16_t b) {
     r_ = r;
     g_ = g;
     b_ = b;
   }
-  GUIColor(unsigned short r, unsigned short g, unsigned short b, int idx) {
+  GUIColor(uint16_t r, uint16_t g, uint16_t b, int idx) {
     r_ = r;
     g_ = g;
     b_ = b;
     paletteIndex_ = idx;
   }
-  unsigned short r_, g_, b_;
+  uint16_t r_, g_, b_;
   int paletteIndex_;
 
   // Equality operator

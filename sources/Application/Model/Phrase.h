@@ -32,25 +32,25 @@ public:
   Phrase();
   ~Phrase();
   void Reset();
-  unsigned short GetNext();
+  uint16_t GetNext();
   bool IsUsed(uint8_t i) { return isUsed_[i]; };
   void SetUsed(uint8_t c);
   void ClearAllocation();
 
   inline FourCC getCmd1(int phrase, int step) const {
-    return FourCC::enum_type(steps_[phrase * STEPS_PER_PHRASE + step].cmd1);
+    return FourCC::enum_type(steps_[phrase][step].cmd1);
   }
   inline FourCC getCmd2(int phrase, int step) const {
-    return FourCC::enum_type(steps_[phrase * STEPS_PER_PHRASE + step].cmd2);
+    return FourCC::enum_type(steps_[phrase][step].cmd2);
   }
   inline void setCmd1(int phrase, int step, FourCC f) {
-    steps_[phrase * STEPS_PER_PHRASE + step].cmd1 = f.raw();
+    steps_[phrase][step].cmd1 = f.raw();
   }
   inline void setCmd2(int phrase, int step, FourCC f) {
-    steps_[phrase * STEPS_PER_PHRASE + step].cmd2 = f.raw();
+    steps_[phrase][step].cmd2 = f.raw();
   }
 
-  PhraseStep steps_[PHRASE_COUNT * STEPS_PER_PHRASE];
+  PhraseStep steps_[PHRASE_COUNT][STEPS_PER_PHRASE];
 
 private:
   bool isUsed_[PHRASE_COUNT];

@@ -20,7 +20,7 @@ UIIntVarOffField::UIIntVarOffField(const GUIPoint &position, Variable &v, const 
     : UIIntVarField(position, v, format, min, max, xOffset, yOffset) {
 }
 
-void UIIntVarOffField::ProcessArrow(unsigned short mask) {
+void UIIntVarOffField::ProcessArrow(uint16_t mask) {
 
   int value = src_.GetInt();
 

@@ -204,15 +204,15 @@ void InstrumentBank::purgeInstrument(I_Instrument *instrument) {
   }
 }
 
-void InstrumentBank::releaseInstrument(unsigned short id) {
+void InstrumentBank::releaseInstrument(uint16_t id) {
   auto instrument = instruments_[id];
 
   purgeInstrument(instrument);
   instruments_[id] = &none_;
 }
 
-unsigned short InstrumentBank::GetNextFreeInstrumentSlotId() {
-  for (unsigned short i = 0; i < instruments_.max_size(); i++) {
+uint16_t InstrumentBank::GetNextFreeInstrumentSlotId() {
+  for (uint16_t i = 0; i < instruments_.max_size(); i++) {
     if (instruments_[i] == &none_) {
       return i;
     }
@@ -220,7 +220,7 @@ unsigned short InstrumentBank::GetNextFreeInstrumentSlotId() {
   return NO_MORE_INSTRUMENT;
 }
 
-unsigned short InstrumentBank::Clone(unsigned short i) {
+uint16_t InstrumentBank::Clone(uint16_t i) {
   I_Instrument *src = instruments_[i];
 
   // Find next available instrument slot

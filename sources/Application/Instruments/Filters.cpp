@@ -128,8 +128,8 @@ void filterize(int channel, void* buffer, long int size)
         for(int i=0;i<size;i++)					//there's only
 lowpass for now. so they'll all sound the same.
         {
-                short* l;l = (short*)&buf[i];
-                short* r;r = (short*)&buf[i];
+                int16_t* l;l = (int16_t*)&buf[i];
+                int16_t* r;r = (int16_t*)&buf[i];
                 r++;
 
                 float goalr = *r;
@@ -147,8 +147,8 @@ cutoff = no sound, so it's better not be 0. flt->speed[1] += difl*flt->parm1;
                 flt->height[0] += flt->speed[0];
                 flt->height[1] += flt->speed[1];
 
-                *r = (short)flt->height[0];
-                *l = (short)flt->height[1];
+                *r = (int16_t)flt->height[0];
+                *l = (int16_t)flt->height[1];
         }
 }
 */

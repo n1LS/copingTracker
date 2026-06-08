@@ -41,7 +41,7 @@ void UIIntField::Draw(GUIWindow &w) {
   DrawLabeledField(w, position, buffer, focus_);
 }
 
-void UIIntField::ProcessArrow(unsigned short mask) {
+void UIIntField::ProcessArrow(uint16_t mask) {
 
   int value = *src_;
 

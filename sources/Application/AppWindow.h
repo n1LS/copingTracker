@@ -112,7 +112,7 @@ private:
 
   bool _closeProject;
   bool _shouldQuit;
-  unsigned short _mask;
+  uint16_t _mask;
   unsigned long _lastA;
   unsigned long _lastB;
   char _statusLine[80];

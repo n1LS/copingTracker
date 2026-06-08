@@ -123,7 +123,7 @@ void MixerView::toggleMute() {
   isDirty_ = true;
 }
 
-void MixerView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
       if (mask & EPBM_NAV) {

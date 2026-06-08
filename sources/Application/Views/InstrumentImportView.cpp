@@ -37,7 +37,7 @@ void InstrumentImportView::Reset() {
   fileIndexList_.clear();
 }
 
-void InstrumentImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed)
     return;
 

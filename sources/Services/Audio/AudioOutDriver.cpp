@@ -13,7 +13,7 @@
 #include "System/System/System.h"
 
 fixed AudioOutDriver::primarySoundBuffer_[MIX_BUFFER_SIZE];
-short AudioOutDriver::mixBuffer_[MIX_BUFFER_SIZE];
+int16_t AudioOutDriver::mixBuffer_[MIX_BUFFER_SIZE];
 
 AudioOutDriver::AudioOutDriver(AudioDriver &driver) {
   driver_ = &driver;
@@ -72,10 +72,10 @@ void AudioOutDriver::clipToMix() {
   bool interlaced = driver_->Interlaced();
 
   if (!hasSound_) {
-    memset(mixBuffer_, 0, sampleCount_ * 2 * sizeof(short));
+    memset(mixBuffer_, 0, sampleCount_ * 2 * sizeof(uint16_t));
   } else {
-    short *s1 = mixBuffer_;
-    short *s2 = (interlaced) ? s1 + 1 : s1 + sampleCount_;
+    int16_t *s1 = mixBuffer_;
+    int16_t *s2 = (interlaced) ? s1 + 1 : s1 + sampleCount_;
     int offset = (interlaced) ? 2 : 1;
 
     fixed *p = primarySoundBuffer_;
@@ -84,14 +84,14 @@ void AudioOutDriver::clipToMix() {
     fixed f_32767 = i2fp(32767);
     fixed f_m32768 = i2fp(-32768);
 
-    short peakL = 0;
-    short peakR = 0;
+    int16_t peakL = 0;
+    int16_t peakR = 0;
 
     for (int i = 0; i < sampleCount_; i++) {
       // Left
       v = *p++;
       int iVal = fp2i(v);
-      *s1 = short(iVal);
+      *s1 = int16_t(iVal);
       s1 += offset;
       if (iVal >= peakL) {
         peakL = iVal;
@@ -100,7 +100,7 @@ void AudioOutDriver::clipToMix() {
       // Right
       v = *p++;
       iVal = fp2i(v);
-      *s2 = short(iVal);
+      *s2 = int16_t(iVal);
       s2 += offset;
       if (iVal >= peakR) {
         peakR = iVal;

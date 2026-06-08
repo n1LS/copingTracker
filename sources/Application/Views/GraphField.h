@@ -29,7 +29,7 @@ public:
 
   void Draw(GUIWindow &w, int offset = 0) override;
   void OnClick() override {};
-  void ProcessArrow(unsigned short) override {};
+  void ProcessArrow(uint16_t) override {};
 
   void Reset();
   void SetShowBaseline(bool show);

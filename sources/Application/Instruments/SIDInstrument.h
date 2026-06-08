@@ -34,7 +34,7 @@ enum SIDInstrumentWaveform {
 // sense to offer all combinations, or just some that make sense?
 enum SIDInstrumentFilterMode { DFM_LP = 0, DFM_BP, DFM_HP, DFM_NOTCH, DFM_LAST };
 
-static const unsigned short sid_notes[96] = {0x0112, 0x0123, 0x0134, 0x0146, 0x015A, 0x016E, 0x0184, 0x018B, 0x01B3,
+static const uint16_t sid_notes[96] = {0x0112, 0x0123, 0x0134, 0x0146, 0x015A, 0x016E, 0x0184, 0x018B, 0x01B3,
                                              0x01CD, 0x01E9, 0x0206, 0x0225, 0x0245, 0x0268, 0x028C, 0x02B3, 0x02DC,
                                              0x0308, 0x0336, 0x0367, 0x039B, 0x03D2, 0x040C, 0x0449, 0x048B, 0x04D0,
                                              0x0519, 0x0567, 0x05B9, 0x0610, 0x066C, 0x06CE, 0x0735, 0x07A3, 0x0817,
@@ -88,7 +88,7 @@ public:
   SIDInstrumentInstance GetChip() {
     return chip_;
   };
-  unsigned short GetOsc() {
+  uint16_t GetOsc() {
     return osc_.GetInt();
   };
   void SetRender(bool render) {

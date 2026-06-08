@@ -244,15 +244,15 @@ void Project::Purge() {
   for (int i = 0; i < CHAIN_COUNT; i++) {
     if (song_.chain_.IsUsed(i)) {
       for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
-        uint8_t p = song_.chain_.steps_[i * PHRASES_PER_CHAIN + j].phrase;
+        uint8_t p = song_.chain_.steps_[i][j].phrase;
         if (p != DATA_UNUSED_VALUE) {
           song_.phrase_.SetUsed(p);
         }
       }
     } else {
       for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
-        song_.chain_.steps_[i * PHRASES_PER_CHAIN + j].phrase    = DATA_UNUSED_VALUE;
-        song_.chain_.steps_[i * PHRASES_PER_CHAIN + j].transpose = 0x00;
+        song_.chain_.steps_[i][j].phrase    = DATA_UNUSED_VALUE;
+        song_.chain_.steps_[i][j].transpose = 0x00;
       }
     }
   }
@@ -261,7 +261,7 @@ void Project::Purge() {
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
       if (!song_.phrase_.IsUsed(i)) {
-        PhraseStep *step = &(song_.phrase_.steps_[i * STEPS_PER_PHRASE + j]);
+        PhraseStep *step = &(song_.phrase_.steps_[i][j]);
         step->note   = DATA_UNUSED_VALUE;
         step->instr  = DATA_UNUSED_VALUE;
         step->cmd1   = kNone;
@@ -328,7 +328,7 @@ void Project::PurgeInstruments() {
   bool used[MAX_INSTRUMENT_COUNT] = {false};
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
-      uint8_t instr = song_.phrase_.steps_[i * STEPS_PER_PHRASE + j].instr;
+      uint8_t instr = song_.phrase_.steps_[i][j].instr;
       if (instr != DATA_UNUSED_VALUE) {
         NAssert(instr < MAX_INSTRUMENT_COUNT);
         used[instr] = true;

@@ -23,7 +23,7 @@ public:
   UIBitmaskVarField(const GUIPoint &position, Variable &v, const char *format, int len);
   virtual ~UIBitmaskVarField() {};
   virtual void Draw(GUIWindow &w, int offset = 0);
-  virtual void ProcessArrow(unsigned short mask);
+  virtual void ProcessArrow(uint16_t mask);
 
 private:
   unsigned int len_;

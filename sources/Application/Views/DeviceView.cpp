@@ -107,7 +107,7 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 DeviceView::~DeviceView() {
 }
 
-void DeviceView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed)
     return;
