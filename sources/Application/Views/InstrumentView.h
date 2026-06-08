@@ -70,6 +70,9 @@ private:
   void onConfirmSampleChange(View &view, ModalView &dialog);
   void onConfirmExportOverwrite(View &view, ModalView &dialog);
 
+  void goToModulationPage();
+  void goToInstrumentPage();
+
   static constexpr size_t SliceCountLabelSize = 20;
   Project *project_;
   FourCC lastFocusID_;
