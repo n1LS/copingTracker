@@ -397,7 +397,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   };
 }
 
-void ThemeView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed)
     return;
 

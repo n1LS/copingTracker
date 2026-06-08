@@ -17,7 +17,7 @@
 #include <cstring>
 #include <limits>
 
-short WavFileWriter::buffer_[MAX_SAMPLE_COUNT * 2];
+int16_t WavFileWriter::buffer_[MAX_SAMPLE_COUNT * 2];
 
 inline void reportProgress(SampleEditProgressCallback callback, uint32_t processed, uint32_t total) {
   if (!callback || total == 0u) {
@@ -63,7 +63,7 @@ void WavFileWriter::AddBuffer(fixed *bufferIn, int size) {
   if (!file_)
     return;
 
-  short *s = buffer_;
+  int16_t *s = buffer_;
   fixed *p = bufferIn;
 
   fixed v;
@@ -78,7 +78,7 @@ void WavFileWriter::AddBuffer(fixed *bufferIn, int size) {
     } else if (v < f_m32768) {
       v = f_m32768;
     }
-    *s++ = short(fp2i(v));
+    *s++ = int16_t(fp2i(v));
   };
   file_->Write(buffer_, 2, size * 2);
   sampleCount_ += size;

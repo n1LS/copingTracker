@@ -24,10 +24,16 @@
 #define HIGHEST_NOTE 119
 #define NOTE_OFF 0xFE
 #define NO_NOTE 0xFF
-#define NO_INSTRUMENT 0xFF
 #define NOTE_C3 60
+
+#define NO_INSTRUMENT 0xFF
+
 #define EMPTY_SONG_VALUE 0xFF
 #define EMPTY_CHAIN_VALUE 0xFF
+
+struct SongRow {
+  uint8_t chains[SONG_CHANNEL_COUNT];
+};
 
 class Song : Persistent {
 public:
@@ -38,7 +44,7 @@ public:
   virtual void SaveContent(tinyxml2::XMLPrinter *printer);
   virtual void RestoreContent(PersistencyDocument *doc);
 
-  unsigned char data_[SONG_CHANNEL_COUNT * SONG_ROW_COUNT];
+  SongRow rows_[SONG_ROW_COUNT];
   Chain chain_;
   Phrase phrase_;
 };

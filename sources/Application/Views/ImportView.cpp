@@ -75,7 +75,7 @@ void ImportView::SetSourceViewType(ViewType vt) {
   sourceViewType_ = vt;
 }
 
-void ImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   // Check for key release events
   if (!pressed) {
     // Open selected directory only when ENTER is released, unless ENTER was

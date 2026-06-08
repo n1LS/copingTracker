@@ -372,7 +372,7 @@ void SampleEditorView::addAllFields() {
   fieldList_.insert(fieldList_.end(), &graphField_);
 }
 
-void SampleEditorView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
   updateSelectedMarkerFromFocus();
 
   // Check for key release events

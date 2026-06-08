@@ -730,7 +730,7 @@ void InstrumentView::warpToNext(int offset) {
   isDirty_ = true;
 }
 
-void InstrumentView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed)
     return;

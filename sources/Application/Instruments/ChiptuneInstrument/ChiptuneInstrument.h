@@ -47,7 +47,7 @@ public:
   // size refers to the number of samples
   // should always fill interleaved stereo / 16bit
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick);
-  virtual void ProcessCommand(int channel, FourCC cc, ushort value);
+  virtual void ProcessCommand(int channel, FourCC cc, uint16_t value);
 
   virtual int GetTable() {
     return vTable_.GetInt();
@@ -83,6 +83,6 @@ private:
   Variable vWaveform_;
 
   void RunCommand(int channel);
-  void CommandInitArp(int channel, ushort value);
+  void CommandInitArp(int channel, uint16_t value);
   InstrumentParameters getInstrumentParameters();
 };

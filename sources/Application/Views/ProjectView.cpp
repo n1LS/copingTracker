@@ -98,7 +98,7 @@ bool ProjectView::canRenderFromFirstSongRow() const {
     return false;
   }
 
-  const unsigned char *songRow = project_->song_.data_;
+  const unsigned char *songRow = project_->song_.rows_[0].chains;
   for (int channel = 0; channel < SONG_CHANNEL_COUNT; channel++) {
     const unsigned char chain = songRow[channel];
     if (chain == EMPTY_SONG_VALUE) {
@@ -106,7 +106,7 @@ bool ProjectView::canRenderFromFirstSongRow() const {
     }
 
     for (int phrase = 0; phrase < PHRASES_PER_CHAIN; phrase++) {
-      const unsigned char phraseId = project_->song_.chain_.data_[chain * PHRASES_PER_CHAIN + phrase];
+      const unsigned char phraseId = project_->song_.chain_.steps_[chain][phrase].phrase;
       if (phraseId != EMPTY_SONG_VALUE) {
         return true;
       }
@@ -229,7 +229,7 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 ProjectView::~ProjectView() {
 }
 
-void ProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void ProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed)
     return;

@@ -123,7 +123,7 @@ void AppWindow::defineColor(FourCC colorCode, GUIColor &color, int paletteIndex)
   auto rgbVar = config->FindVariable(colorCode);
   if (rgbVar) {
     const int32_t rgbValue = rgbVar->GetInt();
-    unsigned short r, g, b;
+    uint16_t r, g, b;
     r = (rgbValue >> 16) & 0xFF;
     g = (rgbValue >> 8) & 0xFF;
     b = rgbValue & 0xFF;
@@ -546,7 +546,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
   _shouldQuit = false;
 
-  unsigned short v = 1 << event.GetValue();
+  uint16_t v = 1 << event.GetValue();
 
   MixerService *sm = MixerService::GetInstance();
   // TODO(democloid): this causes a deadlock, verify original intent

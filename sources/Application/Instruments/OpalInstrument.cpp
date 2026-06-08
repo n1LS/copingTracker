@@ -169,7 +169,7 @@ bool OpalInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void OpalInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
+void OpalInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
   switch (cc) {
     case FourCC::InstrumentCommandGateOff:
       uint8_t stop = BitClr(breg, 5);

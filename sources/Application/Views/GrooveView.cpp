@@ -78,7 +78,7 @@ void GrooveView::clearCursorValue() {
   isDirty_ = true;
 }
 
-void GrooveView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void GrooveView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed)
     return;

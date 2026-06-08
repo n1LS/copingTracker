@@ -22,15 +22,15 @@ public:
   TableView(GUIWindow &w, ViewData *viewData);
   ~TableView();
   void Reset();
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed);
+  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
 
 protected:
-  void processNormalButtonMask(unsigned short mask);
-  void processSelectionButtonMask(unsigned short mask);
+  void processNormalButtonMask(uint16_t mask);
+  void processSelectionButtonMask(uint16_t mask);
 
   void cutPosition();
   void pasteLast();
@@ -51,9 +51,9 @@ protected:
 private:
   int8_t row_;
   int8_t col_;
-  uchar lastVol_;
-  uchar lastTick_;
-  uchar lastTsp_;
+  uint8_t lastVol_;
+  uint8_t lastTick_;
+  uint8_t lastTsp_;
   int lastCmd_;
   int lastParam_;
 
@@ -67,12 +67,12 @@ private:
     int row_;
     int width_;
     int height_;
-    uchar cmd1_[16];
-    ushort param1_[16];
-    uchar cmd2_[16];
-    ushort param2_[16];
-    uchar cmd3_[16];
-    ushort param3_[16];
+    uint8_t cmd1_[16];
+    uint16_t param1_[16];
+    uint8_t cmd2_[16];
+    uint16_t param2_[16];
+    uint8_t cmd3_[16];
+    uint16_t param3_[16];
   } clipboard_;
 
   int saveCol_;
@@ -107,7 +107,7 @@ private:
 #endif
   }
 
-  uchar lastPosition_[3];
+  uint8_t lastPosition_[3];
 };
 
 #endif

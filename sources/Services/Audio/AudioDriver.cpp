@@ -58,7 +58,7 @@ void AudioDriver::Stop() {
 }
 
 void AudioDriver::AddBuffer(short *buffer, int samplecount) {
-  int len = samplecount * 2 * sizeof(short);
+  int len = samplecount * 2 * sizeof(uint16_t);
 
   if (!isPlaying_)
     return;

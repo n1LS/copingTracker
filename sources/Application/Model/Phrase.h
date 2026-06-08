@@ -18,22 +18,39 @@
 #define NO_MORE_PHRASE 0x81
 #define STEPS_PER_PHRASE 16
 
+struct PhraseStep {
+  uint8_t note;
+  uint8_t instr;
+  uint8_t cmd1;
+  uint8_t cmd2;
+  uint16_t param1;
+  uint16_t param2;
+};
+
 class Phrase {
 public:
   Phrase();
   ~Phrase();
   void Reset();
-  unsigned short GetNext();
-  bool IsUsed(uchar i) { return isUsed_[i]; };
-  void SetUsed(uchar c);
+  uint16_t GetNext();
+  bool IsUsed(uint8_t i) { return isUsed_[i]; };
+  void SetUsed(uint8_t c);
   void ClearAllocation();
 
-  uchar note_[PHRASE_COUNT * STEPS_PER_PHRASE];
-  uchar instr_[PHRASE_COUNT * STEPS_PER_PHRASE];
-  FourCC cmd1_[PHRASE_COUNT * STEPS_PER_PHRASE];
-  ushort param1_[PHRASE_COUNT * STEPS_PER_PHRASE];
-  FourCC cmd2_[PHRASE_COUNT * STEPS_PER_PHRASE];
-  ushort param2_[PHRASE_COUNT * STEPS_PER_PHRASE];
+  inline FourCC getCmd1(int phrase, int step) const {
+    return FourCC::enum_type(steps_[phrase][step].cmd1);
+  }
+  inline FourCC getCmd2(int phrase, int step) const {
+    return FourCC::enum_type(steps_[phrase][step].cmd2);
+  }
+  inline void setCmd1(int phrase, int step, FourCC f) {
+    steps_[phrase][step].cmd1 = f.raw();
+  }
+  inline void setCmd2(int phrase, int step, FourCC f) {
+    steps_[phrase][step].cmd2 = f.raw();
+  }
+
+  PhraseStep steps_[PHRASE_COUNT][STEPS_PER_PHRASE];
 
 private:
   bool isUsed_[PHRASE_COUNT];

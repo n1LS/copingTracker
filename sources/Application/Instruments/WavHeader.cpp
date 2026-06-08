@@ -49,12 +49,12 @@ bool WavHeaderWriter::WriteHeader(I_File *file, uint32_t sampleRate, uint16_t ch
   if (file->Write(&size, 1, 4) != 4)
     return false;
 
-  uint16_t ushort = 1; // PCM compression
-  if (file->Write(&ushort, 1, 2) != 2)
+  uint16_t uint16_t = 1; // PCM compression
+  if (file->Write(&uint16_t, 1, 2) != 2)
     return false;
 
-  ushort = channels; // number of channels
-  if (file->Write(&ushort, 1, 2) != 2)
+  uint16_t = channels; // number of channels
+  if (file->Write(&uint16_t, 1, 2) != 2)
     return false;
 
   if (file->Write(&sampleRate, 1, 4) != 4)
@@ -64,12 +64,12 @@ bool WavHeaderWriter::WriteHeader(I_File *file, uint32_t sampleRate, uint16_t ch
   if (file->Write(&byteRate, 1, 4) != 4)
     return false;
 
-  ushort = (bitsPerSample / 8) * channels; // block align
-  if (file->Write(&ushort, 1, 2) != 2)
+  uint16_t = (bitsPerSample / 8) * channels; // block align
+  if (file->Write(&uint16_t, 1, 2) != 2)
     return false;
 
-  ushort = bitsPerSample; // bits per sample
-  if (file->Write(&ushort, 1, 2) != 2)
+  uint16_t = bitsPerSample; // bits per sample
+  if (file->Write(&uint16_t, 1, 2) != 2)
     return false;
 
   // data subchunk

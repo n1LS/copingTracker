@@ -202,7 +202,7 @@ public:
 
   void ForceClear();
 
-  void ProcessButton(unsigned short mask, bool pressed);
+  void ProcessButton(uint16_t mask, bool pressed);
 
   void Redraw();
 
@@ -250,7 +250,7 @@ public:
   void DismissModal();
 
 protected:
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed) = 0;
+  virtual void ProcessButtonMask(uint16_t mask, bool pressed) = 0;
 
   void DrawTitle(const char *format, ...);
 
@@ -319,7 +319,7 @@ public: // temp hack for modal window constructors
   int powerButtonHoldCount_;
 
 private:
-  unsigned short mask_;
+  uint16_t mask_;
   bool locked_;
   static bool initPrivate_;
   ModalView *modalView_;

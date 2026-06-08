@@ -133,7 +133,7 @@ void platform_init() {
   // PWM
   gpio_set_function(DISPLAY_PWM, GPIO_FUNC_PWM);
   // Find out which PWM slice is connected to GPIO 0 (it's slice 0)
-  uint slice_num = pwm_gpio_to_slice_num(DISPLAY_PWM);
+  uint32_t slice_num = pwm_gpio_to_slice_num(DISPLAY_PWM);
 
   // Set divider so that we have 1KHz signal
   pwm_set_clkdiv(slice_num, 220.5 * KHZ);

@@ -27,7 +27,6 @@
 
 SongView::SongView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
 
-  updatingChain_ = false;
   lastChain_ = 0;
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
@@ -50,7 +49,6 @@ SongView::~SongView() {
 ******************************************************************************/
 
 void SongView::Reset() {
-  updatingChain_ = false;
   lastChain_ = 0;
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
@@ -83,12 +81,10 @@ void SongView::Reset() {
 ******************************************************************************/
 
 void SongView::updateChain(int offset) {
-
-  unsigned int chain = viewData_->UpdateSongChain(offset);
-  updatingChain_ = true;
-  lastChain_ = chain;
-  updateX_ = viewData_->songX_;
-  updateY_ = viewData_->songY_;
+  unsigned char chain = viewData_->UpdateSongChain(offset);
+  if (chain != 0xFF) {
+    viewData_->song_->chain_.SetUsed(chain);
+  }
   isDirty_ = true;
 }
 
@@ -179,19 +175,12 @@ void SongView::clonePosition() {
   if (current == 255)
     return;
 
-  unsigned short next = viewData_->song_->chain_.GetNext();
+  uint16_t next = viewData_->song_->chain_.GetNext();
   if (next == NO_MORE_CHAIN)
     return;
 
-  unsigned char *src = viewData_->song_->chain_.data_ + 16 * current;
-  unsigned char *dst = viewData_->song_->chain_.data_ + 16 * next;
-
-  for (int i = 0; i < 16; i++) {
-    *dst++ = *src++;
-  };
-
-  src = viewData_->song_->chain_.transpose_ + 16 * current;
-  dst = viewData_->song_->chain_.transpose_ + 16 * next;
+  ChainStep *src = viewData_->song_->chain_.steps_[current];
+  ChainStep *dst = viewData_->song_->chain_.steps_[next];
 
   for (int i = 0; i < 16; i++) {
     *dst++ = *src++;
@@ -267,7 +256,7 @@ void SongView::fillClipboardData() {
   clipboard_.width_ = selRect.Width() + 1;
   clipboard_.height_ = selRect.Height() + 1;
 
-  unsigned char *src = viewData_->song_->data_ + selRect.Left() + SONG_CHANNEL_COUNT * selRect.Top();
+  unsigned char *src = viewData_->song_->rows_[selRect.Top()].chains + selRect.Left();
   unsigned char *dst = clipboard_.data_;
 
   for (int j = 0; j < clipboard_.height_; j++) {
@@ -308,7 +297,7 @@ void SongView::cutSelection() {
 
   // now move all rows up for cut
 
-  unsigned char *dst = viewData_->song_->data_ + selRect.Left() + SONG_CHANNEL_COUNT * (selRect.Top());
+  unsigned char *dst = viewData_->song_->rows_[selRect.Top()].chains + selRect.Left();
   unsigned char *src = dst + SONG_CHANNEL_COUNT * clipboard_.height_;
 
   int rowCount = SONG_ROW_COUNT - selRect.Bottom() - 1;
@@ -362,7 +351,7 @@ void SongView::pasteClipboard() {
 
     // Move down from insert point
 
-    unsigned char *dst = viewData_->song_->data_ + viewData_->songX_ + (SONG_ROW_COUNT - 1) * SONG_CHANNEL_COUNT;
+    unsigned char *dst = viewData_->song_->rows_[SONG_ROW_COUNT - 1].chains + viewData_->songX_;
     unsigned char *src = dst - height * SONG_CHANNEL_COUNT;
 
     int rowCount = SONG_ROW_COUNT - (viewData_->songY_ + viewData_->songOffset_);
@@ -471,7 +460,7 @@ void SongView::jumpToNextSection(int direction) {
   int current = viewData_->songY_ + viewData_->songOffset_;
   bool foundGap = false;
   for (int i = 0; i < SONG_ROW_COUNT; i++) {
-    unsigned char *start = viewData_->song_->data_ + viewData_->songX_ + SONG_CHANNEL_COUNT * current;
+    unsigned char *start = viewData_->song_->rows_[current].chains + viewData_->songX_;
     if (foundGap && (*start != 0xFF)) {
       break;
     } else {
@@ -491,7 +480,7 @@ void SongView::jumpToNextSection(int direction) {
 
   if (direction < 0) {
     while (current > 0) {
-      unsigned char *start = viewData_->song_->data_ + viewData_->songX_ + SONG_CHANNEL_COUNT * current;
+      unsigned char *start = viewData_->song_->rows_[current].chains + viewData_->songX_;
       if (*start == 0xFF) {
         current++;
         break;
@@ -518,7 +507,7 @@ void SongView::jumpToNextSection(int direction) {
         application window
 ******************************************************************************/
 
-void SongView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void SongView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
@@ -536,7 +525,7 @@ void SongView::ProcessButtonMask(unsigned short mask, bool pressed) {
 
   if (viewMode_ == VM_NEW) {
     if (mask == EPBM_ENTER) {
-      unsigned short next = viewData_->song_->chain_.GetNext();
+      uint16_t next = viewData_->song_->chain_.GetNext();
       if (next != NO_MORE_CHAIN) {
         setChain((unsigned char)next);
         isDirty_ = true;
@@ -714,12 +703,6 @@ void SongView::processNormalButtonMask(unsigned int mask) {
       onStart();
     }
   }
-
-  if ((!(mask & EPBM_ENTER)) && updatingChain_) {
-    unsigned char *c = viewData_->song_->data_ + updateX_ + SONG_CHANNEL_COUNT * (viewData_->songOffset_ + updateY_);
-    viewData_->song_->chain_.SetUsed(*c);
-    updatingChain_ = false;
-  }
 }
 
 /*******************************************************************************
@@ -831,9 +814,11 @@ void SongView::DrawView() {
 
   char row[3];
   GUIPoint pos = anchor;
-  unsigned char *data = viewData_->song_->data_ + (SONG_CHANNEL_COUNT * viewData_->songOffset_);
-  short dx = 3;
-  short dy = 1;
+
+  unsigned char *data = viewData_->song_->rows_[viewData_->songOffset_].chains;
+
+  int16_t dx = 3;
+  int16_t dy = 1;
 
   for (int j = 0; j < View::songRowCount_; j++) {
     char p = j + viewData_->songOffset_;

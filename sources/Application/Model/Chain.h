@@ -13,23 +13,28 @@
 #define _CHAIN_H_
 
 #include <bitset>
+#include <stdint.h>
 
 #define CHAIN_COUNT 0xFF
 #define NO_MORE_CHAIN 0x100
 #define PHRASES_PER_CHAIN 0x10
+
+struct ChainStep {
+  uint8_t phrase;
+  uint8_t transpose;
+};
 
 class Chain {
 public:
   Chain();
   ~Chain();
   void Reset();
-  unsigned short GetNext();
+  uint16_t GetNext();
   bool IsUsed(unsigned char i) { return isUsed_[i]; };
   void SetUsed(unsigned char c);
   void ClearAllocation();
 
-  unsigned char data_[CHAIN_COUNT * PHRASES_PER_CHAIN];
-  unsigned char transpose_[CHAIN_COUNT * PHRASES_PER_CHAIN];
+  ChainStep steps_[CHAIN_COUNT][PHRASES_PER_CHAIN];
 
 private:
   std::bitset<CHAIN_COUNT> isUsed_;

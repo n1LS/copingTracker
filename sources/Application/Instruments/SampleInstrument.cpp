@@ -723,7 +723,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
     // Get pan multiplicators, and take volume into account
 
     int n = int(rp->position_);
-    short *input = (short *)(wavbuf + 2 * channelCount * n); // input is the current
+    int16_t *input = (int16_t *)(wavbuf + 2 * channelCount * n); // input is the current
                                                              // sample to the left of position
 
     fixed fpPos = fl2fp(rp->position_ - n); // fpPos is current pos from input
@@ -736,11 +736,11 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
     s2 = 0;
     t2 = 0;
 
-    short *loopPosition = (short *)(wavbuf + rp->rendLoopStart_ * 2 * channelCount);
-    short *lastSample = (short *)(wavbuf + (rp->rendLoopEnd_ - 1) * 2 * channelCount);
+    int16_t *loopPosition = (int16_t *)(wavbuf + rp->rendLoopStart_ * 2 * channelCount);
+    int16_t *lastSample = (int16_t *)(wavbuf + (rp->rendLoopEnd_ - 1) * 2 * channelCount);
 
     if (/*(loopMode==SILM_OSCFINE)||*/ (rp->reverse_)) {
-      lastSample = (short *)(wavbuf + rp->rendLoopEnd_ * 2 * channelCount);
+      lastSample = (int16_t *)(wavbuf + rp->rendLoopEnd_ * 2 * channelCount);
     }
 
     fixed zerofive = fl2fp(0.5f);
@@ -763,7 +763,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
     fixed *fltDelayPtr = 0;
     fixed *fltHeightPtr = 0;
 
-    short *dsBasePtr = ((short *)wavbuf) + rp->rendFirst_ * channelCount;
+    int16_t *dsBasePtr = ((int16_t *)wavbuf) + rp->rendFirst_ * channelCount;
 
     while (count > 0) {
 
@@ -911,10 +911,10 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
         // get input sample to interpolate from
         // s= left channel
         // t= right channel
-        short *i1 = input;
+        int16_t *i1 = input;
         if (dsMask != 0xFFFFFFFF) {
           if (useDirtyDownsampling_) {
-            i1 = (short *)(((uintptr_t)input) & dsMask);
+            i1 = (int16_t *)(((uintptr_t)input) & dsMask);
           } else {
             // prevent input ever being lower mem address then dsBasePtr (sample
             // start point) this can occur eg. if doing reverse playback and
@@ -928,7 +928,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
           }
         }
 
-        short *i2 = i1 + channelCount;
+        int16_t *i2 = i1 + channelCount;
 
         if (filtering) {
           fltSpeedPtr = fltSpeed;
@@ -1150,7 +1150,7 @@ void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
   };
 }
 
-void SampleInstrument::ProcessCommand(int channel, FourCC cc, ushort value) {
+void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
 
   renderParams *rp = renderParams_ + channel;
   if (!source_)
@@ -1587,13 +1587,13 @@ bool SampleInstrument::GetTableAutomation() {
 }
 
 void SampleInstrument::GetTableState(TableSaveState &state) {
-  memcpy(state.hopCount_, tableState_.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(state.hopCount_, tableState_.hopCount_, sizeof(uint8_t) * TABLE_STEPS * 3);
   memcpy(state.position_, tableState_.position_, sizeof(int) * 3);
   state.groove_ = tableState_.groove_;
 }
 
 void SampleInstrument::SetTableState(TableSaveState &state) {
-  memcpy(tableState_.hopCount_, state.hopCount_, sizeof(uchar) * TABLE_STEPS * 3);
+  memcpy(tableState_.hopCount_, state.hopCount_, sizeof(uint8_t) * TABLE_STEPS * 3);
   memcpy(tableState_.position_, state.position_, sizeof(int) * 3);
   tableState_.groove_ = state.groove_;
 }

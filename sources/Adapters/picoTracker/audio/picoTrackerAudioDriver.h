@@ -52,7 +52,7 @@ private:
   static picoTrackerAudioDriver *instance_;
 
   AudioSettings settings_;
-  static const char miniBlank_[MINI_BLANK_SIZE * 2 * sizeof(short)];
+  static const char miniBlank_[MINI_BLANK_SIZE * 2 * sizeof(int16_t)];
   int volume_;
   uint32_t startTime_;
   unsigned int pioOffset_;

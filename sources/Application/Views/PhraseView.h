@@ -22,7 +22,7 @@ public:
   PhraseView(GUIWindow &w, ViewData *viewData);
   ~PhraseView();
   void Reset();
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed);
+  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
@@ -51,8 +51,8 @@ protected:
   void toggleMute();
   void switchSoloMode();
 
-  void processNormalButtonMask(unsigned short mask);
-  void processSelectionButtonMask(unsigned short mask);
+  void processNormalButtonMask(uint16_t mask);
+  void processSelectionButtonMask(uint16_t mask);
 
   void setTextProps(int row, int col, Color textColor);
   bool getEffectiveInstrumentForRow(int row, uint8_t &instrumentId) const;
@@ -76,12 +76,12 @@ private:
     int row_;
     int width_;
     int height_;
-    uchar note_[16];
-    uchar instr_[16];
-    uchar cmd1_[16];
-    ushort param1_[16];
-    uchar cmd2_[16];
-    ushort param2_[16];
+    uint8_t note_[16];
+    uint8_t instr_[16];
+    uint8_t cmd1_[16];
+    uint16_t param1_[16];
+    uint8_t cmd2_[16];
+    uint16_t param2_[16];
   } clipboard_;
 
   int saveCol_;

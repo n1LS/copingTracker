@@ -175,7 +175,7 @@ void *WavFile::GetSampleBuffer(int note) {
   return samples_;
 }
 
-void WavFile::SetSampleBuffer(short *ptr) {
+void WavFile::SetSampleBuffer(int16_t *ptr) {
   samples_ = ptr;
 }
 

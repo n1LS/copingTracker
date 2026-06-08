@@ -38,7 +38,7 @@ void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
   DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
 }
 
-void UIBitmaskVarField::ProcessArrow(unsigned short mask) {
+void UIBitmaskVarField::ProcessArrow(uint16_t mask) {
 
   int value = src_.GetInt();
 

@@ -29,7 +29,7 @@ SerialDebugUI::SerialDebugUI() {};
 // ref: https://forums.raspberrypi.com/viewtopic.php?t=303964
 // will return true if user pressed return and the buffer now contains the
 // string they entered up to pressing return
-bool SerialDebugUI::readSerialIn(char *buffer, short size) {
+bool SerialDebugUI::readSerialIn(char *buffer, int16_t size) {
   char chr = getchar_timeout_us(0);
   // in pico-sdk the char seemed to change from ENDSTDIN to 0xFE, no idea why
   while (chr != ENDSTDIN && chr != 0xFE) {

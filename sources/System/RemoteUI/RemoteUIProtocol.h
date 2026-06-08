@@ -75,9 +75,9 @@ void remoteUIDrawCharCommand(const char c, uint8_t x, uint8_t y, bool invert, ch
 
 uint16_t remoteUIDrawRectCommand(int left, int top, int width, int height, char *buffer);
 
-void remoteUIClearCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer);
+void remoteUIClearCommand(uint16_t r, uint16_t g, uint16_t b, char *buffer);
 
-uint16_t remoteUISetColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer);
-uint16_t remoteUISetBackgroundColorCommand(unsigned short r, unsigned short g, unsigned short b, char *buffer);
+uint16_t remoteUISetColorCommand(uint16_t r, uint16_t g, uint16_t b, char *buffer);
+uint16_t remoteUISetBackgroundColorCommand(uint16_t r, uint16_t g, uint16_t b, char *buffer);
 
 #endif

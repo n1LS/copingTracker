@@ -25,7 +25,7 @@ inline void hex2char(const unsigned char c, char *s) {
   *dest__ = 0;
 }
 
-inline void hexshort2char(const ushort c, char *s) {
+inline void hexshort2char(const uint16_t c, char *s) {
   char *dest__ = s;
   *dest__++ = h2c__[(c & 0xF000) >> 12];
   *dest__++ = h2c__[(c & 0x0F00) >> 8];

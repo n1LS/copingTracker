@@ -364,7 +364,7 @@ void View::SetDirty(bool isDirty) {
   isDirty_ = isDirty;
 }
 
-void View::ProcessButton(unsigned short mask, bool pressed) {
+void View::ProcessButton(uint16_t mask, bool pressed) {
   if (!pressed) {
     powerButtonPressed_ = false;
   } else if (mask & EPBM_POWER) {

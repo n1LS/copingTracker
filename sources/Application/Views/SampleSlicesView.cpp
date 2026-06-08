@@ -115,7 +115,7 @@ void SampleSlicesView::OnFocus() {
   isDirty_ = true;
 }
 
-void SampleSlicesView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed) {
     if (playKeyHeld_ && !(mask & EPBM_PLAY)) {
       playKeyHeld_ = false;
@@ -660,7 +660,7 @@ void SampleSlicesView::startPreview() {
     note = static_cast<uint8_t>(rootNoteVar->GetInt());
   }
 
-  Player::GetInstance()->PlayNote(static_cast<unsigned short>(instrumentIndex_), PreviewChannel, note, 0x7F);
+  Player::GetInstance()->PlayNote(static_cast<uint16_t>(instrumentIndex_), PreviewChannel, note, 0x7F);
   previewNote_ = note;
   previewActive_ = true;
   previewStartSample_ = startSample;

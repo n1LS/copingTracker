@@ -90,14 +90,14 @@ class Arp : public I_SRPUpdater {
 public:
   Arp() {};
   virtual ~Arp() {};
-  void SetData(uint data);
+  void SetData(uint32_t data);
   virtual void Trigger(bool tableTick);
   virtual void UpdateSRP(struct RUParams &rup);
 
 private:
-  uchar arp_[5];      // Arp setting
-  uchar arpPosition_; // Position of in the arpegiator
-  uchar arpLength_;   // Length of arp data
+  uint8_t arp_[5];      // Arp setting
+  uint8_t arpPosition_; // Position of in the arpegiator
+  uint8_t arpLength_;   // Length of arp data
   fixed current_;
 };
 

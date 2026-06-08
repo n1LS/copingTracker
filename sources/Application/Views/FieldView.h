@@ -20,7 +20,7 @@ public:
   FieldView(GUIWindow &w, ViewData *viewData);
 
   virtual void Redraw();
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed) override;
+  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
 
   void SetFocus(UIField *);
   UIField *GetFocus();

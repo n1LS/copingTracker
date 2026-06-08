@@ -19,7 +19,7 @@ NullView::NullView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {
 NullView::~NullView() {
 }
 
-void NullView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void NullView::ProcessButtonMask(uint16_t mask, bool pressed) {
 }
 
 void NullView::DrawView() {

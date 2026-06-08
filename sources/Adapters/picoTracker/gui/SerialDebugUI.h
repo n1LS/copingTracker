@@ -16,7 +16,7 @@
 class SerialDebugUI {
 public:
   SerialDebugUI();
-  bool readSerialIn(char *buffer, short size);
+  bool readSerialIn(char *buffer, int16_t size);
   void dispatchCmd(char *cmd);
   void catFile(const char *path);
   void listFiles(const char *path);

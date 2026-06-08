@@ -19,7 +19,7 @@ class UISortedVarList : public UIIntVarField {
 public:
   UISortedVarList(const GUIPoint &position, Variable &v, const char *format);
   virtual ~UISortedVarList() {};
-  virtual void ProcessArrow(unsigned short mask);
+  virtual void ProcessArrow(uint16_t mask);
 };
 
 #endif

@@ -41,7 +41,7 @@ void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
   DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
 }
 
-void UIBigHexVarField::ProcessArrow(unsigned short mask) {
+void UIBigHexVarField::ProcessArrow(uint16_t mask) {
 
   int value = src_.GetInt();
   int offset = 1;

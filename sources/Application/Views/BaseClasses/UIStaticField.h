@@ -20,7 +20,7 @@ public:
   UIStaticField(const GUIPoint &position, const char *string);
   virtual ~UIStaticField() {};
   virtual void Draw(GUIWindow &w, int offset = 0);
-  virtual void ProcessArrow(unsigned short mask);
+  virtual void ProcessArrow(uint16_t mask);
   virtual void OnClick() {};
 
   virtual bool IsStatic();

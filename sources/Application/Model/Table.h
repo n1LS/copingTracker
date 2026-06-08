@@ -10,17 +10,29 @@
  */
 
 #ifndef _TABLE_H_
+
 #define _TABLE_H_
 
 #include "Application/Persistency/Persistent.h"
 #include "Foundation/T_Singleton.h"
 #include "Foundation/Types/Types.h"
+#include <stdint.h>
 
 #define TABLE_COUNT 0x20
 #define TABLE_STEPS 16
 #define TABLE_COLUMNS 3
 
 #define NO_MORE_TABLE TABLE_COUNT + 10
+
+struct TableStep {
+  uint8_t  cmd1;
+  uint8_t  cmd2;
+  uint8_t  cmd3;
+  uint8_t  _pad;
+  uint16_t param1;
+  uint16_t param2;
+  uint16_t param3;
+};
 
 class Table {
 public:
@@ -29,13 +41,24 @@ public:
   bool IsEmpty();
   void Copy(const Table &other);
 
+  inline FourCC getCmd(int step, int col) const {
+    switch (col) {
+      case 0:  return FourCC::enum_type(steps_[step].cmd1);
+      case 1:  return FourCC::enum_type(steps_[step].cmd2);
+      default: return FourCC::enum_type(steps_[step].cmd3);
+    }
+  }
+
+  inline uint16_t getParam(int step, int col) const {
+    switch (col) {
+      case 0:  return steps_[step].param1;
+      case 1:  return steps_[step].param2;
+      default: return steps_[step].param3;
+    }
+  }
+
 public:
-  FourCC cmd1_[TABLE_STEPS];
-  ushort param1_[TABLE_STEPS];
-  FourCC cmd2_[TABLE_STEPS];
-  ushort param2_[TABLE_STEPS];
-  FourCC cmd3_[TABLE_STEPS];
-  ushort param3_[TABLE_STEPS];
+  TableStep steps_[TABLE_STEPS];
 };
 
 class TableHolder : public T_Singleton<TableHolder>, Persistent {

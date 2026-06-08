@@ -10,6 +10,7 @@
  */
 
 #include "Chain.h"
+#include "Song.h"
 #include "System/System/System.h"
 #include <stdlib.h>
 #include <string.h>
@@ -19,16 +20,16 @@ Chain::Chain() { Reset(); };
 Chain::~Chain() {};
 
 void Chain::Reset() {
-  for (int i = 0; i < CHAIN_COUNT * PHRASES_PER_CHAIN; i++) {
-    data_[i] = 0xFF;
-    transpose_[i] = 0x00;
-  }
   for (int i = 0; i < CHAIN_COUNT; i++) {
+    for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
+      steps_[i][j].phrase    = EMPTY_CHAIN_VALUE;
+      steps_[i][j].transpose = 0x00;
+    }
     isUsed_[i] = false;
   }
 }
 
-unsigned short Chain::GetNext() {
+uint16_t Chain::GetNext() {
   for (int i = 0; i < CHAIN_COUNT; i++) {
     if (!isUsed_[i]) {
       isUsed_[i] = true;
@@ -41,7 +42,6 @@ unsigned short Chain::GetNext() {
 void Chain::SetUsed(unsigned char c) { isUsed_[c] = true; }
 
 void Chain::ClearAllocation() {
-
   for (int i = 0; i < CHAIN_COUNT; i++) {
     isUsed_[i] = false;
   }

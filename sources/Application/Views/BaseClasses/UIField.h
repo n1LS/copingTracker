@@ -23,9 +23,9 @@ public:
   virtual ~UIField();
   virtual void Draw(GUIWindow &w, int offset = 0) = 0;
   virtual void OnClick() = 0; // ENTER pressed
-  virtual void ProcessArrow(unsigned short mask) = 0;
+  virtual void ProcessArrow(uint16_t mask) = 0;
   virtual void OnEditClick() {}; // EDIT pressed
-  virtual void ProcessEditArrow(unsigned short mask) {};
+  virtual void ProcessEditArrow(uint16_t mask) {};
   virtual void ProcessClear() {}; // EDIT+ENTER pressed
   void SetFocus();
   void ClearFocus();

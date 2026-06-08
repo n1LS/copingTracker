@@ -270,7 +270,7 @@ void Panner::UpdateSRP(struct RUParams &rup) {
 // Arpegiator
 //
 
-void Arp::SetData(unsigned int value) {
+void Arp::SetData(uint32_t value) {
   int arp = value;
   int position = 0;
   arp_[0] = 0;

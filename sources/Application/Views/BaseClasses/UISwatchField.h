@@ -20,7 +20,7 @@ public:
   UISwatchField(const GUIPoint &position, const Color color);
   virtual ~UISwatchField() {};
   virtual void Draw(GUIWindow &w, int offset = 0);
-  virtual void ProcessArrow(unsigned short mask);
+  virtual void ProcessArrow(uint16_t mask);
   virtual void OnClick() {};
 
   virtual bool IsStatic();

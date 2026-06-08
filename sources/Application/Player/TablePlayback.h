@@ -28,7 +28,7 @@ struct TablePlayback {
 public:
   void Init(int i);
   void ProcessStep(TablePlayerChange &tpc);
-  bool ProcessLocalCommand(int row, FourCC *commandList, ushort *paramList, TablePlayerChange &tpc);
+  bool ProcessLocalCommand(int row, const Table &table, TablePlayerChange &tpc);
   void Start(I_Instrument *, Table &, bool automated);
   void Stop();
   int GetPlaybackPosition(int channel);
@@ -47,7 +47,7 @@ private:
   I_Instrument *instrument_;
   int channel_;
   bool automated_;
-  uchar hopCount_[TABLE_STEPS][TABLE_COLUMNS];
+  uint8_t hopCount_[TABLE_STEPS][TABLE_COLUMNS];
   ChannelGroove groove_;
 
   static TablePlayback playback_[SONG_CHANNEL_COUNT];
@@ -57,7 +57,7 @@ private:
 class TableSaveState {
 public:
   void Reset();
-  uchar hopCount_[TABLE_STEPS][TABLE_COLUMNS];
+  uint8_t hopCount_[TABLE_STEPS][TABLE_COLUMNS];
   int position_[TABLE_COLUMNS];
   ChannelGroove groove_;
 };

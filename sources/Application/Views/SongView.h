@@ -23,7 +23,7 @@ public:
   void Reset();
 
   // View implementation
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed);
+  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
@@ -61,13 +61,6 @@ protected:
   void nudgeTempo(int direction);
 
 private:
-  bool updatingChain_; // .Flag that tells we're updating chain
-                       //  so we don't allocate chains while
-                       //  doing multiple A+ARROWS
-
-  int updateX_; // . Position where update is happening
-  int updateY_; //
-
   unsigned char lastChain_; // .Last chain clipboard
 
   int lastPlayedPosition_[SONG_CHANNEL_COUNT]; // .Last position played for song

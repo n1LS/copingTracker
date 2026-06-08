@@ -46,8 +46,8 @@ protected:
 
   // Static buffer for single cycle waveforms (max 600 samples in mono from AKWF
   // single cycle format
-  static short singleCycleBuffer_[SINGLE_CYCLE_MAX_SAMPLE_SIZE];
-  short *singleCycleData_; // Pointer to the current single cycle data
+  static int16_t singleCycleBuffer_[SINGLE_CYCLE_MAX_SAMPLE_SIZE];
+  int16_t *singleCycleData_; // Pointer to the current single cycle data
 
   // For matching oscillator mode in SampleInstrument
   float referencePitch_; // Reference pitch in Hz (C3 = 130.81 Hz)

@@ -50,7 +50,7 @@ bool MidiService::Init() {
   }
 
   // Initialize the new channel-to-instrument mapping
-  for (short i = 0; i < 16; i++) {
+  for (uint8_t i = 0; i < 16; i++) {
     inList_[0]->AssignInstrumentToChannel(i, i);
   }
 
@@ -175,7 +175,7 @@ void MidiService::flushOutQueue() {
   currentOutQueue_ = (currentOutQueue_ + 1) % MIDI_MAX_BUFFERS;
 }
 
-void MidiService::updateActiveDevicesList(unsigned short config) {
+void MidiService::updateActiveDevicesList(uint16_t config) {
   activeOutDevices_.clear();
 
   switch (config) {

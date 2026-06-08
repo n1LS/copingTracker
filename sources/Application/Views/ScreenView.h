@@ -19,7 +19,7 @@ class ScreenView : public View {
 public:
   ScreenView(GUIWindow &w, ViewData *viewData);
   ~ScreenView();
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed) {};
+  virtual void ProcessButtonMask(uint16_t mask, bool pressed) {};
   virtual void DrawView() {};
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0) {};
   virtual void OnFocus() {};

@@ -166,7 +166,7 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
         int note = event.data1_ & MIDI_DATA_MASK;
 
         // Map MIDI channel directly to instrument index
-        short instrumentIndex = midiChannel;
+        int16_t instrumentIndex = midiChannel;
 
         Player *player = Player::GetInstance();
         if (player) {
@@ -191,7 +191,7 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
         int value = event.data2_ & MIDI_DATA_MASK;
 
         // Map MIDI channel directly to instrument index
-        short instrumentIndex = midiChannel;
+        int16_t instrumentIndex = midiChannel;
 
         Player *player = Player::GetInstance();
         if (player) {

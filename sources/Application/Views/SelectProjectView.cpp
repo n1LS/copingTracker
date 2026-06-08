@@ -35,7 +35,7 @@ public:
   }
   virtual void OnFocus() override {
   }
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed) override;
+  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
   virtual void AnimationUpdate() override;
 
 private:
@@ -44,7 +44,7 @@ private:
   static bool inUse_;
   static void *storage_;
   etl::string<MAX_PROJECT_NAME_LENGTH + 12> projectLine_;
-  unsigned short currentMask_ = 0;
+  uint16_t currentMask_ = 0;
   unsigned long holdStartMs_ = 0;
   uint16_t holdProgressMs_ = 0;
   bool holdingCombo_ = false;
@@ -122,7 +122,7 @@ void DeleteProjectConfirmModal::AnimationUpdate() {
   UpdateProgress_();
 }
 
-void DeleteProjectConfirmModal::ProcessButtonMask(unsigned short mask, bool pressed) {
+void DeleteProjectConfirmModal::ProcessButtonMask(uint16_t mask, bool pressed) {
   currentMask_ = mask;
 
   if (pressed && (mask & EPBM_ENTER)) {
@@ -271,7 +271,7 @@ void SelectProjectView::OnFocus() {
   setCurrentFolder();
 }
 
-void SelectProjectView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void SelectProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed)
     return;
 

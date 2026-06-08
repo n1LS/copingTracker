@@ -20,20 +20,22 @@ Phrase::Phrase() { Reset(); };
 Phrase::~Phrase() {};
 
 void Phrase::Reset() {
-  for (int i = 0; i < PHRASE_COUNT * STEPS_PER_PHRASE; i++) {
-    note_[i] = NO_NOTE;
-    instr_[i] = 0xFF;
-    cmd1_[i] = FourCC::InstrumentCommandNone;
-    param1_[i] = 0x00;
-    cmd2_[i] = FourCC::InstrumentCommandNone;
-    param2_[i] = 0x00;
-  }
+  static const uint8_t NO_COMMAND = static_cast<uint8_t>(static_cast<char>(FourCC::InstrumentCommandNone));
+
   for (int i = 0; i < PHRASE_COUNT; i++) {
+    for (int j = 0; j < STEPS_PER_PHRASE; j++) {
+      steps_[i][j].note   = NO_NOTE;
+      steps_[i][j].instr  = NO_INSTRUMENT;
+      steps_[i][j].cmd1   = NO_COMMAND;
+      steps_[i][j].param1 = 0x00;
+      steps_[i][j].cmd2   = NO_COMMAND;
+      steps_[i][j].param2 = 0x00;
+    }
     isUsed_[i] = false;
   }
 }
 
-unsigned short Phrase::GetNext() {
+uint16_t Phrase::GetNext() {
   for (int i = 0; i < PHRASE_COUNT; i++) {
     if (!isUsed_[i]) {
       isUsed_[i] = true;
@@ -46,7 +48,6 @@ unsigned short Phrase::GetNext() {
 void Phrase::SetUsed(unsigned char c) { isUsed_[c] = true; }
 
 void Phrase::ClearAllocation() {
-
   for (int i = 0; i < PHRASE_COUNT; i++) {
     isUsed_[i] = false;
   }

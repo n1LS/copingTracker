@@ -40,7 +40,7 @@ void UITempoField::Update(Observable &, I_ObservableData *data) {
   NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(action_)));
 }
 
-void UITempoField::ProcessArrow(unsigned short mask) {
+void UITempoField::ProcessArrow(uint16_t mask) {
   int value = src_.GetInt();
 
   switch (mask) {
@@ -67,7 +67,7 @@ void UITempoField::ProcessArrow(unsigned short mask) {
   src_.SetInt(value);
 }
 
-void UITempoField::ProcessEditArrow(unsigned short mask) {
+void UITempoField::ProcessEditArrow(uint16_t mask) {
 
   ApplicationCommandDispatcher *dispatcher = ApplicationCommandDispatcher::GetInstance();
   switch (mask) {

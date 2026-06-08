@@ -48,7 +48,7 @@ void ThemeImportView::OpenSelectedItem() {
   onImportTheme(name);
 }
 
-void ThemeImportView::ProcessButtonMask(unsigned short mask, bool pressed) {
+void ThemeImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed)
     return;
 
