@@ -877,13 +877,34 @@ void SongView::DrawView() {
 }
 
 void SongView::drawChainPreview() {
+  // no preview when playing
+  if (Player::GetInstance()->IsRunning()) {
+    return;
+  }
+
   char buffer[3];
   buffer[2] = 0;
 
+  int row = viewData_->songY_ + viewData_->songOffset_;
+  unsigned char chainId = viewData_->song_->rows_[row].chains[viewData_->songX_];
+
+  if (chainId == EMPTY_SONG_VALUE) {
+    return;
+  }
+
+  GUIPoint pos = GetAnchor();
+  SetBackgroundColor(Theme::View::bg);
+
   for (int i = 0; i < PHRASES_PER_CHAIN; i++) {
-    SetColor(Theme::Song::preview(i & ALT_ROW_NUMBER == 0));
-    hex2char(X, buffer);
-    DrawString(30, i, buffer);
+    SetColor(Theme::Song::preview((i % ALT_ROW_NUMBER) == 0));
+    unsigned char phraseId = viewData_->song_->chain_.steps_[chainId][i].phrase;
+
+    if (phraseId == EMPTY_CHAIN_VALUE) {
+      DrawString(pos.x_ + 24, pos.y_  + i, "--");
+    } else {
+      hex2char(phraseId, buffer);
+      DrawString(pos.x_ + 24, pos.y_  + i, buffer);
+    }
   }
 }
 
