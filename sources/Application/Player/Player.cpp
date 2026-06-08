@@ -768,6 +768,7 @@ void Player::triggerLiveChains() {
 
 void Player::updateSongPos(int pos, int channel, int chainPos, int hop) {
   unsigned char *data = &viewData_->song_->rows_[pos].chains[channel];
+  viewData_->songPlayPos_[channel] = pos;
   viewData_->currentPlayChain_[channel] = *data;
   updateChainPos(chainPos, channel, hop);
 }
