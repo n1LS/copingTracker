@@ -43,7 +43,7 @@ protected:
 
   void updateCursor(int dx, int dy);
   void updateCursorValue(int offset);
-  void setTextProps(int row, int col);
+  void setTextProps(int row, int col, Color color);
   void warpToNeighbour(int dir);
 
   GUIRect getSelectionRect();

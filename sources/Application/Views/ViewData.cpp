@@ -110,10 +110,11 @@ unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
     case 1:
       c = &song_->chain_.steps_[currentChain_][chainRow_ + dy].transpose;
       limit = 0xFF;
-      wrap = true;
+      wrap = false;
       break;
   }
   updateData(c, offset, limit, wrap);
+
   return *c;
 }
 

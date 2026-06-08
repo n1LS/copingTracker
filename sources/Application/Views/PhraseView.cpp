@@ -145,7 +145,7 @@ void PhraseView::updateCursor(int dx, int dy) {
       cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param1);
       break;
     case 5:
-      p.x_ += 21;
+      p.x_ += 20;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
@@ -1106,7 +1106,7 @@ void PhraseView::DrawView() {
         instrLine += instr->GetDisplayName();
 
         SetBackgroundColor(Theme::View::Title::bg);
-        SetBackgroundColor(Theme::View::Title::fg);
+        SetColor(Theme::View::Title::fg);
         DrawString(location.x_ + 10, location.y_, instrLine.c_str());
       }
     }

@@ -280,23 +280,23 @@ void TableView::updateCursor(int dx, int dy) {
   }
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
-  GUIPoint anchor = GetAnchor();
-  GUIPoint p(anchor);
+  GUIPoint p = GetAnchor();
+  
   switch (col_) {
     case 1:
-      p.x_ += 4;
+      p.x_ += 3;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(table.steps_[row_].param1);
       break;
     case 3:
-      p.x_ += 13;
+      p.x_ += 11;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(table.steps_[row_].param2);
       break;
     case 5:
-      p.x_ += 22;
+      p.x_ += 19;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(table.steps_[row_].param3);
@@ -322,6 +322,10 @@ void TableView::warpToNeighbour(int dir) {
 }
 
 void TableView::updateCursorValue(int offset) {
+  unsigned char *c = 0;
+  unsigned char limit = 0;
+  bool wrap = false;
+  FourCC *cc;
 
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
@@ -562,8 +566,7 @@ void TableView::processSelectionButtonMask(uint16_t mask) {
   }
 }
 
-void TableView::setTextProps(int row, int col) {
-
+void TableView::setTextProps(int row, int col, Color color = Theme::View::fg) {
   bool highlighted = false;
 
   if (clipboard_.active_) {
@@ -577,8 +580,8 @@ void TableView::setTextProps(int row, int col) {
     }
   }
 
-  SetColor(highlighted ? Theme::View::bg : Theme::View::fg);
-  SetBackgroundColor(highlighted ? Theme::View::fg : Theme::View::bg);
+  SetColor(highlighted ? Theme::View::bg : color);
+  SetBackgroundColor(highlighted ? color : Theme::View::bg);
 }
 
 void TableView::DrawView() {
@@ -597,13 +600,11 @@ void TableView::DrawView() {
   drawRowNumbers(anchor.x_ - 3, anchor.y_, 0, 16);
   
   // Draw command 1
-  SetColor(Theme::View::fg);
-
   GUIPoint pos = anchor;
 
   for (int j = 0; j < 16; j++) {
     FourCC command = table.getCmd(j, 0);
-    setTextProps(0, j);
+    setTextProps(0, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 0 || col_ == 1)) {
@@ -614,13 +615,15 @@ void TableView::DrawView() {
   // Draw commands params 1
   
   pos = anchor;
-  pos.x_ += 4;
+  pos.x_ += 3;
+  
+  ushort *param = table.param1_;
   char buffer[6];
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    uint16_t p = table.getParam(j, 0);
-    setTextProps(1, j);
+    ushort p = *param++;
+    setTextProps(1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
@@ -629,11 +632,11 @@ void TableView::DrawView() {
   // Draw commands 2
 
   pos = anchor;
-  pos.x_ += 9;
+  pos.x_ += 8;
 
   for (int j = 0; j < 16; j++) {
     FourCC command = table.getCmd(j, 1);
-    setTextProps(2, j);
+    setTextProps(2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 2 || col_ == 3)) {
@@ -644,12 +647,14 @@ void TableView::DrawView() {
   // Draw commands params
 
   pos = anchor;
-  pos.x_ += 13;
+  pos.x_ += 11;
+
+  uint16_t p = table.getParam(j, 1);;
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    uint16_t p = table.getParam(j, 1);
-    setTextProps(3, j);
+    ushort p = *param++;
+    setTextProps(3, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
@@ -658,11 +663,11 @@ void TableView::DrawView() {
   // Draw command 3
 
   pos = anchor;
-  pos.x_ += 18;
+  pos.x_ += 16;
 
   for (int j = 0; j < 16; j++) {
     FourCC command = table.getCmd(j, 2);
-    setTextProps(4, j);
+    setTextProps(4, j, Theme::Phrase::command3(j % ALT_ROW_NUMBER == 0));
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 4 || col_ == 5)) {
@@ -673,12 +678,14 @@ void TableView::DrawView() {
   // Draw commands params 3
 
   pos = anchor;
-  pos.x_ += 22;
+  pos.x_ += 19;
+
+  param = table.param3_;
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
     uint16_t p = table.getParam(j, 2);
-    setTextProps(5, j);
+    setTextProps(5, j, Theme::Phrase::command3(j % ALT_ROW_NUMBER == 0));
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;

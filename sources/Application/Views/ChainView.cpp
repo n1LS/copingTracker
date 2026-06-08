@@ -69,7 +69,6 @@ void ChainView::cutPosition() {
 }
 
 void ChainView::pasteLastPhrase() {
-
   // If we're on an empty spot, we past the last phrase
   // otherwise we take the current phrase as last
 
@@ -88,18 +87,18 @@ void ChainView::updateCursor(int dx, int dy) {
 }
 
 void ChainView::updateCursorValue(int offset, int dx, int dy) {
-
   unsigned char v = viewData_->UpdateChainCursorValue(offset, dx, dy);
+
   if (viewData_->chainCol_ == 0) {
     lastPhrase_ = v;
     updatingPhrase_ = true;
     updateRow_ = viewData_->chainRow_;
   }
+
   isDirty_ = true;
 }
 
 void ChainView::updateSelectionValue(int offset) { // HERE
-
   int savecol = viewData_->chainCol_;
   int saverow = viewData_->chainRow_;
   GUIRect r = getSelectionRect();
@@ -115,7 +114,6 @@ void ChainView::updateSelectionValue(int offset) { // HERE
 }
 
 void ChainView::warpInColumn(int offset) {
-
   // save current data
 
   int saveY = viewData_->songY_;
@@ -448,9 +446,9 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
     if (mask & EPBM_UP)
       updateCursorValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
     if (mask & EPBM_LEFT)
-      updateCursorValue(-0x01);
+      updateCursorValue(-1);
     if (mask & EPBM_RIGHT)
-      updateCursorValue(0x01);
+      updateCursorValue(+1);
     if (mask & EPBM_ALT)
       pasteClipboard();
     if (mask == EPBM_ENTER) {
