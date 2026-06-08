@@ -622,8 +622,7 @@ void TableView::DrawView() {
   // Draw command 1
   SetColor(Theme::View::fg);
 
-  FourCC *f = table.cmd1_;
-  pos = anchor;
+  GUIPoint pos = anchor;
 
   for (int j = 0; j < 16; j++) {
     FourCC command = table.getCmd(j, 0);

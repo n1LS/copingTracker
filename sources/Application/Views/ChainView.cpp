@@ -636,6 +636,9 @@ void ChainView::DrawView() {
   // Display phrases
   ChainStep *base = &viewData_->song_->chain_.steps_[16 * viewData_->currentChain_];
 
+  char row[6];
+  row[5] = 0;
+
   for (int j = 0; j < 16; j++) {
     unsigned char d = base[j].phrase;
     setTextProps(0, j);
@@ -677,7 +680,7 @@ void ChainView::DrawView() {
 
   Player *player = Player::GetInstance();
 
-  unsigned char phrase = *(viewData_->song_->chain_.data_ + (16 * viewData_->currentChain_ + viewData_->chainRow_));
+  unsigned char phrase = viewData_->song_->chain_.steps_[viewData_->currentChain_ * 16 + viewData_->chainRow_].phrase;
   if (phrase != EMPTY_CHAIN_VALUE) {
     drawPhrasePreview(phrase);
   }
@@ -793,8 +796,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   pos.x_ += 12;
 
   // Display notes
-  unsigned char *data = viewData_->song_->phrase_.note_ + (16 * phrase);
-  unsigned char *instrData = viewData_->song_->phrase_.instr_ + (16 * phrase);  
+  PhraseStep *steps = viewData_->song_->phrase_.steps_ + (16 * phrase);
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   
@@ -802,8 +804,8 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   buffer[4] = 0;
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
-    unsigned char d = *data++;
-    unsigned char instr = *instrData++;
+    unsigned char d = steps[j].note;
+    unsigned char instr = steps[j].instr;
 
     if (d == NO_NOTE) {
       DrawString(pos.x_, pos.y_, "----");
@@ -843,14 +845,14 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   pos = GetAnchor();
   pos.x_ += 17;
 
-  data = viewData_->song_->phrase_.instr_ + (16 * viewData_->currentPhrase_);
+  PhraseStep *instrSteps = viewData_->song_->phrase_.steps_ + (16 * viewData_->currentPhrase_);
   buffer[0] = 'I';
   buffer[3] = 0;
 
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
 
-    unsigned char d = *data++;
+    unsigned char d = instrSteps[j].instr;
     
     if (d == NO_INSTRUMENT) {
       DrawString(pos.x_, pos.y_, "I--");

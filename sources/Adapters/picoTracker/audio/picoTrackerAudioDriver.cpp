@@ -123,7 +123,7 @@ bool picoTrackerAudioDriver::InitDriver() {
   memcpy(modified_audio_i2s_instructions, audio_i2s_program_instructions, 24 * 2);
   modified_audio_i2s_program.instructions = modified_audio_i2s_instructions;
 
-  uiuint32_tnt offset = pio_add_program(AUDIO_PIO, &modified_audio_i2s_program);
+  uint32_t offset = pio_add_program(AUDIO_PIO, &modified_audio_i2s_program);
   pioOffset_ = offset;
 
   audio_i2s_program_init(AUDIO_PIO, AUDIO_SM, offset, AUDIO_SDATA, AUDIO_BCLK);
