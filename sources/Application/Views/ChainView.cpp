@@ -838,7 +838,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
 
   // Draw instruments
   pos = GetAnchor();
-  pos.x_ += 17;
+  pos.x_ += 20;
 
   PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
   buffer[0] = 'I';
