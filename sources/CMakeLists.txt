@@ -14,11 +14,9 @@ add_compile_options(
   -fcallgraph-info=su # include above info in callgraph
   -Wstack-usage=2074 # allows high watermark at the time this option was added TODO: reduce this for safety and/or reduce stack size
 
-  # braids
+  # stm HAL
   -Wno-unused-variable
   -Wno-array-bounds
-
-  # stm HAL
   -Wno-unused-parameter
   -Wno-missing-field-initializers
 )

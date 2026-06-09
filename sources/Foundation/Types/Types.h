@@ -70,13 +70,6 @@ struct FourCC {
     SampleInstrumentTable = 117,
     SampleInstrumentTableAutomation = 60,
 
-    MacroInstrumentShape = 93,
-    MacroInstrmentTimbre = 94,
-    MacroInstrumentColor = 95,
-    MacroInstrumentAttack = 96,
-    MacroInstrumentDecay = 97,
-    MacroInstrumentSignature = 98,
-
     MidiInstrumentChannel = 1,
     MidiInstrumentNoteLength = 32,
     MidiInstrumentVolume = 118,
@@ -289,6 +282,8 @@ struct FourCC {
     ActionMassStorage = 50,
     VarOutputVolume = 74,
 
+    // 93-98 free (formerly MacroInstrument fields)
+
     Default = 255, // "    "
   };
 
@@ -339,12 +334,6 @@ struct FourCC {
   ETL_ENUM_TYPE(VarUIFont, "UIFONT")
   ETL_ENUM_TYPE(VarThemeName, "THEMENAME")
   ETL_ENUM_TYPE(VarScaleRoot, "scaleroot")
-  ETL_ENUM_TYPE(MacroInstrumentShape, "shape")
-  ETL_ENUM_TYPE(MacroInstrmentTimbre, "timbre")
-  ETL_ENUM_TYPE(MacroInstrumentColor, "color")
-  ETL_ENUM_TYPE(MacroInstrumentAttack, "Attack")
-  ETL_ENUM_TYPE(MacroInstrumentDecay, "Decay")
-  ETL_ENUM_TYPE(MacroInstrumentSignature, "Signature")
   ETL_ENUM_TYPE(SampleInstrumentSample, "sample")
   ETL_ENUM_TYPE(SampleInstrumentVolume, "volume")
   ETL_ENUM_TYPE(SampleInstrumentInterpolation, "interpol")
