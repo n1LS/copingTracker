@@ -73,6 +73,7 @@ void ThemeImportView::DrawView() {
   DrawTitle("Import Theme");
 
   // Draw theme files
+  SetBackgroundColor(Theme::View::bg);
   auto fs = FileSystem::GetInstance();
 
   int x = 1;

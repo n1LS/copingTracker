@@ -69,7 +69,6 @@ void ChainView::cutPosition() {
 }
 
 void ChainView::pasteLastPhrase() {
-
   // If we're on an empty spot, we past the last phrase
   // otherwise we take the current phrase as last
 
@@ -88,18 +87,18 @@ void ChainView::updateCursor(int dx, int dy) {
 }
 
 void ChainView::updateCursorValue(int offset, int dx, int dy) {
-
   unsigned char v = viewData_->UpdateChainCursorValue(offset, dx, dy);
+
   if (viewData_->chainCol_ == 0) {
     lastPhrase_ = v;
     updatingPhrase_ = true;
     updateRow_ = viewData_->chainRow_;
   }
+
   isDirty_ = true;
 }
 
 void ChainView::updateSelectionValue(int offset) { // HERE
-
   int savecol = viewData_->chainCol_;
   int saverow = viewData_->chainRow_;
   GUIRect r = getSelectionRect();
@@ -115,7 +114,6 @@ void ChainView::updateSelectionValue(int offset) { // HERE
 }
 
 void ChainView::warpInColumn(int offset) {
-
   // save current data
 
   int saveY = viewData_->songY_;
@@ -448,9 +446,9 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
     if (mask & EPBM_UP)
       updateCursorValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
     if (mask & EPBM_LEFT)
-      updateCursorValue(-0x01);
+      updateCursorValue(-1);
     if (mask & EPBM_RIGHT)
-      updateCursorValue(0x01);
+      updateCursorValue(+1);
     if (mask & EPBM_ALT)
       pasteClipboard();
     if (mask == EPBM_ENTER) {
@@ -663,14 +661,14 @@ void ChainView::DrawView() {
     SetBackgroundColor(Theme::View::bg);
 
     if (transpose > 0) {
-      npf_snprintf(row, sizeof(row), "+%3d", transpose);
+      npf_snprintf(row, sizeof(row), "+%2d", transpose);
       SetColor(Theme::Data::positive);
-      DrawString(pos.x_ + 3, pos.y_, row);
     } else if (transpose < 0) {
-      npf_snprintf(row, sizeof(row), "-%3d", -transpose);
+      npf_snprintf(row, sizeof(row), "-%2d", -transpose);
       SetColor(Theme::Data::negative);
-      DrawString(pos.x_ + 3, pos.y_, row);
     }
+
+    DrawString(pos.x_ + 3, pos.y_, row);
 
     pos.y_++;
   }
@@ -790,7 +788,7 @@ void ChainView::AnimationUpdate() {
 
 void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
-  pos.x_ += 12;
+  pos.x_ += 15;
 
   // Display notes
   PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];
@@ -840,7 +838,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
 
   // Draw instruments
   pos = GetAnchor();
-  pos.x_ += 17;
+  pos.x_ += 20;
 
   PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
   buffer[0] = 'I';

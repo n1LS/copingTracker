@@ -168,7 +168,7 @@ void GrooveView::DrawView() {
   char buffer[6];
 
   unsigned char *grooveData = Groove::GetInstance()->GetGrooveData(viewData_->currentGroove_);
-  for (int j = 0; j < 16; j++) {
+  for (int j = 0; j < STEPS_PER_GROOVE; j++) {
     bool highlighted = (j == position_);
 
     if (grooveData[j] != NO_GROOVE_DATA) {
@@ -176,10 +176,17 @@ void GrooveView::DrawView() {
       buffer[3] = 0;
     } else {
       strcpy(buffer, "--");
-    };
+    }
+
+    // Valid pair: both empty, or both set and summing to 12
+    int pairBase = j & ~1;
+    bool bothEmpty = grooveData[pairBase] == NO_GROOVE_DATA && grooveData[pairBase + 1] == NO_GROOVE_DATA;
+    bool bothValidSum = grooveData[pairBase] != NO_GROOVE_DATA && grooveData[pairBase + 1] != NO_GROOVE_DATA &&
+                        (grooveData[pairBase] + grooveData[pairBase + 1]) == 12;
+    bool pairInvalid = !bothEmpty && !bothValidSum;
 
     SetBackgroundColor(Theme::View::bg);
-    SetColor(Theme::View::fg);
+    SetColor(pairInvalid ? Theme::View::warning : Theme::View::fg);
 
     if (highlighted) {
       SwapColors();
@@ -194,7 +201,6 @@ void GrooveView::DrawView() {
 }
 
 void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
-
   GUIPoint anchor = GetAnchor();
   GUIPoint pos;
 
@@ -202,9 +208,10 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
 
   pos.x_ = anchor.x_ - 1;
   pos.y_ = anchor.y_ + lastPosition_;
-  DrawString(pos.x_, pos.y_, " ");
+  DrawChar(pos.x_, pos.y_, ' ');
 
   Groove *gr = Groove::GetInstance();
+  
   // Get current channel
   int channel = viewData_->songX_;
 
@@ -213,6 +220,7 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
 
   gr->GetChannelData(channel, &groove, &groovepos);
 
+  // draw indicator
   if (groove == viewData_->currentGroove_ && viewData_->playMode_ != PM_AUDITION) {
     lastPosition_ = groovepos;
     pos.x_ = anchor.x_ - 1;

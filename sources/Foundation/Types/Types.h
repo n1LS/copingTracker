@@ -281,6 +281,7 @@ struct FourCC {
 
     ActionMassStorage = 50,
     VarOutputVolume = 74,
+    ActionModulation = 213,
 
     // 93-98 free (formerly MacroInstrument fields)
 

@@ -18,6 +18,7 @@
 #include "Foundation/T_Singleton.h"
 
 #define MAX_GROOVES 0x20
+#define STEPS_PER_GROOVE 16
 #define NO_GROOVE_DATA 0xFF
 
 struct ChannelGroove {
@@ -43,6 +44,6 @@ public:
 
 private:
   ChannelGroove channelGroove_[SONG_CHANNEL_COUNT];
-  static unsigned char data_[MAX_GROOVES][16];
+  static unsigned char data_[MAX_GROOVES][STEPS_PER_GROOVE];
 };
 #endif

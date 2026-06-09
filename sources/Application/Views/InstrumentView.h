@@ -70,6 +70,9 @@ private:
   void onConfirmSampleChange(View &view, ModalView &dialog);
   void onConfirmExportOverwrite(View &view, ModalView &dialog);
 
+  void goToModulationPage();
+  void goToInstrumentPage();
+
   static constexpr size_t SliceCountLabelSize = 20;
   Project *project_;
   FourCC lastFocusID_;
@@ -87,7 +90,7 @@ private:
   InstrumentType pendingInstrumentType_ = IT_NONE;
 
   etl::vector<UIIntVarField, 1> typeIntVarField_;
-  etl::vector<UIActionField, 2> persistentActionField_;
+  etl::vector<UIActionField, 3> persistentActionField_;
   etl::vector<UIIntVarField, 40> intVarField_;
   etl::vector<UINoteVarField, 1> noteVarField_;
   etl::vector<UIStaticField, 16> staticField_;

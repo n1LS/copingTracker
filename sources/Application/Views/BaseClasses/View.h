@@ -157,6 +157,7 @@ struct Theme {
     SWITCHABLE(instrument, LIGHT_BLUE, BLUE)
     SWITCHABLE(command1, LIGHT_YELLOW, YELLOW)
     SWITCHABLE(command2, LIGHT_GREEN, GREEN)
+    SWITCHABLE(command3, LIGHT_CYAN, CYAN)
   };
 
   struct Song {
