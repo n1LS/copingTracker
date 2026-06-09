@@ -663,12 +663,14 @@ void ChainView::DrawView() {
     if (transpose > 0) {
       npf_snprintf(row, sizeof(row), "+%2d", transpose);
       SetColor(Theme::Data::positive);
+      DrawString(pos.x_ + 3, pos.y_, row);
     } else if (transpose < 0) {
       npf_snprintf(row, sizeof(row), "-%2d", -transpose);
       SetColor(Theme::Data::negative);
+      DrawString(pos.x_ + 3, pos.y_, row);
+    } else {
+      DrawString(pos.x_ + 3, pos.y_, "   ");
     }
-
-    DrawString(pos.x_ + 3, pos.y_, row);
 
     pos.y_++;
   }
