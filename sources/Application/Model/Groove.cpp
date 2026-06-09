@@ -11,7 +11,7 @@
 
 #include "Groove.h"
 
-unsigned char Groove::data_[MAX_GROOVES][16];
+unsigned char Groove::data_[MAX_GROOVES][STEPS_PER_GROOVE];
 
 Groove::Groove() : Persistent("GROOVES") { Clear(); };
 
@@ -50,7 +50,7 @@ void Groove::GetChannelData(int channel, int *groove, int *position) {
 }
 
 void Groove::SaveContent(tinyxml2::XMLPrinter *printer) {
-  saveHexBuffer(printer, "DATA", (unsigned char *)data_, 16 * MAX_GROOVES);
+  saveHexBuffer(printer, "DATA", (unsigned char *)data_, STEPS_PER_GROOVE * MAX_GROOVES);
 }
 
 void Groove::RestoreContent(PersistencyDocument *doc) {
@@ -80,7 +80,7 @@ bool Groove::UpdateGroove(ChannelGroove &c, bool reverse) {
       }
     } else {
       if (c.ticks_ == data_[c.groove_][c.position_]) {
-        c.position_ = (c.position_ + 1) % 16;
+        c.position_ = (c.position_ + 1) % STEPS_PER_GROOVE;
         if (data_[c.groove_][c.position_] == 0xFF) {
           c.position_ = 0;
         };
@@ -90,7 +90,7 @@ bool Groove::UpdateGroove(ChannelGroove &c, bool reverse) {
     }
   } else { // Note
     if (c.ticks_ == 0) {
-      c.position_ = (c.position_ + 1) % 16;
+      c.position_ = (c.position_ + 1) % STEPS_PER_GROOVE;
       if (data_[c.groove_][c.position_] == 0xFF) {
         c.position_ = 0;
       };

@@ -617,12 +617,11 @@ void TableView::DrawView() {
   pos = anchor;
   pos.x_ += 3;
   
-  ushort *param = table.param1_;
-  char buffer[6];
+    char buffer[6];
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    ushort p = *param++;
+    uint16_t p = table.getParam(j, 0);
     setTextProps(1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
@@ -649,11 +648,10 @@ void TableView::DrawView() {
   pos = anchor;
   pos.x_ += 11;
 
-  uint16_t p = table.getParam(j, 1);;
   buffer[5] = 0;
-
+  
   for (int j = 0; j < 16; j++) {
-    ushort p = *param++;
+    uint16_t p = table.getParam(j, 1);
     setTextProps(3, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
     hexshort2char(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
@@ -680,7 +678,6 @@ void TableView::DrawView() {
   pos = anchor;
   pos.x_ += 19;
 
-  param = table.param3_;
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
