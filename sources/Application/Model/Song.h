@@ -12,6 +12,8 @@
 #ifndef _SONG_H_
 #define _SONG_H_
 
+#include <stdint.h>
+
 #include "Application/Persistency/Persistent.h"
 #include "Chain.h"
 #include "Phrase.h"

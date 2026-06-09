@@ -46,8 +46,7 @@ PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
   clipboard_.height_ = 0;
 
   for (int i = 0; i < 16; i++) {
-    clipboard_.note_[i] = NO_NOTE;
-    clipboard_.instr_[i] = 0;
+    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0};
   };
 }
 
@@ -70,12 +69,7 @@ void PhraseView::Reset() {
   clipboard_.col_ = 0;
   clipboard_.row_ = 0;
   for (int i = 0; i < 16; i++) {
-    clipboard_.note_[i] = 0xFF;
-    clipboard_.instr_[i] = 0;
-    clipboard_.cmd1_[i] = 0;
-    clipboard_.param1_[i] = 0;
-    clipboard_.cmd2_[i] = 0;
-    clipboard_.param2_[i] = 0;
+    clipboard_.steps_[i] = {0xFF, 0, 0, 0, 0, 0};
   }
 
   saveCol_ = 0;
@@ -503,13 +497,7 @@ void PhraseView::fillClipboardData() {
   PhraseStep *base = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
 
   for (int i = 0; i < clipboard_.height_; i++) {
-    int r = clipboard_.row_ + i;
-    clipboard_.note_[i]   = base[r].note;
-    clipboard_.instr_[i]  = base[r].instr;
-    clipboard_.cmd1_[i]   = base[r].cmd1;
-    clipboard_.param1_[i] = base[r].param1;
-    clipboard_.cmd2_[i]   = base[r].cmd2;
-    clipboard_.param2_[i] = base[r].param2;
+    clipboard_.steps_[i] = base[clipboard_.row_ + i];
   };
   updateCursor(0, 0);
 }
@@ -636,12 +624,12 @@ void PhraseView::pasteClipboard() {
     for (int j = 0; j < height; j++) {
       int r = (j + row_) % 16;
       switch (i + clipboard_.col_) {
-        case 0: base[r].note   = clipboard_.note_[j];   break;
-        case 1: base[r].instr  = clipboard_.instr_[j];  break;
-        case 2: base[r].cmd1   = clipboard_.cmd1_[j];   break;
-        case 3: base[r].param1 = clipboard_.param1_[j]; break;
-        case 4: base[r].cmd2   = clipboard_.cmd2_[j];   break;
-        case 5: base[r].param2 = clipboard_.param2_[j]; break;
+        case 0: base[r].note   = clipboard_.steps_[j].note;   break;
+        case 1: base[r].instr  = clipboard_.steps_[j].instr;  break;
+        case 2: base[r].cmd1   = clipboard_.steps_[j].cmd1;   break;
+        case 3: base[r].param1 = clipboard_.steps_[j].param1; break;
+        case 4: base[r].cmd2   = clipboard_.steps_[j].cmd2;   break;
+        case 5: base[r].param2 = clipboard_.steps_[j].param2; break;
       }
     }
   }

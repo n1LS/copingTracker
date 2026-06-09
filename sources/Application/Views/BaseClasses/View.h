@@ -18,6 +18,7 @@
 #include "Application/Model/Project.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/mathutils.h"
+#include "Application/Utils/updateData.h"
 #include "Externals/etl/include/etl/delegate.h"
 #include "Foundation/Types/Colors.h"
 #include "I_Action.h"
@@ -257,16 +258,7 @@ protected:
   // to remove once everything got to viewdata
 
   inline void updateData(unsigned char *c, int offset, unsigned char limit, bool wrap) {
-    int v = *c;
-    if (v == 0xFF) { // Uninitiaized data
-      v = 0;
-    }
-    v += offset;
-    if (v < 0)
-      v = (wrap ? (limit + 1 + v) : 0);
-    if (v > limit)
-      v = (wrap ? v - (limit + 1) : limit);
-    *c = v;
+    updateDataValue(c, offset, limit, wrap);
   }
 
   GUIPoint GetAnchor();
@@ -281,7 +273,6 @@ protected:
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
   void drawPlayTime(Player *player, GUIPoint pos);
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
-  void drawPowerButtonUI();
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
 
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
@@ -313,10 +304,6 @@ public: // temp hack for modal window constructors
   // Previous VU meter values for optimization (one pair per channel + master)
   int32_t prevLeftVU_[SONG_CHANNEL_COUNT + 1];
   int32_t prevRightVU_[SONG_CHANNEL_COUNT + 1];
-
-  // Power button state
-  bool powerButtonPressed_;
-  int powerButtonHoldCount_;
 
 private:
   uint16_t mask_;

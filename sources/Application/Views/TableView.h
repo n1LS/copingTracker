@@ -67,12 +67,7 @@ private:
     int row_;
     int width_;
     int height_;
-    uint8_t cmd1_[16];
-    uint16_t param1_[16];
-    uint8_t cmd2_[16];
-    uint16_t param2_[16];
-    uint8_t cmd3_[16];
-    uint16_t param3_[16];
+    TableStep steps_[16];
   } clipboard_;
 
   int saveCol_;

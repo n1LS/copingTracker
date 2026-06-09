@@ -81,12 +81,7 @@ void TableView::Reset() {
   clipboard_.col_ = 0;
   clipboard_.row_ = 0;
   for (int i = 0; i < 16; i++) {
-    clipboard_.cmd1_[i] = 0;
-    clipboard_.param1_[i] = 0;
-    clipboard_.cmd2_[i] = 0;
-    clipboard_.param2_[i] = 0;
-    clipboard_.cmd3_[i] = 0;
-    clipboard_.param3_[i] = 0;
+    clipboard_.steps_[i] = {};
   }
 
   saveCol_ = 0;
@@ -144,13 +139,7 @@ void TableView::fillClipboardData() {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   for (int i = 0; i < clipboard_.height_; i++) {
-    const TableStep &step = table.steps_[clipboard_.row_ + i];
-    clipboard_.cmd1_[i] = step.cmd1;
-    clipboard_.param1_[i] = step.param1;
-    clipboard_.cmd2_[i] = step.cmd2;
-    clipboard_.param2_[i] = step.param2;
-    clipboard_.cmd3_[i] = step.cmd3;
-    clipboard_.param3_[i] = step.param3;
+    clipboard_.steps_[i] = table.steps_[clipboard_.row_ + i];
   }
   updateCursor(0, 0);
 }
@@ -260,24 +249,12 @@ void TableView::pasteClipboard() {
     for (int j = 0; j < height; j++) {
       const int row = (j + row_) % 16;
       switch (i + clipboard_.col_) {
-        case 0:
-          table.steps_[row].cmd1 = clipboard_.cmd1_[j];
-          break;
-        case 1:
-          table.steps_[row].param1 = clipboard_.param1_[j];
-          break;
-        case 2:
-          table.steps_[row].cmd2 = clipboard_.cmd2_[j];
-          break;
-        case 3:
-          table.steps_[row].param2 = clipboard_.param2_[j];
-          break;
-        case 4:
-          table.steps_[row].cmd3 = clipboard_.cmd3_[j];
-          break;
-        case 5:
-          table.steps_[row].param3 = clipboard_.param3_[j];
-          break;
+        case 0: table.steps_[row].cmd1   = clipboard_.steps_[j].cmd1;   break;
+        case 1: table.steps_[row].param1 = clipboard_.steps_[j].param1; break;
+        case 2: table.steps_[row].cmd2   = clipboard_.steps_[j].cmd2;   break;
+        case 3: table.steps_[row].param2 = clipboard_.steps_[j].param2; break;
+        case 4: table.steps_[row].cmd3   = clipboard_.steps_[j].cmd3;   break;
+        case 5: table.steps_[row].param3 = clipboard_.steps_[j].param3; break;
       }
     }
   }

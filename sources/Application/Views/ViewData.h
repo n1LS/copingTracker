@@ -13,6 +13,7 @@
 #define _VIEW_DATA_
 
 #include "Application/Model/Project.h"
+#include "Application/Utils/updateData.h"
 #include "System/Console/Trace.h"
 
 enum PlayMode { PM_SONG, PM_CHAIN, PM_PHRASE, PM_LIVE, PM_AUDITION };
@@ -39,16 +40,7 @@ protected:
   void checkSongBoundaries();
 
   inline void updateData(unsigned char *c, int offset, unsigned char limit, bool wrap) {
-    int v = *c;
-    if ((v == 0xFF) && (limit != 0xFF)) {
-      v = 0;
-    }
-    v += offset;
-    if (v < 0)
-      v = (wrap ? (limit + 1 + v) : 0);
-    if (v > limit)
-      v = (wrap ? v - (limit + 1) : limit);
-    *c = v;
+    updateDataValue(c, offset, limit, wrap);
   }
 
 public:

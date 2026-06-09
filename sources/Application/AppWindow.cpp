@@ -151,7 +151,6 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   _lastB = 0;
   _mask = 0;
   lowBatteryMessageShown_ = false;
-  lowBatteryWarningCounter_ = 0;
   sdCardMissing_ = false;
   sdCardMessageShown_ = false;
 
@@ -639,26 +638,6 @@ void AppWindow::AnimationUpdate() {
       Trace::Error("Failed to load project '%s'. Waiting for key press to load untitled", failedProjectName_);
       awaitingProjectLoadAck_ = true;
       return;
-    }
-  }
-
-  // run at 1Hz
-  if (animationFrameCounter_ % PICO_CLOCK_HZ == 0) {
-    // Check battery level
-    BatteryState batteryState;
-    System::GetInstance()->GetBatteryState(batteryState);
-    if (!batteryState.error) {
-      // only process battery status if no error state
-      if (batteryState.percentage < MINIMUM_ALLOWED_BATTERY_PERCENTAGE && !batteryState.charging) {
-        lowBatteryState_ = true;
-        lowBatteryWarningCounter_++;
-      } else {
-        lowBatteryState_ = false;
-        lowBatteryWarningCounter_ = 0;
-      }
-      if (lowBatteryWarningCounter_ > MIN_BATT_POWEROFF_SEC) {
-        System::GetInstance()->PowerDown();
-      }
     }
   }
 

@@ -47,7 +47,7 @@ bool View::batteryDisplayInitialized_ = false;
 
 View::View(GUIWindow &w, ViewData *viewData)
     : w_(w), viewData_(viewData), needsRedraw_(false), isVisible_(true), vuMeterCount_(0), viewMode_(VM_NORMAL),
-      isDirty_(true), viewType_(VT_SONG), hasFocus_(false), powerButtonPressed_(false), powerButtonHoldCount_(0) {
+      isDirty_(true), viewType_(VT_SONG), hasFocus_(false) {
   if (!initPrivate_) {
     View::margin_ = 0;
     songRowCount_ = 16;
@@ -365,12 +365,6 @@ void View::SetDirty(bool isDirty) {
 }
 
 void View::ProcessButton(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    powerButtonPressed_ = false;
-  } else if (mask & EPBM_POWER) {
-    powerButtonPressed_ = pressed;
-  }
-
   // Normal button processing
   if (modalView_) {
     modalView_->ProcessButton(mask, pressed);
@@ -508,55 +502,6 @@ void View::drawBattery() {
   battpos.x_ = startX + (kBattWidth - battLen);
   DrawString(battpos.x_, battpos.y_, battText);
 #endif
-}
-
-// Draw power button UI overlay
-void View::drawPowerButtonUI() {
-  // Only process and draw UI when power button is pressed
-  if (powerButtonPressed_) {
-    char countdownMessage[SCREEN_WIDTH];
-    powerButtonHoldCount_++;
-
-    int remainingSeconds = 3 - (powerButtonHoldCount_ / PICO_CLOCK_HZ);
-    if (remainingSeconds < 0) {
-      remainingSeconds = 0;
-    }
-
-    snprintf(countdownMessage, sizeof(countdownMessage), "Hold for shutdown (%d sec)", remainingSeconds);
-
-    if (remainingSeconds == 0) {
-      Trace::Debug("Power button held for threshold time, Powerdown!");
-
-      System::GetInstance()->PowerDown();
-    }
-
-    // Calculate center position for the message
-    GUIPoint pos = GetAnchor();
-    uint16_t mesgLen = strlen(countdownMessage);
-    pos.x_ = (SCREEN_WIDTH - mesgLen) / 2;
-    pos.y_ = SCREEN_HEIGHT / 2 - 1;
-
-    // Draw a background box
-    SetBackgroundColor(Theme::View::bg);
-    for (int y = pos.y_ - 1; y <= pos.y_ + 1; y++) {
-      for (int x = pos.x_ - 1; x <= (uint16_t)(pos.x_ + mesgLen + 1); x++) {
-        DrawString(x, y, " ");
-      }
-    }
-
-    // Draw the message
-    SetColor(Theme::View::info);
-    DrawString(pos.x_, pos.y_, countdownMessage);
-  } else if (powerButtonHoldCount_ > 0) {
-    // Reset hold counter when button is released
-    powerButtonHoldCount_ = 0;
-
-    // Force immediate redraw by calling DrawView directly
-    // This will redraw the entire screen with the correct content
-    DrawView();
-
-    Trace::Debug("Power button released! View redrawn.");
-  }
 }
 
 void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick = false) {

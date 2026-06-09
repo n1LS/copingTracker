@@ -12,6 +12,7 @@
 #ifndef _PHRASE_VIEW_H_
 #define _PHRASE_VIEW_H_
 
+#include "Application/Model/Phrase.h"
 #include "BaseClasses/UIBigHexVarField.h"
 #include "ScreenView.h"
 #include "ViewData.h"
@@ -76,12 +77,7 @@ private:
     int row_;
     int width_;
     int height_;
-    uint8_t note_[16];
-    uint8_t instr_[16];
-    uint8_t cmd1_[16];
-    uint16_t param1_[16];
-    uint8_t cmd2_[16];
-    uint16_t param2_[16];
+    PhraseStep steps_[16];
   } clipboard_;
 
   int saveCol_;

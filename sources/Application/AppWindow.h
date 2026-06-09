@@ -119,7 +119,6 @@ private:
 
   bool lowBatteryState_;
   bool lowBatteryMessageShown_;
-  uint16_t lowBatteryWarningCounter_;
   bool sdCardMissing_;
   bool sdCardMessageShown_;
 

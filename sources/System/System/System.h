@@ -33,7 +33,6 @@ public:                                 // Override in implementation
   virtual void SetDisplayBrightness(unsigned char value) = 0;
   virtual void PostQuitMessage() = 0;
   virtual unsigned int GetMemoryUsage() = 0;
-  virtual void PowerDown() = 0;
   virtual void SystemPutChar(int c) = 0;
   virtual void SystemBootloader() = 0;
   virtual void SystemReboot() = 0;

@@ -23,7 +23,6 @@ ScreenView::~ScreenView() {
 /// every clock tick
 void ScreenView::AnimationUpdate() {
   drawBattery();
-  drawPowerButtonUI();
 }
 
 void ScreenView::Navigate(ViewType target) {
