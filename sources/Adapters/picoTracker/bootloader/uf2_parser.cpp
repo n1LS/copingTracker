@@ -131,8 +131,7 @@ int flash_derived_bin_to_slot(const char *bin_path, uint32_t target_slot) {
 
 // Parse UF2 from SD, validate slot range, write derived .bin, and
 // optionally flash app slot.
-int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *derived_output_path,
-                                 bool do_flash) {
+int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *derived_output_path, bool do_flash) {
   if (do_flash) {
     return flash_derived_bin_to_slot(derived_output_path, target_slot);
   }

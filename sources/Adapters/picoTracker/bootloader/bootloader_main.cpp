@@ -13,12 +13,12 @@
 #include "Externals/SdFat/src/SdFat.h"
 #include "bootloader_gfx.h"
 #include "bootloader_log.h"
+#include "bootloader_menu.h"
 #include "bsp/board.h"
 #include "hardware/clocks.h"
 #include "hardware/pll.h"
 #include "hardware/structs/watchdog.h"
 #include "hardware/watchdog.h"
-#include "bootloader_menu.h"
 #include "path_utils.h"
 #include "pico/stdlib.h"
 #include "pico/time.h"
@@ -35,7 +35,8 @@ constexpr uint32_t kHeartbeatPeriodMs = 1000;
 constexpr uint32_t kAppBootTraceMagic = 0x41505452u; // 'APTR'
 constexpr const char *kBootloaderBuildTag = "BLD-2026-06-05-library-v4";
 
-extern int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *derived_output_path, bool do_flash);
+extern int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *derived_output_path,
+                             bool do_flash);
 
 // Convert "/foo.uf2" -> "/firmwares/foo.bin".
 static void uf2_to_firmware_bin_path(const char *uf2_path, char *out, size_t out_size) {

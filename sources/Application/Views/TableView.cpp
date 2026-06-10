@@ -249,12 +249,24 @@ void TableView::pasteClipboard() {
     for (int j = 0; j < height; j++) {
       const int row = (j + row_) % 16;
       switch (i + clipboard_.col_) {
-        case 0: table.steps_[row].cmd1   = clipboard_.steps_[j].cmd1;   break;
-        case 1: table.steps_[row].param1 = clipboard_.steps_[j].param1; break;
-        case 2: table.steps_[row].cmd2   = clipboard_.steps_[j].cmd2;   break;
-        case 3: table.steps_[row].param2 = clipboard_.steps_[j].param2; break;
-        case 4: table.steps_[row].cmd3   = clipboard_.steps_[j].cmd3;   break;
-        case 5: table.steps_[row].param3 = clipboard_.steps_[j].param3; break;
+        case 0:
+          table.steps_[row].cmd1 = clipboard_.steps_[j].cmd1;
+          break;
+        case 1:
+          table.steps_[row].param1 = clipboard_.steps_[j].param1;
+          break;
+        case 2:
+          table.steps_[row].cmd2 = clipboard_.steps_[j].cmd2;
+          break;
+        case 3:
+          table.steps_[row].param2 = clipboard_.steps_[j].param2;
+          break;
+        case 4:
+          table.steps_[row].cmd3 = clipboard_.steps_[j].cmd3;
+          break;
+        case 5:
+          table.steps_[row].param3 = clipboard_.steps_[j].param3;
+          break;
       }
     }
   }
@@ -281,7 +293,7 @@ void TableView::updateCursor(int dx, int dy) {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   GUIPoint p = GetAnchor();
-  
+
   switch (col_) {
     case 1:
       p.x_ += 3;
@@ -592,7 +604,7 @@ void TableView::DrawView() {
 
   // Display row numbers
   drawRowNumbers(anchor.x_ - 3, anchor.y_, 0, 16);
-  
+
   // Draw command 1
   GUIPoint pos = anchor;
 
@@ -605,13 +617,13 @@ void TableView::DrawView() {
       drawHelpLegend(command);
     }
   }
-  
+
   // Draw commands params 1
-  
+
   pos = anchor;
   pos.x_ += 3;
-  
-    char buffer[6];
+
+  char buffer[6];
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
@@ -643,7 +655,7 @@ void TableView::DrawView() {
   pos.x_ += 11;
 
   buffer[5] = 0;
-  
+
   for (int j = 0; j < 16; j++) {
     uint16_t p = table.getParam(j, 1);
     setTextProps(3, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));

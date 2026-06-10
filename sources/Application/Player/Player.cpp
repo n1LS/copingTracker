@@ -784,7 +784,7 @@ void Player::updateChainPos(int pos, int channel, int hop) {
     viewData_->chainPlayPos_[channel] = pos;
     viewData_->currentPlayPhrase_[channel] = viewData_->song_->chain_.steps_[chain][pos].phrase;
     if (viewData_->currentPlayPhrase_[channel] == 0xFF) { // This could happen if starting in song mode on a row
-                         // where a chain contains no phrase
+                                                          // where a chain contains no phrase
       mixer_.StopChannel(channel);
     }
   } else {
@@ -834,7 +834,7 @@ void Player::playCursorPosition(int channel) {
 
     Song *song = viewData_->song_;
     Phrase *phrase = &(song->phrase_);
-    unsigned char note  = phrase->steps_[currentPhrase][pos].note;
+    unsigned char note = phrase->steps_[currentPhrase][pos].note;
     unsigned char instr = phrase->steps_[currentPhrase][pos].instr;
 
     TableHolder *th = TableHolder::GetInstance();
@@ -1216,11 +1216,11 @@ void Player::moveToNextChain(int channel, int hop) {
       pos--;
       while (pos >= 0) {
         chainId = viewData_->song_->rows_[pos].chains[channel];
-        
-        if (chainId == EMPTY_SONG_VALUE) { 
+
+        if (chainId == EMPTY_SONG_VALUE) {
           // we stop searching if there's a blank
           break;
-        } else { 
+        } else {
           // Or if first phrase of chain is empty
           if (viewData_->song_->chain_.steps_[chainId][0].phrase == EMPTY_CHAIN_VALUE) {
             break;
@@ -1231,7 +1231,7 @@ void Player::moveToNextChain(int channel, int hop) {
 
       pos++;
     }
-    
+
     nextPos = pos;
   }
   // Do a last check in case we had only one chain and it go destroyed
@@ -1335,8 +1335,7 @@ etl::array<stereosample, SONG_CHANNEL_COUNT> *Player::GetMixerLevels() {
 
 // Direct note playback methods for MIDI
 
-void Player::PlayNote(uint16_t instrumentIndex, uint16_t channel, unsigned char note,
-                      unsigned char velocity) {
+void Player::PlayNote(uint16_t instrumentIndex, uint16_t channel, unsigned char note, unsigned char velocity) {
   if (!project_)
     return;
 

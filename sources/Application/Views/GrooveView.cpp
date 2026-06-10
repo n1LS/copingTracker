@@ -205,7 +205,7 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
   DrawChar(pos.x_, pos.y_, ' ');
 
   Groove *gr = Groove::GetInstance();
-  
+
   // Get current channel
   int channel = viewData_->songX_;
 

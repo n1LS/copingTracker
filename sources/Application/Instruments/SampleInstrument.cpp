@@ -724,7 +724,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
     int n = int(rp->position_);
     int16_t *input = (int16_t *)(wavbuf + 2 * channelCount * n); // input is the current
-                                                             // sample to the left of position
+                                                                 // sample to the left of position
 
     fixed fpPos = fl2fp(rp->position_ - n); // fpPos is current pos from input
     fixed fpSpeed = rp->speed_;             // speed in fixed

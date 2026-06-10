@@ -102,7 +102,7 @@ void menu_render_static(void) {
 
   // Key legend at the bottom
   gfx_set_foreground(LIGHT_GRAY);
-  // max length      "KEYNAME " |                             "                             "     
+  // max length      "KEYNAME " |                             "                             "
   render_text(1, 25, "  ENTER " char_border_single_vertical_s " flash & boot selection      ");
   render_text(1, 26, "   PLAY " char_border_single_vertical_s " boot installed firmware     ");
   render_text(1, 27, "DOWN,UP " char_border_single_vertical_s " change selection            ");
@@ -135,8 +135,7 @@ void menu_render_main(const Uf2FileEntry *uf2_files, int uf2_count, int selected
   const uint8_t kBoxInnerWidth = TEXT_WIDTH - 6;
 
   if (!sd_ready || uf2_count == 0) {
-    menu_show_message_box("No firmware files found.",
-                       "Add .uf2 to SD card root, then reboot.");
+    menu_show_message_box("No firmware files found.", "Add .uf2 to SD card root, then reboot.");
   } else {
     const int shown = uf2_count < kRowsAvail ? uf2_count : kRowsAvail;
 
@@ -167,8 +166,7 @@ void menu_render_main(const Uf2FileEntry *uf2_files, int uf2_count, int selected
 
       // Prefix the installed entry with "* "; align all others with "  ".
       // Total row: 2-char prefix + up to (kBoxInnerWidth-2) chars of name.
-      const bool is_installed = installed_bin && installed_bin[0] &&
-                                bl_str_equals_ci(uf2_files[i].path, installed_bin);
+      const bool is_installed = installed_bin && installed_bin[0] && bl_str_equals_ci(uf2_files[i].path, installed_bin);
       char row_buf[40];
       row_buf[0] = is_installed ? '*' : ' ';
       row_buf[1] = ' ';

@@ -284,7 +284,7 @@ void ChainView::cutSelection() {
     for (int j = 0; j < clipboard_.height_; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          base[j + clipboard_.row_].phrase    = 0xFF;
+          base[j + clipboard_.row_].phrase = 0xFF;
           break;
         case 1:
           base[j + clipboard_.row_].transpose = 0x00;
@@ -322,7 +322,7 @@ void ChainView::pasteClipboard() {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          base[j + viewData_->chainRow_].phrase    = clipboard_.steps_[j].phrase;
+          base[j + viewData_->chainRow_].phrase = clipboard_.steps_[j].phrase;
           break;
         case 1:
           base[j + viewData_->chainRow_].transpose = clipboard_.steps_[j].transpose;
@@ -621,7 +621,7 @@ void ChainView::DrawView() {
   // Display row numbers
 
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
-  
+
   // Display phrases
   ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
 
@@ -790,7 +790,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  
+
   char buffer[6];
   buffer[4] = 0;
   for (int j = 0; j < 16; j++) {
@@ -844,7 +844,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
 
     unsigned char d = instrSteps[j].instr;
-    
+
     if (d == NO_INSTRUMENT) {
       DrawString(pos.x_, pos.y_, "I--");
     } else {

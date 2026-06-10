@@ -184,19 +184,19 @@ void picoTrackerAudioDriver::SetAudioLevel(int level) {
   uint8_t backfillCount;
 
   switch (level) {
-  case 1: // HP high volume
-    offsetCount = 3u;
-    backfillCount = 10u;
-    break;
-  case 2: // Line level (loudest)
-    offsetCount = 1u;
-    backfillCount = 12u;
-    break;
-  case 0: // Default: matches PIO defaults (OFFSET_COUNT=6, BACKFILL_COUNT=7)
-  default:
-    offsetCount = 6u;
-    backfillCount = 7u;
-    break;
+    case 1: // HP high volume
+      offsetCount = 3u;
+      backfillCount = 10u;
+      break;
+    case 2: // Line level (loudest)
+      offsetCount = 1u;
+      backfillCount = 12u;
+      break;
+    case 0: // Default: matches PIO defaults (OFFSET_COUNT=6, BACKFILL_COUNT=7)
+    default:
+      offsetCount = 6u;
+      backfillCount = 7u;
+      break;
   }
 
   // Single-word writes to instruction memory; the SM picks up the new

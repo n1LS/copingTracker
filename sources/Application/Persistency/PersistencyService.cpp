@@ -10,9 +10,9 @@
  */
 
 #include "PersistencyService.h"
-#include "PersistenceConstants.h"
 #include "../Instruments/SamplePool.h"
 #include "Foundation/Services/ServiceRegistry.h"
+#include "PersistenceConstants.h"
 
 #include "Foundation/Types/Types.h"
 #include "Persistent.h"

@@ -2,8 +2,8 @@
 #define PICOTRACKER_BOOTLOADER_GFX_H
 
 #include "Adapters/picoTracker/display/ili9341.h"
-#include "Foundation/Types/Colors.h"
 #include "Foundation/Constants/SpecialCharacters.h"
+#include "Foundation/Types/Colors.h"
 
 #include <stdint.h>
 

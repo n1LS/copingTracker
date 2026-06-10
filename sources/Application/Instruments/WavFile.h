@@ -57,7 +57,7 @@ protected:
 private:
   FileHandle file_;    // File
   int readBufferSize_; // Read buffer size
-  int16_t *samples_;     // sample buffer size (16 bits)
+  int16_t *samples_;   // sample buffer size (16 bits)
   int sampleBufferSize_;
   int size_;             // number of samples
   int sampleRate_;       // sample rate

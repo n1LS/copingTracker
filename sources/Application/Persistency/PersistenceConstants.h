@@ -20,23 +20,23 @@
 // accounts for .ins extension so they are 4 chars shorter.
 #define MAX_INSTRUMENT_NAME_LENGTH (MAX_INSTRUMENT_FILENAME_LENGTH - 4)
 
-#define INSTRUMENT_FILE_EXTENSION       ".ins"
-#define THEME_FILE_EXTENSION            ".thm"
+#define INSTRUMENT_FILE_EXTENSION ".ins"
+#define THEME_FILE_EXTENSION ".thm"
 
-#define UNNAMED_PROJECT_NAME            ".untitled"
-#define CONFIG_FILENAME                 ".config.xml"
-#define PROJECT_FILENAME                "project.xml"
-#define AUTO_SAVE_FILENAME              "autosave.xml"
+#define UNNAMED_PROJECT_NAME ".untitled"
+#define CONFIG_FILENAME ".config.xml"
+#define PROJECT_FILENAME "project.xml"
+#define AUTO_SAVE_FILENAME "autosave.xml"
 
-#define SD_BASE_DIR         "/copingTracker"
+#define SD_BASE_DIR "/copingTracker"
 
-#define PROJECTS_DIR        SD_BASE_DIR "/projects"
-#define SAMPLES_LIB_DIR     SD_BASE_DIR "/samples"
-#define INSTRUMENTS_DIR     SD_BASE_DIR "/instruments"
-#define RENDERS_DIR         SD_BASE_DIR "/renders"
-#define THEMES_DIR          SD_BASE_DIR "/themes"
-#define CONFIG_FILE_PATH    SD_BASE_DIR "/" CONFIG_FILENAME
+#define PROJECTS_DIR SD_BASE_DIR "/projects"
+#define SAMPLES_LIB_DIR SD_BASE_DIR "/samples"
+#define INSTRUMENTS_DIR SD_BASE_DIR "/instruments"
+#define RENDERS_DIR SD_BASE_DIR "/renders"
+#define THEMES_DIR SD_BASE_DIR "/themes"
+#define CONFIG_FILE_PATH SD_BASE_DIR "/" CONFIG_FILENAME
 
-#define PROJECT_SAMPLES_DIR             "samples"
+#define PROJECT_SAMPLES_DIR "samples"
 
 #endif // _PERSISTENCE_CONSTANTS_H_

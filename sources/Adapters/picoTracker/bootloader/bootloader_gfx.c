@@ -29,22 +29,22 @@ uint16_t buffer[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
 
 // Default VGA/PC terminal palette, swapped bytes
 uint16_t palette[16] = {
-  0x0000, // BLACK         (0,   0,   0)
-  0x00A8, // RED           (170, 0,   0)
-  0x4005, // GREEN         (0,   170, 0)
-  0x40AD, // YELLOW        (170, 85,  0)
-  0x1500, // BLUE          (0,   0,   170)
-  0x15A8, // MAGENTA       (170, 0,   170)
-  0x5505, // CYAN          (0,   170, 170)
-  0x55AD, // LIGHT_GRAY    (170, 170, 170)
-  0xAA52, // DARK_GRAY     (85,  85,  85)
-  0x00F8, // LIGHT_RED     (255, 85,  85)
-  0xE057, // LIGHT_GREEN   (85,  255, 85)
-  0xE0FF, // LIGHT_YELLOW  (255, 255, 85)
-  0x9F52, // LIGHT_BLUE    (85,  85,  255)
-  0x9FFA, // LIGHT_MAGENTA (255, 85,  255)
-  0xFF57, // LIGHT_CYAN    (85,  255, 255)
-  0xFFFF  // WHITE         (255, 255, 255)
+    0x0000, // BLACK         (0,   0,   0)
+    0x00A8, // RED           (170, 0,   0)
+    0x4005, // GREEN         (0,   170, 0)
+    0x40AD, // YELLOW        (170, 85,  0)
+    0x1500, // BLUE          (0,   0,   170)
+    0x15A8, // MAGENTA       (170, 0,   170)
+    0x5505, // CYAN          (0,   170, 170)
+    0x55AD, // LIGHT_GRAY    (170, 170, 170)
+    0xAA52, // DARK_GRAY     (85,  85,  85)
+    0x00F8, // LIGHT_RED     (255, 85,  85)
+    0xE057, // LIGHT_GREEN   (85,  255, 85)
+    0xE0FF, // LIGHT_YELLOW  (255, 255, 85)
+    0x9F52, // LIGHT_BLUE    (85,  85,  255)
+    0x9FFA, // LIGHT_MAGENTA (255, 85,  255)
+    0xFF57, // LIGHT_CYAN    (85,  255, 255)
+    0xFFFF  // WHITE         (255, 255, 255)
 };
 
 void gfx_clear(Color color) {
@@ -94,7 +94,7 @@ void gfx_putc(char c) {
 }
 
 static inline void gfx_set_window_for_region(uint16_t screen_x, uint16_t screen_y, uint16_t screen_width,
-                                                 uint16_t screen_height) {
+                                             uint16_t screen_height) {
   // column address set
   ili9341_set_command(ILI9341_CASET);
   ili9341_command_param16(screen_y);
@@ -109,8 +109,7 @@ static inline void gfx_set_window_for_region(uint16_t screen_x, uint16_t screen_
   ili9341_set_command(ILI9341_RAMWR);
 }
 
-static inline void gfx_rasterize_char_column(uint8_t char_col, uint8_t row_start, uint8_t row_count,
-                                                 uint16_t *dst) {
+static inline void gfx_rasterize_char_column(uint8_t char_col, uint8_t row_start, uint8_t row_count, uint16_t *dst) {
   for (int glyph_bit = CHAR_WIDTH - 1; glyph_bit >= 0; glyph_bit--) {
     uint16_t glyph_mask = 1 << (CHAR_WIDTH - 1 - glyph_bit);
 
@@ -258,7 +257,7 @@ void gfx_draw_changed() {
         for (int probe_y = y; probe_y < y + height; probe_y++) {
           // if we don't get to max height, then abort
           int probe_idx = probe_y * TEXT_WIDTH + probe_x;
-          
+
           if (!changed[probe_idx]) {
             // undo last column
             for (int undo_y = y; undo_y < probe_y; undo_y++) {

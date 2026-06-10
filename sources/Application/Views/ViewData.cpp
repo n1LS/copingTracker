@@ -120,7 +120,7 @@ unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
 void ViewData::UpdateChainCursor(int dx, int dy) {
   chainCol_ += dx;
   chainRow_ += dy;
-  
+
   if (chainCol_ > 1)
     chainCol_ = 1;
   if (chainCol_ < 0)

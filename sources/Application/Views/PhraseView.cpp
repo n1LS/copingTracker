@@ -178,10 +178,18 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
         FourCC cc = FourCC::enum_type(step.cmd1);
         switch (direction) {
-          case VUD_RIGHT: cc = CommandList::GetNext(cc);      break;
-          case VUD_UP:    cc = CommandList::GetNextAlpha(cc); break;
-          case VUD_LEFT:  cc = CommandList::GetPrev(cc);      break;
-          case VUD_DOWN:  cc = CommandList::GetPrevAlpha(cc); break;
+          case VUD_RIGHT:
+            cc = CommandList::GetNext(cc);
+            break;
+          case VUD_UP:
+            cc = CommandList::GetNextAlpha(cc);
+            break;
+          case VUD_LEFT:
+            cc = CommandList::GetPrev(cc);
+            break;
+          case VUD_DOWN:
+            cc = CommandList::GetPrevAlpha(cc);
+            break;
         }
         step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
         lastCmd_ = cc;
@@ -191,10 +199,18 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
     case 3:
       {
         switch (direction) {
-          case VUD_RIGHT: cmdEditField_.ProcessArrow(BM_RIGHT); break;
-          case VUD_UP:    cmdEditField_.ProcessArrow(BM_UP);    break;
-          case VUD_LEFT:  cmdEditField_.ProcessArrow(BM_LEFT);  break;
-          case VUD_DOWN:  cmdEditField_.ProcessArrow(BM_DOWN);  break;
+          case VUD_RIGHT:
+            cmdEditField_.ProcessArrow(BM_RIGHT);
+            break;
+          case VUD_UP:
+            cmdEditField_.ProcessArrow(BM_UP);
+            break;
+          case VUD_LEFT:
+            cmdEditField_.ProcessArrow(BM_LEFT);
+            break;
+          case VUD_DOWN:
+            cmdEditField_.ProcessArrow(BM_DOWN);
+            break;
         }
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
         FourCC currentCmd = FourCC::enum_type(step.cmd1);
@@ -210,10 +226,18 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
         FourCC cc = FourCC::enum_type(step.cmd2);
         switch (direction) {
-          case VUD_RIGHT: cc = CommandList::GetNext(cc);      break;
-          case VUD_UP:    cc = CommandList::GetNextAlpha(cc); break;
-          case VUD_LEFT:  cc = CommandList::GetPrev(cc);      break;
-          case VUD_DOWN:  cc = CommandList::GetPrevAlpha(cc); break;
+          case VUD_RIGHT:
+            cc = CommandList::GetNext(cc);
+            break;
+          case VUD_UP:
+            cc = CommandList::GetNextAlpha(cc);
+            break;
+          case VUD_LEFT:
+            cc = CommandList::GetPrev(cc);
+            break;
+          case VUD_DOWN:
+            cc = CommandList::GetPrevAlpha(cc);
+            break;
         }
         step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
         lastCmd_ = cc;
@@ -222,10 +246,18 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
     case 5:
       {
         switch (direction) {
-          case VUD_RIGHT: cmdEditField_.ProcessArrow(BM_RIGHT); break;
-          case VUD_UP:    cmdEditField_.ProcessArrow(BM_UP);    break;
-          case VUD_LEFT:  cmdEditField_.ProcessArrow(BM_LEFT);  break;
-          case VUD_DOWN:  cmdEditField_.ProcessArrow(BM_DOWN);  break;
+          case VUD_RIGHT:
+            cmdEditField_.ProcessArrow(BM_RIGHT);
+            break;
+          case VUD_UP:
+            cmdEditField_.ProcessArrow(BM_UP);
+            break;
+          case VUD_LEFT:
+            cmdEditField_.ProcessArrow(BM_LEFT);
+            break;
+          case VUD_DOWN:
+            cmdEditField_.ProcessArrow(BM_DOWN);
+            break;
         }
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
         FourCC currentCmd = FourCC::enum_type(step.cmd2);
@@ -315,11 +347,11 @@ void PhraseView::pasteLast() {
       {
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
         if (step.note == NO_NOTE) {
-          step.note  = lastNote_;
+          step.note = lastNote_;
           step.instr = lastInstr_;
           isDirty_ = true;
         } else {
-          lastNote_  = step.note;
+          lastNote_ = step.note;
           lastInstr_ = step.instr;
         }
       }
@@ -587,12 +619,24 @@ void PhraseView::cutSelection() {
     for (int j = 0; j < clipboard_.height_; j++) {
       int r = j + clipboard_.row_;
       switch (i + clipboard_.col_) {
-        case 0: base[r].note   = 0xFF;    break;
-        case 1: base[r].instr  = 0xFF;    break;
-        case 2: base[r].cmd1   = kNone;   break;
-        case 3: base[r].param1 = 0x0000;  break;
-        case 4: base[r].cmd2   = kNone;   break;
-        case 5: base[r].param2 = 0x0000;  break;
+        case 0:
+          base[r].note = 0xFF;
+          break;
+        case 1:
+          base[r].instr = 0xFF;
+          break;
+        case 2:
+          base[r].cmd1 = kNone;
+          break;
+        case 3:
+          base[r].param1 = 0x0000;
+          break;
+        case 4:
+          base[r].cmd2 = kNone;
+          break;
+        case 5:
+          base[r].param2 = 0x0000;
+          break;
       }
     }
   }
@@ -624,12 +668,24 @@ void PhraseView::pasteClipboard() {
     for (int j = 0; j < height; j++) {
       int r = (j + row_) % 16;
       switch (i + clipboard_.col_) {
-        case 0: base[r].note   = clipboard_.steps_[j].note;   break;
-        case 1: base[r].instr  = clipboard_.steps_[j].instr;  break;
-        case 2: base[r].cmd1   = clipboard_.steps_[j].cmd1;   break;
-        case 3: base[r].param1 = clipboard_.steps_[j].param1; break;
-        case 4: base[r].cmd2   = clipboard_.steps_[j].cmd2;   break;
-        case 5: base[r].param2 = clipboard_.steps_[j].param2; break;
+        case 0:
+          base[r].note = clipboard_.steps_[j].note;
+          break;
+        case 1:
+          base[r].instr = clipboard_.steps_[j].instr;
+          break;
+        case 2:
+          base[r].cmd1 = clipboard_.steps_[j].cmd1;
+          break;
+        case 3:
+          base[r].param1 = clipboard_.steps_[j].param1;
+          break;
+        case 4:
+          base[r].cmd2 = clipboard_.steps_[j].cmd2;
+          break;
+        case 5:
+          base[r].param2 = clipboard_.steps_[j].param2;
+          break;
       }
     }
   }
@@ -729,8 +785,8 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
         }
         mask &= (0xFFFF - BM_ENTER);
       } else {
-        if ((col_ == 3) &&
-            FourCC::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) == FourCC::InstrumentCommandTable) {
+        if ((col_ == 3) && FourCC::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) ==
+                               FourCC::InstrumentCommandTable) {
           TableHolder *th = TableHolder::GetInstance();
           uint16_t next = th->GetNext();
           if (next != NO_MORE_TABLE) {
@@ -749,8 +805,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
     viewMode_ = VM_SELECTION;
   }
 
-  if ((mask == (BM_ALT | BM_EDIT | BM_ENTER)) ||
-      ((viewMode_ == VM_CLONE) && (mask & BM_ENTER) && (mask & BM_ALT))) {
+  if ((mask == (BM_ALT | BM_EDIT | BM_ENTER)) || ((viewMode_ == VM_CLONE) && (mask & BM_ENTER) && (mask & BM_ALT))) {
     if (col_ < 2) {
       InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
       unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instr;
@@ -1020,18 +1075,18 @@ void PhraseView::DrawView() {
   GUIPoint pos = GetAnchor();
 
   // Display row numbers
-  
+
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
-  
+
   // Display notes
   PhraseStep *stepsBase = phrase_->steps_[viewData_->currentPhrase_];
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  
+
   char buffer[6];
   buffer[4] = 0;
   for (int j = 0; j < 16; j++) {
-    unsigned char d     = stepsBase[j].note;
+    unsigned char d = stepsBase[j].note;
     unsigned char instr = stepsBase[j].instr;
     if (instr != NO_INSTRUMENT) {
       lastInstr = instr;
@@ -1083,9 +1138,9 @@ void PhraseView::DrawView() {
   for (int j = 0; j < 16; j++) {
     SetBackgroundColor(Theme::View::bg);
     setTextProps(1, j, Theme::Phrase::instrument(j % ALT_ROW_NUMBER == 0));
-    
+
     unsigned char d = stepsBase[j].instr;
-    
+
     if (d == NO_INSTRUMENT) {
       DrawString(pos.x_, pos.y_, "I--");
     } else {

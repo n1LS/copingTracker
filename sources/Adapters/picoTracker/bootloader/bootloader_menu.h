@@ -9,8 +9,8 @@
 #ifndef PICOTRACKER_BOOTLOADER_MENU_H
 #define PICOTRACKER_BOOTLOADER_MENU_H
 
-#include <cstdint>
 #include "Foundation/Types/Colors.h"
+#include <cstdint>
 
 // One entry in the firmware library list. After boot the list holds paths to
 // .bin files under /firmwares; during the import pass it can also be used as

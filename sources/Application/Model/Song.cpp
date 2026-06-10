@@ -36,7 +36,7 @@ void Song::Reset() {
 
 void Song::SaveContent(tinyxml2::XMLPrinter *printer) {
   saveHexBuffer(printer, "SONG", (uint8_t *)rows_, SONG_ROW_COUNT * SONG_CHANNEL_COUNT);
-  saveHexBuffer(printer, "CHAIN_STEPS",  (uint8_t *)chain_.steps_, CHAIN_COUNT * PHRASES_PER_CHAIN * sizeof(ChainStep));
+  saveHexBuffer(printer, "CHAIN_STEPS", (uint8_t *)chain_.steps_, CHAIN_COUNT * PHRASES_PER_CHAIN * sizeof(ChainStep));
   saveHexBuffer(printer, "PHRASE_STEPS", (uint8_t *)phrase_.steps_, PHRASE_COUNT * STEPS_PER_PHRASE * sizeof(PhraseStep));
 }
 

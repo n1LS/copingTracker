@@ -251,7 +251,7 @@ void Project::Purge() {
       }
     } else {
       for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
-        song_.chain_.steps_[i][j].phrase    = DATA_UNUSED_VALUE;
+        song_.chain_.steps_[i][j].phrase = DATA_UNUSED_VALUE;
         song_.chain_.steps_[i][j].transpose = 0x00;
       }
     }
@@ -262,11 +262,11 @@ void Project::Purge() {
     for (int j = 0; j < 16; j++) {
       if (!song_.phrase_.IsUsed(i)) {
         PhraseStep *step = &(song_.phrase_.steps_[i][j]);
-        step->note   = DATA_UNUSED_VALUE;
-        step->instr  = DATA_UNUSED_VALUE;
-        step->cmd1   = kNone;
+        step->note = DATA_UNUSED_VALUE;
+        step->instr = DATA_UNUSED_VALUE;
+        step->cmd1 = kNone;
         step->param1 = 0;
-        step->cmd2   = kNone;
+        step->cmd2 = kNone;
         step->param2 = 0;
       }
     };

@@ -32,10 +32,12 @@ void UISortedVarList::ProcessArrow(uint16_t mask) {
     case BM_RIGHT:
       value += 1;
       break;
-  };
+  }
+
   if (value < min_) {
     value = min_;
-  };
+  }
+
   if (value > max_) {
     value = max_;
   }

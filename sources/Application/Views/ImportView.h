@@ -52,7 +52,7 @@ private:
 
   bool changeDirectory(FileSystem *fs, const char *name);
   void onConfirmRemoveProjectSample(View &view, ModalView &dialog);
-  virtual const char *emptyStateMessage() const override; 
+  virtual const char *emptyStateMessage() const override;
 
   size_t topIndex_ = 0;
   size_t currentIndex_ = 0;

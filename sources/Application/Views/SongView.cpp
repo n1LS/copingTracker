@@ -895,10 +895,10 @@ void SongView::drawChainPreview() {
     unsigned char phraseId = viewData_->song_->chain_.steps_[chainId][i].phrase;
 
     if (phraseId == EMPTY_CHAIN_VALUE) {
-      DrawString(pos.x_ + 24, pos.y_  + i, "--");
+      DrawString(pos.x_ + 24, pos.y_ + i, "--");
     } else {
       hex2char(phraseId, buffer);
-      DrawString(pos.x_ + 24, pos.y_  + i, buffer);
+      DrawString(pos.x_ + 24, pos.y_ + i, buffer);
     }
   }
 }
