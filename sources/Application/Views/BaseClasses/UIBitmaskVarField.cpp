@@ -43,21 +43,21 @@ void UIBitmaskVarField::ProcessArrow(uint16_t mask) {
   int value = src_.GetInt();
 
   switch (mask) {
-    case EPBM_LEFT:
+    case BM_LEFT:
       if (position_ < len_) {
         position_++;
       };
       break;
-    case EPBM_RIGHT:
+    case BM_RIGHT:
       if (position_ > 0) {
         position_--;
       };
       break;
-    case EPBM_UP:
+    case BM_UP:
       value = value ^ (1 << (position_ - 1));
       break;
 
-    case EPBM_DOWN:
+    case BM_DOWN:
       value = value ^ (1 << (position_ - 1));
       break;
   };

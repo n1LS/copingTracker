@@ -15,6 +15,7 @@
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Mixer/MixerService.h"
 #include "Application/Model/Mixer.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
@@ -40,14 +41,12 @@
 #include "BaseClasses/View.h"
 #include "Foundation/Variables/WatchedVariable.h"
 #include "Player/Player.h"
-#include "Application/Persistency/PersistenceConstants.h"
 #include "Services/Midi/MidiService.h"
 #include "System/Console/Trace.h"
 #include "System/FileSystem/FileSystem.h"
 #include "System/System/System.h"
 #include "UIFramework/Interfaces/I_GUIWindowFactory.h"
 #include "Views/UIController.h"
-#include "platform.h"
 #include <nanoprintf.h>
 #include <string.h>
 
@@ -110,8 +109,7 @@ struct AppWindowViews {
         themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData), importView(w, &viewData),
         instrumentImportView(w, &viewData), instrumentView(w, &viewData), tableView(w, &viewData),
         grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
-        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData),
-        nullView(w, &viewData) {
+        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), nullView(w, &viewData) {
   }
 };
 
@@ -669,9 +667,9 @@ void AppWindow::AnimationUpdate() {
     }
     sdCardMessageShown_ = false;
     // reinserted SD card means we need to either leave the view or reload the current directory in all views
-    if (_currentView ) {
+    if (_currentView) {
       // todo: change this to just back out as little as possible, but for now just jump to the song view
-      _currentView = &views_->songView; 
+      _currentView = &views_->songView;
       _currentView->OnFocus();
     }
     SetDirty();

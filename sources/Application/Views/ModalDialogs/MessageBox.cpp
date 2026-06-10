@@ -132,17 +132,17 @@ void MessageBox::OnFocus() {
 }
 
 void MessageBox::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (mask & EPBM_LEFT) {
+  if (mask & BM_LEFT) {
     selected_ = (selected_ + 1);
     if (selected_ >= buttonCount_) {
       selected_ = 0;
     }
-  } else if (mask & EPBM_RIGHT) {
+  } else if (mask & BM_RIGHT) {
     selected_ = (selected_ - 1);
     if (selected_ < 0) {
       selected_ = buttonCount_ - 1;
     }
-  } else if (mask & EPBM_ENTER && pressed) {
+  } else if (mask & BM_ENTER && pressed) {
     EndModal(button_[selected_]);
   }
   isDirty_ = true;

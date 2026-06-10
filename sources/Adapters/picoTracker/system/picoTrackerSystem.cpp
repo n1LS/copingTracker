@@ -78,7 +78,7 @@ void picoTrackerSystem::Boot(int argc, char **argv) {
 
   // First check for SDCard
   picoTrackerFileSystem *fs = (picoTrackerFileSystem *)FileSystem::GetInstance();
-    if (!fs->isCardPresent() || scanKeys()) {
+  if (!fs->isCardPresent() || scanKeys()) {
     Trace::Log("COPINGTRACKERSYSTEM", "SDCARD MISSING!!");
     critical_error_message("SDCARD MISSING", 0x01, pollForValidSDCard);
   }
@@ -215,4 +215,8 @@ uint32_t picoTrackerSystem::Micros() {
 
 uint32_t picoTrackerSystem::Millis() {
   return millis();
+}
+
+SysMutex *picoTrackerSystem::GetMutex() {
+  return platform_mutex();
 }

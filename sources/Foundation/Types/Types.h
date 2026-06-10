@@ -213,7 +213,7 @@ struct FourCC {
     // 186 is taken for ActionAutoSlice
     // 188 is taken for InstrumentCommandSetInstrumentParameter
     // 189 is taken for VarOutputVolume
-    
+
     VarChannel1Volume = 163,
     VarChannel2Volume = 164,
     VarChannel3Volume = 165,
@@ -223,9 +223,9 @@ struct FourCC {
     VarChannel7Volume = 169,
     VarChannel8Volume = 170,
     VarThemeName = 173, // Variable for storing the current theme name
-    
+
     VarInstrumentType = 113,
-    
+
     ActionTempoChanged = 61,
     ActionPurge = 49,
     ActionPurgeInstrument = 47,
@@ -255,7 +255,7 @@ struct FourCC {
     VarSampleEditOperation = 181,
     VarImportResampler = 185,
     ActionAutoSlice = 186,
-    
+
     ChiptuneInstrumentWaveform = 200,
     ChiptuneInstrumentAttack = 201,
     ChiptuneInstrumentDecay = 202,
@@ -269,26 +269,26 @@ struct FourCC {
     ChiptuneInstrumentSweepTime = 210,
     ChiptuneInstrumentSweepAmount = 211,
     ChiptuneInstrumentArpSpeed = 212,
-    
+
     ActionMassStorage = 50,
     VarOutputVolume = 74,
     ActionModulation = 213,
-    
+
     // 93-98 free (formerly MacroInstrument fields)
     // 176 is free
     // 182 is free
     // 183 is free
     // 187 is free
-    
+
     Default = 255, // "    "
   };
-  
+
   uint8_t raw() {
     return static_cast<uint8_t>(*this);
   }
-  
+
   ETL_DECLARE_ENUM_TYPE(FourCC, uint8_t)
-  
+
   // Not all enums need reflection. Only cases where we need reflection is the
   // FourCC codes that need to be converted to text in order to display on
   // screen

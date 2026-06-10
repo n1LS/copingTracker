@@ -66,237 +66,92 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
     focus_->SetFocus();
   }
 
-  if (mask & EPBM_ENTER) { // ENTER or ENTER+ARROW is sent to the field
-    if (mask & EPBM_DOWN) {
-      focus_->ProcessArrow(EPBM_DOWN);
+  if (mask & BM_ENTER) { // ENTER or ENTER+ARROW is sent to the field
+    if (mask & BM_DOWN) {
+      focus_->ProcessArrow(BM_DOWN);
       isDirty_ = true;
     }
-    if (mask & EPBM_UP) {
-      focus_->ProcessArrow(EPBM_UP);
-      isDirty_ = true;
-    }
-
-    if (mask & EPBM_LEFT) {
-      focus_->ProcessArrow(EPBM_LEFT);
+    if (mask & BM_UP) {
+      focus_->ProcessArrow(BM_UP);
       isDirty_ = true;
     }
 
-    if (mask & EPBM_RIGHT) {
-      focus_->ProcessArrow(EPBM_RIGHT);
+    if (mask & BM_LEFT) {
+      focus_->ProcessArrow(BM_LEFT);
       isDirty_ = true;
     }
 
-    if (mask & EPBM_EDIT) {
+    if (mask & BM_RIGHT) {
+      focus_->ProcessArrow(BM_RIGHT);
+      isDirty_ = true;
+    }
+
+    if (mask & BM_EDIT) {
       focus_->ProcessClear();
       isDirty_ = true;
     }
 
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       focus_->OnClick();
     };
 
   } else {
-    if (mask & EPBM_EDIT) { // EDIT or EDIT+ARROW is sent to the field
+    if (mask & BM_EDIT) { // EDIT or EDIT+ARROW is sent to the field
 
-      if (mask == EPBM_EDIT) {
+      if (mask == BM_EDIT) {
         focus_->OnEditClick();
         isDirty_ = true;
       };
 
-      if (mask & EPBM_DOWN) {
-        focus_->ProcessEditArrow(EPBM_DOWN);
+      if (mask & BM_DOWN) {
+        focus_->ProcessEditArrow(BM_DOWN);
         isDirty_ = true;
       }
-      if (mask & EPBM_UP) {
-        focus_->ProcessEditArrow(EPBM_UP);
-        isDirty_ = true;
-      }
-
-      if (mask & EPBM_LEFT) {
-        focus_->ProcessEditArrow(EPBM_LEFT);
+      if (mask & BM_UP) {
+        focus_->ProcessEditArrow(BM_UP);
         isDirty_ = true;
       }
 
-      if (mask & EPBM_RIGHT) {
-        focus_->ProcessEditArrow(EPBM_RIGHT);
+      if (mask & BM_LEFT) {
+        focus_->ProcessEditArrow(BM_LEFT);
+        isDirty_ = true;
+      }
+
+      if (mask & BM_RIGHT) {
+        focus_->ProcessEditArrow(BM_RIGHT);
         isDirty_ = true;
       }
 
     } else { // Nor ENTER or EDIT is pressed
 
-      if (!(mask & (EPBM_ENTER | EPBM_EDIT | EPBM_ALT | EPBM_NAV | EPBM_SELECT | EPBM_PLAY))) {
+      if (!(mask & (BM_ENTER | BM_EDIT | BM_ALT | BM_NAV | BM_PLAY))) {
 
-        if (mask & EPBM_DOWN) {
-          UIField *next = 0;
-          UIField *first = 0;
-
-          auto it = fieldList_.begin();
-          for (size_t i = 0; i < fieldList_.size(); i++) {
-            if (!(*it)->IsStatic()) {
-              if (first) {
-                if ((*it)->GetPosition().y_ < first->GetPosition().y_) {
-                  first = *it;
-                };
-              } else {
-                first = *it;
-              }
-              if ((*it)->GetPosition().y_ > focus_->GetPosition().y_) {
-                if (next) {
-                  if ((*it)->GetPosition().y_ < next->GetPosition().y_) {
-                    next = *it;
-                  } else if ((*it)->GetPosition().y_ == next->GetPosition().y_) {
-                    // if both targets at same height, prefer the target with an
-                    // X value closest to the current focus
-
-                    // cast to signed ints
-                    int32_t itX = (*it)->GetPosition().x_;
-                    int32_t nextX = next->GetPosition().x_;
-                    int32_t focusX = focus_->GetPosition().x_;
-
-                    if (abs(itX - focusX) < abs(nextX - focusX)) {
-                      next = *it;
-                    }
-                  };
-                } else {
-                  next = *it;
-                };
-              };
-            }
-            it++;
-          }
-          if (next == 0) {
-            next = first;
-          }
-
+        if (mask & BM_DOWN) {
+          UIField *next = findAdjacentField(true, +1);
           focus_->ClearFocus();
           focus_ = next;
           focus_->SetFocus();
           isDirty_ = true;
         }
 
-        if (mask & EPBM_UP) {
-
-          UIField *prev = 0;
-          UIField *last = 0;
-
-          auto it = fieldList_.begin();
-          for (size_t i = 0; i < fieldList_.size(); i++) {
-
-            if (!(*it)->IsStatic()) {
-              if (last) {
-                if ((*it)->GetPosition().y_ > last->GetPosition().y_) {
-                  last = *it;
-                };
-              } else {
-                last = *it;
-              }
-              if ((*it)->GetPosition().y_ < focus_->GetPosition().y_) {
-                if (prev) {
-                  if ((*it)->GetPosition().y_ > prev->GetPosition().y_) {
-                    prev = *it;
-                  } else if ((*it)->GetPosition().y_ == prev->GetPosition().y_) {
-                    // if both targets at same height, prefer the target with an
-                    // X value closest to the current focus
-
-                    // cast to signed ints
-                    int32_t itX = (*it)->GetPosition().x_;
-                    int32_t prevX = prev->GetPosition().x_;
-                    int32_t focusX = focus_->GetPosition().x_;
-
-                    if (abs(itX - focusX) < abs(prevX - focusX)) {
-                      prev = *it;
-                    }
-                  };
-                } else {
-                  prev = *it;
-                };
-              };
-            }
-            it++;
-          }
-          if (prev == 0) {
-            prev = last;
-          }
-
+        if (mask & BM_UP) {
+          UIField *prev = findAdjacentField(true, -1);
           focus_->ClearFocus();
           focus_ = prev;
           focus_->SetFocus();
           isDirty_ = true;
         }
 
-        if (mask & EPBM_RIGHT) {
-          UIField *next = 0;
-          UIField *first = 0;
-
-          auto it = fieldList_.begin();
-          for (size_t i = 0; i < fieldList_.size(); i++) {
-
-            if (!(*it)->IsStatic() && ((*it)->GetPosition().y_ == focus_->GetPosition().y_)) {
-              if (first) {
-                if ((*it)->GetPosition().x_ < first->GetPosition().x_) {
-                  first = *it;
-                };
-              } else {
-                first = *it;
-              }
-              if ((*it)->GetPosition().x_ > focus_->GetPosition().x_) {
-                if (next) {
-                  if ((*it)->GetPosition().x_ < next->GetPosition().x_) {
-                    next = *it;
-                  } else {
-                    // if both target at same height
-                  };
-                } else {
-                  next = *it;
-                };
-              };
-            }
-            it++;
-          }
-          if (next == 0) {
-            next = first;
-          }
-
+        if (mask & BM_RIGHT) {
+          UIField *next = findAdjacentField(false, +1);
           focus_->ClearFocus();
           focus_ = next;
           focus_->SetFocus();
           isDirty_ = true;
         }
 
-        if (mask & EPBM_LEFT) {
-
-          UIField *prev = 0;
-          UIField *last = 0;
-
-          auto it = fieldList_.begin();
-          for (size_t i = 0; i < fieldList_.size(); i++) {
-
-            if (!(*it)->IsStatic() && ((*it)->GetPosition().y_ == focus_->GetPosition().y_)) {
-              if (last) {
-                if ((*it)->GetPosition().x_ > last->GetPosition().x_) {
-                  last = *it;
-                };
-              } else {
-                last = *it;
-              }
-              if ((*it)->GetPosition().x_ < focus_->GetPosition().x_) {
-                if (prev) {
-                  if ((*it)->GetPosition().x_ > prev->GetPosition().x_) {
-                    prev = *it;
-                  } else {
-                    // if both target at same height
-                  };
-                } else {
-                  prev = *it;
-                };
-              };
-            }
-            it++;
-          }
-          if (prev == 0) {
-            prev = last;
-          }
-
+        if (mask & BM_LEFT) {
+          UIField *prev = findAdjacentField(false, -1);
           focus_->ClearFocus();
           focus_ = prev;
           focus_->SetFocus();
@@ -305,6 +160,69 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
       }
     }
   }
+}
+
+// Finds the next focusable field adjacent to the current focus.
+//
+// vertical=true  → UP/DOWN navigation (searches across all rows)
+// vertical=false → LEFT/RIGHT navigation (stays on the focus row)
+// direction=+1   → DOWN or RIGHT; direction=-1 → UP or LEFT
+//
+// Candidate: closest field strictly in the given direction; vertical
+// tie-breaks on same row by closest X to current focus.
+// Wrap: topmost/leftmost (direction=+1) or bottommost/rightmost (direction=-1)
+// field, used when no candidate exists (at the edge).
+UIField *FieldView::findAdjacentField(bool vertical, int8_t direction) {
+  UIField *candidate = nullptr;
+  UIField *wrap = nullptr;
+
+  int32_t focusY = focus_->GetPosition().y_;
+  int32_t focusX = focus_->GetPosition().x_;
+
+  for (auto it = fieldList_.begin(); it != fieldList_.end(); ++it) {
+    UIField *field = *it;
+    if (field->IsStatic())
+      continue;
+
+    int32_t fy = field->GetPosition().y_;
+    int32_t fx = field->GetPosition().x_;
+
+    // Horizontal navigation is constrained to the focus row
+    if (!vertical && fy != focusY)
+      continue;
+
+    int32_t primary = vertical ? fy : fx;
+    int32_t focusPrimary = vertical ? focusY : focusX;
+
+    // Update wrap: keeps the extreme field in the wrap direction
+    if (!wrap) {
+      wrap = field;
+    } else {
+      int32_t wrapPrimary = vertical ? wrap->GetPosition().y_ : wrap->GetPosition().x_;
+      if (direction > 0 ? primary < wrapPrimary : primary > wrapPrimary)
+        wrap = field;
+    }
+
+    // Only consider fields strictly beyond the focus in the given direction
+    if (direction > 0 ? primary <= focusPrimary : primary >= focusPrimary)
+      continue;
+
+    if (!candidate) {
+      candidate = field;
+    } else {
+      int32_t candPrimary = vertical ? candidate->GetPosition().y_ : candidate->GetPosition().x_;
+      bool closerPrimary = direction > 0 ? primary < candPrimary : primary > candPrimary;
+      if (closerPrimary) {
+        candidate = field;
+      } else if (primary == candPrimary && vertical) {
+        // Tie-break on same row: prefer field with X closest to focus
+        if (abs(fx - focusX) < abs(candidate->GetPosition().x_ - focusX))
+          candidate = field;
+      }
+    }
+  }
+
+  return candidate ? candidate : wrap;
 }
 
 int FieldView::GetFocusIndex() {

@@ -46,7 +46,7 @@ protected:
   void copySelection();
   void pasteClipboard();
   void cutSelection();
-  void drawChainPreview(); 
+  void drawChainPreview();
 
   void unMuteAll();
   void toggleMute();

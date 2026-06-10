@@ -84,7 +84,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed) {
     // Open selected directory only when ENTER is released, unless ENTER was
     // consumed by another action (e.g. volume edit).
-    if (enterKeyHeld_ && !(mask & EPBM_ENTER)) {
+    if (enterKeyHeld_ && !(mask & BM_ENTER)) {
       enterKeyHeld_ = false;
       if (pendingDirEnterOnRelease_ && !fileIndexList_.empty()) {
         auto fs = FileSystem::GetInstance();
@@ -105,7 +105,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
 
     // Check if play key was released
-    if (playKeyHeld_ && !(mask & EPBM_PLAY)) {
+    if (playKeyHeld_ && !(mask & BM_PLAY)) {
       // Play key no longer pressed so should stop playback
       playKeyHeld_ = false;
       if (Player::GetInstance()->IsPlaying()) {
@@ -116,7 +116,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
 
     // Check if edit key was released
-    if (editKeyHeld_ && !(mask & EPBM_EDIT)) {
+    if (editKeyHeld_ && !(mask & BM_EDIT)) {
       // Edit key no longer pressed, redraw the view to clear status message
       editKeyHeld_ = false;
       isDirty_ = true; // Mark view as dirty to force redraw
@@ -131,18 +131,18 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
     // EDIT+LEFT: go to parent directory within the import file browser.
     // NAV+LEFT remains reserved for leaving the ImportView entirely.
-    if ((mask & EPBM_EDIT) && (mask & EPBM_LEFT) && !(mask & EPBM_NAV) && !inProjectSampleDir_) {
+    if ((mask & BM_EDIT) && (mask & BM_LEFT) && !(mask & BM_NAV) && !inProjectSampleDir_) {
       goToParentDirectory(fs);
       isDirty_ = true;
       return;
     }
 
-    if (mask & EPBM_EDIT) {
+    if (mask & BM_EDIT) {
       // Set flag to track that edit key is being held
       editKeyHeld_ = true;
     }
 
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       if (!hasFiles) {
         return;
       }
@@ -153,7 +153,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
       // Set flag to track that play key is being held
       playKeyHeld_ = true;
 
-      if (mask & EPBM_ALT) {
+      if (mask & BM_ALT) {
         Trace::Log("PICOIMPORT", "SHIFT play - import");
         import();
       } else {
@@ -163,7 +163,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
       return; // We've handled the play button, so return
     }
 
-    if (mask & EPBM_NAV && mask & EPBM_EDIT) {
+    if (mask & BM_NAV && mask & BM_EDIT) {
       // toggle from sdcard "import sample" & project pool listing
       if (inProjectSampleDir_) {
         inProjectSampleDir_ = false;
@@ -175,28 +175,28 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
       selectedButton_ = 0;
     }
 
-    if (mask & EPBM_ENTER) {
+    if (mask & BM_ENTER) {
       if (!enterKeyHeld_) {
         enterKeyHeld_ = true;
         pendingDirEnterOnRelease_ = true;
       }
-      if (mask & (EPBM_LEFT | EPBM_RIGHT | EPBM_UP | EPBM_DOWN)) {
+      if (mask & (BM_LEFT | BM_RIGHT | BM_UP | BM_DOWN)) {
         pendingDirEnterOnRelease_ = false;
       }
 
       if (inProjectSampleDir_) {
         if (selectedButton_ == kProjectButtonVolume) {
           int volumeOffset = 0;
-          if (mask & EPBM_LEFT) {
+          if (mask & BM_LEFT) {
             volumeOffset -= 1;
           }
-          if (mask & EPBM_RIGHT) {
+          if (mask & BM_RIGHT) {
             volumeOffset += 1;
           }
-          if (mask & EPBM_DOWN) {
+          if (mask & BM_DOWN) {
             volumeOffset -= 5;
           }
-          if (mask & EPBM_UP) {
+          if (mask & BM_UP) {
             volumeOffset += 5;
           }
           if (volumeOffset != 0) {
@@ -220,16 +220,16 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
       }
       if (selectedButton_ == kImportButtonVolume) {
         int volumeOffset = 0;
-        if (mask & EPBM_LEFT) {
+        if (mask & BM_LEFT) {
           volumeOffset -= 1;
         }
-        if (mask & EPBM_RIGHT) {
+        if (mask & BM_RIGHT) {
           volumeOffset += 1;
         }
-        if (mask & EPBM_DOWN) {
+        if (mask & BM_DOWN) {
           volumeOffset -= 5;
         }
-        if (mask & EPBM_UP) {
+        if (mask & BM_UP) {
           volumeOffset += 5;
         }
         if (volumeOffset != 0) {
@@ -256,13 +256,13 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
     // handle changing selected "bottom button", note: ignore if this is a
     // nav+arrow combo
-    if ((mask & EPBM_LEFT || mask & EPBM_RIGHT) && !(mask & EPBM_NAV)) {
+    if ((mask & BM_LEFT || mask & BM_RIGHT) && !(mask & BM_NAV)) {
       if (inProjectSampleDir_ && fileIndexList_.empty()) {
         return; // Do nothing if the list is empty
       }
       uint8_t buttonCount = inProjectSampleDir_ ? static_cast<uint8_t>(kProjectPoolButtonCount)
                                                 : static_cast<uint8_t>(kImportButtonCount);
-      if (mask & EPBM_LEFT) {
+      if (mask & BM_LEFT) {
         selectedButton_ = (selectedButton_ + buttonCount - 1) % buttonCount;
       } else {
         selectedButton_ = (selectedButton_ + 1) % buttonCount;
@@ -276,17 +276,17 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
 
   // handle moving up and down the file list
-  if (mask & EPBM_UP) {
+  if (mask & BM_UP) {
     if (inProjectSampleDir_ && fileIndexList_.empty()) {
       return; // Do nothing if the list is empty
     }
     warpToNextSample(true);
-  } else if (mask & EPBM_DOWN) {
+  } else if (mask & BM_DOWN) {
     if (inProjectSampleDir_ && fileIndexList_.empty()) {
       return; // Do nothing if the list is empty
     }
     warpToNextSample(false);
-  } else if ((mask & EPBM_LEFT) && (mask & EPBM_NAV)) {
+  } else if ((mask & BM_LEFT) && (mask & BM_NAV)) {
     // clear this flag on leaving this screen
     viewData_->isShowingSampleEditorProjectPool = false;
 

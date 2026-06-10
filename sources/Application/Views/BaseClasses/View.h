@@ -34,18 +34,16 @@
 
 #define NUM_COLORS 16
 
-enum GUIEventPadButtonMasks {
-  EPBM_LEFT = 1,
-  EPBM_DOWN = 2,
-  EPBM_RIGHT = 4,
-  EPBM_UP = 8,
-  EPBM_ALT = 16,
-  EPBM_EDIT = 32,
-  EPBM_ENTER = 64,
-  EPBM_NAV = 128,
-  EPBM_PLAY = 256,
-  EPBM_SELECT = 512,
-  EPBM_POWER = 1024,
+enum ButtonMask {
+  BM_LEFT = 1,
+  BM_DOWN = 2,
+  BM_RIGHT = 4,
+  BM_UP = 8,
+  BM_ALT = 16,
+  BM_EDIT = 32,
+  BM_ENTER = 64,
+  BM_NAV = 128,
+  BM_PLAY = 256
 };
 
 enum ViewType {

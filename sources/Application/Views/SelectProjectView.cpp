@@ -22,7 +22,7 @@
 #define LIST_PAGE_SIZE (SCREEN_HEIGHT - 4)
 #define LIST_WIDTH 26
 #define INVALID_PROJECT_NAME "INVALID NAME"
-#define DELETE_HOLD_MASK (EPBM_ALT | EPBM_PLAY | EPBM_EDIT)
+#define DELETE_HOLD_MASK (BM_ALT | BM_PLAY | BM_EDIT)
 #define DELETE_HOLD_DURATION_MS 2000
 
 class DeleteProjectConfirmModal : public ModalView {
@@ -125,7 +125,7 @@ void DeleteProjectConfirmModal::AnimationUpdate() {
 void DeleteProjectConfirmModal::ProcessButtonMask(uint16_t mask, bool pressed) {
   currentMask_ = mask;
 
-  if (pressed && (mask & EPBM_ENTER)) {
+  if (pressed && (mask & BM_ENTER)) {
     EndModal(MBL_CANCEL);
     return;
   }
@@ -284,17 +284,17 @@ void SelectProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed)
     return;
 
-  if (mask & EPBM_EDIT) {
+  if (mask & BM_EDIT) {
     // EDIT+ENTER -> hotkey to delete
-    if (mask & EPBM_ENTER)
+    if (mask & BM_ENTER)
       AttemptDeletingSelectedProject();
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       warpToNextProject(true);
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       warpToNextProject(false);
   } else {
     // A modifier
-    if (mask & EPBM_ENTER) {
+    if (mask & BM_ENTER) {
       switch (selectedButton_) {
         case 0:
           // load project
@@ -306,19 +306,19 @@ void SelectProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
       }
     } else {
       // R Modifier
-      if ((mask & EPBM_NAV) && (mask & EPBM_LEFT)) {
+      if ((mask & BM_NAV) && (mask & BM_LEFT)) {
         // Go to back "left" to Project Screen
         Navigate(VT_PROJECT);
         return;
       } else {
         // No modifier
-        if (mask == EPBM_UP)
+        if (mask == BM_UP)
           warpToNextProject(true);
-        if (mask == EPBM_DOWN)
+        if (mask == BM_DOWN)
           warpToNextProject(false);
-        if (mask == EPBM_LEFT)
+        if (mask == BM_LEFT)
           SelectButton(-1);
-        if (mask == EPBM_RIGHT)
+        if (mask == BM_RIGHT)
           SelectButton(1);
       }
     }

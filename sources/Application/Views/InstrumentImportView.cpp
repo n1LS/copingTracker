@@ -41,7 +41,7 @@ void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed)
     return;
 
-  if (mask & EPBM_PLAY) {
+  if (mask & BM_PLAY) {
     auto fs = FileSystem::GetInstance();
     char name[PFILENAME_SIZE];
 
@@ -49,7 +49,7 @@ void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
       unsigned fileIndex = fileIndexList_[currentIndex_];
       fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 
-      if (mask & EPBM_ALT) {
+      if (mask & BM_ALT) {
         Trace::Log("INSTRUMENTIMPORT", "SHIFT play - import");
         importInstrument(name);
       } else {
@@ -59,17 +59,17 @@ void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
 
     // handle moving up and down the file list
-  } else if (mask & EPBM_UP) {
+  } else if (mask & BM_UP) {
     warpToNextInstrument(true);
-  } else if (mask & EPBM_DOWN) {
+  } else if (mask & BM_DOWN) {
     warpToNextInstrument(false);
-  } else if ((mask & EPBM_LEFT) && (mask & EPBM_NAV)) {
+  } else if ((mask & BM_LEFT) && (mask & BM_NAV)) {
     // Go to back "left" to instrument screen
     Navigate(VT_INSTRUMENT);
     return;
   } else {
     // ENTER modifier
-    if (mask & EPBM_ENTER) {
+    if (mask & BM_ENTER) {
       auto fs = FileSystem::GetInstance();
 
       if (currentIndex_ < fileIndexList_.size()) {

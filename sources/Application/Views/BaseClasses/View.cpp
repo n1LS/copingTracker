@@ -605,13 +605,12 @@ void View::DrawTitle(const char *format, ...) {
 
 void View::drawRowNumbers(int x, int y, int start, int numRows) {
   SetBackgroundColor(Theme::View::bg);
-  
+
   char row[3];
-  
+
   for (int j = 0; j < numRows; j++) {
     SetColor(Theme::View::index((j + start) % ALT_ROW_NUMBER == 0));
     hex2char(j, row);
     DrawString(x, y + j, row);
   }
 }
-

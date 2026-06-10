@@ -26,25 +26,25 @@ void UIIntVarOffField::ProcessArrow(uint16_t mask) {
 
   if (value == VAR_OFF) { // Off state
     switch (mask) {
-      case EPBM_UP:
+      case BM_UP:
         value = min_ + yOffset_;
         break;
-      case EPBM_RIGHT:
+      case BM_RIGHT:
         value = min_;
         break;
     };
   } else {
     switch (mask) {
-      case EPBM_UP:
+      case BM_UP:
         value += yOffset_;
         break;
-      case EPBM_DOWN:
+      case BM_DOWN:
         value -= yOffset_;
         break;
-      case EPBM_LEFT:
+      case BM_LEFT:
         value -= xOffset_;
         break;
-      case EPBM_RIGHT:
+      case BM_RIGHT:
         value += xOffset_;
         break;
     };

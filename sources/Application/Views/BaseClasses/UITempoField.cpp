@@ -44,16 +44,16 @@ void UITempoField::ProcessArrow(uint16_t mask) {
   int value = src_.GetInt();
 
   switch (mask) {
-    case EPBM_UP:
+    case BM_UP:
       value += yOffset_;
       break;
-    case EPBM_DOWN:
+    case BM_DOWN:
       value -= yOffset_;
       break;
-    case EPBM_LEFT:
+    case BM_LEFT:
       value -= xOffset_;
       break;
-    case EPBM_RIGHT:
+    case BM_RIGHT:
       value += xOffset_;
       break;
   };
@@ -71,14 +71,14 @@ void UITempoField::ProcessEditArrow(uint16_t mask) {
 
   ApplicationCommandDispatcher *dispatcher = ApplicationCommandDispatcher::GetInstance();
   switch (mask) {
-    case EPBM_UP:
+    case BM_UP:
       break;
-    case EPBM_DOWN:
+    case BM_DOWN:
       break;
-    case EPBM_LEFT:
+    case BM_LEFT:
       dispatcher->OnNudgeDown();
       break;
-    case EPBM_RIGHT:
+    case BM_RIGHT:
       dispatcher->OnNudgeUp();
       break;
   };

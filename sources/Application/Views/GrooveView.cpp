@@ -85,55 +85,55 @@ void GrooveView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   Player *player = Player::GetInstance();
 
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_LEFT) {
+  if (mask & BM_EDIT) {
+    if (mask & BM_LEFT) {
       warpGroove(-1);
     }
-    if (mask & EPBM_RIGHT) {
+    if (mask & BM_RIGHT) {
       warpGroove(1);
     }
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
       warpGroove(-0x10);
     }
-    if (mask & EPBM_UP) {
+    if (mask & BM_UP) {
       warpGroove(0x10);
     }
-    if (mask & EPBM_ENTER) {
+    if (mask & BM_ENTER) {
       clearCursorValue();
     };
-  } else if (mask & EPBM_ENTER) {
+  } else if (mask & BM_ENTER) {
     // ENTER modifier
-    if (mask & EPBM_LEFT) {
+    if (mask & BM_LEFT) {
       updateCursorValue(-1);
     }
-    if (mask & EPBM_RIGHT) {
+    if (mask & BM_RIGHT) {
       updateCursorValue(1);
     }
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
       updateCursorValue(-1, true);
     }
-    if (mask & EPBM_UP) {
+    if (mask & BM_UP) {
       updateCursorValue(1, true);
     }
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       initCursorValue();
     };
-  } else if (mask & EPBM_NAV) {
+  } else if (mask & BM_NAV) {
     // NAV Modifier
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
       Navigate(VT_PHRASE);
-    } else if (mask & EPBM_LEFT) {
+    } else if (mask & BM_LEFT) {
       Navigate(VT_PROJECT);
-    } else if (mask & EPBM_PLAY) {
+    } else if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
   } else {
     // No modifier
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateCursor(1);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateCursor(-1);
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
@@ -205,7 +205,7 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
   DrawChar(pos.x_, pos.y_, ' ');
 
   Groove *gr = Groove::GetInstance();
-  
+
   // Get current channel
   int channel = viewData_->songX_;
 

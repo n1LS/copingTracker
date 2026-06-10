@@ -25,10 +25,10 @@
 #define NO_MORE_TABLE TABLE_COUNT + 10
 
 struct TableStep {
-  uint8_t  cmd1;
-  uint8_t  cmd2;
-  uint8_t  cmd3;
-  uint8_t  _pad;
+  uint8_t cmd1;
+  uint8_t cmd2;
+  uint8_t cmd3;
+  uint8_t _pad;
   uint16_t param1;
   uint16_t param2;
   uint16_t param3;
@@ -43,17 +43,23 @@ public:
 
   inline FourCC getCmd(int step, int col) const {
     switch (col) {
-      case 0:  return FourCC::enum_type(steps_[step].cmd1);
-      case 1:  return FourCC::enum_type(steps_[step].cmd2);
-      default: return FourCC::enum_type(steps_[step].cmd3);
+    case 0:
+      return FourCC::enum_type(steps_[step].cmd1);
+    case 1:
+      return FourCC::enum_type(steps_[step].cmd2);
+    default:
+      return FourCC::enum_type(steps_[step].cmd3);
     }
   }
 
   inline uint16_t getParam(int step, int col) const {
     switch (col) {
-      case 0:  return steps_[step].param1;
-      case 1:  return steps_[step].param2;
-      default: return steps_[step].param3;
+    case 0:
+      return steps_[step].param1;
+    case 1:
+      return steps_[step].param2;
+    default:
+      return steps_[step].param3;
     }
   }
 

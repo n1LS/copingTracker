@@ -236,21 +236,21 @@ void ProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & EPBM_NAV) {
-    if (mask & EPBM_DOWN || mask & EPBM_UP) {
+  if (mask & BM_NAV) {
+    if (mask & BM_DOWN || mask & BM_UP) {
       if (!CanExit()) {
         return;
       }
     }
 
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
       Navigate(VT_SONG);
-    } else if (mask & EPBM_RIGHT) {
+    } else if (mask & BM_RIGHT) {
       Navigate(VT_GROOVE);
-    } else if (mask & EPBM_UP) {
+    } else if (mask & BM_UP) {
       Navigate(VT_DEVICE);
     }
-  } else if (mask & EPBM_PLAY) {
+  } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   }

@@ -24,10 +24,9 @@
 #include "Services/Midi/MidiService.h"
 #include "System/Console/Trace.h"
 #include "System/System/System.h"
-#include "platform.h"
 #include <nanoprintf.h>
 
-MixerService::MixerService() : master_(), sync_(platform_mutex()) {
+MixerService::MixerService() : master_(), sync_(System::GetInstance()->GetMutex()) {
   out_ = 0;
   project_ = NULL;
   mode_ = MSM_AUDIO;

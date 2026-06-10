@@ -22,10 +22,7 @@
 #include "Services/Audio/Audio.h"
 #include "Services/Midi/MidiService.h"
 #include "System/System/System.h"
-#include "platform.h"
 #include <nanoprintf.h>
-
-#define ACTION_BOOTSEL MAKE_FOURCC('B', 'O', 'O', 'T')
 
 static void BootselCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
@@ -114,11 +111,11 @@ void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & EPBM_NAV) {
-    if (mask & EPBM_DOWN) {
+  if (mask & BM_NAV) {
+    if (mask & BM_DOWN) {
       Navigate(VT_PROJECT);
     }
-  } else if (mask & EPBM_PLAY) {
+  } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   };

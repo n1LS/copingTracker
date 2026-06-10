@@ -30,40 +30,39 @@ int16_t ClampToInt16(double sample) {
   return static_cast<int16_t>(s * 32768.0f);
 }
 
-int16_t ConvertSampleToInt16(const uint8_t *samplePtr, uint16_t audioFormat, int32_t bytePerSample) {
-
-  if (audioFormat == 1) { // PCM
-    switch (bytePerSample) {
-      case 1:
-        {
-          // expand 8-bit to 16-bit
-          // 8-bit PCM is unsigned while >8-bit is signed
-          return static_cast<int16_t>((static_cast<int16_t>(samplePtr[0]) - 128) << 8);
-        }
-      case 2:
-        {
-          // signed 16-bit
-          int16_t value;
-          memcpy(&value, samplePtr, sizeof(value));
-          return value;
-        }
-      case 3:
-        {
-          // signed 24-bit
-          int32_t value = samplePtr[0] | (samplePtr[1] << 8) | (static_cast<int32_t>(samplePtr[2]) << 16);
-          value = (value << 8) >> 8; // Sign extend
-          return static_cast<int16_t>(value >> 8);
-        }
-      case 4:
-        {
-          // signed 32-bit
-          int32_t value;
-          memcpy(&value, samplePtr, sizeof(value));
-          return static_cast<int16_t>(value >> 16);
-        }
-      default:
-        break;
+// Normalizes a PCM sample of any supported bit depth to a full signed 32-bit
+// range. Using multiplication instead of left-shifts avoids signed overflow UB.
+static int32_t readPCMInt32(const uint8_t *samplePtr, int32_t bytePerSample) {
+  switch (bytePerSample) {
+    case 1:
+      // 8-bit PCM is unsigned; center and scale to 32-bit range
+      return (static_cast<int32_t>(samplePtr[0]) - 128) * 0x01000000;
+    case 2: {
+      int16_t v;
+      memcpy(&v, samplePtr, sizeof(v));
+      return static_cast<int32_t>(v) * 0x00010000;
     }
+    case 3: {
+      // Build as unsigned to avoid UB in bit-ops, then sign-extend
+      uint32_t u = static_cast<uint32_t>(samplePtr[0]) |
+                   (static_cast<uint32_t>(samplePtr[1]) << 8) |
+                   (static_cast<uint32_t>(samplePtr[2]) << 16);
+      int32_t v = (u & 0x800000u) ? static_cast<int32_t>(u | 0xFF000000u) : static_cast<int32_t>(u);
+      return v * 0x00000100;
+    }
+    case 4: {
+      int32_t v;
+      memcpy(&v, samplePtr, sizeof(v));
+      return v;
+    }
+    default:
+      return 0;
+  }
+}
+
+int16_t ConvertSampleToInt16(const uint8_t *samplePtr, uint16_t audioFormat, int32_t bytePerSample) {
+  if (audioFormat == 1) { // PCM
+    return static_cast<int16_t>(readPCMInt32(samplePtr, bytePerSample) >> 16);
   } else if (audioFormat == 3) { // IEEE float
     if (bytePerSample == 4) {
       float value;
@@ -83,33 +82,7 @@ int16_t ConvertSampleToInt16(const uint8_t *samplePtr, uint16_t audioFormat, int
 
 float ConvertSampleToFloat(const uint8_t *samplePtr, uint16_t audioFormat, int32_t bytePerSample) {
   if (audioFormat == 1) { // PCM
-    switch (bytePerSample) {
-      case 1:
-        {
-          int16_t v = static_cast<int16_t>(samplePtr[0]) - 128;
-          return static_cast<float>(v) / 128.0f;
-        }
-      case 2:
-        {
-          int16_t value;
-          memcpy(&value, samplePtr, sizeof(value));
-          return static_cast<float>(value) / 32768.0f;
-        }
-      case 3:
-        {
-          int32_t value = samplePtr[0] | (samplePtr[1] << 8) | (static_cast<int32_t>(samplePtr[2]) << 16);
-          value = (value << 8) >> 8; // Sign extend
-          return static_cast<float>(value) / 8388608.0f;
-        }
-      case 4:
-        {
-          int32_t value;
-          memcpy(&value, samplePtr, sizeof(value));
-          return static_cast<float>(value) / 2147483648.0f;
-        }
-      default:
-        break;
-    }
+    return static_cast<float>(readPCMInt32(samplePtr, bytePerSample)) / 2147483648.0f;
   } else if (audioFormat == 3) { // IEEE float
     if (bytePerSample == 4) {
       float value;
@@ -304,7 +277,6 @@ bool WavFile::Read(void *buff, uint32_t btr, uint32_t *bytesRead) {
   uint32_t framesRead = actualBytesRead / srcFrameSize;
   uint32_t totalSamples = framesRead * channelCount_;
 
-  // TODO: we repeat this logic in two places
   // Now adjust the samples
   uint8_t *src = static_cast<uint8_t *>(buff);
   int16_t *dst = static_cast<int16_t *>(buff);

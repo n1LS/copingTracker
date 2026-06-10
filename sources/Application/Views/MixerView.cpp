@@ -126,38 +126,23 @@ void MixerView::toggleMute() {
 void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
         toggleMute();
       }
-    };
+    }
     if (viewMode_ == VM_SOLOON) {
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
         switchSoloMode();
       }
-    };
+    }
     // Force a full redraw of the mixer view
     SetDirty(true);
     return;
-  };
-
-  // First check if we need to handle special mixer-specific actions
-  if (!pressed) {
-    if (viewMode_ == VM_MUTEON) {
-      if (mask & EPBM_NAV) {
-        toggleMute();
-      }
-    };
-    if (viewMode_ == VM_SOLOON) {
-      if (mask & EPBM_NAV) {
-        switchSoloMode();
-      }
-    };
-    return;
-  };
+  }
 
   // Ignore up/down arrow keys when pressed by themselves in MixerView
   // We only want left/right to navigate between channels
-  if (mask == EPBM_UP || mask == EPBM_DOWN) {
+  if (mask == BM_UP || mask == BM_DOWN) {
     return;
   }
 
@@ -165,19 +150,19 @@ void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
   FieldView::ProcessButtonMask(mask, pressed);
 
   // Handle playback specific actions
-  if (mask == EPBM_PLAY) {
+  if (mask == BM_PLAY) {
     togglePlay();
   }
   // NAV back to Song view
-  if (mask & EPBM_NAV) {
-    if (mask & EPBM_UP) {
+  if (mask & BM_NAV) {
+    if (mask & BM_UP) {
       Navigate(VT_SONG);
-    } else if (mask & EPBM_RIGHT) {
+    } else if (mask & BM_RIGHT) {
       Navigate(VT_TABLE);
     }
   }
 
-  if (mask == (EPBM_NAV & EPBM_ALT)) {
+  if (mask == (BM_NAV & BM_ALT)) {
     unMuteAll();
   }
 
@@ -186,13 +171,13 @@ void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
   // editing
 
   // EDIT+NAV is always for toggling mute
-  if ((mask & EPBM_EDIT) && (mask & EPBM_NAV)) {
+  if ((mask & BM_EDIT) && (mask & BM_NAV)) {
     toggleMute();
     return;
   }
 
   // ENTER+NAV is always for solo mode
-  if ((mask & EPBM_ENTER) && (mask & EPBM_NAV)) {
+  if ((mask & BM_ENTER) && (mask & BM_NAV)) {
     switchSoloMode();
     return;
   }
@@ -212,26 +197,26 @@ void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
 // This method is no longer needed as we're using FieldView's field navigation
 void MixerView::processNormalButtonMask(unsigned int mask) {
   // Handle mixer-specific actions
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_NAV) {
+  if (mask & BM_EDIT) {
+    if (mask & BM_NAV) {
       toggleMute();
     }
-  } else if (mask & EPBM_ENTER) {
-    if (mask & EPBM_NAV) {
+  } else if (mask & BM_ENTER) {
+    if (mask & BM_NAV) {
       switchSoloMode();
     }
-  } else if (mask & EPBM_NAV) {
-    if (mask & EPBM_UP) {
+  } else if (mask & BM_NAV) {
+    if (mask & BM_UP) {
       Navigate(VT_SONG);
     }
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       unMuteAll();
     }
   } else {
-    if (mask & EPBM_LEFT) {
+    if (mask & BM_LEFT) {
       updateCursor(-1, 0);
     }
-    if (mask & EPBM_RIGHT) {
+    if (mask & BM_RIGHT) {
       updateCursor(1, 0);
     }
   }
@@ -244,24 +229,24 @@ void MixerView::processNormalButtonMask(unsigned int mask) {
 ******************************************************************************/
 void MixerView::processSelectionButtonMask(unsigned int mask) {
 
-  if (mask & EPBM_EDIT) {
+  if (mask & BM_EDIT) {
 
   } else {
-    if (mask & EPBM_ENTER) {
-      if (mask & EPBM_NAV) {
+    if (mask & BM_ENTER) {
+      if (mask & BM_NAV) {
         switchSoloMode();
       }
     } else {
-      if (mask & EPBM_NAV) {
-        if (mask & EPBM_PLAY) {
+      if (mask & BM_NAV) {
+        if (mask & BM_PLAY) {
           onStop();
         }
-        if (mask & EPBM_ALT) {
+        if (mask & BM_ALT) {
           unMuteAll();
         }
       } else {
         // No modifier
-        if (mask & EPBM_PLAY) {
+        if (mask & BM_PLAY) {
           onStart();
         }
       }

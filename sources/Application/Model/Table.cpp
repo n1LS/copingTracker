@@ -20,10 +20,10 @@ Table::Table() { Reset(); };
 
 void Table::Reset() {
   for (int i = 0; i < TABLE_STEPS; i++) {
-    steps_[i].cmd1   = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
-    steps_[i].cmd2   = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
-    steps_[i].cmd3   = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
-    steps_[i]._pad   = 0;
+    steps_[i].cmd1 = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
+    steps_[i].cmd2 = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
+    steps_[i].cmd3 = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
+    steps_[i]._pad = 0;
     steps_[i].param1 = 0;
     steps_[i].param2 = 0;
     steps_[i].param3 = 0;
@@ -75,21 +75,21 @@ void TableHolder::SaveContent(tinyxml2::XMLPrinter *printer) {
 
     Table &table = table_[i];
     if (!table.IsEmpty()) {
-      uint8_t  cmd1[TABLE_STEPS], cmd2[TABLE_STEPS], cmd3[TABLE_STEPS];
+      uint8_t cmd1[TABLE_STEPS], cmd2[TABLE_STEPS], cmd3[TABLE_STEPS];
       uint16_t param1[TABLE_STEPS], param2[TABLE_STEPS], param3[TABLE_STEPS];
       for (int j = 0; j < TABLE_STEPS; j++) {
-        cmd1[j]   = table.steps_[j].cmd1;
-        cmd2[j]   = table.steps_[j].cmd2;
-        cmd3[j]   = table.steps_[j].cmd3;
+        cmd1[j] = table.steps_[j].cmd1;
+        cmd2[j] = table.steps_[j].cmd2;
+        cmd3[j] = table.steps_[j].cmd3;
         param1[j] = table.steps_[j].param1;
         param2[j] = table.steps_[j].param2;
         param3[j] = table.steps_[j].param3;
       }
-      saveHexBuffer(printer, "CMD1",   cmd1,   TABLE_STEPS);
+      saveHexBuffer(printer, "CMD1", cmd1, TABLE_STEPS);
       saveHexBuffer(printer, "PARAM1", param1, TABLE_STEPS);
-      saveHexBuffer(printer, "CMD2",   cmd2,   TABLE_STEPS);
+      saveHexBuffer(printer, "CMD2", cmd2, TABLE_STEPS);
       saveHexBuffer(printer, "PARAM2", param2, TABLE_STEPS);
-      saveHexBuffer(printer, "CMD3",   cmd3,   TABLE_STEPS);
+      saveHexBuffer(printer, "CMD3", cmd3, TABLE_STEPS);
       saveHexBuffer(printer, "PARAM3", param3, TABLE_STEPS);
     }
     printer->CloseElement();
@@ -120,31 +120,37 @@ void TableHolder::RestoreContent(PersistencyDocument *doc) {
 
       bool subelem = doc->FirstChild();
       while (subelem) {
-        uint8_t  cbuf[TABLE_STEPS];
+        uint8_t cbuf[TABLE_STEPS];
         uint16_t pbuf[TABLE_STEPS];
         if (!strcmp("CMD1", doc->ElemName())) {
           restoreHexBuffer(doc, cbuf);
-          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].cmd1 = cbuf[j];
+          for (int j = 0; j < TABLE_STEPS; j++)
+            table.steps_[j].cmd1 = cbuf[j];
         };
         if (!strcmp("PARAM1", doc->ElemName())) {
           restoreHexBuffer(doc, (unsigned char *)pbuf);
-          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].param1 = pbuf[j];
+          for (int j = 0; j < TABLE_STEPS; j++)
+            table.steps_[j].param1 = pbuf[j];
         };
         if (!strcmp("CMD2", doc->ElemName())) {
           restoreHexBuffer(doc, cbuf);
-          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].cmd2 = cbuf[j];
+          for (int j = 0; j < TABLE_STEPS; j++)
+            table.steps_[j].cmd2 = cbuf[j];
         };
         if (!strcmp("PARAM2", doc->ElemName())) {
           restoreHexBuffer(doc, (unsigned char *)pbuf);
-          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].param2 = pbuf[j];
+          for (int j = 0; j < TABLE_STEPS; j++)
+            table.steps_[j].param2 = pbuf[j];
         };
         if (!strcmp("CMD3", doc->ElemName())) {
           restoreHexBuffer(doc, cbuf);
-          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].cmd3 = cbuf[j];
+          for (int j = 0; j < TABLE_STEPS; j++)
+            table.steps_[j].cmd3 = cbuf[j];
         };
         if (!strcmp("PARAM3", doc->ElemName())) {
           restoreHexBuffer(doc, (unsigned char *)pbuf);
-          for (int j = 0; j < TABLE_STEPS; j++) table.steps_[j].param3 = pbuf[j];
+          for (int j = 0; j < TABLE_STEPS; j++)
+            table.steps_[j].param3 = pbuf[j];
         };
         subelem = doc->NextSibling();
       }

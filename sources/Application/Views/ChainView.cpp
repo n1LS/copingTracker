@@ -284,7 +284,7 @@ void ChainView::cutSelection() {
     for (int j = 0; j < clipboard_.height_; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          base[j + clipboard_.row_].phrase    = 0xFF;
+          base[j + clipboard_.row_].phrase = 0xFF;
           break;
         case 1:
           base[j + clipboard_.row_].transpose = 0x00;
@@ -322,7 +322,7 @@ void ChainView::pasteClipboard() {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          base[j + viewData_->chainRow_].phrase    = clipboard_.steps_[j].phrase;
+          base[j + viewData_->chainRow_].phrase = clipboard_.steps_[j].phrase;
           break;
         case 1:
           base[j + viewData_->chainRow_].transpose = clipboard_.steps_[j].transpose;
@@ -359,12 +359,12 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
         toggleMute();
       }
     };
     if (viewMode_ == VM_SOLOON) {
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
         switchSoloMode();
       }
     };
@@ -372,20 +372,20 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
   };
 
   if (viewMode_ == VM_NEW) {
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       uint16_t next = viewData_->song_->phrase_.GetNext();
       if (next != NO_MORE_PHRASE) {
         setPhrase((unsigned char)next);
         isDirty_ = true;
       }
-      mask &= (0xFFFF - EPBM_ENTER);
+      mask &= (0xFFFF - BM_ENTER);
     }
   }
 
   if (viewMode_ == VM_CLONE) {
-    if ((mask & EPBM_ENTER) && (mask & EPBM_ALT)) {
+    if ((mask & BM_ENTER) && (mask & BM_ALT)) {
       clonePosition();
-      mask &= (0xFFFF - (EPBM_ENTER | EPBM_ALT));
+      mask &= (0xFFFF - (BM_ENTER | BM_ALT));
     } else {
       viewMode_ = VM_SELECTION;
     }
@@ -416,47 +416,47 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  if (mask & EPBM_EDIT) {
+  if (mask & BM_EDIT) {
     // EDIT Modifier
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       warpToNeighbour(-1);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       warpToNeighbour(+1);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       warpInColumn(-1);
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       warpInColumn(+1);
-    if (mask & EPBM_ENTER)
+    if (mask & BM_ENTER)
       cutPosition();
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       viewMode_ = VM_CLONE;
     };
-    if (mask & EPBM_NAV)
+    if (mask & BM_NAV)
       toggleMute();
-  } else if (mask & EPBM_ENTER) {
+  } else if (mask & BM_ENTER) {
     // ENTER Modifier
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateCursorValue(viewData_->chainCol_ == 0 ? -0x10 : -0x0C);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateCursorValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       updateCursorValue(-1);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       updateCursorValue(+1);
-    if (mask & EPBM_ALT)
+    if (mask & BM_ALT)
       pasteClipboard();
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       pasteLastPhrase();
       if (viewData_->chainCol_ == 0)
         viewMode_ = VM_NEW;
     }
-    if (mask & EPBM_NAV)
+    if (mask & BM_NAV)
       switchSoloMode();
-  } else if (mask & EPBM_NAV) {
+  } else if (mask & BM_NAV) {
     // NAV Modifier
-    if (mask & EPBM_LEFT) {
+    if (mask & BM_LEFT) {
       Navigate(VT_SONG);
-    } else if (mask & EPBM_RIGHT) {
+    } else if (mask & BM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentChainPointer();
       if (*data != 0xFF) {
         viewData_->currentPhrase_ = *data;
@@ -467,27 +467,27 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
     // We toggle full chain start only if we"re not in live mode
     // or if the player ain't playing yet
 
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
     }
-    if (mask & EPBM_ALT)
+    if (mask & BM_ALT)
       unMuteAll();
   } else {
     // NO modifier
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateCursor(0, 1);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateCursor(0, -1);
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       updateCursor(-1, 0);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       updateCursor(1, 0);
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_CHAIN, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
 
-  if ((!(mask & EPBM_ENTER)) && updatingPhrase_) {
+  if ((!(mask & BM_ENTER)) && updatingPhrase_) {
     uint8_t p = viewData_->song_->chain_.steps_[viewData_->currentChain_][updateRow_].phrase;
     viewData_->song_->phrase_.SetUsed(p);
     updatingPhrase_ = false;
@@ -500,46 +500,46 @@ void ChainView::processSelectionButtonMask(uint16_t mask) {
 
   // B Modifier
 
-  if (mask & EPBM_EDIT) {
-    if (mask == EPBM_EDIT)
+  if (mask & BM_EDIT) {
+    if (mask == BM_EDIT)
       copySelection();
-    if (mask & EPBM_NAV)
+    if (mask & BM_NAV)
       toggleMute();
-    if (mask & EPBM_ALT)
+    if (mask & BM_ALT)
       extendSelection();
   } else {
 
     // A modifier
 
-    if (mask & EPBM_ENTER) {
+    if (mask & BM_ENTER) {
 
-      if (mask & EPBM_DOWN)
+      if (mask & BM_DOWN)
         updateSelectionValue(viewData_->chainCol_ == 0 ? -0x10 : -0x0C);
-      if (mask & EPBM_UP)
+      if (mask & BM_UP)
         updateSelectionValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
-      if (mask & EPBM_LEFT)
+      if (mask & BM_LEFT)
         updateSelectionValue(-0x01);
-      if (mask & EPBM_RIGHT)
+      if (mask & BM_RIGHT)
         updateSelectionValue(0x01);
 
-      if (mask & EPBM_ALT) {
+      if (mask & BM_ALT) {
         cutSelection();
       }
-      if (mask & EPBM_NAV)
+      if (mask & BM_NAV)
         switchSoloMode();
     } else {
 
       // R Modifier
 
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
 
-        if (mask & EPBM_LEFT) {
+        if (mask & BM_LEFT) {
           Navigate(VT_SONG);
           ;
           ;
         }
 
-        if (mask & EPBM_RIGHT) {
+        if (mask & BM_RIGHT) {
           unsigned char *data = viewData_->GetCurrentChainPointer();
           if (*data != 0xFF) {
             viewData_->currentPhrase_ = *data;
@@ -547,27 +547,27 @@ void ChainView::processSelectionButtonMask(uint16_t mask) {
           }
         }
 
-        if (mask & EPBM_PLAY) {
+        if (mask & BM_PLAY) {
           player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
         }
 
-        if (mask & EPBM_ALT)
+        if (mask & BM_ALT)
           unMuteAll();
 
       } else {
 
         // No modifier
 
-        if (mask & EPBM_DOWN)
+        if (mask & BM_DOWN)
           updateCursor(0, 1);
-        if (mask & EPBM_UP)
+        if (mask & BM_UP)
           updateCursor(0, -1);
-        if (mask & EPBM_LEFT)
+        if (mask & BM_LEFT)
           updateCursor(-1, 0);
-        if (mask & EPBM_RIGHT)
+        if (mask & BM_RIGHT)
           updateCursor(1, 0);
 
-        if (mask & EPBM_PLAY) {
+        if (mask & BM_PLAY) {
           player->OnStartButton(PM_CHAIN, viewData_->songX_, false, viewData_->chainRow_);
         }
       }
@@ -621,7 +621,7 @@ void ChainView::DrawView() {
   // Display row numbers
 
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
-  
+
   // Display phrases
   ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
 
@@ -790,7 +790,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  
+
   char buffer[6];
   buffer[4] = 0;
   for (int j = 0; j < 16; j++) {
@@ -844,7 +844,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
 
     unsigned char d = instrSteps[j].instr;
-    
+
     if (d == NO_INSTRUMENT) {
       DrawString(pos.x_, pos.y_, "I--");
     } else {

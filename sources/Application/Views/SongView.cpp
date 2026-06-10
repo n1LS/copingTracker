@@ -511,12 +511,12 @@ void SongView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
         toggleMute();
       }
     };
     if (viewMode_ == VM_SOLOON) {
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
         switchSoloMode();
       }
     };
@@ -524,20 +524,20 @@ void SongView::ProcessButtonMask(uint16_t mask, bool pressed) {
   };
 
   if (viewMode_ == VM_NEW) {
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       uint16_t next = viewData_->song_->chain_.GetNext();
       if (next != NO_MORE_CHAIN) {
         setChain((unsigned char)next);
         isDirty_ = true;
       }
-      mask &= (0xFFFF - EPBM_ENTER);
+      mask &= (0xFFFF - BM_ENTER);
     }
   }
 
   if (viewMode_ == VM_CLONE) {
-    if ((mask & EPBM_ENTER) && (mask & EPBM_ALT)) {
+    if ((mask & BM_ENTER) && (mask & BM_ALT)) {
       clonePosition();
-      mask &= (0xFFFF - (EPBM_ENTER | EPBM_ALT));
+      mask &= (0xFFFF - (BM_ENTER | BM_ALT));
     } else {
       viewMode_ = VM_SELECTION;
     }
@@ -576,14 +576,14 @@ void SongView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
 void SongView::processNormalButtonMask(unsigned int mask) {
 
-  if (mask & EPBM_EDIT) {
+  if (mask & BM_EDIT) {
     // EDIT Modifier
     Player *player = Player::GetInstance();
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateSongOffset(View::songRowCount_);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateSongOffset(-View::songRowCount_);
-    if (mask & (EPBM_RIGHT | EPBM_LEFT)) {
+    if (mask & (BM_RIGHT | BM_LEFT)) {
       switch (player->GetSequencerMode()) {
         case SM_SONG:
           player->SetSequencerMode(SM_LIVE);
@@ -594,47 +594,47 @@ void SongView::processNormalButtonMask(unsigned int mask) {
       }
       isDirty_ = true;
     }
-    if ((mask & EPBM_ENTER) && (!(mask & EPBM_NAV)))
+    if ((mask & BM_ENTER) && (!(mask & BM_NAV)))
       cutPosition();
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       viewMode_ = VM_CLONE;
     };
-    if (mask & EPBM_NAV) {
+    if (mask & BM_NAV) {
       toggleMute();
     };
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       if (player->GetSequencerMode() == SM_LIVE) {
         startImmediate();
       }
     }
-  } else if (mask & EPBM_ENTER) {
+  } else if (mask & BM_ENTER) {
     // ENTER modifier
 
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateChain(-0x10);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateChain(0x10);
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       updateChain(-0x01);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       updateChain(0x01);
-    if (mask & EPBM_ALT)
+    if (mask & BM_ALT)
       pasteClipboard();
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       pasteLast();
       viewMode_ = VM_NEW;
     }
-    if (mask & EPBM_NAV) {
+    if (mask & BM_NAV) {
       switchSoloMode();
     };
-  } else if (mask & EPBM_NAV) {
+  } else if (mask & BM_NAV) {
     // NAV Modifier
 
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       unMuteAll();
     }
 
-    if (mask & EPBM_RIGHT) {
+    if (mask & BM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentSongPointer();
       if (*data != 0xFF) {
         ViewType vt = VT_CHAIN;
@@ -645,56 +645,56 @@ void SongView::processNormalButtonMask(unsigned int mask) {
       }
     }
 
-    if (mask & EPBM_UP) {
+    if (mask & BM_UP) {
       ViewType vt = VT_PROJECT;
       ViewEvent ve(VET_SWITCH_VIEW, &vt);
       SetChanged();
       NotifyObservers(&ve);
     }
 
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
       ViewType vt = VT_MIXER;
       ViewEvent ve(VET_SWITCH_VIEW, &vt);
       SetChanged();
       NotifyObservers(&ve);
     }
 
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       onStop();
     }
 
-  } else if (mask & EPBM_ALT) {
+  } else if (mask & BM_ALT) {
     // ALT Modifier
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
       jumpToNextSection(1);
     }
-    if (mask & EPBM_UP) {
+    if (mask & BM_UP) {
       jumpToNextSection(-1);
     }
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       startCurrentRow();
     }
-    if (mask & EPBM_LEFT) {
+    if (mask & BM_LEFT) {
       nudgeTempo(-1);
     }
-    if (mask & EPBM_RIGHT) {
+    if (mask & BM_RIGHT) {
       nudgeTempo(1);
     }
   } else {
     // No modifier
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
       updateCursor(0, 1);
     }
-    if (mask & EPBM_UP) {
+    if (mask & BM_UP) {
       updateCursor(0, -1);
     }
-    if (mask & EPBM_LEFT) {
+    if (mask & BM_LEFT) {
       updateCursor(-1, 0);
     }
-    if (mask & EPBM_RIGHT) {
+    if (mask & BM_RIGHT) {
       updateCursor(1, 0);
     }
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       onStart();
     }
   }
@@ -708,33 +708,33 @@ void SongView::processNormalButtonMask(unsigned int mask) {
 
 void SongView::processSelectionButtonMask(unsigned int mask) {
 
-  if (mask & EPBM_EDIT) {
+  if (mask & BM_EDIT) {
     // EDIT Modifier
-    if (mask & EPBM_NAV) {
+    if (mask & BM_NAV) {
       toggleMute();
     };
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       extendSelection();
     };
-    if (mask == EPBM_EDIT) {
+    if (mask == BM_EDIT) {
       copySelection();
     }
 
-  } else if (mask & EPBM_ENTER) {
+  } else if (mask & BM_ENTER) {
     // ENTER modifier
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       cutSelection();
     }
-    if (mask & EPBM_NAV) {
+    if (mask & BM_NAV) {
       switchSoloMode();
     };
-  } else if (mask & EPBM_NAV) {
+  } else if (mask & BM_NAV) {
     // NAV Modifier
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       unMuteAll();
     }
 
-    if (mask & EPBM_RIGHT) {
+    if (mask & BM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentSongPointer();
       if (*data != 0xFF) {
         ViewType vt = VT_CHAIN;
@@ -745,35 +745,35 @@ void SongView::processSelectionButtonMask(unsigned int mask) {
       }
     }
 
-    if (mask & EPBM_UP) {
+    if (mask & BM_UP) {
       ViewType vt = VT_PROJECT;
       ViewEvent ve(VET_SWITCH_VIEW, &vt);
       SetChanged();
       NotifyObservers(&ve);
     }
 
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
       ViewType vt = VT_MIXER;
       ViewEvent ve(VET_SWITCH_VIEW, &vt);
       SetChanged();
       NotifyObservers(&ve);
     }
 
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       onStop();
     }
   } else {
     // No modifier
 
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateCursor(0, 1);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateCursor(0, -1);
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       updateCursor(-1, 0);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       updateCursor(1, 0);
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       onStart();
     }
   }
@@ -895,10 +895,10 @@ void SongView::drawChainPreview() {
     unsigned char phraseId = viewData_->song_->chain_.steps_[chainId][i].phrase;
 
     if (phraseId == EMPTY_CHAIN_VALUE) {
-      DrawString(pos.x_ + 24, pos.y_  + i, "--");
+      DrawString(pos.x_ + 24, pos.y_ + i, "--");
     } else {
       hex2char(phraseId, buffer);
-      DrawString(pos.x_ + 24, pos.y_  + i, buffer);
+      DrawString(pos.x_ + 24, pos.y_ + i, buffer);
     }
   }
 }

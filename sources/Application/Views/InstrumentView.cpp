@@ -742,7 +742,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
 
   isDirty_ = false;
-  if ((mask & EPBM_EDIT) && (mask & EPBM_ENTER)) {
+  if ((mask & BM_EDIT) && (mask & BM_ENTER)) {
     int i = viewData_->currentInstrumentID_;
     InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
     I_Instrument *instr = bank->GetInstrument(i);
@@ -773,7 +773,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   Player *player = Player::GetInstance();
 
-  if (mask == EPBM_ENTER) {
+  if (mask == BM_ENTER) {
     // Get the current field to check if we're on the sample field
     UIIntVarField *currentField = (UIIntVarField *)GetFocus();
 
@@ -827,7 +827,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       default:
         break;
     }
-    mask &= (0xFFFF - EPBM_ENTER);
+    mask &= (0xFFFF - BM_ENTER);
   } else {
     // Clear the VM_NEW state if any key other than ENTER is pressed
     if (viewMode_ == VM_NEW) {
@@ -836,9 +836,9 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   if (viewMode_ == VM_CLONE) {
-    if ((mask & EPBM_ENTER) && (mask & EPBM_ALT)) {
+    if ((mask & BM_ENTER) && (mask & BM_ALT)) {
       UIIntVarField *field = (UIIntVarField *)GetFocus();
-      mask &= (0xFFFF - EPBM_ENTER);
+      mask &= (0xFFFF - BM_ENTER);
       Variable &v = field->GetVariable();
       int current = v.GetInt();
       if (current == -1)
@@ -853,7 +853,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
         }
       };
     }
-    mask &= (0xFFFF - (EPBM_ENTER | EPBM_ALT));
+    mask &= (0xFFFF - (BM_ENTER | BM_ALT));
   };
 
   if (viewMode_ == VM_SELECTION) {
@@ -862,21 +862,21 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   // EDIT Modifier
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_LEFT)
+  if (mask & BM_EDIT) {
+    if (mask & BM_LEFT)
       warpToNext(-1);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       warpToNext(+1);
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       warpToNext(-16);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       warpToNext(+16);
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       viewMode_ = VM_CLONE;
     }
-  } else if (mask & EPBM_NAV) {
+  } else if (mask & BM_NAV) {
     // NAV Modifier
-    if (mask & EPBM_LEFT) {
+    if (mask & BM_LEFT) {
       // remove listening when leaving this screen
       getInstrument()->RemoveObserver(*this);
       ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
@@ -884,7 +884,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       Navigate(VT_PHRASE);
     }
 
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
 
       // Go to table view
       int i = viewData_->currentInstrumentID_;
@@ -897,12 +897,12 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       Navigate(VT_TABLE2);
     }
 
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
   } else {
     // No modifier
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
@@ -986,38 +986,39 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
   uintptr_t fourcc = (uintptr_t)data;
 
   switch (fourcc) {
-    case FourCC::VarInstrumentType: {
-      // Get the current instrument to determine its actual type
-      I_Instrument *instr = getInstrument();
-      InstrumentType currentType = instr ? instr->GetType() : IT_NONE;
+    case FourCC::VarInstrumentType:
+      {
+        // Get the current instrument to determine its actual type
+        I_Instrument *instr = getInstrument();
+        InstrumentType currentType = instr ? instr->GetType() : IT_NONE;
 
-      // Store the proposed instrument type BEFORE we revert the UI
-      InstrumentType proposedType = (InstrumentType)instrumentType_.GetInt();
+        // Store the proposed instrument type BEFORE we revert the UI
+        InstrumentType proposedType = (InstrumentType)instrumentType_.GetInt();
 
-      // Revert the UI field back to the current type until confirmed
-      instrumentType_.SetInt(currentType, false);
+        // Revert the UI field back to the current type until confirmed
+        instrumentType_.SetInt(currentType, false);
 
-      // Check if player is running
-      Player *player = Player::GetInstance();
-      if (!player->IsRunning()) {
-        // Check if any instrument field has been modified
-        bool instrumentModified = checkInstrumentModified();
-        if (instrumentModified) {
-          MessageBox *mb = MessageBox::Create(*this, "Change Instrument &", "lose settings?", MBBF_YES | MBBF_NO);
-          pendingInstrumentType_ = proposedType;
-          DoModal(mb,
-                  ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
+        // Check if player is running
+        Player *player = Player::GetInstance();
+        if (!player->IsRunning()) {
+          // Check if any instrument field has been modified
+          bool instrumentModified = checkInstrumentModified();
+          if (instrumentModified) {
+            MessageBox *mb = MessageBox::Create(*this, "Change Instrument &", "lose settings?", MBBF_YES | MBBF_NO);
+            pendingInstrumentType_ = proposedType;
+            DoModal(mb,
+                    ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
+          } else {
+            // Apply the proposed type change immediately if not modified
+            instrumentType_.SetInt(proposedType, false);
+            onInstrumentTypeChange();
+          }
         } else {
-          // Apply the proposed type change immediately if not modified
-          instrumentType_.SetInt(proposedType, false);
-          onInstrumentTypeChange();
+          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
+          DoModal(mb);
         }
-      } else {
-        MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-        DoModal(mb);
+        break;
       }
-      break;
-    }
     case FourCC::ActionExport:
       handleInstrumentExport();
       break;
@@ -1028,78 +1029,81 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       // Switch to the InstrumentImportView
       Navigate(VT_INSTRUMENT_IMPORT);
       break;
-    case FourCC::SampleInstrumentSample: {
-      I_Instrument *instr = getInstrument();
-      if (!instr || instr->GetType() != IT_SAMPLE) {
-        break;
-      }
-
-      SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
-      int newIndex = sampleInstr->GetSampleIndex();
-
-      if (suppressSampleChangeWarning_) {
-        suppressSampleChangeWarning_ = false;
-        lastSampleIndex_ = newIndex;
-        break;
-      }
-
-      if (newIndex == lastSampleIndex_) {
-        break;
-      }
-
-      if (!sampleInstr->HasSlicesForWarning()) {
-        sampleInstr->ClearSlices();
-        lastSampleIndex_ = newIndex;
-        updateSliceCountLabel(sliceCountLabel_, sampleInstr);
-        isDirty_ = true;
-        break;
-      }
-
-      MessageBox *mb = MessageBox::Create(*this, "Change sample &", "clear slices?", MBBF_YES | MBBF_NO);
-      pendingSampleChangeInstrument_ = sampleInstr;
-      pendingSampleChangeNewIndex_ = newIndex;
-      DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmSampleChange>(*this));
-      break;
-    }
-    case FourCC::ActionShowSampleSlices: {
-      I_Instrument *instr = getInstrument();
-      if (!instr || instr->GetType() != IT_SAMPLE) {
-        break;
-      }
-      SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
-      if (sampleInstr->GetSampleIndex() < 0) {
-        MessageBox *mb = MessageBox::Create(*this, "Assign a sample first", MBBF_OK);
-        DoModal(mb);
-        break;
-      }
-      Navigate(VT_SAMPLE_SLICES);
-      break;
-    }
-    case FourCC::MidiInstrumentProgram: {
-      // When program value changes, send a MIDI Program Change message during
-      // playback
-      if (!Player::GetInstance()->IsRunning()) {
-        break;
-      }
-
-      I_Instrument *instr = getInstrument();
-      if (instr && instr->GetType() == IT_MIDI) {
-        MidiInstrument *midiInstr = (MidiInstrument *)instr;
-
-        // Get the channel and program values
-        Variable *channelVar = midiInstr->FindVariable(FourCC::MidiInstrumentChannel);
-        Variable *programVar = midiInstr->FindVariable(FourCC::MidiInstrumentProgram);
-
-        if (channelVar && programVar) {
-          int channel = channelVar->GetInt();
-          int program = programVar->GetInt();
-
-          // Send Program Change message
-          midiInstr->SendProgramChange(channel, program);
+    case FourCC::SampleInstrumentSample:
+      {
+        I_Instrument *instr = getInstrument();
+        if (!instr || instr->GetType() != IT_SAMPLE) {
+          break;
         }
+
+        SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
+        int newIndex = sampleInstr->GetSampleIndex();
+
+        if (suppressSampleChangeWarning_) {
+          suppressSampleChangeWarning_ = false;
+          lastSampleIndex_ = newIndex;
+          break;
+        }
+
+        if (newIndex == lastSampleIndex_) {
+          break;
+        }
+
+        if (!sampleInstr->HasSlicesForWarning()) {
+          sampleInstr->ClearSlices();
+          lastSampleIndex_ = newIndex;
+          updateSliceCountLabel(sliceCountLabel_, sampleInstr);
+          isDirty_ = true;
+          break;
+        }
+
+        MessageBox *mb = MessageBox::Create(*this, "Change sample &", "clear slices?", MBBF_YES | MBBF_NO);
+        pendingSampleChangeInstrument_ = sampleInstr;
+        pendingSampleChangeNewIndex_ = newIndex;
+        DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmSampleChange>(*this));
+        break;
       }
-      break;
-    }
+    case FourCC::ActionShowSampleSlices:
+      {
+        I_Instrument *instr = getInstrument();
+        if (!instr || instr->GetType() != IT_SAMPLE) {
+          break;
+        }
+        SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
+        if (sampleInstr->GetSampleIndex() < 0) {
+          MessageBox *mb = MessageBox::Create(*this, "Assign a sample first", MBBF_OK);
+          DoModal(mb);
+          break;
+        }
+        Navigate(VT_SAMPLE_SLICES);
+        break;
+      }
+    case FourCC::MidiInstrumentProgram:
+      {
+        // When program value changes, send a MIDI Program Change message during
+        // playback
+        if (!Player::GetInstance()->IsRunning()) {
+          break;
+        }
+
+        I_Instrument *instr = getInstrument();
+        if (instr && instr->GetType() == IT_MIDI) {
+          MidiInstrument *midiInstr = (MidiInstrument *)instr;
+
+          // Get the channel and program values
+          Variable *channelVar = midiInstr->FindVariable(FourCC::MidiInstrumentChannel);
+          Variable *programVar = midiInstr->FindVariable(FourCC::MidiInstrumentProgram);
+
+          if (channelVar && programVar) {
+            int channel = channelVar->GetInt();
+            int program = programVar->GetInt();
+
+            // Send Program Change message
+            midiInstr->SendProgramChange(channel, program);
+          }
+        }
+        break;
+      }
     default:
       break;
   }
@@ -1131,11 +1135,11 @@ bool InstrumentView::checkInstrumentModified() {
 }
 
 void InstrumentView::goToModulationPage() {
-    // TODO
+  // TODO
 }
 
 void InstrumentView::goToInstrumentPage() {
-    // TODO
+  // TODO
 }
 
 void InstrumentView::resetInstrumentToDefaults() {

@@ -40,6 +40,7 @@ public: // System implementation
   virtual uint32_t GetRandomNumber();
   virtual uint32_t Micros();
   virtual uint32_t Millis();
+  virtual SysMutex *GetMutex() override;
 
 private:
   static bool invert_;

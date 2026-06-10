@@ -34,6 +34,7 @@ public:
 
 private:
   UIField *focus_;
+  UIField *findAdjacentField(bool vertical, int8_t direction);
 };
 
 #endif
