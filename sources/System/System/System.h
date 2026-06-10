@@ -13,6 +13,7 @@
 #define _SYSTEM_H_
 
 #include "Foundation/T_Factory.h"
+#include "System/Process/SysMutex.h"
 #include "typedefs.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -40,6 +41,7 @@ public:                                 // Override in implementation
   virtual uint32_t GetRandomNumber() = 0;
   virtual uint32_t Micros() = 0;
   virtual uint32_t Millis() = 0;
+  virtual SysMutex *GetMutex() = 0;
 };
 
 #endif

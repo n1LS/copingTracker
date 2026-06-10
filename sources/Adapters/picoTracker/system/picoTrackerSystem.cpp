@@ -216,3 +216,7 @@ uint32_t picoTrackerSystem::Micros() {
 uint32_t picoTrackerSystem::Millis() {
   return millis();
 }
+
+SysMutex *picoTrackerSystem::GetMutex() {
+  return platform_mutex();
+}

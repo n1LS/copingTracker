@@ -47,7 +47,6 @@
 #include "System/System/System.h"
 #include "UIFramework/Interfaces/I_GUIWindowFactory.h"
 #include "Views/UIController.h"
-#include "platform.h"
 #include <nanoprintf.h>
 #include <string.h>
 
