@@ -129,31 +129,16 @@ void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
       if (mask & BM_NAV) {
         toggleMute();
       }
-    };
+    }
     if (viewMode_ == VM_SOLOON) {
       if (mask & BM_NAV) {
         switchSoloMode();
       }
-    };
+    }
     // Force a full redraw of the mixer view
     SetDirty(true);
     return;
-  };
-
-  // First check if we need to handle special mixer-specific actions
-  if (!pressed) {
-    if (viewMode_ == VM_MUTEON) {
-      if (mask & BM_NAV) {
-        toggleMute();
-      }
-    };
-    if (viewMode_ == VM_SOLOON) {
-      if (mask & BM_NAV) {
-        switchSoloMode();
-      }
-    };
-    return;
-  };
+  }
 
   // Ignore up/down arrow keys when pressed by themselves in MixerView
   // We only want left/right to navigate between channels
