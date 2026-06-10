@@ -74,7 +74,7 @@ void ThemeImportView::DrawView() {
 
   // Draw title
 
-  DrawTitle("Import Theme");
+  DrawTitle(char_back_s " Import Theme");
 
   if (fileIndexList_.empty()) {
     drawEmptyState();

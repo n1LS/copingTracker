@@ -201,7 +201,7 @@ void SelectProjectView::DrawView() {
 
   // Draw title
 
-  DrawTitle("Browse Projects");
+  DrawTitle(char_back_s " Browse Projects");
 
   // Draw projects
   auto fs = FileSystem::GetInstance();

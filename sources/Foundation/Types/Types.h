@@ -225,8 +225,7 @@ struct FourCC {
     VarThemeName = 173, // Variable for storing the current theme name
 
     VarInstrumentType = 113,
-
-    ActionTempoChanged = 61,
+    ActionBPMChanged = 61,
     ActionPurge = 49,
     ActionPurgeInstrument = 47,
     ActionProjectRename = 102,
