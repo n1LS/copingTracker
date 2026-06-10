@@ -145,7 +145,7 @@ void ThemeView::DrawView() {
 
   // Draw title
 
-  DrawTitle("Theme Settings");
+  DrawTitle(char_back_s "Theme Settings");
 
   // Draw view contents
 

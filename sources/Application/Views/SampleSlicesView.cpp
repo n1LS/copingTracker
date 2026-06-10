@@ -227,10 +227,10 @@ void SampleSlicesView::DrawView() {
     Clear();
   }
 
-  GUIPoint titlePos = GetTitlePosition();
-  DrawString(titlePos.x_, titlePos.y_, "Sample Slices");
+  DrawTitle(char_back_s " Sample Slices");
 
   bool hasModal = HasModalView();
+  
   if (!hasModal) {
     drawWaveform();
     ClearTextRect(0, 9, SCREEN_WIDTH, 3);

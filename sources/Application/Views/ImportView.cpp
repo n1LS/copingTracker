@@ -304,7 +304,7 @@ void ImportView::DrawView() {
 
   // Draw title with available storage space
   uint32_t availableSpace = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
-  DrawTitle("%s (%d)", inProjectSampleDir_ ? "Project Pool" : "Import Sample", availableSpace);
+  DrawTitle(char_back_s " %s (%d)", inProjectSampleDir_ ? "Project Pool" : "Import Sample", availableSpace);
 
   if (fileIndexList_.empty()) {
     drawEmptyState();

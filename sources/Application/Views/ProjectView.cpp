@@ -126,8 +126,8 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   GUIPoint position = GetAnchor();
 
   Variable *v = project_->FindVariable(FourCC::VarTempo);
-  tempoField_.emplace_back(FourCC::ActionTempoChanged, position, *v, "Tempo     :%d [%2.2X]  ", MIN_TEMPO, MAX_TEMPO, 1,
-                           10);
+  tempoField_.emplace_back(FourCC::ActionBPMChanged, position, *v, "Tempo     :" char_symbol_bpm_s " %d", MIN_TEMPO, 
+                           MAX_TEMPO, 1, 10);
   fieldList_.insert(fieldList_.end(), &(*tempoField_.rbegin()));
   (*tempoField_.rbegin()).AddObserver(*this);
 
@@ -286,7 +286,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   uintptr_t fourcc = (uintptr_t)data;
 
   UIField *focus = GetFocus();
-  if (fourcc != FourCC::ActionTempoChanged) {
+  if (fourcc != FourCC::ActionBPMChanged) {
     focus->ClearFocus();
     focus->Draw(w_);
     w_.Flush();
@@ -380,7 +380,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
         break;
       }
 
-    case FourCC::ActionTempoChanged:
+    case FourCC::ActionBPMChanged:
       break;
     case FourCC::ActionRenderMixdown:
       if (!player->IsRunning()) {
