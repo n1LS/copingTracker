@@ -98,7 +98,7 @@ void InstrumentImportView::DrawView() {
 
   // Draw title
 
-  DrawTitle("Import Instrument");
+  DrawTitle(char_back_s " Import Instrument");
 
   if (fileIndexList_.empty()) {
     drawEmptyState();

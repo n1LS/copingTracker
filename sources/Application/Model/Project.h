@@ -29,7 +29,7 @@
 
 #define MAX_TAP 3
 
-const uint16_t MAX_TEMPO = 400;
+const uint16_t MAX_TEMPO = 300;
 const uint16_t MIN_TEMPO = 60;
 const uint16_t DEFAULT_TEMPO = 138;
 
