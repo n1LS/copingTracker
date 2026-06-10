@@ -93,7 +93,7 @@ void RenderProgressModal::OnFocus() {
 }
 
 void RenderProgressModal::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (mask & EPBM_ENTER && pressed) {
+  if (mask & BM_ENTER && pressed) {
     // If player is still running, stop it first
     Player *player = Player::GetInstance();
     if (player && player->IsRunning()) {

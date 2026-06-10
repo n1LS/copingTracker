@@ -191,10 +191,10 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
     case 3:
       {
         switch (direction) {
-          case VUD_RIGHT: cmdEditField_.ProcessArrow(EPBM_RIGHT); break;
-          case VUD_UP:    cmdEditField_.ProcessArrow(EPBM_UP);    break;
-          case VUD_LEFT:  cmdEditField_.ProcessArrow(EPBM_LEFT);  break;
-          case VUD_DOWN:  cmdEditField_.ProcessArrow(EPBM_DOWN);  break;
+          case VUD_RIGHT: cmdEditField_.ProcessArrow(BM_RIGHT); break;
+          case VUD_UP:    cmdEditField_.ProcessArrow(BM_UP);    break;
+          case VUD_LEFT:  cmdEditField_.ProcessArrow(BM_LEFT);  break;
+          case VUD_DOWN:  cmdEditField_.ProcessArrow(BM_DOWN);  break;
         }
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
         FourCC currentCmd = FourCC::enum_type(step.cmd1);
@@ -222,10 +222,10 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
     case 5:
       {
         switch (direction) {
-          case VUD_RIGHT: cmdEditField_.ProcessArrow(EPBM_RIGHT); break;
-          case VUD_UP:    cmdEditField_.ProcessArrow(EPBM_UP);    break;
-          case VUD_LEFT:  cmdEditField_.ProcessArrow(EPBM_LEFT);  break;
-          case VUD_DOWN:  cmdEditField_.ProcessArrow(EPBM_DOWN);  break;
+          case VUD_RIGHT: cmdEditField_.ProcessArrow(BM_RIGHT); break;
+          case VUD_UP:    cmdEditField_.ProcessArrow(BM_UP);    break;
+          case VUD_LEFT:  cmdEditField_.ProcessArrow(BM_LEFT);  break;
+          case VUD_DOWN:  cmdEditField_.ProcessArrow(BM_DOWN);  break;
         }
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
         FourCC currentCmd = FourCC::enum_type(step.cmd2);
@@ -690,17 +690,17 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
     // ENTER might now no longer be pressed so first check if we were in
     // audition mode and if its not then stop auditioning, stopAudition does
     // both those things
-    if (!(mask & EPBM_ENTER)) {
+    if (!(mask & BM_ENTER)) {
       stopAudition();
     }
 
     if (viewMode_ == VM_MUTEON) {
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
         toggleMute();
       }
     };
     if (viewMode_ == VM_SOLOON) {
-      if (mask & EPBM_NAV) {
+      if (mask & BM_NAV) {
         switchSoloMode();
       }
     };
@@ -708,7 +708,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
   };
 
   if (viewMode_ == VM_NEW) {
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       // If note or I, we request a new instr
       if (col_ < 2) {
         InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
@@ -727,7 +727,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
           DoModal(mb);
           return;
         }
-        mask &= (0xFFFF - EPBM_ENTER);
+        mask &= (0xFFFF - BM_ENTER);
       } else {
         if ((col_ == 3) &&
             FourCC::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) == FourCC::InstrumentCommandTable) {
@@ -737,7 +737,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
             uint16_t *c = &phrase_->steps_[viewData_->currentPhrase_][row_].param1;
             *c = next;
             isDirty_ = true;
-            mask &= (0xFFFF - EPBM_ENTER);
+            mask &= (0xFFFF - BM_ENTER);
             cmdEdit_.SetInt(next);
           }
         }
@@ -745,12 +745,12 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
 
-  if ((viewMode_ == VM_CLONE) && !((mask & EPBM_ENTER) && (mask & EPBM_ALT))) {
+  if ((viewMode_ == VM_CLONE) && !((mask & BM_ENTER) && (mask & BM_ALT))) {
     viewMode_ = VM_SELECTION;
   }
 
-  if ((mask == (EPBM_ALT | EPBM_EDIT | EPBM_ENTER)) ||
-      ((viewMode_ == VM_CLONE) && (mask & EPBM_ENTER) && (mask & EPBM_ALT))) {
+  if ((mask == (BM_ALT | BM_EDIT | BM_ENTER)) ||
+      ((viewMode_ == VM_CLONE) && (mask & BM_ENTER) && (mask & BM_ALT))) {
     if (col_ < 2) {
       InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
       unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instr;
@@ -810,39 +810,39 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
 void PhraseView::processNormalButtonMask(uint16_t mask) {
   Player *player = Player::GetInstance();
 
-  if (mask & EPBM_EDIT) {
+  if (mask & BM_EDIT) {
     // EDIT Modifier
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       warpToNeighbour(-1);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       warpToNeighbour(1);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       warpInChain(-1);
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       warpInChain(1);
-    if (mask & EPBM_ENTER) {
+    if (mask & BM_ENTER) {
       cutPosition();
     }
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       viewMode_ = VM_CLONE;
     }
-    if (mask & EPBM_NAV)
+    if (mask & BM_NAV)
       toggleMute();
-  } else if (mask & EPBM_ENTER) {
+  } else if (mask & BM_ENTER) {
     // ENTER Modifer
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateCursorValue(VUD_DOWN);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateCursorValue(VUD_UP);
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       updateCursorValue(VUD_LEFT);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       updateCursorValue(VUD_RIGHT);
-    if (mask & EPBM_ALT)
+    if (mask & BM_ALT)
       pasteClipboard();
-    if (mask & EPBM_NAV)
+    if (mask & BM_NAV)
       switchSoloMode();
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       pasteLast();
       if ((col_ == 1) || (col_ == 3) || (col_ == 5))
         viewMode_ = VM_NEW;
@@ -853,11 +853,11 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
         startAudition(true);
       }
     }
-  } else if (mask & EPBM_NAV) {
+  } else if (mask & BM_NAV) {
     // NAV Modifier
-    if (mask & EPBM_LEFT) {
+    if (mask & BM_LEFT) {
       Navigate(VT_CHAIN);
-    } else if (mask & EPBM_RIGHT) {
+    } else if (mask & BM_RIGHT) {
       unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instr;
       if (*c != 0xFF) {
         viewData_->currentInstrumentID_ = *c;
@@ -867,7 +867,7 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
       if (viewData_->currentInstrumentID_ != 0xFF) {
         Navigate(VT_INSTRUMENT);
       }
-    } else if (mask & EPBM_DOWN) {
+    } else if (mask & BM_DOWN) {
       // Go to table view
       {
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
@@ -881,32 +881,32 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
       }
 
       Navigate(VT_TABLE);
-    } else if (mask & EPBM_UP) {
+    } else if (mask & BM_UP) {
       // Go to groove view
       stopAudition();
 
       Navigate(VT_GROOVE);
     }
 
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
-    if (mask & EPBM_ALT)
+    if (mask & BM_ALT)
       unMuteAll();
 
-  } else if (mask & EPBM_ALT) {
+  } else if (mask & BM_ALT) {
     // ALT Modifier
   } else {
     // No modifier
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateCursor(0, 1);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateCursor(0, -1);
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       updateCursor(-1, 0);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       updateCursor(1, 0);
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
@@ -918,8 +918,8 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
 
   // B modifier
 
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_ALT) {
+  if (mask & BM_EDIT) {
+    if (mask & BM_ALT) {
       extendSelection();
     } else {
       copySelection();
@@ -928,30 +928,30 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
 
     // A Modifer
 
-    if (mask & EPBM_ENTER) {
+    if (mask & BM_ENTER) {
 
-      if (mask & EPBM_DOWN)
+      if (mask & BM_DOWN)
         updateSelectionValue(VUD_DOWN);
-      if (mask & EPBM_UP)
+      if (mask & BM_UP)
         updateSelectionValue(VUD_UP);
-      if (mask & EPBM_LEFT)
+      if (mask & BM_LEFT)
         updateSelectionValue(VUD_LEFT);
-      if (mask & EPBM_RIGHT)
+      if (mask & BM_RIGHT)
         updateSelectionValue(VUD_RIGHT);
 
-      if (mask & EPBM_ALT)
+      if (mask & BM_ALT)
         cutSelection();
-      if (mask & EPBM_NAV)
+      if (mask & BM_NAV)
         switchSoloMode();
     } else {
 
       // R Modifier
 
-      if (mask & EPBM_NAV) {
-        if (mask & EPBM_LEFT) {
+      if (mask & BM_NAV) {
+        if (mask & BM_LEFT) {
           Navigate(VT_CHAIN);
         }
-        if (mask & EPBM_RIGHT) {
+        if (mask & BM_RIGHT) {
           unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instr;
           if (*c != 0xFF) {
             viewData_->currentInstrumentID_ = *c;
@@ -960,28 +960,28 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
           }
           Navigate(VT_INSTRUMENT);
         }
-        if (mask & EPBM_PLAY) {
+        if (mask & BM_PLAY) {
           player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
         }
-        if (mask & EPBM_ALT)
+        if (mask & BM_ALT)
           unMuteAll();
 
       } else {
         // L Modifier
-        if (mask & EPBM_ALT) {
+        if (mask & BM_ALT) {
 
         } else {
           // No modifier
 
-          if (mask & EPBM_DOWN)
+          if (mask & BM_DOWN)
             updateCursor(0, 1);
-          if (mask & EPBM_UP)
+          if (mask & BM_UP)
             updateCursor(0, -1);
-          if (mask & EPBM_LEFT)
+          if (mask & BM_LEFT)
             updateCursor(-1, 0);
-          if (mask & EPBM_RIGHT)
+          if (mask & BM_RIGHT)
             updateCursor(1, 0);
-          if (mask & EPBM_PLAY) {
+          if (mask & BM_PLAY) {
             player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
           }
         }

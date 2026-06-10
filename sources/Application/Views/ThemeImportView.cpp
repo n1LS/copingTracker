@@ -52,13 +52,13 @@ void ThemeImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed)
     return;
 
-  if (mask & EPBM_ENTER) {
+  if (mask & BM_ENTER) {
     OpenSelectedItem();
-  } else if (mask & EPBM_UP) {
-    changeSelection(mask & EPBM_EDIT ? -LIST_PAGE_SIZE : -1);
-  } else if (mask & EPBM_DOWN) {
-    changeSelection(mask & EPBM_EDIT ? LIST_PAGE_SIZE : 1);
-  } else if ((mask & EPBM_LEFT) && (mask & EPBM_NAV)) {
+  } else if (mask & BM_UP) {
+    changeSelection(mask & BM_EDIT ? -LIST_PAGE_SIZE : -1);
+  } else if (mask & BM_DOWN) {
+    changeSelection(mask & BM_EDIT ? LIST_PAGE_SIZE : 1);
+  } else if ((mask & BM_LEFT) && (mask & BM_NAV)) {
     // Go to back "left" to theme screen
     Navigate(VT_THEME);
     return;

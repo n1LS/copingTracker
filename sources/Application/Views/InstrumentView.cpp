@@ -742,7 +742,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
 
   isDirty_ = false;
-  if ((mask & EPBM_EDIT) && (mask & EPBM_ENTER)) {
+  if ((mask & BM_EDIT) && (mask & BM_ENTER)) {
     int i = viewData_->currentInstrumentID_;
     InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
     I_Instrument *instr = bank->GetInstrument(i);
@@ -773,7 +773,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   Player *player = Player::GetInstance();
 
-  if (mask == EPBM_ENTER) {
+  if (mask == BM_ENTER) {
     // Get the current field to check if we're on the sample field
     UIIntVarField *currentField = (UIIntVarField *)GetFocus();
 
@@ -827,7 +827,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       default:
         break;
     }
-    mask &= (0xFFFF - EPBM_ENTER);
+    mask &= (0xFFFF - BM_ENTER);
   } else {
     // Clear the VM_NEW state if any key other than ENTER is pressed
     if (viewMode_ == VM_NEW) {
@@ -836,9 +836,9 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   if (viewMode_ == VM_CLONE) {
-    if ((mask & EPBM_ENTER) && (mask & EPBM_ALT)) {
+    if ((mask & BM_ENTER) && (mask & BM_ALT)) {
       UIIntVarField *field = (UIIntVarField *)GetFocus();
-      mask &= (0xFFFF - EPBM_ENTER);
+      mask &= (0xFFFF - BM_ENTER);
       Variable &v = field->GetVariable();
       int current = v.GetInt();
       if (current == -1)
@@ -853,7 +853,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
         }
       };
     }
-    mask &= (0xFFFF - (EPBM_ENTER | EPBM_ALT));
+    mask &= (0xFFFF - (BM_ENTER | BM_ALT));
   };
 
   if (viewMode_ == VM_SELECTION) {
@@ -862,21 +862,21 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   // EDIT Modifier
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_LEFT)
+  if (mask & BM_EDIT) {
+    if (mask & BM_LEFT)
       warpToNext(-1);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       warpToNext(+1);
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       warpToNext(-16);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       warpToNext(+16);
-    if (mask & EPBM_ALT) {
+    if (mask & BM_ALT) {
       viewMode_ = VM_CLONE;
     }
-  } else if (mask & EPBM_NAV) {
+  } else if (mask & BM_NAV) {
     // NAV Modifier
-    if (mask & EPBM_LEFT) {
+    if (mask & BM_LEFT) {
       // remove listening when leaving this screen
       getInstrument()->RemoveObserver(*this);
       ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
@@ -884,7 +884,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       Navigate(VT_PHRASE);
     }
 
-    if (mask & EPBM_DOWN) {
+    if (mask & BM_DOWN) {
 
       // Go to table view
       int i = viewData_->currentInstrumentID_;
@@ -897,12 +897,12 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       Navigate(VT_TABLE2);
     }
 
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
   } else {
     // No modifier
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
     }
   }

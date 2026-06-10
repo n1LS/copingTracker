@@ -403,21 +403,21 @@ void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   bool wasColorComponentFocus = isColorComponentFocus();
 
-  if (wasColorComponentFocus && !(mask & (EPBM_ENTER | EPBM_EDIT | EPBM_ALT | EPBM_NAV | EPBM_SELECT | EPBM_PLAY))) {
-    if (mask & EPBM_DOWN) {
+  if (wasColorComponentFocus && !(mask & (BM_ENTER | BM_EDIT | BM_ALT | BM_NAV | BM_PLAY))) {
+    if (mask & BM_DOWN) {
       if (selectedColor_ < COLOR_COUNT - 1) {
         moveColorComponentFocus(1, 0);
         return;
       }
-    } else if (mask & EPBM_UP) {
+    } else if (mask & BM_UP) {
       if (selectedColor_ > 0) {
         moveColorComponentFocus(-1, 0);
         return;
       }
-    } else if (mask & EPBM_RIGHT) {
+    } else if (mask & BM_RIGHT) {
       moveColorComponentFocus(0, 1);
       return;
-    } else if (mask & EPBM_LEFT) {
+    } else if (mask & BM_LEFT) {
       moveColorComponentFocus(0, -1);
       return;
     }
@@ -425,12 +425,12 @@ void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & EPBM_NAV) {
-    if (mask & EPBM_LEFT) {
+  if (mask & BM_NAV) {
+    if (mask & BM_LEFT) {
       // Go back to Device view with NAV+LEFT
       Navigate(VT_DEVICE);
     }
-  } else if (mask & EPBM_PLAY) {
+  } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   }

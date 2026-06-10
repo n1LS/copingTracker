@@ -370,7 +370,7 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
   // Check for key release events
   if (!pressed) {
     // Check if play key was released (exactly like ImportView approach)
-    if (playKeyHeld_ && !(mask & EPBM_PLAY)) {
+    if (playKeyHeld_ && !(mask & BM_PLAY)) {
       // Play key no longer pressed so should stop playback
       playKeyHeld_ = false;
 
@@ -390,8 +390,8 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
-  if (mask & EPBM_NAV) {
-    if (mask & EPBM_LEFT) {
+  if (mask & BM_NAV) {
+    if (mask & BM_LEFT) {
       ViewType vt = SampleEditorView::sourceViewType_;
       navigateToView(vt);
       return;
@@ -399,7 +399,7 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     // For other NAV combinations, let parent handle it
     FieldView::ProcessButtonMask(mask, pressed);
     return;
-  } else if (mask & EPBM_PLAY) {
+  } else if (mask & BM_PLAY) {
     // Set flag to track that play key is being held down (like in ImportView)
     playKeyHeld_ = true;
 
@@ -447,14 +447,14 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   bool graphFocused = (GetFocus() == &graphField_);
-  if (graphFocused && (mask & EPBM_EDIT)) {
-    if (mask & EPBM_LEFT) {
+  if (graphFocused && (mask & BM_EDIT)) {
+    if (mask & BM_LEFT) {
       selectedMarker_ = MarkerStart;
       isDirty_ = true;
       ((AppWindow &)w_).SetDirty();
       return;
     }
-    if (mask & EPBM_RIGHT) {
+    if (mask & BM_RIGHT) {
       selectedMarker_ = MarkerEnd;
       isDirty_ = true;
       ((AppWindow &)w_).SetDirty();
@@ -462,7 +462,7 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
 
-  if (graphFocused && (mask & EPBM_ENTER)) {
+  if (graphFocused && (mask & BM_ENTER)) {
     uint32_t viewStart = graphField_.ViewStart();
     uint32_t viewEnd = graphField_.ViewEnd();
     uint32_t viewSpan = (viewEnd > viewStart) ? (viewEnd - viewStart) : 0;
@@ -474,14 +474,14 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
     if (viewSpan > 0) {
       int32_t delta = 0;
-      if (mask & (EPBM_LEFT | EPBM_RIGHT)) {
+      if (mask & (BM_LEFT | BM_RIGHT)) {
         delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 64));
-        if (mask & EPBM_LEFT) {
+        if (mask & BM_LEFT) {
           delta = -delta;
         }
-      } else if (mask & (EPBM_UP | EPBM_DOWN)) {
+      } else if (mask & (BM_UP | BM_DOWN)) {
         delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 16));
-        if (mask & EPBM_DOWN) {
+        if (mask & BM_DOWN) {
           delta = -delta;
         }
       }
@@ -526,11 +526,11 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   // We allow zooming from any place of the screen
-  if ((mask & EPBM_EDIT) && (mask & EPBM_UP)) {
+  if ((mask & BM_EDIT) && (mask & BM_UP)) {
     adjustZoom(1);
     return;
   }
-  if ((mask & EPBM_EDIT) && (mask & EPBM_DOWN)) {
+  if ((mask & BM_EDIT) && (mask & BM_DOWN)) {
     adjustZoom(-1);
     return;
   }
@@ -540,8 +540,8 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
   updateSelectedMarkerFromFocus();
 
   // EDIT Modifier
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_ENTER) {
+  if (mask & BM_EDIT) {
+    if (mask & BM_ENTER) {
       UIField *focus = GetFocus();
       for (auto &field : bigHexVarField_) {
         if (&field == focus && field.GetVariableID() == FourCC::VarSampleEditEnd) {

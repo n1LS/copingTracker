@@ -114,11 +114,11 @@ void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & EPBM_NAV) {
-    if (mask & EPBM_DOWN) {
+  if (mask & BM_NAV) {
+    if (mask & BM_DOWN) {
       Navigate(VT_PROJECT);
     }
-  } else if (mask & EPBM_PLAY) {
+  } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   };

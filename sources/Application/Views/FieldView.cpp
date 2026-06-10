@@ -66,67 +66,67 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
     focus_->SetFocus();
   }
 
-  if (mask & EPBM_ENTER) { // ENTER or ENTER+ARROW is sent to the field
-    if (mask & EPBM_DOWN) {
-      focus_->ProcessArrow(EPBM_DOWN);
+  if (mask & BM_ENTER) { // ENTER or ENTER+ARROW is sent to the field
+    if (mask & BM_DOWN) {
+      focus_->ProcessArrow(BM_DOWN);
       isDirty_ = true;
     }
-    if (mask & EPBM_UP) {
-      focus_->ProcessArrow(EPBM_UP);
-      isDirty_ = true;
-    }
-
-    if (mask & EPBM_LEFT) {
-      focus_->ProcessArrow(EPBM_LEFT);
+    if (mask & BM_UP) {
+      focus_->ProcessArrow(BM_UP);
       isDirty_ = true;
     }
 
-    if (mask & EPBM_RIGHT) {
-      focus_->ProcessArrow(EPBM_RIGHT);
+    if (mask & BM_LEFT) {
+      focus_->ProcessArrow(BM_LEFT);
       isDirty_ = true;
     }
 
-    if (mask & EPBM_EDIT) {
+    if (mask & BM_RIGHT) {
+      focus_->ProcessArrow(BM_RIGHT);
+      isDirty_ = true;
+    }
+
+    if (mask & BM_EDIT) {
       focus_->ProcessClear();
       isDirty_ = true;
     }
 
-    if (mask == EPBM_ENTER) {
+    if (mask == BM_ENTER) {
       focus_->OnClick();
     };
 
   } else {
-    if (mask & EPBM_EDIT) { // EDIT or EDIT+ARROW is sent to the field
+    if (mask & BM_EDIT) { // EDIT or EDIT+ARROW is sent to the field
 
-      if (mask == EPBM_EDIT) {
+      if (mask == BM_EDIT) {
         focus_->OnEditClick();
         isDirty_ = true;
       };
 
-      if (mask & EPBM_DOWN) {
-        focus_->ProcessEditArrow(EPBM_DOWN);
+      if (mask & BM_DOWN) {
+        focus_->ProcessEditArrow(BM_DOWN);
         isDirty_ = true;
       }
-      if (mask & EPBM_UP) {
-        focus_->ProcessEditArrow(EPBM_UP);
-        isDirty_ = true;
-      }
-
-      if (mask & EPBM_LEFT) {
-        focus_->ProcessEditArrow(EPBM_LEFT);
+      if (mask & BM_UP) {
+        focus_->ProcessEditArrow(BM_UP);
         isDirty_ = true;
       }
 
-      if (mask & EPBM_RIGHT) {
-        focus_->ProcessEditArrow(EPBM_RIGHT);
+      if (mask & BM_LEFT) {
+        focus_->ProcessEditArrow(BM_LEFT);
+        isDirty_ = true;
+      }
+
+      if (mask & BM_RIGHT) {
+        focus_->ProcessEditArrow(BM_RIGHT);
         isDirty_ = true;
       }
 
     } else { // Nor ENTER or EDIT is pressed
 
-      if (!(mask & (EPBM_ENTER | EPBM_EDIT | EPBM_ALT | EPBM_NAV | EPBM_SELECT | EPBM_PLAY))) {
+      if (!(mask & (BM_ENTER | BM_EDIT | BM_ALT | BM_NAV | BM_PLAY))) {
 
-        if (mask & EPBM_DOWN) {
+        if (mask & BM_DOWN) {
           UIField *next = 0;
           UIField *first = 0;
 
@@ -174,7 +174,7 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
           isDirty_ = true;
         }
 
-        if (mask & EPBM_UP) {
+        if (mask & BM_UP) {
 
           UIField *prev = 0;
           UIField *last = 0;
@@ -224,7 +224,7 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
           isDirty_ = true;
         }
 
-        if (mask & EPBM_RIGHT) {
+        if (mask & BM_RIGHT) {
           UIField *next = 0;
           UIField *first = 0;
 
@@ -263,7 +263,7 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
           isDirty_ = true;
         }
 
-        if (mask & EPBM_LEFT) {
+        if (mask & BM_LEFT) {
 
           UIField *prev = 0;
           UIField *last = 0;

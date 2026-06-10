@@ -101,19 +101,19 @@ void UITextField<MaxLength>::ProcessArrow(uint16_t mask) {
   bool isEmptyBuffer = buffer.empty();
 
   switch (mask) {
-  case EPBM_UP:
-  case EPBM_DOWN:
+  case BM_UP:
+  case BM_DOWN:
     // If buffer is empty or matches default, initialize with 'A'
     if (isEmptyBuffer || buffer.compare(defaultValue_) == 0) {
       currentChar_ = 0;
       buffer = "A";
     } else {
       buffer[currentChar_] = 
-        getNext(buffer.c_str()[currentChar_], mask == EPBM_DOWN);
+        getNext(buffer.c_str()[currentChar_], mask == BM_DOWN);
     }
     applyAndNotify();
     break;
-  case EPBM_LEFT:
+  case BM_LEFT:
     // If we're showing the default value and user presses left, initialize with
     // the default
     if (isEmptyBuffer) {
@@ -124,7 +124,7 @@ void UITextField<MaxLength>::ProcessArrow(uint16_t mask) {
       currentChar_--;
     }
     break;
-  case EPBM_RIGHT:
+  case BM_RIGHT:
     // If we're showing the default value and user presses right, initialize
     // with the default
     if (isEmptyBuffer) {

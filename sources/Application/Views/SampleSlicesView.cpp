@@ -117,7 +117,7 @@ void SampleSlicesView::OnFocus() {
 
 void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed) {
-    if (playKeyHeld_ && !(mask & EPBM_PLAY)) {
+    if (playKeyHeld_ && !(mask & BM_PLAY)) {
       playKeyHeld_ = false;
       stopPreview();
       graphField_.RequestFullRedraw();
@@ -126,8 +126,8 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
-  if (mask & EPBM_NAV) {
-    if (mask & EPBM_LEFT) {
+  if (mask & BM_NAV) {
+    if (mask & BM_LEFT) {
       // Go back to sample browser NAV+LEFT
       stopPreview();
       Navigate(VT_INSTRUMENT);
@@ -138,7 +138,7 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
-  if (mask & EPBM_PLAY) {
+  if (mask & BM_PLAY) {
     if (!playKeyHeld_) {
       startPreview();
       playKeyHeld_ = true;
@@ -149,14 +149,14 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   bool graphFocused = (GetFocus() == &graphField_);
 
-  if (graphFocused && (mask == EPBM_LEFT)) {
+  if (graphFocused && (mask == BM_LEFT)) {
     int32_t index = sliceIndexVar_.GetInt();
     if (index > 0) {
       sliceIndexVar_.SetInt(index - 1);
     }
     return;
   }
-  if (graphFocused && (mask == EPBM_RIGHT)) {
+  if (graphFocused && (mask == BM_RIGHT)) {
     int32_t index = sliceIndexVar_.GetInt();
     if (index < static_cast<int32_t>(SampleInstrument::MaxSlices) - 1) {
       sliceIndexVar_.SetInt(index + 1);
@@ -164,7 +164,7 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
-  if (graphFocused && (mask & EPBM_ENTER)) {
+  if (graphFocused && (mask & BM_ENTER)) {
     uint32_t viewStart = graphField_.ViewStart();
     uint32_t viewEnd = graphField_.ViewEnd();
     uint32_t viewSpan = (viewEnd > viewStart) ? (viewEnd - viewStart) : 0;
@@ -176,19 +176,19 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
     if (viewSpan > 0) {
       int32_t delta = 0;
-      if (mask & (EPBM_LEFT | EPBM_RIGHT)) {
+      if (mask & (BM_LEFT | BM_RIGHT)) {
         // We allow single sample movement at max zoom level
         if (graphField_.ZoomLevel() >= graphField_.MaxZoomLevel()) {
           delta = 1;
         } else {
           delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 64));
         }
-        if (mask & EPBM_LEFT) {
+        if (mask & BM_LEFT) {
           delta = -delta;
         }
-      } else if (mask & (EPBM_UP | EPBM_DOWN)) {
+      } else if (mask & (BM_UP | BM_DOWN)) {
         delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 16));
-        if (mask & EPBM_DOWN) {
+        if (mask & BM_DOWN) {
           delta = -delta;
         }
       }
@@ -210,11 +210,11 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
   // We allow zooming from any place of the screen
-  if ((mask & EPBM_EDIT) && (mask & EPBM_UP)) {
+  if ((mask & BM_EDIT) && (mask & BM_UP)) {
     adjustZoom(1);
     return;
   }
-  if ((mask & EPBM_EDIT) && (mask & EPBM_DOWN)) {
+  if ((mask & BM_EDIT) && (mask & BM_DOWN)) {
     adjustZoom(-1);
     return;
   }

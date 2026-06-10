@@ -50,21 +50,21 @@ void UIBigHexVarField::ProcessArrow(uint16_t mask) {
   }
 
   switch (mask) {
-    case EPBM_LEFT:
+    case BM_LEFT:
       if (position_ < precision_) {
         position_++;
       };
       break;
-    case EPBM_RIGHT:
+    case BM_RIGHT:
       if (position_ > 0) {
         position_--;
       };
       break;
-    case EPBM_UP:
+    case BM_UP:
       value += offset;
       break;
 
-    case EPBM_DOWN:
+    case BM_DOWN:
       value -= offset;
       break;
   };

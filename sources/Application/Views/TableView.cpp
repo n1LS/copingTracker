@@ -373,16 +373,16 @@ void TableView::updateCursorValue(int offset) {
       {
         switch (offset) {
           case 0x01:
-            cmdEditField_.ProcessArrow(EPBM_RIGHT);
+            cmdEditField_.ProcessArrow(BM_RIGHT);
             break;
           case 0x10:
-            cmdEditField_.ProcessArrow(EPBM_UP);
+            cmdEditField_.ProcessArrow(BM_UP);
             break;
           case -0x01:
-            cmdEditField_.ProcessArrow(EPBM_LEFT);
+            cmdEditField_.ProcessArrow(BM_LEFT);
             break;
           case -0x10:
-            cmdEditField_.ProcessArrow(EPBM_DOWN);
+            cmdEditField_.ProcessArrow(BM_DOWN);
             break;
         }
         const int commandColumn = col_ / 2;
@@ -447,59 +447,59 @@ void TableView::processNormalButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_LEFT)
+  if (mask & BM_EDIT) {
+    if (mask & BM_LEFT)
       warpToNeighbour(-1);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       warpToNeighbour(+1);
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       warpToNeighbour(-16);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       warpToNeighbour(16);
-    if (mask & EPBM_ENTER)
+    if (mask & BM_ENTER)
       cutPosition();
-    if (mask & EPBM_ALT)
+    if (mask & BM_ALT)
       viewMode_ = VM_SELECTION;
-  } else if (mask & EPBM_ENTER) {
+  } else if (mask & BM_ENTER) {
     // ENTER modifier
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateCursorValue(-0x10);
-    else if (mask & EPBM_UP)
+    else if (mask & BM_UP)
       updateCursorValue(0x10);
-    else if (mask & EPBM_LEFT)
+    else if (mask & BM_LEFT)
       updateCursorValue(-0x01);
-    else if (mask & EPBM_RIGHT)
+    else if (mask & BM_RIGHT)
       updateCursorValue(0x01);
-    else if (mask == EPBM_ENTER)
+    else if (mask == BM_ENTER)
       pasteLast();
-    else if (mask & EPBM_ALT)
+    else if (mask & BM_ALT)
       pasteClipboard();
-  } else if (mask & EPBM_NAV) {
+  } else if (mask & BM_NAV) {
     // NAV Modifier
-    if (mask & EPBM_UP) {
+    if (mask & BM_UP) {
       Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT));
-    } else if (mask & EPBM_LEFT) {
+    } else if (mask & BM_LEFT) {
       Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE);
-    } else if (mask & EPBM_RIGHT) {
+    } else if (mask & BM_RIGHT) {
       if (viewType_ == VT_TABLE) {
         Navigate(VT_TABLE2);
       }
     }
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
 
   } else {
     // No modifier
-    if (mask & EPBM_DOWN)
+    if (mask & BM_DOWN)
       updateCursor(0, 1);
-    if (mask & EPBM_UP)
+    if (mask & BM_UP)
       updateCursor(0, -1);
-    if (mask & EPBM_LEFT)
+    if (mask & BM_LEFT)
       updateCursor(-1, 0);
-    if (mask & EPBM_RIGHT)
+    if (mask & BM_RIGHT)
       updateCursor(1, 0);
-    if (mask & EPBM_PLAY) {
+    if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
     }
   }
@@ -509,8 +509,8 @@ void TableView::processSelectionButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_ALT) {
+  if (mask & BM_EDIT) {
+    if (mask & BM_ALT) {
       extendSelection();
     } else {
       copySelection();
@@ -519,39 +519,39 @@ void TableView::processSelectionButtonMask(uint16_t mask) {
 
     // A Modifer
 
-    if (mask & EPBM_ENTER) {
-      if (mask & EPBM_ALT)
+    if (mask & BM_ENTER) {
+      if (mask & BM_ALT)
         cutSelection();
-      //		if (mask&EPBM_R) switchSoloMode() ;
+      //		if (mask&BM_R) switchSoloMode() ;
     } else {
 
       // R Modifier
 
-      if (mask & EPBM_NAV) {
-        if (mask & EPBM_UP) {
+      if (mask & BM_NAV) {
+        if (mask & BM_UP) {
           Navigate(VT_PHRASE);
         }
-        if (mask & EPBM_PLAY) {
+        if (mask & BM_PLAY) {
           player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
         }
-        /*			if (mask&EPBM_L) unMuteAll() ;
+        /*			if (mask&BM_L) unMuteAll() ;
          */
       } else {
         // L Modifier
-        if (mask & EPBM_ALT) {
+        if (mask & BM_ALT) {
 
         } else {
           // No modifier
 
-          if (mask & EPBM_DOWN)
+          if (mask & BM_DOWN)
             updateCursor(0, 1);
-          if (mask & EPBM_UP)
+          if (mask & BM_UP)
             updateCursor(0, -1);
-          if (mask & EPBM_LEFT)
+          if (mask & BM_LEFT)
             updateCursor(-1, 0);
-          if (mask & EPBM_RIGHT)
+          if (mask & BM_RIGHT)
             updateCursor(1, 0);
-          if (mask & EPBM_PLAY) {
+          if (mask & BM_PLAY) {
             player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
           }
         }
