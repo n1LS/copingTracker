@@ -433,12 +433,6 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
     };
     if (mask & EPBM_NAV)
       toggleMute();
-    if (mask & EPBM_PLAY) {
-      // recording screen
-      if (!Player::GetInstance()->IsRunning()) {
-        switchToRecordView();
-      }
-    }
   } else if (mask & EPBM_ENTER) {
     // ENTER Modifier
     if (mask & EPBM_DOWN)

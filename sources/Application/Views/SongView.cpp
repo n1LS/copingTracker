@@ -605,11 +605,6 @@ void SongView::processNormalButtonMask(unsigned int mask) {
     if (mask & EPBM_PLAY) {
       if (player->GetSequencerMode() == SM_LIVE) {
         startImmediate();
-      } else {
-        // recording screen
-        if (!player->IsRunning()) {
-          switchToRecordView();
-        }
       }
     }
   } else if (mask & EPBM_ENTER) {

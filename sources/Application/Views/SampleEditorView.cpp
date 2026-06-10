@@ -311,14 +311,6 @@ void SampleEditorView::addAllFields() {
   position.y_ = 10; // offset enough for waveform display
   position.x_ = 0;
 
-  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Name      :");
-
-  auto defaultRecName = etl::make_string_with_capacity<MAX_INSTRUMENT_NAME_LENGTH>(RECORDING_FILENAME)
-                            .substr(0, strlen(RECORDING_FILENAME) - 4);
-
-  nameTextField_.emplace_back(filenameVar_, position, label, FourCC::InstrumentName, defaultRecName);
-  fieldList_.insert(fieldList_.end(), &(*nameTextField_.rbegin()));
-
   const uint16_t baseX = position.x_;
 
   position.y_ += 1;
@@ -870,18 +862,6 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
     case FourCC::ActionCancel:
       {
         discardWorkingCopy();
-
-        const auto &originalFilename = viewData_->sampleEditorFilename;
-        if (originalFilename.compare(RECORDING_FILENAME) == 0 && !viewData_->isShowingSampleEditorProjectPool) {
-          auto fs = FileSystem::GetInstance();
-          if (fs) {
-            if (!fs->DeleteFile(originalFilename.c_str())) {
-              Trace::Error("SampleEditorView: Failed to discard recording %s", originalFilename.c_str());
-            }
-          } else {
-            Trace::Error("SampleEditorView: Failed to get FS to delete: %s", originalFilename.c_str());
-          }
-        }
         ViewType vt = SampleEditorView::sourceViewType_;
         navigateToView(vt);
         return;
@@ -1173,11 +1153,6 @@ void SampleEditorView::confirmSave(bool loadToPool) {
   }
 
   const auto &originalFilename = viewData_->sampleEditorFilename;
-  if (originalFilename.compare(RECORDING_FILENAME) == 0) {
-    auto fs = FileSystem::GetInstance();
-    fs->chdir(RECORDINGS_DIR);
-    viewData_->importViewStartDir = RECORDINGS_DIR;
-  }
   ViewType vt = SampleEditorView::sourceViewType_;
   navigateToView(vt);
 }

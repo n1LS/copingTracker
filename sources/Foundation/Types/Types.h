@@ -203,21 +203,17 @@ struct FourCC {
     // 173 is taken for VarThemeName
     // 174 is taken for VarBacklightLevel
     // 175 is taken for ActionShowSampleEditor
-    // 176 is taken for VarRecordSource
     // 177 is taken for VarSampleEditStart
     // 178 is taken for VarSampleEditStop
     // 179 is taken for ActionLoadAndSave
     // 180 is taken for ActionCancel
     // 181 is taken for VarSampleEditOperation
-    // 182 is taken for VarRecordLineGain
-    // 183 is taken for VarRecordMicGain
     // 184 is taken for ActionShowSampleSlices
     // 185 is taken for VarImportResampler
     // 186 is taken for ActionAutoSlice
-    // 187 is taken for ActionShowRecordView
     // 188 is taken for InstrumentCommandSetInstrumentParameter
     // 189 is taken for VarOutputVolume
-
+    
     VarChannel1Volume = 163,
     VarChannel2Volume = 164,
     VarChannel3Volume = 165,
@@ -227,9 +223,9 @@ struct FourCC {
     VarChannel7Volume = 169,
     VarChannel8Volume = 170,
     VarThemeName = 173, // Variable for storing the current theme name
-
+    
     VarInstrumentType = 113,
-
+    
     ActionTempoChanged = 61,
     ActionPurge = 49,
     ActionPurgeInstrument = 47,
@@ -254,17 +250,12 @@ struct FourCC {
     VarBacklightLevel = 174,
     ActionShowSampleEditor = 175,
     ActionShowSampleSlices = 184,
-    VarRecordSource = 176,
     VarSampleEditStart = 177,
     VarSampleEditEnd = 178,
     VarSampleEditOperation = 181,
-    VarRecordLineGain = 182,
-    VarRecordMicGain = 183,
     VarImportResampler = 185,
     ActionAutoSlice = 186,
-    ActionShowRecordView = 187,
-
-
+    
     ChiptuneInstrumentWaveform = 200,
     ChiptuneInstrumentAttack = 201,
     ChiptuneInstrumentDecay = 202,
@@ -278,22 +269,26 @@ struct FourCC {
     ChiptuneInstrumentSweepTime = 210,
     ChiptuneInstrumentSweepAmount = 211,
     ChiptuneInstrumentArpSpeed = 212,
-
+    
     ActionMassStorage = 50,
     VarOutputVolume = 74,
     ActionModulation = 213,
-
+    
     // 93-98 free (formerly MacroInstrument fields)
-
+    // 176 is free
+    // 182 is free
+    // 183 is free
+    // 187 is free
+    
     Default = 255, // "    "
   };
-
+  
   uint8_t raw() {
     return static_cast<uint8_t>(*this);
   }
-
+  
   ETL_DECLARE_ENUM_TYPE(FourCC, uint8_t)
-
+  
   // Not all enums need reflection. Only cases where we need reflection is the
   // FourCC codes that need to be converted to text in order to display on
   // screen
@@ -439,9 +434,6 @@ struct FourCC {
   ETL_ENUM_TYPE(ActionImport, "import")
   ETL_ENUM_TYPE(ActionThemeName, "themename")
   ETL_ENUM_TYPE(VarBacklightLevel, "backlightLevel")
-  ETL_ENUM_TYPE(VarRecordSource, "recordsource")
-  ETL_ENUM_TYPE(VarRecordLineGain, "recordlinegain")
-  ETL_ENUM_TYPE(VarRecordMicGain, "recordmicgain")
   ETL_ENUM_TYPE(VarOutputVolume, "outputvolume")
   ETL_ENUM_TYPE(VarImportResampler, "IMPORTRESAMP")
 

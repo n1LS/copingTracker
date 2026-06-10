@@ -460,12 +460,6 @@ void TableView::processNormalButtonMask(uint16_t mask) {
       cutPosition();
     if (mask & EPBM_ALT)
       viewMode_ = VM_SELECTION;
-    if (mask & EPBM_PLAY) {
-      // recording screen
-      if (!Player::GetInstance()->IsRunning()) {
-        switchToRecordView();
-      }
-    }
   } else if (mask & EPBM_ENTER) {
     // ENTER modifier
     if (mask & EPBM_DOWN)

@@ -114,14 +114,7 @@ void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_PLAY) {
-      // recording screen
-      if (!Player::GetInstance()->IsRunning()) {
-        switchToRecordView();
-      }
-    }
-  } else if (mask & EPBM_NAV) {
+  if (mask & EPBM_NAV) {
     if (mask & EPBM_DOWN) {
       Navigate(VT_PROJECT);
     }

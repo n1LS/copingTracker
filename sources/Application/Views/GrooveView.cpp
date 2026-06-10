@@ -101,12 +101,6 @@ void GrooveView::ProcessButtonMask(uint16_t mask, bool pressed) {
     if (mask & EPBM_ENTER) {
       clearCursorValue();
     };
-    if (mask & EPBM_PLAY) {
-      // recording screen
-      if (!Player::GetInstance()->IsRunning()) {
-        switchToRecordView();
-      }
-    }
   } else if (mask & EPBM_ENTER) {
     // ENTER modifier
     if (mask & EPBM_LEFT) {
