@@ -29,7 +29,7 @@ public:
 
 protected:
   bool initProject(char *projectName);
-  void ensurePTDirsExist();
+  void ensureSystemDirsExist();
 
 private:
   GUIWindow *window_;

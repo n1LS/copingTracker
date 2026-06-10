@@ -29,10 +29,6 @@ enum PersistencyResult {
   PERSIST_EXISTS,
 };
 
-#define UNNAMED_PROJECT_NAME ".untitled"
-#define PROJECT_DATA_FILE "lgptsav.dat"
-#define AUTO_SAVE_FILENAME "autosave.dat"
-
 class PersistencyService : public Service, public T_Singleton<PersistencyService> {
 public:
   PersistencyService();

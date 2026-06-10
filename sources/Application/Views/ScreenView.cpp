@@ -11,6 +11,7 @@
 
 #include "ScreenView.h"
 #include <Application/AppWindow.h>
+#include <cstring>
 #include <nanoprintf.h>
 
 ScreenView::ScreenView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {
@@ -29,4 +30,18 @@ void ScreenView::Navigate(ViewType target) {
   ViewEvent ve(VET_SWITCH_VIEW, &target);
   SetChanged();
   NotifyObservers(&ve);
+}
+
+const char *ScreenView::emptyStateMessage() const {
+  return "No items to show";
+}
+
+void ScreenView::drawEmptyState() {
+  const char *msg = emptyStateMessage();
+  int len = (int)strlen(msg);
+  int x = (SCREEN_WIDTH - len) / 2;
+  int y = SCREEN_HEIGHT / 2;
+  SetColor(Theme::View::fg);
+  SetBackgroundColor(Theme::View::bg);
+  DrawString(x, y, msg);
 }

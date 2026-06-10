@@ -28,6 +28,7 @@ public:
   virtual void OnFocus();
 
 protected:
+  virtual const char *emptyStateMessage() const override;
   void setCurrentFolder();
   void changeSelection(int delta);
   void onImportTheme(const char *filename);

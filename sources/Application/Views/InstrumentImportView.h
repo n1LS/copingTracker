@@ -28,6 +28,7 @@ public:
   virtual void OnFocus();
 
 protected:
+  virtual const char *emptyStateMessage() const override;
   void setCurrentFolder(FileSystem *fs, const char *name);
   void warpToNextInstrument(bool goUp);
   void importInstrument(char *name);

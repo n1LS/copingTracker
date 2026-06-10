@@ -89,12 +89,21 @@ void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 }
 
+const char *InstrumentImportView::emptyStateMessage() const {
+  return "No instruments to show";
+}
+
 void InstrumentImportView::DrawView() {
   Clear();
 
   // Draw title
 
   DrawTitle("Import Instrument");
+
+  if (fileIndexList_.empty()) {
+    drawEmptyState();
+    return;
+  }
 
   // Draw instrument files
 

@@ -30,7 +30,7 @@ Application::Application() {
 bool Application::Init(GUICreateWindowParams &params) {
   PersistencyService::GetInstance();
 
-  ensurePTDirsExist();
+  ensureSystemDirsExist();
 
   char projectName[MAX_PROJECT_NAME_LENGTH + 1];
   initProject(projectName);
@@ -60,7 +60,7 @@ bool Application::initProject(char *projectName) {
 
   if (forceLoadUntitledProject) {
     Trace::Log("APPLICATION", "Force loading untitled project");
-    FileSystem::GetInstance()->DeleteFile("/.current");
+    FileSystem::GetInstance()->DeleteFile(SD_BASE_DIR "/.current");
     PersistencyService::GetInstance()->PurgeUnnamedProject();
     forceLoadUntitledProject = false; // Reset the flag
   }
@@ -94,10 +94,11 @@ bool Application::initProject(char *projectName) {
   }
 }
 
-// ensure that all the directories required by picoTracker exist:
-void Application::ensurePTDirsExist() {
+// ensure that all the directories required by copingTracker exist:
+void Application::ensureSystemDirsExist() {
   auto fs = FileSystem::GetInstance();
 
+  createIfNotExists(fs, SD_BASE_DIR);
   createIfNotExists(fs, PROJECTS_DIR);
   createIfNotExists(fs, SAMPLES_LIB_DIR);
   createIfNotExists(fs, INSTRUMENTS_DIR);

@@ -29,7 +29,4 @@ typedef enum { ERROR = -1, FALSE, TRUE } LOGICAL;
 #define BitFlp(arg, posn) ((arg) ^ (1L << (posn)))
 
 void measure_freqs(void);
-#ifdef SDIO_BENCH
-void sd_bench();
-#endif
 #endif

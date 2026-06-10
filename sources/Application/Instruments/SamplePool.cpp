@@ -168,9 +168,9 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
     projSampleFilename.append(".wav");
   }
 
-  etl::string<MAX_PROJECT_SAMPLE_PATH_LENGTH> projectSamplePath("/projects/");
+  etl::string<MAX_PROJECT_SAMPLE_PATH_LENGTH> projectSamplePath(PROJECTS_DIR "/");
   projectSamplePath.append(projectName);
-  projectSamplePath.append("/samples/");
+  projectSamplePath.append("/" PROJECT_SAMPLES_DIR "/");
   projectSamplePath.append(projSampleFilename);
   Status::SetMultiLine("Loading %s->\n%s", name, projSampleFilename);
 

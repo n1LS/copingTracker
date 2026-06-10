@@ -20,6 +20,12 @@ inline void updateDataValue(unsigned char *c, int offset, unsigned char limit, b
   if ((v == 0xFF) && (limit != 0xFF))
     v = 0;
   v += offset;
+  // Full uint8 range (limit == 0xFF) implies signed two's-complement semantics:
+  // always wrap so that e.g. 0 - 1 = 0xFF (= -1 as int8_t).
+  if (limit == 0xFF) {
+    *c = (unsigned char)(v & 0xFF);
+    return;
+  }
   if (v < 0)
     v = wrap ? (limit + 1 + v) : 0;
   if (v > limit)
