@@ -27,6 +27,8 @@ public:
 
   void Navigate(ViewType target);
 
-private:
+protected:
+  virtual const char *emptyStateMessage() const;
+  void drawEmptyState();
 };
 #endif

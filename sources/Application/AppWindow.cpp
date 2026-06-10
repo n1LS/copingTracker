@@ -41,6 +41,7 @@
 #include "BaseClasses/View.h"
 #include "Foundation/Variables/WatchedVariable.h"
 #include "Player/Player.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "Services/Midi/MidiService.h"
 #include "System/Console/Trace.h"
 #include "System/FileSystem/FileSystem.h"
@@ -620,7 +621,7 @@ void AppWindow::AnimationUpdate() {
 
   if (awaitingProjectLoadAck_) {
     if (_mask != 0) {
-      FileSystem::GetInstance()->DeleteFile("/.current");
+      FileSystem::GetInstance()->DeleteFile(SD_BASE_DIR "/.current");
       npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
       loadProject_ = true;
       awaitingProjectLoadAck_ = false;

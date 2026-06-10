@@ -37,8 +37,6 @@ endif()
 # add_definitions(-DPICO_DEBUG_MALLOC)
 # add_definitions(-DALL_MALLOC)
 # add_definitions(-DSHOW_MEM_USAGE)
-# Perform a benchmark of SD card using SDIO oin startup. Can be removed once performance issues have been solved
-# add_definitions(-DSDIO_BENCH)
 # Enable loading samples into Flash
 add_definitions(-DLOAD_IN_FLASH)
 # define to use battery level as percentage instead of battery level as "+" bars

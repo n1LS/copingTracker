@@ -14,6 +14,7 @@
 #include "Application/Application.h"
 #include "Application/Model/Config.h"
 #include "Application/Model/Project.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Player/Player.h"
 #include "Application/Player/PlayerMixer.h"
 #include "Application/Utils/char.h"
@@ -225,11 +226,11 @@ bool MixerService::configureRenderPaths() {
   char projectname[MAX_PROJECT_NAME_LENGTH + 1];
   project->GetProjectName(projectname);
 
-  char path[30 + MAX_PROJECT_NAME_LENGTH];
-  npf_snprintf(path, sizeof(path), "/renders/%s-mixdown.wav", projectname);
+  char path[sizeof(RENDERS_DIR) + 1 + MAX_PROJECT_NAME_LENGTH + 16];
+  npf_snprintf(path, sizeof(path), RENDERS_DIR "/%s-mixdown.wav", projectname);
   out_->SetFileRenderer(path);
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-    npf_snprintf(path, sizeof(path), "/renders/%s-channel%d.wav", projectname, i);
+    npf_snprintf(path, sizeof(path), RENDERS_DIR "/%s-channel%d.wav", projectname, i);
     bus_[i].SetFileRenderer(path);
   }
   return true;

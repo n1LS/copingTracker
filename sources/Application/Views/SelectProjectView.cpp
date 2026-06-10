@@ -192,6 +192,10 @@ void SelectProjectView::Reset() {
   fileIndexList_.clear();
 }
 
+const char *SelectProjectView::emptyStateMessage() const {
+  return "No projects to show";
+}
+
 void SelectProjectView::DrawView() {
   Clear();
 
@@ -204,6 +208,11 @@ void SelectProjectView::DrawView() {
 
   int x = 1;
   int y = 2;
+
+  if (fileIndexList_.empty()) {
+    drawEmptyState();
+    return;
+  }
 
   auto var = viewData_->project_->FindVariable(FourCC::VarProjectName);
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = var->GetString();
@@ -459,7 +468,7 @@ void SelectProjectView::AttemptDeletingSelectedProject() {
 }
 
 void SelectProjectView::AttemptLoadingProject() {
-  if (WarnPlayerRunning()) {
+  if (currentIndex_ >= fileIndexList_.size() || WarnPlayerRunning()) {
     return;
   }
 

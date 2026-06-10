@@ -24,7 +24,6 @@
 #include "Variable.h"
 #include <stdlib.h>
 
-#define CONFIG_FILE_PATH "/.config.xml"
 #define CONFIG_VERSION_NUMBER 1
 
 #define MIDI_DEVICE_LEN 4
@@ -184,7 +183,7 @@ Config::Config()
 
   bool elem = doc.FirstChild();
   if (!elem || strcmp(doc.ElemName(), "CONFIG")) {
-    Trace::Log("CONFIG", "Bad config.xml format!");
+    Trace::Log("CONFIG", "Bad " CONFIG_FILE_PATH " format!");
     // TODO: need show user some UI that config file is invalid
     Save(); // and write the defaults to SDCard
     return;
@@ -550,7 +549,7 @@ int Config::GetValue(const char *key) {
 bool Config::ExportTheme(const char *themeName, bool overwrite) {
   auto fs = FileSystem::GetInstance();
 
-  // Add .ptt extension to the filename
+  // Add .thm extension to the filename
   etl::string<MAX_THEME_NAME_LENGTH> filename = themeName;
   filename.append(THEME_FILE_EXTENSION);
 
@@ -590,12 +589,12 @@ bool Config::ExportTheme(const char *themeName, bool overwrite) {
 bool Config::ImportTheme(const char *themeName) {
   auto fs = FileSystem::GetInstance();
 
-  // Check if the filename already has the .ptt extension
+  // Check if the filename already has the .thm extension
   etl::string<MAX_THEME_NAME_LENGTH + strlen(THEME_FILE_EXTENSION)> filename = themeName;
 
   const char *extension = strrchr(themeName, '.');
   if (!extension || strcmp(extension, THEME_FILE_EXTENSION) != 0) {
-    // Add .ptt extension only if it's not already there
+    // Add .thm extension only if it's not already there
     filename.append(THEME_FILE_EXTENSION);
   }
 

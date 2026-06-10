@@ -1,6 +1,7 @@
 #include "ViewUtils.h"
 
 #include "Application/AppWindow.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
 #include <string.h>
 
@@ -73,14 +74,13 @@ bool goProjectSamplesDir(ViewData *viewData_) {
       return fs->chdir(PROJECT_SAMPLES_DIR);
     } else {
       Trace::Error("SampleEditorView: Failed to chdir to project dir: %s", projectName);
-      // It's good practice to return to the root to avoid being in an unknown
-      // state
-      fs->chdir("/");
+      // Return to a known base state
+      fs->chdir(SD_BASE_DIR);
       return false; // Abort if we can't find the project directory
     }
   } else {
     Trace::Error("SampleEditorView: No project data available to find samples dir.");
-    fs->chdir("/");
+    fs->chdir(SD_BASE_DIR);
     return false; // Abort if project data is missing
   }
   return true;

@@ -10,6 +10,7 @@
  */
 
 #include "PersistencyService.h"
+#include "PersistenceConstants.h"
 #include "../Instruments/SamplePool.h"
 #include "Foundation/Services/ServiceRegistry.h"
 
@@ -19,7 +20,7 @@
 #include "System/FileSystem/FileSystem.h"
 #include <cstring>
 
-#define PROJECT_STATE_FILE "/.current"
+#define PROJECT_STATE_FILE SD_BASE_DIR "/.current"
 #define MAX_DELETE_DEPTH 3
 
 PersistencyService::PersistencyService() : Service(FourCC::ServicePersistency) {};
@@ -209,7 +210,7 @@ PersistencyResult PersistencyService::AutoSaveProjectData(const char *projectNam
 
 PersistencyResult PersistencyService::SaveProjectData(const char *projectName, bool autosave) {
 
-  const char *filename = autosave ? AUTO_SAVE_FILENAME : PROJECT_DATA_FILE;
+  const char *filename = autosave ? AUTO_SAVE_FILENAME : PROJECT_FILENAME;
 
   etl::vector<const char *, 3> segments = {PROJECTS_DIR, projectName, filename};
   CreatePath(pathBufferA, segments);
@@ -271,7 +272,7 @@ PersistencyResult PersistencyService::Load(const char *projectName) {
 
   Trace::Log("PERSISTENCYSERVICE", "using autosave: %b", useAutosave);
   // if autosave exists, then we load it instead of the normal project file
-  const char *filename = useAutosave ? AUTO_SAVE_FILENAME : PROJECT_DATA_FILE;
+  const char *filename = useAutosave ? AUTO_SAVE_FILENAME : PROJECT_FILENAME;
 
   etl::string<128> projectFilePath(PROJECTS_DIR);
   projectFilePath.append("/");
@@ -366,7 +367,7 @@ PersistencyResult PersistencyService::ExportInstrument(I_Instrument *instrument,
                                                        etl::string<MAX_INSTRUMENT_NAME_LENGTH> name, bool overwrite) {
   auto fs = FileSystem::GetInstance();
 
-  // Add .pti extension to the filename
+  // Add .ins extension to the filename
   etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename = name;
   filename.append(INSTRUMENT_FILE_EXTENSION);
 
@@ -511,7 +512,7 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
     return PERSIST_ERROR;
   }
 
-  // Extract instrument name from filename (minus .pti extension)
+  // Extract instrument name from filename (minus .ins extension)
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> instrumentName;
   const char *dotPos = strrchr(name, '.');
   if (dotPos) {

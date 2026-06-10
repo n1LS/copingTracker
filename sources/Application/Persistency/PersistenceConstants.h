@@ -17,19 +17,28 @@
 #define MAX_INSTRUMENT_FILENAME_LENGTH 24
 #define MAX_THEME_NAME_LENGTH 16
 #define MAX_THEME_EXPORT_PATH_LENGTH (MAX_THEME_NAME_LENGTH + strlen(THEMES_DIR) + 1 + strlen(THEME_FILE_EXTENSION))
-// accounts for .pti extension so they are 4 chars shorter.
+// accounts for .ins extension so they are 4 chars shorter.
 #define MAX_INSTRUMENT_NAME_LENGTH (MAX_INSTRUMENT_FILENAME_LENGTH - 4)
 
-#define PROJECTS_DIR "/projects"
-#define PROJECT_SAMPLES_DIR "samples"
-#define SAMPLES_LIB_DIR "/samples"
-#define INSTRUMENTS_DIR "/instruments"
-#define RENDERS_DIR "/renders"
-#define THEMES_DIR "/themes"
-#define RECORDINGS_DIR "/recordings"
-#define INSTRUMENT_FILE_EXTENSION ".pti"
-#define THEME_FILE_EXTENSION ".ptt"
+#define INSTRUMENT_FILE_EXTENSION       ".ins"
+#define THEME_FILE_EXTENSION            ".thm"
 
+#define UNNAMED_PROJECT_NAME            ".untitled"
+#define CONFIG_FILENAME                 ".config.xml"
+#define PROJECT_FILENAME                "project.xml"
+#define AUTO_SAVE_FILENAME              "autosave.xml"
+
+#define SD_BASE_DIR         "/copingTracker"
+
+#define PROJECTS_DIR        SD_BASE_DIR "/projects"
+#define SAMPLES_LIB_DIR     SD_BASE_DIR "/samples"
+#define INSTRUMENTS_DIR     SD_BASE_DIR "/instruments"
+#define RENDERS_DIR         SD_BASE_DIR "/renders"
+#define THEMES_DIR          SD_BASE_DIR "/themes"
+#define RECORDINGS_DIR      SD_BASE_DIR "/recordings"
+#define CONFIG_FILE_PATH    SD_BASE_DIR "/" CONFIG_FILENAME
+
+#define PROJECT_SAMPLES_DIR             "samples"
 #define RECORDING_FILENAME "REC01.wav"
 
 #endif // _PERSISTENCE_CONSTANTS_H_

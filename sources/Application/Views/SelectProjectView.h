@@ -34,6 +34,7 @@ public:
   void ClearAutoSave();
 
 protected:
+  virtual const char *emptyStateMessage() const override;
   void warpToNextProject(bool goUp);
 
 private:

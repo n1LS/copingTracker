@@ -75,6 +75,10 @@ void ImportView::SetSourceViewType(ViewType vt) {
   sourceViewType_ = vt;
 }
 
+const char *ImportView::emptyStateMessage() const {
+  return "Sample pool is empty.";
+}
+
 void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   // Check for key release events
   if (!pressed) {
@@ -294,11 +298,19 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
 }
 
 void ImportView::DrawView() {
-  // todo: is this really the correct way to handle an empty state?
+  Clear();
+
+  auto fs = FileSystem::GetInstance();
+
+  // Draw title with available storage space
+  uint32_t availableSpace = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
+  DrawTitle("%s (%d)", inProjectSampleDir_ ? "Project Pool" : "Import Sample", availableSpace);
 
   if (fileIndexList_.empty()) {
+    drawEmptyState();
     return;
   }
+
   // ensure selected item is in visible range
   const size_t pageSize = LIST_PAGE_SIZE;
   if (currentIndex_ < topIndex_) {
@@ -306,15 +318,6 @@ void ImportView::DrawView() {
   } else if (currentIndex_ >= topIndex_ + pageSize) {
     topIndex_ = currentIndex_ - pageSize + 1;
   }
-
-  Clear();
-
-  auto fs = FileSystem::GetInstance();
-
-  // Draw title with available storage space
-
-  uint32_t availableSpace = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
-  DrawTitle("%s (%d)", inProjectSampleDir_ ? "Project Pool" : "Import Sample", availableSpace);
 
   // Draw samples
   int x = 1;
@@ -410,24 +413,18 @@ void ImportView::DrawView() {
     npf_snprintf(volField, sizeof(volField), "Vol:%2d", previewVolume);
     DrawString(x + 23, y, volField);
   } else {
-    if (fileIndexList_.empty()) {
-      // draw this a few lines down from *top* of screen
-      SetColor(Theme::View::fg);
-      DrawString(2, 3, "[pool empty]");
-    } else {
-      // we make edit the first button to make things easier
-      setColors(selectedButton_ == 0);
-      DrawString(x, y, "Edit");
+    // we make edit the first button to make things easier
+    setColors(selectedButton_ == 0);
+    DrawString(x, y, "Edit");
 
-      // todo: make remove available or remove the button
-      setColors(selectedButton_ == 1);
-      DrawString(x + 9, y, "N/A");
+    // todo: make remove available or remove the button
+    setColors(selectedButton_ == 1);
+    DrawString(x + 9, y, "N/A");
 
-      setColors(selectedButton_ == kProjectButtonVolume);
-      char volField[12];
-      npf_snprintf(volField, sizeof(volField), "vol:%2d", previewVolume);
-      DrawString(x + 23, y, volField);
-    }
+    setColors(selectedButton_ == kProjectButtonVolume);
+    char volField[12];
+    npf_snprintf(volField, sizeof(volField), "vol:%2d", previewVolume);
+    DrawString(x + 23, y, volField);
   }
   y += 1;
 
@@ -717,8 +714,8 @@ void ImportView::adjustPreviewVolume(int offset) {
 
 bool ImportView::changeDirectory(FileSystem *fs, const char *name) {
   if (strcmp(name, "..") == 0 && fs->isParentRoot()) {
-    Trace::Log("PICOIMPORT", "Detected top-level directory, navigating to root");
-    return fs->chdir("/");
+    Trace::Log("PICOIMPORT", "Detected top-level directory, navigating to samples root");
+    return fs->chdir(SAMPLES_LIB_DIR);
   }
 
   if (!fs->chdir(name)) {

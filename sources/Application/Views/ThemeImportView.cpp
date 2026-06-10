@@ -65,12 +65,21 @@ void ThemeImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 }
 
+const char *ThemeImportView::emptyStateMessage() const {
+  return "No themes to show";
+}
+
 void ThemeImportView::DrawView() {
   Clear();
 
   // Draw title
 
   DrawTitle("Import Theme");
+
+  if (fileIndexList_.empty()) {
+    drawEmptyState();
+    return;
+  }
 
   // Draw theme files
   SetBackgroundColor(Theme::View::bg);
@@ -92,7 +101,7 @@ void ThemeImportView::DrawView() {
     unsigned fileIndex = fileIndexList_[i];
     fs->getFileName(fileIndex, buffer, PFILENAME_SIZE);
 
-    // Remove the .ptt extension for display
+    // Remove the .thm extension for display
     char *dot = strrchr(buffer, '.');
     if (dot) {
       *dot = '\0';
