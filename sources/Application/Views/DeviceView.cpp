@@ -24,8 +24,6 @@
 #include "System/System/System.h"
 #include <nanoprintf.h>
 
-#define ACTION_BOOTSEL MAKE_FOURCC('B', 'O', 'O', 'T')
-
 static void BootselCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
     System *sys = System::GetInstance();
