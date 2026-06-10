@@ -30,7 +30,6 @@
 #include "Application/Views/NullView.h"
 #include "Application/Views/PhraseView.h"
 #include "Application/Views/ProjectView.h"
-#include "Application/Views/RecordView.h"
 #include "Application/Views/SampleEditorView.h"
 #include "Application/Views/SampleSlicesView.h"
 #include "Application/Views/SelectProjectView.h"
@@ -51,8 +50,6 @@
 #include "platform.h"
 #include <nanoprintf.h>
 #include <string.h>
-
-#include "Adapters/picoTracker/audio/record.h"
 
 const uint16_t AUTOSAVE_INTERVAL_IN_SECONDS = 1 * 60;
 
@@ -106,7 +103,6 @@ struct AppWindowViews {
   MixerView mixerView;
   SampleEditorView sampleEditorView;
   SampleSlicesView sampleSlicesView;
-  RecordView recordView;
   NullView nullView;
 
   AppWindowViews(GUIWindow &w, ViewData &viewData)
@@ -114,7 +110,7 @@ struct AppWindowViews {
         themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData), importView(w, &viewData),
         instrumentImportView(w, &viewData), instrumentView(w, &viewData), tableView(w, &viewData),
         grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
-        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), recordView(w, &viewData),
+        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData),
         nullView(w, &viewData) {
   }
 };
@@ -191,7 +187,6 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   views_->mixerView.AddObserver(*this);
   views_->sampleEditorView.AddObserver(*this);
   views_->sampleSlicesView.AddObserver(*this);
-  views_->recordView.AddObserver(*this);
 
   memset(_charScreen, ' ', SCREEN_CHARS);
   memset(_preScreen, ' ', SCREEN_CHARS);
@@ -449,7 +444,6 @@ AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
     views_->selectProjectView.Reset();
     views_->sampleEditorView.Reset();
     views_->sampleSlicesView.Reset();
-    views_->recordView.Reset();
   }
 
   bool playerOK = true;
@@ -800,9 +794,6 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
           case VT_SAMPLE_SLICES:
             _currentView = &views_->sampleSlicesView;
             break;
-          case VT_RECORD:
-            _currentView = &views_->recordView;
-            break;
           default:
             break;
         }
@@ -942,15 +933,14 @@ bool AppWindow::AutoSave() {
   if (views_ == nullptr || _currentView == nullptr) {
     return false;
   }
-  // only auto save when sequencer is not running, not recording,
-  // and the user is in an autosave-safe view.
+  // only auto save when sequencer is not running and the user is in an autosave-safe view.
   bool autosaveSafeView = _currentView == &views_->songView || _currentView == &views_->chainView ||
                           _currentView == &views_->phraseView || _currentView == &views_->tableView ||
                           _currentView == &views_->grooveView || _currentView == &views_->instrumentView ||
                           _currentView == &views_->deviceView || _currentView == &views_->themeView ||
                           _currentView == &views_->mixerView;
-  bool recording = IsRecordingActive();
-  if (!player->IsRunning() && !recording && autosaveSafeView) {
+
+  if (!player->IsRunning() && autosaveSafeView) {
     Trace::Log("APPWINDOW", "AutoSaving Project Data");
     // get persistence service and call autosave
     PersistencyService *ps = PersistencyService::GetInstance();

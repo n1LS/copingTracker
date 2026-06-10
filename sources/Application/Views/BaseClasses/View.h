@@ -69,7 +69,6 @@ enum ViewType {
   VT_THEME_IMPORT,      // Theme file import
   VT_SAMPLE_EDITOR,     // Sample Editor
   VT_SAMPLE_SLICES,     // Sample slice editor
-  VT_RECORD             // Recording screen
 };
 
 enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
@@ -221,8 +220,6 @@ public:
   virtual void AnimationUpdate() = 0;
 
   void SetDirty(bool dirty);
-
-  void switchToRecordView();
 
   // Methods to access modal view
   bool HasModalView() const {

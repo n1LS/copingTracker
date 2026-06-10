@@ -15,7 +15,6 @@
 #include "Application/Utils/HelpLegend.h"
 #include "Application/Utils/char.h"
 #include "Application/Utils/mathutils.h"
-#include "Application/Views/RecordView.h"
 #include "Application/Views/SampleEditorView.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalView.h"
@@ -166,9 +165,6 @@ void View::drawMap() {
       pos.y_ += 2;
       DrawString(pos.x_, pos.y_, "S");
   }
-}
-
-void View::switchToRecordView() {
 }
 
 void View::drawNotes() {

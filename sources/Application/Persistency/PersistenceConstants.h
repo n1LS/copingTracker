@@ -35,10 +35,8 @@
 #define INSTRUMENTS_DIR     SD_BASE_DIR "/instruments"
 #define RENDERS_DIR         SD_BASE_DIR "/renders"
 #define THEMES_DIR          SD_BASE_DIR "/themes"
-#define RECORDINGS_DIR      SD_BASE_DIR "/recordings"
 #define CONFIG_FILE_PATH    SD_BASE_DIR "/" CONFIG_FILENAME
 
 #define PROJECT_SAMPLES_DIR             "samples"
-#define RECORDING_FILENAME "REC01.wav"
 
 #endif // _PERSISTENCE_CONSTANTS_H_

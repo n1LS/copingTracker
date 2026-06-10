@@ -66,9 +66,6 @@ private:
   StringVariable<MAX_VARIABLE_STRING_LENGTH> themeName_;
   WatchedVariable backlightLevel_;
   WatchedVariable outputVolume_;
-  WatchedVariable recordSource_;
-  WatchedVariable recordLineGain_;
-  WatchedVariable recordMicGain_;
 
   void SaveContent(tinyxml2::XMLPrinter *printer);
   void useDefaultConfig();

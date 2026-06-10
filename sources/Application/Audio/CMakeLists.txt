@@ -1,6 +1,5 @@
 add_library(application_audio
   AudioFileStreamer.cpp
-  RecordStreamer.cpp
 )
 
 target_link_libraries(application_audio PUBLIC

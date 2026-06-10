@@ -873,12 +873,6 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       warpToNext(+16);
     if (mask & EPBM_ALT) {
       viewMode_ = VM_CLONE;
-    };
-    if (mask & EPBM_PLAY) {
-      // recording screen
-      if (!Player::GetInstance()->IsRunning()) {
-        switchToRecordView();
-      }
     }
   } else if (mask & EPBM_NAV) {
     // NAV Modifier

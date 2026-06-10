@@ -104,7 +104,6 @@ void Application::ensureSystemDirsExist() {
   createIfNotExists(fs, INSTRUMENTS_DIR);
   createIfNotExists(fs, RENDERS_DIR);
   createIfNotExists(fs, THEMES_DIR);
-  createIfNotExists(fs, RECORDINGS_DIR);
 }
 
 void Application::createIfNotExists(FileSystem *fs, const char *path) {

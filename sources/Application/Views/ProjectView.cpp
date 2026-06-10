@@ -236,14 +236,7 @@ void ProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & EPBM_EDIT) {
-    if (mask & EPBM_PLAY) {
-      // recording screen
-      if (!Player::GetInstance()->IsRunning()) {
-        switchToRecordView();
-      }
-    }
-  } else if (mask & EPBM_NAV) {
+  if (mask & EPBM_NAV) {
     if (mask & EPBM_DOWN || mask & EPBM_UP) {
       if (!CanExit()) {
         return;
@@ -420,9 +413,6 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
         // Start playback in rendering mode with MSM_FILESPLIT
         player->Start(PM_SONG, true, MSM_FILESPLIT, true);
       }
-      break;
-    case FourCC::ActionShowRecordView:
-      switchToRecordView();
       break;
     case FourCC::ActionImport:
       // Switch to the ImportView **BUT** to show the Project Pool by default

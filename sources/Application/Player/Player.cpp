@@ -1292,14 +1292,6 @@ void Player::StopStreaming() {
   }
 }
 
-void Player::StartRecordStreaming(uint16_t *srcBuffer, uint32_t size, bool stereo) {
-  mixer_.StartRecordStreaming(srcBuffer, size, stereo);
-}
-
-void Player::StopRecordStreaming() {
-  mixer_.StopRecordStreaming();
-}
-
 void Player::SetAudioActive(bool active) {
   MixerService *ms = MixerService::GetInstance();
   AudioOut *out = (ms != nullptr) ? ms->GetAudioOut() : nullptr;
