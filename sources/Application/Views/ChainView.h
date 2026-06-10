@@ -63,14 +63,12 @@ private:
   int lastPlayingPos_;
   int lastQueuedPos_;
 
-  struct ChainClip {
+  struct {
     bool active_;
     int col_;
     int row_;
     int width_;
     int height_;
-    //		int saverow_ ;
-    //		int savecol_ ;
     ChainStep steps_[16];
   } clipboard_;
 
