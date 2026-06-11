@@ -1,6 +1,9 @@
 # copingTracker
 
-copingTracker is a fork of picoTracker (https://www.github.com/xiphonics/picoTracker). Maybe a spoon. Or a spork. Yes, a spork.
+copingTracker is a fork of picoTracker ~2.3 (https://www.github.com/xiphonics/picoTracker). Maybe a spoon. Or a spork. Yes, probably a spork.
+
+## Silly name. Why?
+_copingTracker_ is essentially _picoTracker_ having an existential crisis - jumbled up a bit (_pico_ → _copi_), with some extra features thrown in (_n_ + _g_) and finally accepted its fate of _coping_ with having to run on an rp2040/2350.
 
 ## Features
 
