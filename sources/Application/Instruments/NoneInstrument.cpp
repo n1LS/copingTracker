@@ -24,11 +24,12 @@ bool NoneInstrument::Init() {
 
 void NoneInstrument::OnStart() {};
 
-bool NoneInstrument::Start(int c, unsigned char note, bool retrigger) {
+bool NoneInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   return true;
 }
 
-void NoneInstrument::Stop(int c) {};
+void NoneInstrument::Stop(int channel) {
+}
 
 bool NoneInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   return false;

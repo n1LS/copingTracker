@@ -152,6 +152,7 @@ struct Theme {
   struct Phrase {
     SWITCHABLE(note, LIGHT_RED, RED)
     SWITCHABLE(instrument, LIGHT_BLUE, BLUE)
+    SWITCHABLE(volume, LIGHT_MAGENTA, MAGENTA)
     SWITCHABLE(command1, LIGHT_YELLOW, YELLOW)
     SWITCHABLE(command2, LIGHT_GREEN, GREEN)
     SWITCHABLE(command3, LIGHT_CYAN, CYAN)

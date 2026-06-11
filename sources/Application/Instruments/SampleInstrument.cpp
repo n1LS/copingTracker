@@ -352,7 +352,7 @@ void SampleInstrument::OnStart() {
   tableState_.Reset();
 }
 
-bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstart) {
+bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // Look if we're dirty & need to update this instrument's data
 
   if (dirty_) {
@@ -368,11 +368,11 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
 
   renderParams *rp = renderParams_ + channel;
 
-  rp->midiNote_ = midinote;
+  rp->midiNote_ = note;
 
-  if (lastMidiNote_[channel] == -1) // To prevent First LEGA to go bonkers
-  {
-    lastMidiNote_[channel] = midinote;
+  if (lastMidiNote_[channel] == -1) { 
+    // To prevent First LEGA to go bonkers
+    lastMidiNote_[channel] = note;
   }
 
   // Duplicate variable value to local rendering
@@ -410,10 +410,10 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
   SampleInstrumentLoopMode loopmode = (SampleInstrumentLoopMode)loopMode_.GetInt();
 
   size_t sliceIndex = 0;
-  bool sliceActive = shouldUseSlice(midinote, sliceIndex, sampleSizeU);
+  bool sliceActive = shouldUseSlice(note, sliceIndex, sampleSizeU);
   // Only play valid slices
-  if (!sliceActive && HasSlicesForPlayback() && midinote >= SliceNoteBase &&
-      midinote < static_cast<unsigned char>(SliceNoteBase + MaxSlices)) {
+  if (!sliceActive && HasSlicesForPlayback() && note >= SliceNoteBase &&
+      note < static_cast<unsigned char>(SliceNoteBase + MaxSlices)) {
     return false;
   }
   uint32_t sliceStart = 0;
@@ -477,7 +477,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
         };
         rp->baseSpeed_ = fl2fp((freq * length) / driverRate);
         rp->rendFirst_ = rp->rendLoopStart_;
-        if (cleanstart) {
+        if (retrigger) {
           rp->position_ = float(rp->rendFirst_);
         }
         break;
@@ -494,7 +494,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
         sampleCount *= (6 * 16);
         rp->baseSpeed_ = fl2fp(length / float(sampleCount));
         rp->rendFirst_ = rp->rendLoopStart_;
-        if (cleanstart) {
+        if (retrigger) {
           rp->position_ = float(rp->rendFirst_);
         }
         break;
@@ -516,7 +516,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
 
   float fineTune = float(fineTune_.GetInt() - 0x7F);
   fineTune /= float(0x80);
-  int offset = midinote - rootNote;
+  int offset = note - rootNote;
   if (sliceActive) {
     offset = 0;
   }
@@ -538,8 +538,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
 
   // If we do a clean start (there was a instr number on the line)
 
-  if (cleanstart) {
-
+  if (retrigger) {
     // Clear retrigger data
 
     rp->retrig_ = false;

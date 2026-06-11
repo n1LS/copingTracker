@@ -43,7 +43,7 @@ public:
   virtual ~SampleInstrument();
   // I_Instrument implementation
   virtual bool Init();
-  virtual bool Start(int channel, unsigned char note, bool trigger = true);
+  virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retriggertrigger = true);
   virtual void Stop(int channel);
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick);
   virtual bool IsInitialized();

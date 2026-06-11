@@ -25,7 +25,7 @@ PlayerChannel::PlayerChannel(int index) {
 PlayerChannel::~PlayerChannel() {
 }
 
-void PlayerChannel::StartInstrument(I_Instrument *instr, unsigned char note, bool trigger) {
+void PlayerChannel::StartInstrument(I_Instrument *instr, unsigned char note, uint8_t volume, bool trigger) {
   if (instr_) {
     StopInstrument();
   }

@@ -74,7 +74,7 @@ bool OpalInstrument::Init() {
 
 void OpalInstrument::OnStart() {};
 
-bool OpalInstrument::Start(int channel, unsigned char note, bool retrigger) {
+bool OpalInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // channel wide settings
   // enable left/right output (D4, D5) & set algorithm D0
   // for now only 2 op so just Additive or FM

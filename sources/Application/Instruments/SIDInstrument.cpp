@@ -113,7 +113,7 @@ void SIDInstrument::OnStart() {
       ((byte) & 0x08 ? '1' : '0'), ((byte) & 0x04 ? '1' : '0'), ((byte) & 0x02 ? '1' : '0'),                           \
       ((byte) & 0x01 ? '1' : '0')
 
-bool SIDInstrument::Start(int c, unsigned char note, bool retrigger) {
+bool SIDInstrument::Start(int c, unsigned char note, uint8_t volume, bool retrigger) {
   Trace::Debug("Retrigger: %i", retrigger);
   gate_ = retrigger;
   // Select master render instrument

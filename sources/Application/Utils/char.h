@@ -44,16 +44,10 @@ inline void char2hex(const char *s, unsigned char *c) {
 }
 
 inline void note2char(unsigned char d, char *s) {
-  int oct = d / 12 - 2;
+  int oct = d / 12;
   int note = d % 12;
   strcpy(s, noteNames[note]);
-  if (oct < 0) {
-    s[2] = '-';
-    oct = -oct;
-  } else {
-    s[2] = ' ';
-  }
-  s[3] = '0' + oct;
+  s[2] = h2c__[oct];
 }
 
 inline void note2visualizer(unsigned char d, char *s) {

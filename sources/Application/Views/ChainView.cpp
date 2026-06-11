@@ -618,6 +618,12 @@ void ChainView::DrawView() {
 
   GUIPoint pos = GetAnchor();
 
+  // Draw section header
+
+  SetColor(Theme::View::inactive);
+  SetBackgroundColor(Theme::View::bg);
+  DrawString(pos.x_, pos.y_ - 1, "Ph Transpose     Nte In");
+
   // Display row numbers
 
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
@@ -784,7 +790,7 @@ void ChainView::AnimationUpdate() {
 
 void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
-  pos.x_ += 15;
+  pos.x_ += 17;
 
   // Display notes
   PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];
@@ -796,12 +802,12 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
     unsigned char d = steps[j].note;
-    unsigned char instr = steps[j].instr;
+    unsigned char instr = steps[j].instrument;
 
     if (d == NO_NOTE) {
-      DrawString(pos.x_, pos.y_, "----");
+      DrawString(pos.x_, pos.y_, "---");
     } else if (d == NOTE_OFF) {
-      DrawString(pos.x_, pos.y_, "off ");
+      DrawString(pos.x_, pos.y_, "off");
     } else {
       bool showSlice = false;
       bool invalidSlice = false;
@@ -821,9 +827,9 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
         }
       }
       if (showSlice) {
-        npf_snprintf(buffer, sizeof(buffer), "SL%02u", static_cast<unsigned>(sliceIndex));
+        npf_snprintf(buffer, sizeof(buffer), "S%02u", static_cast<unsigned>(sliceIndex));
       } else if (invalidSlice) {
-        npf_snprintf(buffer, sizeof(buffer), "SL**");
+        npf_snprintf(buffer, sizeof(buffer), "S**");
       } else {
         note2char(d, buffer);
       }
@@ -834,21 +840,19 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
 
   // Draw instruments
   pos = GetAnchor();
-  pos.x_ += 20;
+  pos.x_ += 21;
 
   PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
-  buffer[0] = 'I';
-  buffer[3] = 0;
 
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
 
-    unsigned char d = instrSteps[j].instr;
+    unsigned char d = instrSteps[j].instrument;
 
     if (d == NO_INSTRUMENT) {
-      DrawString(pos.x_, pos.y_, "I--");
+      DrawString(pos.x_, pos.y_, "--");
     } else {
-      hex2char(d, buffer + 1);
+      npf_snprintf(buffer, sizeof(buffer), "%02X", d);
       DrawString(pos.x_, pos.y_, buffer);
     }
     pos.y_++;

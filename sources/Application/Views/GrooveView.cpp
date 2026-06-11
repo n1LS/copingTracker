@@ -151,6 +151,12 @@ void GrooveView::DrawView() {
   GUIPoint anchor = GetAnchor();
   GUIPoint pos = anchor;
 
+  // Draw section header
+
+  SetColor(Theme::View::inactive);
+  SetBackgroundColor(Theme::View::bg);
+  DrawString(pos.x_, pos.y_ - 1, "Grv");
+
   // Display row numbers
   pos = anchor;
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);

@@ -26,6 +26,7 @@
 #define HIGHEST_NOTE 119
 #define NOTE_OFF 0xFE
 #define NO_NOTE 0xFF
+#define NO_VOLUME 0xFF
 #define NOTE_C3 60
 
 #define NO_INSTRUMENT 0xFF

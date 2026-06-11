@@ -38,7 +38,7 @@ public:
   };
 
   // Start & stop the instument
-  virtual bool Start(int channel, unsigned char note, bool retrigger = true);
+  virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true);
   virtual void Stop(int channel);
 
   virtual void OnStart() {};

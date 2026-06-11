@@ -602,6 +602,12 @@ void TableView::DrawView() {
 
   GUIPoint anchor = GetAnchor();
 
+  // Draw section header
+
+  SetColor(Theme::View::inactive);
+  SetBackgroundColor(Theme::View::bg);
+  DrawString(anchor.x_, anchor.y_ - 1, "Cmd1Val Cmd2Val Cmd3Val");
+
   // Display row numbers
   drawRowNumbers(anchor.x_ - 3, anchor.y_, 0, 16);
 

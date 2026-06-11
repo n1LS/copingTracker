@@ -148,15 +148,17 @@ void PlayerMixer::Update(Observable &o, I_ObservableData *d) {
   ms->SetMasterVolume(project_->GetMasterVolume());
 }
 
-void PlayerMixer::StartInstrument(int channel, I_Instrument *instrument, unsigned char note, bool newInstrument) {
-  channel_[channel]->StartInstrument(instrument, note, newInstrument);
+void PlayerMixer::StartInstrument(int channel, I_Instrument *instrument, unsigned char note, uint8_t volume, bool newInstrument) {
+  channel_[channel]->StartInstrument(instrument, note, volume, newInstrument);
   lastInstrument_[channel] = instrument;
   notes_[channel] = note;
+  volume_[channel] = volume;
 }
 
 void PlayerMixer::StopInstrument(int channel) {
   channel_[channel]->StopInstrument();
   notes_[channel] = NO_NOTE;
+  volume_[channel] = NO_VOLUME;
 }
 
 I_Instrument *PlayerMixer::GetInstrument(int channel) {
@@ -221,6 +223,10 @@ static bool shouldShowSlice(int channel, uint8_t &sliceIndex, I_Instrument *inst
 
 int PlayerMixer::GetChannelNote(int channel) {
   return notes_[channel];
+}
+
+int PlayerMixer::GetChannelVolume(int channel) {
+  return volume_[channel];
 }
 
 const char *PlayerMixer::GetPlayedNote(int channel) {

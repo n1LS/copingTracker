@@ -835,7 +835,8 @@ void Player::playCursorPosition(int channel) {
     Song *song = viewData_->song_;
     Phrase *phrase = &(song->phrase_);
     unsigned char note = phrase->steps_[currentPhrase][pos].note;
-    unsigned char instr = phrase->steps_[currentPhrase][pos].instr;
+    unsigned char instr = phrase->steps_[currentPhrase][pos].instrument;
+    uint8_t stepVolume = phrase->steps_[currentPhrase][pos].volume;
 
     TableHolder *th = TableHolder::GetInstance();
     TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
@@ -886,7 +887,7 @@ void Player::playCursorPosition(int channel) {
         // Check if note is in acceptable midi range
 
         if (note < 128) {
-          mixer_.StartInstrument(channel, instrument, note, newInstrument);
+          mixer_.StartInstrument(channel, instrument, note, stepVolume, newInstrument);
           int instrTable = instrument->GetTable();
 
           // If an instrument number has been specified && instrument has table,
@@ -963,6 +964,7 @@ void Player::StepAutomationTableForRetrigger(int channel, I_Instrument *instrume
 
 void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool stepAutomationTable) {
   int note = mixer_.GetChannelNote(channel);
+  uint8_t volume = mixer_.GetChannelVolume(channel);
   I_Instrument *instrument = mixer_.GetInstrument(channel);
 
   if ((note > HIGHEST_NOTE) || (instrument == 0)) {
@@ -979,7 +981,7 @@ void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool st
 
   mixer_.StopInstrument(channel);
   // NOTE: 'newInstrument' bool flag is really the "retrigger" flag
-  mixer_.StartInstrument(channel, instrument, note, false);
+  mixer_.StartInstrument(channel, instrument, note, volume, false);
 
   if (stepAutomationTable) {
     StepAutomationTableForRetrigger(channel, instrument);
@@ -1347,7 +1349,7 @@ void Player::PlayNote(uint16_t instrumentIndex, uint16_t channel, unsigned char 
   if (instrument) {
     // Use the channel modulo SONG_CHANNEL_COUNT to ensure it's within range
     int playerChannel = channel % SONG_CHANNEL_COUNT;
-    mixer_.StartInstrument(playerChannel, instrument, note, true);
+    mixer_.StartInstrument(playerChannel, instrument, note, velocity, true);
     if (!isRunning_) {
       SetAudioActive(true);
     }
