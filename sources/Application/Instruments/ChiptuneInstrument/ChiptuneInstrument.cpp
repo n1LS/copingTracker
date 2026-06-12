@@ -54,7 +54,9 @@ void ChiptuneInstrument::Stop(int channel) {
 bool ChiptuneInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // get the instrument parameters from the instrument and pass them to the
   // current voice
-  voices_[channel].note_on(note, retrigger, getInstrumentParameters());
+  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 :volumeLUT[volume];
+
+  voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters());
 
   return true;
 }

@@ -388,7 +388,10 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
 
   int rootNote = (rootNote_.GetInt() - 60) + source_->GetRootNote(rp->midiNote_);
 
-  rp->volume_ = rp->baseVolume_ = i2fp(volume_.GetInt());
+  // step volume 
+  uint32_t stepVolume = (volume == NO_VOLUME) ? 256 : volumeLUT[volume];
+  uint32_t calculatedVolume = (volume_.GetInt() * stepVolume) >> 8;
+  rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
 
   rp->pan_ = rp->basePan_ = i2fp(pan_.GetInt());
 

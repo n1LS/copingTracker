@@ -33,7 +33,6 @@ int32_t DecodeRetriggerOffset(int32_t value) {
 // Private constructor - Singleton
 
 Player::Player() : mixer_() {
-
   isRunning_ = false;
   viewData_ = 0;
 
@@ -44,14 +43,11 @@ Player::Player() : mixer_() {
   retrigAllImmediate_ = false;
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-    instrumentOnChannel_[i][0] = ' ';
-    instrumentOnChannel_[i][1] = ' ';
-    instrumentOnChannel_[i][2] = '\0';
+    instrumentOnChannel_[i] = NO_INSTRUMENT;
   }
 }
 
 bool Player::Init(Project *project, ViewData *viewData) {
-
   viewData_ = viewData;
   project_ = project;
 
@@ -245,24 +241,16 @@ void Player::Stop() {
   mixer_.Unlock();
 }
 
-const char *Player::GetPlayedNote(int channel) {
-  return mixer_.GetPlayedNote(channel);
+int Player::GetChannelNote(int channel) {
+  return mixer_.GetChannelNote(channel);
 }
 
-const char *Player::GetPlayedOctive(int channel) {
-  return mixer_.GetPlayedOctive(channel);
-}
-
-const char *Player::GetPlayedInstrument(int channel) {
-  if ((mixer_.GetPlayedOctive(channel))[1] == ' ') {
-    return mixer_.GetPlayedOctive(channel);
-  } else {
-    if (!IsChannelMuted(channel)) {
-      return (char *)(&(instrumentOnChannel_[channel][0]));
-    } else {
-      return "--";
-    }
+uint8_t Player::GetPlayedInstrument(int channel) {
+  if (!IsChannelMuted(channel)) {
+    return instrumentOnChannel_[channel];
   }
+
+  return NO_INSTRUMENT;
 }
 
 bool Player::GetPlayedSliceIndex(int channel, uint8_t &sliceIndex) {
@@ -880,9 +868,7 @@ void Player::playCursorPosition(int channel) {
           note += viewData_->song_->chain_.steps_[chain][chainPos].transpose;
           note += project_->GetTranspose();
         }
-        instrumentOnChannel_[channel][0] = (instr / 16) > 9 ? 'A' - 10 + (instr / 16) : '0' + (instr / 16);
-        instrumentOnChannel_[channel][1] = (instr % 16) > 9 ? 'A' - 10 + (instr % 16) : '0' + (instr % 16);
-        instrumentOnChannel_[channel][2] = '\0';
+        instrumentOnChannel_[channel] = instr;
 
         // Check if note is in acceptable midi range
 
@@ -972,7 +958,7 @@ void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool st
   }
 
   note += semitoneOffset;
-  while (note > 127) {
+  while (note > HIGHEST_NOTE) {
     note -= 12;
   }
   while (note < 0) {
@@ -1338,12 +1324,14 @@ etl::array<stereosample, SONG_CHANNEL_COUNT> *Player::GetMixerLevels() {
 // Direct note playback methods for MIDI
 
 void Player::PlayNote(uint16_t instrumentIndex, uint16_t channel, unsigned char note, unsigned char velocity) {
-  if (!project_)
+  if (!project_) {
     return;
+  }
 
   InstrumentBank *bank = project_->GetInstrumentBank();
-  if (!bank)
+  if (!bank) {
     return;
+  }
 
   I_Instrument *instrument = bank->GetInstrument(instrumentIndex);
   if (instrument) {

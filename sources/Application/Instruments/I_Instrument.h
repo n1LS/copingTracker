@@ -22,9 +22,11 @@
 #include "Foundation/Variables/VariableContainer.h"
 
 enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_MIDI, IT_SID, IT_OPAL, IT_CHIPTUNE, IT_LAST };
+
 // non-linear volume (4-bit) mapping to volume scaler
 static const uint8_t volumeLUT[16] = { 0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 160, 193, 228, 245, 255 };
-static const char *InstrumentTypeNames[IT_LAST] = {"NONE", "SAMPLE", "MIDI", "SID", "OPAL", "Chiptune"};
+
+static const char *InstrumentTypeNames[IT_LAST] = {"None", "Sample", "MIDI", "SID", "OPL3", "Chiptune"};
 
 class I_Instrument : public VariableContainer, public Observable, public Persistent {
 protected:

@@ -71,7 +71,7 @@ void PlayerMixer::BindProject(Project *project) {
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     lastInstrument_[i] = 0;
     isChannelPlaying_[i] = false;
-    notes_[i] = 0xFF;
+    notes_[i] = NO_NOTE;
   }
 }
 
@@ -227,27 +227,6 @@ int PlayerMixer::GetChannelNote(int channel) {
 
 int PlayerMixer::GetChannelVolume(int channel) {
   return volume_[channel];
-}
-
-const char *PlayerMixer::GetPlayedNote(int channel) {
-
-  if (notes_[channel] <= HIGHEST_NOTE) {
-    note2visualizer(notes_[channel], noteBuffer);
-    return noteBuffer;
-  }
-  return "  ";
-}
-
-const char *PlayerMixer::GetPlayedOctive(int channel) {
-  if (notes_[channel] <= HIGHEST_NOTE) {
-    if (!IsChannelMuted(channel)) {
-      oct2visualizer(notes_[channel], noteBuffer);
-      return noteBuffer;
-    } else {
-      return "--";
-    }
-  }
-  return "  ";
 }
 
 bool PlayerMixer::GetPlayedSliceIndex(int channel, uint8_t &sliceIndex) {

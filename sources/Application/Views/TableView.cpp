@@ -169,7 +169,7 @@ void TableView::extendSelection() {
 
 void TableView::copySelection() {
 
-  // Keep up with row,col of selection coz
+  // Keep up with row,col of selection because
   // fillClipboardData will trash it
 
   fillClipboardData();
@@ -184,7 +184,7 @@ void TableView::copySelection() {
 
 void TableView::cutSelection() {
 
-  // Keep up with row,col of selection coz
+  // Keep up with row,col of selection because
   // fillClipboardData will trash it
 
   fillClipboardData();

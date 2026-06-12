@@ -245,9 +245,7 @@ void ChainView::extendSelection() {
 
 void ChainView::copySelection() {
 
-  // Keep up with row,col of selection coz
-  // fillClipboardData will trash it
-
+  // Keep up with row,col of selection because fillClipboardData will trash it
   //	saveClipboardPosition() ;
 
   fillClipboardData();
@@ -269,7 +267,7 @@ void ChainView::copySelection() {
 
 void ChainView::cutSelection() {
 
-  // Keep up with row,col of selection coz
+  // Keep up with row,col of selection because
   // fillClipboardData will trash it
 
   //	saveClipboardPosition() ;

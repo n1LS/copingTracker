@@ -150,9 +150,9 @@ struct Theme {
   };
 
   struct Phrase {
-    SWITCHABLE(note, LIGHT_RED, RED)
+    SWITCHABLE(note, WHITE, LIGHT_GRAY)
     SWITCHABLE(instrument, LIGHT_BLUE, BLUE)
-    SWITCHABLE(volume, LIGHT_MAGENTA, MAGENTA)
+    SWITCHABLE(volume, LIGHT_RED, RED)
     SWITCHABLE(command1, LIGHT_YELLOW, YELLOW)
     SWITCHABLE(command2, LIGHT_GREEN, GREEN)
     SWITCHABLE(command3, LIGHT_CYAN, CYAN)
@@ -262,6 +262,7 @@ protected:
   GUIPoint GetTitlePosition();
 
   void drawMap();
+  void drawRegularNote(const GUIPoint &pos, uint8_t channel);
   void drawNotes();
   void drawRowNumbers(int x, int y, int start, int numRows);
   void drawHelpLegend(FourCC command);

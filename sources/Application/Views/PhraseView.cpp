@@ -186,7 +186,7 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
         vol = 0xFF;
       } else if (direction == VUD_LEFT) {
         vol = std::max(-1, vol - 1);
-      } else if (direction == VUD_UP) {
+      } else if (direction == VUD_RIGHT) {
         vol = std::min(0x0F, vol + 1);
       } 
       lastVolume_ = vol;
@@ -567,8 +567,7 @@ void PhraseView::fillClipboardData() {
   updateCursor(0, 0);
 }
 
-void PhraseView::updateSelectionValue(ViewUpdateDirection direction) { // HERE
-
+void PhraseView::updateSelectionValue(ViewUpdateDirection direction) {
   saveRow_ = row_;
   saveCol_ = col_;
 
@@ -617,7 +616,7 @@ void PhraseView::extendSelection() {
 
 void PhraseView::copySelection() {
 
-  // Keep up with row,col of selection coz
+  // Keep up with row,col of selection because
   // fillClipboardData will trash it
 
   fillClipboardData();
@@ -638,7 +637,7 @@ void PhraseView::copySelection() {
 
 void PhraseView::cutSelection() {
 
-  // Keep up with row,col of selection coz
+  // Keep up with row,col of selection because
   // fillClipboardData will trash it
 
   fillClipboardData();
@@ -1213,7 +1212,7 @@ void PhraseView::DrawView() {
   for (int j = 0; j < 16; j++) {
     uint8_t vol = stepsBase[j].volume;
     setTextProps(colVolume, j, Theme::Phrase::volume(j % ALT_ROW_NUMBER == 0));
-    DrawChar(pos.x_, pos.y_, vol == 0xFF ? '-' : h2c__[vol & 0xF]);
+    DrawChar(pos.x_, pos.y_, vol == 0xFF ? '-' : hexChars[vol & 0xF]);
     pos.y_++;
   }
 
