@@ -45,6 +45,9 @@ public:
   virtual bool Init();
   virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retriggertrigger = true);
   virtual void Stop(int channel);
+
+  virtual void SetStepVolume(int channel, uint8_t volume);
+
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick);
   virtual bool IsInitialized();
   virtual bool IsEmpty();

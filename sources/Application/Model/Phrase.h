@@ -14,8 +14,8 @@
 
 #include "Foundation/Types/Types.h"
 
-#define PHRASE_COUNT     0x80
-#define NO_MORE_PHRASE   0x81
+#define PHRASE_COUNT 0x80
+#define NO_MORE_PHRASE 0x81
 #define STEPS_PER_PHRASE 16
 
 struct PhraseStep {

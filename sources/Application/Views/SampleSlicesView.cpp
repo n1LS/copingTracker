@@ -230,7 +230,7 @@ void SampleSlicesView::DrawView() {
   DrawTitle(char_back_s " Sample Slices");
 
   bool hasModal = HasModalView();
-  
+
   if (!hasModal) {
     drawWaveform();
     ClearTextRect(0, 9, SCREEN_WIDTH, 3);

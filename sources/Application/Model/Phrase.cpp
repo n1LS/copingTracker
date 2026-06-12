@@ -30,7 +30,7 @@ void Phrase::Reset() {
       steps_[i][j].param1 = 0x00;
       steps_[i][j].cmd2 = NO_COMMAND;
       steps_[i][j].param2 = 0x00;
-      steps_[i][j].volume = 0xFF;
+      steps_[i][j].volume = NO_VOLUME;
     }
     isUsed_[i] = false;
   }

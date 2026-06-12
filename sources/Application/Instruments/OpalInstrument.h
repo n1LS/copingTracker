@@ -32,6 +32,8 @@ public:
   virtual bool Start(int channel, unsigned char note, uint8_t volume, bool etrigger = true);
   virtual void Stop(int channel);
 
+  virtual void SetStepVolume(int channel, uint8_t volume);
+
   // size refers to the number of samples
   // should always fill interleaved stereo / 16bit
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick);

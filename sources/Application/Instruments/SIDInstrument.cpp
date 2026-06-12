@@ -128,7 +128,7 @@ bool SIDInstrument::Start(int c, unsigned char note, uint8_t volume, bool retrig
     case SID1:
       if (SID1RenderMaster) {
         SID1RenderMaster->SetRender(false);
-        
+
         Trace::Debug("Previous renderer for SID1 was %s", SID1RenderMaster->GetName().c_str());
       }
       SID1RenderMaster = this;
@@ -200,6 +200,10 @@ bool SIDInstrument::Start(int c, unsigned char note, uint8_t volume, bool retrig
   return true;
 }
 
+void SIDInstrument::SetStepVolume(int channel, uint8_t volume) {
+  stepVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+}
+
 void SIDInstrument::Stop(int c) {
   playing_ = false;
   int osc = GetOsc();
@@ -212,7 +216,7 @@ bool SIDInstrument::Render(int channel, fixed *buffer, int size, bool updateTick
 
     // clear the fixed point buffer
     memset(buffer, 0, size * 2 * sizeof(fixed));
-    
+
     // apply output level
     sid_->cRSID_emulateWavesBuffer(buffer, size, stepVolume_);
 

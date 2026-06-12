@@ -136,7 +136,7 @@ void PhraseView::updateCursor(int dx, int dy) {
 
   GUIPoint anchor = GetAnchor();
   GUIPoint p(anchor);
-  
+
   switch (col_) {
     case colCmdVal1:
       p.x_ += 12; // TODO: pick from constant array
@@ -150,7 +150,7 @@ void PhraseView::updateCursor(int dx, int dy) {
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
       break;
-    default: 
+    default:
       break;
   }
 
@@ -162,7 +162,7 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
 
   unsigned char *c = 0;
   unsigned char limit = 0;
-  
+
   bool wrap = false;
 
   switch (col_ + xOffset) {
@@ -171,119 +171,133 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
       limit = HIGHEST_NOTE;
       wrap = true;
       break;
-    
+
     case colInstrument:
       c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].instrument;
       limit = MAX_INSTRUMENT_COUNT - 1;
       wrap = true;
       break;
-    
-    case colVolume: {
-      uint8_t &vol = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].volume;
-      if (direction == VUD_UP) {
-        vol = 0x0F;
-      } else if (direction == VUD_DOWN) {
-        vol = 0xFF;
-      } else if (direction == VUD_LEFT) {
-        vol = std::max(-1, vol - 1);
-      } else if (direction == VUD_RIGHT) {
-        vol = std::min(0x0F, vol + 1);
-      } 
-      lastVolume_ = vol;
-      break;
-    }
 
-    case colCmd1: {
-      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-      FourCC cc = FourCC::enum_type(step.cmd1);
-      switch (direction) {
-        case VUD_RIGHT:
-          cc = CommandList::GetNext(cc);
-          break;
-        case VUD_UP:
-          cc = CommandList::GetNextAlpha(cc);
-          break;
-        case VUD_LEFT:
-          cc = CommandList::GetPrev(cc);
-          break;
-        case VUD_DOWN:
-          cc = CommandList::GetPrevAlpha(cc);
-          break;
+    case colVolume:
+      {
+        uint8_t &vol = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].volume;
+        if (direction == VUD_UP) {
+          vol = 0x0F;
+        } else if (direction == VUD_DOWN) {
+          vol = 0xFF;
+        } else if (direction == VUD_LEFT) {
+          if (vol == 0) {
+            // below 0 is no value
+            vol = NO_VOLUME;
+          } else if (vol != NO_VOLUME) {
+            vol--;
+          }
+        } else if (direction == VUD_RIGHT) {
+          if (vol == NO_VOLUME) {
+            vol = 0;
+          } else {
+            vol = std::min(0x0F, vol + 1);
+          }
+        }
+        lastVolume_ = vol;
+        break;
       }
-      step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
-      lastCmd_ = cc;
-      break;
-    }
 
-    case colCmdVal1: {
-      switch (direction) {
-        case VUD_RIGHT:
-          cmdEditField_.ProcessArrow(BM_RIGHT);
-          break;
-        case VUD_UP:
-          cmdEditField_.ProcessArrow(BM_UP);
-          break;
-        case VUD_LEFT:
-          cmdEditField_.ProcessArrow(BM_LEFT);
-          break;
-        case VUD_DOWN:
-          cmdEditField_.ProcessArrow(BM_DOWN);
-          break;
+    case colCmd1:
+      {
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
+        FourCC cc = FourCC::enum_type(step.cmd1);
+        switch (direction) {
+          case VUD_RIGHT:
+            cc = CommandList::GetNext(cc);
+            break;
+          case VUD_UP:
+            cc = CommandList::GetNextAlpha(cc);
+            break;
+          case VUD_LEFT:
+            cc = CommandList::GetPrev(cc);
+            break;
+          case VUD_DOWN:
+            cc = CommandList::GetPrevAlpha(cc);
+            break;
+        }
+        step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
+        lastCmd_ = cc;
+        break;
       }
-      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-      FourCC currentCmd = FourCC::enum_type(step.cmd1);
-      uint8_t paramValue = cmdEdit_.GetInt();
-      paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-      cmdEdit_.SetInt(paramValue);
-      step.param1 = paramValue;
-      lastParam_ = paramValue;
-      break;
-    }
-    case colCmd2: {
-      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-      FourCC cc = FourCC::enum_type(step.cmd2);
-      switch (direction) {
-        case VUD_RIGHT:
-          cc = CommandList::GetNext(cc);
-          break;
-        case VUD_UP:
-          cc = CommandList::GetNextAlpha(cc);
-          break;
-        case VUD_LEFT:
-          cc = CommandList::GetPrev(cc);
-          break;
-        case VUD_DOWN:
-          cc = CommandList::GetPrevAlpha(cc);
-          break;
+
+    case colCmdVal1:
+      {
+        switch (direction) {
+          case VUD_RIGHT:
+            cmdEditField_.ProcessArrow(BM_RIGHT);
+            break;
+          case VUD_UP:
+            cmdEditField_.ProcessArrow(BM_UP);
+            break;
+          case VUD_LEFT:
+            cmdEditField_.ProcessArrow(BM_LEFT);
+            break;
+          case VUD_DOWN:
+            cmdEditField_.ProcessArrow(BM_DOWN);
+            break;
+        }
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
+        FourCC currentCmd = FourCC::enum_type(step.cmd1);
+        uint8_t paramValue = cmdEdit_.GetInt();
+        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
+        cmdEdit_.SetInt(paramValue);
+        step.param1 = paramValue;
+        lastParam_ = paramValue;
+        break;
       }
-      step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
-      lastCmd_ = cc;
-      break;
-    }
-    case colCmdVal2: {
-      switch (direction) {
-        case VUD_RIGHT:
-          cmdEditField_.ProcessArrow(BM_RIGHT);
-          break;
-        case VUD_UP:
-          cmdEditField_.ProcessArrow(BM_UP);
-          break;
-        case VUD_LEFT:
-          cmdEditField_.ProcessArrow(BM_LEFT);
-          break;
-        case VUD_DOWN:
-          cmdEditField_.ProcessArrow(BM_DOWN);
-          break;
+    case colCmd2:
+      {
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
+        FourCC cc = FourCC::enum_type(step.cmd2);
+        switch (direction) {
+          case VUD_RIGHT:
+            cc = CommandList::GetNext(cc);
+            break;
+          case VUD_UP:
+            cc = CommandList::GetNextAlpha(cc);
+            break;
+          case VUD_LEFT:
+            cc = CommandList::GetPrev(cc);
+            break;
+          case VUD_DOWN:
+            cc = CommandList::GetPrevAlpha(cc);
+            break;
+        }
+        step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
+        lastCmd_ = cc;
+        break;
       }
-      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-      FourCC currentCmd = FourCC::enum_type(step.cmd2);
-      uint8_t paramValue = cmdEdit_.GetInt();
-      paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-      cmdEdit_.SetInt(paramValue);
-      step.param2 = paramValue;
-      lastParam_ = paramValue;
-      break;
-    }
+    case colCmdVal2:
+      {
+        switch (direction) {
+          case VUD_RIGHT:
+            cmdEditField_.ProcessArrow(BM_RIGHT);
+            break;
+          case VUD_UP:
+            cmdEditField_.ProcessArrow(BM_UP);
+            break;
+          case VUD_LEFT:
+            cmdEditField_.ProcessArrow(BM_LEFT);
+            break;
+          case VUD_DOWN:
+            cmdEditField_.ProcessArrow(BM_DOWN);
+            break;
+        }
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
+        FourCC currentCmd = FourCC::enum_type(step.cmd2);
+        uint8_t paramValue = cmdEdit_.GetInt();
+        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
+        cmdEdit_.SetInt(paramValue);
+        step.param2 = paramValue;
+        lastParam_ = paramValue;
+        break;
+      }
   }
 
   if ((c) && (*c != NO_NOTE)) {
@@ -339,16 +353,16 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
 
     switch (col_ + xOffset) {
       case colNote:
-          lastNote_ = *c;
-          // Need to restart audition to update it with the new note
-          startAudition(false);
-          break;
+        lastNote_ = *c;
+        // Need to restart audition to update it with the new note
+        startAudition(false);
+        break;
 
       case colInstrument:
         lastInstr_ = *c;
         break;
 
-      // TODO: store last volume as well?
+        // TODO: store last volume as well?
 
       default:
         break;
@@ -364,52 +378,56 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
 void PhraseView::pasteLast() {
 
   switch (col_) {
-    case colNote: {
-      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-      if (step.note == NO_NOTE) {
-        step.note = lastNote_;
-        step.instrument = lastInstr_;
-        isDirty_ = true;
-      } else {
-        lastNote_ = step.note;
-        lastInstr_ = step.instrument;
-      }
-      break;
-    }
-    case colInstrument: {
-      uint8_t &instr = phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
-      if (instr == 0xFF) {
-        instr = lastInstr_;
-        isDirty_ = true;
-      } else {
-        lastInstr_ = instr;
-      }
-      break;
-    }
-    case colVolume: {
-      uint8_t &vol = phrase_->steps_[viewData_->currentPhrase_][row_].volume;
-      if (vol == 0xFF) {
-        if (lastVolume_ != 0xFF) {
-          vol = lastVolume_;
+    case colNote:
+      {
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
+        if (step.note == NO_NOTE) {
+          step.note = lastNote_;
+          step.instrument = lastInstr_;
           isDirty_ = true;
+        } else {
+          lastNote_ = step.note;
+          lastInstr_ = step.instrument;
         }
-      } else {
-        lastVolume_ = vol;
+        break;
       }
-      break;
-    }
+    case colInstrument:
+      {
+        uint8_t &instr = phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
+        if (instr == 0xFF) {
+          instr = lastInstr_;
+          isDirty_ = true;
+        } else {
+          lastInstr_ = instr;
+        }
+        break;
+      }
+    case colVolume:
+      {
+        uint8_t &vol = phrase_->steps_[viewData_->currentPhrase_][row_].volume;
+        if (vol == 0xFF) {
+          if (lastVolume_ != 0xFF) {
+            vol = lastVolume_;
+            isDirty_ = true;
+          }
+        } else {
+          lastVolume_ = vol;
+        }
+        break;
+      }
 
-    case colCmd1: {
-      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-      FourCC cmd1 = FourCC::enum_type(step.cmd1);
-      if (cmd1 == FourCC::InstrumentCommandNone) {
-        step.cmd1 = static_cast<uint8_t>(static_cast<char>(lastCmd_));
-        isDirty_ = true;
-      } else {
-        lastCmd_ = cmd1;
+    case colCmd1:
+      {
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
+        FourCC cmd1 = FourCC::enum_type(step.cmd1);
+        if (cmd1 == FourCC::InstrumentCommandNone) {
+          step.cmd1 = static_cast<uint8_t>(static_cast<char>(lastCmd_));
+          isDirty_ = true;
+        } else {
+          lastCmd_ = cmd1;
+        }
+        break;
       }
-      break;
-    }
     case colCmdVal1:
       // TODO check if this is not needed
       /*			s=phrase_->param1_+(16*viewData_->currentPhrase_+row_) ;
@@ -421,17 +439,18 @@ void PhraseView::pasteLast() {
       �*/
       break;
 
-    case colCmd2: {
-      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-      FourCC cmd2 = FourCC::enum_type(step.cmd2);
-      if (cmd2 == FourCC::InstrumentCommandNone) {
-        step.cmd2 = static_cast<uint8_t>(static_cast<char>(lastCmd_));
-        isDirty_ = true;
-      } else {
-        lastCmd_ = cmd2;
+    case colCmd2:
+      {
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
+        FourCC cmd2 = FourCC::enum_type(step.cmd2);
+        if (cmd2 == FourCC::InstrumentCommandNone) {
+          step.cmd2 = static_cast<uint8_t>(static_cast<char>(lastCmd_));
+          isDirty_ = true;
+        } else {
+          lastCmd_ = cmd2;
+        }
+        break;
       }
-      break;
-    }
     case colCmdVal2:
       // TODO check if this is not needed
       /*			s=phrase_->param2_+(16*viewData_->currentPhrase_+row_) ;
@@ -937,11 +956,11 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
       if ((col_ == colInstrument) || (col_ == colCmdVal1) || (col_ == colCmdVal2)) {
         viewMode_ = VM_NEW;
       } else {
-          // for note, volume and instrument:
-          // Start auditionq, note stopping audition happens in
-          // processButtonMask on key up
-          stopAudition();
-          startAudition(true);
+        // for note, volume and instrument:
+        // Start auditionq, note stopping audition happens in
+        // processButtonMask on key up
+        stopAudition();
+        startAudition(true);
       }
     }
   } else if (mask & BM_NAV) {

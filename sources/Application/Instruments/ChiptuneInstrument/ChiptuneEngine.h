@@ -210,7 +210,7 @@ typedef struct voice_t {
   uint32_t time; // sample counter
   uint8_t tock;  // sample counter for 1000Hz updates
 
-  uint8_t stepVolume; 
+  uint8_t stepVolume;
 
   uint8_t alignmentSentinel[2]; // placeholder to guarantee alignment & padding
 
@@ -668,6 +668,18 @@ typedef struct voice_t {
     }
 
     flags.arpeggio = 1; // set arpeggio flag
+  }
+
+  void set_step_volume(uint8_t inVolume) {
+    stepVolume = inVolume;
+    
+    uint32_t calculatedVolume = ((uint32_t)parameters.level * inVolume) >> 8;
+    volume.level = calculatedVolume;
+    volume.target = calculatedVolume;
+    volume.current = calculatedVolume << 8;
+    volume.step = 0;
+
+    calculate_gain();
   }
 } voice_t;
 #pragma pack(pop)

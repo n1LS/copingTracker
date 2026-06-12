@@ -30,7 +30,7 @@ void PlayerChannel::StartInstrument(I_Instrument *instr, unsigned char note, uin
     StopInstrument();
   }
 
-  if (instr->Start(index_, note, volume, trigger)) { 
+  if (instr->Start(index_, note, volume, trigger)) {
     // note could be refused because it's out of the keymap
     instr_ = instr;
   } else {
@@ -50,7 +50,7 @@ bool PlayerChannel::Render(fixed *buffer, int samplecount) {
     bool tableSlice = SyncMaster::GetInstance()->TableSlice();
     bool status = instr_->Render(index_, buffer, samplecount, tableSlice);
     return (status && !muted_);
-  } 
+  }
 
   return false;
 }

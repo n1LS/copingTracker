@@ -370,7 +370,7 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
 
   rp->midiNote_ = note;
 
-  if (lastMidiNote_[channel] == -1) { 
+  if (lastMidiNote_[channel] == -1) {
     // To prevent First LEGA to go bonkers
     lastMidiNote_[channel] = note;
   }
@@ -388,7 +388,7 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
 
   int rootNote = (rootNote_.GetInt() - 60) + source_->GetRootNote(rp->midiNote_);
 
-  // step volume 
+  // step volume
   uint32_t stepVolume = (volume == NO_VOLUME) ? 256 : volumeLUT[volume];
   uint32_t calculatedVolume = (volume_.GetInt() * stepVolume) >> 8;
   rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
@@ -575,6 +575,14 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
     rp->activeUpdaters_.clear();
   }
   return true;
+}
+
+void SampleInstrument::SetStepVolume(int channel, uint8_t volume) {
+  uint32_t stepVolume = (volume == NO_VOLUME) ? 256 : volumeLUT[volume];
+  uint32_t calculatedVolume = (volume_.GetInt() * stepVolume) >> 8;
+
+  renderParams *rp = renderParams_ + channel;
+  rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
 }
 
 void SampleInstrument::Stop(int channel) {

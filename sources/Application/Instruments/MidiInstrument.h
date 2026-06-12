@@ -44,6 +44,8 @@ public:
   virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true);
   virtual void Stop(int channel);
 
+  virtual void SetStepVolume(int channel, uint8_t volume);
+
   // size refers to the number of samples
   // should always fill interleaved stereo / 16bit
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick);
@@ -90,6 +92,7 @@ private:
 
   etl::array<uint8_t, MAX_MIDI_CHORD_NOTES + 1> lastNotes_[SONG_CHANNEL_COUNT];
   uint8_t lastVolumes_[SONG_CHANNEL_COUNT];
+  uint32_t stepVolume_;
   int remainingTicks_;
   bool playing_;
   bool retrig_;

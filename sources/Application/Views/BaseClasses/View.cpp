@@ -174,7 +174,7 @@ void View::drawRegularNote(const GUIPoint &pos, uint8_t channel) {
   uint8_t instrument = player->GetPlayedInstrument(channel);
 
   char buf[3];
-      
+
   if (note == NOTE_OFF) {
     strcpy(buf, "of");
   } else if (note == NO_NOTE) {
@@ -184,8 +184,8 @@ void View::drawRegularNote(const GUIPoint &pos, uint8_t channel) {
   }
 
   DrawString(pos.x_, pos.y_ + 0, buf); // row for the note values
-  
-  // draw octave 
+
+  // draw octave
 
   if (note != NO_NOTE) {
     npf_snprintf(buf, sizeof(buf), " %X", note / 12);
@@ -201,10 +201,10 @@ void View::drawRegularNote(const GUIPoint &pos, uint8_t channel) {
   } else {
     hex2char(instrument, buf);
   }
-  
+
   // draw instrument number
-  DrawString(pos.x_, pos.y_ + 2, "  "); 
-}  
+  DrawString(pos.x_, pos.y_ + 2, "  ");
+}
 
 void View::drawNotes() {
   GUIPoint anchor = GetAnchor();
@@ -230,7 +230,7 @@ void View::drawNotes() {
         buf[2] = '\0';
         DrawString(pos.x_, pos.y_, buf);
         pos.y_++;
-        
+
         uint8_t instrument = player->GetPlayedInstrument(i);
         if (instrument == NO_INSTRUMENT) {
           strcpy(buf, "--");

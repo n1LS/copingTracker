@@ -35,6 +35,9 @@ public:
 
   virtual bool IsInitialized();
 
+  virtual void SetStepVolume(int channel, uint8_t volume) {
+  }
+
   virtual bool IsEmpty() {
     return true;
   };
@@ -45,7 +48,8 @@ public:
 
   virtual void OnStart();
 
-  virtual void Purge() {};
+  virtual void Purge() {
+  }
 
   virtual int GetTable();
   virtual bool GetTableAutomation();

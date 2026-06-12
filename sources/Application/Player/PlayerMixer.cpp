@@ -148,7 +148,8 @@ void PlayerMixer::Update(Observable &o, I_ObservableData *d) {
   ms->SetMasterVolume(project_->GetMasterVolume());
 }
 
-void PlayerMixer::StartInstrument(int channel, I_Instrument *instrument, unsigned char note, uint8_t volume, bool newInstrument) {
+void PlayerMixer::StartInstrument(int channel, I_Instrument *instrument, unsigned char note, uint8_t volume,
+                                  bool newInstrument) {
   channel_[channel]->StartInstrument(instrument, note, volume, newInstrument);
   lastInstrument_[channel] = instrument;
   notes_[channel] = note;

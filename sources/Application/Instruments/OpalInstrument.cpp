@@ -63,7 +63,8 @@ OpalInstrument::OpalInstrument()
   variables_.insert(variables_.end(), &op2TremVibSusKSR_);
 }
 
-OpalInstrument::~OpalInstrument() {};
+OpalInstrument::~OpalInstrument() {
+}
 
 bool OpalInstrument::Init() {
   // enable left/right only for 0 channel
@@ -72,7 +73,8 @@ bool OpalInstrument::Init() {
   return true;
 }
 
-void OpalInstrument::OnStart() {};
+void OpalInstrument::OnStart() {
+}
 
 bool OpalInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   stepVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
@@ -151,6 +153,11 @@ bool OpalInstrument::Start(int channel, unsigned char note, uint8_t volume, bool
   opl_.Port(0x81 + CHANNEL, (uint8_t)(adsr2 & 0x00FF));
 
   return true;
+}
+
+void OpalInstrument::SetStepVolume(int channel, uint8_t volume) {
+  stepVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+  ;
 }
 
 void OpalInstrument::Stop(int c) {

@@ -78,10 +78,14 @@ void MidiInstrument::OnStart() {
   svc_->RegisterActiveChannel(channel_.GetInt());
 }
 
+void MidiInstrument::SetStepVolume(int channel, uint8_t volume) {
+  lastVolumes_[channel] = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+}
+
 bool MidiInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   first_[channel] = true;
   lastNotes_[channel][0] = note;
-  lastVolumes_[channel] = volume; 
+  lastVolumes_[channel] = volume == NO_VOLUME ? 256 : volumeLUT[volume];
 
   Variable *v = FindVariable(FourCC::MidiInstrumentNoteLength);
   remainingTicks_ = v->GetInt();
@@ -136,7 +140,7 @@ bool MidiInstrument::Render(int channel, fixed *buffer, int size, bool updateTic
     MidiMessage msg;
     msg.status_ = MidiMessage::MIDI_NOTE_ON + mchannel;
     msg.data1_ = lastNotes_[channel][0];
-    uint8_t volume = lastVolumes_[channel];
+    uint8_t volume = (lastVolumes_[channel] * stepVolume_) >> 8;
     msg.data2_ = (volume != NO_VOLUME) ? static_cast<uint8_t>((velocity_ * volume) / 15) : velocity_;
     svc_->QueueMessage(msg);
 

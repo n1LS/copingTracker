@@ -812,109 +812,122 @@ void Player::updatePhrasePos(int pos, int channel) {
 }
 
 void Player::playCursorPosition(int channel) {
-
   int pos = viewData_->phrasePlayPos_[channel];
+  bool noteTriggered = false;
 
   // Get chain content and see if instr needs to be started/Stopped
   unsigned char currentPhrase = viewData_->currentPlayPhrase_[channel];
 
-  if (currentPhrase != 0xFF) {
+  if (currentPhrase == EMPTY_CHAIN_VALUE) {
+    return;
+  }
 
-    Song *song = viewData_->song_;
-    Phrase *phrase = &(song->phrase_);
-    unsigned char note = phrase->steps_[currentPhrase][pos].note;
-    unsigned char instr = phrase->steps_[currentPhrase][pos].instrument;
-    uint8_t stepVolume = phrase->steps_[currentPhrase][pos].volume;
+  Song *song = viewData_->song_;
+  Phrase *phrase = &(song->phrase_);
+  unsigned char note = phrase->steps_[currentPhrase][pos].note;
+  unsigned char instr = phrase->steps_[currentPhrase][pos].instrument;
+  uint8_t stepVolume = phrase->steps_[currentPhrase][pos].volume;
 
-    TableHolder *th = TableHolder::GetInstance();
-    TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
-    TablePlayback &atp = TablePlayback::GetAutomationPlayback(channel);
+  TableHolder *th = TableHolder::GetInstance();
+  TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
+  TablePlayback &atp = TablePlayback::GetAutomationPlayback(channel);
 
-    if (note == NOTE_OFF) {
-      mixer_.StopInstrument(channel);
-    } else if (note <= HIGHEST_NOTE) {
+  // note off ********************************************************************************************************
+  if (note == NOTE_OFF) {
+    mixer_.StopInstrument(channel);
+  } else if (note <= HIGHEST_NOTE) {
+    // note on *******************************************************************************************************
 
-      // Stop instrument if playing
+    // Stop instrument if playing
+    mixer_.StopInstrument(channel);
+    InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
 
-      mixer_.StopInstrument(channel);
-      InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+    // get instrument for next note
+    bool newInstrument = false;
 
-      // get instrument for next note
+    I_Instrument *instrument;
 
-      bool newInstrument = false;
+    if (instr != 0xFF) {
+      instrument = bank->GetInstrument(instr);
+      newInstrument = true;
+    } else {
+      instrument = mixer_.GetLastInstrument(channel);
+    }
 
-      I_Instrument *instrument;
-      if (instr != 0xFF) {
-        instrument = bank->GetInstrument(instr);
-        newInstrument = true;
-      } else {
-        instrument = mixer_.GetLastInstrument(channel);
+    if (instrument == NULL) {
+      instrument = bank->GetInstrument(0);
+    }
+
+    if (instrument != 0) {
+      int chain = viewData_->currentPlayChain_[channel];
+      int chainPos = viewData_->chainPlayPos_[channel];
+      bool preserveNote = false;
+      // TODO: this is special handling that should not happen here
+      if (instrument->GetType() == IT_SAMPLE) {
+        SampleInstrument *sampleInstrument = static_cast<SampleInstrument *>(instrument);
+        preserveNote = sampleInstrument->HasSlicesForPlayback();
       }
-
-      if (instrument == 0) {
-        instrument = bank->GetInstrument(0);
+      if (!preserveNote) {
+        note += viewData_->song_->chain_.steps_[chain][chainPos].transpose;
+        note += project_->GetTranspose();
       }
+      instrumentOnChannel_[channel] = instr;
 
-      if (instrument != 0) {
+      // Check if note is in acceptable midi range
 
-        int chain = viewData_->currentPlayChain_[channel];
-        int chainPos = viewData_->chainPlayPos_[channel];
-        bool preserveNote = false;
-        if (instrument->GetType() == IT_SAMPLE) {
-          SampleInstrument *sampleInstrument = static_cast<SampleInstrument *>(instrument);
-          preserveNote = sampleInstrument->HasSlicesForPlayback();
-        }
-        if (!preserveNote) {
-          note += viewData_->song_->chain_.steps_[chain][chainPos].transpose;
-          note += project_->GetTranspose();
-        }
-        instrumentOnChannel_[channel] = instr;
+      if (note < HIGHEST_PLAYABLE_NOTE) {
+        mixer_.StartInstrument(channel, instrument, note, stepVolume, newInstrument);
+        noteTriggered = true;
+        int instrTable = instrument->GetTable();
 
-        // Check if note is in acceptable midi range
+        // If an instrument number has been specified && instrument has table,
+        // we trigger the table.
 
-        if (note < 128) {
-          mixer_.StartInstrument(channel, instrument, note, stepVolume, newInstrument);
-          int instrTable = instrument->GetTable();
-
-          // If an instrument number has been specified && instrument has table,
-          // we trigger the table.
-
-          if ((instrTable != VAR_OFF) && (newInstrument)) {
-            Table &table = th->GetTable(instrTable);
-            bool automated = instrument->GetTableAutomation();
-            if (automated) {
-              atp.Start(instrument, table, true);
-              tpb.Stop();
-            } else {
-              atp.Stop();
-              tpb.Start(instrument, table, false);
-            }
+        if ((instrTable != VAR_OFF) && (newInstrument)) {
+          Table &table = th->GetTable(instrTable);
+          bool automated = instrument->GetTableAutomation();
+          if (automated) {
+            atp.Start(instrument, table, true);
+            tpb.Stop();
           } else {
-            // if there was an instrument number, we stop the table
-            if (newInstrument) {
-              atp.Stop();
-              tpb.Stop();
-            }
+            atp.Stop();
+            tpb.Start(instrument, table, false);
           }
         } else {
-          Trace::Error("Note outside range: %02x", (unsigned int)note);
+          // if there was an instrument number, we stop the table
+          if (newInstrument) {
+            atp.Stop();
+            tpb.Stop();
+          }
+        }
+      } else {
+        Trace::Error("Note outside range: %02x", (unsigned int)note);
+      }
+    }
+  }
+
+  if ((note <= HIGHEST_NOTE) || (instr != 0xFF)) {
+    I_Instrument *instrument = mixer_.GetInstrument(channel);
+    if (instrument) {
+      if (instrument->GetTableAutomation()) {
+        TablePlayerChange tpc;
+        tpc.timeToLive_ = timeToLive_[channel];
+        tpc.instrRetrigger_ = -1;
+        atp.ProcessStep(tpc);
+        timeToLive_[channel] = tpc.timeToLive_;
+        if (tpc.instrRetrigger_ >= 0) {
+          RetriggerChannelInstrument(channel, DecodeRetriggerOffset(tpc.instrRetrigger_), false);
+          noteTriggered = true;
         }
       }
     }
-    if ((note <= HIGHEST_NOTE) || (instr != 0xFF)) {
-      I_Instrument *instrument = mixer_.GetInstrument(channel);
-      if (instrument) {
-        if (instrument->GetTableAutomation()) {
-          TablePlayerChange tpc;
-          tpc.timeToLive_ = timeToLive_[channel];
-          tpc.instrRetrigger_ = -1;
-          atp.ProcessStep(tpc);
-          timeToLive_[channel] = tpc.timeToLive_;
-          if (tpc.instrRetrigger_ >= 0) {
-            RetriggerChannelInstrument(channel, DecodeRetriggerOffset(tpc.instrRetrigger_), false);
-          };
-        }
-      }
+  }
+
+  if (!noteTriggered && stepVolume != NO_VOLUME) {
+    I_Instrument *instrument = mixer_.GetInstrument(channel);
+
+    if (instrument) {
+      instrument->SetStepVolume(channel, stepVolume);
     }
   }
 }
