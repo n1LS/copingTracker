@@ -116,6 +116,8 @@ void SIDInstrument::OnStart() {
 bool SIDInstrument::Start(int c, unsigned char note, uint8_t volume, bool retrigger) {
   Trace::Debug("Retrigger: %i", retrigger);
   gate_ = retrigger;
+  stepVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+
   // Select master render instrument
   // At each row of the sequencer we call start for each instrument in
   // the channel. With this we are ensuring that the only instrument that
@@ -126,6 +128,7 @@ bool SIDInstrument::Start(int c, unsigned char note, uint8_t volume, bool retrig
     case SID1:
       if (SID1RenderMaster) {
         SID1RenderMaster->SetRender(false);
+        
         Trace::Debug("Previous renderer for SID1 was %s", SID1RenderMaster->GetName().c_str());
       }
       SID1RenderMaster = this;
@@ -209,11 +212,13 @@ bool SIDInstrument::Render(int channel, fixed *buffer, int size, bool updateTick
 
     // clear the fixed point buffer
     memset(buffer, 0, size * 2 * sizeof(fixed));
-
-    sid_->cRSID_emulateWavesBuffer(buffer, size);
+    
+    // apply output level
+    sid_->cRSID_emulateWavesBuffer(buffer, size, stepVolume_);
 
     return true;
   }
+
   return false;
 }
 

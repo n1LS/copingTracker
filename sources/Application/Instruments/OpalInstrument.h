@@ -63,6 +63,7 @@ private:
   Opal opl_ = (44100);
 
   uint8_t breg;
+  uint32_t stepVolume_;
 
   etl::list<Variable *, 16> variables_;
 

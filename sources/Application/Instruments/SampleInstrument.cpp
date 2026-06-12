@@ -468,9 +468,11 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
       {
 
         float freq = 261.6255653006f; // C3
-                                      /*			if (loopmode==SILM_OSCFINE) {
-                                                                      freq=float(pow(2.0,-0.75))*440; // C3
-                                                              }*/
+        /*
+        if (loopmode==SILM_OSCFINE) {
+          freq=float(pow(2.0,-0.75))*440; // C3
+        }
+        */
         int length = rp->rendLoopEnd_ - rp->rendLoopStart_;
         if (length == 0)
           length = 1;

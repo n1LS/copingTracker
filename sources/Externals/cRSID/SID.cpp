@@ -202,11 +202,14 @@ cRSID::combinedWF(const unsigned char *WFarray, unsigned short oscval,
   return PrevWavData[Channel] << 8;
 }
 
-void cRSID::cRSID_emulateWavesBuffer(fixed *buffer, int size) {
+void cRSID::cRSID_emulateWavesBuffer(fixed *buffer, int size, unsigned int volume) {
   for (int n = 0; n < size; n++) {
     // Have to calculate ASDRs somewhere here
     cRSID_emulateADSRs(7);
     int output = cRSID_emulateWaves();
+    output *= volume;
+    output /= 256;
+    
     buffer[2 * n] = buffer[2 * n + 1] = (fixed)output << 15; // L & R
   }
 }

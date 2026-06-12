@@ -92,7 +92,7 @@ private:
 
   // store trigger notes, 0xFF = none
 
-  int notes_[SONG_CHANNEL_COUNT];
+  uint8_t notes_[SONG_CHANNEL_COUNT];
   unsigned char volume_[SONG_CHANNEL_COUNT];
 };
 

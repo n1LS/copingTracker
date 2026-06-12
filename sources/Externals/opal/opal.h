@@ -186,7 +186,7 @@ public:
   void Port(uint16_t reg_num, uint8_t val);
   void Sample(int16_t *left, int16_t *right);
 
-  void SampleBuffer(fixed *buffer, int size);
+  void SampleBuffer(fixed *buffer, int size, uint32_t volume);
 
 protected:
   void Init(int sample_rate);

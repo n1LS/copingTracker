@@ -107,6 +107,9 @@ private:
 
   bool playing_;
   bool gate_;
+
+  uint8_t stepVolume_;
+
   //  bool retrig_;
   // int retrigLoop_;
   TableSaveState tableState_;

@@ -75,6 +75,8 @@ bool OpalInstrument::Init() {
 void OpalInstrument::OnStart() {};
 
 bool OpalInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
+  stepVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+
   // channel wide settings
   // enable left/right output (D4, D5) & set algorithm D0
   // for now only 2 op so just Additive or FM
@@ -160,7 +162,7 @@ bool OpalInstrument::Render(int channel, fixed *buffer, int size, bool updateTic
   PROFILE_SCOPE("OpalInstrument::Render");
 
   // optimise to remove function calls in hot loop
-  opl_.SampleBuffer(buffer, size);
+  opl_.SampleBuffer(buffer, size, stepVolume_);
 
   return true;
 }
