@@ -8,7 +8,7 @@
  * This file is part of the copingTracker firmware
  */
 
-#include "System/RemoteUI/RemoteUIProtocol.h"
+#include "System/mirrorUI/mirrorUIProtocol.h"
 #include <cstdint>
 
 #ifndef PICO_REMOTE_UI_H_

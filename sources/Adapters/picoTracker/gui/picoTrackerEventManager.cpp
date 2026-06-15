@@ -18,7 +18,7 @@
 #include "Application/Model/Config.h"
 #include "Services/Midi/MidiService.h"
 #include "System/FileSystem/FileSystem.h"
-#include "picoRemoteUI.h"
+#include "mirrorUI.h"
 #include "picoTrackerGUIWindowImp.h"
 #include "usb_utils.h"
 
@@ -198,20 +198,6 @@ void picoTrackerEventManager::ProcessInputEvent() {
   char inBuffer[16];
   auto readbytes = readFromUSBCDC(inBuffer, 16);
   if (readbytes > 0) {
-    Trace::Debug("Read %d bytes from USB CDC", readbytes);
-    if (inBuffer[0] != REMOTE_INPUT_CMD_MARKER) {
-      Trace::Debug("Invalid input command marker %d", inBuffer[0]);
-      return;
-    }
-    switch (inBuffer[1]) {
-      case FULL_REFRESH_CMD:
-        Trace::Debug("Full refresh requested!");
-        queue = picoTrackerEventQueue::GetInstance();
-        queue->push(picoTrackerEvent(PICO_REDRAW));
-        break;
-
-      default:
-        break;
-    }
+    // TODO
   }
 }

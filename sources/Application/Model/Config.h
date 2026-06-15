@@ -60,7 +60,7 @@ private:
   WatchedVariable lineOut_;
   WatchedVariable midiDevice_;
   WatchedVariable midiSync_;
-  WatchedVariable remoteUI_;
+  WatchedVariable mirrorUI_;
   WatchedVariable importResampler_;
   WatchedVariable uiFont_;
   StringVariable<MAX_VARIABLE_STRING_LENGTH> themeName_;

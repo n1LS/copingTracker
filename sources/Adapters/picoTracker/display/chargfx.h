@@ -28,7 +28,6 @@ void chargfx_init();
 void chargfx_clear(Color color);
 void chargfx_draw_screen();
 void chargfx_draw_changed();
-void chargfx_draw_changed_simple();
 void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
@@ -40,6 +39,7 @@ uint8_t chargfx_get_cursor_y();
 void chargfx_putc(char c);
 void chargfx_set_palette_color(int idx, uint16_t rgb565_color);
 void chargfx_set_font_index(uint8_t idx);
+void chargfx_get_screen_storage(const uint8_t *outScreen, const uint8_t *outColors, const uint8_t *outChanged) {
 
 #ifdef __cplusplus
 }

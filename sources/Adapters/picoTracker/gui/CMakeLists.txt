@@ -4,7 +4,7 @@ add_library(platform_gui
   picoTrackerGUIWindowImp.cpp
   picoTrackerEventManager.cpp
   SerialDebugUI.cpp
-  picoRemoteUI.cpp
+  mirrorUI.cpp
 )
 
 target_link_libraries(platform_gui PUBLIC

@@ -1,5 +1,5 @@
 add_library(remote_ui
-  RemoteUIProtocol.cpp
+  mirrorUIProtocol.cpp
 )
 
 target_include_directories(remote_ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

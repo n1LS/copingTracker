@@ -32,7 +32,7 @@ static const char *lineOutOptions[3] = {"HP Low", "HP High", "Line Level"};
 static const char *midiDeviceList[MIDI_DEVICE_LEN] = {"Off", "TRS", "USB", "TRS+USB"};
 static const char *midiSendSync[2] = {"Off", "Send"};
 static const char *midiClockSyncOptions[2] = {"Internal", "External"};
-static const char *remoteUIOnOff[2] = {"Off", "On"};
+static const char *mirrorUIOnOff[2] = {"Off", "On"};
 static const char *importResamplerOptions[] = {"None", "Linear"};
 static constexpr int kImportResamplerOptionCount = 2;
 
@@ -90,7 +90,7 @@ static const ConfigParam configParams[] = {
     {"LINEOUT", {.intValue = DEFAULT_LINEOUT}, FourCC::VarLineOut, lineOutOptions, 3, false},
     {"MIDIDEVICE", {.intValue = DEFAULT_MIDIDEVICE}, FourCC::VarMidiDevice, midiDeviceList, 4, false},
     {"MIDISYNC", {.intValue = DEFAULT_MIDISYNC}, FourCC::VarMidiSync, midiSendSync, 2, false},
-    {"REMOTEUI", {.intValue = DEFAULT_REMOTEUI}, FourCC::VarRemoteUI, remoteUIOnOff, 2, false},
+    {"MIRRORUI", {.intValue = DEFAULT_REMOTEUI}, FourCC::VarMirrorUI, mirrorUIOnOff, 2, false},
     {"UIFONT", {.intValue = ThemeConstants::DEFAULT_UIFONT}, FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES, ThemeConstants::THEME_FONT_COUNT, false},
 
     // Display brightness setting
@@ -121,7 +121,7 @@ Config::Config()
       lineOut_(FourCC::VarLineOut, lineOutOptions, 3, DEFAULT_LINEOUT),
       midiDevice_(FourCC::VarMidiDevice, midiDeviceList, 4, DEFAULT_MIDIDEVICE),
       midiSync_(FourCC::VarMidiSync, midiSendSync, 2, DEFAULT_MIDISYNC),
-      remoteUI_(FourCC::VarRemoteUI, remoteUIOnOff, 2, DEFAULT_REMOTEUI),
+      mirrorUI_(FourCC::VarMirrorUI, mirrorUIOnOff, 2, DEFAULT_REMOTEUI),
       importResampler_(FourCC::VarImportResampler, importResamplerOptions, kImportResamplerOptionCount, DEFAULT_IMPORT_RESAMPLER),
       uiFont_(FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES,
               ThemeConstants::THEME_FONT_COUNT, ThemeConstants::DEFAULT_UIFONT),
@@ -148,7 +148,7 @@ Config::Config()
   variables_.push_back(&lineOut_);
   variables_.push_back(&midiDevice_);
   variables_.push_back(&midiSync_);
-  variables_.push_back(&remoteUI_);
+  variables_.push_back(&mirrorUI_);
   variables_.push_back(&importResampler_);
   variables_.push_back(&uiFont_);
   variables_.push_back(&themeName_);

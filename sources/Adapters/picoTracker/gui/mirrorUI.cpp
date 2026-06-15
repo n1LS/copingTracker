@@ -8,7 +8,7 @@
  * This file is part of the copingTracker firmware
  */
 
-#include "picoRemoteUI.h"
+#include "mirrorUI.h"
 #include "tusb.h"
 #include <cstdint>
 
