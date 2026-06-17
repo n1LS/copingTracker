@@ -479,8 +479,13 @@ void PhraseView::cutPosition() {
   saveRow_ = row_;
   saveCol_ = col_;
 
-  if (col_ == colNote || col_ == colCmd1 || col_ == colCmd2) {
-    col_ += 1; // This way, A+B on note cuts the instruments too and parameters get cut with commands
+  // This way, A+B on note cuts the instruments/volume, too...
+  if (col_ == colNote) {
+    col_ += 2;
+  }
+  // ... and parameters get cut with commands
+  if (col_ == colCmd1 || col_ == colCmd2) {
+    col_ += 1; 
   }
 
   cutSelection();
