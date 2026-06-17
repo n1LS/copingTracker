@@ -17,6 +17,27 @@
 #include "ScreenView.h"
 #include "ViewData.h"
 
+typedef enum PhraseColumn {
+  colNote,
+  colInstrument,
+  colVolume,
+  colCmd1,
+  colCmdVal1,
+  colCmd2,
+  colCmdVal2,
+} PhraseColumn;
+
+inline PhraseColumn operator+(PhraseColumn lhs, int rhs) {
+  int value = static_cast<int>(lhs);
+  value = (value + (int)colCmdVal2 + 1 + rhs) % ((int)colCmdVal2 + 1);
+  return static_cast<PhraseColumn>(value);
+}
+
+inline PhraseColumn &operator+=(PhraseColumn &lhs, int rhs) {
+  lhs = lhs + rhs;
+  return lhs;
+}
+
 class PhraseView : public ScreenView {
 
 public:
@@ -60,11 +81,12 @@ protected:
 
 private:
   int row_;
-  int col_;
+  PhraseColumn col_;
   int lastNote_;
   int lastInstr_;
   int lastCmd_;
   int lastParam_;
+  uint8_t lastVolume_;
   Phrase *phrase_;
   int lastPlayingPos_;
   Variable cmdEdit_;
@@ -80,7 +102,7 @@ private:
     PhraseStep steps_[16];
   } clipboard_;
 
-  int saveCol_;
+  PhraseColumn saveCol_;
   int saveRow_;
 
   static short offsets_[2][4];

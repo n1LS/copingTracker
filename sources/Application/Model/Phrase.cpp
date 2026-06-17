@@ -25,11 +25,12 @@ void Phrase::Reset() {
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < STEPS_PER_PHRASE; j++) {
       steps_[i][j].note = NO_NOTE;
-      steps_[i][j].instr = NO_INSTRUMENT;
+      steps_[i][j].instrument = NO_INSTRUMENT;
       steps_[i][j].cmd1 = NO_COMMAND;
       steps_[i][j].param1 = 0x00;
       steps_[i][j].cmd2 = NO_COMMAND;
       steps_[i][j].param2 = 0x00;
+      steps_[i][j].volume = NO_VOLUME;
     }
     isUsed_[i] = false;
   }

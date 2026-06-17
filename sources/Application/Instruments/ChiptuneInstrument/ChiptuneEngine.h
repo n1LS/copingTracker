@@ -210,7 +210,9 @@ typedef struct voice_t {
   uint32_t time; // sample counter
   uint8_t tock;  // sample counter for 1000Hz updates
 
-  uint8_t alignmentSentinel[3]; // placeholder to guarantee alignment & padding
+  uint8_t stepVolume;
+
+  uint8_t alignmentSentinel[2]; // placeholder to guarantee alignment & padding
 
   // implementation ------------------------------------------------------------
 
@@ -269,7 +271,7 @@ typedef struct voice_t {
       if (flags.retrigger) {
         flags.retrigger = 0; // clear retrigger flag
         // retrigger without resetting clocks
-        note_on(note, false, parameters, true);
+        note_on(note, stepVolume, false, parameters, true);
       } else {
         // note off, kill everything
         wave = waveNone;
@@ -376,13 +378,16 @@ typedef struct voice_t {
     *right = (sample >> 8) * gain.right;
   }
 
-  inline void note_on(unsigned char note, bool retrigger, const InstrumentParameters &parameters,
+  inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const InstrumentParameters &parameters,
                       bool keepClocks = false) {
     // bool retrigger is currently unused
     this->parameters = parameters;
 
     // is this the best time to store that?
     lastFrequency = frequency;
+
+    // store volume
+    stepVolume = inVolume;
 
     // command settings
     legato.steps = 0;
@@ -399,9 +404,10 @@ typedef struct voice_t {
     pan.step = 0;
 
     // reset volume slide
-    volume.level = parameters.level;
-    volume.target = parameters.level;
-    volume.current = parameters.level << 8;
+    uint32_t calculatedVolume = ((uint32_t)parameters.level * (uint32_t)stepVolume) >> 8;
+    volume.level = calculatedVolume;
+    volume.target = calculatedVolume;
+    volume.current = calculatedVolume << 8;
     volume.step = 0;
 
     // oscillator frequency setup
@@ -414,7 +420,6 @@ typedef struct voice_t {
 
     // reset noise seed to get deterministic noise
     lfsr = 42;
-    //    noise = 67;
     lastSample = 42;
 
     this->note = note;
@@ -663,6 +668,18 @@ typedef struct voice_t {
     }
 
     flags.arpeggio = 1; // set arpeggio flag
+  }
+
+  void set_step_volume(uint8_t inVolume) {
+    stepVolume = inVolume;
+    
+    uint32_t calculatedVolume = ((uint32_t)parameters.level * inVolume) >> 8;
+    volume.level = calculatedVolume;
+    volume.target = calculatedVolume;
+    volume.current = calculatedVolume << 8;
+    volume.step = 0;
+
+    calculate_gain();
   }
 } voice_t;
 #pragma pack(pop)

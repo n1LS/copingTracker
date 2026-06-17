@@ -54,8 +54,10 @@ public:
   virtual bool Init();
 
   // Start & stop the instument
-  virtual bool Start(int channel, unsigned char note, bool retrigger = true);
+  virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true);
   virtual void Stop(int channel);
+
+  virtual void SetStepVolume(int channel, uint8_t volume);
 
   // size refers to the number of samples
   // should always fill interleaved stereo / 16bit
@@ -107,6 +109,9 @@ private:
 
   bool playing_;
   bool gate_;
+
+  uint8_t stepVolume_;
+
   //  bool retrig_;
   // int retrigLoop_;
   TableSaveState tableState_;

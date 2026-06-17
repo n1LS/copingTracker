@@ -22,7 +22,11 @@
 #include "Foundation/Variables/VariableContainer.h"
 
 enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_MIDI, IT_SID, IT_OPAL, IT_CHIPTUNE, IT_LAST };
-static const char *InstrumentTypeNames[IT_LAST] = {"NONE", "SAMPLE", "MIDI", "SID", "OPAL", "Chiptune"};
+
+// non-linear volume (4-bit) mapping to volume scaler
+static const uint8_t volumeLUT[16] = {0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 160, 193, 228, 245, 255};
+
+static const char *InstrumentTypeNames[IT_LAST] = {"None", "Sample", "MIDI", "SID", "OPL3", "Chiptune"};
 
 class I_Instrument : public VariableContainer, public Observable, public Persistent {
 protected:
@@ -38,7 +42,7 @@ public:
   virtual bool Init() = 0;
 
   // Start & stop the instument
-  virtual bool Start(int channel, unsigned char note, bool retrigger = true) = 0;
+  virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true) = 0;
   virtual void Stop(int channel) = 0;
 
   // Engine playback  start callback
@@ -51,6 +55,8 @@ public:
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick) = 0;
 
   virtual bool IsInitialized() = 0;
+
+  virtual void SetStepVolume(int channel, uint8_t volume) = 0;
 
   virtual bool IsEmpty() = 0;
 

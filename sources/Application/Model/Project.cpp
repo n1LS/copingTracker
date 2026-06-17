@@ -263,7 +263,7 @@ void Project::Purge() {
       if (!song_.phrase_.IsUsed(i)) {
         PhraseStep *step = &(song_.phrase_.steps_[i][j]);
         step->note = DATA_UNUSED_VALUE;
-        step->instr = DATA_UNUSED_VALUE;
+        step->instrument = DATA_UNUSED_VALUE;
         step->cmd1 = kNone;
         step->param1 = 0;
         step->cmd2 = kNone;
@@ -328,7 +328,7 @@ void Project::PurgeInstruments() {
   bool used[MAX_INSTRUMENT_COUNT] = {false};
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
-      uint8_t instr = song_.phrase_.steps_[i][j].instr;
+      uint8_t instr = song_.phrase_.steps_[i][j].instrument;
       if (instr != DATA_UNUSED_VALUE) {
         NAssert(instr < MAX_INSTRUMENT_COUNT);
         used[instr] = true;

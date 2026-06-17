@@ -126,7 +126,7 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   GUIPoint position = GetAnchor();
 
   Variable *v = project_->FindVariable(FourCC::VarTempo);
-  tempoField_.emplace_back(FourCC::ActionBPMChanged, position, *v, "Tempo     :" char_symbol_bpm_s " %d", MIN_TEMPO, 
+  tempoField_.emplace_back(FourCC::ActionBPMChanged, position, *v, "Tempo     :" char_symbol_bpm_s " %d", MIN_TEMPO,
                            MAX_TEMPO, 1, 10);
   fieldList_.insert(fieldList_.end(), &(*tempoField_.rbegin()));
   (*tempoField_.rbegin()).AddObserver(*this);

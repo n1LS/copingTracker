@@ -39,10 +39,11 @@ public:
   void OnPlayerStart(MixerServiceMode msmMode);
   void OnPlayerStop();
 
-  void StartInstrument(int channel, I_Instrument *instrument, unsigned char note, bool newInstrument);
+  void StartInstrument(int channel, I_Instrument *instrument, unsigned char note, uint8_t volume, bool newInstrument);
   void StopInstrument(int channel);
 
   int GetChannelNote(int Channel);
+  int GetChannelVolume(int Channel);
 
   I_Instrument *GetInstrument(int channel);
 
@@ -65,8 +66,6 @@ public:
   void SetChannelMute(int channel, bool mute);
   bool IsChannelMuted(int channel);
 
-  const char *GetPlayedNote(int channel);
-  const char *GetPlayedOctive(int channel);
   bool GetPlayedSliceIndex(int channel, uint8_t &sliceIndex);
 
   AudioOut *GetAudioOut();
@@ -93,7 +92,8 @@ private:
 
   // store trigger notes, 0xFF = none
 
-  unsigned char notes_[SONG_CHANNEL_COUNT];
+  uint8_t notes_[SONG_CHANNEL_COUNT];
+  unsigned char volume_[SONG_CHANNEL_COUNT];
 };
 
 #endif

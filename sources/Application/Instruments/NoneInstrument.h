@@ -25,7 +25,7 @@ public:
   virtual bool Init();
 
   // Start & stop the instument
-  virtual bool Start(int channel, unsigned char note, bool retrigger = true);
+  virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true);
   virtual void Stop(int channel);
 
   // size refers to the number of samples
@@ -34,6 +34,9 @@ public:
   virtual void ProcessCommand(int channel, FourCC cc, uint16_t value);
 
   virtual bool IsInitialized();
+
+  virtual void SetStepVolume(int channel, uint8_t volume) {
+  }
 
   virtual bool IsEmpty() {
     return true;
@@ -45,7 +48,8 @@ public:
 
   virtual void OnStart();
 
-  virtual void Purge() {};
+  virtual void Purge() {
+  }
 
   virtual int GetTable();
   virtual bool GetTableAutomation();

@@ -27,7 +27,7 @@ class I_GUIWindowImp;
 class GUIWindow : public I_GUIGraphics {
 
 protected:
-  // We protect the constructors coz zzeeee
+  // We protect the constructors because zzeeee
   // Class is abstract.
 
   GUIWindow(I_GUIWindowImp &);

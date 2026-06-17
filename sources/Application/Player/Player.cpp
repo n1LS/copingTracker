@@ -33,7 +33,6 @@ int32_t DecodeRetriggerOffset(int32_t value) {
 // Private constructor - Singleton
 
 Player::Player() : mixer_() {
-
   isRunning_ = false;
   viewData_ = 0;
 
@@ -44,14 +43,11 @@ Player::Player() : mixer_() {
   retrigAllImmediate_ = false;
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-    instrumentOnChannel_[i][0] = ' ';
-    instrumentOnChannel_[i][1] = ' ';
-    instrumentOnChannel_[i][2] = '\0';
+    instrumentOnChannel_[i] = NO_INSTRUMENT;
   }
 }
 
 bool Player::Init(Project *project, ViewData *viewData) {
-
   viewData_ = viewData;
   project_ = project;
 
@@ -241,24 +237,16 @@ void Player::Stop() {
   mixer_.Unlock();
 }
 
-const char *Player::GetPlayedNote(int channel) {
-  return mixer_.GetPlayedNote(channel);
+int Player::GetChannelNote(int channel) {
+  return mixer_.GetChannelNote(channel);
 }
 
-const char *Player::GetPlayedOctive(int channel) {
-  return mixer_.GetPlayedOctive(channel);
-}
-
-const char *Player::GetPlayedInstrument(int channel) {
-  if ((mixer_.GetPlayedOctive(channel))[1] == ' ') {
-    return mixer_.GetPlayedOctive(channel);
-  } else {
-    if (!IsChannelMuted(channel)) {
-      return (char *)(&(instrumentOnChannel_[channel][0]));
-    } else {
-      return "--";
-    }
+uint8_t Player::GetPlayedInstrument(int channel) {
+  if (!IsChannelMuted(channel)) {
+    return instrumentOnChannel_[channel];
   }
+
+  return NO_INSTRUMENT;
 }
 
 bool Player::GetPlayedSliceIndex(int channel, uint8_t &sliceIndex) {
@@ -820,110 +808,122 @@ void Player::updatePhrasePos(int pos, int channel) {
 }
 
 void Player::playCursorPosition(int channel) {
-
   int pos = viewData_->phrasePlayPos_[channel];
+  bool noteTriggered = false;
 
   // Get chain content and see if instr needs to be started/Stopped
   unsigned char currentPhrase = viewData_->currentPlayPhrase_[channel];
 
-  if (currentPhrase != 0xFF) {
+  if (currentPhrase == EMPTY_CHAIN_VALUE) {
+    return;
+  }
 
-    Song *song = viewData_->song_;
-    Phrase *phrase = &(song->phrase_);
-    unsigned char note = phrase->steps_[currentPhrase][pos].note;
-    unsigned char instr = phrase->steps_[currentPhrase][pos].instr;
+  Song *song = viewData_->song_;
+  Phrase *phrase = &(song->phrase_);
+  unsigned char note = phrase->steps_[currentPhrase][pos].note;
+  unsigned char instr = phrase->steps_[currentPhrase][pos].instrument;
+  uint8_t stepVolume = phrase->steps_[currentPhrase][pos].volume;
 
-    TableHolder *th = TableHolder::GetInstance();
-    TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
-    TablePlayback &atp = TablePlayback::GetAutomationPlayback(channel);
+  TableHolder *th = TableHolder::GetInstance();
+  TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
+  TablePlayback &atp = TablePlayback::GetAutomationPlayback(channel);
 
-    if (note == NOTE_OFF) {
-      mixer_.StopInstrument(channel);
-    } else if (note <= HIGHEST_NOTE) {
+  // note off ********************************************************************************************************
+  if (note == NOTE_OFF) {
+    mixer_.StopInstrument(channel);
+  } else if (note <= HIGHEST_NOTE) {
+    // note on *******************************************************************************************************
 
-      // Stop instrument if playing
+    // Stop instrument if playing
+    mixer_.StopInstrument(channel);
+    InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
 
-      mixer_.StopInstrument(channel);
-      InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+    // get instrument for next note
+    bool newInstrument = false;
 
-      // get instrument for next note
+    I_Instrument *instrument;
 
-      bool newInstrument = false;
+    if (instr != 0xFF) {
+      instrument = bank->GetInstrument(instr);
+      newInstrument = true;
+    } else {
+      instrument = mixer_.GetLastInstrument(channel);
+    }
 
-      I_Instrument *instrument;
-      if (instr != 0xFF) {
-        instrument = bank->GetInstrument(instr);
-        newInstrument = true;
-      } else {
-        instrument = mixer_.GetLastInstrument(channel);
+    if (instrument == NULL) {
+      instrument = bank->GetInstrument(0);
+    }
+
+    if (instrument != 0) {
+      int chain = viewData_->currentPlayChain_[channel];
+      int chainPos = viewData_->chainPlayPos_[channel];
+      bool preserveNote = false;
+      // TODO: this is special handling that should not happen here
+      if (instrument->GetType() == IT_SAMPLE) {
+        SampleInstrument *sampleInstrument = static_cast<SampleInstrument *>(instrument);
+        preserveNote = sampleInstrument->HasSlicesForPlayback();
       }
-
-      if (instrument == 0) {
-        instrument = bank->GetInstrument(0);
+      if (!preserveNote) {
+        note += viewData_->song_->chain_.steps_[chain][chainPos].transpose;
+        note += project_->GetTranspose();
       }
+      instrumentOnChannel_[channel] = instr;
 
-      if (instrument != 0) {
+      // Check if note is in acceptable midi range
 
-        int chain = viewData_->currentPlayChain_[channel];
-        int chainPos = viewData_->chainPlayPos_[channel];
-        bool preserveNote = false;
-        if (instrument->GetType() == IT_SAMPLE) {
-          SampleInstrument *sampleInstrument = static_cast<SampleInstrument *>(instrument);
-          preserveNote = sampleInstrument->HasSlicesForPlayback();
-        }
-        if (!preserveNote) {
-          note += viewData_->song_->chain_.steps_[chain][chainPos].transpose;
-          note += project_->GetTranspose();
-        }
-        instrumentOnChannel_[channel][0] = (instr / 16) > 9 ? 'A' - 10 + (instr / 16) : '0' + (instr / 16);
-        instrumentOnChannel_[channel][1] = (instr % 16) > 9 ? 'A' - 10 + (instr % 16) : '0' + (instr % 16);
-        instrumentOnChannel_[channel][2] = '\0';
+      if (note < HIGHEST_PLAYABLE_NOTE) {
+        mixer_.StartInstrument(channel, instrument, note, stepVolume, newInstrument);
+        noteTriggered = true;
+        int instrTable = instrument->GetTable();
 
-        // Check if note is in acceptable midi range
+        // If an instrument number has been specified && instrument has table,
+        // we trigger the table.
 
-        if (note < 128) {
-          mixer_.StartInstrument(channel, instrument, note, newInstrument);
-          int instrTable = instrument->GetTable();
-
-          // If an instrument number has been specified && instrument has table,
-          // we trigger the table.
-
-          if ((instrTable != VAR_OFF) && (newInstrument)) {
-            Table &table = th->GetTable(instrTable);
-            bool automated = instrument->GetTableAutomation();
-            if (automated) {
-              atp.Start(instrument, table, true);
-              tpb.Stop();
-            } else {
-              atp.Stop();
-              tpb.Start(instrument, table, false);
-            }
+        if ((instrTable != VAR_OFF) && (newInstrument)) {
+          Table &table = th->GetTable(instrTable);
+          bool automated = instrument->GetTableAutomation();
+          if (automated) {
+            atp.Start(instrument, table, true);
+            tpb.Stop();
           } else {
-            // if there was an instrument number, we stop the table
-            if (newInstrument) {
-              atp.Stop();
-              tpb.Stop();
-            }
+            atp.Stop();
+            tpb.Start(instrument, table, false);
           }
         } else {
-          Trace::Error("Note outside range: %02x", (unsigned int)note);
+          // if there was an instrument number, we stop the table
+          if (newInstrument) {
+            atp.Stop();
+            tpb.Stop();
+          }
+        }
+      } else {
+        Trace::Error("Note outside range: %02x", (unsigned int)note);
+      }
+    }
+  }
+
+  if ((note <= HIGHEST_NOTE) || (instr != 0xFF)) {
+    I_Instrument *instrument = mixer_.GetInstrument(channel);
+    if (instrument) {
+      if (instrument->GetTableAutomation()) {
+        TablePlayerChange tpc;
+        tpc.timeToLive_ = timeToLive_[channel];
+        tpc.instrRetrigger_ = -1;
+        atp.ProcessStep(tpc);
+        timeToLive_[channel] = tpc.timeToLive_;
+        if (tpc.instrRetrigger_ >= 0) {
+          RetriggerChannelInstrument(channel, DecodeRetriggerOffset(tpc.instrRetrigger_), false);
+          noteTriggered = true;
         }
       }
     }
-    if ((note <= HIGHEST_NOTE) || (instr != 0xFF)) {
-      I_Instrument *instrument = mixer_.GetInstrument(channel);
-      if (instrument) {
-        if (instrument->GetTableAutomation()) {
-          TablePlayerChange tpc;
-          tpc.timeToLive_ = timeToLive_[channel];
-          tpc.instrRetrigger_ = -1;
-          atp.ProcessStep(tpc);
-          timeToLive_[channel] = tpc.timeToLive_;
-          if (tpc.instrRetrigger_ >= 0) {
-            RetriggerChannelInstrument(channel, DecodeRetriggerOffset(tpc.instrRetrigger_), false);
-          };
-        }
-      }
+  }
+
+  if (!noteTriggered && stepVolume != NO_VOLUME) {
+    I_Instrument *instrument = mixer_.GetInstrument(channel);
+
+    if (instrument) {
+      instrument->SetStepVolume(channel, stepVolume);
     }
   }
 }
@@ -959,6 +959,7 @@ void Player::StepAutomationTableForRetrigger(int channel, I_Instrument *instrume
 
 void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool stepAutomationTable) {
   int note = mixer_.GetChannelNote(channel);
+  uint8_t volume = mixer_.GetChannelVolume(channel);
   I_Instrument *instrument = mixer_.GetInstrument(channel);
 
   if ((note > HIGHEST_NOTE) || (instrument == 0)) {
@@ -966,7 +967,7 @@ void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool st
   }
 
   note += semitoneOffset;
-  while (note > 127) {
+  while (note > HIGHEST_NOTE) {
     note -= 12;
   }
   while (note < 0) {
@@ -975,7 +976,7 @@ void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool st
 
   mixer_.StopInstrument(channel);
   // NOTE: 'newInstrument' bool flag is really the "retrigger" flag
-  mixer_.StartInstrument(channel, instrument, note, false);
+  mixer_.StartInstrument(channel, instrument, note, volume, false);
 
   if (stepAutomationTable) {
     StepAutomationTableForRetrigger(channel, instrument);
@@ -1332,18 +1333,20 @@ etl::array<stereosample, SONG_CHANNEL_COUNT> *Player::GetMixerLevels() {
 // Direct note playback methods for MIDI
 
 void Player::PlayNote(uint16_t instrumentIndex, uint16_t channel, unsigned char note, unsigned char velocity) {
-  if (!project_)
+  if (!project_) {
     return;
+  }
 
   InstrumentBank *bank = project_->GetInstrumentBank();
-  if (!bank)
+  if (!bank) {
     return;
+  }
 
   I_Instrument *instrument = bank->GetInstrument(instrumentIndex);
   if (instrument) {
     // Use the channel modulo SONG_CHANNEL_COUNT to ensure it's within range
     int playerChannel = channel % SONG_CHANNEL_COUNT;
-    mixer_.StartInstrument(playerChannel, instrument, note, true);
+    mixer_.StartInstrument(playerChannel, instrument, note, velocity, true);
     if (!isRunning_) {
       SetAudioActive(true);
     }

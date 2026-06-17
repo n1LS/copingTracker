@@ -20,11 +20,12 @@
 
 struct PhraseStep {
   uint8_t note;
-  uint8_t instr;
+  uint8_t instrument;
   uint8_t cmd1;
   uint8_t cmd2;
   uint16_t param1;
   uint16_t param2;
+  uint8_t volume;
 };
 
 class Phrase {

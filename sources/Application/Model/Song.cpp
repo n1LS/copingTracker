@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-Song::Song() : Persistent("SONG"), chain_(), phrase_() { Reset(); };
+Song::Song() : Persistent("Song"), chain_(), phrase_() { Reset(); };
 
 Song::~Song() {};
 
@@ -35,22 +35,22 @@ void Song::Reset() {
 }
 
 void Song::SaveContent(tinyxml2::XMLPrinter *printer) {
-  saveHexBuffer(printer, "SONG", (uint8_t *)rows_, SONG_ROW_COUNT * SONG_CHANNEL_COUNT);
-  saveHexBuffer(printer, "CHAIN_STEPS", (uint8_t *)chain_.steps_, CHAIN_COUNT * PHRASES_PER_CHAIN * sizeof(ChainStep));
-  saveHexBuffer(printer, "PHRASE_STEPS", (uint8_t *)phrase_.steps_, PHRASE_COUNT * STEPS_PER_PHRASE * sizeof(PhraseStep));
+  saveHexBuffer(printer, "Song", (uint8_t *)rows_, SONG_ROW_COUNT * SONG_CHANNEL_COUNT);
+  saveHexBuffer(printer, "ChainSteps", (uint8_t *)chain_.steps_, CHAIN_COUNT * PHRASES_PER_CHAIN * sizeof(ChainStep));
+  saveHexBuffer(printer, "PhraseSteps", (uint8_t *)phrase_.steps_, PHRASE_COUNT * STEPS_PER_PHRASE * sizeof(PhraseStep));
 }
 
 void Song::RestoreContent(PersistencyDocument *doc) {
   bool elem = doc->FirstChild();
 
   while (elem) {
-    if (!strcmp("SONG", doc->ElemName())) {
+    if (!strcmp("Song", doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)rows_);
     };
-    if (!strcmp("CHAIN_STEPS", doc->ElemName())) {
+    if (!strcmp("ChainSteps", doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)chain_.steps_);
     };
-    if (!strcmp("PHRASE_STEPS", doc->ElemName())) {
+    if (!strcmp("PhraseSteps", doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)phrase_.steps_);
     };
     elem = doc->NextSibling();

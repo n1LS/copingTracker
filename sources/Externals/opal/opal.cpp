@@ -397,15 +397,18 @@ void Opal::Port(uint16_t reg_num, uint8_t val) {
 }
 
 // Fill a fixed point buffer with size number of samples
-void Opal::SampleBuffer(fixed *buffer, int size) {
+void Opal::SampleBuffer(fixed *buffer, int size, uint32_t volume) {
   int count = size;
   while (count--) {
     int16_t l, r;
 
     Sample(&l, &r);
 
-    buffer[0] = i2fp(l);
-    buffer[1] = i2fp(r);
+    int32_t lv = (l * volume) >> 8;
+    int32_t rv = (r * volume) >> 8;
+
+    buffer[0] = i2fp(lv);
+    buffer[1] = i2fp(rv);
     buffer += 2;
   }
 }

@@ -23,10 +23,12 @@
 
 #define MAX_INSTRUMENT_COUNT 32
 
+#define NOTE_C3 60
 #define HIGHEST_NOTE 119
+#define HIGHEST_PLAYABLE_NOTE 127
 #define NOTE_OFF 0xFE
 #define NO_NOTE 0xFF
-#define NOTE_C3 60
+#define NO_VOLUME 0xFF
 
 #define NO_INSTRUMENT 0xFF
 

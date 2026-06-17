@@ -804,6 +804,12 @@ void SongView::DrawView() {
   // Compute song grid location
   GUIPoint anchor = GetAnchor();
 
+  // Draw section header
+
+  SetColor(Theme::View::inactive);
+  SetBackgroundColor(Theme::View::bg);
+  DrawString(anchor.x_, anchor.y_ - 1, "T1 T2 T3 T4 T5 T6 T7 T8");
+
   // Display row numbers
   drawRowNumbers(anchor.x_ - 3, anchor.y_, viewData_->songOffset_, 16);
 

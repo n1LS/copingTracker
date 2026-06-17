@@ -63,7 +63,8 @@ OpalInstrument::OpalInstrument()
   variables_.insert(variables_.end(), &op2TremVibSusKSR_);
 }
 
-OpalInstrument::~OpalInstrument() {};
+OpalInstrument::~OpalInstrument() {
+}
 
 bool OpalInstrument::Init() {
   // enable left/right only for 0 channel
@@ -72,9 +73,12 @@ bool OpalInstrument::Init() {
   return true;
 }
 
-void OpalInstrument::OnStart() {};
+void OpalInstrument::OnStart() {
+}
 
-bool OpalInstrument::Start(int channel, unsigned char note, bool retrigger) {
+bool OpalInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
+  stepVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+
   // channel wide settings
   // enable left/right output (D4, D5) & set algorithm D0
   // for now only 2 op so just Additive or FM
@@ -151,6 +155,11 @@ bool OpalInstrument::Start(int channel, unsigned char note, bool retrigger) {
   return true;
 }
 
+void OpalInstrument::SetStepVolume(int channel, uint8_t volume) {
+  stepVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+  ;
+}
+
 void OpalInstrument::Stop(int c) {
   uint8_t stop = BitClr(breg, 5);
   opl_.Port(OCTAVE_BASE_REG, stop);
@@ -160,7 +169,7 @@ bool OpalInstrument::Render(int channel, fixed *buffer, int size, bool updateTic
   PROFILE_SCOPE("OpalInstrument::Render");
 
   // optimise to remove function calls in hot loop
-  opl_.SampleBuffer(buffer, size);
+  opl_.SampleBuffer(buffer, size, stepVolume_);
 
   return true;
 }

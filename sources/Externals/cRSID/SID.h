@@ -20,7 +20,7 @@ public:
   int cRSID_emulateWaves();
   cRSID_SIDwavOutput cRSID_emulateHQwaves(char cycles);
 
-  void cRSID_emulateWavesBuffer(fixed *buffer, int size);
+  void cRSID_emulateWavesBuffer(fixed *buffer, int size, unsigned int volume);
 
   // SID-chip data:
   unsigned char Register[29];

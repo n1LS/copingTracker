@@ -352,7 +352,7 @@ void SampleInstrument::OnStart() {
   tableState_.Reset();
 }
 
-bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstart) {
+bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // Look if we're dirty & need to update this instrument's data
 
   if (dirty_) {
@@ -368,11 +368,11 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
 
   renderParams *rp = renderParams_ + channel;
 
-  rp->midiNote_ = midinote;
+  rp->midiNote_ = note;
 
-  if (lastMidiNote_[channel] == -1) // To prevent First LEGA to go bonkers
-  {
-    lastMidiNote_[channel] = midinote;
+  if (lastMidiNote_[channel] == -1) {
+    // To prevent First LEGA to go bonkers
+    lastMidiNote_[channel] = note;
   }
 
   // Duplicate variable value to local rendering
@@ -388,7 +388,10 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
 
   int rootNote = (rootNote_.GetInt() - 60) + source_->GetRootNote(rp->midiNote_);
 
-  rp->volume_ = rp->baseVolume_ = i2fp(volume_.GetInt());
+  // step volume
+  uint32_t stepVolume = (volume == NO_VOLUME) ? 256 : volumeLUT[volume];
+  uint32_t calculatedVolume = (volume_.GetInt() * stepVolume) >> 8;
+  rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
 
   rp->pan_ = rp->basePan_ = i2fp(pan_.GetInt());
 
@@ -410,10 +413,10 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
   SampleInstrumentLoopMode loopmode = (SampleInstrumentLoopMode)loopMode_.GetInt();
 
   size_t sliceIndex = 0;
-  bool sliceActive = shouldUseSlice(midinote, sliceIndex, sampleSizeU);
+  bool sliceActive = shouldUseSlice(note, sliceIndex, sampleSizeU);
   // Only play valid slices
-  if (!sliceActive && HasSlicesForPlayback() && midinote >= SliceNoteBase &&
-      midinote < static_cast<unsigned char>(SliceNoteBase + MaxSlices)) {
+  if (!sliceActive && HasSlicesForPlayback() && note >= SliceNoteBase &&
+      note < static_cast<unsigned char>(SliceNoteBase + MaxSlices)) {
     return false;
   }
   uint32_t sliceStart = 0;
@@ -465,9 +468,11 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
       {
 
         float freq = 261.6255653006f; // C3
-                                      /*			if (loopmode==SILM_OSCFINE) {
-                                                                      freq=float(pow(2.0,-0.75))*440; // C3
-                                                              }*/
+        /*
+        if (loopmode==SILM_OSCFINE) {
+          freq=float(pow(2.0,-0.75))*440; // C3
+        }
+        */
         int length = rp->rendLoopEnd_ - rp->rendLoopStart_;
         if (length == 0)
           length = 1;
@@ -477,7 +482,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
         };
         rp->baseSpeed_ = fl2fp((freq * length) / driverRate);
         rp->rendFirst_ = rp->rendLoopStart_;
-        if (cleanstart) {
+        if (retrigger) {
           rp->position_ = float(rp->rendFirst_);
         }
         break;
@@ -494,7 +499,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
         sampleCount *= (6 * 16);
         rp->baseSpeed_ = fl2fp(length / float(sampleCount));
         rp->rendFirst_ = rp->rendLoopStart_;
-        if (cleanstart) {
+        if (retrigger) {
           rp->position_ = float(rp->rendFirst_);
         }
         break;
@@ -516,7 +521,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
 
   float fineTune = float(fineTune_.GetInt() - 0x7F);
   fineTune /= float(0x80);
-  int offset = midinote - rootNote;
+  int offset = note - rootNote;
   if (sliceActive) {
     offset = 0;
   }
@@ -538,8 +543,7 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
 
   // If we do a clean start (there was a instr number on the line)
 
-  if (cleanstart) {
-
+  if (retrigger) {
     // Clear retrigger data
 
     rp->retrig_ = false;
@@ -571,6 +575,14 @@ bool SampleInstrument::Start(int channel, unsigned char midinote, bool cleanstar
     rp->activeUpdaters_.clear();
   }
   return true;
+}
+
+void SampleInstrument::SetStepVolume(int channel, uint8_t volume) {
+  uint32_t stepVolume = (volume == NO_VOLUME) ? 256 : volumeLUT[volume];
+  uint32_t calculatedVolume = (volume_.GetInt() * stepVolume) >> 8;
+
+  renderParams *rp = renderParams_ + channel;
+  rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
 }
 
 void SampleInstrument::Stop(int channel) {

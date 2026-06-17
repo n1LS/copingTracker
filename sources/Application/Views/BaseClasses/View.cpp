@@ -167,6 +167,45 @@ void View::drawMap() {
   }
 }
 
+void View::drawRegularNote(const GUIPoint &pos, uint8_t channel) {
+  Player *player = Player::GetInstance();
+
+  int note = player->GetChannelNote(channel);
+  uint8_t instrument = player->GetPlayedInstrument(channel);
+
+  char buf[3];
+
+  if (note == NOTE_OFF) {
+    strcpy(buf, "of");
+  } else if (note == NO_NOTE) {
+    strcpy(buf, "  ");
+  } else {
+    strcpy(buf, noteNames[note % 12]);
+  }
+
+  DrawString(pos.x_, pos.y_ + 0, buf); // row for the note values
+
+  // draw octave
+
+  if (note != NO_NOTE) {
+    npf_snprintf(buf, sizeof(buf), " %X", note / 12);
+  } else {
+    strcpy(buf, "  ");
+  }
+  DrawString(pos.x_, pos.y_ + 1, buf); // row for the octive values
+
+  // draw instrument
+
+  if (instrument == NO_INSTRUMENT || note == NO_NOTE) {
+    strcpy(buf, "  ");
+  } else {
+    hex2char(instrument, buf);
+  }
+
+  // draw instrument number
+  DrawString(pos.x_, pos.y_ + 2, "  ");
+}
+
 void View::drawNotes() {
   GUIPoint anchor = GetAnchor();
   int initialX = View::margin_ + 5;
@@ -185,28 +224,27 @@ void View::drawNotes() {
       if (player->GetPlayedSliceIndex(i, sliceIndex)) {
         DrawString(pos.x_, pos.y_, "SL");
         pos.y_++;
-        char sliceBuffer[3];
-        sliceBuffer[0] = static_cast<char>('0' + (sliceIndex / 10));
-        sliceBuffer[1] = static_cast<char>('0' + (sliceIndex % 10));
-        sliceBuffer[2] = '\0';
-        DrawString(pos.x_, pos.y_, sliceBuffer);
+        char buf[3];
+        buf[0] = static_cast<char>('0' + (sliceIndex / 10));
+        buf[1] = static_cast<char>('0' + (sliceIndex % 10));
+        buf[2] = '\0';
+        DrawString(pos.x_, pos.y_, buf);
         pos.y_++;
-        DrawString(pos.x_, pos.y_, player->GetPlayedInstrument(i)); // draw instrument number
+
+        uint8_t instrument = player->GetPlayedInstrument(i);
+        if (instrument == NO_INSTRUMENT) {
+          strcpy(buf, "--");
+        } else {
+          hex2char(instrument, buf);
+        }
+        DrawString(pos.x_, pos.y_, buf); // draw instrument number
       } else {
-        DrawString(pos.x_, pos.y_, player->GetPlayedNote(i)); // row for the note values
-        pos.y_++;
-        DrawString(pos.x_, pos.y_, player->GetPlayedOctive(i)); // row for the octive values
-        pos.y_++;
-        DrawString(pos.x_, pos.y_, player->GetPlayedInstrument(i)); // draw instrument number
+        drawRegularNote(pos, i);
       }
     } else {
-      DrawString(pos.x_, pos.y_, "  "); // row for the note
-                                        // values
-      pos.y_++;
-      DrawString(pos.x_, pos.y_, "  "); // row for the octive values
-      pos.y_++;
-      DrawString(pos.x_, pos.y_, "  "); // draw instrument number
+      drawRegularNote(pos, i);
     }
+
     pos.y_ = initialY;
     pos.x_ += 3;
   }

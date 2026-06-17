@@ -37,24 +37,26 @@ static int32_t readPCMInt32(const uint8_t *samplePtr, int32_t bytePerSample) {
     case 1:
       // 8-bit PCM is unsigned; center and scale to 32-bit range
       return (static_cast<int32_t>(samplePtr[0]) - 128) * 0x01000000;
-    case 2: {
-      int16_t v;
-      memcpy(&v, samplePtr, sizeof(v));
-      return static_cast<int32_t>(v) * 0x00010000;
-    }
-    case 3: {
-      // Build as unsigned to avoid UB in bit-ops, then sign-extend
-      uint32_t u = static_cast<uint32_t>(samplePtr[0]) |
-                   (static_cast<uint32_t>(samplePtr[1]) << 8) |
-                   (static_cast<uint32_t>(samplePtr[2]) << 16);
-      int32_t v = (u & 0x800000u) ? static_cast<int32_t>(u | 0xFF000000u) : static_cast<int32_t>(u);
-      return v * 0x00000100;
-    }
-    case 4: {
-      int32_t v;
-      memcpy(&v, samplePtr, sizeof(v));
-      return v;
-    }
+    case 2:
+      {
+        int16_t v;
+        memcpy(&v, samplePtr, sizeof(v));
+        return static_cast<int32_t>(v) * 0x00010000;
+      }
+    case 3:
+      {
+        // Build as unsigned to avoid UB in bit-ops, then sign-extend
+        uint32_t u = static_cast<uint32_t>(samplePtr[0]) | (static_cast<uint32_t>(samplePtr[1]) << 8) |
+                     (static_cast<uint32_t>(samplePtr[2]) << 16);
+        int32_t v = (u & 0x800000u) ? static_cast<int32_t>(u | 0xFF000000u) : static_cast<int32_t>(u);
+        return v * 0x00000100;
+      }
+    case 4:
+      {
+        int32_t v;
+        memcpy(&v, samplePtr, sizeof(v));
+        return v;
+      }
     default:
       return 0;
   }
