@@ -165,10 +165,9 @@ struct Theme {
       FIXED(live, LIGHT_YELLOW)
     };
 
-    SWITCHABLE(preview, LIGHT_GRAY, DARK_GRAY)
-
     FIXED(placeholder, DARK_GRAY)
     SWITCHABLE(fg, WHITE, LIGHT_GRAY)
+    SWITCHABLE(preview, LIGHT_GRAY, DARK_GRAY)
   };
 };
 

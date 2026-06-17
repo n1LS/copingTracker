@@ -54,6 +54,9 @@ public: // I_GUIWindowImp implementation
   virtual void ClearTextRect(GUIRect &);
   virtual void PushEvent(GUIEvent &event);
 
+  virtual void SendFont(uint8_t uifontIndex);
+  virtual void SendPalette();
+
   static void ProcessEvent(picoTrackerEvent &event);
   static void ProcessButtonChange(uint16_t changeMask, uint16_t buttonMask);
 
@@ -65,8 +68,6 @@ protected:
   virtual void Update(Observable &o, I_ObservableData *d);
 
 private:
-  void SendFont(uint8_t uifontIndex);
-  void SendPalette();
   bool mirrorUIEnabled_ = 0;
 };
 #endif

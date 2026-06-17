@@ -37,10 +37,7 @@ static uint8_t ui_font_index = 0;
 static bool changed[TEXT_HEIGHT * TEXT_WIDTH ] = {0};
 
 // Default palette, can be redefined
-static uint16_t palette[16] = {SWAP_BYTES(0x0000), SWAP_BYTES(0x49E5), SWAP_BYTES(0xB926), SWAP_BYTES(0xE371),
-                               SWAP_BYTES(0x9CF3), SWAP_BYTES(0xA324), SWAP_BYTES(0xEC46), SWAP_BYTES(0xF70D),
-                               SWAP_BYTES(0xffff), SWAP_BYTES(0x1926), SWAP_BYTES(0x2A49), SWAP_BYTES(0x4443),
-                               SWAP_BYTES(0xA664), SWAP_BYTES(0x02B0), SWAP_BYTES(0x351E), SWAP_BYTES(0xB6FD)};
+static uint16_t palette[16] = {};
 
 uint16_t *chargfx_get_palette() {
   return palette;

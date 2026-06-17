@@ -249,7 +249,7 @@ void AppWindow::Clear(bool all) {
 
   if (all) {
     memset(_preScreen, '\0', SCREEN_CHARS);
-    memset(_preScreenColor, base.byte, SCREEN_CHARS);
+    memset(_preScreenColor, 0xff, SCREEN_CHARS);
   };
 }
 
