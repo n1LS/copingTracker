@@ -18,6 +18,7 @@
 #include "Application/Commands/NodeList.h"
 #include "Application/Model/Config.h"
 #include "Application/Player/SyncMaster.h"
+#include "Adapters/picoTracker/gui/mirrorUI.h"
 #include "hardware/gpio.h"
 #include "input.h"
 #include "pico/rand.h"
@@ -43,9 +44,22 @@ bool picoTrackerSystem::invert_ = false;
 unsigned int picoTrackerSystem::lastBeatCount_ = 0;
 
 int picoTrackerSystem::MainLoop() {
-
   eventManager_->InstallMappings();
   return eventManager_->MainLoop();
+}
+
+void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
+  (void)itf;
+  (void)rts;
+  
+  if (dtr) {
+    // Host application opened the serial port - connection established
+    Trace::Log("USB_CDC", "Host connected (DTR set)");
+    mirrorUI_connected();
+  } else {
+    // Host application closed the serial port
+    Trace::Log("USB_CDC", "Host disconnected (DTR cleared)");
+  }
 }
 
 static bool pollForValidSDCard() {
@@ -115,6 +129,7 @@ void picoTrackerSystem::Boot(int argc, char **argv) {
 
   Trace::Log("COPINGTRACKERSYSTEM", "ADC INIT DONE");
 #endif
+
 }
 
 void picoTrackerSystem::Shutdown() {

@@ -35,6 +35,9 @@ public:
   virtual void PushEvent(GUIEvent &) = 0;
   virtual void DrawRect(GUIRect &r) = 0;
 
+  virtual void SendFont(uint8_t uifontIndex) = 0;
+  virtual void SendPalette() = 0;
+
   //	virtual void Save()=0 ;
   //	virtual void Restore()=0 ;
 

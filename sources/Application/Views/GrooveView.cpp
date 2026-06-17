@@ -144,7 +144,7 @@ void GrooveView::DrawView() {
 
   // Draw title
 
-  DrawTitle("Groove: %2.2X", viewData_->currentGroove_);
+  DrawTitle("Groove %2.2X", viewData_->currentGroove_);
 
   // Compute song grid location
 

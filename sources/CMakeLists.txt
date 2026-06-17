@@ -71,8 +71,10 @@ add_subdirectory(Externals/SdFat)
 
 if(PICOTRACKER_SLOT_LINKED_APP)
   message(STATUS "Building picoTracker in single app-slot linked mode")
-  pico_set_linker_script(
-    picoTracker
+ 
+  target_link_options(picoTracker PRIVATE
+    -L${CMAKE_CURRENT_SOURCE_DIR}/Externals/pico-sdk/src/rp2_common/pico_crt0/rp2040)
+  pico_set_linker_script(picoTracker
     ${CMAKE_CURRENT_SOURCE_DIR}/Adapters/picoTracker/bootloader/memmap_app_slot.ld)
 endif()
 
@@ -102,7 +104,7 @@ target_compile_definitions(picoTracker PUBLIC
 )
 
 # Debug output with USB uses +6K memory
-pico_enable_stdio_usb(${PROJECT_NAME} 0)
+pico_enable_stdio_usb(${PROJECT_NAME} 1)
 pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
 # This is the default, but better to make it explicit

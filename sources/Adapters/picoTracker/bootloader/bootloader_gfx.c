@@ -83,9 +83,13 @@ void gfx_putc(char c) {
 
   int idx = cursor_y * TEXT_WIDTH + cursor_x;
   if (c >= 32) {
-    screen[idx] = c - 32;
-    changed[idx] = true;
-    colors[idx] = ((screen_fg_color & 0xf) << 4) | (screen_bg_color & 0xf);
+    c -= 32;
+    uint8_t color = ((screen_fg_color & 0xf) << 4) | (screen_bg_color & 0xf);
+    if (screen[idx] != c || colors[idx] != color) {
+      screen[idx] = c;
+      colors[idx] = color;
+      changed[idx] = true;
+    }
   }
 
   if (cursor_x + 1 < TEXT_WIDTH) {

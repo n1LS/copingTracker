@@ -65,7 +65,7 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
-  v = config->FindVariable(FourCC::VarRemoteUI);
+  v = config->FindVariable(FourCC::VarMirrorUI);
   intVarField_.emplace_back(position, *v, "Remote UI    :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
@@ -216,7 +216,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
       }
     case FourCC::VarMidiDevice:
     case FourCC::VarMidiSync:
-    case FourCC::VarRemoteUI:
+    case FourCC::VarMirrorUI:
     case FourCC::VarImportResampler:
       {
         configDirty_ = true;

@@ -22,8 +22,10 @@
 
 static Color screen_bg_color = BLACK;
 static Color screen_fg_color = WHITE;
+
 static int cursor_x = 0;
 static int cursor_y = 0;
+
 static uint8_t screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 static uint8_t colors[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 static uint16_t buffer[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
@@ -32,16 +34,17 @@ static uint8_t ui_font_index = 0;
 
 // Using a bit array in order to save memory, there is a slight performance
 // hit in doing so vs a bool array
-static uint8_t changed[TEXT_HEIGHT * TEXT_WIDTH / 8] = {0};
-#define SetBit(A, k) (A[(k) / 8] |= (1 << ((k) % 8)))
-#define ClearBit(A, k) (A[(k) / 8] &= ~(1 << ((k) % 8)))
-#define TestBit(A, k) (A[(k) / 8] & (1 << ((k) % 8)))
+static bool changed[TEXT_HEIGHT * TEXT_WIDTH ] = {0};
 
 // Default palette, can be redefined
 static uint16_t palette[16] = {SWAP_BYTES(0x0000), SWAP_BYTES(0x49E5), SWAP_BYTES(0xB926), SWAP_BYTES(0xE371),
                                SWAP_BYTES(0x9CF3), SWAP_BYTES(0xA324), SWAP_BYTES(0xEC46), SWAP_BYTES(0xF70D),
                                SWAP_BYTES(0xffff), SWAP_BYTES(0x1926), SWAP_BYTES(0x2A49), SWAP_BYTES(0x4443),
                                SWAP_BYTES(0xA664), SWAP_BYTES(0x02B0), SWAP_BYTES(0x351E), SWAP_BYTES(0xB6FD)};
+
+uint16_t *chargfx_get_palette() {
+  return palette;
+}
 
 void chargfx_clear(Color color) {
   int size = TEXT_WIDTH * TEXT_HEIGHT;
@@ -68,6 +71,10 @@ void chargfx_set_font_index(uint8_t idx) {
   ui_font_index = idx;
 }
 
+uint8_t chargfx_get_font_index() {
+  return ui_font_index;
+}
+
 uint8_t chargfx_get_cursor_x() {
   return cursor_x;
 }
@@ -78,13 +85,17 @@ uint8_t chargfx_get_cursor_y() {
 
 void chargfx_putc(char c) {
   int idx = cursor_y * TEXT_WIDTH + cursor_x;
-  screen[idx] = c;
-  SetBit(changed, idx);
-  colors[idx] = (screen_fg_color << 4) | screen_bg_color; // todo: use a color_t
+  // todo: use a color_t
+  uint8_t color = (screen_fg_color << 4) | screen_bg_color;
+
+  if (screen[idx] != c || colors[idx] != color) {
+    screen[idx] = c;
+    colors[idx] = color;
+    changed[idx] = true;
+  }
 }
 
 void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-
   int remainder = height;
   while (remainder) {
     int sub_height = (remainder > BUFFER_CHARS) ? BUFFER_CHARS : remainder;
@@ -214,8 +225,8 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
 
 void chargfx_draw_changed() {
   for (int idx = 0; idx < TEXT_HEIGHT * TEXT_WIDTH; idx++) {
-    if (TestBit(changed, idx)) {
-      ClearBit(changed, idx);
+    if (changed[idx]) {
+      changed[idx] = false;
       // check adjacent in order to find bigger rectangle
       uint16_t y = idx / TEXT_WIDTH;
       uint16_t x = idx - (TEXT_WIDTH * y);
@@ -224,8 +235,8 @@ void chargfx_draw_changed() {
       // first pass tests the height
       for (int probe_y = y + 1; probe_y < TEXT_HEIGHT; probe_y++) {
         int probe_idx = probe_y * TEXT_WIDTH + x;
-        if (TestBit(changed, probe_idx)) {
-          ClearBit(changed, probe_idx);
+        if (changed[probe_idx]) {
+          changed[probe_idx] = false;
           height++;
           continue;
         }
@@ -238,31 +249,19 @@ void chargfx_draw_changed() {
         for (int probe_y = y; probe_y < y + height; probe_y++) {
           // if we don't get to max height, then abort
           int probe_idx = probe_y * TEXT_WIDTH + probe_x;
-          if (!TestBit(changed, probe_idx)) {
+          if (!changed[probe_idx]) {
             // undo last column
             for (int undo_y = y; undo_y < probe_y; undo_y++) {
-              SetBit(changed, undo_y * TEXT_WIDTH + probe_x);
+              changed[undo_y * TEXT_WIDTH + probe_x] = true;
             }
             goto end;
           }
-          ClearBit(changed, probe_idx);
+          changed[probe_idx] = false;
         }
         width++;
       }
     end:
       chargfx_draw_region(x, y, width, height);
-    }
-  }
-}
-
-void chargfx_draw_changed_simple() {
-  // This method is better (faster) for fewer characters changed
-  for (int idx = 0; idx < TEXT_HEIGHT * TEXT_WIDTH; idx++) {
-    if (TestBit(changed, idx)) {
-      ClearBit(changed, idx);
-      uint16_t y = idx / TEXT_WIDTH;
-      uint16_t x = idx - (TEXT_WIDTH * y);
-      chargfx_draw_region(x, y, 1, 1);
     }
   }
 }
@@ -278,4 +277,10 @@ void chargfx_set_palette_color(int idx, uint16_t rgb565_color) {
 
 void chargfx_init() {
   ili9341_init();
+}
+
+void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool **outChanged) {
+  *outScreen = screen;
+  *outColors = colors;
+  *outChanged = changed;
 }

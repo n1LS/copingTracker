@@ -8,7 +8,7 @@
  * This file is part of the copingTracker firmware
  */
 
-#include "System/RemoteUI/RemoteUIProtocol.h"
+#include "System/mirrorUI/mirrorUIProtocol.h"
 #include <cstdint>
 
 #ifndef PICO_REMOTE_UI_H_
@@ -17,6 +17,11 @@
 #define ITF_NUM_CDC_0 0
 #define USB_TIMEOUT_US 500000
 
-void sendToUSBCDC(char buf[], int length);
+void mirrorUI_Flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullscreenUpdate = false);
+void mirrorUI_sendCommand(mirrorUICommand *command);
+void mirrorUI_sendPalette(uint16_t *color);
+void mirrorUI_connected();
+
+mirrorUICommand *mirrorUI_getCommand();
 
 #endif

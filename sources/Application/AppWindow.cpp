@@ -613,7 +613,7 @@ void AppWindow::AnimationUpdate() {
 
   if (awaitingProjectLoadAck_) {
     if (_mask != 0) {
-      FileSystem::GetInstance()->DeleteFile(SD_BASE_DIR "/.current");
+      FileSystem::GetInstance()->DeleteFile("/.current");
       npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
       loadProject_ = true;
       awaitingProjectLoadAck_ = false;

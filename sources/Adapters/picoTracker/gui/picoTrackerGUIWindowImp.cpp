@@ -14,9 +14,10 @@
 #include "Application/Utils/char.h"
 #include "System/Console/Trace.h"
 #include "UIFramework/BasicDatas/GUIPoint.h"
+#include "UIFramework/BasicDatas/GUIEvent.h"
 #include "UIFramework/Interfaces/I_GUIWindowFactory.h"
 #include "pico/stdlib.h"
-#include "picoRemoteUI.h"
+#include "mirrorUI.h"
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -41,20 +42,23 @@ picoTrackerGUIWindowImp::picoTrackerGUIWindowImp(GUICreateWindowParams &p) {
 
   Config *config = Config::GetInstance();
 
-  auto remoteUIVar = (WatchedVariable *)config->FindVariable(FourCC::VarRemoteUI);
+  auto mirrorUIVar = (WatchedVariable *)config->FindVariable(FourCC::VarMirrorUI);
 
-  // register to receive updates to remoteui setting
-  remoteUIVar->AddObserver(*this);
-  auto remoteui = remoteUIVar->GetInt();
-  remoteUIEnabled_ = remoteui != 0;
+  // register to receive updates to mirrorUI setting
+  mirrorUIVar->AddObserver(*this);
+  auto mirrorUI = mirrorUIVar->GetInt();
+  mirrorUIEnabled_ = mirrorUI != 0;
 
   auto uiFontVar = (WatchedVariable *)config->FindVariable(FourCC::VarUIFont);
-  // register to receive updates to remoteui setting
+  
+  // register to receive updates to mirrorUI setting
   uiFontVar->AddObserver(*this);
   auto uifontIndex = uiFontVar->GetInt();
   chargfx_set_font_index(uifontIndex);
-  if (remoteUIEnabled_) {
+  
+  if (mirrorUIEnabled_) {
     SendFont(uifontIndex);
+    SendPalette();
   }
 };
 
@@ -62,20 +66,22 @@ picoTrackerGUIWindowImp::~picoTrackerGUIWindowImp() {
 }
 
 void picoTrackerGUIWindowImp::SendFont(uint8_t uifontIndex) {
-  char remoteUIBuffer[3];
-  remoteUIFontCommand(uifontIndex, remoteUIBuffer);
-  sendToUSBCDC(remoteUIBuffer, 3);
+  if (mirrorUIEnabled_) {
+    mirrorUICommand *command = mirrorUI_getCommand();
+    mirrorUI_command_Font(command, uifontIndex);
+    mirrorUI_sendCommand(command);
+  }
+}
+
+void picoTrackerGUIWindowImp::SendPalette() {
+  if (mirrorUIEnabled_) {
+    mirrorUI_sendPalette(chargfx_get_palette());
+  }
 }
 
 void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos) {
   chargfx_set_cursor(pos.x_, pos.y_);
   chargfx_putc(c);
-
-  if (remoteUIEnabled_) {
-    char remoteUIBuffer[6];
-    remoteUIDrawCharCommand(c, pos.x_, pos.y_, false, remoteUIBuffer);
-    sendToUSBCDC(remoteUIBuffer, 6);
-  }
 }
 
 void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos) {
@@ -92,27 +98,22 @@ void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos
 void picoTrackerGUIWindowImp::DrawRect(GUIRect &r) {
   // This is the local drawing command for the device's own screen.
   chargfx_fill_rect(lastRemoteColorIdx, r.Left(), r.Top(), r.Width(), r.Height());
-  if (remoteUIEnabled_) {
+  /*
+  if (mirrorUIEnabled_) {
     // Now, send the DrawRect command with full byte-escaping.
     // Worst-case buffer: 2 (header) + 9 payload bytes * 2 (if all are escaped)
     // = 20  bytes.
-    char remoteUIBuffer[20];
-    auto bufferIndex = remoteUIDrawRectCommand(r.Left(), r.Top(), r.Width(), r.Height(), remoteUIBuffer);
-    sendToUSBCDC(remoteUIBuffer, bufferIndex);
+    char mirrorUIBuffer[20];
+    auto bufferIndex = mirrorUIDrawRectCommand(r.Left(), r.Top(), r.Width(), r.Height(), mirrorUIBuffer);
+    sendToUSBCDC(mirrorUIBuffer, bufferIndex);
   }
+  */
 };
 
 void picoTrackerGUIWindowImp::Clear(GUIColor &c) {
   Color backgroundColor = GetColor(c);
   chargfx_set_background(backgroundColor);
   chargfx_clear(backgroundColor);
-  if (remoteUIEnabled_) {
-    char remoteUIBuffer[5];
-    remoteUIClearCommand(c.r_, c.g_, c.b_, remoteUIBuffer);
-    // log sent buffer values
-    Trace::Debug("sent clear command: %d,%d,%d", c.r_, c.g_, c.b_);
-    sendToUSBCDC(remoteUIBuffer, 5);
-  }
 };
 
 void picoTrackerGUIWindowImp::ClearTextRect(GUIRect &r) {
@@ -126,7 +127,7 @@ Color picoTrackerGUIWindowImp::GetColor(GUIColor &c) {
   }
 
   // Convert the color to RGB565 format
-  uint16_t rgb565 = to_rgb565(c);
+  uint16_t rgb565 = GUIColorToRGB565(c);
 
   // Only update the palette if the color has changed
   if (lastPaletteRGB[c.paletteIndex_] != rgb565) {
@@ -145,15 +146,6 @@ void picoTrackerGUIWindowImp::SetColor(GUIColor &color) {
   NAssert(c.g_ < 255);
   NAssert(c.b_ < 255);
   chargfx_set_foreground(gColor);
-
-  if (remoteUIEnabled_) {
-    // Buffer must be large enough for the worst case where all 3 color bytes
-    // are escaped. Header (2) + 3 color components * 2 bytes/escaped_component
-    // = 8 bytes.
-    char remoteUIBuffer[8];
-    auto bufferIndex = remoteUISetColorCommand(color.r_, color.g_, color.b_, remoteUIBuffer);
-    sendToUSBCDC(remoteUIBuffer, bufferIndex);
-  }
 };
 
 void picoTrackerGUIWindowImp::SetBackgroundColor(GUIColor &color) {
@@ -164,15 +156,6 @@ void picoTrackerGUIWindowImp::SetBackgroundColor(GUIColor &color) {
   NAssert(c.g_ < 255);
   NAssert(c.b_ < 255);
   chargfx_set_background(gColor);
-
-  if (remoteUIEnabled_) {
-    // Buffer must be large enough for the worst case where all 3 color bytes
-    // are escaped. Header (2) + 3 color components * 2 bytes/escaped_component
-    // = 8 bytes.
-    char remoteUIBuffer[8];
-    auto bufferIndex = remoteUISetBackgroundColorCommand(color.r_, color.g_, color.b_, remoteUIBuffer);
-    sendToUSBCDC(remoteUIBuffer, bufferIndex);
-  }
 };
 
 void picoTrackerGUIWindowImp::Lock() {
@@ -182,6 +165,13 @@ void picoTrackerGUIWindowImp::Unlock() {
 }
 
 void picoTrackerGUIWindowImp::Flush() {
+  if (mirrorUIEnabled_) {
+    uint8_t *scr, *col;
+    bool *chg;
+    chargfx_get_screen_storage(&scr, &col, &chg);
+    mirrorUI_Flush(scr, col, chg);
+  }
+
   chargfx_draw_changed();
 }
 
@@ -203,7 +193,7 @@ void picoTrackerGUIWindowImp::ProcessEvent(picoTrackerEvent &event) {
     case PICO_REDRAW:
       instance_->_window->Update(true);
       // send font update
-      if (instance_->remoteUIEnabled_) {
+      if (instance_->mirrorUIEnabled_) {
         Config *config = Config::GetInstance();
         auto uiFontVar = config->FindVariable(FourCC::VarUIFont);
         int uifontIndex = uiFontVar->GetInt();
@@ -239,20 +229,18 @@ void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t 
 void picoTrackerGUIWindowImp::Update(Observable &o, I_ObservableData *d) {
   WatchedVariable &v = (WatchedVariable &)o;
   switch (v.GetID()) {
-    case FourCC::VarRemoteUI:
-      {
-        auto remoteui = v.GetInt();
-        remoteUIEnabled_ = remoteui != 0;
+    case FourCC::VarMirrorUI: {
+      auto mirrorUI = v.GetInt();
+      mirrorUIEnabled_ = mirrorUI != 0;
+      break;
+    }
+    case FourCC::VarUIFont: {
+      auto uifont = v.GetInt();
+      chargfx_set_font_index(uifont);
+      if (mirrorUIEnabled_) {
+        SendFont(uifont);
       }
       break;
-    case FourCC::VarUIFont:
-      {
-        auto uifont = v.GetInt();
-        chargfx_set_font_index(uifont);
-        if (remoteUIEnabled_) {
-          SendFont(uifont);
-        }
-      }
-      break;
+    }
   }
 }

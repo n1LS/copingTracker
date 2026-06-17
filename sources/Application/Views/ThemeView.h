@@ -24,6 +24,7 @@
 #include "FieldView.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/StringVariable.h"
+#include "UIFramework/Interfaces/I_GUIWindowImp.h"
 #include "ViewData.h"
 
 #define COLOR_COMPONENT_COUNT 3
