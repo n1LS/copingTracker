@@ -157,50 +157,46 @@ void Player::Start(PlayMode mode, bool forceSongMode, MixerServiceMode msmMode, 
   ms->OnPlayerStart();
 
   switch (viewData_->playMode_) {
-    case PM_SONG:
-      {
-        for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-          mixer_.StartChannel(i);
-          updateSongPos(playPos, i);
-        }
+    case PM_SONG: {
+      for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+        mixer_.StartChannel(i);
+        updateSongPos(playPos, i);
       }
-      break;
+    }
+    break;
 
-    case PM_LIVE:
-      {
-        for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-          if ((liveQueueingMode_[i] == QM_CHAINSTART) || (liveQueueingMode_[i] == QM_PHRASESTART) ||
-              (liveQueueingMode_[i] == QM_TICKSTART)) {
-            mixer_.StartChannel(i);
-            updateSongPos(liveQueuePosition_[i], i, liveQueueChainPosition_[i]);
-            liveQueueingMode_[i] = QM_NONE;
-          }
+    case PM_LIVE: {
+      for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+        if ((liveQueueingMode_[i] == QM_CHAINSTART) || (liveQueueingMode_[i] == QM_PHRASESTART) ||
+            (liveQueueingMode_[i] == QM_TICKSTART)) {
+          mixer_.StartChannel(i);
+          updateSongPos(liveQueuePosition_[i], i, liveQueueChainPosition_[i]);
+          liveQueueingMode_[i] = QM_NONE;
         }
       }
       break;
+    }
 
     case PM_CHAIN:
-    case PM_PHRASE:
-      {
-        int currentChannel = viewData_->songX_;
-        mixer_.StartChannel(currentChannel);
-        ;
-        int currentChainPos = viewData_->chainRow_;
-        updateSongPos(playPos, currentChannel, currentChainPos);
-      }
+    case PM_PHRASE: {
+      int currentChannel = viewData_->songX_;
+      mixer_.StartChannel(currentChannel);
+      ;
+      int currentChainPos = viewData_->chainRow_;
+      updateSongPos(playPos, currentChannel, currentChainPos);
       break;
+    }
 
-    case PM_AUDITION:
-      {
-        int currentChannel = viewData_->songX_;
-        mixer_.StartChannel(currentChannel);
+    case PM_AUDITION: {
+      int currentChannel = viewData_->songX_;
+      mixer_.StartChannel(currentChannel);
 
-        int currentChainPos = viewData_->chainRow_;
-        int currentPhrasePos = viewData_->phraseCurPos_;
-        // uses hop for PhrasePos
-        updateSongPos(playPos, currentChannel, currentChainPos, currentPhrasePos);
-      }
+      int currentChainPos = viewData_->chainRow_;
+      int currentPhrasePos = viewData_->phraseCurPos_;
+      // uses hop for PhrasePos
+      updateSongPos(playPos, currentChannel, currentChainPos, currentPhrasePos);
       break;
+    }
 
     default:
       NInvalid;

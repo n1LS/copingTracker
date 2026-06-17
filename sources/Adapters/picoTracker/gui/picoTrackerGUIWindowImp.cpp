@@ -50,12 +50,15 @@ picoTrackerGUIWindowImp::picoTrackerGUIWindowImp(GUICreateWindowParams &p) {
   mirrorUIEnabled_ = mirrorUI != 0;
 
   auto uiFontVar = (WatchedVariable *)config->FindVariable(FourCC::VarUIFont);
+  
   // register to receive updates to mirrorUI setting
   uiFontVar->AddObserver(*this);
   auto uifontIndex = uiFontVar->GetInt();
   chargfx_set_font_index(uifontIndex);
+  
   if (mirrorUIEnabled_) {
     SendFont(uifontIndex);
+    SendPalette();
   }
 };
 
@@ -63,8 +66,17 @@ picoTrackerGUIWindowImp::~picoTrackerGUIWindowImp() {
 }
 
 void picoTrackerGUIWindowImp::SendFont(uint8_t uifontIndex) {
-  const mirrorUICommand *command = mirrorUI_command_Font(uifontIndex);
-  sendToUSBCDC((char *)command->payload.raw, command->payloadSize);
+  if (mirrorUIEnabled_) {
+    mirrorUICommand *command = mirrorUI_getCommand();
+    mirrorUI_command_Font(command, uifontIndex);
+    mirrorUI_sendCommand(command);
+  }
+}
+
+void picoTrackerGUIWindowImp::SendPalette() {
+  if (mirrorUIEnabled_) {
+    mirrorUI_sendPalette(chargfx_get_palette());
+  }
 }
 
 void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos) {
@@ -154,8 +166,9 @@ void picoTrackerGUIWindowImp::Unlock() {
 
 void picoTrackerGUIWindowImp::Flush() {
   if (mirrorUIEnabled_) {
-    uint8_t *scr, *col, *chg;
-    chargfx_get_screen_storage(scr, col, chg);
+    uint8_t *scr, *col;
+    bool *chg;
+    chargfx_get_screen_storage(&scr, &col, &chg);
     mirrorUI_Flush(scr, col, chg);
   }
 
@@ -216,20 +229,18 @@ void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t 
 void picoTrackerGUIWindowImp::Update(Observable &o, I_ObservableData *d) {
   WatchedVariable &v = (WatchedVariable &)o;
   switch (v.GetID()) {
-    case FourCC::VarMirrorUI:
-      {
-        auto mirrorUI = v.GetInt();
-        mirrorUIEnabled_ = mirrorUI != 0;
+    case FourCC::VarMirrorUI: {
+      auto mirrorUI = v.GetInt();
+      mirrorUIEnabled_ = mirrorUI != 0;
+      break;
+    }
+    case FourCC::VarUIFont: {
+      auto uifont = v.GetInt();
+      chargfx_set_font_index(uifont);
+      if (mirrorUIEnabled_) {
+        SendFont(uifont);
       }
       break;
-    case FourCC::VarUIFont:
-      {
-        auto uifont = v.GetInt();
-        chargfx_set_font_index(uifont);
-        if (mirrorUIEnabled_) {
-          SendFont(uifont);
-        }
-      }
-      break;
+    }
   }
 }

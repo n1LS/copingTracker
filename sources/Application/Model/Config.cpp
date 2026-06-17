@@ -158,8 +158,7 @@ Config::Config()
   PersistencyDocument doc;
 
   if (!doc.Load(CONFIG_FILE_PATH)) {
-    Trace::Error("CONFIG Could not open file for reading: %s",
-                 CONFIG_FILE_PATH);
+    Trace::Error("CONFIG Could not open file for reading: %s", CONFIG_FILE_PATH);
     Save(); // and write the defaults to SDCard
     return;
   }

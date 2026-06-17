@@ -22,17 +22,13 @@
 
 static Color screen_bg_color = BLACK;
 static Color screen_fg_color = WHITE;
+
 static int cursor_x = 0;
 static int cursor_y = 0;
+
 static uint8_t screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 static uint8_t colors[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 static uint16_t buffer[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
-
-void chargfx_get_screen_storage(const uint8_t *outScreen, const uint8_t *outColors, const uint8_t *outChanged) {
-  outScreen = screen;
-  outColors = colors;
-  outScreen = outChanged;
-}
 
 static uint8_t ui_font_index = 0;
 
@@ -45,6 +41,10 @@ static uint16_t palette[16] = {SWAP_BYTES(0x0000), SWAP_BYTES(0x49E5), SWAP_BYTE
                                SWAP_BYTES(0x9CF3), SWAP_BYTES(0xA324), SWAP_BYTES(0xEC46), SWAP_BYTES(0xF70D),
                                SWAP_BYTES(0xffff), SWAP_BYTES(0x1926), SWAP_BYTES(0x2A49), SWAP_BYTES(0x4443),
                                SWAP_BYTES(0xA664), SWAP_BYTES(0x02B0), SWAP_BYTES(0x351E), SWAP_BYTES(0xB6FD)};
+
+uint16_t *chargfx_get_palette() {
+  return palette;
+}
 
 void chargfx_clear(Color color) {
   int size = TEXT_WIDTH * TEXT_HEIGHT;
@@ -71,6 +71,10 @@ void chargfx_set_font_index(uint8_t idx) {
   ui_font_index = idx;
 }
 
+uint8_t chargfx_get_font_index() {
+  return ui_font_index;
+}
+
 uint8_t chargfx_get_cursor_x() {
   return cursor_x;
 }
@@ -81,9 +85,14 @@ uint8_t chargfx_get_cursor_y() {
 
 void chargfx_putc(char c) {
   int idx = cursor_y * TEXT_WIDTH + cursor_x;
-  screen[idx] = c;
-  changed[idx] = true;
-  colors[idx] = (screen_fg_color << 4) | screen_bg_color; // todo: use a color_t
+  // todo: use a color_t
+  uint8_t color = (screen_fg_color << 4) | screen_bg_color;
+
+  if (screen[idx] != c || colors[idx] != color) {
+    screen[idx] = c;
+    colors[idx] = color;
+    changed[idx] = true;
+  }
 }
 
 void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
@@ -268,4 +277,10 @@ void chargfx_set_palette_color(int idx, uint16_t rgb565_color) {
 
 void chargfx_init() {
   ili9341_init();
+}
+
+void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool **outChanged) {
+  *outScreen = screen;
+  *outColors = colors;
+  *outChanged = changed;
 }

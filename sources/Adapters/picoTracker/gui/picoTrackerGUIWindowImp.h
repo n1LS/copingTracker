@@ -66,6 +66,7 @@ protected:
 
 private:
   void SendFont(uint8_t uifontIndex);
+  void SendPalette();
   bool mirrorUIEnabled_ = 0;
 };
 #endif
