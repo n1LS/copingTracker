@@ -9,29 +9,29 @@
  * This file is part of the copingTracker firmware
  */
 
-#include "SampleInstrument.h"
-#include "Application/Instruments/Filters.h"
-#include "Application/Model/Table.h"
-#include "Application/Player/SyncMaster.h"
-#include "Application/Utils/fixed.h"
-#include "CommandList.h"
-#include "Foundation/Constants/SineTable.h"
-#include "SamplePool.h"
-#include "SampleVariable.h"
-#include "Services/Audio/Audio.h"
-#include "System/Console/Trace.h"
-#include "System/io/Status.h"
-#include <assert.h>
-#include "Adapters/picoTracker/bootloader/bootloader_log.h"
-#include "System/Console/nanoprintf.h"
 #include <algorithm>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
+#include "Application/Instruments/Filters.h"
+#include "Application/Model/Table.h"
 #include "Application/Player/SyncMaster.h"
+#include "Application/Utils/fixed.h"
+#include "Application/Persistency/PersistenceConstants.h"
+#include "Application/Player/SyncMaster.h"
+#include "CommandList.h"
+#include "Foundation/Constants/SineTable.h"
+#include "SamplePool.h"
+#include "SampleVariable.h"
+#include "SampleInstrument.h"
 #include "SampleInstrumentDatas.h"
+#include "Services/Audio/Audio.h"
+#include "System/Console/Trace.h"
+#include "System/io/Status.h"
+#include "System/Console/nanoprintf.h"
 
 bool SampleInstrument::useDirtyDownsampling_ = false;
 
@@ -1497,11 +1497,11 @@ void SampleInstrument::SaveContent(tinyxml2::XMLPrinter *printer) {
     if (slicePoints_[i] == 0) {
       continue;
     }
-    printer->OpenElement("Parameter");
+    printer->OpenElement(XML_ELEM_PARAMETER);
     char sliceName[6];
     npf_snprintf(sliceName, sizeof(sliceName), "sl%02u", static_cast<unsigned>(i));
-    printer->PushAttribute("name", sliceName);
-    printer->PushAttribute("value", static_cast<unsigned int>(slicePoints_[i]));
+    printer->PushAttribute(XML_ATTR_NAME, sliceName);
+    printer->PushAttribute(XML_ATTR_VALUE, static_cast<unsigned int>(slicePoints_[i]));
     printer->CloseElement();
   }
 }
@@ -1518,9 +1518,9 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
 
   bool hasAttr = doc->NextAttribute();
   while (hasAttr) {
-    if (!strcasecmp(doc->attrname_, "type")) {
+    if (!strcasecmp(doc->attrname_, XML_ATTR_TYPE)) {
       Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval_);
-    } else if (!strncasecmp(doc->attrname_, "sl", 2)) {
+    } else if (!strncasecmp(doc->attrname_, XML_ATTR_SLICE_PREFIX, 2)) {
       setSliceFromString(doc->attrname_ + 2, doc->attrval_);
     }
     hasAttr = doc->NextAttribute();
@@ -1534,10 +1534,10 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
     etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> value;
 
     while (attr) {
-      if (!strcasecmp(doc->attrname_, "name")) {
+      if (!strcasecmp(doc->attrname_, XML_ATTR_NAME)) {
         name = doc->attrval_;
       }
-      if (!strcasecmp(doc->attrname_, "value")) {
+      if (!strcasecmp(doc->attrname_, XML_ATTR_VALUE)) {
         value = doc->attrval_;
       }
       attr = doc->NextAttribute();

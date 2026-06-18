@@ -10,6 +10,7 @@
  */
 
 #include "Groove.h"
+#include "Application/Persistency/PersistenceConstants.h"
 
 unsigned char Groove::data_[MAX_GROOVES][STEPS_PER_GROOVE];
 
@@ -50,7 +51,7 @@ void Groove::GetChannelData(int channel, int *groove, int *position) {
 }
 
 void Groove::SaveContent(tinyxml2::XMLPrinter *printer) {
-  saveHexBuffer(printer, "Data", (unsigned char *)data_, STEPS_PER_GROOVE * MAX_GROOVES);
+  saveHexBuffer(printer, XML_ELEM_DATA, (unsigned char *)data_, STEPS_PER_GROOVE * MAX_GROOVES);
 }
 
 void Groove::RestoreContent(PersistencyDocument *doc) {

@@ -12,12 +12,13 @@
 #include "Chain.h"
 #include "Song.h"
 #include "System/System/System.h"
-#include <stdlib.h>
-#include <string.h>
 
-Chain::Chain() { Reset(); };
+Chain::Chain() { 
+  Reset(); 
+}
 
-Chain::~Chain() {};
+Chain::~Chain() {
+}
 
 void Chain::Reset() {
   for (int i = 0; i < CHAIN_COUNT; i++) {

@@ -12,6 +12,7 @@
 #include "HexBuffers.h"
 #include "Application/Utils/char.h"
 #include "Externals/etl/include/etl/string.h"
+#include "Application/Persistency/PersistenceConstants.h"
 
 #define XML_CUT_LENGTH 64
 
@@ -35,8 +36,8 @@ void prepareHexChunk(tinyxml2::XMLPrinter *printer, unsigned char *datasrc, int 
     hex += 2;
   };
   if (singleValue) {
-    printer->PushAttribute("value", singleValueData);
-    printer->PushAttribute("length", len);
+    printer->PushAttribute(XML_ATTR_VALUE, singleValueData);
+    printer->PushAttribute(XML_ATTR_LENGTH, len);
   } else {
     printer->PushText(reinterpret_cast<const char *>(hexBuffer));
   }
@@ -50,7 +51,7 @@ void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned
   unsigned char *datasrc = (unsigned char *)src;
 
   for (unsigned i = 0; i < count; i++) {
-    printer->OpenElement("Data");
+    printer->OpenElement(XML_ELEM_DATA);
     prepareHexChunk(printer, datasrc, XML_CUT_LENGTH);
     datasrc += XML_CUT_LENGTH;
     printer->CloseElement();
@@ -58,7 +59,7 @@ void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned
 
   len -= count * XML_CUT_LENGTH;
   if (len > 0) {
-    printer->OpenElement("Data");
+    printer->OpenElement(XML_ELEM_DATA);
     prepareHexChunk(printer, datasrc, len);
     printer->CloseElement();
   }
@@ -88,11 +89,11 @@ void restoreHexBuffer(PersistencyDocument *doc, unsigned char *destination) {
       int length = 0;
       bool gotData = false;
       while (hasAttr) {
-        if (!strcmp(doc->attrname_, "value")) {
+        if (!strcmp(doc->attrname_, XML_ATTR_VALUE)) {
           data = atoi(doc->attrval_);
           gotData = true;
         }
-        if (!strcmp(doc->attrname_, "length")) {
+        if (!strcmp(doc->attrname_, XML_ATTR_LENGTH)) {
           length = atoi(doc->attrval_);
         }
         hasAttr = doc->NextAttribute();

@@ -164,7 +164,7 @@ Config::Config()
   }
 
   bool elem = doc.FirstChild();
-  if (!elem || strcmp(doc.ElemName(), "Configuration")) {
+  if (!elem || strcmp(doc.ElemName(), XML_ELEM_CONFIGURATION)) {
     Trace::Log("CONFIG", "Bad " CONFIG_FILE_PATH " format!");
     // TODO: need show user some UI that config file is invalid
     Save(); // and write the defaults to SDCard
@@ -182,7 +182,7 @@ Config::Config()
     }
 
     // Special handling for Color elements
-    if (strcmp(doc.ElemName(), "Color") == 0) {
+    if (strcmp(doc.ElemName(), XML_ELEM_COLOR) == 0) {
       // Process Color element
       ReadColorVariable(&doc);
       elem = doc.NextSibling();
@@ -199,7 +199,7 @@ Config::Config()
     while (hasAttr) {
       // Special handling for Theme Name sadly because it is a string and no
       // easy way to look that that up in configParams data above
-      if (!strcmp(doc.ElemName(), "ThemeName")) {
+      if (!strcmp(doc.ElemName(), XML_ELEM_THEME_NAME)) {
         if (Variable *themeVar = FindVariable(FourCC::VarThemeName)) {
           themeVar->SetString(doc.attrval_);
           Trace::Log("CONFIG", "Read Theme Name:%s", doc.attrval_);
@@ -267,17 +267,17 @@ void Config::WriteColorVariables(tinyxml2::XMLPrinter *printer) {
         id == FourCC::VarColor_F_White) {
 
       // Open a Color element
-      printer->OpenElement("Color");
+      printer->OpenElement(XML_ELEM_COLOR);
 
       // Add name attribute
-      printer->PushAttribute("name", var->GetName());
+      printer->PushAttribute(XML_ATTR_NAME, var->GetName());
 
       // Format color value in hex format with # prefix
       char hexValue[16];
       npf_snprintf(hexValue, sizeof(hexValue), "#%X", var->GetInt());
 
       // Add value attribute in hex format
-      printer->PushAttribute("value", hexValue);
+      printer->PushAttribute(XML_ATTR_VALUE, hexValue);
 
       // Close the Color element
       printer->CloseElement();
@@ -288,14 +288,14 @@ void Config::WriteColorVariables(tinyxml2::XMLPrinter *printer) {
 
 void Config::ReadColorVariable(PersistencyDocument *doc) {
   // Process the current element if it's a Color element
-  if (strcmp(doc->ElemName(), "Color") == 0) {
+  if (strcmp(doc->ElemName(), XML_ELEM_COLOR) == 0) {
     // Process Color element
     char colorName[64] = {0};
     char colorValue[64] = {0};
 
     // Get the name and value attributes
     while (doc->NextAttribute()) {
-      if (strcmp(doc->attrname_, "name") == 0) {
+      if (strcmp(doc->attrname_, XML_ATTR_NAME) == 0) {
         // Use safer string copy to ensure null-termination
         size_t len = strlen(doc->attrval_);
         if (len >= sizeof(colorName)) {
@@ -303,7 +303,7 @@ void Config::ReadColorVariable(PersistencyDocument *doc) {
         }
         memcpy(colorName, doc->attrval_, len);
         colorName[len] = '\0'; // Ensure null-termination
-      } else if (strcmp(doc->attrname_, "value") == 0) {
+      } else if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
         // Use safer string copy to ensure null-termination
         size_t len = strlen(doc->attrval_);
         if (len >= sizeof(colorValue)) {
@@ -391,7 +391,7 @@ bool Config::SaveTheme(tinyxml2::XMLPrinter *printer, const char *themeName) {
   Trace::Log("CONFIG", "Saving theme content to XML");
 
   // Open the THEME root element
-  printer->OpenElement("Theme");
+  printer->OpenElement(XML_ELEM_THEME);
 
   // We don't need to save the theme name in the file
   // The filename itself serves as the theme name
@@ -399,10 +399,10 @@ bool Config::SaveTheme(tinyxml2::XMLPrinter *printer, const char *themeName) {
   // Save the font setting
   Variable *fontVar = FindVariable(FourCC::VarUIFont);
   if (fontVar) {
-    printer->OpenElement("Font");
+    printer->OpenElement(XML_ELEM_FONT);
     char buf[16];
     npf_snprintf(buf, sizeof(buf), "%d", fontVar->GetInt());
-    printer->PushAttribute("value", buf);
+    printer->PushAttribute(XML_ATTR_VALUE, buf);
     printer->CloseElement(); // Font
   }
 
@@ -420,8 +420,8 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
   Trace::Log("CONFIG", "Saving %d variables to config file", variables_.size());
 
   // store config version
-  printer->OpenElement("Configuration");
-  printer->PushAttribute("version", CONFIG_VERSION_NUMBER);
+  printer->OpenElement(XML_ELEM_CONFIGURATION);
+  printer->PushAttribute(XML_ATTR_VERSION, CONFIG_VERSION_NUMBER);
   // save all of the config parameters
   auto it = variables_.begin();
   for (size_t i = 0; i < variables_.size(); i++) {
@@ -457,10 +457,10 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
     if (var->GetType() == Variable::CHAR_LIST) {
       char buf[16];
       npf_snprintf(buf, sizeof(buf), "%d", var->GetInt());
-      printer->PushAttribute("value", buf);
+      printer->PushAttribute(XML_ATTR_VALUE, buf);
     } else {
       // all other settings need to be saved as thier String values
-      printer->PushAttribute("value", var->GetString().c_str());
+      printer->PushAttribute(XML_ATTR_VALUE, var->GetString().c_str());
     }
     printer->CloseElement();
     it++;
@@ -477,7 +477,7 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
   Trace::Log("CONFIG", "Loading theme content from XML");
 
   // Find the THEME root element
-  if (!doc->FirstChild() || strcmp(doc->ElemName(), "Theme") != 0) {
+  if (!doc->FirstChild() || strcmp(XML_ELEM_THEME, doc->ElemName()) != 0) {
     Trace::Error("Could not find <Theme> element in document");
     return false;
   }
@@ -492,7 +492,7 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
       if (strcmp(elemName, "Font") == 0) {
         // Process Font element attributes
         while (doc->NextAttribute()) {
-          if (strcmp(doc->attrname_, "value") == 0) {
+          if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
             Trace::Log("CONFIG", "Found font value: %s", doc->attrval_);
             // Parse font value as decimal
             int fontValue = atoi(doc->attrval_);

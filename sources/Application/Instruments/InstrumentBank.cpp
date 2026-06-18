@@ -59,8 +59,8 @@ void InstrumentBank::SaveContent(tinyxml2::XMLPrinter *printer) {
   for (auto &instr : instruments_) {
     if (!instr->IsEmpty()) {
       hex2char(i, hex);
-      printer->OpenElement("Instrument");
-      printer->PushAttribute("id", hex);
+      printer->OpenElement(XML_ELEM_INSTRUMENT);
+      printer->PushAttribute(XML_ATTR_TABLE_ID, hex);
 
       // Let the instrument save its own content
       instr->SaveContent(printer);
@@ -76,7 +76,7 @@ void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
   bool elem = doc->FirstChild();
   while (elem) {
     // Check it is an instrument
-    if (!strcasecmp(doc->ElemName(), "Instrument")) {
+    if (!strcasecmp(XML_ELEM_INSTRUMENT, doc->ElemName())) {
       // Get the instrument ID
       unsigned char id = '\0';
       char instype[16];
@@ -85,7 +85,7 @@ void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
       bool hasType = false;
       bool hasAttr = doc->NextAttribute();
       while (hasAttr) {
-        if (!strcasecmp(doc->attrname_, "id")) {
+        if (!strcasecmp(doc->attrname_, XML_ATTR_ID)) {
           unsigned char b1 = (c2h__(doc->attrval_[0])) << 4;
           unsigned char b2 = c2h__(doc->attrval_[1]);
           id = b1 + b2;
@@ -94,7 +94,7 @@ void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
           Trace::Log("InstrumentBank", "instrument ID from xml:%d", id);
 #endif
         }
-        if (!strcasecmp(doc->attrname_, "type")) {
+        if (!strcasecmp(doc->attrname_, XML_ATTR_TYPE)) {
           strncpy(instype, doc->attrval_, sizeof(instype) - 1);
           instype[sizeof(instype) - 1] = '\0';
           hasType = true;
