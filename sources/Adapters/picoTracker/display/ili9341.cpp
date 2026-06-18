@@ -42,21 +42,21 @@ void ili9341_command_param(uint8_t data) {
   cs_deselect();
 }
 
-inline void ili9341_start_writing() {
+void ili9341_start_writing() {
   cs_select();
 }
 
-void ili9341_write_data(void *buffer, int bytes) {
+void ili9341_write_data(const uint8_t *buffer, int bytes) {
   cs_select();
   spi_write_blocking(DISPLAY_SPI, buffer, bytes);
   cs_deselect();
 }
 
-void ili9341_write_data_continuous(void *buffer, int bytes) {
+void ili9341_write_data_continuous(const uint8_t *buffer, int bytes) {
   spi_write_blocking(DISPLAY_SPI, buffer, bytes);
 }
 
-inline void ili9341_stop_writing() {
+void ili9341_stop_writing() {
   cs_deselect();
 }
 

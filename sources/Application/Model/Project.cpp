@@ -33,7 +33,7 @@
 #define DATA_UNUSED_VALUE 0xFF
 
 Project::Project(const char *name)
-    : Persistent("PROJECT"), VariableContainer(&variables_), song_(),
+    : Persistent("Project"), VariableContainer(&variables_), song_(),
       tempoNudge_(0), tempo_(FourCC::VarTempo, DEFAULT_TEMPO),
       masterVolume_(FourCC::VarMasterVolume, DEFAULT_MASTER_VOLUME),
       channelVolume1_(FourCC::VarChannel1Volume, DEFAULT_CHANNEL_VOLUME),
@@ -357,10 +357,10 @@ void Project::RestoreContent(PersistencyDocument *doc) {
   doc->version_ = 32;
   int tableRatio = 0;
   while (attr) {
-    if (!strcmp(doc->attrname_, "VERSION")) {
+    if (!strcmp(doc->attrname_, "version")) {
       doc->version_ = int(atof(doc->attrval_) * 100);
     }
-    if (!strcmp(doc->attrname_, "TABLERATIO")) {
+    if (!strcmp(doc->attrname_, "tableRatio")) {
       tableRatio = atoi(doc->attrval_);
     }
     attr = doc->NextAttribute();
@@ -376,10 +376,10 @@ void Project::RestoreContent(PersistencyDocument *doc) {
     char name[MAX_VARIABLE_STRING_LENGTH + 1];
     char value[MAX_VARIABLE_STRING_LENGTH + 1];
     while (attr) {
-      if (!strcmp(doc->attrname_, "NAME")) {
+      if (!strcmp(doc->attrname_, "name")) {
         strcpy(name, doc->attrval_);
       }
-      if (!strcmp(doc->attrname_, "VALUE")) {
+      if (!strcmp(doc->attrname_, "value")) {
         strcpy(value, doc->attrval_);
       }
       attr = doc->NextAttribute();
@@ -396,12 +396,12 @@ void Project::RestoreContent(PersistencyDocument *doc) {
 void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
 
   // store project version
-  printer->PushAttribute("VERSION", PROJECT_NUMBER);
+  printer->PushAttribute("version", PROJECT_NUMBER);
 
   // store table ratio if not one
   int tableRatio = SyncMaster::GetInstance()->GetTableRatio();
   if (tableRatio != 1) {
-    printer->PushAttribute("TABLERATIO", tableRatio);
+    printer->PushAttribute("tableRatio", tableRatio);
   }
 
   // save all of the project's parameters
@@ -415,9 +415,9 @@ void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
       continue;
     }
 
-    printer->OpenElement("PARAMETER");
-    printer->PushAttribute("NAME", currentVar->GetName());
-    printer->PushAttribute("VALUE", currentVar->GetString().c_str());
+    printer->OpenElement("Parameter");
+    printer->PushAttribute("name", currentVar->GetName());
+    printer->PushAttribute("value", currentVar->GetString().c_str());
     printer->CloseElement();
     it++;
   }

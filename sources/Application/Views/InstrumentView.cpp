@@ -488,33 +488,33 @@ void InstrumentView::fillSIDParameters() {
 
   position.y_ += 2;
   Variable *v = instrument->FindVariable(FourCC::SIDInstrumentOSCNumber);
-  intVarField_.emplace_back(position, *v, "Oscillator:    %1.1X", 0, 0x2, 1, 1);
+  intVarField_.emplace_back(position, *v, "Oscillator    :%1.1X", 0, 0x2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentPulseWidth);
-  intVarField_.emplace_back(position, *v, "  Pulsewidth:  %2.2X", 0, 0xFFF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "  Pulsewidth  :%2.2X", 0, 0xFFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentWaveform);
 
-  intVarField_.emplace_back(position, *v, "  Waveform:    %s", 0, DWF_LAST - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "  Waveform    :%s", 0, DWF_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentVSync);
-  intVarField_.emplace_back(position, *v, "  Osc Sync:    %s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "  Osc Sync    :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentRingModulator);
-  intVarField_.emplace_back(position, *v, "  Ring Mod:    %s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "  Ring Mod    :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
   v = instrument->FindVariable(FourCC::SIDInstrumentADSR);
-  bigHexVarField_.emplace_back(UIBigHexVarField(position, *v, 4, "Env. A/D/S/R:  %4.4X", 0, 0xFFFF, 16, true));
+  bigHexVarField_.emplace_back(UIBigHexVarField(position, *v, 4, "Env. A/D/S/R  :%4.4X", 0, 0xFFFF, 16, true));
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 2;
@@ -523,7 +523,7 @@ void InstrumentView::fillSIDParameters() {
 
   position.y_ += 2;
   v = instrument->FindVariable(FourCC::SIDInstrumentFilterOn);
-  intVarField_.emplace_back(position, *v, "Filter:        %s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Filter        :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -535,7 +535,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterCut);
       break;
   }
-  intVarField_.emplace_back(position, *v, "  Cutoff:      %1.1X", 0, 0x7FF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "  Cutoff      :%1.1X", 0, 0x7FF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -547,7 +547,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterResonance);
       break;
   }
-  intVarField_.emplace_back(position, *v, "  Resonance:   %1.1X", 0, 0xF, 1, 1);
+  intVarField_.emplace_back(position, *v, "  Resonance   :%1.1X", 0, 0xF, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -559,7 +559,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterMode);
       break;
   }
-  intVarField_.emplace_back(position, *v, "  Mode:        %s", 0, DFM_LAST - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "  Mode        :%s", 0, DFM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
@@ -571,7 +571,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2Volume);
       break;
   }
-  intVarField_.emplace_back(position, *v, "Volume:        %1.1X", 0, 0xF, 1, 1);
+  intVarField_.emplace_back(position, *v, "Volume        :%1.1X", 0, 0xF, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 }
 

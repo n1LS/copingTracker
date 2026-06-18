@@ -15,7 +15,6 @@
 #include "Application/Instruments/InstrumentBank.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Persistency/Persistent.h"
-#include "BuildNumber.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Types/Types.h"
 #include "Foundation/Variables/StringVariable.h"
@@ -23,9 +22,9 @@
 #include "Foundation/Variables/WatchedVariable.h"
 #include "Song.h"
 
-#define PROJECT_NUMBER "2.3-Beta3"
+#define PROJECT_NUMBER "3.0-Alpha1"
 #define PROJECT_RELEASE "r"
-// BUILD_COUNT define comes from BuildNumber.h
+#define BUILD_COUNT "000"
 
 #define MAX_TAP 3
 

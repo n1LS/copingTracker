@@ -24,11 +24,11 @@ static SdioCard msd_sd_card;
 static bool msd_sd_initialized = false;
 
 // Timestamp of last USB I/O activity (read or write callback)
-volatile uint32_t msd_last_io_time_us = 0;
+volatile uint32_t msd_scsi_last_io_time_us = 0;
 
 // Initialize the SD card for MSD mode
 // Called once before the USB loop starts
-extern "C" bool msd_sd_init(void) {
+bool msd_sd_init(void) {
   SdioConfig config(DMA_SDIO);
   if (msd_sd_card.begin(config)) {
     msd_sd_initialized = true;
@@ -37,7 +37,7 @@ extern "C" bool msd_sd_init(void) {
   return false;
 }
 
-extern "C" uint32_t msd_sd_get_sector_count(void) {
+uint32_t msd_sd_get_sector_count(void) {
   if (msd_sd_initialized) {
     return msd_sd_card.sectorCount();
   }
@@ -47,7 +47,7 @@ extern "C" uint32_t msd_sd_get_sector_count(void) {
 // Read the boot sector to extract FAT size info for mount time estimation.
 // Returns estimated total FAT+metadata sectors the host needs to read.
 // Handles both FAT32 (two FAT copies ~16MB on 64GB) and exFAT (one FAT ~2MB).
-extern "C" uint32_t msd_sd_get_fat_sectors(void) {
+uint32_t msd_sd_get_fat_sectors(void) {
   if (!msd_sd_initialized)
     return 0;
 
@@ -89,8 +89,6 @@ extern "C" uint32_t msd_sd_get_fat_sectors(void) {
   // Total sectors host needs to read: both FAT copies + some overhead
   return fat_size * num_fats;
 }
-
-extern "C" {
 
 // Invoked when received SCSI_CMD_INQUIRY
 // Vendor id, product id, and revision string are filled in
@@ -165,7 +163,7 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void *buff
   }
 
   if (ok) {
-    msd_last_io_time_us = time_us_32();
+    msd_scsi_last_io_time_us = time_us_32();
     return (int32_t)bytes_to_read;
   }
 
@@ -197,7 +195,7 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t *
   }
 
   if (ok) {
-    msd_last_io_time_us = time_us_32();
+    msd_scsi_last_io_time_us = time_us_32();
     return (int32_t)bytes_to_write;
   }
 
@@ -214,5 +212,3 @@ bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, boo
   (void)load_eject;
   return true;
 }
-
-} // extern "C"

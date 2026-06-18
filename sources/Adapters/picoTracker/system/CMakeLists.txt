@@ -2,7 +2,7 @@ add_library(platform_system
   picoTrackerSystem.cpp
   picoTrackerEventQueue.cpp
   input.cpp
-  critical_error_message.c
+  critical_error_message.cpp
   picoTrackerSamplePool.cpp
 )
 

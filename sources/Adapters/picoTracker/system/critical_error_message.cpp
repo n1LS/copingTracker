@@ -37,7 +37,8 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
     memset(&msgbuffer[center + msglen], ' ', 32 - center - msglen - 1);
   }
 
-  chargfx_clear(0);
+  chargfx_set_background(BLACK);
+  chargfx_clear();
 
   // halt
   for (int i = 0;; i++) {
@@ -47,7 +48,7 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
     msgbuffer[31] = msgbuffer[0];
 
     chargfx_set_cursor(10, 2);
-    chargfx_putc(' ');
+    chargfx_putc(' ', false);
 
     // draw border
     for (int y = 0; y < 3; y++) {

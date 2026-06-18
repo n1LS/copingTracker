@@ -12,12 +12,8 @@
 #define _PICOTRACKERINPUT_H_
 #include "pico/stdlib.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define BIT(n) (1 << (n))
-
 typedef enum KEYPAD_BITS {
   KEY_LEFT = BIT(0),  //!< Keypad LEFT button.
   KEY_DOWN = BIT(1),  //!< Keypad DOWN button.
@@ -31,9 +27,5 @@ typedef enum KEYPAD_BITS {
 } KEYPAD_BITS;
 
 uint16_t scanKeys();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

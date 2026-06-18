@@ -40,19 +40,23 @@ public:
   virtual ~picoTrackerGUIWindowImp();
 
 public: // I_GUIWindowImp implementation
-  virtual void SetColor(GUIColor &color) override;
-  virtual void SetBackgroundColor(GUIColor &color) override;
+  virtual void SetColor(Color color) override;
+  virtual void SetBackgroundColor(Color color) override;
   virtual void DrawRect(GUIRect &rect) override;
-  virtual void DrawChar(const char c, const GUIPoint &pos) override;
+  virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false) override;
   virtual void DrawString(const char *string, const GUIPoint &pos) override;
   virtual GUIRect GetRect();
   virtual void Invalidate();
   virtual void Flush();
   virtual void Lock();
   virtual void Unlock();
-  virtual void Clear(GUIColor &);
-  virtual void ClearTextRect(GUIRect &);
+  virtual void Clear();
+  virtual void ClearTextRect(GUIRect &rect);
   virtual void PushEvent(GUIEvent &event);
+
+  virtual void SendFont(uint8_t uifontIndex);
+  virtual void SendPalette();
+  virtual void SetPalette(const GUIColor *palette, int colorCount) override;
 
   static void ProcessEvent(picoTrackerEvent &event);
   static void ProcessButtonChange(uint16_t changeMask, uint16_t buttonMask);
@@ -60,13 +64,9 @@ public: // I_GUIWindowImp implementation
   static picoTrackerGUIWindowImp *instance_;
 
 protected:
-  static Color GetColor(GUIColor &c);
-
   virtual void Update(Observable &o, I_ObservableData *d);
 
 private:
-  void SendFont(uint8_t uifontIndex);
-  void SendPalette();
   bool mirrorUIEnabled_ = 0;
 };
 #endif

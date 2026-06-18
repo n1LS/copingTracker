@@ -58,7 +58,7 @@ void ThemeImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     changeSelection(mask & BM_EDIT ? -LIST_PAGE_SIZE : -1);
   } else if (mask & BM_DOWN) {
     changeSelection(mask & BM_EDIT ? LIST_PAGE_SIZE : 1);
-  } else if ((mask & BM_LEFT) && (mask & BM_NAV)) {
+  } else if (mask == (BM_LEFT | BM_NAV)) {
     // Go to back "left" to theme screen
     Navigate(VT_THEME);
     return;
@@ -154,16 +154,12 @@ void ThemeImportView::onImportTheme(const char *filename) {
   bool result = config->ImportTheme(filename);
 
   if (result) {
-    // Theme was successfully imported and applied to config
-    // Save the config to ensure changes persist
-    config->Save();
-
     // Get the AppWindow to update colors
     AppWindow &app = (AppWindow &)w_;
     app.UpdateColorsFromConfig();
 
     // make sure we redraw everything with the new colors
-    ForceClear();
+    Clear();
 
     // Show success message
     MessageBox *mb = MessageBox::Create(*this, "Theme imported successfully", MBBF_OK);

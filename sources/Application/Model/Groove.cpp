@@ -13,7 +13,7 @@
 
 unsigned char Groove::data_[MAX_GROOVES][STEPS_PER_GROOVE];
 
-Groove::Groove() : Persistent("GROOVES") { Clear(); };
+Groove::Groove() : Persistent("Grooves") { Clear(); };
 
 Groove::~Groove() {};
 
@@ -50,7 +50,7 @@ void Groove::GetChannelData(int channel, int *groove, int *position) {
 }
 
 void Groove::SaveContent(tinyxml2::XMLPrinter *printer) {
-  saveHexBuffer(printer, "DATA", (unsigned char *)data_, STEPS_PER_GROOVE * MAX_GROOVES);
+  saveHexBuffer(printer, "Data", (unsigned char *)data_, STEPS_PER_GROOVE * MAX_GROOVES);
 }
 
 void Groove::RestoreContent(PersistencyDocument *doc) {

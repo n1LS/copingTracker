@@ -42,6 +42,7 @@ bool Application::Init(GUICreateWindowParams &params) {
   // Initialize display brightness from config
   // Get the brightness value from config and apply it
   Config *config = Config::GetInstance();
+  
   if (config) {
     Variable *v = config->FindVariable(FourCC::VarBacklightLevel);
     if (v) {

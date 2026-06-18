@@ -108,10 +108,10 @@ bool picoTrackerAudioDriver::InitDriver() {
   pio_sm_claim(AUDIO_PIO, AUDIO_SM);
 
   Config *config = Config::GetInstance();
-  auto audioLevel = config->GetValue("LINEOUT");
+  auto audioLevel = config->GetValue("LineOut");
   Trace::Log("pTAUDIODRIVER", "LINE LEVEL config:%d", audioLevel);
   volume_ = 65;
-  volume_ = config->GetValue("VOLUME");
+  volume_ = config->GetValue("Volume");
 
   // Audio Level support in PIO code:
   // PIO instructions 9 and 21 hold the SET Y immediate for OFFSET_COUNT

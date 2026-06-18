@@ -49,7 +49,7 @@ bool Table::IsEmpty() {
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 
-TableHolder::TableHolder() : Persistent("TABLES") { Reset(); }
+TableHolder::TableHolder() : Persistent("Tables") { Reset(); }
 
 void TableHolder::Reset() {
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
@@ -69,9 +69,9 @@ void TableHolder::SaveContent(tinyxml2::XMLPrinter *printer) {
 
   char hex[3];
   for (int i = 0; i < TABLE_COUNT; i++) {
-    printer->OpenElement("TABLE");
+    printer->OpenElement("Table");
     hex2char(i, hex);
-    printer->PushAttribute("ID", hex);
+    printer->PushAttribute("id", hex);
 
     Table &table = table_[i];
     if (!table.IsEmpty()) {
@@ -85,12 +85,12 @@ void TableHolder::SaveContent(tinyxml2::XMLPrinter *printer) {
         param2[j] = table.steps_[j].param2;
         param3[j] = table.steps_[j].param3;
       }
-      saveHexBuffer(printer, "CMD1", cmd1, TABLE_STEPS);
-      saveHexBuffer(printer, "PARAM1", param1, TABLE_STEPS);
-      saveHexBuffer(printer, "CMD2", cmd2, TABLE_STEPS);
-      saveHexBuffer(printer, "PARAM2", param2, TABLE_STEPS);
-      saveHexBuffer(printer, "CMD3", cmd3, TABLE_STEPS);
-      saveHexBuffer(printer, "PARAM3", param3, TABLE_STEPS);
+      saveHexBuffer(printer, "Command1", cmd1, TABLE_STEPS);
+      saveHexBuffer(printer, "Value1", param1, TABLE_STEPS);
+      saveHexBuffer(printer, "Command2", cmd2, TABLE_STEPS);
+      saveHexBuffer(printer, "Value2", param2, TABLE_STEPS);
+      saveHexBuffer(printer, "Command3", cmd3, TABLE_STEPS);
+      saveHexBuffer(printer, "Value3", param3, TABLE_STEPS);
     }
     printer->CloseElement();
   }
@@ -101,12 +101,12 @@ void TableHolder::RestoreContent(PersistencyDocument *doc) {
   bool elem = doc->FirstChild();
   while (elem) {
     // Check it is a table
-    if (!strcmp(doc->ElemName(), "TABLE")) {
+    if (!strcmp(doc->ElemName(), "Table")) {
       // Get the table ID
       unsigned char id = '\0';
       bool attr = doc->NextAttribute();
       while (attr) {
-        if (!strcmp(doc->attrname_, "ID")) {
+        if (!strcmp(doc->attrname_, "id")) {
           unsigned char b1 = (c2h__(doc->attrval_[0])) << 4;
           unsigned char b2 = c2h__(doc->attrval_[1]);
           id = b1 + b2;
@@ -122,32 +122,32 @@ void TableHolder::RestoreContent(PersistencyDocument *doc) {
       while (subelem) {
         uint8_t cbuf[TABLE_STEPS];
         uint16_t pbuf[TABLE_STEPS];
-        if (!strcmp("CMD1", doc->ElemName())) {
+        if (!strcmp("Command1", doc->ElemName())) {
           restoreHexBuffer(doc, cbuf);
           for (int j = 0; j < TABLE_STEPS; j++)
             table.steps_[j].cmd1 = cbuf[j];
         };
-        if (!strcmp("PARAM1", doc->ElemName())) {
+        if (!strcmp("Value1", doc->ElemName())) {
           restoreHexBuffer(doc, (unsigned char *)pbuf);
           for (int j = 0; j < TABLE_STEPS; j++)
             table.steps_[j].param1 = pbuf[j];
         };
-        if (!strcmp("CMD2", doc->ElemName())) {
+        if (!strcmp("Command2", doc->ElemName())) {
           restoreHexBuffer(doc, cbuf);
           for (int j = 0; j < TABLE_STEPS; j++)
             table.steps_[j].cmd2 = cbuf[j];
         };
-        if (!strcmp("PARAM2", doc->ElemName())) {
+        if (!strcmp("Value2", doc->ElemName())) {
           restoreHexBuffer(doc, (unsigned char *)pbuf);
           for (int j = 0; j < TABLE_STEPS; j++)
             table.steps_[j].param2 = pbuf[j];
         };
-        if (!strcmp("CMD3", doc->ElemName())) {
+        if (!strcmp("Command3", doc->ElemName())) {
           restoreHexBuffer(doc, cbuf);
           for (int j = 0; j < TABLE_STEPS; j++)
             table.steps_[j].cmd3 = cbuf[j];
         };
-        if (!strcmp("PARAM3", doc->ElemName())) {
+        if (!strcmp("Value3", doc->ElemName())) {
           restoreHexBuffer(doc, (unsigned char *)pbuf);
           for (int j = 0; j < TABLE_STEPS; j++)
             table.steps_[j].param3 = pbuf[j];

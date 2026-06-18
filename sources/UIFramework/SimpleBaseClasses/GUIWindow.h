@@ -12,6 +12,7 @@
 #ifndef _GUIWINDOW_H_
 #define _GUIWINDOW_H_
 
+#include "Foundation/Types/Colors.h"
 #include "UIFramework/BasicDatas/GUICreateWindowParams.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
@@ -38,13 +39,13 @@ public:
   virtual ~GUIWindow();
 
 public: // I_GUIGraphics implementation
-  virtual void SetColor(GUIColor &color);
-  virtual void SetBackgroundColor(GUIColor &color);
+  virtual void SetColor(Color color);
+  virtual void SetBackgroundColor(Color color);
   virtual void ClearTextRect(GUIRect &rect);
-  virtual void DrawChar(const char c, const GUIPoint &pos);
+  virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false);
   virtual void DrawString(const char *string, const GUIPoint &pos);
   virtual void DrawRect(GUIRect &rect);
-  virtual void SetCurrentRectColor(GUIColor color);
+  virtual void SetCurrentRectColor(Color color);
   virtual GUIRect GetRect();
   virtual void Invalidate();
   virtual void Flush();
@@ -57,7 +58,7 @@ public: // I_GUIGraphics implementation
   //	virtual void Save() ;
   //	virtual void Restore() ;
   void PushEvent(GUIEvent &event);
-  void Clear(GUIColor &color);
+  void Clear();
   I_GUIWindowImp *GetImpWindow() {
     return _imp;
   };

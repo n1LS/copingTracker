@@ -132,7 +132,7 @@ Text UI and list/menu rendering:
 
 Character graphics implementation:
 
-- sources/Adapters/picoTracker/bootloader/bootloader_gfx.c
+- sources/Adapters/picoTracker/bootloader/bootloader_gfx.cpp
 
 Current rendering details:
 
@@ -170,5 +170,5 @@ This confirms the bootloader is currently under the 64 KB cap.
 - sources/Adapters/picoTracker/bootloader/uf2_parser.cpp
 - sources/Adapters/picoTracker/bootloader/flash_writer.cpp
 - sources/Adapters/picoTracker/bootloader/bootloader_menu.cpp
-- sources/Adapters/picoTracker/bootloader/bootloader_gfx.c
+- sources/Adapters/picoTracker/bootloader/bootloader_gfx.cpp
 - sources/Adapters/picoTracker/bootloader/CMakeLists.txt

@@ -161,7 +161,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   UpdateColorsFromConfig();
 
-  GUIWindow::Clear(colorPalette_[Theme::View::bg]);
+  GUIWindow::Clear();
 
   static AppWindowViews views(*this, viewData_);
   views_ = &views;
@@ -216,20 +216,17 @@ void appwindow_set_sdcard_present(bool present) {
 }
 
 void AppWindow::DrawString(const char *string, const GUIPoint &pos) {
-  // Safety check for null string
   if (!string) {
     return;
   }
 
-  // DrawString and DrawChar share the same cache staging logic.
   int x = pos.x_;
   for (const char *current = string; *current; ++current, ++x) {
-    GUIPoint charPos(x, pos.y_);
-    DrawChar(*current, charPos);
+    DrawChar(*current, GUIPoint(x, pos.y_));
   }
 }
 
-void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
+void AppWindow::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
   if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT || pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
     return;
   }
@@ -237,20 +234,21 @@ void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
   int index = pos.x_ + SCREEN_WIDTH * pos.y_;
   _charScreen[index] = c;
 
-  // Ensure color index is masked to prevent overlap with inversion bit.
-  _screenColor[index] = color_;
+  if (transparent) {
+    _screenColor[index].fg = color_.fg;
+  } else {
+    _screenColor[index] = color_;
+  }
 }
 
-void AppWindow::Clear(bool all) {
+void AppWindow::Clear() {
   color_t base = (color_t){.fg = Theme::View::fg, .bg = Theme::View::bg};
 
   memset(_charScreen, ' ', SCREEN_CHARS);
   memset(_screenColor, base.byte, SCREEN_CHARS);
 
-  if (all) {
-    memset(_preScreen, '\0', SCREEN_CHARS);
-    memset(_preScreenColor, base.byte, SCREEN_CHARS);
-  };
+  memset(_preScreen, '\0', SCREEN_CHARS);
+  memset(_preScreenColor, 0xff, SCREEN_CHARS);
 }
 
 void AppWindow::ClearTextRect(GUIRect &r) {
@@ -332,12 +330,12 @@ void AppWindow::Flush() {
         // current color
         if (fg != currentFG) {
           currentFG = fg;
-          GUIWindow::SetColor(colorPalette_[fg]);
+          GUIWindow::SetColor(fg);
         }
 
         if (bg != currentBG) {
           currentBG = bg;
-          GUIWindow::SetBackgroundColor(colorPalette_[bg]);
+          GUIWindow::SetBackgroundColor(bg);
         }
 
         GUIWindow::DrawChar(*current, pos);
@@ -529,6 +527,8 @@ void AppWindow::UpdateColorsFromConfig() {
   defineColor(FourCC::VarColor_D_Magenta, colorPalette_[13], 13);
   defineColor(FourCC::VarColor_E_Cyan, colorPalette_[14], 14);
   defineColor(FourCC::VarColor_F_White, colorPalette_[15], 15);
+
+  GetImpWindow()->SetPalette(colorPalette_, NUM_COLORS);
 }
 
 bool AppWindow::onEvent(GUIEvent &event) {
@@ -598,8 +598,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
 void AppWindow::onUpdate(bool redraw) {
   if (redraw) {
-    GUIWindow::Clear(colorPalette_[Theme::View::bg]);
-    Clear(true);
+    Clear();
     // Mark as dirty to trigger redraw in AnimationUpdate
     SetDirty();
   }
@@ -797,8 +796,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         }
         _currentView->SetFocus(*vt);
         SetDirty();
-        GUIWindow::Clear(colorPalette_[Theme::View::bg]);
-        Clear(true);
+        Clear();
         break;
       }
 
@@ -952,11 +950,4 @@ bool AppWindow::AutoSave() {
     return true;
   }
   return false;
-}
-
-// Maps the ColorDefinition used in View classes to a GUIColor that is needed by
-// DrawRect which unlike the text grid based drawing code works in terms of
-// GUIColor and not definitions
-GUIColor AppWindow::GetGUIColor(Color cd) {
-  return colorPalette_[cd];
 }

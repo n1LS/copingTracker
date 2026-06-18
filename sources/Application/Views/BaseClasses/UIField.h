@@ -32,7 +32,6 @@ public:
   bool HasFocus();
   void SetPosition(const GUIPoint &);
   GUIPoint GetPosition();
-  GUIColor GetColor();
 
   virtual bool IsStatic();
 

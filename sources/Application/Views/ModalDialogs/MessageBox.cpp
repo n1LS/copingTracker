@@ -89,7 +89,7 @@ void MessageBox::DrawView() {
   // compute space needed for buttons
   // and set window size
 
-  int btnSize = 5;
+  int btnSize = 6;
   int width = buttonCount_ * (btnSize + 1) + 1;
   width = (size > width) ? size : width;
   SetWindow(width, line2_.size() > 0 ? 4 : 3);
@@ -111,17 +111,15 @@ void MessageBox::DrawView() {
     bool sel = i == selected_;
     const char *text = buttonText[button_[i]];
     x = offset * (i + 1) - strlen(text) / 2;
-    SetColor(Theme::Button::fg(sel));
-    SetBackgroundColor(Theme::Button::bg(sel));
+    SetColor(Theme::Dialog::Button::fg(sel));
+    SetBackgroundColor(Theme::Dialog::Button::bg(sel));
     DrawString(x, y, text);
 
-    if (sel) {
-      // draw highlight button ends
-      SwapColors();
-      SetBackgroundColor(Theme::Dialog::bg);
-      DrawChar(x - 1, y, GLYPH(char_button_border_left_s));
-      DrawChar(x + strlen(text), y, GLYPH(char_button_border_right_s));
-    }
+    // draw highlight button ends
+    SetColor(Theme::Dialog::Button::bg(sel));
+    SetBackgroundColor(Theme::Dialog::bg);
+    DrawChar(x - 1, y, GLYPH(char_button_border_left_s));
+    DrawChar(x + strlen(text), y, GLYPH(char_button_border_right_s));
   }
 }
 

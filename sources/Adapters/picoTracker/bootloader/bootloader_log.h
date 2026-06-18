@@ -9,14 +9,6 @@
 #ifndef BOOTLOADER_LOG_H
 #define BOOTLOADER_LOG_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void bootlog(const char *fmt, ...);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

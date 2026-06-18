@@ -182,7 +182,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
 
   const int32_t sourceSampleRate = wav.GetSampleRate(-1);
   const int32_t channelCount = wav.GetChannelCount(-1);
-  const int32_t importResampler = Config::GetInstance()->GetValue("IMPORTRESAMP");
+  const int32_t importResampler = Config::GetInstance()->GetValue("ImportResampling");
   const bool shouldResample = (importResampler > 0) && (sourceSampleRate != 44100);
   const int32_t outputSampleRate = shouldResample ? 44100 : sourceSampleRate;
 

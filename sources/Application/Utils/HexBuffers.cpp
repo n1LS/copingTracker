@@ -35,8 +35,8 @@ void prepareHexChunk(tinyxml2::XMLPrinter *printer, unsigned char *datasrc, int 
     hex += 2;
   };
   if (singleValue) {
-    printer->PushAttribute("VALUE", singleValueData);
-    printer->PushAttribute("LENGTH", len);
+    printer->PushAttribute("value", singleValueData);
+    printer->PushAttribute("length", len);
   } else {
     printer->PushText(reinterpret_cast<const char *>(hexBuffer));
   }
@@ -50,7 +50,7 @@ void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned
   unsigned char *datasrc = (unsigned char *)src;
 
   for (unsigned i = 0; i < count; i++) {
-    printer->OpenElement("DATA");
+    printer->OpenElement("Data");
     prepareHexChunk(printer, datasrc, XML_CUT_LENGTH);
     datasrc += XML_CUT_LENGTH;
     printer->CloseElement();
@@ -58,7 +58,7 @@ void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, unsigned
 
   len -= count * XML_CUT_LENGTH;
   if (len > 0) {
-    printer->OpenElement("DATA");
+    printer->OpenElement("Data");
     prepareHexChunk(printer, datasrc, len);
     printer->CloseElement();
   }
@@ -88,11 +88,11 @@ void restoreHexBuffer(PersistencyDocument *doc, unsigned char *destination) {
       int length = 0;
       bool gotData = false;
       while (hasAttr) {
-        if (!strcmp(doc->attrname_, "VALUE")) {
+        if (!strcmp(doc->attrname_, "value")) {
           data = atoi(doc->attrval_);
           gotData = true;
         }
-        if (!strcmp(doc->attrname_, "LENGTH")) {
+        if (!strcmp(doc->attrname_, "length")) {
           length = atoi(doc->attrval_);
         }
         hasAttr = doc->NextAttribute();

@@ -67,36 +67,36 @@ struct ConfigParam {
 // initialization
 static const ConfigParam configParams[] = {
     // Color variables
-    {"COLOR0", {.intValue = ThemeConstants::DEFAULT_COLOR0}, FourCC::VarColor_0_Black, nullptr, 0, false},
-    {"COLOR1", {.intValue = ThemeConstants::DEFAULT_COLOR1}, FourCC::VarColor_1_Maroon, nullptr, 0, false},
-    {"COLOR2", {.intValue = ThemeConstants::DEFAULT_COLOR2}, FourCC::VarColor_2_Green, nullptr, 0, false},
-    {"COLOR3", {.intValue = ThemeConstants::DEFAULT_COLOR3}, FourCC::VarColor_3_Olive, nullptr, 0, false},
-    {"COLOR4", {.intValue = ThemeConstants::DEFAULT_COLOR4}, FourCC::VarColor_4_Blue, nullptr, 0, false},
-    {"COLOR5", {.intValue = ThemeConstants::DEFAULT_COLOR5}, FourCC::VarColor_5_Purple, nullptr, 0, false},
-    {"COLOR6", {.intValue = ThemeConstants::DEFAULT_COLOR6}, FourCC::VarColor_6_Turqoise, nullptr, 0, false},
-    {"COLOR7", {.intValue = ThemeConstants::DEFAULT_COLOR7}, FourCC::VarColor_7_LightyGray},
-    {"COLOR8", {.intValue = ThemeConstants::DEFAULT_COLOR8}, FourCC::VarColor_8_Gray, nullptr, 0, false},
-    {"COLOR9", {.intValue = ThemeConstants::DEFAULT_COLOR9}, FourCC::VarColor_9_Red, nullptr, 0, false},
-    {"COLOR10", {.intValue = ThemeConstants::DEFAULT_COLOR10}, FourCC::VarColor_A_Lime, nullptr, 0, false},
-    {"COLOR11", {.intValue = ThemeConstants::DEFAULT_COLOR11}, FourCC::VarColor_B_Yellow, nullptr, 0, false},
-    {"COLOR12", {.intValue = ThemeConstants::DEFAULT_COLOR12}, FourCC::VarColor_C_LightBlue, nullptr, 0, false},
-    {"COLOR13", {.intValue = ThemeConstants::DEFAULT_COLOR13}, FourCC::VarColor_D_Magenta, nullptr, 0, false},
-    {"COLOR14", {.intValue = ThemeConstants::DEFAULT_COLOR14}, FourCC::VarColor_E_Cyan, nullptr, 0, false},
-    {"COLOR15", {.intValue = ThemeConstants::DEFAULT_COLOR15}, FourCC::VarColor_F_White, nullptr, 0, false},
+    {"Color0", {.intValue = ThemeConstants::DEFAULT_COLOR0}, FourCC::VarColor_0_Black, nullptr, 0, false},
+    {"Color1", {.intValue = ThemeConstants::DEFAULT_COLOR1}, FourCC::VarColor_1_Maroon, nullptr, 0, false},
+    {"Color2", {.intValue = ThemeConstants::DEFAULT_COLOR2}, FourCC::VarColor_2_Green, nullptr, 0, false},
+    {"Color3", {.intValue = ThemeConstants::DEFAULT_COLOR3}, FourCC::VarColor_3_Olive, nullptr, 0, false},
+    {"Color4", {.intValue = ThemeConstants::DEFAULT_COLOR4}, FourCC::VarColor_4_Blue, nullptr, 0, false},
+    {"Color5", {.intValue = ThemeConstants::DEFAULT_COLOR5}, FourCC::VarColor_5_Purple, nullptr, 0, false},
+    {"Color6", {.intValue = ThemeConstants::DEFAULT_COLOR6}, FourCC::VarColor_6_Turqoise, nullptr, 0, false},
+    {"Color7", {.intValue = ThemeConstants::DEFAULT_COLOR7}, FourCC::VarColor_7_LightyGray},
+    {"Color8", {.intValue = ThemeConstants::DEFAULT_COLOR8}, FourCC::VarColor_8_Gray, nullptr, 0, false},
+    {"Color9", {.intValue = ThemeConstants::DEFAULT_COLOR9}, FourCC::VarColor_9_Red, nullptr, 0, false},
+    {"Color10", {.intValue = ThemeConstants::DEFAULT_COLOR10}, FourCC::VarColor_A_Lime, nullptr, 0, false},
+    {"Color11", {.intValue = ThemeConstants::DEFAULT_COLOR11}, FourCC::VarColor_B_Yellow, nullptr, 0, false},
+    {"Color12", {.intValue = ThemeConstants::DEFAULT_COLOR12}, FourCC::VarColor_C_LightBlue, nullptr, 0, false},
+    {"Color13", {.intValue = ThemeConstants::DEFAULT_COLOR13}, FourCC::VarColor_D_Magenta, nullptr, 0, false},
+    {"Color14", {.intValue = ThemeConstants::DEFAULT_COLOR14}, FourCC::VarColor_E_Cyan, nullptr, 0, false},
+    {"Color15", {.intValue = ThemeConstants::DEFAULT_COLOR15}, FourCC::VarColor_F_White, nullptr, 0, false},
 
-    {"THEMENAME", {.strValue = ThemeConstants::DEFAULT_THEME_NAME}, FourCC::VarThemeName, nullptr, 0, true},
+    {"ThemeName", {.strValue = ThemeConstants::DEFAULT_THEME_NAME}, FourCC::VarThemeName, nullptr, 0, true},
 
     // Device settings with options
-    {"LINEOUT", {.intValue = DEFAULT_LINEOUT}, FourCC::VarLineOut, lineOutOptions, 3, false},
-    {"MIDIDEVICE", {.intValue = DEFAULT_MIDIDEVICE}, FourCC::VarMidiDevice, midiDeviceList, 4, false},
-    {"MIDISYNC", {.intValue = DEFAULT_MIDISYNC}, FourCC::VarMidiSync, midiSendSync, 2, false},
-    {"MIRRORUI", {.intValue = DEFAULT_REMOTEUI}, FourCC::VarMirrorUI, mirrorUIOnOff, 2, false},
-    {"UIFONT", {.intValue = ThemeConstants::DEFAULT_UIFONT}, FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES, ThemeConstants::THEME_FONT_COUNT, false},
+    {"LineOut", {.intValue = DEFAULT_LINEOUT}, FourCC::VarLineOut, lineOutOptions, 3, false},
+    {"MidiDevice", {.intValue = DEFAULT_MIDIDEVICE}, FourCC::VarMidiDevice, midiDeviceList, 4, false},
+    {"MidiSync", {.intValue = DEFAULT_MIDISYNC}, FourCC::VarMidiSync, midiSendSync, 2, false},
+    {"mirrorUI", {.intValue = DEFAULT_REMOTEUI}, FourCC::VarMirrorUI, mirrorUIOnOff, 2, false},
+    {"UIFont", {.intValue = ThemeConstants::DEFAULT_UIFONT}, FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES, ThemeConstants::THEME_FONT_COUNT, false},
 
     // Display brightness setting
-    {"BACKLIGHTLEVEL", {.intValue = DEFAULT_BACKLIGHT_LEVEL}, FourCC::VarBacklightLevel, nullptr, 0, false},
-    {"OUTPUTVOLUME", {.intValue = DEFAULT_OUTPUT_VOLUME}, FourCC::VarOutputVolume, nullptr, 0, false},
-    {"IMPORTRESAMP", {.intValue = DEFAULT_IMPORT_RESAMPLER}, FourCC::VarImportResampler, importResamplerOptions, kImportResamplerOptionCount, false},
+    {"BacklightLevel", {.intValue = DEFAULT_BACKLIGHT_LEVEL}, FourCC::VarBacklightLevel, nullptr, 0, false},
+    {"OutputVolume", {.intValue = DEFAULT_OUTPUT_VOLUME}, FourCC::VarOutputVolume, nullptr, 0, false},
+    {"ImportResampling", {.intValue = DEFAULT_IMPORT_RESAMPLER}, FourCC::VarImportResampler, importResamplerOptions, kImportResamplerOptionCount, false},
 };
 
 Config::Config()
@@ -164,7 +164,7 @@ Config::Config()
   }
 
   bool elem = doc.FirstChild();
-  if (!elem || strcmp(doc.ElemName(), "CONFIG")) {
+  if (!elem || strcmp(doc.ElemName(), "Configuration")) {
     Trace::Log("CONFIG", "Bad " CONFIG_FILE_PATH " format!");
     // TODO: need show user some UI that config file is invalid
     Save(); // and write the defaults to SDCard
@@ -199,7 +199,7 @@ Config::Config()
     while (hasAttr) {
       // Special handling for Theme Name sadly because it is a string and no
       // easy way to look that that up in configParams data above
-      if (!strcmp(doc.ElemName(), "THEMENAME")) {
+      if (!strcmp(doc.ElemName(), "ThemeName")) {
         if (Variable *themeVar = FindVariable(FourCC::VarThemeName)) {
           themeVar->SetString(doc.attrval_);
           Trace::Log("CONFIG", "Read Theme Name:%s", doc.attrval_);
@@ -339,40 +339,39 @@ void Config::ReadColorVariable(PersistencyDocument *doc) {
         // Find the variable by name and set its value
         FourCC fourcc = FourCC::Default; // Use Default as invalid marker
 
-        // Only support uppercase color names for consistency
-        if (strcmp(colorName, "COLOR0") == 0) {
+        if (strcmp(colorName, "Color0") == 0) {
           fourcc = FourCC::VarColor_0_Black;
-        } else if (strcmp(colorName, "COLOR1") == 0) {
+        } else if (strcmp(colorName, "Color1") == 0) {
           fourcc = FourCC::VarColor_1_Maroon;
-        } else if (strcmp(colorName, "COLOR2") == 0) {
+        } else if (strcmp(colorName, "Color2") == 0) {
           fourcc = FourCC::VarColor_2_Green;
-        } else if (strcmp(colorName, "COLOR3") == 0) {
+        } else if (strcmp(colorName, "Color3") == 0) {
           fourcc = FourCC::VarColor_3_Olive;
-        } else if (strcmp(colorName, "COLOR4") == 0) {
+        } else if (strcmp(colorName, "Color4") == 0) {
           fourcc = FourCC::VarColor_4_Blue;
-        } else if (strcmp(colorName, "COLOR5") == 0) {
+        } else if (strcmp(colorName, "Color5") == 0) {
           fourcc = FourCC::VarColor_5_Purple;
-        } else if (strcmp(colorName, "COLOR6") == 0) {
+        } else if (strcmp(colorName, "Color6") == 0) {
           fourcc = FourCC::VarColor_6_Turqoise;
-        } else if (strcmp(colorName, "COLOR7") == 0) {
+        } else if (strcmp(colorName, "Color7") == 0) {
           fourcc = FourCC::VarColor_7_LightyGray;
-        } else if (strcmp(colorName, "COLOR8") == 0) {
+        } else if (strcmp(colorName, "Color8") == 0) {
           fourcc = FourCC::VarColor_8_Gray;
-        } else if (strcmp(colorName, "COLOR9") == 0) {
+        } else if (strcmp(colorName, "Color9") == 0) {
           fourcc = FourCC::VarColor_9_Red;
-        } else if (strcmp(colorName, "COLOR9") == 0) {
+        } else if (strcmp(colorName, "Color9") == 0) {
           fourcc = FourCC::VarColor_9_Red;
-        } else if (strcmp(colorName, "COLOR10") == 0) {
+        } else if (strcmp(colorName, "Color10") == 0) {
           fourcc = FourCC::VarColor_A_Lime;
-        } else if (strcmp(colorName, "COLOR11") == 0) {
+        } else if (strcmp(colorName, "Color11") == 0) {
           fourcc = FourCC::VarColor_B_Yellow;
-        } else if (strcmp(colorName, "COLOR12") == 0) {
+        } else if (strcmp(colorName, "Color12") == 0) {
           fourcc = FourCC::VarColor_C_LightBlue;
-        } else if (strcmp(colorName, "COLOR13") == 0) {
+        } else if (strcmp(colorName, "Color13") == 0) {
           fourcc = FourCC::VarColor_D_Magenta;
-        } else if (strcmp(colorName, "COLOR14") == 0) {
+        } else if (strcmp(colorName, "Color14") == 0) {
           fourcc = FourCC::VarColor_E_Cyan;
-        } else if (strcmp(colorName, "COLOR15") == 0) {
+        } else if (strcmp(colorName, "Color15") == 0) {
           fourcc = FourCC::VarColor_F_White;
         }
 
@@ -392,7 +391,7 @@ bool Config::SaveTheme(tinyxml2::XMLPrinter *printer, const char *themeName) {
   Trace::Log("CONFIG", "Saving theme content to XML");
 
   // Open the THEME root element
-  printer->OpenElement("THEME");
+  printer->OpenElement("Theme");
 
   // We don't need to save the theme name in the file
   // The filename itself serves as the theme name
@@ -421,8 +420,8 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
   Trace::Log("CONFIG", "Saving %d variables to config file", variables_.size());
 
   // store config version
-  printer->OpenElement("CONFIG");
-  printer->PushAttribute("VERSION", CONFIG_VERSION_NUMBER);
+  printer->OpenElement("Configuration");
+  printer->PushAttribute("version", CONFIG_VERSION_NUMBER);
   // save all of the config parameters
   auto it = variables_.begin();
   for (size_t i = 0; i < variables_.size(); i++) {
@@ -451,7 +450,6 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
     }
 
     etl::string<16> elemName = var->GetName();
-    to_upper_case(elemName);
 
     printer->OpenElement(elemName.c_str());
     // these settings need to be saved as the Int values not as String
@@ -459,10 +457,10 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
     if (var->GetType() == Variable::CHAR_LIST) {
       char buf[16];
       npf_snprintf(buf, sizeof(buf), "%d", var->GetInt());
-      printer->PushAttribute("VALUE", buf);
+      printer->PushAttribute("value", buf);
     } else {
       // all other settings need to be saved as thier String values
-      printer->PushAttribute("VALUE", var->GetString().c_str());
+      printer->PushAttribute("value", var->GetString().c_str());
     }
     printer->CloseElement();
     it++;
@@ -479,8 +477,8 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
   Trace::Log("CONFIG", "Loading theme content from XML");
 
   // Find the THEME root element
-  if (!doc->FirstChild() || strcmp(doc->ElemName(), "THEME") != 0) {
-    Trace::Error("Could not find THEME element in document");
+  if (!doc->FirstChild() || strcmp(doc->ElemName(), "Theme") != 0) {
+    Trace::Error("Could not find <Theme> element in document");
     return false;
   }
 
