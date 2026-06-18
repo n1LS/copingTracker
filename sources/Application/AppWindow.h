@@ -55,8 +55,6 @@ protected:
 public:
   static AppWindow *Create(GUICreateWindowParams &, const char *projectName);
 
-  static GUIColor GetGUIColor(Color cd);
-
   enum LoadProjectResult { LOAD_FAILED = -1, LOAD_OK = 0 };
 
   LoadProjectResult LoadProject(const char *name);

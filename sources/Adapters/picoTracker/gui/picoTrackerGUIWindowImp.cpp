@@ -15,6 +15,7 @@
 #include "System/Console/Trace.h"
 #include "UIFramework/BasicDatas/GUIPoint.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
+#include "UIFramework/Framework/GUIColor.h"
 #include "UIFramework/Interfaces/I_GUIWindowFactory.h"
 #include "pico/stdlib.h"
 #include "mirrorUI.h"
@@ -26,6 +27,10 @@
 static uint16_t lastPaletteRGB[16] = {0};
 
 static GUIEventPadButtonType *eventMapping = eventMappingPico;
+
+static uint16_t guiColorToRGB565(const GUIColor &color) {
+  return ((color.r_ & 0xF8) << 8) | ((color.g_ & 0xFC) << 3) | (color.b_ >> 3);
+}
 
 // Initialize static members
 picoTrackerGUIWindowImp *picoTrackerGUIWindowImp::instance_ = NULL;
@@ -71,6 +76,27 @@ void picoTrackerGUIWindowImp::SendPalette() {
   if (mirrorUIEnabled_) {
     mirrorUI_sendPalette(chargfx_get_palette());
   }
+}
+
+void picoTrackerGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount) {
+  if (!palette) {
+    return;
+  }
+
+  for (int i = 0; i < colorCount; ++i) {
+    int paletteIndex = palette[i].paletteIndex_;
+    if (paletteIndex < 0 || paletteIndex >= 16) {
+      continue;
+    }
+
+    uint16_t rgb565 = guiColorToRGB565(palette[i]);
+    if (lastPaletteRGB[paletteIndex] != rgb565) {
+      chargfx_set_palette_color(paletteIndex, rgb565);
+      lastPaletteRGB[paletteIndex] = rgb565;
+    }
+  }
+
+  SendPalette();
 }
 
 void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos, bool transparent) {

@@ -148,8 +148,8 @@ struct Theme {
     FIXED(fg, BLACK)
     
     struct Button {
-      SWITCHABLE(fg, BLACK, LIGHT_GRAY)
-      SWITCHABLE(bg, WHITE, DARK_GRAY)
+      SWITCHABLE(fg, BLACK, WHITE)
+      SWITCHABLE(bg, LIGHT_GREEN, DARK_GRAY)
     };
   };
 

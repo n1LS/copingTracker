@@ -527,6 +527,8 @@ void AppWindow::UpdateColorsFromConfig() {
   defineColor(FourCC::VarColor_D_Magenta, colorPalette_[13], 13);
   defineColor(FourCC::VarColor_E_Cyan, colorPalette_[14], 14);
   defineColor(FourCC::VarColor_F_White, colorPalette_[15], 15);
+
+  GetImpWindow()->SetPalette(colorPalette_, NUM_COLORS);
 }
 
 bool AppWindow::onEvent(GUIEvent &event) {
@@ -948,11 +950,4 @@ bool AppWindow::AutoSave() {
     return true;
   }
   return false;
-}
-
-// Maps the ColorDefinition used in View classes to a GUIColor that is needed by
-// DrawRect which unlike the text grid based drawing code works in terms of
-// GUIColor and not definitions
-GUIColor AppWindow::GetGUIColor(Color cd) {
-  return colorPalette_[cd];
 }

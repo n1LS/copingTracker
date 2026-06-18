@@ -424,10 +424,6 @@ void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (mask & BM_NAV) {
     if (mask & BM_LEFT) {
-      // propagate color changes
-      AppWindow &app = (AppWindow &)w_;
-      app.GetImpWindow()->SendPalette();
-
       // Go back to Device view with NAV+LEFT
       Navigate(VT_DEVICE);
     }

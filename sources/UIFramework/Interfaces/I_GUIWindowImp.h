@@ -18,6 +18,7 @@
 
 class I_GUIWindowFactory; // forward declaration
 class GUIWindow;
+class GUIColor;
 
 // Base class for implementation window. Base operation directed
 // to system calls are passed from a GUIWindow to an instance of
@@ -37,6 +38,7 @@ public:
 
   virtual void SendFont(uint8_t uifontIndex) = 0;
   virtual void SendPalette() = 0;
+  virtual void SetPalette(const GUIColor *palette, int colorCount) = 0;
 
   //	virtual void Save()=0 ;
   //	virtual void Restore()=0 ;
