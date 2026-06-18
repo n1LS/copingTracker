@@ -20,23 +20,23 @@ I_Instrument::~I_Instrument() {
 
 void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {
   // Add firmware version information
-  printer->PushAttribute("VERSION", PROJECT_NUMBER);
+  printer->PushAttribute("version", PROJECT_NUMBER);
   // Save the instrument type
-  printer->PushAttribute("TYPE", InstrumentTypeNames[GetType()]);
+  printer->PushAttribute("type", InstrumentTypeNames[GetType()]);
 
   // Save the instrument name as its not stored in the Variables
   if (!name_.empty()) {
-    printer->OpenElement("PARAM");
-    printer->PushAttribute("NAME", "InstrumentName");
-    printer->PushAttribute("VALUE", name_.c_str());
+    printer->OpenElement("Parameter");
+    printer->PushAttribute("name", "InstrumentName");
+    printer->PushAttribute("value", name_.c_str());
     printer->CloseElement(); // PARAM
   }
 
   // Save all the instrument's parameters
   for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
-    printer->OpenElement("PARAM");
-    printer->PushAttribute("NAME", (*it)->GetName());
-    printer->PushAttribute("VALUE", (*it)->GetString().c_str());
+    printer->OpenElement("Parameter");
+    printer->PushAttribute("name", (*it)->GetName());
+    printer->PushAttribute("value", (*it)->GetString().c_str());
     printer->CloseElement(); // PARAM
   }
 }
@@ -45,7 +45,7 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
   // First, check for TYPE attribute in the INSTRUMENT element
   bool hasAttr = doc->NextAttribute();
   while (hasAttr) {
-    if (!strcasecmp(doc->attrname_, "TYPE")) {
+    if (!strcasecmp(doc->attrname_, "type")) {
       Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval_);
       // TODO: We already know the instrument type so need to validate it
       // matches the imported one here
@@ -64,10 +64,10 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
     char name[MAX_VARIABLE_STRING_LENGTH + 1] = "";
     char value[MAX_VARIABLE_STRING_LENGTH + 1] = "";
     while (hasAttr) {
-      if (!strcasecmp(doc->attrname_, "NAME")) {
+      if (!strcasecmp(doc->attrname_, "name")) {
         strcpy(name, doc->attrval_);
       }
-      if (!strcasecmp(doc->attrname_, "VALUE")) {
+      if (!strcasecmp(doc->attrname_, "value")) {
         strcpy(value, doc->attrval_);
       }
       hasAttr = doc->NextAttribute();

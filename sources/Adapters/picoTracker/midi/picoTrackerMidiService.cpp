@@ -12,7 +12,7 @@
 
 picoTrackerMidiService::picoTrackerMidiService()
     : // Initialize static member variables with their respective names
-      midiOutDevice_("MIDI OUT"), usbMidiOutDevice_("USB"), midiInDevice_("MIDI IN"), usbMidiInDevice_("USB MIDI IN") {
+      midiOutDevice_("MidiOut"), usbMidiOutDevice_("USB"), midiInDevice_("MidiIn"), usbMidiInDevice_("USBMidiIn") {
   // Add MIDI output devices to the output device list
   outList_.insert(outList_.end(), &midiOutDevice_);
   outList_.insert(outList_.end(), &usbMidiOutDevice_);

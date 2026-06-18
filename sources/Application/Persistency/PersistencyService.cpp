@@ -426,7 +426,7 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
   InstrumentType importedType = IT_NONE;
   bool hasAttr = doc.NextAttribute();
   while (hasAttr) {
-    if (!strcasecmp(doc.attrname_, "TYPE")) {
+    if (!strcasecmp(doc.attrname_, "type")) {
       Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval_);
 
       // Map the type string to InstrumentType enum
@@ -460,7 +460,7 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
 
   // Find the INSTRUMENT element
   bool elem = doc.FirstChild();
-  if (!elem || strcmp(doc.ElemName(), "INSTRUMENT")) {
+  if (!elem || strcmp(doc.ElemName(), "Instrument")) {
     Trace::Error("PERSISTENCYSERVICE: Could not find INSTRUMENT node in file: %s", name);
     return PERSIST_ERROR;
   }
@@ -471,11 +471,11 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
   etl::string<32> versionInfo;
 
   while (hasAttr) {
-    if (!strcasecmp(doc.attrname_, "VERSION")) {
+    if (!strcasecmp(doc.attrname_, "version")) {
       // Store version information for logging
       versionInfo = doc.attrval_;
       Trace::Log("PERSISTENCYSERVICE", "Instrument file version: %s", doc.attrval_);
-    } else if (!strcasecmp(doc.attrname_, "TYPE")) {
+    } else if (!strcasecmp(doc.attrname_, "type")) {
       Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval_);
 
       // Map the type string to InstrumentType enum

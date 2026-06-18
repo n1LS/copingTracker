@@ -339,40 +339,39 @@ void Config::ReadColorVariable(PersistencyDocument *doc) {
         // Find the variable by name and set its value
         FourCC fourcc = FourCC::Default; // Use Default as invalid marker
 
-        // Only support uppercase color names for consistency
-        if (strcmp(colorName, "COLOR0") == 0) {
+        if (strcmp(colorName, "Color0") == 0) {
           fourcc = FourCC::VarColor_0_Black;
-        } else if (strcmp(colorName, "COLOR1") == 0) {
+        } else if (strcmp(colorName, "Color1") == 0) {
           fourcc = FourCC::VarColor_1_Maroon;
-        } else if (strcmp(colorName, "COLOR2") == 0) {
+        } else if (strcmp(colorName, "Color2") == 0) {
           fourcc = FourCC::VarColor_2_Green;
-        } else if (strcmp(colorName, "COLOR3") == 0) {
+        } else if (strcmp(colorName, "Color3") == 0) {
           fourcc = FourCC::VarColor_3_Olive;
-        } else if (strcmp(colorName, "COLOR4") == 0) {
+        } else if (strcmp(colorName, "Color4") == 0) {
           fourcc = FourCC::VarColor_4_Blue;
-        } else if (strcmp(colorName, "COLOR5") == 0) {
+        } else if (strcmp(colorName, "Color5") == 0) {
           fourcc = FourCC::VarColor_5_Purple;
-        } else if (strcmp(colorName, "COLOR6") == 0) {
+        } else if (strcmp(colorName, "Color6") == 0) {
           fourcc = FourCC::VarColor_6_Turqoise;
-        } else if (strcmp(colorName, "COLOR7") == 0) {
+        } else if (strcmp(colorName, "Color7") == 0) {
           fourcc = FourCC::VarColor_7_LightyGray;
-        } else if (strcmp(colorName, "COLOR8") == 0) {
+        } else if (strcmp(colorName, "Color8") == 0) {
           fourcc = FourCC::VarColor_8_Gray;
-        } else if (strcmp(colorName, "COLOR9") == 0) {
+        } else if (strcmp(colorName, "Color9") == 0) {
           fourcc = FourCC::VarColor_9_Red;
-        } else if (strcmp(colorName, "COLOR9") == 0) {
+        } else if (strcmp(colorName, "Color9") == 0) {
           fourcc = FourCC::VarColor_9_Red;
-        } else if (strcmp(colorName, "COLOR10") == 0) {
+        } else if (strcmp(colorName, "Color10") == 0) {
           fourcc = FourCC::VarColor_A_Lime;
-        } else if (strcmp(colorName, "COLOR11") == 0) {
+        } else if (strcmp(colorName, "Color11") == 0) {
           fourcc = FourCC::VarColor_B_Yellow;
-        } else if (strcmp(colorName, "COLOR12") == 0) {
+        } else if (strcmp(colorName, "Color12") == 0) {
           fourcc = FourCC::VarColor_C_LightBlue;
-        } else if (strcmp(colorName, "COLOR13") == 0) {
+        } else if (strcmp(colorName, "Color13") == 0) {
           fourcc = FourCC::VarColor_D_Magenta;
-        } else if (strcmp(colorName, "COLOR14") == 0) {
+        } else if (strcmp(colorName, "Color14") == 0) {
           fourcc = FourCC::VarColor_E_Cyan;
-        } else if (strcmp(colorName, "COLOR15") == 0) {
+        } else if (strcmp(colorName, "Color15") == 0) {
           fourcc = FourCC::VarColor_F_White;
         }
 
@@ -392,7 +391,7 @@ bool Config::SaveTheme(tinyxml2::XMLPrinter *printer, const char *themeName) {
   Trace::Log("CONFIG", "Saving theme content to XML");
 
   // Open the THEME root element
-  printer->OpenElement("THEME");
+  printer->OpenElement("Theme");
 
   // We don't need to save the theme name in the file
   // The filename itself serves as the theme name
@@ -422,7 +421,7 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
 
   // store config version
   printer->OpenElement("Configuration");
-  printer->PushAttribute("VERSION", CONFIG_VERSION_NUMBER);
+  printer->PushAttribute("version", CONFIG_VERSION_NUMBER);
   // save all of the config parameters
   auto it = variables_.begin();
   for (size_t i = 0; i < variables_.size(); i++) {
@@ -451,7 +450,6 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
     }
 
     etl::string<16> elemName = var->GetName();
-    to_upper_case(elemName);
 
     printer->OpenElement(elemName.c_str());
     // these settings need to be saved as the Int values not as String
@@ -459,10 +457,10 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
     if (var->GetType() == Variable::CHAR_LIST) {
       char buf[16];
       npf_snprintf(buf, sizeof(buf), "%d", var->GetInt());
-      printer->PushAttribute("Value", buf);
+      printer->PushAttribute("value", buf);
     } else {
       // all other settings need to be saved as thier String values
-      printer->PushAttribute("Value", var->GetString().c_str());
+      printer->PushAttribute("value", var->GetString().c_str());
     }
     printer->CloseElement();
     it++;
@@ -479,8 +477,8 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
   Trace::Log("CONFIG", "Loading theme content from XML");
 
   // Find the THEME root element
-  if (!doc->FirstChild() || strcmp(doc->ElemName(), "THEME") != 0) {
-    Trace::Error("Could not find THEME element in document");
+  if (!doc->FirstChild() || strcmp(doc->ElemName(), "Theme") != 0) {
+    Trace::Error("Could not find <Theme> element in document");
     return false;
   }
 

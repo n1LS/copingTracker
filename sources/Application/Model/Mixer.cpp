@@ -11,7 +11,7 @@
 
 #include "Mixer.h"
 
-Mixer::Mixer() : Persistent("MIXER") { Clear(); };
+Mixer::Mixer() : Persistent("Mixer") { Clear(); };
 
 Mixer::~Mixer() {};
 

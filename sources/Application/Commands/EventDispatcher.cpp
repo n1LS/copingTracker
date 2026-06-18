@@ -23,8 +23,8 @@ EventDispatcher::EventDispatcher() {
   // Read config file key repeat
 
   Config *config = Config::GetInstance();
-  keyDelay_ = config->GetValue("KEYDELAY");
-  keyRepeat_ = config->GetValue("KEYREPEAT");
+  keyDelay_ = config->GetValue("KeyDelay");
+  keyRepeat_ = config->GetValue("KeyRepeat");
 
   repeatMask_ = 0;
   repeatMask_ |= (1 << EPBT_LEFT);

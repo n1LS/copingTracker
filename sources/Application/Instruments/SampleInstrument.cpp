@@ -22,7 +22,7 @@
 #include "System/Console/Trace.h"
 #include "System/io/Status.h"
 #include <assert.h>
-
+#include "Adapters/picoTracker/bootloader/bootloader_log.h"
 #include "System/Console/nanoprintf.h"
 #include <algorithm>
 #include <math.h>
@@ -1477,7 +1477,7 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SampleInstrument::GetDisplayName() {
 
   // If no sample is set (empty filename), return "NONE"
   if (sampleFileName.empty()) {
-    return etl::string<MAX_INSTRUMENT_NAME_LENGTH>("NONE");
+    return etl::string<MAX_INSTRUMENT_NAME_LENGTH>("None");
   }
 
   // Strip .wav extension if present
@@ -1497,11 +1497,11 @@ void SampleInstrument::SaveContent(tinyxml2::XMLPrinter *printer) {
     if (slicePoints_[i] == 0) {
       continue;
     }
-    printer->OpenElement("PARAM");
+    printer->OpenElement("Parameter");
     char sliceName[6];
-    npf_snprintf(sliceName, sizeof(sliceName), "SL%02u", static_cast<unsigned>(i));
-    printer->PushAttribute("NAME", sliceName);
-    printer->PushAttribute("VALUE", static_cast<unsigned int>(slicePoints_[i]));
+    npf_snprintf(sliceName, sizeof(sliceName), "sl%02u", static_cast<unsigned>(i));
+    printer->PushAttribute("name", sliceName);
+    printer->PushAttribute("value", static_cast<unsigned int>(slicePoints_[i]));
     printer->CloseElement();
   }
 }
@@ -1518,9 +1518,9 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
 
   bool hasAttr = doc->NextAttribute();
   while (hasAttr) {
-    if (!strcasecmp(doc->attrname_, "TYPE")) {
+    if (!strcasecmp(doc->attrname_, "type")) {
       Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval_);
-    } else if (!strncasecmp(doc->attrname_, "SL", 2)) {
+    } else if (!strncasecmp(doc->attrname_, "sl", 2)) {
       setSliceFromString(doc->attrname_ + 2, doc->attrval_);
     }
     hasAttr = doc->NextAttribute();
@@ -1534,10 +1534,10 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
     etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> value;
 
     while (attr) {
-      if (!strcasecmp(doc->attrname_, "NAME")) {
+      if (!strcasecmp(doc->attrname_, "name")) {
         name = doc->attrval_;
       }
-      if (!strcasecmp(doc->attrname_, "VALUE")) {
+      if (!strcasecmp(doc->attrname_, "value")) {
         value = doc->attrval_;
       }
       attr = doc->NextAttribute();
@@ -1546,7 +1546,7 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
     if (!name.empty() && !value.empty()) {
       if (!strcasecmp(name.c_str(), "InstrumentName")) {
         SetName(value.c_str());
-      } else if (!strncasecmp(name.c_str(), "SL", 2)) {
+      } else if (!strncasecmp(name.c_str(), "sl", 2)) {
         setSliceFromString(name.c_str() + 2, value.c_str());
       } else {
         bool found = false;
@@ -1616,5 +1616,5 @@ bool SampleInstrument::IsMulti() {
 
 void SampleInstrument::EnableDownsamplingLegacy() {
   useDirtyDownsampling_ = true;
-  Trace::Log("CONFIG", "Enabling downsampling legacy");
+  bootlog("Enabling downsampling legacy");
 }
