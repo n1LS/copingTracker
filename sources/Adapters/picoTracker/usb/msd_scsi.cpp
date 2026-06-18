@@ -95,7 +95,7 @@ uint32_t msd_sd_get_fat_sectors(void) {
 void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor_id[8], uint8_t product_id[16], uint8_t product_rev[4]) {
   (void)lun;
 
-  const char vid[] = "picoTrkr";
+  const char vid[] = "cpngTrkr";
   const char pid[] = "SD Card";
   const char rev[] = "1.0";
 

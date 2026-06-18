@@ -13,6 +13,7 @@
 #include "../Model/Project.h"
 #include "Application/Utils/char.h"
 #include "System/Console/Trace.h"
+#include "Application/Persistency/PersistenceConstants.h"
 
 I_Instrument::~I_Instrument() {
   // Virtual destructor implementation
@@ -20,23 +21,23 @@ I_Instrument::~I_Instrument() {
 
 void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {
   // Add firmware version information
-  printer->PushAttribute("version", PROJECT_NUMBER);
+  printer->PushAttribute(XML_ATTR_VERSION, PROJECT_NUMBER);
   // Save the instrument type
-  printer->PushAttribute("type", InstrumentTypeNames[GetType()]);
+  printer->PushAttribute(XML_ATTR_TYPE, InstrumentTypeNames[GetType()]);
 
   // Save the instrument name as its not stored in the Variables
   if (!name_.empty()) {
-    printer->OpenElement("Parameter");
-    printer->PushAttribute("name", "InstrumentName");
-    printer->PushAttribute("value", name_.c_str());
+    printer->OpenElement(XML_ELEM_PARAMETER);
+    printer->PushAttribute(XML_ATTR_NAME, XML_ATTR_INSTRUMENT_NAME);
+    printer->PushAttribute(XML_ATTR_VALUE, name_.c_str());
     printer->CloseElement(); // PARAM
   }
 
   // Save all the instrument's parameters
   for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
-    printer->OpenElement("Parameter");
-    printer->PushAttribute("name", (*it)->GetName());
-    printer->PushAttribute("value", (*it)->GetString().c_str());
+    printer->OpenElement(XML_ELEM_PARAMETER);
+    printer->PushAttribute(XML_ATTR_NAME, (*it)->GetName());
+    printer->PushAttribute(XML_ATTR_VALUE, (*it)->GetString().c_str());
     printer->CloseElement(); // PARAM
   }
 }
@@ -45,7 +46,7 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
   // First, check for TYPE attribute in the INSTRUMENT element
   bool hasAttr = doc->NextAttribute();
   while (hasAttr) {
-    if (!strcasecmp(doc->attrname_, "type")) {
+    if (!strcasecmp(doc->attrname_, XML_ATTR_TYPE)) {
       Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval_);
       // TODO: We already know the instrument type so need to validate it
       // matches the imported one here
@@ -64,10 +65,10 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
     char name[MAX_VARIABLE_STRING_LENGTH + 1] = "";
     char value[MAX_VARIABLE_STRING_LENGTH + 1] = "";
     while (hasAttr) {
-      if (!strcasecmp(doc->attrname_, "name")) {
+      if (!strcasecmp(doc->attrname_, XML_ATTR_NAME)) {
         strcpy(name, doc->attrval_);
       }
-      if (!strcasecmp(doc->attrname_, "value")) {
+      if (!strcasecmp(doc->attrname_, XML_ATTR_VALUE)) {
         strcpy(value, doc->attrval_);
       }
       hasAttr = doc->NextAttribute();
@@ -75,7 +76,7 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
 
     if (name[0] != '\0' && value[0] != '\0') {
       // Special handling for InstrumentName parameter
-      if (!strcasecmp(name, "InstrumentName")) {
+      if (!strcasecmp(name, XML_ATTR_INSTRUMENT_NAME)) {
         // Set the instrument name directly
         SetName(value);
         Trace::Log("I_INSTRUMENT", "Set instrument name: %s", value);

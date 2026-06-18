@@ -357,10 +357,10 @@ void Project::RestoreContent(PersistencyDocument *doc) {
   doc->version_ = 32;
   int tableRatio = 0;
   while (attr) {
-    if (!strcmp(doc->attrname_, "version")) {
+    if (!strcmp(doc->attrname_, XML_ATTR_VERSION)) {
       doc->version_ = int(atof(doc->attrval_) * 100);
     }
-    if (!strcmp(doc->attrname_, "tableRatio")) {
+    if (!strcmp(doc->attrname_, XML_ATTR_TABLE_RATIO)) {
       tableRatio = atoi(doc->attrval_);
     }
     attr = doc->NextAttribute();
@@ -376,10 +376,10 @@ void Project::RestoreContent(PersistencyDocument *doc) {
     char name[MAX_VARIABLE_STRING_LENGTH + 1];
     char value[MAX_VARIABLE_STRING_LENGTH + 1];
     while (attr) {
-      if (!strcmp(doc->attrname_, "name")) {
+      if (!strcmp(doc->attrname_, XML_ATTR_NAME)) {
         strcpy(name, doc->attrval_);
       }
-      if (!strcmp(doc->attrname_, "value")) {
+      if (!strcmp(doc->attrname_, XML_ATTR_VALUE)) {
         strcpy(value, doc->attrval_);
       }
       attr = doc->NextAttribute();
@@ -396,12 +396,12 @@ void Project::RestoreContent(PersistencyDocument *doc) {
 void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
 
   // store project version
-  printer->PushAttribute("version", PROJECT_NUMBER);
+  printer->PushAttribute(XML_ATTR_VERSION, PROJECT_NUMBER);
 
   // store table ratio if not one
   int tableRatio = SyncMaster::GetInstance()->GetTableRatio();
   if (tableRatio != 1) {
-    printer->PushAttribute("tableRatio", tableRatio);
+    printer->PushAttribute(XML_ATTR_TABLE_RATIO, tableRatio);
   }
 
   // save all of the project's parameters
@@ -415,9 +415,9 @@ void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
       continue;
     }
 
-    printer->OpenElement("Parameter");
-    printer->PushAttribute("name", currentVar->GetName());
-    printer->PushAttribute("value", currentVar->GetString().c_str());
+    printer->OpenElement(XML_ELEM_PARAMETER);
+    printer->PushAttribute(XML_ATTR_NAME, currentVar->GetName());
+    printer->PushAttribute(XML_ATTR_VALUE, currentVar->GetString().c_str());
     printer->CloseElement();
     it++;
   }

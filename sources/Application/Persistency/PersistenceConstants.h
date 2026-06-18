@@ -39,4 +39,38 @@
 
 #define PROJECT_SAMPLES_DIR "samples"
 
+/* xml attributes and keys ***************************************************/
+
+#define XML_ATTR_VERSION "version"
+#define XML_ATTR_VALUE "value"
+#define XML_ATTR_NAME "name"
+#define XML_ATTR_TYPE "type"
+#define XML_ATTR_ID "id"
+#define XML_ATTR_TABLE_RATIO "table-ratio"
+#define XML_ATTR_LENGTH "length"
+#define XML_ATTR_SLICE_PREFIX "sl"
+#define XML_ATTR_TABLE_ID "table-id"
+#define XML_ATTR_ID "id"
+#define XML_ATTR_INSTRUMENT_NAME "instrument-name"
+
+#define XML_ELEM_PARAMETER "parameter"
+#define XML_ELEM_INSTRUMENT "instrument"
+#define XML_ELEM_TABLE "table"
+#define XML_ELEM_COLOR "color"
+#define XML_ELEM_SONG "song"
+#define XML_ELEM_THEME "theme"
+#define XML_ELEM_BASE "coping-tracker"
+#define XML_ELEM_DATA "data"
+#define XML_ELEM_CONFIGURATION "configuration"
+#define XML_ELEM_FONT "font"
+#define XML_ELEM_THEME_NAME "theme-name"
+#define XML_ELEM_COMMAND1 "command1"
+#define XML_ELEM_COMMAND2 "command2"
+#define XML_ELEM_COMMAND3 "command3"
+#define XML_ELEM_VALUE1 "value1"
+#define XML_ELEM_VALUE2 "value2"
+#define XML_ELEM_VALUE3 "value3"
+#define XML_ELEM_CHAIN_STEPS "chain-steps"
+#define XML_ELEM_PHRASE_STEPS "phrase-steps"
+
 #endif // _PERSISTENCE_CONSTANTS_H_

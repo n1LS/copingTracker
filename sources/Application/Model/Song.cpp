@@ -11,6 +11,7 @@
 
 #include "Song.h"
 #include "Application/Instruments/CommandList.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Utils/HexBuffers.h"
 #include "Phrase.h"
 #include "System/System/System.h"
@@ -35,27 +36,28 @@ void Song::Reset() {
 }
 
 void Song::SaveContent(tinyxml2::XMLPrinter *printer) {
-  saveHexBuffer(printer, "Song", (uint8_t *)rows_, SONG_ROW_COUNT * SONG_CHANNEL_COUNT);
-  saveHexBuffer(printer, "ChainSteps", (uint8_t *)chain_.steps_, CHAIN_COUNT * PHRASES_PER_CHAIN * sizeof(ChainStep));
-  saveHexBuffer(printer, "PhraseSteps", (uint8_t *)phrase_.steps_, PHRASE_COUNT * STEPS_PER_PHRASE * sizeof(PhraseStep));
+  saveHexBuffer(printer, XML_ELEM_SONG, (uint8_t *)rows_, SONG_ROW_COUNT * SONG_CHANNEL_COUNT);
+  saveHexBuffer(printer, XML_ELEM_CHAIN_STEPS, (uint8_t *)chain_.steps_, CHAIN_COUNT * PHRASES_PER_CHAIN * sizeof(ChainStep));
+  saveHexBuffer(printer, XML_ELEM_PHRASE_STEPS, (uint8_t *)phrase_.steps_, PHRASE_COUNT * STEPS_PER_PHRASE * sizeof(PhraseStep));
 }
 
 void Song::RestoreContent(PersistencyDocument *doc) {
   bool elem = doc->FirstChild();
 
   while (elem) {
-    if (!strcmp("Song", doc->ElemName())) {
+    if (!strcmp(XML_ELEM_SONG, doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)rows_);
     };
-    if (!strcmp("ChainSteps", doc->ElemName())) {
+    if (!strcmp(XML_ELEM_CHAIN_STEPS, doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)chain_.steps_);
     };
-    if (!strcmp("PhraseSteps", doc->ElemName())) {
+    if (!strcmp(XML_ELEM_PHRASE_STEPS, doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)phrase_.steps_);
     };
     elem = doc->NextSibling();
   }
 
+  // TODO rename
   Status::Set("Restoring allocation");
 
   // Restore chain & phrase allocation table

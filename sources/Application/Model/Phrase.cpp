@@ -15,9 +15,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-Phrase::Phrase() { Reset(); };
+Phrase::Phrase() { 
+  Reset(); 
+}
 
-Phrase::~Phrase() {};
+Phrase::~Phrase() {
+}
 
 void Phrase::Reset() {
   static const uint8_t NO_COMMAND = static_cast<uint8_t>(static_cast<char>(FourCC::InstrumentCommandNone));
@@ -46,7 +49,9 @@ uint16_t Phrase::GetNext() {
   return NO_MORE_PHRASE;
 }
 
-void Phrase::SetUsed(unsigned char c) { isUsed_[c] = true; }
+void Phrase::SetUsed(unsigned char c) { 
+  isUsed_[c] = true; 
+}
 
 void Phrase::ClearAllocation() {
   for (int i = 0; i < PHRASE_COUNT; i++) {
