@@ -202,7 +202,7 @@ void gfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t width, 
 
   // Write the buffer for each column
   for (uint16_t i = 0; i < display_h; i++) {
-    ili9341_write_data_continuous(buffer, display_w * sizeof(uint16_t));
+    ili9341_write_data_continuous((uint8_t *)buffer, display_w * sizeof(uint16_t));
   }
 
   ili9341_stop_writing();
@@ -230,7 +230,7 @@ inline void gfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
 
     gfx_rasterize_char_column(char_col, y, height, buffer_idx);
 
-    ili9341_write_data_continuous(buffer, CHAR_WIDTH * screen_height * sizeof(int16_t));
+    ili9341_write_data_continuous((uint8_t *)buffer, CHAR_WIDTH * screen_height * sizeof(int16_t));
   }
   ili9341_stop_writing();
 }

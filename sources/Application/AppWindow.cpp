@@ -229,7 +229,7 @@ void AppWindow::DrawString(const char *string, const GUIPoint &pos) {
   }
 }
 
-void AppWindow::DrawChar(const char c, const GUIPoint &pos) {
+void AppWindow::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
   if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT || pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
     return;
   }

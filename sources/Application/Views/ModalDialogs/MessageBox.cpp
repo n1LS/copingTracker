@@ -89,7 +89,7 @@ void MessageBox::DrawView() {
   // compute space needed for buttons
   // and set window size
 
-  int btnSize = 5;
+  int btnSize = 6;
   int width = buttonCount_ * (btnSize + 1) + 1;
   width = (size > width) ? size : width;
   SetWindow(width, line2_.size() > 0 ? 4 : 3);

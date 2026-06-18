@@ -240,7 +240,7 @@ public:
   virtual void SetBackgroundColor(Color cd);
   virtual void ClearTextRect(int x, int y, int w, int h);
   virtual void DrawString(int x, int y, const char *text);
-  virtual void DrawChar(int x, int y, const char character);
+  virtual void DrawChar(int x, int y, const char character, bool transparent = false);
   virtual void DrawRect(GUIRect &r, Color color);
 
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
@@ -271,6 +271,7 @@ protected:
   void drawPlayTime(Player *player, GUIPoint pos);
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
+  void DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half);
 
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
     // Extract both channels

@@ -47,7 +47,7 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
     msgbuffer[31] = msgbuffer[0];
 
     chargfx_set_cursor(10, 2);
-    chargfx_putc(' ');
+    chargfx_putc(' ', false);
 
     // draw border
     for (int y = 0; y < 3; y++) {

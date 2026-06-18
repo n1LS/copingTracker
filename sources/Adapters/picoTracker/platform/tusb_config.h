@@ -34,9 +34,7 @@
  */
 #ifndef _TUSB_CONFIG_H_
 #define _TUSB_CONFIG_H_
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
 //--------------------------------------------------------------------
@@ -94,7 +92,4 @@ extern "C" {
 // MSC Buffer size of Device Mass storage
 #define CFG_TUD_MSC_EP_BUFSIZE 4096
 
-#ifdef __cplusplus
-}
-#endif
 #endif /* _TUSB_CONFIG_H_ */

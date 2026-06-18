@@ -79,7 +79,7 @@ void picoTrackerGUIWindowImp::SendPalette() {
   }
 }
 
-void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos) {
+void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
   chargfx_set_cursor(pos.x_, pos.y_);
   chargfx_putc(c);
 }

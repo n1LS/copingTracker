@@ -17,10 +17,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Magic value written to watchdog scratch[5] to request MSD mode on reboot
 #define MSD_MAGIC 0x4D534400 // "MSD\0"
 
@@ -36,9 +32,5 @@ void msd_mode_run();
 // Global flag indicating we are in MSD mode - used by USB descriptor
 // callbacks to return MSC-only descriptors instead of CDC+MIDI
 extern bool g_msd_mode;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* _MSD_MODE_H_ */

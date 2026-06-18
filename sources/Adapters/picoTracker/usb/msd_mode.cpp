@@ -21,6 +21,11 @@
 #include <stdio.h>
 #include <string.h>
 
+uint32_t msd_sd_get_sector_count(void);
+uint32_t msd_sd_get_fat_sectors(void);
+bool msd_sd_init(void);
+volatile uint32_t msd_last_io_time_us;
+
 // TinyUSB callbacks for connection state tracking
 void tud_mount_cb(void) {
 }
@@ -67,12 +72,12 @@ static void msd_draw_inner(int row, const char *str) {
   // Clear the row
   for (int i = 0; i < BOX_INNER_W; i++) {
     chargfx_set_cursor(BOX_INNER_X + i, y);
-    chargfx_putc(' ');
+    chargfx_putc(' ', false);
   }
   // Draw text
   for (int i = 0; i < len; i++) {
     chargfx_set_cursor(x + i, y);
-    chargfx_putc(str[i]);
+    chargfx_putc(str[i], false);
   }
 }
 
@@ -82,42 +87,42 @@ static void msd_draw_box() {
 
   // Top row
   chargfx_set_cursor(x0, y0);
-  chargfx_putc(char_border_single_topLeft_s[0]);
+  chargfx_putc(char_border_single_topLeft_s[0], false);
   for (int x = x0 + 1; x < x1; x++) {
     chargfx_set_cursor(x, y0);
-    chargfx_putc(char_border_single_horizontal_s[0]);
+    chargfx_putc(char_border_single_horizontal_s[0], false);
   }
   chargfx_set_cursor(x1, y0);
-  chargfx_putc(char_border_single_topRight_s[0]);
+  chargfx_putc(char_border_single_topRight_s[0], false);
 
   // Bottom row
   chargfx_set_cursor(x0, y1);
-  chargfx_putc(char_border_single_bottomLeft_s[0]);
+  chargfx_putc(char_border_single_bottomLeft_s[0], false);
   for (int x = x0 + 1; x < x1; x++) {
     chargfx_set_cursor(x, y1);
-    chargfx_putc(char_border_single_horizontal_s[0]);
+    chargfx_putc(char_border_single_horizontal_s[0], false);
   }
   chargfx_set_cursor(x1, y1);
-  chargfx_putc(char_border_single_bottomRight_s[0]);
+  chargfx_putc(char_border_single_bottomRight_s[0], false);
 
   // Side borders
   for (int y = y0 + 1; y < y1; y++) {
     chargfx_set_cursor(x0, y);
-    chargfx_putc(char_border_single_vertical_s[0]);
+    chargfx_putc(char_border_single_vertical_s[0], false);
     chargfx_set_cursor(x1, y);
-    chargfx_putc(char_border_single_vertical_s[0]);
+    chargfx_putc(char_border_single_vertical_s[0], false);
   }
 
   // Separator under title (interior row 1)
   int sep_y = y0 + 2;
   chargfx_set_cursor(x0, sep_y);
-  chargfx_putc(char_border_single_verticalRight_s[0]);
+  chargfx_putc(char_border_single_verticalRight_s[0], false);
   for (int x = x0 + 1; x < x1; x++) {
     chargfx_set_cursor(x, sep_y);
-    chargfx_putc(char_border_single_horizontal_s[0]);
+    chargfx_putc(char_border_single_horizontal_s[0], false);
   }
   chargfx_set_cursor(x1, sep_y);
-  chargfx_putc(char_border_single_verticalLeft_s[0]);
+  chargfx_putc(char_border_single_verticalLeft_s[0], false);
 }
 
 static void msd_draw_screen(const char *status) {
@@ -140,7 +145,6 @@ void msd_mode_run() {
 
   msd_draw_screen("Initializing...");
 
-  extern bool msd_sd_init();
   if (!msd_sd_init()) {
     msd_draw_screen("SD card init failed!");
   }
@@ -152,7 +156,6 @@ void msd_mode_run() {
   // Estimate mount time from actual FAT table size on the SD card.
   // At Full Speed USB (~700 KB/s effective), total FAT sectors * 512 bytes
   // gives the data volume; divide by throughput for estimated time.
-  extern uint32_t msd_sd_get_fat_sectors(void);
   uint32_t fat_sectors = msd_sd_get_fat_sectors();
   uint32_t est_seconds = 0;
   if (fat_sectors > 0) {
@@ -160,7 +163,6 @@ void msd_mode_run() {
     est_seconds = fat_kb / 800 + 5;    // ~700 KB/s USB throughput + overhead
   } else {
     // Fallback: rough guess from card size
-    extern uint32_t msd_sd_get_sector_count(void);
     uint32_t card_mb = msd_sd_get_sector_count() / 2048;
     est_seconds = (card_mb * 27) / (64 * 1024) + 5;
   }
@@ -170,7 +172,6 @@ void msd_mode_run() {
     est_seconds = 180;
 
   // Track I/O activity to detect when mount is complete
-  extern volatile uint32_t msd_last_io_time_us;
 
   uint32_t last_display_s = 0;
   bool mounted = false;

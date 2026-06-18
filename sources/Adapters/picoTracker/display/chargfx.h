@@ -11,12 +11,8 @@
 #ifndef _TEXT_CHARGFX_H
 #define _TEXT_CHARGFX_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "Foundation/Types/Colors.h"
 #include "ili9341.h"
+#include "Foundation/Types/Colors.h"
 
 #define TEXT_WIDTH 32
 #define TEXT_HEIGHT 24
@@ -36,15 +32,11 @@ void chargfx_set_background(Color color);
 void chargfx_set_cursor(uint8_t x, uint8_t y);
 uint8_t chargfx_get_cursor_x();
 uint8_t chargfx_get_cursor_y();
-void chargfx_putc(char c);
+void chargfx_putc(char c, bool transparent = false);
 void chargfx_set_palette_color(int idx, uint16_t rgb565_color);
 void chargfx_set_font_index(uint8_t idx);
 uint8_t chargfx_get_font_index();
 void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool **outChanged);
 uint16_t *chargfx_get_palette();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

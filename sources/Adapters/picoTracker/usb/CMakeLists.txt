@@ -1,7 +1,7 @@
 add_library(platform_usb
   usb_utils.cpp 
-  usb_descriptors.c
-  msd_mode.c
+  usb_descriptors.cpp
+  msd_mode.cpp
   msd_scsi.cpp
 )
 

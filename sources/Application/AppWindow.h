@@ -87,7 +87,7 @@ protected: // GUIWindow implementation
   // override draw string to avoid going too far off
   // the screen.
   virtual void DrawString(const char *string, const GUIPoint &pos);
-  virtual void DrawChar(const char c, const GUIPoint &pos);
+  virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false);
 
   // I_Observer implementation
 

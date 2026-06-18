@@ -12,6 +12,9 @@
 #include "ModalView.h"
 #include "Application/AppWindow.h"
 
+// TODO remove
+#include "System/System/System.h"
+
 uint32_t ModalView::nextInstanceId_ = 0;
 
 ModalView::ModalView(View &v)
@@ -56,8 +59,8 @@ void ModalView::DrawString(int x, int y, const char *text) {
 }
 
 // DrawChar override to account for modal window position
-void ModalView::DrawChar(int x, int y, char c) {
-  View::DrawChar(x + left_, y + top_, c);
+void ModalView::DrawChar(int x, int y, char c, bool transparent) {
+  View::DrawChar(x + left_, y + top_, c, transparent);
 }
 
 GUIPoint ModalView::GetAnchor() {
@@ -83,5 +86,5 @@ void ModalView::SetWindow(int width, int height) {
 
   SetBackgroundColor(Theme::Dialog::bg);
   SetColor(Theme::Dialog::border);
-  DrawBorder(-2, -2, width + 4, height + 4, true);
+  DrawFilledBorder(-2, -2, width + 4, height + 4, RED, System::GetInstance()->GetRandomNumber() % 2);
 }

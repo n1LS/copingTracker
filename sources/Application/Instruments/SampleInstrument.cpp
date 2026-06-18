@@ -1616,5 +1616,4 @@ bool SampleInstrument::IsMulti() {
 
 void SampleInstrument::EnableDownsamplingLegacy() {
   useDirtyDownsampling_ = true;
-  bootlog("Enabling downsampling legacy");
 }

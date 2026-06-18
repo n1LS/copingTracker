@@ -22,18 +22,6 @@
 
 #include "../system/input.h"
 
-// this prevents a really annoying linker warning due to newlib and >gcc13
-// ref:
-// https://github.com/raspberrypi/pico-sdk/issues/1768#issuecomment-2649260970
-#ifdef __cplusplus
-extern "C" {
-int _getentropy(void *buffer, size_t length) {
-  return -1;
-}
-}
-#endif
-// ================
-
 int main(int argc, char *argv[]) {
 
   // Initialise microcontroller specific hardware

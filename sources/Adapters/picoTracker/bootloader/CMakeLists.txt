@@ -1,6 +1,6 @@
 add_executable(picoTrackerBootloader
   bootloader_main.cpp
-  bootloader_gfx.c
+  bootloader_gfx.cpp
   bootloader_log.cpp
   flash_writer.cpp
   bootloader_menu.cpp
@@ -8,7 +8,7 @@ add_executable(picoTrackerBootloader
   slot_boot.cpp
   trace_wrap.cpp
   uf2_parser.cpp
-  ${PROJECT_SOURCE_DIR}/Adapters/picoTracker/display/ili9341.c
+  ${PROJECT_SOURCE_DIR}/Adapters/picoTracker/display/ili9341.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/picoTracker/platform/platform.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/picoTracker/mutex/picoTrackerMutex.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/picoTracker/system/input.cpp

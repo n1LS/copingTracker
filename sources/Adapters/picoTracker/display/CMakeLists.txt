@@ -1,6 +1,6 @@
 add_library(platform_display
-  ili9341.c
-  chargfx.c
+  ili9341.cpp
+  chargfx.cpp
 )
 
 target_link_libraries(platform_display PUBLIC pico_sdk_bundle)

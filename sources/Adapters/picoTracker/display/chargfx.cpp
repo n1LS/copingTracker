@@ -80,10 +80,17 @@ uint8_t chargfx_get_cursor_y() {
   return cursor_y;
 }
 
-void chargfx_putc(char c) {
+void chargfx_putc(char c, bool transparent) {
   int idx = cursor_y * TEXT_WIDTH + cursor_x;
   // todo: use a color_t
-  uint8_t color = (screen_fg_color << 4) | screen_bg_color;
+  uint8_t color;
+
+  if (transparent) {
+    // use already printed bg color instead of the currently set color
+    color = (screen_fg_color << 4) | (colors[idx] & 0x0f);
+  } else {
+    color = (screen_fg_color << 4) | screen_bg_color;
+  }
 
   if (screen[idx] != c || colors[idx] != color) {
     screen[idx] = c;
@@ -160,7 +167,7 @@ void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t wid
 
   // Write the buffer for each column
   for (uint16_t i = 0; i < display_h; i++) {
-    ili9341_write_data_continuous(buffer, display_w * sizeof(uint16_t));
+    ili9341_write_data_continuous((uint8_t *)buffer, display_w * sizeof(uint16_t));
   }
 
   ili9341_stop_writing();
@@ -215,7 +222,7 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
         }
       }
     }
-    ili9341_write_data_continuous(buffer, CHAR_WIDTH * screen_height * sizeof(int16_t));
+    ili9341_write_data_continuous((uint8_t *)buffer, CHAR_WIDTH * screen_height * sizeof(int16_t));
   }
   ili9341_stop_writing();
 }

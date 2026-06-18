@@ -73,10 +73,6 @@
 #define char_block_triangleTopLeft_s "\xFD"
 #define char_block_triangleBottomRight_s "\xFE"
 #define char_block_triangleBottomLeft_s "\xFF"
-#define char_block_topLeftCorner_s "\xE4"
-#define char_block_topRightCorner_s "\xE7"
-#define char_block_bottomLeftCorner_s "\xE5"
-#define char_block_bottomRightCorner_s "\xE6"
 
 #define char_button_border_left_s "\x8E"
 #define char_button_border_right_s "\x8F"
@@ -95,10 +91,16 @@
 #define char_filledBorder_top_s "\xDC"
 #define char_filledBorder_right_s "\xDE"
 #define char_filledBorder_left_s "\xDD"
-#define char_filledBorder_topLeftCorner_s "\xE0"
-#define char_filledBorder_topRightCorner_s "\xE3"
-#define char_filledBorder_bottomLeftCorner_s "\xE1"
-#define char_filledBorder_bottomRightCorner_s "\xE2"
+
+#define char_filledBorder_topLeft_s "\xE0"
+#define char_filledBorder_topRight_s "\xE3"
+#define char_filledBorder_bottomLeft_s "\xE1"
+#define char_filledBorder_bottomRight_s "\xE2"
+
+#define char_filledHalfBorder_topLeft_s "\xE4"
+#define char_filledHalfBorder_topRight_s "\xE7"
+#define char_filledHalfBorder_bottomLeft_s "\xE5"
+#define char_filledHalfBorder_bottomRight_s "\xE6"
 
 #define char_waveform_sine1_s "\xF0"
 #define char_waveform_sine2_s "\xF1"
