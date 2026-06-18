@@ -21,12 +21,12 @@
 #define BUFFER_CHARS 12
 
 void chargfx_init();
-void chargfx_clear(Color color);
+void chargfx_clear();
 void chargfx_draw_screen();
 void chargfx_draw_changed();
 void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 void chargfx_set_foreground(Color color);
 void chargfx_set_background(Color color);
 void chargfx_set_cursor(uint8_t x, uint8_t y);

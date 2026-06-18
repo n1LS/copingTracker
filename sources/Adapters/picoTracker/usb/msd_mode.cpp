@@ -126,7 +126,8 @@ static void msd_draw_box() {
 }
 
 static void msd_draw_screen(const char *status) {
-  chargfx_clear(BLACK);
+  chargfx_set_background(BLACK);
+  chargfx_clear();
   msd_draw_box();
   msd_draw_inner(0, "USB STORAGE DEVICE MODE");
   msd_draw_inner(3, status);                   // center row of interior

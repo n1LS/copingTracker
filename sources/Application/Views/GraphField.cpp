@@ -34,7 +34,7 @@ void GraphField::Draw(GUIWindow &w, int offset) {
   int32_t bottom = y + height_;
 
   Color borderColor = focus_ ? borderFocused_ : borderNormal_;
-  w.SetCurrentRectColor(AppWindow::GetGUIColor(borderColor));
+  w.SetCurrentRectColor(borderColor);
   GUIRect top(x, y, right, y + 1);
   GUIRect bottomLine(x, bottom - 1, right, bottom);
   GUIRect left(x, y, x + 1, bottom);
@@ -43,7 +43,7 @@ void GraphField::Draw(GUIWindow &w, int offset) {
   w.DrawRect(bottomLine);
   w.DrawRect(left);
   w.DrawRect(rightLine);
-  w.SetCurrentRectColor(AppWindow::GetGUIColor(Theme::View::fg));
+  w.SetCurrentRectColor(Theme::View::fg);
 }
 
 void GraphField::Reset() {

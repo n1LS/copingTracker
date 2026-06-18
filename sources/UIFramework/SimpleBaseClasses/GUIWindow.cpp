@@ -31,11 +31,11 @@ GUIWindow::~GUIWindow() {
 // I_GUIGraphics Implementation: We rely on the imp window to provide
 // core graphics on the window
 
-void GUIWindow::SetColor(GUIColor &color) {
+void GUIWindow::SetColor(Color color) {
   _imp->SetColor(color);
 }
 
-void GUIWindow::SetBackgroundColor(GUIColor &color) {
+void GUIWindow::SetBackgroundColor(Color color) {
   _imp->SetBackgroundColor(color);
 }
 
@@ -47,7 +47,7 @@ void GUIWindow::DrawString(const char *string, const GUIPoint &pos) {
   _imp->DrawString(string, pos);
 }
 
-void GUIWindow::SetCurrentRectColor(GUIColor color) {
+void GUIWindow::SetCurrentRectColor(Color color) {
   _imp->SetColor(color);
 }
 
@@ -59,8 +59,8 @@ void GUIWindow::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
   _imp->DrawChar(c, pos, transparent);
 }
 
-void GUIWindow::Clear(GUIColor &c) {
-  _imp->Clear(c);
+void GUIWindow::Clear() {
+  _imp->Clear();
 }
 
 /*void GUIWindow::Save() {

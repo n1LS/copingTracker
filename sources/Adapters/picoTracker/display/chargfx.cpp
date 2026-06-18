@@ -37,16 +37,33 @@ static uint8_t ui_font_index = 0;
 static bool changed[TEXT_HEIGHT * TEXT_WIDTH ] = {0};
 
 // Default palette, can be redefined
-static uint16_t palette[16] = {};
+static uint16_t palette[16] = {
+    0x0000, // 0: black       (#000000)
+    0x0080, // 1: dark red    (#800000)
+    0x0004, // 2: dark green  (#008000)
+    0x0084, // 3: dark yellow (#808000)
+    0x1000, // 4: dark blue   (#000080)
+    0x1080, // 5: dark magenta(#800080)
+    0x1004, // 6: dark cyan   (#008080)
+    0x1084, // 7: gray        (#808080)
+    0x38C6, // 8: light gray  (#C6C6C6)
+    0x00F8, // 9: red         (#FF0000)
+    0xE007, // 10: green      (#00FF00)
+    0xE0FF, // 11: yellow     (#FFFF00)
+    0x1F00, // 12: blue       (#0000FF)
+    0x1FF8, // 13: magenta    (#FF00FF)
+    0xFF07, // 14: cyan       (#00FFFF)
+    0xFFFF  // 15: white      (#FFFFFF)
+};
 
 uint16_t *chargfx_get_palette() {
   return palette;
 }
 
-void chargfx_clear(Color color) {
+void chargfx_clear() {
   int size = TEXT_WIDTH * TEXT_HEIGHT;
   memset(screen, 0, size);
-  memset(colors, color, size);
+  memset(colors, screen_bg_color, size);
   chargfx_set_cursor(0, 0);
   chargfx_draw_screen();
 }
@@ -116,9 +133,9 @@ void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
 // mounted rotated 90deg clockwise, ie. the "bottom" of the LCD with the flex
 // pcb connector is actually on the left instead of its normal orientation of
 // being mounted on the bottom of the LCD
-void chargfx_fill_rect(uint8_t color_index, uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
+void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
   // Get the RGB565 color from the current foreground palette index
-  uint16_t color = palette[color_index];
+  uint16_t color = palette[screen_fg_color];
 
   // Clip the rectangle to the screen dimensions
   if (x >= ILI9341_TFTHEIGHT || y >= ILI9341_TFTWIDTH) {

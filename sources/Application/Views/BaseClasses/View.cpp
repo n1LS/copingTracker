@@ -413,11 +413,7 @@ void View::ProcessButton(uint16_t mask, bool pressed) {
 }
 
 void View::Clear() {
-  ((AppWindow &)w_).Clear();
-}
-
-void View::ForceClear() {
-  ((AppWindow &)w_).Clear(true);
+  w_.Clear();
 }
 
 void View::SwapColors() {
@@ -425,11 +421,11 @@ void View::SwapColors() {
 }
 
 void View::SetColor(Color cd) {
-  ((AppWindow &)w_).SetColor(cd);
+  w_.SetColor(cd);
 }
 
 void View::SetBackgroundColor(Color cd) {
-  ((AppWindow &)w_).SetBackgroundColor(cd);
+  w_.SetBackgroundColor(cd);
 }
 
 void View::ClearTextRect(int x, int y, int w, int h) {
@@ -448,7 +444,7 @@ void View::DrawChar(int x, int y, const char character, bool transparent) {
 }
 
 void View::DrawRect(GUIRect &r, Color color) {
-  w_.SetCurrentRectColor(AppWindow::GetGUIColor(color));
+  w_.SetCurrentRectColor(color);
   w_.DrawRect(r);
 }
 
@@ -567,16 +563,17 @@ void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool 
 
 void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half = false) {
   // corners, top, right, bottom, left
-  const char *fullChars = char_filledBorder_topLeft_s char_filledBorder_topRight_s char_filledBorder_bottomLeft_s
-      char_filledBorder_bottomRight_s char_block_full_s char_block_full_s char_block_full_s char_block_full_s;
-  const char *halfChars = char_filledHalfBorder_topLeft_s char_filledHalfBorder_topRight_s 
-      char_filledHalfBorder_bottomLeft_s char_filledHalfBorder_bottomRight_s char_block_bottom_s char_block_left_s 
+  const char *fullChars = char_filledHalfBorder_topLeft_s char_filledHalfBorder_topRight_s 
+      char_filledHalfBorder_bottomLeft_s char_filledHalfBorder_bottomRight_s char_block_full_s char_block_full_s char_block_full_s char_block_full_s;
+  const char *halfChars = char_filledBorder_topLeft_s char_filledBorder_topRight_s char_filledBorder_bottomLeft_s
+      char_filledBorder_bottomRight_s char_block_bottom_s char_block_left_s 
       char_block_top_s char_block_right_s;
 
   const char *chars = half ? halfChars : fullChars;
 
   SetColor(fill);
 
+  // corners
   DrawChar(x, y, chars[0], true);
   DrawChar(x + width - 1, y, chars[1], true);
   DrawChar(x, y + height - 1, chars[2], true);
@@ -590,15 +587,15 @@ void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height,
 
   // left and right borders
   for (int32_t j = y + 1; j < y + height - 1; j++) {
-    DrawChar(x, j, chars[5]);
-    DrawChar(x + width - 1, j, chars[5]);
+    DrawChar(x, j, chars[5], true);
+    DrawChar(x + width - 1, j, chars[5], true);
   }
 
   // fill 
   SetBackgroundColor(fill);
 
   for (int i = x + 1; i < x + width - 1; i++) {
-    for (int j = y + 1; i < y + height - 1; j++) {
+    for (int j = y + 1; j < y + height - 1; j++) {
       DrawChar(i, j, ' ');
     }
   }

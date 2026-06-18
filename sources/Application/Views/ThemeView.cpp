@@ -358,7 +358,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
     // if font changes call redraw all fields
     case FourCC::VarUIFont: {
       // need to force redraw of entire screen to update for font change
-      ForceClear();
+      Clear();
       DrawView();
       configDirty_ = true;
       break;
@@ -539,7 +539,7 @@ void ThemeView::importTheme() {
 }
 void ThemeView::AnimationUpdate() {
   if (forceRedraw_) {
-    ForceClear();
+    Clear();
     DrawView();
     forceRedraw_ = false;
   }

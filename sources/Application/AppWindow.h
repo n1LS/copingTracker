@@ -12,8 +12,8 @@
 #ifndef _APP_WINDOW_H_
 #define _APP_WINDOW_H_
 
+#include "Foundation/Types/Colors.h"
 #include "Application/Views/BaseClasses/View.h"
-
 typedef union color_t {
   struct {
     Color fg : 4;
@@ -29,6 +29,8 @@ typedef union color_t {
 #include "System/io/Status.h"
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
 #include <UIFramework/SimpleBaseClasses/EventManager.h>
+#include <UIFramework/Framework/GUIColor.h>
+#include "Foundation/Types/Colors.h"
 
 #define PROP_INVERT 0x80
 #define CHAR_WIDTH 10
@@ -61,8 +63,10 @@ public:
   void CloseProject();
 
   using GUIWindow::Clear;
-  virtual void Clear(bool all = false);
+  virtual void Clear();
   virtual void ClearTextRect(GUIRect &rect);
+  virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false);
+  virtual void DrawString(const char *string, const GUIPoint &pos);
   virtual void SwapColors();
   virtual void SetColor(Color color);
   virtual void SetBackgroundColor(Color color);
@@ -83,11 +87,6 @@ protected: // GUIWindow implementation
   virtual void Flush();
   virtual void Redraw() {};
   virtual void AnimationUpdate();
-
-  // override draw string to avoid going too far off
-  // the screen.
-  virtual void DrawString(const char *string, const GUIPoint &pos);
-  virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false);
 
   // I_Observer implementation
 

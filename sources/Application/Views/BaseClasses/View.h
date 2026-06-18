@@ -144,9 +144,13 @@ struct Theme {
   };
 
   struct Dialog {
-    FIXED(bg, BLACK)
-    FIXED(fg, WHITE)
-    FIXED(border, WHITE);
+    FIXED(bg, LIGHT_GRAY)
+    FIXED(fg, BLACK)
+    
+    struct Button {
+      SWITCHABLE(fg, BLACK, LIGHT_GRAY)
+      SWITCHABLE(bg, WHITE, DARK_GRAY)
+    };
   };
 
   struct Phrase {
@@ -198,8 +202,6 @@ public:
   };
 
   void Clear();
-
-  void ForceClear();
 
   void ProcessButton(uint16_t mask, bool pressed);
 

@@ -84,7 +84,5 @@ void ModalView::SetWindow(int width, int height) {
   // Clear the entire modal area including the border frame using absolute screen coordinates.
   ClearTextRect(left_ - 2, top_ - 2, width + 4, height + 4);
 
-  SetBackgroundColor(Theme::Dialog::bg);
-  SetColor(Theme::Dialog::border);
-  DrawFilledBorder(-2, -2, width + 4, height + 4, RED, System::GetInstance()->GetRandomNumber() % 2);
+  DrawFilledBorder(-2, -2, width + 4, height + 4, Theme::Dialog::bg, false);
 }

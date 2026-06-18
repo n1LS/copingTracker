@@ -25,12 +25,6 @@
 // Keep track of the last RGB values set for each palette index
 static uint16_t lastPaletteRGB[16] = {0};
 
-// Keep track of the last "SetColor()" call to track the current color palette
-// index, used by DrawRect() to know which color to use when drawing to the
-// devices LCD
-static uint8_t lastRemoteColorIdx = 255;
-static uint8_t lastRemoteBackgroundColorIdx = 255;
-
 static GUIEventPadButtonType *eventMapping = eventMappingPico;
 
 // Initialize static members
@@ -81,7 +75,7 @@ void picoTrackerGUIWindowImp::SendPalette() {
 
 void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
   chargfx_set_cursor(pos.x_, pos.y_);
-  chargfx_putc(c);
+  chargfx_putc(c, transparent);
 }
 
 void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos) {
@@ -97,7 +91,7 @@ void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos
 
 void picoTrackerGUIWindowImp::DrawRect(GUIRect &r) {
   // This is the local drawing command for the device's own screen.
-  chargfx_fill_rect(lastRemoteColorIdx, r.Left(), r.Top(), r.Width(), r.Height());
+  chargfx_fill_rect(r.Left(), r.Top(), r.Width(), r.Height());
   /*
   if (mirrorUIEnabled_) {
     // Now, send the DrawRect command with full byte-escaping.
@@ -110,52 +104,20 @@ void picoTrackerGUIWindowImp::DrawRect(GUIRect &r) {
   */
 };
 
-void picoTrackerGUIWindowImp::Clear(GUIColor &c) {
-  Color backgroundColor = GetColor(c);
-  chargfx_set_background(backgroundColor);
-  chargfx_clear(backgroundColor);
+void picoTrackerGUIWindowImp::Clear() {
+  chargfx_clear();
 };
 
 void picoTrackerGUIWindowImp::ClearTextRect(GUIRect &r) {
   Trace::Debug("GUI ClearTextRect call");
 };
 
-Color picoTrackerGUIWindowImp::GetColor(GUIColor &c) {
-  // Palette index should always be < 16
-  if (c.paletteIndex_ >= 16) {
-    return WHITE; // Default to normal color if index is invalid
-  }
-
-  // Convert the color to RGB565 format
-  uint16_t rgb565 = GUIColorToRGB565(c);
-
-  // Only update the palette if the color has changed
-  if (lastPaletteRGB[c.paletteIndex_] != rgb565) {
-    chargfx_set_palette_color(c.paletteIndex_, rgb565);
-    lastPaletteRGB[c.paletteIndex_] = rgb565;
-  }
-
-  return (Color)c.paletteIndex_;
-}
-
-void picoTrackerGUIWindowImp::SetColor(GUIColor &color) {
-  Color gColor = GetColor(color);
-  lastRemoteColorIdx = gColor;
-
-  NAssert(c.r_ < 255);
-  NAssert(c.g_ < 255);
-  NAssert(c.b_ < 255);
-  chargfx_set_foreground(gColor);
+void picoTrackerGUIWindowImp::SetColor(Color color) {
+  chargfx_set_foreground(color);
 };
 
-void picoTrackerGUIWindowImp::SetBackgroundColor(GUIColor &color) {
-  Color gColor = GetColor(color);
-  lastRemoteBackgroundColorIdx = gColor;
-
-  NAssert(c.r_ < 255);
-  NAssert(c.g_ < 255);
-  NAssert(c.b_ < 255);
-  chargfx_set_background(gColor);
+void picoTrackerGUIWindowImp::SetBackgroundColor(Color color) {
+  chargfx_set_background(color);
 };
 
 void picoTrackerGUIWindowImp::Lock() {
