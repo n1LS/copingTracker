@@ -28,10 +28,6 @@ static uint16_t lastPaletteRGB[16] = {0};
 
 static GUIEventPadButtonType *eventMapping = eventMappingPico;
 
-static uint16_t guiColorToRGB565(const GUIColor &color) {
-  return ((color.r_ & 0xF8) << 8) | ((color.g_ & 0xFC) << 3) | (color.b_ >> 3);
-}
-
 // Initialize static members
 picoTrackerGUIWindowImp *picoTrackerGUIWindowImp::instance_ = NULL;
 
@@ -89,7 +85,7 @@ void picoTrackerGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount
       continue;
     }
 
-    uint16_t rgb565 = guiColorToRGB565(palette[i]);
+    uint16_t rgb565 = GUIColorToRGB565(palette[i]);
     if (lastPaletteRGB[paletteIndex] != rgb565) {
       chargfx_set_palette_color(paletteIndex, rgb565);
       lastPaletteRGB[paletteIndex] = rgb565;

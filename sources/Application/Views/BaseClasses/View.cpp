@@ -582,13 +582,13 @@ void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height,
   // horizontal borders
   for (int32_t i = x + 1; i < x + width - 1; i++) {
     DrawChar(i, y, chars[4], true);
-    DrawChar(i, y + height - 1, chars[4], true);
+    DrawChar(i, y + height - 1, chars[6], true);
   }
 
   // left and right borders
   for (int32_t j = y + 1; j < y + height - 1; j++) {
     DrawChar(x, j, chars[5], true);
-    DrawChar(x + width - 1, j, chars[5], true);
+    DrawChar(x + width - 1, j, chars[7], true);
   }
 
   // fill 
