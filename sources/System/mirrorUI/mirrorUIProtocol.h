@@ -16,12 +16,7 @@
 
 #define GUIColorToRGB565(color) ((color.r_ & 0b11111000) << 8) | ((color.g_ & 0b11111100) << 3) | (color.b_ >> 3)
 
-enum mirrorUICommandType {
-  cmdPalette = 0x00,
-  cmdData = 0x01,
-  cmdFont = 0x02,
-  cmdInput = 0x03
-};
+enum mirrorUICommandType { cmdPalette = 0x00, cmdData = 0x01, cmdFont = 0x02, cmdInput = 0x03 };
 
 typedef struct mirrorUICommand {
   uint8_t payload[68];

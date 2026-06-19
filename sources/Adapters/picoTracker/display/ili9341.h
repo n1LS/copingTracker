@@ -124,4 +124,6 @@ void ili9341_write_data(const uint8_t *buffer, int bytes);
 void ili9341_start_writing();
 void ili9341_stop_writing();
 void ili9341_write_data_continuous(const uint8_t *buffer, int bytes);
+void ili9341_transmit32(uint8_t command, uint16_t word1, uint16_t word2);
+
 #endif

@@ -88,7 +88,10 @@ Profiler::~Profiler() {
       it->second.addSample(duration);
     }
   } else {
-    Trace::Log("PROFILER", "%-30s: %6lu us", name_.c_str(), (unsigned long)duration);
+    // debug just to clean up the output for now
+    if (duration > 100) {
+      Trace::Log("PROFILER", "%-30s: %6lu us", name_.c_str(), (unsigned long)duration);
+    }
   }
 #endif
 }

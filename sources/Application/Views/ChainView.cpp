@@ -705,13 +705,6 @@ void ChainView::AnimationUpdate() {
   // Get player instance safely
   Player *player = Player::GetInstance();
 
-  // Only process updates if we're fully initialized
-  if (!viewData_ || !player) {
-    // Just flush the battery gauge and return
-    w_.Flush();
-    return;
-  }
-
   // Always update VU meter even if other parts of UI dont need updating
   drawMasterVuMeter(player);
 
@@ -783,8 +776,7 @@ void ChainView::AnimationUpdate() {
   }
 
   // Flush the window to ensure changes are displayed
-  w_.Flush();
-}
+  }
 
 void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();

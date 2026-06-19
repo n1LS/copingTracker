@@ -672,7 +672,7 @@ typedef struct voice_t {
 
   void set_step_volume(uint8_t inVolume) {
     stepVolume = inVolume;
-    
+
     uint32_t calculatedVolume = ((uint32_t)parameters.level * inVolume) >> 8;
     volume.level = calculatedVolume;
     volume.target = calculatedVolume;

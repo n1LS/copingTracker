@@ -13,12 +13,12 @@
 #include "Application/Model/Config.h"
 #include "Application/Utils/char.h"
 #include "System/Console/Trace.h"
-#include "UIFramework/BasicDatas/GUIPoint.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
+#include "UIFramework/BasicDatas/GUIPoint.h"
 #include "UIFramework/Framework/GUIColor.h"
 #include "UIFramework/Interfaces/I_GUIWindowFactory.h"
-#include "pico/stdlib.h"
 #include "mirrorUI.h"
+#include "pico/stdlib.h"
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -45,12 +45,12 @@ picoTrackerGUIWindowImp::picoTrackerGUIWindowImp(GUICreateWindowParams &p) {
   mirrorUIEnabled_ = mirrorUI != 0;
 
   auto uiFontVar = (WatchedVariable *)config->FindVariable(FourCC::VarUIFont);
-  
+
   // register to receive updates to mirrorUI setting
   uiFontVar->AddObserver(*this);
   auto uifontIndex = uiFontVar->GetInt();
   chargfx_set_font_index(uifontIndex);
-  
+
   if (mirrorUIEnabled_) {
     SendFont(uifontIndex);
     SendPalette();
@@ -220,18 +220,20 @@ void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t 
 void picoTrackerGUIWindowImp::Update(Observable &o, I_ObservableData *d) {
   WatchedVariable &v = (WatchedVariable &)o;
   switch (v.GetID()) {
-    case FourCC::VarMirrorUI: {
-      auto mirrorUI = v.GetInt();
-      mirrorUIEnabled_ = mirrorUI != 0;
-      break;
-    }
-    case FourCC::VarUIFont: {
-      auto uifont = v.GetInt();
-      chargfx_set_font_index(uifont);
-      if (mirrorUIEnabled_) {
-        SendFont(uifont);
+    case FourCC::VarMirrorUI:
+      {
+        auto mirrorUI = v.GetInt();
+        mirrorUIEnabled_ = mirrorUI != 0;
+        break;
       }
-      break;
-    }
+    case FourCC::VarUIFont:
+      {
+        auto uifont = v.GetInt();
+        chargfx_set_font_index(uifont);
+        if (mirrorUIEnabled_) {
+          SendFont(uifont);
+        }
+        break;
+      }
   }
 }

@@ -11,13 +11,15 @@
 
 #include "Table.h"
 #include "Application/Instruments/CommandList.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Utils/HexBuffers.h"
 #include "Application/Utils/char.h"
 #include "Song.h"
 #include "System/System/System.h"
-#include "Application/Persistency/PersistenceConstants.h"
 
-Table::Table() { Reset(); };
+Table::Table() {
+  Reset();
+};
 
 void Table::Reset() {
   for (int i = 0; i < TABLE_STEPS; i++) {
@@ -50,7 +52,9 @@ bool Table::IsEmpty() {
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 
-TableHolder::TableHolder() : Persistent("Tables") { Reset(); }
+TableHolder::TableHolder() : Persistent("Tables") {
+  Reset();
+}
 
 void TableHolder::Reset() {
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {

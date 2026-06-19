@@ -1034,8 +1034,7 @@ void SongView::AnimationUpdate() {
   }
 
   // Flush the window to ensure changes are displayed
-  w_.Flush();
-}
+  }
 
 void SongView::nudgeTempo(int direction) {
   ApplicationCommandDispatcher *dispatcher = ApplicationCommandDispatcher::GetInstance();

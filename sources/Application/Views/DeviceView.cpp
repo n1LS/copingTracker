@@ -66,7 +66,7 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   position.y_ += 1;
   v = config->FindVariable(FourCC::VarMirrorUI);
-  intVarField_.emplace_back(position, *v, "Remote UI    :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "mirrorUI     :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
@@ -151,8 +151,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   UIField *focus = GetFocus();
   focus->ClearFocus();
   focus->Draw(w_);
-  w_.Flush();
-  focus->SetFocus();
+    focus->SetFocus();
 
   // Handle brightness changes directly
   if (fourcc == FourCC::VarBacklightLevel) {

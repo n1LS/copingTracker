@@ -10,28 +10,27 @@
  */
 
 #include <algorithm>
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include "Application/Instruments/Filters.h"
 #include "Application/Model/Table.h"
-#include "Application/Player/SyncMaster.h"
-#include "Application/Utils/fixed.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Player/SyncMaster.h"
+#include "Application/Utils/fixed.h"
 #include "CommandList.h"
 #include "Foundation/Constants/SineTable.h"
-#include "SamplePool.h"
-#include "SampleVariable.h"
 #include "SampleInstrument.h"
 #include "SampleInstrumentDatas.h"
+#include "SamplePool.h"
+#include "SampleVariable.h"
 #include "Services/Audio/Audio.h"
 #include "System/Console/Trace.h"
-#include "System/io/Status.h"
 #include "System/Console/nanoprintf.h"
+#include "System/io/Status.h"
 
 bool SampleInstrument::useDirtyDownsampling_ = false;
 

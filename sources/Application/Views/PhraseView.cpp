@@ -485,7 +485,7 @@ void PhraseView::cutPosition() {
   }
   // ... and parameters get cut with commands
   if (col_ == colCmd1 || col_ == colCmd2) {
-    col_ += 1; 
+    col_ += 1;
   }
 
   cutSelection();
@@ -1416,5 +1416,4 @@ void PhraseView::AnimationUpdate() {
   }
 
   // Flush the window to ensure changes are displayed
-  w_.Flush();
-}
+  }

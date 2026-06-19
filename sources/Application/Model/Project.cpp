@@ -33,9 +33,8 @@
 #define DATA_UNUSED_VALUE 0xFF
 
 Project::Project(const char *name)
-    : Persistent("Project"), VariableContainer(&variables_), song_(),
-      tempoNudge_(0), tempo_(FourCC::VarTempo, DEFAULT_TEMPO),
-      masterVolume_(FourCC::VarMasterVolume, DEFAULT_MASTER_VOLUME),
+    : Persistent("Project"), VariableContainer(&variables_), song_(), tempoNudge_(0),
+      tempo_(FourCC::VarTempo, DEFAULT_TEMPO), masterVolume_(FourCC::VarMasterVolume, DEFAULT_MASTER_VOLUME),
       channelVolume1_(FourCC::VarChannel1Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume2_(FourCC::VarChannel2Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume3_(FourCC::VarChannel3Volume, DEFAULT_CHANNEL_VOLUME),
@@ -43,11 +42,9 @@ Project::Project(const char *name)
       channelVolume5_(FourCC::VarChannel5Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume6_(FourCC::VarChannel6Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume7_(FourCC::VarChannel7Volume, DEFAULT_CHANNEL_VOLUME),
-      channelVolume8_(FourCC::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME),
-      wrap_(FourCC::VarWrap, false), transpose_(FourCC::VarTranspose, 0),
-      scale_(FourCC::VarScale, scaleNames, numScales, 0),
-      scaleRoot_(FourCC::VarScaleRoot, noteNames, 12, 0),
-      projectName_(FourCC::VarProjectName, name),
+      channelVolume8_(FourCC::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME), wrap_(FourCC::VarWrap, false),
+      transpose_(FourCC::VarTranspose, 0), scale_(FourCC::VarScale, scaleNames, numScales, 0),
+      scaleRoot_(FourCC::VarScaleRoot, noteNames, 12, 0), projectName_(FourCC::VarProjectName, name),
       previewVolume_(FourCC::VarPreviewVolume, DEFAULT_PREVIEW_VOLUME) {
 
   this->variables_.insert(variables_.end(), &tempo_);
@@ -87,7 +84,8 @@ Project::Project(const char *name)
   Status::Set("About to load project");
 }
 
-Project::~Project() {}
+Project::~Project() {
+}
 
 void Project::Load(const char *name) {
   tempoNudge_ = 0;
@@ -153,25 +151,25 @@ int Project::GetMasterVolume() {
 int Project::GetChannelVolume(int channel) {
   // Return the appropriate channel volume variable
   switch (channel) {
-  case 0:
-    return channelVolume1_.GetInt();
-  case 1:
-    return channelVolume2_.GetInt();
-  case 2:
-    return channelVolume3_.GetInt();
-  case 3:
-    return channelVolume4_.GetInt();
-  case 4:
-    return channelVolume5_.GetInt();
-  case 5:
-    return channelVolume6_.GetInt();
-  case 6:
-    return channelVolume7_.GetInt();
-  case 7:
-    return channelVolume8_.GetInt();
-  default:
-    NAssert(false);
-    return 0;
+    case 0:
+      return channelVolume1_.GetInt();
+    case 1:
+      return channelVolume2_.GetInt();
+    case 2:
+      return channelVolume3_.GetInt();
+    case 3:
+      return channelVolume4_.GetInt();
+    case 4:
+      return channelVolume5_.GetInt();
+    case 5:
+      return channelVolume6_.GetInt();
+    case 6:
+      return channelVolume7_.GetInt();
+    case 7:
+      return channelVolume8_.GetInt();
+    default:
+      NAssert(false);
+      return 0;
   }
 }
 
@@ -221,7 +219,9 @@ bool Project::Wrap() {
   return v->GetBool();
 }
 
-InstrumentBank *Project::GetInstrumentBank() { return &instrumentBank_; };
+InstrumentBank *Project::GetInstrumentBank() {
+  return &instrumentBank_;
+};
 
 void Project::Update(Observable &o, I_ObservableData *d) {
   // Nothing to do here for now
@@ -274,8 +274,7 @@ void Project::Purge() {
 }
 
 // Returns true if sample is used by at least 1 Sampler instrument
-bool Project::SampleInUse(
-    etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename) {
+bool Project::SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename) {
   InstrumentBank *bank = GetInstrumentBank();
 
   for (int i = 0; i < MAX_INSTRUMENT_COUNT; i++) {
@@ -341,8 +340,7 @@ void Project::PurgeInstruments() {
     if (!used[i]) {
       I_Instrument *instrument = bank->GetInstrument(i);
       if (instrument->GetType() == IT_SAMPLE) {
-        SampleInstrument *sampleInstrument =
-            static_cast<SampleInstrument *>(instrument);
+        SampleInstrument *sampleInstrument = static_cast<SampleInstrument *>(instrument);
         sampleInstrument->AssignSample(NO_SAMPLE);
       }
       // we dont reorder indexes on release so safe to call inside this loop
@@ -439,8 +437,7 @@ void Project::OnTempoTap() {
       } else {
         tempoTapCount_++;
       }
-      int tempo =
-          int(60000 * (tempoTapCount_ - 1) / (float)(now - lastTap_[0]));
+      int tempo = int(60000 * (tempoTapCount_ - 1) / (float)(now - lastTap_[0]));
       Variable *v = FindVariable(FourCC::VarTempo);
       // ensure tempo is within range
       tempo = std::clamp((unsigned short)tempo, MIN_TEMPO, MAX_TEMPO);

@@ -31,6 +31,18 @@ void ili9341_set_command(uint8_t cmd) {
   cs_deselect();
 }
 
+void ili9341_transmit32(uint8_t command, uint16_t word1, uint16_t word2) {
+  cs_select();
+  gpio_put(DISPLAY_DC, 0);
+  spi_write_blocking(DISPLAY_SPI, &command, 1);
+  gpio_put(DISPLAY_DC, 1);
+
+  uint8_t data[4] = {(uint8_t)(word1 >> 8), (uint8_t)(word1 & 0xff), (uint8_t)(word2 >> 8), (uint8_t)(word2 & 0xff)};
+
+  spi_write_blocking(DISPLAY_SPI, data, 4);
+  cs_deselect();
+}
+
 void ili9341_command_param16(uint16_t data) {
   ili9341_command_param(data >> 8);
   ili9341_command_param(data & 0xFF);

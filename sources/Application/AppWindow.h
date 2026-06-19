@@ -12,8 +12,8 @@
 #ifndef _APP_WINDOW_H_
 #define _APP_WINDOW_H_
 
-#include "Foundation/Types/Colors.h"
 #include "Application/Views/BaseClasses/View.h"
+#include "Foundation/Types/Colors.h"
 typedef union color_t {
   struct {
     Color fg : 4;
@@ -25,12 +25,12 @@ typedef union color_t {
 #include "Application/Views/BaseClasses/View.h"
 #include "Application/Views/ViewData.h"
 #include "Foundation/Observable.h"
+#include "Foundation/Types/Colors.h"
 #include "System/Process/SysMutex.h"
 #include "System/io/Status.h"
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
-#include <UIFramework/SimpleBaseClasses/EventManager.h>
 #include <UIFramework/Framework/GUIColor.h>
-#include "Foundation/Types/Colors.h"
+#include <UIFramework/SimpleBaseClasses/EventManager.h>
 
 #define PROP_INVERT 0x80
 #define CHAR_WIDTH 10

@@ -287,7 +287,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   } else if ((mask & BM_LEFT) && (mask & BM_NAV)) {
     // clear this flag on leaving this screen
     viewData_->isShowingSampleEditorProjectPool = false;
-    
+
     // Go back to the source view that opened the ImportView
     Navigate(sourceViewType_);
   } else {
@@ -298,7 +298,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
 void ImportView::DrawBottomBar() {
   int y = SCREEN_HEIGHT - 2;
   int x = 0;
-  
+
   // ensure selectedButton is valid (TODO: how does it even get set to something invalid...)
   uint8_t buttonCount = (uint8_t)(inProjectSampleDir_ ? kProjectPoolButtonCount : kImportButtonCount);
   if (selectedButton_ < 0 || selectedButton_ >= buttonCount) {
@@ -361,16 +361,15 @@ void ImportView::DrawBottomBar() {
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);
   DrawString(x, y, buffer);
-
 }
 
 void ImportView::DrawView() {
   const int listWidth = SCREEN_WIDTH - 5; // spacing, scrollbar, file indicator, usage indicator, space
-  
+
   Clear();
-  
+
   auto fs = FileSystem::GetInstance();
-  
+
   // Draw title with available storage space
   DrawTitle(char_back_s " %s", inProjectSampleDir_ ? "Project Pool" : "Import Sample");
 
@@ -378,7 +377,7 @@ void ImportView::DrawView() {
     drawEmptyState();
     return;
   }
-  
+
   // ensure selected item is in visible range
   const size_t pageSize = LIST_PAGE_SIZE;
   if (currentIndex_ < topIndex_) {
@@ -386,17 +385,17 @@ void ImportView::DrawView() {
   } else if (currentIndex_ >= topIndex_ + pageSize) {
     topIndex_ = currentIndex_ - pageSize + 1;
   }
-  
+
   // Draw samples
   int x = 1;
   int y = 2;
-  
+
   // Loop through visible files in the list
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
     uint32_t fileIndex = fileIndexList_[i];
     bool isDir = fs->getFileType(fileIndex) == PFT_DIR;
     bool isSelected = (i == currentIndex_);
-    
+
     if (isSelected) {
       // draw selection ends
       SetColor(Theme::View::Selection::bg);

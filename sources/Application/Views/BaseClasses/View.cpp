@@ -564,7 +564,7 @@ void View::DrawButton(int x, int y, const char *title, bool selected) {
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::Button::bg(selected));
   DrawString(x, y, char_button_border_left_s);
-    
+
   SetBackgroundColor(Theme::View::Button::bg(selected));
   SetColor(Theme::View::Button::fg(selected));
   DrawString(x + 1, y, title);
@@ -576,9 +576,9 @@ void View::DrawButton(int x, int y, const char *title, bool selected) {
 
 void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half = false) {
   // corners, top, right, bottom, left
-  const char *halfChars = char_filledHalfBorder_topLeft_s char_filledHalfBorder_topRight_s 
-      char_filledHalfBorder_bottomLeft_s char_filledHalfBorder_bottomRight_s char_block_bottom_s char_block_left_s 
-      char_block_top_s char_block_right_s;
+  const char *halfChars =
+      char_filledHalfBorder_topLeft_s char_filledHalfBorder_topRight_s char_filledHalfBorder_bottomLeft_s
+          char_filledHalfBorder_bottomRight_s char_block_bottom_s char_block_left_s char_block_top_s char_block_right_s;
   const char *fullChars = char_filledBorder_topLeft_s char_filledBorder_topRight_s char_filledBorder_bottomLeft_s
       char_filledBorder_bottomRight_s char_block_full_s char_block_full_s char_block_full_s char_block_full_s;
 
@@ -604,7 +604,7 @@ void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height,
     DrawChar(x + width - 1, j, chars[7], true);
   }
 
-  // fill 
+  // fill
   SetBackgroundColor(fill);
 
   for (int i = x + 1; i < x + width - 1; i++) {

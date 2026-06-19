@@ -199,8 +199,8 @@ bool PersistencyDocument::NextAttribute() {
       Trace::Log("XML", "ignoring whitespace between attributes");
       return false;
     }
-    Trace::Error("NextAttribute called with non-whitespace content '%c' in element '%s'",
-                 contentChar, state_->elem ? state_->elem : "<unknown>");
+    Trace::Error("NextAttribute called with non-whitespace content '%c' in element '%s'", contentChar,
+                 state_->elem ? state_->elem : "<unknown>");
     // we use r_ = YXML_EREF to signal that the xml parsing had a fatal error
     r_ = YXML_EREF;
     return false;

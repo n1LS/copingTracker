@@ -289,8 +289,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   if (fourcc != FourCC::ActionBPMChanged) {
     focus->ClearFocus();
     focus->Draw(w_);
-    w_.Flush();
-    focus->SetFocus();
+        focus->SetFocus();
   } else {
     focus = &tempoField_[0];
   }

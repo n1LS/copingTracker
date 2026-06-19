@@ -12,13 +12,13 @@
 #include "Adapters/picoTracker/audio/picoTrackerAudio.h"
 #include "Adapters/picoTracker/filesystem/picoTrackerFileSystem.h"
 #include "Adapters/picoTracker/gui/GUIFactory.h"
+#include "Adapters/picoTracker/gui/mirrorUI.h"
 #include "Adapters/picoTracker/midi/picoTrackerMidiService.h"
 #include "Adapters/picoTracker/system/picoTrackerSamplePool.h"
 #include "Adapters/picoTracker/timer/picoTrackerTimer.h"
 #include "Application/Commands/NodeList.h"
 #include "Application/Model/Config.h"
 #include "Application/Player/SyncMaster.h"
-#include "Adapters/picoTracker/gui/mirrorUI.h"
 #include "hardware/gpio.h"
 #include "input.h"
 #include "pico/rand.h"
@@ -51,7 +51,7 @@ int picoTrackerSystem::MainLoop() {
 void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
   (void)itf;
   (void)rts;
-  
+
   if (dtr) {
     // Host application opened the serial port - connection established
     Trace::Log("USB_CDC", "Host connected (DTR set)");
@@ -129,7 +129,6 @@ void picoTrackerSystem::Boot(int argc, char **argv) {
 
   Trace::Log("COPINGTRACKERSYSTEM", "ADC INIT DONE");
 #endif
-
 }
 
 void picoTrackerSystem::Shutdown() {

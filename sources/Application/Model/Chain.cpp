@@ -13,8 +13,8 @@
 #include "Song.h"
 #include "System/System/System.h"
 
-Chain::Chain() { 
-  Reset(); 
+Chain::Chain() {
+  Reset();
 }
 
 Chain::~Chain() {
@@ -40,7 +40,9 @@ uint16_t Chain::GetNext() {
   return NO_MORE_CHAIN;
 }
 
-void Chain::SetUsed(unsigned char c) { isUsed_[c] = true; }
+void Chain::SetUsed(unsigned char c) {
+  isUsed_[c] = true;
+}
 
 void Chain::ClearAllocation() {
   for (int i = 0; i < CHAIN_COUNT; i++) {

@@ -907,7 +907,6 @@ void AppWindow::PrintMultiLine(char *line) {
   GUIPoint pos(0, 22);
   pos.x_ = (32 - strlen(buildString)) / 2;
   DrawString(buildString, pos);
-  Flush();
 }
 
 void AppWindow::SwapColors() {

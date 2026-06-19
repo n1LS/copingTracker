@@ -11,7 +11,9 @@
 
 #include "Mixer.h"
 
-Mixer::Mixer() : Persistent("Mixer") { Clear(); };
+Mixer::Mixer() : Persistent("Mixer") {
+  Clear();
+};
 
 Mixer::~Mixer() {};
 
@@ -24,4 +26,5 @@ void Mixer::Clear() {
 
 void Mixer::SaveContent(tinyxml2::XMLPrinter *printer) {};
 
-void Mixer::RestoreContent(PersistencyDocument *doc) {}
+void Mixer::RestoreContent(PersistencyDocument *doc) {
+}

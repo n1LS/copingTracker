@@ -30,7 +30,9 @@ public:
   ~Chain();
   void Reset();
   uint16_t GetNext();
-  bool IsUsed(unsigned char i) { return isUsed_[i]; };
+  bool IsUsed(unsigned char i) {
+    return isUsed_[i];
+  };
   void SetUsed(unsigned char c);
   void ClearAllocation();
 
