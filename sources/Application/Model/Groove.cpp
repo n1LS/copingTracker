@@ -14,7 +14,9 @@
 
 unsigned char Groove::data_[MAX_GROOVES][STEPS_PER_GROOVE];
 
-Groove::Groove() : Persistent("Grooves") { Clear(); };
+Groove::Groove() : Persistent("Grooves") {
+  Clear();
+};
 
 Groove::~Groove() {};
 
@@ -108,8 +110,7 @@ void Groove::SetGroove(int channel, int groove) {
     return;
   channelGroove_[channel].groove_ = groove;
   channelGroove_[channel].position_ = 0;
-  channelGroove_[channel].ticks_ =
-      data_[channelGroove_[channel].groove_][channelGroove_[channel].position_];
+  channelGroove_[channel].ticks_ = data_[channelGroove_[channel].groove_][channelGroove_[channel].position_];
 }
 
 // Returns true if, according to current groove setting it is time to go
@@ -120,4 +121,6 @@ bool Groove::TriggerChannel(int i) {
   return ((c.ticks_) % (data_[c.groove_][c.position_]) == 0);
 }
 
-unsigned char *Groove::GetGrooveData(int groove) { return data_[groove]; };
+unsigned char *Groove::GetGrooveData(int groove) {
+  return data_[groove];
+};

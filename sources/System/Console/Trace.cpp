@@ -24,6 +24,8 @@
 #define NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS 1
 #include "nanoprintf.h"
 
+#undef NDEBUG
+
 Trace::Trace() {
 }
 

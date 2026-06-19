@@ -28,7 +28,7 @@ void mirrorUI_setChecksum(mirrorUICommand *command) {
   int size = 0;
 
   switch (command->payload[0]) {
-    case cmdFont:   
+    case cmdFont:
       size = 1; // fontId
       break;
     case cmdPalette:
@@ -59,12 +59,12 @@ void mirrorUI_command_Font(mirrorUICommand *command, uint8_t index) {
 
 void mirrorUI_command_Palette(mirrorUICommand *command, uint16_t *palette) {
   int index = 1;
-  
+
   for (int c = 0; c < 16; c++) {
     command->payload[index++] = (palette[c] >> 8);
     command->payload[index++] = (palette[c] & 0xff);
   }
-  
+
   command->payload[0] = cmdPalette;
   command->payloadSize = 33;
 }

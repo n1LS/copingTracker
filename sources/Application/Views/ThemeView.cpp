@@ -292,8 +292,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   UIField *focus = GetFocus();
   focus->ClearFocus();
   focus->Draw(w_);
-  w_.Flush();
-  focus->SetFocus();
+    focus->SetFocus();
   focus->Draw(w_);
   isDirty_ = true;
 
@@ -341,28 +340,30 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
         return;
       }
     // Handle theme name field
-    case FourCC::ActionThemeName: {
-      // Update the export theme name
-      exportThemeName_ = themeNameField_->GetString();
+    case FourCC::ActionThemeName:
+      {
+        // Update the export theme name
+        exportThemeName_ = themeNameField_->GetString();
 
-      // Update the theme name in the Config
-      Config *config = Config::GetInstance();
-      Variable *themeNameVar = config->FindVariable(FourCC::VarThemeName);
-      if (themeNameVar) {
-        themeNameVar->SetString(exportThemeName_.c_str());
-        configDirty_ = true;
+        // Update the theme name in the Config
+        Config *config = Config::GetInstance();
+        Variable *themeNameVar = config->FindVariable(FourCC::VarThemeName);
+        if (themeNameVar) {
+          themeNameVar->SetString(exportThemeName_.c_str());
+          configDirty_ = true;
+        }
+        themeNameVar_.SetString(exportThemeName_.c_str());
+        return;
       }
-      themeNameVar_.SetString(exportThemeName_.c_str());
-      return;
-    }
     // if font changes call redraw all fields
-    case FourCC::VarUIFont: {
-      // need to force redraw of entire screen to update for font change
-      Clear();
-      DrawView();
-      configDirty_ = true;
-      break;
-    }
+    case FourCC::VarUIFont:
+      {
+        // need to force redraw of entire screen to update for font change
+        Clear();
+        DrawView();
+        configDirty_ = true;
+        break;
+      }
     // Handle color variable changes
     case FourCC::VarColor_0_Black:
     case FourCC::VarColor_1_Maroon:
@@ -379,15 +380,16 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
     case FourCC::VarColor_C_LightBlue:
     case FourCC::VarColor_D_Magenta:
     case FourCC::VarColor_E_Cyan:
-    case FourCC::VarColor_F_White: {
-      // Update the AppWindow's color values from Config
-      ((AppWindow &)w_).UpdateColorsFromConfig();
+    case FourCC::VarColor_F_White:
+      {
+        // Update the AppWindow's color values from Config
+        ((AppWindow &)w_).UpdateColorsFromConfig();
 
-      // Force a redraw of the entire screen to update all colors
-      forceRedraw_ = true;
-      configDirty_ = true;
-      break;
-    }
+        // Force a redraw of the entire screen to update all colors
+        forceRedraw_ = true;
+        configDirty_ = true;
+        break;
+      }
     default:
       NInvalid;
       break;
@@ -422,11 +424,9 @@ void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & BM_NAV) {
-    if (mask & BM_LEFT) {
-      // Go back to Device view with NAV+LEFT
-      Navigate(VT_DEVICE);
-    }
+  if (mask & (BM_NAV | BM_LEFT)) {
+    // Go back to Device view with NAV+LEFT
+    Navigate(VT_DEVICE);
   } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);

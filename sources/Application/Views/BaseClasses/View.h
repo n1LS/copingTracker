@@ -117,7 +117,10 @@ struct Theme {
   struct View {
     FIXED(bg, BLACK)
     FIXED(fg, WHITE)
+
     FIXED(inactive, LIGHT_GRAY)
+    FIXED(scrollbar, LIGHT_GRAY)
+
     SWITCHABLE(index, LIGHT_CYAN, CYAN)
     SWITCHABLE(help, WHITE, LIGHT_GRAY)
 
@@ -132,21 +135,32 @@ struct Theme {
       SWITCHABLE(fg, BLACK, WHITE)
     };
 
+    struct Selection {
+      FIXED(bg, LIGHT_GREEN)
+      FIXED(fg, BLACK)
+    };
+
     struct Title {
       FIXED(bg, BLUE)
       FIXED(fg, WHITE)
+    };
+
+    struct Button {
+      SWITCHABLE(fg, BLACK, WHITE)
+      SWITCHABLE(bg, LIGHT_GREEN, DARK_GRAY)
     };
   };
 
   struct FileList {
     FIXED(directory, LIGHT_YELLOW)
     FIXED(file, Theme::View::fg)
+    FIXED(icon, LIGHT_GRAY);
   };
 
   struct Dialog {
     FIXED(bg, LIGHT_GRAY)
     FIXED(fg, BLACK)
-    
+
     struct Button {
       SWITCHABLE(fg, BLACK, WHITE)
       SWITCHABLE(bg, LIGHT_GREEN, DARK_GRAY)
@@ -274,6 +288,7 @@ protected:
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
   void DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half);
+  void DrawButton(int x, int y, const char *title, bool selected);
 
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
     // Extract both channels

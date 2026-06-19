@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "System/Profiler/Profiler.h"
+
 /* Character graphics mode */
 
 #define SWAP_BYTES(color) ((uint16_t)(color >> 8) | (uint16_t)(color << 8))
@@ -34,7 +36,7 @@ static uint8_t ui_font_index = 0;
 
 // Using a bit array in order to save memory, there is a slight performance
 // hit in doing so vs a bool array
-static bool changed[TEXT_HEIGHT * TEXT_WIDTH ] = {0};
+static bool changed[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 
 // Default palette, can be redefined
 static uint16_t palette[16] = {
@@ -165,13 +167,8 @@ void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) 
   ili9341_command_param(0x28); // 90-degree clockwise rotation
 
   // Set display window
-  ili9341_set_command(ILI9341_CASET);
-  ili9341_command_param16(display_x);
-  ili9341_command_param16(display_x + display_w - 1);
-
-  ili9341_set_command(ILI9341_PASET);
-  ili9341_command_param16(display_y);
-  ili9341_command_param16(display_y + display_h - 1);
+  ili9341_transmit32(ILI9341_CASET, display_x, display_x + display_w - 1);
+  ili9341_transmit32(ILI9341_PASET, display_y, display_y + display_h - 1);
 
   ili9341_set_command(ILI9341_RAMWR);
   ili9341_start_writing();
@@ -203,14 +200,11 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
   uint16_t screen_height = height * CHAR_HEIGHT;
 
   // column address set
-  ili9341_set_command(ILI9341_CASET);
-  ili9341_command_param16(screen_y);
-  ili9341_command_param16(screen_y + screen_height - 1);
+  ili9341_transmit32(ILI9341_CASET, screen_y, screen_y + screen_height - 1);
 
   // page address set
-  ili9341_set_command(ILI9341_PASET);
-  ili9341_command_param16(screen_x);
-  ili9341_command_param16(screen_x + screen_width - 1);
+  ili9341_transmit32(ILI9341_PASET, screen_x, screen_x + screen_width - 1);
+
   // start writing
   ili9341_set_command(ILI9341_RAMWR);
 
@@ -245,6 +239,8 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
 }
 
 void chargfx_draw_changed() {
+  PROFILE_FUNCTION();
+
   for (int idx = 0; idx < TEXT_HEIGHT * TEXT_WIDTH; idx++) {
     if (changed[idx]) {
       changed[idx] = false;

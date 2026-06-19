@@ -92,15 +92,15 @@
 #define char_filledBorder_right_s "\xDE"
 #define char_filledBorder_left_s "\xDD"
 
-#define char_filledBorder_topLeft_s "\xE0"
-#define char_filledBorder_topRight_s "\xE3"
-#define char_filledBorder_bottomLeft_s "\xE1"
-#define char_filledBorder_bottomRight_s "\xE2"
+#define char_filledHalfBorder_topLeft_s "\xE0"
+#define char_filledHalfBorder_topRight_s "\xE3"
+#define char_filledHalfBorder_bottomLeft_s "\xE1"
+#define char_filledHalfBorder_bottomRight_s "\xE2"
 
-#define char_filledHalfBorder_topLeft_s "\xE4"
-#define char_filledHalfBorder_topRight_s "\xE7"
-#define char_filledHalfBorder_bottomLeft_s "\xE5"
-#define char_filledHalfBorder_bottomRight_s "\xE6"
+#define char_filledBorder_topLeft_s "\xE4"
+#define char_filledBorder_topRight_s "\xE7"
+#define char_filledBorder_bottomLeft_s "\xE5"
+#define char_filledBorder_bottomRight_s "\xE6"
 
 #define char_waveform_sine1_s "\xF0"
 #define char_waveform_sine2_s "\xF1"
@@ -155,6 +155,13 @@
 
 #define char_dotted_horizontal_s "\xC6"
 #define char_back_s "\xC7"
+
+#define char_file_folder_s "\xD0"
+#define char_file_file_s "\xD1"
+#define char_file_sd_s "\xD2"
+#define char_file_no_sd_s "\xD3"
+#define char_file_cycle_s "\xD4"
+#define char_symbol_return_s "\xD5"
 
 #define string_battery_charging                                                                                        \
   char_battery_left_s char_battery_charging1_s char_battery_charging2_s char_battery_right_s

@@ -11,8 +11,8 @@
 #ifndef _TEXT_CHARGFX_H
 #define _TEXT_CHARGFX_H
 
-#include "ili9341.h"
 #include "Foundation/Types/Colors.h"
+#include "ili9341.h"
 
 #define TEXT_WIDTH 32
 #define TEXT_HEIGHT 24

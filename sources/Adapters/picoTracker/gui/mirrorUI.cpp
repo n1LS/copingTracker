@@ -9,57 +9,57 @@
  */
 
 #include "mirrorUI.h"
-#include "mirrorUIProtocol.h"
-#include "Application/AppWindow.h"
-#include "tusb.h"
 #include "Adapters/picoTracker/display/chargfx.h"
+#include "Application/AppWindow.h"
+#include "mirrorUIProtocol.h"
+#include "tusb.h"
 #include <cstdint>
 
 static mirrorUICommand command_;
 
 void mirrorUI_sendCommand(mirrorUICommand *command) {
-  command->payload[command->payloadSize] = 0x7f;  
+  command->payload[command->payloadSize] = 0x7f;
   command->payloadSize++;
 
   if (!tud_cdc_connected())
-        return;
+    return;
 
-    uint32_t total = command->payloadSize;
-    uint32_t i = 0;
+  uint32_t total = command->payloadSize;
+  uint32_t i = 0;
 
-    while (i < total) {
-        tud_task(); // keep USB stack alive
+  while (i < total) {
+    tud_task(); // keep USB stack alive
 
-        uint32_t avail = tud_cdc_write_available();
-        if (avail == 0) {
-            tud_cdc_write_flush();
-            continue;
-        }
-
-        uint32_t n = total - i;
-        if (n > avail)
-            n = avail;
-
-        uint32_t written = tud_cdc_write(command->payload + i, n);
-
-        if (written == 0) {
-            tud_task();
-            tud_cdc_write_flush();
-            continue;
-        }
-
-        i += written;
+    uint32_t avail = tud_cdc_write_available();
+    if (avail == 0) {
+      tud_cdc_write_flush();
+      continue;
     }
 
-    tud_cdc_write_flush(); // flush once at end
+    uint32_t n = total - i;
+    if (n > avail)
+      n = avail;
+
+    uint32_t written = tud_cdc_write(command->payload + i, n);
+
+    if (written == 0) {
+      tud_task();
+      tud_cdc_write_flush();
+      continue;
+    }
+
+    i += written;
+  }
+
+  tud_cdc_write_flush(); // flush once at end
 }
 
 void mirrorUI_Flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUpdate) {
   int index = 0;
 
-  #define WAITING_FOR_CHANGED 0
-  #define IN_CHANGED 1
-   
+#define WAITING_FOR_CHANGED 0
+#define IN_CHANGED 1
+
   command_.payload[0] = cmdData;
 
   for (int y = 0; y < SCREEN_HEIGHT; y++) {
@@ -83,10 +83,8 @@ void mirrorUI_Flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUp
           break;
         case IN_CHANGED:
           // Check bounds before accessing changed array
-          if (changed[index] || fullUpdate || 
-              ((x + 1 < SCREEN_WIDTH) && changed[index + 1]) ||
-              ((x + 2 < SCREEN_WIDTH) && changed[index + 2]) || 
-              ((x + 3 < SCREEN_WIDTH) && changed[index + 3])) {
+          if (changed[index] || fullUpdate || ((x + 1 < SCREEN_WIDTH) && changed[index + 1]) ||
+              ((x + 2 < SCREEN_WIDTH) && changed[index + 2]) || ((x + 3 < SCREEN_WIDTH) && changed[index + 3])) {
             // keep going
             command_.payload[ptr++] = colors[index];
             command_.payload[ptr++] = screen[index];
@@ -126,7 +124,7 @@ void mirrorUI_sendPalette(uint16_t *color) {
     command_.payload[1 + c * 2] = val2;
     command_.payload[2 + c * 2] = val;
   }
-  
+
   command_.payload[0] = 0;
   command_.payloadSize = 33;
 

@@ -16,7 +16,7 @@
 
 namespace {
 
-constexpr const char *kBootlogPath = "/bootloader.log";
+constexpr const char *kBootlogPath = "/copingTracker/boot.log";
 constexpr size_t kBootlogBufferSize = 256;
 
 static SdFs g_log_sd;

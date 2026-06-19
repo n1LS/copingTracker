@@ -91,12 +91,22 @@ static const ConfigParam configParams[] = {
     {"MidiDevice", {.intValue = DEFAULT_MIDIDEVICE}, FourCC::VarMidiDevice, midiDeviceList, 4, false},
     {"MidiSync", {.intValue = DEFAULT_MIDISYNC}, FourCC::VarMidiSync, midiSendSync, 2, false},
     {"mirrorUI", {.intValue = DEFAULT_REMOTEUI}, FourCC::VarMirrorUI, mirrorUIOnOff, 2, false},
-    {"UIFont", {.intValue = ThemeConstants::DEFAULT_UIFONT}, FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES, ThemeConstants::THEME_FONT_COUNT, false},
+    {"UIFont",
+     {.intValue = ThemeConstants::DEFAULT_UIFONT},
+     FourCC::VarUIFont,
+     ThemeConstants::THEME_FONT_NAMES,
+     ThemeConstants::THEME_FONT_COUNT,
+     false},
 
     // Display brightness setting
     {"BacklightLevel", {.intValue = DEFAULT_BACKLIGHT_LEVEL}, FourCC::VarBacklightLevel, nullptr, 0, false},
     {"OutputVolume", {.intValue = DEFAULT_OUTPUT_VOLUME}, FourCC::VarOutputVolume, nullptr, 0, false},
-    {"ImportResampling", {.intValue = DEFAULT_IMPORT_RESAMPLER}, FourCC::VarImportResampler, importResamplerOptions, kImportResamplerOptionCount, false},
+    {"ImportResampling",
+     {.intValue = DEFAULT_IMPORT_RESAMPLER},
+     FourCC::VarImportResampler,
+     importResamplerOptions,
+     kImportResamplerOptionCount,
+     false},
 };
 
 Config::Config()
@@ -122,9 +132,10 @@ Config::Config()
       midiDevice_(FourCC::VarMidiDevice, midiDeviceList, 4, DEFAULT_MIDIDEVICE),
       midiSync_(FourCC::VarMidiSync, midiSendSync, 2, DEFAULT_MIDISYNC),
       mirrorUI_(FourCC::VarMirrorUI, mirrorUIOnOff, 2, DEFAULT_REMOTEUI),
-      importResampler_(FourCC::VarImportResampler, importResamplerOptions, kImportResamplerOptionCount, DEFAULT_IMPORT_RESAMPLER),
-      uiFont_(FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES,
-              ThemeConstants::THEME_FONT_COUNT, ThemeConstants::DEFAULT_UIFONT),
+      importResampler_(FourCC::VarImportResampler, importResamplerOptions, kImportResamplerOptionCount,
+                       DEFAULT_IMPORT_RESAMPLER),
+      uiFont_(FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES, ThemeConstants::THEME_FONT_COUNT,
+              ThemeConstants::DEFAULT_UIFONT),
       themeName_(FourCC::VarThemeName, ThemeConstants::DEFAULT_THEME_NAME),
       backlightLevel_(FourCC::VarBacklightLevel, DEFAULT_BACKLIGHT_LEVEL),
       outputVolume_(FourCC::VarOutputVolume, DEFAULT_OUTPUT_VOLUME) {
@@ -190,8 +201,7 @@ Config::Config()
     }
 
     if (!paramFound) {
-      Trace::Log("CONFIG", "Found unknown config parameter \"%s\", skipping...",
-                 doc.ElemName());
+      Trace::Log("CONFIG", "Found unknown config parameter \"%s\", skipping...", doc.ElemName());
       elem = doc.NextSibling();
       continue;
     }
@@ -223,7 +233,8 @@ Config::Config()
   Trace::Log("CONFIG", "Loaded successfully");
 }
 
-Config::~Config() {}
+Config::~Config() {
+}
 
 bool Config::Save() {
   auto fs = FileSystem::GetInstance();
@@ -249,21 +260,11 @@ void Config::WriteColorVariables(tinyxml2::XMLPrinter *printer) {
     FourCC id = var->GetID();
 
     // Check if this is a color variable
-    if (id == FourCC::VarColor_0_Black ||
-        id == FourCC::VarColor_1_Maroon ||
-        id == FourCC::VarColor_2_Green ||
-        id == FourCC::VarColor_3_Olive ||
-        id == FourCC::VarColor_4_Blue ||
-        id == FourCC::VarColor_5_Purple ||
-        id == FourCC::VarColor_6_Turqoise ||
-        id == FourCC::VarColor_7_LightyGray ||
-        id == FourCC::VarColor_8_Gray ||
-        id == FourCC::VarColor_9_Red ||
-        id == FourCC::VarColor_A_Lime ||
-        id == FourCC::VarColor_B_Yellow ||
-        id == FourCC::VarColor_C_LightBlue ||
-        id == FourCC::VarColor_D_Magenta ||
-        id == FourCC::VarColor_E_Cyan ||
+    if (id == FourCC::VarColor_0_Black || id == FourCC::VarColor_1_Maroon || id == FourCC::VarColor_2_Green ||
+        id == FourCC::VarColor_3_Olive || id == FourCC::VarColor_4_Blue || id == FourCC::VarColor_5_Purple ||
+        id == FourCC::VarColor_6_Turqoise || id == FourCC::VarColor_7_LightyGray || id == FourCC::VarColor_8_Gray ||
+        id == FourCC::VarColor_9_Red || id == FourCC::VarColor_A_Lime || id == FourCC::VarColor_B_Yellow ||
+        id == FourCC::VarColor_C_LightBlue || id == FourCC::VarColor_D_Magenta || id == FourCC::VarColor_E_Cyan ||
         id == FourCC::VarColor_F_White) {
 
       // Open a Color element
@@ -429,21 +430,11 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
     FourCC id = var->GetID();
 
     // Skip color variables as they will be handled by WriteColorVariables
-    if (id == FourCC::VarColor_0_Black ||
-        id == FourCC::VarColor_1_Maroon ||
-        id == FourCC::VarColor_2_Green ||
-        id == FourCC::VarColor_3_Olive ||
-        id == FourCC::VarColor_4_Blue ||
-        id == FourCC::VarColor_5_Purple ||
-        id == FourCC::VarColor_6_Turqoise ||
-        id == FourCC::VarColor_7_LightyGray ||
-        id == FourCC::VarColor_8_Gray ||
-        id == FourCC::VarColor_9_Red ||
-        id == FourCC::VarColor_A_Lime ||
-        id == FourCC::VarColor_B_Yellow ||
-        id == FourCC::VarColor_C_LightBlue ||
-        id == FourCC::VarColor_D_Magenta ||
-        id == FourCC::VarColor_E_Cyan ||
+    if (id == FourCC::VarColor_0_Black || id == FourCC::VarColor_1_Maroon || id == FourCC::VarColor_2_Green ||
+        id == FourCC::VarColor_3_Olive || id == FourCC::VarColor_4_Blue || id == FourCC::VarColor_5_Purple ||
+        id == FourCC::VarColor_6_Turqoise || id == FourCC::VarColor_7_LightyGray || id == FourCC::VarColor_8_Gray ||
+        id == FourCC::VarColor_9_Red || id == FourCC::VarColor_A_Lime || id == FourCC::VarColor_B_Yellow ||
+        id == FourCC::VarColor_C_LightBlue || id == FourCC::VarColor_D_Magenta || id == FourCC::VarColor_E_Cyan ||
         id == FourCC::VarColor_F_White) {
       it++;
       continue;
@@ -489,7 +480,7 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
       char *elemName = doc->ElemName();
       Trace::Log("CONFIG", "Processing element: %s", elemName);
 
-      if (strcmp(elemName, "Font") == 0) {
+      if (strcmp(elemName, XML_ELEM_FONT) == 0) {
         // Process Font element attributes
         while (doc->NextAttribute()) {
           if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
@@ -505,7 +496,7 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
             }
           }
         }
-      } else if (strcmp(elemName, "Color") == 0) {
+      } else if (strcmp(elemName, XML_ELEM_COLOR) == 0) {
         Trace::Log("CONFIG", "Found Color element");
 
         // Process this color element directly

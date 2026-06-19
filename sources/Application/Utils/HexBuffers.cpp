@@ -10,9 +10,9 @@
  */
 
 #include "HexBuffers.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Utils/char.h"
 #include "Externals/etl/include/etl/string.h"
-#include "Application/Persistency/PersistenceConstants.h"
 
 #define XML_CUT_LENGTH 64
 

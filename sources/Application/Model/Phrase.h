@@ -34,7 +34,9 @@ public:
   ~Phrase();
   void Reset();
   uint16_t GetNext();
-  bool IsUsed(uint8_t i) { return isUsed_[i]; };
+  bool IsUsed(uint8_t i) {
+    return isUsed_[i];
+  };
   void SetUsed(uint8_t c);
   void ClearAllocation();
 

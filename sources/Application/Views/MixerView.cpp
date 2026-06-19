@@ -395,8 +395,7 @@ void MixerView::AnimationUpdate() {
   // Only process updates below if we're fully initialized
   if (!viewData_ || !player) {
     // Just flush the battery gauge and return
-    w_.Flush();
-    return;
+        return;
   }
 
   // Always update VU meters, whether the sequencer is running or not
@@ -424,8 +423,7 @@ void MixerView::AnimationUpdate() {
   }
 
   // Flush the window to ensure changes are displayed
-  w_.Flush();
-}
+  }
 
 void MixerView::drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT> *levels, Player *player,
                                     bool forceRedraw) {

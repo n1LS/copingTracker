@@ -43,23 +43,23 @@ public:
 
   inline FourCC getCmd(int step, int col) const {
     switch (col) {
-    case 0:
-      return FourCC::enum_type(steps_[step].cmd1);
-    case 1:
-      return FourCC::enum_type(steps_[step].cmd2);
-    default:
-      return FourCC::enum_type(steps_[step].cmd3);
+      case 0:
+        return FourCC::enum_type(steps_[step].cmd1);
+      case 1:
+        return FourCC::enum_type(steps_[step].cmd2);
+      default:
+        return FourCC::enum_type(steps_[step].cmd3);
     }
   }
 
   inline uint16_t getParam(int step, int col) const {
     switch (col) {
-    case 0:
-      return steps_[step].param1;
-    case 1:
-      return steps_[step].param2;
-    default:
-      return steps_[step].param3;
+      case 0:
+        return steps_[step].param1;
+      case 1:
+        return steps_[step].param2;
+      default:
+        return steps_[step].param3;
     }
   }
 

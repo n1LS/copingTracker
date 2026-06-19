@@ -11,9 +11,9 @@
 
 #include "I_Instrument.h"
 #include "../Model/Project.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Utils/char.h"
 #include "System/Console/Trace.h"
-#include "Application/Persistency/PersistenceConstants.h"
 
 I_Instrument::~I_Instrument() {
   // Virtual destructor implementation

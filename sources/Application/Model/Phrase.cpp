@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-Phrase::Phrase() { 
-  Reset(); 
+Phrase::Phrase() {
+  Reset();
 }
 
 Phrase::~Phrase() {
@@ -49,8 +49,8 @@ uint16_t Phrase::GetNext() {
   return NO_MORE_PHRASE;
 }
 
-void Phrase::SetUsed(unsigned char c) { 
-  isUsed_[c] = true; 
+void Phrase::SetUsed(unsigned char c) {
+  isUsed_[c] = true;
 }
 
 void Phrase::ClearAllocation() {

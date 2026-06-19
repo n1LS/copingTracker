@@ -228,6 +228,34 @@ bool picoTrackerFileSystem::isParentRoot() {
   return result;
 }
 
+bool picoTrackerFileSystem::isCurrent(const char *path) {
+  if (!path || !*path) {
+    return false;
+  }
+
+  std::lock_guard<Mutex> lock(mutex);
+
+  sd.chvol();
+
+  FsBaseFile cwd;
+  if (!cwd.openCwd()) {
+    Trace::Error("Failed to open cwd");
+    return false;
+  }
+
+  FsBaseFile target;
+  if (!target.open(path, O_READ)) {
+    cwd.close();
+    return false;
+  }
+
+  bool result = target.isDir() && cwd.firstSector() == target.firstSector() && cwd.dirIndex() == target.dirIndex();
+
+  target.close();
+  cwd.close();
+  return result;
+}
+
 bool picoTrackerFileSystem::isCurrentRoot() {
   std::lock_guard<Mutex> lock(mutex);
   FsBaseFile cwd;
