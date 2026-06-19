@@ -79,6 +79,8 @@ void picoTrackerGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount
     return;
   }
 
+  bool paletteChanged = false;
+
   for (int i = 0; i < colorCount; ++i) {
     int paletteIndex = palette[i].paletteIndex_;
     if (paletteIndex < 0 || paletteIndex >= 16) {
@@ -89,10 +91,15 @@ void picoTrackerGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount
     if (lastPaletteRGB[paletteIndex] != rgb565) {
       chargfx_set_palette_color(paletteIndex, rgb565);
       lastPaletteRGB[paletteIndex] = rgb565;
+      paletteChanged = true;
     }
   }
 
   SendPalette();
+
+  if (paletteChanged) {
+    chargfx_draw_screen();
+  }
 }
 
 void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos, bool transparent) {

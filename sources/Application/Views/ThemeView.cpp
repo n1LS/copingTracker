@@ -422,11 +422,9 @@ void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & BM_NAV) {
-    if (mask & BM_LEFT) {
-      // Go back to Device view with NAV+LEFT
-      Navigate(VT_DEVICE);
-    }
+  if (mask & (BM_NAV | BM_LEFT)) {
+    // Go back to Device view with NAV+LEFT
+    Navigate(VT_DEVICE);
   } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);

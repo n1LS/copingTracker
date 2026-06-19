@@ -489,7 +489,7 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
       char *elemName = doc->ElemName();
       Trace::Log("CONFIG", "Processing element: %s", elemName);
 
-      if (strcmp(elemName, "Font") == 0) {
+      if (strcmp(elemName, XML_ELEM_FONT) == 0) {
         // Process Font element attributes
         while (doc->NextAttribute()) {
           if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
@@ -505,7 +505,7 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
             }
           }
         }
-      } else if (strcmp(elemName, "Color") == 0) {
+      } else if (strcmp(elemName, XML_ELEM_COLOR) == 0) {
         Trace::Log("CONFIG", "Found Color element");
 
         // Process this color element directly

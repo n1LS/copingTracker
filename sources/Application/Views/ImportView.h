@@ -48,6 +48,8 @@ protected:
   void refreshFileIndexList(FileSystem *fs);
 
 private:
+  void DrawBottomBar();
+
   static const uint8_t DirectoryIndexStackDepth = 32;
 
   bool changeDirectory(FileSystem *fs, const char *name);
@@ -68,5 +70,6 @@ private:
   FileSystem *pendingDeleteFs_ = nullptr;
   char pendingDeleteFilename_[PFILENAME_SIZE] = {};
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
+  bool atLocalRoot_ = true;
 };
 #endif

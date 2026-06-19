@@ -22,7 +22,6 @@
 #include <memory>
 #include <nanoprintf.h>
 
-#define LIST_WIDTH SCREEN_WIDTH - 2
 // -4 to allow for title, filesize & spacers
 #define LIST_PAGE_SIZE SCREEN_HEIGHT - 5
 
@@ -41,12 +40,11 @@ enum ImportButton : uint8_t {
   kImportButtonCount,
 };
 
-enum ProjectPoolButton : uint8_t {
-  kProjectButtonEdit = 0,
-  kProjectButtonRemove,
-  kProjectButtonVolume,
-  kProjectPoolButtonCount,
-};
+const int kProjectButtonEdit = 0;
+const int kProjectButtonRemove = 1;
+const int kProjectButtonVolume = 2;
+const int kProjectPoolButtonCount = 3;
+
 } // namespace
 
 ImportView::ImportView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
@@ -154,10 +152,10 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
       playKeyHeld_ = true;
 
       if (mask & BM_ALT) {
-        Trace::Log("PICOIMPORT", "SHIFT play - import");
+        Trace::Log("IMPORT", "SHIFT play - import");
         import();
       } else {
-        Trace::Log("PICOIMPORT", "play key pressed - start preview");
+        Trace::Log("IMPORT", "play key pressed - start preview");
         preview(name);
       }
       return; // We've handled the play button, so return
@@ -289,7 +287,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   } else if ((mask & BM_LEFT) && (mask & BM_NAV)) {
     // clear this flag on leaving this screen
     viewData_->isShowingSampleEditorProjectPool = false;
-
+    
     // Go back to the source view that opened the ImportView
     Navigate(sourceViewType_);
   } else {
@@ -297,92 +295,13 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 }
 
-void ImportView::DrawView() {
-  Clear();
-
-  auto fs = FileSystem::GetInstance();
-
-  // Draw title with available storage space
-  uint32_t availableSpace = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
-  DrawTitle(char_back_s " %s (%d)", inProjectSampleDir_ ? "Project Pool" : "Import Sample", availableSpace);
-
-  if (fileIndexList_.empty()) {
-    drawEmptyState();
-    return;
-  }
-
-  // ensure selected item is in visible range
-  const size_t pageSize = LIST_PAGE_SIZE;
-  if (currentIndex_ < topIndex_) {
-    topIndex_ = currentIndex_;
-  } else if (currentIndex_ >= topIndex_ + pageSize) {
-    topIndex_ = currentIndex_ - pageSize + 1;
-  }
-
-  // Draw samples
-  int x = 1;
-  int y = 2;
-
-  // Loop through visible files in the list
-  for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
-    SetBackgroundColor(Theme::View::bg);
-
-    unsigned fileIndex = fileIndexList_[i];
-    etl::string<PFILENAME_SIZE> displayName;
-
-    if (fs->getFileType(fileIndex) != PFT_DIR) {
-      // Handle regular files
-      char tempBuffer[PFILENAME_SIZE];
-      fs->getFileName(fileIndex, tempBuffer, PFILENAME_SIZE);
-
-      // Check if it's a single cycle waveform
-      int filesize = fs->getFileSize(fileIndex);
-      bool isSingleCycle = IS_SINGLE_CYCLE(filesize);
-
-      displayName += tempBuffer;
-      // Format the display name with appropriate prefix
-      if (inProjectSampleDir_ &&
-          viewData_->project_->SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH>(tempBuffer))) {
-        SetColor(Theme::View::info);
-        DrawString(x, y, "*");
-      } else if (isSingleCycle) {
-        SetColor(Theme::View::info);
-        DrawString(x, y, "~");
-      } else {
-        DrawString(x, y, " ");
-      }
-    } else {
-      SetColor(Theme::FileList::directory);
-      // Handle directories
-      char tempBuffer[PFILENAME_SIZE];
-      displayName = "/";
-      // clear temp buffer
-      memset(tempBuffer, 0, PFILENAME_SIZE);
-      fs->getFileName(fileIndex, tempBuffer, PFILENAME_SIZE);
-      displayName += tempBuffer;
-    }
-
-    // Truncate to fit display width
-    if (displayName.size() > LIST_WIDTH) {
-      displayName.resize(LIST_WIDTH);
-    }
-
-    bool highlighted = (i == currentIndex_);
-    SetColor(Theme::View::fg);
-    SetBackgroundColor(Theme::View::bg);
-    if (highlighted) {
-      SwapColors();
-    }
-    DrawString(x + 1, y, displayName.c_str());
-    y += 1;
-  };
-
-  y = SCREEN_HEIGHT - 2;
-  if (inProjectSampleDir_) {
-    if (selectedButton_ < 0 || selectedButton_ >= kProjectPoolButtonCount) {
-      selectedButton_ = 0;
-    }
-  } else if (selectedButton_ < 0 || selectedButton_ >= kImportButtonCount) {
+void ImportView::DrawBottomBar() {
+  int y = SCREEN_HEIGHT - 2;
+  int x = 0;
+  
+  // ensure selectedButton is valid (TODO: how does it even get set to something invalid...)
+  uint8_t buttonCount = (uint8_t)(inProjectSampleDir_ ? kProjectPoolButtonCount : kImportButtonCount);
+  if (selectedButton_ < 0 || selectedButton_ >= buttonCount) {
     selectedButton_ = 0;
   }
 
@@ -392,45 +311,24 @@ void ImportView::DrawView() {
     previewVolume = v->GetInt();
   }
 
-  auto setColors = [&](bool selected) {
-    SetBackgroundColor(Theme::View::bg);
-    SetColor(Theme::View::fg);
-
-    if (selected) {
-      SwapColors();
-    }
-  };
-
   if (!inProjectSampleDir_) {
-    setColors(selectedButton_ == kImportButtonImport);
-    DrawString(x, y, "Import");
-
-    setColors(selectedButton_ == kImportButtonEdit);
-    DrawString(x + 10, y, "Edit");
-
-    setColors(selectedButton_ == kImportButtonVolume);
-    char volField[12];
-    npf_snprintf(volField, sizeof(volField), "Vol:%2d", previewVolume);
-    DrawString(x + 23, y, volField);
+    DrawButton(x, y, "Import", selectedButton_ == kImportButtonImport);
+    DrawButton(x + 8, y, "Edit", selectedButton_ == kImportButtonEdit);
   } else {
-    // we make edit the first button to make things easier
-    setColors(selectedButton_ == 0);
-    DrawString(x, y, "Edit");
-
-    // todo: make remove available or remove the button
-    setColors(selectedButton_ == 1);
-    DrawString(x + 9, y, "N/A");
-
-    setColors(selectedButton_ == kProjectButtonVolume);
-    char volField[12];
-    npf_snprintf(volField, sizeof(volField), "vol:%2d", previewVolume);
-    DrawString(x + 23, y, volField);
+    DrawButton(x, y, "Edit", selectedButton_ == 0);
+    DrawButton(x + 6, y, "N/A", selectedButton_ == 1); // todo: make remove available or remove the button
   }
-  y += 1;
+
+  char volField[12];
+  npf_snprintf(volField, sizeof(volField), "Vol:%2d", previewVolume);
+  DrawButton(x + 24, y, volField, selectedButton_ == kImportButtonVolume);
 
   // draw current selected file size and available storage indicator
-  SetColor(Theme::View::fg);
+  auto fs = FileSystem::GetInstance();
+  uint32_t availableSpace = SamplePool::GetInstance()->GetAvailableSampleStorageSpace();
   y = 0;
+
+  SetColor(Theme::View::fg);
   uint32_t filesize = 0;
   if (!fileIndexList_.empty()) {
     auto currentFileIndex = fileIndexList_[currentIndex_];
@@ -445,24 +343,116 @@ void ImportView::DrawView() {
   }
 
   // Create a temporary buffer for formatting
-  char tempBuffer[SCREEN_WIDTH];
-  tempBuffer[SCREEN_WIDTH - 1] = '\0';
+  char buffer[SCREEN_WIDTH];
+  buffer[SCREEN_WIDTH - 1] = 0;
 
-  npf_snprintf(tempBuffer, sizeof(tempBuffer), "size:%i/%i", filesize, availableSpace);
+  npf_snprintf(buffer, sizeof(buffer), "Size: %i/%i", filesize, availableSpace);
 
   // pad status line buffer with trailing space chars to ensure the invert
   // color is applied to entire line
-  int32_t padWidth = (SCREEN_WIDTH - 2) - static_cast<int32_t>(strlen(tempBuffer));
+  int32_t padWidth = (SCREEN_WIDTH - 2) - static_cast<int32_t>(strlen(buffer));
   if (padWidth < 0) {
     padWidth = 0;
   }
-  npf_snprintf(tempBuffer, sizeof(tempBuffer), "%s%*s", tempBuffer, padWidth, " ");
+  npf_snprintf(buffer, sizeof(buffer), "%s%*s", buffer, padWidth, " ");
 
   x = 1;  // align with rest screen title & file list
   y = 23; // bottom line
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);
-  DrawString(x, y, tempBuffer);
+  DrawString(x, y, buffer);
+
+}
+
+void ImportView::DrawView() {
+  const int listWidth = SCREEN_WIDTH - 5; // spacing, scrollbar, file indicator, usage indicator, space
+  
+  Clear();
+  
+  auto fs = FileSystem::GetInstance();
+  
+  // Draw title with available storage space
+  DrawTitle(char_back_s " %s", inProjectSampleDir_ ? "Project Pool" : "Import Sample");
+
+  if (fileIndexList_.empty()) {
+    drawEmptyState();
+    return;
+  }
+  
+  // ensure selected item is in visible range
+  const size_t pageSize = LIST_PAGE_SIZE;
+  if (currentIndex_ < topIndex_) {
+    topIndex_ = currentIndex_;
+  } else if (currentIndex_ >= topIndex_ + pageSize) {
+    topIndex_ = currentIndex_ - pageSize + 1;
+  }
+  
+  // Draw samples
+  int x = 1;
+  int y = 2;
+  
+  // Loop through visible files in the list
+  for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
+    uint32_t fileIndex = fileIndexList_[i];
+    bool isDir = fs->getFileType(fileIndex) == PFT_DIR;
+    bool isSelected = (i == currentIndex_);
+    
+    if (isSelected) {
+      // draw selection ends
+      SetColor(Theme::View::Selection::bg);
+      SetBackgroundColor(Theme::View::bg);
+      DrawString(0, y, char_button_border_left_s);
+      DrawString(SCREEN_WIDTH - 2, y, char_button_border_right_s);
+
+      SetBackgroundColor(Theme::View::Selection::bg);
+    } else {
+      SetBackgroundColor(Theme::View::bg);
+    }
+
+    // get filename
+    etl::string<SCREEN_WIDTH> displayName;
+    char buffer[SCREEN_WIDTH];
+    fs->getFileName(fileIndex, buffer, SCREEN_WIDTH);
+    displayName += buffer;
+
+    if (isDir) {
+      SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::directory);
+      bool upDir = strcmp(buffer, "..") == 0;
+      const char prefix[3] = {GLYPH(upDir ? char_symbol_return_s : char_file_folder_s), ' ', 0};
+      DrawString(x, y, prefix);
+    } else {
+      SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::file);
+      // regular file, check the fype
+      int filesize = fs->getFileSize(fileIndex);
+      bool isSingleCycle = IS_SINGLE_CYCLE(filesize);
+      const char fileTypeSymbol = GLYPH(isSingleCycle ? char_file_cycle_s : char_file_file_s);
+
+      // Format the display name with appropriate prefix
+      const bool inUse = (inProjectSampleDir_ && viewData_->project_->SampleInUse(buffer));
+      const char usageSymbol = GLYPH(inUse ? char_symbol_indicatorFull_s : " ");
+      const char prefix[3] = {fileTypeSymbol, usageSymbol, 0};
+      DrawString(x, y, prefix);
+    }
+
+    // truncate filename to fit display width
+    while (displayName.size() < listWidth) {
+      displayName += " ";
+    }
+
+    if (displayName.size() > listWidth) {
+      displayName.resize(listWidth - 1);
+      displayName += char_indicator_ellipsis_s;
+    }
+
+    DrawString(x + 2, y, displayName.c_str());
+    y += 1;
+  }
+
+  // draw bottom menu
+  DrawBottomBar();
+
+  // draw scroll bar
+  drawScrollBar(SCREEN_WIDTH - 1, 2, pageSize, topIndex_, fileIndexList_.size());
 }
 
 void ImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {};
@@ -673,7 +663,7 @@ void ImportView::import() {
     // check if we had to truncate filename
     size_t nameLength = strlen(name);
     if (nameLength > MAX_INSTRUMENT_FILENAME_LENGTH) {
-      Trace::Log("PICOIMPORT", "Filename too long: %s (%zu chars, max is %d)", name, nameLength,
+      Trace::Log("IMPORT", "Filename too long: %s (%zu chars, max is %d)", name, nameLength,
                  MAX_INSTRUMENT_FILENAME_LENGTH);
       MessageBox *mb = MessageBox::Create(*this, "Sample name Truncated!", "Max filename length:24", MBBF_OK);
       DoModal(mb);
@@ -713,15 +703,14 @@ void ImportView::adjustPreviewVolume(int offset) {
 }
 
 bool ImportView::changeDirectory(FileSystem *fs, const char *name) {
-  if (strcmp(name, "..") == 0 && fs->isParentRoot()) {
-    Trace::Log("PICOIMPORT", "Detected top-level directory, navigating to samples root");
-    return fs->chdir(SAMPLES_LIB_DIR);
-  }
-
   if (!fs->chdir(name)) {
     Trace::Error("FAILED to chdir to %s", name);
     return false;
   }
+
+  // being in the project samples dir and the samples root means no going up
+  atLocalRoot_ = fs->isCurrent(SAMPLES_LIB_DIR) || inProjectSampleDir_;
+
   return true;
 }
 
@@ -732,7 +721,7 @@ void ImportView::enterDirectory(FileSystem *fs, const char *name) {
   if (strcmp(projName, name) == 0) {
     jumpToDirectory(fs, PROJECTS_DIR);
 
-    Trace::Log("PICOIMPORT", "NOT allowed to browse into current project sample directory");
+    Trace::Log("IMPORT", "NOT allowed to browse into current project sample directory");
     return;
   }
 
@@ -851,7 +840,8 @@ void ImportView::onConfirmRemoveProjectSample(View &, ModalView &dialog) {
 void ImportView::refreshFileIndexList(FileSystem *fs) {
   fs->list(&fileIndexList_, ".wav", false);
 
-  if (fs->isCurrentRoot() || inProjectSampleDir_) {
+  // remove .. from sample root dir to prevent leaving
+  if (atLocalRoot_) {
     for (auto it = fileIndexList_.begin(); it != fileIndexList_.end(); ++it) {
       char entryName[PFILENAME_SIZE];
       fs->getFileName(*it, entryName, PFILENAME_SIZE);

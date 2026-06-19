@@ -560,14 +560,27 @@ void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool 
   }
 }
 
+void View::DrawButton(int x, int y, const char *title, bool selected) {
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::Button::bg(selected));
+  DrawString(x, y, char_button_border_left_s);
+    
+  SetBackgroundColor(Theme::View::Button::bg(selected));
+  SetColor(Theme::View::Button::fg(selected));
+  DrawString(x + 1, y, title);
+
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::Button::bg(selected));
+  DrawString(x + 1 + strlen(title), y, char_button_border_right_s);
+}
 
 void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half = false) {
   // corners, top, right, bottom, left
-  const char *fullChars = char_filledHalfBorder_topLeft_s char_filledHalfBorder_topRight_s 
-      char_filledHalfBorder_bottomLeft_s char_filledHalfBorder_bottomRight_s char_block_full_s char_block_full_s char_block_full_s char_block_full_s;
-  const char *halfChars = char_filledBorder_topLeft_s char_filledBorder_topRight_s char_filledBorder_bottomLeft_s
-      char_filledBorder_bottomRight_s char_block_bottom_s char_block_left_s 
+  const char *halfChars = char_filledHalfBorder_topLeft_s char_filledHalfBorder_topRight_s 
+      char_filledHalfBorder_bottomLeft_s char_filledHalfBorder_bottomRight_s char_block_bottom_s char_block_left_s 
       char_block_top_s char_block_right_s;
+  const char *fullChars = char_filledBorder_topLeft_s char_filledBorder_topRight_s char_filledBorder_bottomLeft_s
+      char_filledBorder_bottomRight_s char_block_full_s char_block_full_s char_block_full_s char_block_full_s;
 
   const char *chars = half ? halfChars : fullChars;
 
@@ -606,7 +619,7 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
     return; // no scrollbar needed
   }
 
-  SetColor(Theme::View::fg);
+  SetColor(Theme::View::scrollbar);
 
   // Thumb size represents the ratio of visible items to total items
   uint16_t thumbSize = std::max(1, (height * height) / total);
