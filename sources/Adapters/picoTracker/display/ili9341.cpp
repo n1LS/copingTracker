@@ -9,11 +9,55 @@
  */
 
 #include "ili9341.h"
+#include "System/Console/Trace.h"
 #include "Adapters/picoTracker/platform/gpio.h"
+#include "hardware/dma.h"
 #include "pico/stdlib.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+// dma implementation *********************************************************
+
+static int dmaTxChannel;
+
+void ili9341_dma_init(void) {
+  dmaTxChannel = 1;
+
+  dma_channel_config cfg = dma_channel_get_default_config(dmaTxChannel);
+  channel_config_set_transfer_data_size(&cfg, DMA_SIZE_8);
+  channel_config_set_read_increment(&cfg, true);
+  channel_config_set_write_increment(&cfg, false);
+  // Use SPI TX DREQ - only transfer when SPI TX FIFO has space
+  channel_config_set_dreq(&cfg, DREQ_SPI1_TX);
+  dma_channel_configure(dmaTxChannel, &cfg, &spi_get_hw(DISPLAY_SPI)->dr, NULL, 0, false);
+}
+
+void ili9341_spi_flush_rx(void) {
+  while (spi_is_readable(DISPLAY_SPI)) {
+    (void)spi_get_hw(DISPLAY_SPI)->dr;
+  }
+}
+
+void ili9341_write_data_continuous_dma(const uint8_t *buffer, int bytes) {
+  ili9341_start_writing();
+
+  dma_channel_set_read_addr(dmaTxChannel, buffer, false);
+  dma_channel_set_trans_count(dmaTxChannel, bytes, true);
+
+  while (dma_channel_is_busy(dmaTxChannel)) {
+    // Wait for DMA to complete
+  }
+
+  // Drain any remaining SPI data and wait for shift register to empty
+  while (spi_is_busy(DISPLAY_SPI)) {
+    // Wait for SPI to finish
+  }
+
+  ili9341_stop_writing();  
+}
+
+// SPI and general setup
 
 static inline void cs_select() {
   gpio_put(DISPLAY_CS, 0);
@@ -149,6 +193,8 @@ void ili9341_init() {
   ili9341_command_param(0x3f); // end page -> 319
 
   ili9341_set_command(ILI9341_RAMWR);
+
+  ili9341_dma_init();
 }
 
 uint16_t swap_bytes(uint16_t color) {

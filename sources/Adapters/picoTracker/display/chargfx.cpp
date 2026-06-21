@@ -181,7 +181,7 @@ void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) 
 
   // Write the buffer for each column
   for (uint16_t i = 0; i < display_h; i++) {
-    ili9341_write_data_continuous((uint8_t *)buffer, display_w * sizeof(uint16_t));
+    ili9341_write_data_continuous_dma((uint8_t *)buffer, display_w * sizeof(uint16_t));
   }
 
   ili9341_stop_writing();
@@ -205,9 +205,8 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
   // page address set
   ili9341_transmit32(ILI9341_PASET, screen_x, screen_x + screen_width - 1);
 
-  // start writing
+  // RAMWR command with CS held low for continuous write
   ili9341_set_command(ILI9341_RAMWR);
-
   ili9341_start_writing();
 
   const font_t *font = fonts[ui_font_index];
@@ -233,8 +232,10 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
         }
       }
     }
-    ili9341_write_data_continuous((uint8_t *)buffer, CHAR_WIDTH * screen_height * sizeof(int16_t));
+    // Write without toggling CS (continuous mode)
+    ili9341_write_data_continuous((uint8_t *)buffer, CHAR_WIDTH * screen_height * sizeof(uint16_t));
   }
+  
   ili9341_stop_writing();
 }
 
