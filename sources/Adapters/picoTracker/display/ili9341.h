@@ -15,6 +15,8 @@
 #include "pico/stdlib.h"
 #include <stdint.h>
 
+#define dmaTxChannel 1
+
 #define ILI9341_TFTWIDTH 240  // ILI9341 max TFT width
 #define ILI9341_TFTHEIGHT 320 // ILI9341 max TFT height
 
@@ -124,8 +126,9 @@ void ili9341_write_data(const uint8_t *buffer, int bytes);
 void ili9341_start_writing();
 void ili9341_stop_writing();
 void ili9341_write_data_continuous(const uint8_t *buffer, int bytes);
-void ili9341_write_data_continuous_dma(const uint8_t *buffer, int bytes);
 void ili9341_transmit32(uint8_t command, uint16_t word1, uint16_t word2);
 void ili9341_spi_flush_rx(void);
+void ili9341_start_dma_transfer(const uint8_t *buffer, int bytes);
+void ili9341_wait_dma();
 
 #endif

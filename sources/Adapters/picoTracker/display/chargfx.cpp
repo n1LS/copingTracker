@@ -10,9 +10,11 @@
 
 #include "chargfx.h"
 #include "font.h"
+#include "gpio.h"
 #include "hardware/spi.h"
 #include "ili9341.h"
 #include "pico/stdlib.h"
+#include "hardware/dma.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -30,7 +32,11 @@ static int cursor_y = 0;
 
 static uint8_t screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 static uint8_t colors[TEXT_HEIGHT * TEXT_WIDTH] = {0};
-static uint16_t buffer[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
+static uint16_t buffer1[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
+static uint16_t buffer2[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
+
+uint16_t *buffer = buffer1;
+uint16_t *buffer_dma = buffer2;
 
 static uint8_t ui_font_index = 0;
 
@@ -181,7 +187,7 @@ void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) 
 
   // Write the buffer for each column
   for (uint16_t i = 0; i < display_h; i++) {
-    ili9341_write_data_continuous_dma((uint8_t *)buffer, display_w * sizeof(uint16_t));
+    ili9341_write_data_continuous((uint8_t *)buffer, display_w * sizeof(uint16_t));
   }
 
   ili9341_stop_writing();
@@ -199,43 +205,68 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
   uint16_t screen_width = width * CHAR_WIDTH;
   uint16_t screen_height = height * CHAR_HEIGHT;
 
-  // column address set
   ili9341_transmit32(ILI9341_CASET, screen_y, screen_y + screen_height - 1);
 
-  // page address set
   ili9341_transmit32(ILI9341_PASET, screen_x, screen_x + screen_width - 1);
 
-  // RAMWR command with CS held low for continuous write
   ili9341_set_command(ILI9341_RAMWR);
   ili9341_start_writing();
 
   const font_t *font = fonts[ui_font_index];
 
+  bool haveDmaInFlight = false;
+
   for (int page = x; page < x + width; page++) {
-    // create one column of screen information
     uint16_t *buffer_idx = buffer;
 
     for (int bit = CHAR_WIDTH - 1; bit >= 0; bit--) {
       uint16_t mask = 1 << (CHAR_WIDTH - 1 - bit);
+
       for (int col = y + height - 1; col >= y; col--) {
         int16_t idx = col * TEXT_WIDTH + page;
+
         uint8_t character = screen[idx];
+
         uint16_t fg_color = palette[colors[idx] >> 4];
         uint16_t bg_color = palette[colors[idx] & 0xf];
 
         const uint16_t *pixel_data = (*font)[character];
 
-        // draw the character into the buffer
         for (int j = CHAR_HEIGHT - 1; j >= 0; j--) {
           uint16_t pix = pixel_data[j];
+
           *buffer_idx++ = (pix & mask) ? fg_color : bg_color;
         }
       }
     }
-    // Write without toggling CS (continuous mode)
-    ili9341_write_data_continuous((uint8_t *)buffer, CHAR_WIDTH * screen_height * sizeof(uint16_t));
+
+    if (haveDmaInFlight) {
+      while (dma_channel_is_busy(dmaTxChannel)) {
+      }
+
+      while (spi_is_busy(DISPLAY_SPI)) {
+      }
+    }
+
+    dma_channel_set_read_addr(dmaTxChannel, buffer, false);
+
+    dma_channel_set_trans_count(dmaTxChannel, CHAR_WIDTH * screen_height * sizeof(uint16_t), true);
+
+    haveDmaInFlight = true;
+
+    uint16_t *tmp = buffer;
+    buffer = buffer_dma;
+    buffer_dma = tmp;
   }
-  
+
+  if (haveDmaInFlight) {
+    while (dma_channel_is_busy(dmaTxChannel)) {
+    }
+
+    while (spi_is_busy(DISPLAY_SPI)) {
+    }
+  }
+
   ili9341_stop_writing();
 }
 
