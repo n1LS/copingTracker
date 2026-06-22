@@ -344,16 +344,14 @@ void SampleEditorView::addAllFields() {
   actionField_.emplace_back("Save", FourCC::ActionSave, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
+  position.x_ += 5;
 
   // load & save button
-  position.x_ += 5;
   if (!viewData_->isShowingSampleEditorProjectPool) {
-    actionField_.emplace_back("Save&Load", FourCC::ActionLoadAndSave, position);
+    actionField_.emplace_back("Save & Load", FourCC::ActionLoadAndSave, position);
     fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
     (*actionField_.rbegin()).AddObserver(*this);
     position.x_ += 12;
-  } else {
-    position.x_ += 7;
   }
 
   // discard button
@@ -1274,8 +1272,9 @@ void SampleEditorView::navigateToView(ViewType vt) {
   isPlaying_ = false;
   playKeyHeld_ = false;
   discardWorkingCopy();
+  clearWaveformRegion();
 
-  Navigate(VT_SONG);
+  Navigate(vt);
 }
 
 void SampleEditorView::updateSampleParameters() {

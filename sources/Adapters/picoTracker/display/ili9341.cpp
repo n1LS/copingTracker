@@ -21,13 +21,13 @@
 
 void ili9341_dma_init(void) {
 
-  dma_channel_config cfg = dma_channel_get_default_config(dmaTxChannel);
+  dma_channel_config cfg = dma_channel_get_default_config(DISPLAY_DMA_CH);
   channel_config_set_transfer_data_size(&cfg, DMA_SIZE_8);
   channel_config_set_read_increment(&cfg, true);
   channel_config_set_write_increment(&cfg, false);
   // Use SPI TX DREQ - only transfer when SPI TX FIFO has space
   channel_config_set_dreq(&cfg, DREQ_SPI1_TX);
-  dma_channel_configure(dmaTxChannel, &cfg, &spi_get_hw(DISPLAY_SPI)->dr, NULL, 0, false);
+  dma_channel_configure(DISPLAY_DMA_CH, &cfg, &spi_get_hw(DISPLAY_SPI)->dr, NULL, 0, false);
 }
 
 void ili9341_spi_flush_rx(void) {
@@ -43,7 +43,7 @@ void ili9341_wait_dma() {
     return;
   }
 
-  while (dma_channel_is_busy(dmaTxChannel)) {
+  while (dma_channel_is_busy(DISPLAY_DMA_CH)) {
   }
 
   while (spi_is_busy(DISPLAY_SPI)) {
@@ -53,8 +53,8 @@ void ili9341_wait_dma() {
 }
 
 void ili9341_start_dma_transfer(const uint8_t *buffer, int bytes) {
-  dma_channel_set_read_addr(dmaTxChannel, buffer, false);
-  dma_channel_set_trans_count(dmaTxChannel, bytes, true);
+  dma_channel_set_read_addr(DISPLAY_DMA_CH, buffer, false);
+  dma_channel_set_trans_count(DISPLAY_DMA_CH, bytes, true);
 
   dmaActive = true;
 }

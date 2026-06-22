@@ -742,7 +742,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
 
   isDirty_ = false;
-  if ((mask & BM_EDIT) && (mask & BM_ENTER)) {
+  if (mask == (BM_EDIT | BM_ENTER)) {
     int i = viewData_->currentInstrumentID_;
     InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
     I_Instrument *instr = bank->GetInstrument(i);

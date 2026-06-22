@@ -10,6 +10,7 @@
  */
 
 #include "Status.h"
+#include "Application/AppWindow.h"
 #include <System/Console/nanoprintf.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -43,4 +44,11 @@ void Status::SetMultiLine(const char *fmt, ...) {
   status->PrintMultiLine(buffer);
 
   va_end(args);
+}
+
+void Status::Flush() {
+  extern AppWindow *instance;
+  if (instance) {
+    instance->Flush();
+  }
 }

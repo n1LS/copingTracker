@@ -151,7 +151,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   UIField *focus = GetFocus();
   focus->ClearFocus();
   focus->Draw(w_);
-    focus->SetFocus();
+  focus->SetFocus();
 
   // Handle brightness changes directly
   if (fourcc == FourCC::VarBacklightLevel) {

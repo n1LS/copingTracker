@@ -78,11 +78,13 @@ public:
 
   static GUIColor colorPalette_[16];
 
+public:
+  void Flush();
+
 protected: // GUIWindow implementation
   virtual bool onEvent(GUIEvent &event);
   virtual void onUpdate(bool redraw);
   virtual void LayoutChildren();
-  virtual void Flush();
   virtual void Redraw() {};
   virtual void AnimationUpdate();
 

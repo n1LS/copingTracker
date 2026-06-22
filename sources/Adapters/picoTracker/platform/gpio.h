@@ -19,6 +19,7 @@
 
 // Display
 #define DISPLAY_SPI spi1
+#define DISPLAY_DMA_CH 1
 
 #define DISPLAY_CS 20
 #define DISPLAY_DC 21

@@ -805,4 +805,4 @@ void TableView::AnimationUpdate() {
   }
 
   // Flush the window to ensure changes are displayed
-  }
+}

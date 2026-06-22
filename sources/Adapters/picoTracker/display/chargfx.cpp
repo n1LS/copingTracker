@@ -197,8 +197,6 @@ void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) 
   ili9341_command_param(LCD_MADCTL_DEFAULT);
 }
 
-#define WAIT_FOR_DMA if (haveDmaInFlight) { while (dma_channel_is_busy(dmaTxChannel)) {}; while (spi_is_busy(DISPLAY_SPI)) {}; }
-
 inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   assert(height <= BUFFER_CHARS);
 
@@ -218,45 +216,51 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
   bool haveDmaInFlight = false;
 
   for (int page = x; page < x + width; page++) {
-      uint16_t *buffer_idx = buffer;
+    uint16_t *buffer_idx = buffer;
 
-      for (int col = y + height - 1; col >= y; col--) {
-          int idx = col * TEXT_WIDTH + page;
+    for (int col = y + height - 1; col >= y; col--) {
+      int idx = col * TEXT_WIDTH + page;
 
-          uint8_t character = screen[idx];
+      uint8_t character = screen[idx];
+      uint16_t fg = palette[colors[idx] >> 4];
+      uint16_t bg = palette[colors[idx] & 0x0f];
 
-          uint16_t fg = palette[colors[idx] >> 4];
-          uint16_t bg = palette[colors[idx] & 0x0f];
+      const uint16_t *glyph = (*font)[character];
 
-          const uint16_t *glyph = (*font)[character];
+      for (int glyphY = 0; glyphY < CHAR_HEIGHT; glyphY++) {
+        uint16_t pix = glyph[glyphY];
 
-          for (int glyphY = 0; glyphY < CHAR_HEIGHT; glyphY++) {
-              uint16_t pix = glyph[glyphY];
-
-              for (int glyphX = CHAR_WIDTH - 1; glyphX >= 0; glyphX--) {
-                  uint16_t mask = 1u << glyphX;
-                  *buffer_idx++ = (pix & mask) ? bg : fg;
-              }
-          }
+        for (int glyphX = CHAR_WIDTH - 1; glyphX >= 0; glyphX--) {
+          uint16_t mask = 1u << glyphX;
+          *buffer_idx++ = (pix & mask) ? bg : fg;
+        }
       }
+    }
 
-      WAIT_FOR_DMA;
+    if (haveDmaInFlight) {
+      while (dma_channel_is_busy(DISPLAY_DMA_CH)) {
+      }
+      while (spi_is_busy(DISPLAY_SPI)) {
+      }
+    }
 
-      dma_channel_set_read_addr(dmaTxChannel, buffer, false);
+    dma_channel_set_read_addr(DISPLAY_DMA_CH, buffer, false);
 
-      dma_channel_set_trans_count(
-          dmaTxChannel,
-          CHAR_WIDTH * screen_height * sizeof(uint16_t),
-          true);
+    dma_channel_set_trans_count(DISPLAY_DMA_CH, CHAR_WIDTH * screen_height * sizeof(uint16_t), true);
 
-      haveDmaInFlight = true;
+    haveDmaInFlight = true;
 
-      uint16_t *tmp = buffer;
-      buffer = buffer_dma;
-      buffer_dma = tmp;
+    uint16_t *tmp = buffer;
+    buffer = buffer_dma;
+    buffer_dma = tmp;
   }
 
-  WAIT_FOR_DMA;
+  if (haveDmaInFlight) {
+    while (dma_channel_is_busy(DISPLAY_DMA_CH)) {
+    }
+    while (spi_is_busy(DISPLAY_SPI)) {
+    }
+  }
 
   ili9341_stop_writing();
 }

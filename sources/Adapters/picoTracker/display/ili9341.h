@@ -15,7 +15,7 @@
 #include "pico/stdlib.h"
 #include <stdint.h>
 
-#define dmaTxChannel 1
+#define DISPLAY_DMA_CH 1
 
 #define ILI9341_TFTWIDTH 240  // ILI9341 max TFT width
 #define ILI9341_TFTHEIGHT 320 // ILI9341 max TFT height

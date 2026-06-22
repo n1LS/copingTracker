@@ -20,6 +20,7 @@ public:
   virtual void PrintMultiLine(char *) = 0;
   static void Set(const char *fmt, ...);
   static void SetMultiLine(const char *fmt, ...);
+  static void Flush();
 };
 
 #endif
