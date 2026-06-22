@@ -11,10 +11,10 @@
 #include "chargfx.h"
 #include "font.h"
 #include "gpio.h"
+#include "hardware/dma.h"
 #include "hardware/spi.h"
 #include "ili9341.h"
 #include "pico/stdlib.h"
-#include "hardware/dma.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -197,6 +197,8 @@ void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) 
   ili9341_command_param(LCD_MADCTL_DEFAULT);
 }
 
+#define WAIT_FOR_DMA if (haveDmaInFlight) { while (dma_channel_is_busy(dmaTxChannel)) {}; while (spi_is_busy(DISPLAY_SPI)) {}; }
+
 inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   assert(height <= BUFFER_CHARS);
 
@@ -206,7 +208,6 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
   uint16_t screen_height = height * CHAR_HEIGHT;
 
   ili9341_transmit32(ILI9341_CASET, screen_y, screen_y + screen_height - 1);
-
   ili9341_transmit32(ILI9341_PASET, screen_x, screen_x + screen_width - 1);
 
   ili9341_set_command(ILI9341_RAMWR);
@@ -217,55 +218,45 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
   bool haveDmaInFlight = false;
 
   for (int page = x; page < x + width; page++) {
-    uint16_t *buffer_idx = buffer;
-
-    for (int bit = CHAR_WIDTH - 1; bit >= 0; bit--) {
-      uint16_t mask = 1 << (CHAR_WIDTH - 1 - bit);
+      uint16_t *buffer_idx = buffer;
 
       for (int col = y + height - 1; col >= y; col--) {
-        int16_t idx = col * TEXT_WIDTH + page;
+          int idx = col * TEXT_WIDTH + page;
 
-        uint8_t character = screen[idx];
+          uint8_t character = screen[idx];
 
-        uint16_t fg_color = palette[colors[idx] >> 4];
-        uint16_t bg_color = palette[colors[idx] & 0xf];
+          uint16_t fg = palette[colors[idx] >> 4];
+          uint16_t bg = palette[colors[idx] & 0x0f];
 
-        const uint16_t *pixel_data = (*font)[character];
+          const uint16_t *glyph = (*font)[character];
 
-        for (int j = CHAR_HEIGHT - 1; j >= 0; j--) {
-          uint16_t pix = pixel_data[j];
+          for (int glyphY = 0; glyphY < CHAR_HEIGHT; glyphY++) {
+              uint16_t pix = glyph[glyphY];
 
-          *buffer_idx++ = (pix & mask) ? fg_color : bg_color;
-        }
-      }
-    }
-
-    if (haveDmaInFlight) {
-      while (dma_channel_is_busy(dmaTxChannel)) {
+              for (int glyphX = CHAR_WIDTH - 1; glyphX >= 0; glyphX--) {
+                  uint16_t mask = 1u << glyphX;
+                  *buffer_idx++ = (pix & mask) ? bg : fg;
+              }
+          }
       }
 
-      while (spi_is_busy(DISPLAY_SPI)) {
-      }
-    }
+      WAIT_FOR_DMA;
 
-    dma_channel_set_read_addr(dmaTxChannel, buffer, false);
+      dma_channel_set_read_addr(dmaTxChannel, buffer, false);
 
-    dma_channel_set_trans_count(dmaTxChannel, CHAR_WIDTH * screen_height * sizeof(uint16_t), true);
+      dma_channel_set_trans_count(
+          dmaTxChannel,
+          CHAR_WIDTH * screen_height * sizeof(uint16_t),
+          true);
 
-    haveDmaInFlight = true;
+      haveDmaInFlight = true;
 
-    uint16_t *tmp = buffer;
-    buffer = buffer_dma;
-    buffer_dma = tmp;
+      uint16_t *tmp = buffer;
+      buffer = buffer_dma;
+      buffer_dma = tmp;
   }
 
-  if (haveDmaInFlight) {
-    while (dma_channel_is_busy(dmaTxChannel)) {
-    }
-
-    while (spi_is_busy(DISPLAY_SPI)) {
-    }
-  }
+  WAIT_FOR_DMA;
 
   ili9341_stop_writing();
 }
@@ -273,44 +264,27 @@ inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t
 void chargfx_draw_changed() {
   PROFILE_FUNCTION();
 
-  for (int idx = 0; idx < TEXT_HEIGHT * TEXT_WIDTH; idx++) {
-    if (changed[idx]) {
-      changed[idx] = false;
-      // check adjacent in order to find bigger rectangle
-      uint16_t y = idx / TEXT_WIDTH;
-      uint16_t x = idx - (TEXT_WIDTH * y);
+  for (uint8_t y = 0; y < TEXT_HEIGHT; y++) {
+    int start = -1;
 
-      int height = 1;
-      // first pass tests the height
-      for (int probe_y = y + 1; probe_y < TEXT_HEIGHT; probe_y++) {
-        int probe_idx = probe_y * TEXT_WIDTH + x;
-        if (changed[probe_idx]) {
-          changed[probe_idx] = false;
-          height++;
-          continue;
-        }
-        break;
-      }
+    for (uint8_t x = 0; x < TEXT_WIDTH; x++) {
+      int idx = y * TEXT_WIDTH + x;
 
-      int16_t width = 1;
-      // having the height, we can test every subsequent column
-      for (int probe_x = x + 1; probe_x < TEXT_WIDTH; probe_x++) {
-        for (int probe_y = y; probe_y < y + height; probe_y++) {
-          // if we don't get to max height, then abort
-          int probe_idx = probe_y * TEXT_WIDTH + probe_x;
-          if (!changed[probe_idx]) {
-            // undo last column
-            for (int undo_y = y; undo_y < probe_y; undo_y++) {
-              changed[undo_y * TEXT_WIDTH + probe_x] = true;
-            }
-            goto end;
-          }
-          changed[probe_idx] = false;
+      if (changed[idx]) {
+        if (start < 0) {
+          start = x;
         }
-        width++;
+
+        changed[idx] = false;
+      } else if (start >= 0) {
+        chargfx_draw_region(start, y, x - start, 1);
+
+        start = -1;
       }
-    end:
-      chargfx_draw_region(x, y, width, height);
+    }
+
+    if (start >= 0) {
+      chargfx_draw_region(start, y, TEXT_WIDTH - start, 1);
     }
   }
 }

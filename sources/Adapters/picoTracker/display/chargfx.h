@@ -18,7 +18,7 @@
 #define TEXT_HEIGHT 24
 #define CHAR_HEIGHT 10
 #define CHAR_WIDTH 10
-#define BUFFER_CHARS 12
+#define BUFFER_CHARS 24
 
 void chargfx_init();
 void chargfx_clear();

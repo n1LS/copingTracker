@@ -54,15 +54,21 @@ def process_image(img_path, threshold, start, end):
         raise SystemExit(f"ERROR: image size must be {expected_w}x{expected_h}. Got {w}x{h}")
     pixels = im.load()
 
-    glyphs = []  # list of glyphs, each glyph is list of 10 uint16 rows
+    glyphs = []
+
     for gy in range(GLYPH_ROWS):
         for gx in range(GLYPH_COLS):
             glyph_rows = []
             left = gx * GLYPH_W
             top = gy * GLYPH_H
-            for row in range(GLYPH_H):
-                row_pixels = [pixels[left + col, top + row] for col in range(GLYPH_W)]
-                row_val = glyph_row_to_uint16(row_pixels, threshold)
+            for out_row in range(GLYPH_W):
+                row_val = 0
+                for out_col in range(GLYPH_H):
+                    src_x = left + out_row
+                    src_y = top + (GLYPH_H - 1 - out_col)
+                    pixel = pixels[src_x, src_y]
+                    if pixel > threshold:
+                        row_val |= (1 << (GLYPH_H - 1 - out_col))
                 glyph_rows.append(row_val)
             glyphs.append(glyph_rows)
 
