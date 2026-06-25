@@ -357,6 +357,8 @@ void View::DoModal(ModalView *view, ModalViewCallback cb) {
   modalView_->OnFocus();
   modalViewCallback_ = cb;
   isDirty_ = true;
+  // Force immediate flush to ensure modal dialog is displayed
+  ((AppWindow &)w_).Flush();
 }
 
 void View::DismissModal() {

@@ -687,15 +687,8 @@ void ImportView::adjustPreviewVolume(int offset) {
     return;
   }
 
-  // Get current value and apply offset
   int newVolume = v->GetInt() + offset;
-
-  // Clamp volume to valid 0-99 as per other channels
-  newVolume = newVolume > 99 ? 99 : newVolume;
-  newVolume = newVolume < 0 ? 0 : newVolume;
-
-  // Set the new value
-  v->SetInt(newVolume);
+  v->SetInt(newVolume > 99 ? 99 : (newVolume < 0 ? 0 : newVolume));
 
   // Mark the view as dirty to update the status bar with the new volume
   isDirty_ = true;
@@ -769,7 +762,6 @@ void ImportView::jumpToDirectory(FileSystem *fs, const char *name) {
 }
 
 void ImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample) {
-
   viewData_->sampleEditorFilename = filename;
   viewData_->isShowingSampleEditorProjectPool = isProjectSample;
 

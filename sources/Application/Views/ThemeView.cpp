@@ -292,7 +292,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   UIField *focus = GetFocus();
   focus->ClearFocus();
   focus->Draw(w_);
-    focus->SetFocus();
+  focus->SetFocus();
   focus->Draw(w_);
   isDirty_ = true;
 

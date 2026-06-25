@@ -10,10 +10,56 @@
 
 #include "ili9341.h"
 #include "Adapters/picoTracker/platform/gpio.h"
+#include "System/Console/Trace.h"
+#include "hardware/dma.h"
 #include "pico/stdlib.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+// dma implementation *********************************************************
+
+void ili9341_dma_init(void) {
+
+  dma_channel_config cfg = dma_channel_get_default_config(DISPLAY_DMA_CH);
+  channel_config_set_transfer_data_size(&cfg, DMA_SIZE_8);
+  channel_config_set_read_increment(&cfg, true);
+  channel_config_set_write_increment(&cfg, false);
+  // Use SPI TX DREQ - only transfer when SPI TX FIFO has space
+  channel_config_set_dreq(&cfg, DREQ_SPI1_TX);
+  dma_channel_configure(DISPLAY_DMA_CH, &cfg, &spi_get_hw(DISPLAY_SPI)->dr, NULL, 0, false);
+}
+
+void ili9341_spi_flush_rx(void) {
+  while (spi_is_readable(DISPLAY_SPI)) {
+    (void)spi_get_hw(DISPLAY_SPI)->dr;
+  }
+}
+
+static bool dmaActive = false;
+
+void ili9341_wait_dma() {
+  if (!dmaActive) {
+    return;
+  }
+
+  while (dma_channel_is_busy(DISPLAY_DMA_CH)) {
+  }
+
+  while (spi_is_busy(DISPLAY_SPI)) {
+  }
+
+  dmaActive = false;
+}
+
+void ili9341_start_dma_transfer(const uint8_t *buffer, int bytes) {
+  dma_channel_set_read_addr(DISPLAY_DMA_CH, buffer, false);
+  dma_channel_set_trans_count(DISPLAY_DMA_CH, bytes, true);
+
+  dmaActive = true;
+}
+
+// SPI and general setup
 
 static inline void cs_select() {
   gpio_put(DISPLAY_CS, 0);
@@ -149,6 +195,8 @@ void ili9341_init() {
   ili9341_command_param(0x3f); // end page -> 319
 
   ili9341_set_command(ILI9341_RAMWR);
+
+  ili9341_dma_init();
 }
 
 uint16_t swap_bytes(uint16_t color) {

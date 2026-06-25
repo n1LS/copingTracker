@@ -257,8 +257,9 @@ void gfx_draw_changed() {
 
       int16_t width = 1;
       // having the height, we can test every subsequent column
-      for (int probe_x = x + 1; probe_x < TEXT_WIDTH; probe_x++) {
-        for (int probe_y = y; probe_y < y + height; probe_y++) {
+      for (int probe_y = y; probe_y < y + height; probe_y++) {
+        for (int probe_x = x + 1; probe_x < TEXT_WIDTH; probe_x++) {
+
           // if we don't get to max height, then abort
           int probe_idx = probe_y * TEXT_WIDTH + probe_x;
 
@@ -276,18 +277,6 @@ void gfx_draw_changed() {
       }
     end:
       gfx_draw_region(x, y, width, height);
-    }
-  }
-}
-
-void gfx_draw_changed_simple() {
-  // This method is better (faster) for fewer characters changed
-  for (int idx = 0; idx < TEXT_HEIGHT * TEXT_WIDTH; idx++) {
-    if (changed[idx]) {
-      changed[idx] = false;
-      uint16_t y = idx / TEXT_WIDTH;
-      uint16_t x = idx - (TEXT_WIDTH * y);
-      gfx_draw_region(x, y, 1, 1);
     }
   }
 }

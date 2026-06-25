@@ -47,6 +47,7 @@ void SamplePool::updateStatus(uint32_t index, uint32_t total, const char *messag
   fillProgressBar(index, total, &progressBar);
   Status::SetMultiLine("%s %.19s" char_indicator_ellipsis_s " \n \n %s %3d%%", message, importName, progressBar,
                        static_cast<int>(percentage));
+  Status::Flush();
 }
 
 void SamplePool::Load(const char *projectName) {
@@ -173,6 +174,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   projectSamplePath.append("/" PROJECT_SAMPLES_DIR "/");
   projectSamplePath.append(projSampleFilename);
   Status::SetMultiLine("Loading %s->\n%s", name, projSampleFilename);
+  Status::Flush();
 
   auto fout = FileSystem::GetInstance()->Open(projectSamplePath.c_str(), "w");
   if (!fout) {

@@ -776,7 +776,7 @@ void ChainView::AnimationUpdate() {
   }
 
   // Flush the window to ensure changes are displayed
-  }
+}
 
 void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
