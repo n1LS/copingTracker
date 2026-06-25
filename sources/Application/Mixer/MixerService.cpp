@@ -45,7 +45,7 @@ bool MixerService::Init() {
 
   char buffer[5];
   for (int i = 0; i < MAX_BUS_COUNT; i++) {
-    hex2char(i, buffer);
+    byteToHexString(i, buffer);
     bus_[i].SetName(etl::string<12>(buffer));
     master_.AddModule(bus_[i]);
     master_.SetName("Master");

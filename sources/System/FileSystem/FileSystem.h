@@ -46,7 +46,6 @@ public:
   virtual PicoFileType getFileType(int index) = 0;
   virtual bool isParentRoot() = 0;
   virtual bool isCurrentRoot() = 0;
-  virtual bool isCurrent(const char *path) = 0;
   virtual bool DeleteFile(const char *name) = 0;
   virtual bool DeleteDir(const char *name) = 0;
   // Optional batching hook for filesystem implementations that cache listings.

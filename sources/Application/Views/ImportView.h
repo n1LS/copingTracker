@@ -38,7 +38,7 @@ public:
 protected:
   void enterDirectory(FileSystem *fs, const char *name);
   void goToParentDirectory(FileSystem *fs);
-  void jumpToDirectory(FileSystem *fs, const char *name);
+  void jumpToDirectory(FileSystem *fs, const char *name, bool pushToStack = false);
   void warpToNextSample(bool goUp);
   void import();
   void preview(char *name);

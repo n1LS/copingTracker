@@ -129,7 +129,7 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
     // EDIT+LEFT: go to parent directory within the import file browser.
     // NAV+LEFT remains reserved for leaving the ImportView entirely.
-    if ((mask & BM_EDIT) && (mask & BM_LEFT) && !(mask & BM_NAV) && !inProjectSampleDir_) {
+    if (mask == (BM_EDIT | BM_LEFT) && !atLocalRoot_) {
       goToParentDirectory(fs);
       isDirty_ = true;
       return;
@@ -701,7 +701,10 @@ bool ImportView::changeDirectory(FileSystem *fs, const char *name) {
   }
 
   // being in the project samples dir and the samples root means no going up
-  atLocalRoot_ = fs->isCurrent(SAMPLES_LIB_DIR) || inProjectSampleDir_;
+  atLocalRoot_ = (dirIndexStack_.size() == 0) || inProjectSampleDir_;
+
+
+  refreshFileIndexList(fs);
 
   return true;
 }
@@ -717,24 +720,11 @@ void ImportView::enterDirectory(FileSystem *fs, const char *name) {
     return;
   }
 
-  if (dirIndexStack_.full()) {
-    Trace::Error("ImportView directory stack overflow at depth %d", DirectoryIndexStackDepth);
-    char message[SCREEN_WIDTH];
-    npf_snprintf(message, sizeof(message), "Max depth is %d", DirectoryIndexStackDepth);
-    MessageBox *mb = MessageBox::Create(*this, "Can't enter folder", message, MBBF_OK);
-    DoModal(mb);
-    return;
-  }
-
-  uint8_t savedIndex = static_cast<uint8_t>(currentIndex_);
   if (!changeDirectory(fs, name)) {
     return;
   }
 
-  dirIndexStack_.push(savedIndex);
-  topIndex_ = 0;
-  currentIndex_ = 0;
-  refreshFileIndexList(fs);
+  jumpToDirectory(fs, ".", true);
 }
 
 void ImportView::goToParentDirectory(FileSystem *fs) {
@@ -750,14 +740,27 @@ void ImportView::goToParentDirectory(FileSystem *fs) {
   refreshFileIndexList(fs);
 }
 
-void ImportView::jumpToDirectory(FileSystem *fs, const char *name) {
+void ImportView::jumpToDirectory(FileSystem *fs, const char *name, bool pushToStack) {
   if (!changeDirectory(fs, name)) {
     return;
   }
 
-  dirIndexStack_.clear();
+  if (pushToStack) {
+    if (dirIndexStack_.full()) {
+      Trace::Error("ImportView directory stack overflow at depth %d", DirectoryIndexStackDepth);
+      char message[SCREEN_WIDTH];
+      npf_snprintf(message, sizeof(message), "Max depth is %d", DirectoryIndexStackDepth);
+      MessageBox *mb = MessageBox::Create(*this, "Can't enter folder", message, MBBF_OK);
+      DoModal(mb);
+      return;
+    }
+    dirIndexStack_.push(static_cast<uint8_t>(currentIndex_));
+  } else {
+    dirIndexStack_.clear();
+  }
   topIndex_ = 0;
   currentIndex_ = 0;
+
   refreshFileIndexList(fs);
 }
 

@@ -81,8 +81,7 @@ void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
         if (fs->getFileType(fileIndex) == PFT_DIR && strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
           setCurrentFolder(fs, name);
           isDirty_ = true;
-          topIndex_ = 0; // need to reset when entering a dir as prev dir may
-                         // have been already scrolled down
+          topIndex_ = 0; // need to reset when entering a dir as prev dir may have been already scrolled down
         }
       }
     }
@@ -116,28 +115,43 @@ void InstrumentImportView::DrawView() {
   // than buffer but instead returns empty string in buffer :-(
   char buffer[PFILENAME_SIZE];
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
-    SetColor(Theme::View::fg);
-    SetBackgroundColor(Theme::View::bg);
+    bool isSelected = (i == currentIndex_);
 
-    if (i == currentIndex_) {
-      SwapColors();
+    if (isSelected) {
+      SetBackgroundColor(Theme::View::Selection::bg);
+    } else {
+      SetBackgroundColor(Theme::View::bg);
     }
 
     memset(buffer, '\0', sizeof(buffer));
     unsigned fileIndex = fileIndexList_[i];
     fs->getFileName(fileIndex, buffer, PFILENAME_SIZE);
-
-    if (fs->getFileType(fileIndex) == PFT_DIR) {
+    
+    char symbol = GLYPH(char_file_instrument_s);
+    
+    if (fs->getFileType(fileIndex) == PFT_DIR ) {
       // Draw a directory
-      DrawString(x, y, "[");
-      DrawString(x + 1, y, buffer);
-      DrawString(x + strlen(buffer) + 1, y, "]");
+      symbol = GLYPH(strcmp(buffer, "..") == 0 ? char_symbol_return_s : char_file_folder_s);
+      SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::directory);
     } else {
-      // Draw a file
-      DrawString(x, y, buffer);
+      SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::file);
     }
+    
+    // Draw a file
+    char text[SCREEN_WIDTH];
+    npf_snprintf(text, sizeof(text), "%c %-*s", symbol, SCREEN_WIDTH - 5, buffer);
+    DrawString(x, y, text);
+
+    if (isSelected) {
+      SwapColors();
+      DrawString(0, y, char_button_border_left_s);
+      DrawString(SCREEN_WIDTH - 2, y, char_button_border_right_s);
+    }
+
     y++;
   }
+
+  drawScrollBar(SCREEN_WIDTH - 1, 2, LIST_PAGE_SIZE, currentIndex_, fileIndexList_.size());
 }
 
 void InstrumentImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {

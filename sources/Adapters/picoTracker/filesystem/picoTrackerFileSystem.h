@@ -39,7 +39,6 @@ public:
   virtual PicoFileType getFileType(int index) override;
   virtual bool isParentRoot() override;
   virtual bool isCurrentRoot() override;
-  virtual bool isCurrent(const char *path) override;
   virtual bool DeleteFile(const char *name) override;
   virtual bool DeleteDir(const char *name) override;
   virtual bool exists(const char *path) override;

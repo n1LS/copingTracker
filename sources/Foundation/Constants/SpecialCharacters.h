@@ -162,6 +162,7 @@
 #define char_file_no_sd_s "\xD3"
 #define char_file_cycle_s "\xD4"
 #define char_symbol_return_s "\xD5"
+#define char_file_instrument_s "\xD6"
 
 #define string_battery_charging                                                                                        \
   char_battery_left_s char_battery_charging1_s char_battery_charging2_s char_battery_right_s

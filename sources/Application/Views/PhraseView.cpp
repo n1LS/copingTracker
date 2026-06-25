@@ -1189,7 +1189,7 @@ void PhraseView::DrawView() {
       } else if (invalidSlice) {
         npf_snprintf(buffer, sizeof(buffer), "S**");
       } else {
-        note2char(d, buffer);
+        noteToString(d, buffer);
       }
       DrawString(pos.x_, pos.y_, buffer);
     }
@@ -1210,7 +1210,7 @@ void PhraseView::DrawView() {
     if (d == NO_INSTRUMENT) {
       DrawString(pos.x_, pos.y_, "--");
     } else {
-      hex2char(d, buffer);
+      byteToHexString(d, buffer);
       DrawString(pos.x_, pos.y_, buffer);
       // todo: move outside of the loop
       if (j == row_) {
@@ -1265,7 +1265,7 @@ void PhraseView::DrawView() {
   for (int j = 0; j < 16; j++) {
     uint8_t p = stepsBase[j].param1;
     setTextProps(colCmdVal1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
-    hexshort2char(p, buffer);
+    byteToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
@@ -1295,7 +1295,7 @@ void PhraseView::DrawView() {
   for (int j = 0; j < 16; j++) {
     uint8_t p = stepsBase[j].param2;
     setTextProps(colCmdVal2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
-    hexshort2char(p, buffer);
+    byteToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }

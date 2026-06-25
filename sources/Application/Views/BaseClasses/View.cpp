@@ -199,7 +199,7 @@ void View::drawRegularNote(const GUIPoint &pos, uint8_t channel) {
   if (instrument == NO_INSTRUMENT || note == NO_NOTE) {
     strcpy(buf, "  ");
   } else {
-    hex2char(instrument, buf);
+    byteToHexString(instrument, buf);
   }
 
   // draw instrument number
@@ -235,7 +235,7 @@ void View::drawNotes() {
         if (instrument == NO_INSTRUMENT) {
           strcpy(buf, "--");
         } else {
-          hex2char(instrument, buf);
+          byteToHexString(instrument, buf);
         }
         DrawString(pos.x_, pos.y_, buf); // draw instrument number
       } else {
@@ -700,7 +700,7 @@ void View::drawRowNumbers(int x, int y, int start, int numRows) {
 
   for (int j = 0; j < numRows; j++) {
     SetColor(Theme::View::index((j + start) % ALT_ROW_NUMBER == 0));
-    hex2char(j, row);
+    byteToHexString(j, row);
     DrawString(x, y + j, row);
   }
 }
