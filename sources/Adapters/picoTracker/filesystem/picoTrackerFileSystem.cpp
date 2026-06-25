@@ -134,8 +134,7 @@ PicoFileType picoTrackerFileSystem::getFileType(int index) {
   return isDir ? PFT_DIR : PFT_FILE;
 }
 
-void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *filter, bool subDirOnly,
-                                 bool includeHidden) {
+void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *filter, uint8_t options) {
   std::lock_guard<Mutex> lock(mutex);
 
   fileIndexes->clear();
@@ -167,18 +166,29 @@ void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *fil
     if (strlen(filter) > 0) {
       tolowercase(buffer);
       matchesFilter = (strstr(buffer, filter) != nullptr);
-      // Trace::Log("FILESYSTEM", "FILTER: %s=%s [%d]", buffer, filter,
+      // Trace::Log("FILESYSTEM", "FILTER: %s=%s [%s]", buffer, filter,
       //            matchesFilter);
     }
+
+    bool isDir = entry.isDirectory();
+    bool isHidden = entry.isHidden();
+
+    // Check file/folder filter
+    bool shouldInclude = true;
+    if (isDir && !(options & loFolders)) {
+      shouldInclude = false;
+    } else if (!isDir && !(options & loFiles)) {
+      shouldInclude = false;
+    }
+
+    // Check hidden filter
+    if (isHidden && !(options & loHidden)) {
+      shouldInclude = false;
+    }
+
     // filter out "." and files that dont match filter if a filter is given
-    if ((entry.isDirectory() && entry.dirIndex() != 0) || ((includeHidden || !entry.isHidden()) && matchesFilter)) {
-      if (subDirOnly) {
-        if (entry.isDirectory()) {
-          fileIndexes->push_back(index);
-        }
-      } else {
-        fileIndexes->push_back(index);
-      }
+    if (shouldInclude && matchesFilter && entry.dirIndex() != 0) {
+      fileIndexes->push_back(index);
       // Trace::Log("FILESYSTEM", "[%d] got file: %s", index, buffer);
       count++;
     } else {

@@ -832,7 +832,7 @@ void ImportView::onConfirmRemoveProjectSample(View &, ModalView &dialog) {
 }
 
 void ImportView::refreshFileIndexList(FileSystem *fs) {
-  fs->list(&fileIndexList_, ".wav", false);
+  fs->list(&fileIndexList_, ".wav", loDefault);
 
   // remove .. from sample root dir to prevent leaving
   if (atLocalRoot_) {

@@ -33,7 +33,7 @@ protected:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name_;
 
 public:
-  I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = "Instrument", bool registerWithPersistence = false)
+  I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = XML_ELEM_INSTRUMENT, bool registerWithPersistence = false)
       : VariableContainer(list), Persistent(nodeName, registerWithPersistence) {};
   virtual ~I_Instrument();
 

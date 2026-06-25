@@ -23,6 +23,14 @@
 
 enum PicoFileType { PFT_UNKNOWN, PFT_FILE, PFT_DIR };
 
+// Bit flags for list options
+enum ListOptions {
+  loFiles = 1 << 0,   // Include files in listing
+  loFolders = 1 << 1, // Include folders in listing
+  loHidden = 1 << 2,  // Include hidden files/folders
+  loDefault = (loFiles | loFolders)
+};
+
 // Forward declaration
 class I_File;
 
@@ -40,8 +48,7 @@ public:
   virtual bool read(int index, void *data) {
     return false;
   } // Default implementation
-  virtual void list(etl::ivector<int> *fileIndexes, const char *filter, bool subDirOnly,
-                    bool includeHidden = false) = 0;
+  virtual void list(etl::ivector<int> *fileIndexes, const char *filter, uint8_t options = loDefault) = 0;
   virtual void getFileName(int index, char *name, int length) = 0;
   virtual PicoFileType getFileType(int index) = 0;
   virtual bool isParentRoot() = 0;
