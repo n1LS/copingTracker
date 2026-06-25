@@ -124,16 +124,6 @@ void chargfx_putc(char c, bool transparent) {
   }
 }
 
-void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-  int remainder = height;
-  while (remainder) {
-    int sub_height = (remainder > BUFFER_CHARS) ? BUFFER_CHARS : remainder;
-    int sub_y = y + height - remainder;
-    remainder -= sub_height;
-    chargfx_draw_sub_region(x, sub_y, width, sub_height);
-  }
-}
-
 // NOTE: we make life easier for ourselves by using the LCD controllers
 // orientation command to let us treat the x,y coords passed into this function
 // as the visual x & y instead of trying to transform them to the LCDs physical
@@ -197,7 +187,7 @@ void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) 
   ili9341_command_param(LCD_MADCTL_DEFAULT);
 }
 
-inline void chargfx_draw_sub_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   assert(height <= BUFFER_CHARS);
 
   uint16_t screen_x = x * CHAR_WIDTH;
@@ -295,7 +285,9 @@ void chargfx_draw_changed() {
 
 void chargfx_draw_screen() {
   // draw the whole screen
-  chargfx_draw_region(0, 0, TEXT_WIDTH, TEXT_HEIGHT);
+  for (int y = 0; y < TEXT_HEIGHT; y++) {
+    chargfx_draw_region(0, y, TEXT_WIDTH, 1);
+  }
 }
 
 void chargfx_set_palette_color(int idx, uint16_t rgb565_color) {
