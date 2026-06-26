@@ -23,7 +23,7 @@ void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {
   // Add firmware version information
   printer->PushAttribute(XML_ATTR_VERSION, PROJECT_NUMBER);
   // Save the instrument type
-  printer->PushAttribute(XML_ATTR_TYPE, InstrumentTypeNames[GetType()]);
+  printer->PushAttribute(XML_ATTR_TYPE, InstrumentTypeNames[GetType()].full);
 
   // Save the instrument name as its not stored in the Variables
   if (!name_.empty()) {

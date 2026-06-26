@@ -19,20 +19,20 @@
 #include "ViewData.h"
 #include <string>
 
-class ImportView : public ScreenView {
+class SampleImportView : public ScreenView {
 public:
-  ImportView(GUIWindow &w, ViewData *viewData);
-  ~ImportView();
+  SampleImportView(GUIWindow &w, ViewData *viewData);
+  ~SampleImportView();
   void Reset();
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
 
-  // Static method to set which view will open the ImportView
+  // Static method to set which view will open the SampleImportView
   static void SetSourceViewType(ViewType vt);
 
-  // Track which view opened the ImportView (default to project view)
+  // Track which view opened the SampleImportView (default to project view)
   static ViewType sourceViewType_;
 
 protected:

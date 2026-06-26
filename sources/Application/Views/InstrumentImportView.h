@@ -41,5 +41,6 @@ private:
   short selected_ = 0;
   int toInstrID_ = 0;
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
+  etl::vector<InstrumentType, MAX_FILE_INDEX_SIZE> instrumentTypeList_;
 };
 #endif

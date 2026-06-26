@@ -35,6 +35,7 @@ void InstrumentImportView::Reset() {
   selected_ = 0;
   toInstrID_ = 0;
   fileIndexList_.clear();
+  instrumentTypeList_.clear();
 }
 
 void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
@@ -121,9 +122,25 @@ void InstrumentImportView::DrawView() {
       SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::file);
     }
     
-    // Draw a file
+    // Draw a file with instrument type prefix
+    char typePrefix[5];
+
+    if (fs->getFileType(fileIndex) == PFT_DIR) {
+      // Directories don't have instrument type
+      strcpy(typePrefix, "    ");
+    } else {
+      // Get the instrument type for this file
+      InstrumentType type = instrumentTypeList_[i];
+      if (type >= IT_NONE && type < IT_LAST) {
+        strncpy(typePrefix, InstrumentTypeNames[type].compact, 4);
+        typePrefix[4] = '\0';
+      } else {
+        strcpy(typePrefix, "    ");
+      }
+    }
+    
     char text[SCREEN_WIDTH];
-    npf_snprintf(text, sizeof(text), "%c %-*s", symbol, SCREEN_WIDTH - 5, buffer);
+    npf_snprintf(text, sizeof(text), "%c %-*s %s", symbol, SCREEN_WIDTH - 10, buffer, typePrefix);
     DrawString(x, y, text);
 
     if (isSelected) {
@@ -315,7 +332,25 @@ void InstrumentImportView::setCurrentFolder(FileSystem *fs, const char *name) {
 
   // Update list of file indexes in this new dir (files and folders, no hidden)
   fileIndexList_.clear();
+  instrumentTypeList_.clear();
   fs->list(&fileIndexList_, INSTRUMENT_FILE_EXTENSION, loFiles);
+
+  // Detect instrument type for each file
+  auto persistency = PersistencyService::GetInstance();
+  char filePath[PFILENAME_SIZE];
+  for (size_t i = 0; i < fileIndexList_.size(); i++) {
+    unsigned fileIndex = fileIndexList_[i];
+    fs->getFileName(fileIndex, filePath, PFILENAME_SIZE);
+    
+    // For directories, use IT_NONE as placeholder
+    if (fs->getFileType(fileIndex) == PFT_DIR) {
+      instrumentTypeList_.push_back(IT_NONE);
+    } else {
+      // Detect the instrument type from the file
+      InstrumentType type = persistency->DetectInstrumentType(filePath);
+      instrumentTypeList_.push_back(type);
+    }
+  }
 
   Trace::Debug("loaded %d files from %s", fileIndexList_.size(), name);
 }

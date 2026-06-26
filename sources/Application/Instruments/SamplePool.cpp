@@ -57,7 +57,7 @@ void SamplePool::Load(const char *projectName) {
   }
   // First, find all wav files
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes;
-  fs->list(&fileIndexes, ".wav", loDefault);
+  fs->list(&fileIndexes, ".wav");
   char name[PFILENAME_SIZE];
   uint32_t totalSamples = fileIndexes.size();
 

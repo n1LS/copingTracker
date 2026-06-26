@@ -102,7 +102,7 @@ FileHandle picoTrackerFileSystem::Open(const char *name, const char *mode) {
 }
 
 bool picoTrackerFileSystem::chdir(const char *name) {
-  Trace::Log("FILESYSTEM", "chdir:%s", name);
+  Trace::Log("FILESYSTEM", "chdir: %s", name);
   std::lock_guard<Mutex> lock(mutex);
 
   sd.chvol();
@@ -111,7 +111,7 @@ bool picoTrackerFileSystem::chdir(const char *name) {
   char buf[PFILENAME_SIZE];
   cwd.openCwd();
   cwd.getName(buf, 128);
-  Trace::Log("FILESYSTEM", "new CWD:%s", buf);
+  Trace::Log("FILESYSTEM", "new CWD: %s", buf);
   cwd.close();
   return res;
 }
@@ -162,40 +162,41 @@ void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *fil
     uint32_t index = entry.dirIndex();
     entry.getName(buffer, PFILENAME_SIZE);
 
-    bool matchesFilter = true;
-    if (strlen(filter) > 0) {
-      tolowercase(buffer);
-      matchesFilter = (strstr(buffer, filter) != nullptr);
-      // Trace::Log("FILESYSTEM", "FILTER: %s=%s [%s]", buffer, filter,
-      //            matchesFilter);
-    }
-
-    bool isDir = entry.isDirectory();
+    // isDirectory() may not work correctly for . and .. entries, so treat them as directories
+    bool isDotDot = strcmp(buffer, "..") == 0;
+    bool isDir = isDotDot || entry.isDirectory();
     bool isHidden = entry.isHidden();
+    bool shouldInclude = true;
 
     // Check file/folder filter
-    bool shouldInclude = true;
-    if (isDir && !(options & loFolders)) {
-      shouldInclude = false;
-    } else if (!isDir && !(options & loFiles)) {
-      shouldInclude = false;
+    if (isDir) {
+      shouldInclude = shouldInclude && (options & loFolders);
+    } else {
+      shouldInclude = shouldInclude && (options & loFiles);
     }
 
-    // Check hidden filter
-    if (isHidden && !(options & loHidden)) {
-      shouldInclude = false;
+    // Check hidden filter (.. is always included if loFolders is set)
+    if (isHidden) {
+      shouldInclude = shouldInclude && ((options & loHidden) || (isDotDot && (options & loFolders)));
+    }
+
+    // Apply filename filter only to files (not directories)
+    bool matchesFilter = true;
+
+    if (!isDir && strlen(filter) > 0) {
+      tolowercase(buffer);
+      matchesFilter = (strstr(buffer, filter) != nullptr);
     }
 
     // filter out "." and files that dont match filter if a filter is given
     if (shouldInclude && matchesFilter && entry.dirIndex() != 0) {
       fileIndexes->push_back(index);
-      // Trace::Log("FILESYSTEM", "[%d] got file: %s", index, buffer);
       count++;
-    } else {
-      // Trace::Log("FILESYSTEM", "skipped hidden: %s", buffer);
-    }
+    } 
+    
     entry.close();
   }
+
   cwd.close();
   Trace::Log("FILESYSTEM", "scanned: %d, added file indexes:%d", count, fileIndexes->size());
 }

@@ -13,7 +13,7 @@
 #include "Application/Model/Scale.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Utils/randomnames.h"
-#include "Application/Views/ImportView.h"
+#include "Application/Views/SampleImportView.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/ModalDialogs/RenderProgressModal.h"
 #include "Application/Views/SampleEditorView.h"
@@ -414,7 +414,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
       }
       break;
     case FourCC::ActionImport:
-      // Switch to the ImportView **BUT** to show the Project Pool by default
+      // Switch to the SampleImportView **BUT** to show the Project Pool by default
       if (!player->IsRunning()) {
         // First check if the samplelib exists
         bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
@@ -423,8 +423,8 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
           MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
           DoModal(mb);
         } else {
-          ImportView::SetSourceViewType(VT_PROJECT);
-          // Set to show project pool dir in ImportView
+          SampleImportView::SetSourceViewType(VT_PROJECT);
+          // Set to show project pool dir in SampleImportView
           viewData_->isShowingSampleEditorProjectPool = true;
 
           // Go to import sample

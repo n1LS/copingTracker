@@ -111,7 +111,7 @@ void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
       InstrumentType instrType = IT_SAMPLE; // default if no type in project XML
       if (instype[0] != '\0') {
         for (uint32_t i = 0; i < IT_LAST; i++) {
-          if (!strcasecmp(instype, InstrumentTypeNames[i])) {
+          if (!strcasecmp(instype, InstrumentTypeNames[i].full)) {
             instrType = (InstrumentType)i;
             break;
           }
@@ -170,7 +170,7 @@ InstrumentAssignResult InstrumentBank::AssignInstrumentToSlot(InstrumentType typ
   }
 
   if (!current->Init()) {
-    Trace::Error("Failed to initialize new %s instrument of type", InstrumentTypeNames[type]);
+    Trace::Error("Failed to initialize new %s instrument of type", InstrumentTypeNames[type].full);
     purgeInstrument(current);
     return InstrumentAssignResult::InitFailed;
   }

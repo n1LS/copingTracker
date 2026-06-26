@@ -23,7 +23,7 @@
 
 enum PicoFileType { PFT_UNKNOWN, PFT_FILE, PFT_DIR };
 
-// Bit flags for list options
+// bit flags for list options
 enum ListOptions {
   loFiles = 1 << 0,   // Include files in listing
   loFolders = 1 << 1, // Include folders in listing
