@@ -89,13 +89,13 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   (*actionField_.rbegin()).AddObserver(*this);
 
   position.y_ += 2;
-  actionField_.emplace_back("Update firmware", FourCC::ActionBootSelect, position);
+  actionField_.emplace_back("Firmware update", FourCC::ActionBootSelect, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
 #ifndef ADV
   position.y_ += 2;
-  actionField_.emplace_back("USB Storage", FourCC::ActionMassStorage, position);
+  actionField_.emplace_back(char_symbols_usb_s " USB Storage", FourCC::ActionMassStorage, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 #endif

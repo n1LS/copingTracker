@@ -35,6 +35,7 @@ void InstrumentImportView::Reset() {
   selected_ = 0;
   toInstrID_ = 0;
   fileIndexList_.clear();
+  instrumentTypeList_.clear();
 }
 
 void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
@@ -42,23 +43,8 @@ void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
 
   if (mask & BM_PLAY) {
-    auto fs = FileSystem::GetInstance();
-    char name[PFILENAME_SIZE];
-
-    if (currentIndex_ < fileIndexList_.size()) {
-      unsigned fileIndex = fileIndexList_[currentIndex_];
-      fs->getFileName(fileIndex, name, PFILENAME_SIZE);
-
-      if (mask & BM_ALT) {
-        Trace::Log("INSTRUMENTIMPORT", "SHIFT play - import");
-        importInstrument(name);
-      } else {
-        // TODO: audition instrument by temporarily loading it and playing a
-        // note
-      }
-    }
-
-    // handle moving up and down the file list
+    // TODO: audition instrument by temporarily loading it and playing a
+    // note
   } else if (mask & BM_UP) {
     warpToNextInstrument(true);
   } else if (mask & BM_DOWN) {
@@ -69,7 +55,7 @@ void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   } else {
     // ENTER modifier
-    if (mask & BM_ENTER) {
+    if (mask == BM_ENTER) {
       auto fs = FileSystem::GetInstance();
 
       if (currentIndex_ < fileIndexList_.size()) {
@@ -77,13 +63,9 @@ void InstrumentImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
         char name[PFILENAME_SIZE];
         fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 
-        // Only allow navigation into directories, not to parent directory
-        if (fs->getFileType(fileIndex) == PFT_DIR && strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
-          setCurrentFolder(fs, name);
-          isDirty_ = true;
-          topIndex_ = 0; // need to reset when entering a dir as prev dir may
-                         // have been already scrolled down
-        }
+        // instrument file
+        Trace::Log("INSTRUMENTIMPORT", "SHIFT play - import");
+        importInstrument(name);
       }
     }
   }
@@ -116,28 +98,61 @@ void InstrumentImportView::DrawView() {
   // than buffer but instead returns empty string in buffer :-(
   char buffer[PFILENAME_SIZE];
   for (size_t i = topIndex_; i < topIndex_ + LIST_PAGE_SIZE && (i < fileIndexList_.size()); i++) {
-    SetColor(Theme::View::fg);
-    SetBackgroundColor(Theme::View::bg);
+    bool isSelected = (i == currentIndex_);
 
-    if (i == currentIndex_) {
-      SwapColors();
+    if (isSelected) {
+      SetBackgroundColor(Theme::View::Selection::bg);
+    } else {
+      SetBackgroundColor(Theme::View::bg);
     }
 
     memset(buffer, '\0', sizeof(buffer));
     unsigned fileIndex = fileIndexList_[i];
     fs->getFileName(fileIndex, buffer, PFILENAME_SIZE);
+    // trim the file extension
+    buffer[strlen(buffer) - strlen(INSTRUMENT_FILE_EXTENSION)] = 0;
+
+    char symbol = GLYPH(char_file_instrument_s);
+    
+    if (fs->getFileType(fileIndex) == PFT_DIR ) {
+      // Draw a directory
+      symbol = GLYPH(strcmp(buffer, "..") == 0 ? char_symbol_return_s : char_file_folder_s);
+      SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::directory);
+    } else {
+      SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::file);
+    }
+    
+    // Draw a file with instrument type prefix
+    char typePrefix[5];
 
     if (fs->getFileType(fileIndex) == PFT_DIR) {
-      // Draw a directory
-      DrawString(x, y, "[");
-      DrawString(x + 1, y, buffer);
-      DrawString(x + strlen(buffer) + 1, y, "]");
+      // Directories don't have instrument type
+      strcpy(typePrefix, "    ");
     } else {
-      // Draw a file
-      DrawString(x, y, buffer);
+      // Get the instrument type for this file
+      InstrumentType type = instrumentTypeList_[i];
+      if (type >= IT_NONE && type < IT_LAST) {
+        strncpy(typePrefix, InstrumentTypeNames[type].compact, 4);
+        typePrefix[4] = '\0';
+      } else {
+        strcpy(typePrefix, "    ");
+      }
     }
+    
+    char text[SCREEN_WIDTH];
+    npf_snprintf(text, sizeof(text), "%c %-*s %s", symbol, SCREEN_WIDTH - 10, buffer, typePrefix);
+    DrawString(x, y, text);
+
+    if (isSelected) {
+      SwapColors();
+      DrawString(0, y, char_button_border_left_s);
+      DrawString(SCREEN_WIDTH - 2, y, char_button_border_right_s);
+    }
+
     y++;
   }
+
+  drawScrollBar(SCREEN_WIDTH - 1, 2, LIST_PAGE_SIZE, currentIndex_, fileIndexList_.size());
 }
 
 void InstrumentImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
@@ -177,8 +192,7 @@ void InstrumentImportView::importInstrument(char *name) {
 
   // Check if the filename exceeds the maximum allowed length
   if (strlen(name) > MAX_INSTRUMENT_FILENAME_LENGTH) {
-    Trace::Error("INSTRUMENTIMPORT: Instrument filename exceeds maximum "
-                 "length: %s (%zu > %d)",
+    Trace::Error("INSTRUMENTIMPORT: Instrument filename exceeds maximum length: %s (%zu > %d)",
                  name, strlen(name), MAX_INSTRUMENT_FILENAME_LENGTH);
 
     char sizeMesg[32];
@@ -311,13 +325,32 @@ void InstrumentImportView::setCurrentFolder(FileSystem *fs, const char *name) {
     Trace::Error("FAILED to chdir to %s", name);
     return;
   }
+
   currentIndex_ = 0;
   topIndex_ = 0;
   isDirty_ = true;
 
-  // Update list of file indexes in this new dir
+  // Update list of file indexes in this new dir (files and folders, no hidden)
   fileIndexList_.clear();
-  // Use false for subDirOnly to include both files and directories
-  fs->list(&fileIndexList_, INSTRUMENT_FILE_EXTENSION, false);
+  instrumentTypeList_.clear();
+  fs->list(&fileIndexList_, INSTRUMENT_FILE_EXTENSION, loFiles);
+
+  // Detect instrument type for each file
+  auto persistency = PersistencyService::GetInstance();
+  char filePath[PFILENAME_SIZE];
+  for (size_t i = 0; i < fileIndexList_.size(); i++) {
+    unsigned fileIndex = fileIndexList_[i];
+    fs->getFileName(fileIndex, filePath, PFILENAME_SIZE);
+    
+    // For directories, use IT_NONE as placeholder
+    if (fs->getFileType(fileIndex) == PFT_DIR) {
+      instrumentTypeList_.push_back(IT_NONE);
+    } else {
+      // Detect the instrument type from the file
+      InstrumentType type = persistency->DetectInstrumentType(filePath);
+      instrumentTypeList_.push_back(type);
+    }
+  }
+
   Trace::Debug("loaded %d files from %s", fileIndexList_.size(), name);
 }

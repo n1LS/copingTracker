@@ -3,7 +3,7 @@ add_library(application_views
   GraphField.cpp
   ChainView.cpp
   GrooveView.cpp
-  ImportView.cpp
+  SampleImportView.cpp
   InstrumentImportView.cpp
   InstrumentView.cpp
   ThemeImportView.cpp

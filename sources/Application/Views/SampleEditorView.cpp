@@ -367,7 +367,7 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   // Check for key release events
   if (!pressed) {
-    // Check if play key was released (exactly like ImportView approach)
+    // Check if play key was released (exactly like SampleImportView approach)
     if (playKeyHeld_ && !(mask & BM_PLAY)) {
       // Play key no longer pressed so should stop playback
       playKeyHeld_ = false;
@@ -398,7 +398,7 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     FieldView::ProcessButtonMask(mask, pressed);
     return;
   } else if (mask & BM_PLAY) {
-    // Set flag to track that play key is being held down (like in ImportView)
+    // Set flag to track that play key is being held down (like in SampleImportView)
     playKeyHeld_ = true;
 
     // Start sample playback if no already playing

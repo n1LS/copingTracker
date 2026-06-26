@@ -9,7 +9,7 @@
  * This file is part of the copingTracker firmware
  */
 
-#include "ImportView.h"
+#include "SampleImportView.h"
 #include "Application/Audio/AudioFileStreamer.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
@@ -30,7 +30,7 @@
 #define IS_SINGLE_CYCLE(x) (x == 1376 || x == 1344 || x == 300)
 
 // Initialize static member
-ViewType ImportView::sourceViewType_ = VT_PROJECT;
+ViewType SampleImportView::sourceViewType_ = VT_PROJECT;
 
 namespace {
 enum ImportButton : uint8_t {
@@ -47,13 +47,13 @@ const int kProjectPoolButtonCount = 3;
 
 } // namespace
 
-ImportView::ImportView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
+SampleImportView::SampleImportView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
 }
 
-ImportView::~ImportView() {
+SampleImportView::~SampleImportView() {
 }
 
-void ImportView::Reset() {
+void SampleImportView::Reset() {
   topIndex_ = 0;
   currentIndex_ = 0;
   previewPlayingIndex_ = 0;
@@ -68,16 +68,16 @@ void ImportView::Reset() {
   fileIndexList_.clear();
 }
 
-// Static method to set the source view type before opening ImportView
-void ImportView::SetSourceViewType(ViewType vt) {
+// Static method to set the source view type before opening SampleImportView
+void SampleImportView::SetSourceViewType(ViewType vt) {
   sourceViewType_ = vt;
 }
 
-const char *ImportView::emptyStateMessage() const {
+const char *SampleImportView::emptyStateMessage() const {
   return "Sample pool is empty.";
 }
 
-void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
+void SampleImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
   // Check for key release events
   if (!pressed) {
     // Open selected directory only when ENTER is released, unless ENTER was
@@ -128,8 +128,8 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     const bool hasFiles = !fileIndexList_.empty();
 
     // EDIT+LEFT: go to parent directory within the import file browser.
-    // NAV+LEFT remains reserved for leaving the ImportView entirely.
-    if ((mask & BM_EDIT) && (mask & BM_LEFT) && !(mask & BM_NAV) && !inProjectSampleDir_) {
+    // NAV+LEFT remains reserved for leaving the SampleImportView entirely.
+    if (mask == (BM_EDIT | BM_LEFT) && !atLocalRoot_) {
       goToParentDirectory(fs);
       isDirty_ = true;
       return;
@@ -288,14 +288,14 @@ void ImportView::ProcessButtonMask(uint16_t mask, bool pressed) {
     // clear this flag on leaving this screen
     viewData_->isShowingSampleEditorProjectPool = false;
 
-    // Go back to the source view that opened the ImportView
+    // Go back to the source view that opened the SampleImportView
     Navigate(sourceViewType_);
   } else {
     // A modifier
   }
 }
 
-void ImportView::DrawBottomBar() {
+void SampleImportView::DrawBottomBar() {
   int y = SCREEN_HEIGHT - 2;
   int x = 0;
 
@@ -363,7 +363,7 @@ void ImportView::DrawBottomBar() {
   DrawString(x, y, buffer);
 }
 
-void ImportView::DrawView() {
+void SampleImportView::DrawView() {
   const int listWidth = SCREEN_WIDTH - 5; // spacing, scrollbar, file indicator, usage indicator, space
 
   Clear();
@@ -454,9 +454,9 @@ void ImportView::DrawView() {
   drawScrollBar(SCREEN_WIDTH - 1, 2, pageSize, topIndex_, fileIndexList_.size());
 }
 
-void ImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {};
+void SampleImportView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {};
 
-void ImportView::OnFocus() {
+void SampleImportView::OnFocus() {
   // clear stale flags
   enterKeyHeld_ = false;
   pendingDirEnterOnRelease_ = false;
@@ -477,7 +477,7 @@ void ImportView::OnFocus() {
   }
 }
 
-void ImportView::warpToNextSample(bool goUp) {
+void SampleImportView::warpToNextSample(bool goUp) {
   if (goUp) {
     if (currentIndex_ > 0) {
       currentIndex_--;
@@ -500,7 +500,7 @@ void ImportView::warpToNextSample(bool goUp) {
   isDirty_ = true;
 }
 
-void ImportView::preview(char *name) {
+void SampleImportView::preview(char *name) {
   auto fs = FileSystem::GetInstance();
   unsigned fileIndex = fileIndexList_[currentIndex_];
 
@@ -562,7 +562,7 @@ void ImportView::preview(char *name) {
   }
 }
 
-void ImportView::import() {
+void SampleImportView::import() {
   // stop playing before trying to import
   if (Player::GetInstance()->IsPlaying()) {
     MessageBox *mb = MessageBox::Create(*this, "Can't import while previewing", MBBF_OK);
@@ -676,7 +676,7 @@ void ImportView::import() {
   isDirty_ = true;
 }
 
-void ImportView::adjustPreviewVolume(int offset) {
+void SampleImportView::adjustPreviewVolume(int offset) {
   // Get the project instance
   Project *project = viewData_->project_;
 
@@ -694,19 +694,19 @@ void ImportView::adjustPreviewVolume(int offset) {
   isDirty_ = true;
 }
 
-bool ImportView::changeDirectory(FileSystem *fs, const char *name) {
+bool SampleImportView::changeDirectory(FileSystem *fs, const char *name) {
   if (!fs->chdir(name)) {
     Trace::Error("FAILED to chdir to %s", name);
     return false;
   }
 
   // being in the project samples dir and the samples root means no going up
-  atLocalRoot_ = fs->isCurrent(SAMPLES_LIB_DIR) || inProjectSampleDir_;
+  atLocalRoot_ = (dirIndexStack_.size() == 0) || inProjectSampleDir_;
 
   return true;
 }
 
-void ImportView::enterDirectory(FileSystem *fs, const char *name) {
+void SampleImportView::enterDirectory(FileSystem *fs, const char *name) {
   char projName[MAX_PROJECT_NAME_LENGTH + 1];
   viewData_->project_->GetProjectName(projName);
 
@@ -717,27 +717,10 @@ void ImportView::enterDirectory(FileSystem *fs, const char *name) {
     return;
   }
 
-  if (dirIndexStack_.full()) {
-    Trace::Error("ImportView directory stack overflow at depth %d", DirectoryIndexStackDepth);
-    char message[SCREEN_WIDTH];
-    npf_snprintf(message, sizeof(message), "Max depth is %d", DirectoryIndexStackDepth);
-    MessageBox *mb = MessageBox::Create(*this, "Can't enter folder", message, MBBF_OK);
-    DoModal(mb);
-    return;
-  }
-
-  uint8_t savedIndex = static_cast<uint8_t>(currentIndex_);
-  if (!changeDirectory(fs, name)) {
-    return;
-  }
-
-  dirIndexStack_.push(savedIndex);
-  topIndex_ = 0;
-  currentIndex_ = 0;
-  refreshFileIndexList(fs);
+  jumpToDirectory(fs, name, true);
 }
 
-void ImportView::goToParentDirectory(FileSystem *fs) {
+void SampleImportView::goToParentDirectory(FileSystem *fs) {
   if (!changeDirectory(fs, "..")) {
     return;
   }
@@ -750,18 +733,31 @@ void ImportView::goToParentDirectory(FileSystem *fs) {
   refreshFileIndexList(fs);
 }
 
-void ImportView::jumpToDirectory(FileSystem *fs, const char *name) {
+void SampleImportView::jumpToDirectory(FileSystem *fs, const char *name, bool pushToStack) {
   if (!changeDirectory(fs, name)) {
     return;
   }
 
-  dirIndexStack_.clear();
+  if (pushToStack) {
+    if (dirIndexStack_.full()) {
+      Trace::Error("SampleImportView directory stack overflow at depth %d", DirectoryIndexStackDepth);
+      char message[SCREEN_WIDTH];
+      npf_snprintf(message, sizeof(message), "Max depth is %d", DirectoryIndexStackDepth);
+      MessageBox *mb = MessageBox::Create(*this, "Can't enter folder", message, MBBF_OK);
+      DoModal(mb);
+      return;
+    }
+    dirIndexStack_.push(static_cast<uint8_t>(currentIndex_));
+  } else {
+    dirIndexStack_.clear();
+  }
   topIndex_ = 0;
   currentIndex_ = 0;
+
   refreshFileIndexList(fs);
 }
 
-void ImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample) {
+void SampleImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample) {
   viewData_->sampleEditorFilename = filename;
   viewData_->isShowingSampleEditorProjectPool = isProjectSample;
 
@@ -772,7 +768,7 @@ void ImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> fi
   Navigate(VT_SAMPLE_EDITOR);
 }
 
-void ImportView::removeProjectSample(uint8_t fileIndex, FileSystem *fs) {
+void SampleImportView::removeProjectSample(uint8_t fileIndex, FileSystem *fs) {
   char filename[PFILENAME_SIZE];
   fs->getFileName(fileIndex, filename, PFILENAME_SIZE);
 
@@ -791,10 +787,10 @@ void ImportView::removeProjectSample(uint8_t fileIndex, FileSystem *fs) {
   pendingDeleteFs_ = fs;
   strncpy(pendingDeleteFilename_, filename, PFILENAME_SIZE - 1);
   pendingDeleteFilename_[PFILENAME_SIZE - 1] = '\0';
-  DoModal(mb, ModalViewCallback::create<ImportView, &ImportView::onConfirmRemoveProjectSample>(*this));
+  DoModal(mb, ModalViewCallback::create<SampleImportView, &SampleImportView::onConfirmRemoveProjectSample>(*this));
 }
 
-void ImportView::onConfirmRemoveProjectSample(View &, ModalView &dialog) {
+void SampleImportView::onConfirmRemoveProjectSample(View &, ModalView &dialog) {
   FileSystem *fs = pendingDeleteFs_;
   pendingDeleteFs_ = nullptr;
 
@@ -824,14 +820,17 @@ void ImportView::onConfirmRemoveProjectSample(View &, ModalView &dialog) {
     --currentIndex_;
   }
 
+  Trace::Debug("Scanning from onConfirmRemoveProjectSample");
   refreshFileIndexList(fs);
   isDirty_ = true;
 }
 
-void ImportView::refreshFileIndexList(FileSystem *fs) {
-  fs->list(&fileIndexList_, ".wav", false);
+void SampleImportView::refreshFileIndexList(FileSystem *fs) {
+  Trace::Debug("Scanning directory...");
+  fs->list(&fileIndexList_, ".wav", loFiles | loFolders);
 
   // remove .. from sample root dir to prevent leaving
+  Trace::Debug("Got a total of %d files", fileIndexList_.size());
   if (atLocalRoot_) {
     for (auto it = fileIndexList_.begin(); it != fileIndexList_.end(); ++it) {
       char entryName[PFILENAME_SIZE];
@@ -841,6 +840,7 @@ void ImportView::refreshFileIndexList(FileSystem *fs) {
         break;
       }
     }
+    Trace::Debug("At local root that leaves %d files", fileIndexList_.size());
   }
 
   if (fileIndexList_.empty()) {

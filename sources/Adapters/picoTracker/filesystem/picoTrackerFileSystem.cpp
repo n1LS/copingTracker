@@ -102,7 +102,7 @@ FileHandle picoTrackerFileSystem::Open(const char *name, const char *mode) {
 }
 
 bool picoTrackerFileSystem::chdir(const char *name) {
-  Trace::Log("FILESYSTEM", "chdir:%s", name);
+  Trace::Log("FILESYSTEM", "chdir: %s", name);
   std::lock_guard<Mutex> lock(mutex);
 
   sd.chvol();
@@ -111,7 +111,7 @@ bool picoTrackerFileSystem::chdir(const char *name) {
   char buf[PFILENAME_SIZE];
   cwd.openCwd();
   cwd.getName(buf, 128);
-  Trace::Log("FILESYSTEM", "new CWD:%s", buf);
+  Trace::Log("FILESYSTEM", "new CWD: %s", buf);
   cwd.close();
   return res;
 }
@@ -134,8 +134,7 @@ PicoFileType picoTrackerFileSystem::getFileType(int index) {
   return isDir ? PFT_DIR : PFT_FILE;
 }
 
-void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *filter, bool subDirOnly,
-                                 bool includeHidden) {
+void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *filter, uint8_t options) {
   std::lock_guard<Mutex> lock(mutex);
 
   fileIndexes->clear();
@@ -163,29 +162,41 @@ void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *fil
     uint32_t index = entry.dirIndex();
     entry.getName(buffer, PFILENAME_SIZE);
 
+    // isDirectory() may not work correctly for . and .. entries, so treat them as directories
+    bool isDotDot = strcmp(buffer, "..") == 0;
+    bool isDir = isDotDot || entry.isDirectory();
+    bool isHidden = entry.isHidden();
+    bool shouldInclude = true;
+
+    // Check file/folder filter
+    if (isDir) {
+      shouldInclude = shouldInclude && (options & loFolders);
+    } else {
+      shouldInclude = shouldInclude && (options & loFiles);
+    }
+
+    // Check hidden filter (.. is always included if loFolders is set)
+    if (isHidden) {
+      shouldInclude = shouldInclude && ((options & loHidden) || (isDotDot && (options & loFolders)));
+    }
+
+    // Apply filename filter only to files (not directories)
     bool matchesFilter = true;
-    if (strlen(filter) > 0) {
+
+    if (!isDir && strlen(filter) > 0) {
       tolowercase(buffer);
       matchesFilter = (strstr(buffer, filter) != nullptr);
-      // Trace::Log("FILESYSTEM", "FILTER: %s=%s [%d]", buffer, filter,
-      //            matchesFilter);
     }
+
     // filter out "." and files that dont match filter if a filter is given
-    if ((entry.isDirectory() && entry.dirIndex() != 0) || ((includeHidden || !entry.isHidden()) && matchesFilter)) {
-      if (subDirOnly) {
-        if (entry.isDirectory()) {
-          fileIndexes->push_back(index);
-        }
-      } else {
-        fileIndexes->push_back(index);
-      }
-      // Trace::Log("FILESYSTEM", "[%d] got file: %s", index, buffer);
+    if (shouldInclude && matchesFilter && entry.dirIndex() != 0) {
+      fileIndexes->push_back(index);
       count++;
-    } else {
-      // Trace::Log("FILESYSTEM", "skipped hidden: %s", buffer);
-    }
+    } 
+    
     entry.close();
   }
+
   cwd.close();
   Trace::Log("FILESYSTEM", "scanned: %d, added file indexes:%d", count, fileIndexes->size());
 }
@@ -224,34 +235,6 @@ bool picoTrackerFileSystem::isParentRoot() {
   bool result = root.firstSector() == parent.firstSector();
   root.close();
   parent.close();
-  cwd.close();
-  return result;
-}
-
-bool picoTrackerFileSystem::isCurrent(const char *path) {
-  if (!path || !*path) {
-    return false;
-  }
-
-  std::lock_guard<Mutex> lock(mutex);
-
-  sd.chvol();
-
-  FsBaseFile cwd;
-  if (!cwd.openCwd()) {
-    Trace::Error("Failed to open cwd");
-    return false;
-  }
-
-  FsBaseFile target;
-  if (!target.open(path, O_READ)) {
-    cwd.close();
-    return false;
-  }
-
-  bool result = target.isDir() && cwd.firstSector() == target.firstSector() && cwd.dirIndex() == target.dirIndex();
-
-  target.close();
   cwd.close();
   return result;
 }

@@ -80,7 +80,7 @@ bool PersistencyService::DeleteDirectoryContents_(uint8_t depth) {
 
   while (true) {
     fileIndexes_.clear();
-    fs->list(&fileIndexes_, "", false, true);
+    fs->list(&fileIndexes_, "", loFiles | loFolders | loHidden);
 
     bool foundEntry = false;
     bool deletedEntry = false;
@@ -182,7 +182,7 @@ PersistencyResult PersistencyService::Save(const char *projectName, const char *
 
     Trace::Debug("get list of samples to copy from old project: %s", oldProjectName);
 
-    fs->list(&fileIndexes_, ".wav", false);
+    fs->list(&fileIndexes_, ".wav");
     char filenameBuffer[PFILENAME_SIZE];
     for (size_t i = 0; i < fileIndexes_.size(); i++) {
       fs->getFileName(fileIndexes_[i], filenameBuffer, sizeof(filenameBuffer));
@@ -431,7 +431,7 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
 
       // Map the type string to InstrumentType enum
       for (int i = 0; i < IT_LAST; i++) {
-        if (!strcasecmp(doc.attrval_, InstrumentTypeNames[i])) {
+        if (!strcasecmp(doc.attrval_, InstrumentTypeNames[i].full)) {
           importedType = static_cast<InstrumentType>(i);
           Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
           break;
@@ -480,7 +480,7 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
 
       // Map the type string to InstrumentType enum
       for (int i = 0; i < IT_LAST; i++) {
-        if (!strcasecmp(doc.attrval_, InstrumentTypeNames[i])) {
+        if (!strcasecmp(doc.attrval_, InstrumentTypeNames[i].full)) {
           importedType = static_cast<InstrumentType>(i);
           Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
           break;

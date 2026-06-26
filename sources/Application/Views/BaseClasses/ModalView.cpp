@@ -81,8 +81,5 @@ void ModalView::SetWindow(int width, int height) {
   left_ = (SCREEN_WIDTH - width) / 2;
   top_ = (SCREEN_HEIGHT - height) / 2;
 
-  // Clear the entire modal area including the border frame using absolute screen coordinates.
-  ClearTextRect(left_ - 2, top_ - 2, width + 4, height + 4);
-
   DrawFilledBorder(-2, -2, width + 4, height + 4, Theme::Dialog::bg, true);
 }

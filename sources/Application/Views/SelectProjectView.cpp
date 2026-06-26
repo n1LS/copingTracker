@@ -356,8 +356,8 @@ void SelectProjectView::setCurrentFolder() {
   // get ready
   fileIndexList_.clear();
 
-  // Let's read all the directory in the project dir
-  fs->list(&fileIndexList_, "", true);
+  // Let's read all the directory in the project dir (folders only)
+  fs->list(&fileIndexList_, "", loFolders);
 
   // Filter out "." and ".." along with the hidden default project entry
   for (auto it = fileIndexList_.begin(); it != fileIndexList_.end();) {

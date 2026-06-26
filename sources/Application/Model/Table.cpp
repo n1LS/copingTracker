@@ -75,7 +75,7 @@ void TableHolder::SaveContent(tinyxml2::XMLPrinter *printer) {
   char hex[3];
   for (int i = 0; i < TABLE_COUNT; i++) {
     printer->OpenElement(XML_ELEM_TABLE);
-    hex2char(i, hex);
+    byteToHexString(i, hex);
     printer->PushAttribute(XML_ATTR_TABLE_ID, hex);
 
     Table &table = table_[i];
@@ -112,8 +112,8 @@ void TableHolder::RestoreContent(PersistencyDocument *doc) {
       bool attr = doc->NextAttribute();
       while (attr) {
         if (!strcmp(doc->attrname_, XML_ATTR_ID)) {
-          unsigned char b1 = (c2h__(doc->attrval_[0])) << 4;
-          unsigned char b2 = c2h__(doc->attrval_[1]);
+          unsigned char b1 = (hexNibble(doc->attrval_[0])) << 4;
+          unsigned char b2 = hexNibble(doc->attrval_[1]);
           id = b1 + b2;
           // found what we wanted
           break;

@@ -223,7 +223,7 @@ etl::string<MAX_VARIABLE_STRING_LENGTH> Variable::GetString() {
       npf_snprintf(buf, sizeof(buf), "%d", value_.int_);
       break;
     case BOOL:
-      npf_snprintf(buf, sizeof(buf), "%s", value_.bool_ ? "true" : "false");
+      npf_snprintf(buf, sizeof(buf), "%s", value_.bool_ ? "yes" : "no");
       break;
     case STRING:
       if (stringValue_) {

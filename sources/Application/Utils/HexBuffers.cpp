@@ -24,7 +24,7 @@ void prepareHexChunk(tinyxml2::XMLPrinter *printer, unsigned char *datasrc, int 
 
   char *hex = (char *)hexBuffer;
   for (int i = 0; i < len; i++) {
-    hex2char(*datasrc, hex);
+    byteToHexString(*datasrc, hex);
     if (singleValueData == -1) {
       singleValueData = *datasrc;
     } else {
@@ -105,11 +105,7 @@ void restoreHexBuffer(PersistencyDocument *doc, unsigned char *destination) {
     } else {
       if (doc->HasContent()) {
         for (unsigned int i = 0; i < strlen(doc->content_) / 2; i++) {
-          const char *src__ = doc->content_ + i * 2;
-          unsigned char b1 = (c2h__(src__[0])) << 4;
-          unsigned char b2 = c2h__(src__[1]);
-          *dst++ = b1 + b2;
-          //        char2hex(buffer+i*2,dst++) ;
+          *dst++ = hexStringToByte(doc->content_ + i * 2);
         }
       }
     }

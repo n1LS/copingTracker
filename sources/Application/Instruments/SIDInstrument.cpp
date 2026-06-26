@@ -246,7 +246,7 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SIDInstrument::GetName() {
     return name_;
   }
   // otherwise return the default name for this instrument type
-  return etl::string<MAX_INSTRUMENT_NAME_LENGTH>(InstrumentTypeNames[IT_SID]);
+  return etl::string<MAX_INSTRUMENT_NAME_LENGTH>(InstrumentTypeNames[IT_SID].full);
 }
 
 int SIDInstrument::GetTable() {

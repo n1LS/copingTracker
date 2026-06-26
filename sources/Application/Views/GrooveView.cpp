@@ -172,7 +172,7 @@ void GrooveView::DrawView() {
     bool highlighted = (j == position_);
 
     if (grooveData[j] != NO_GROOVE_DATA) {
-      hex2char(grooveData[j], buffer);
+      byteToHexString(grooveData[j], buffer);
       buffer[3] = 0;
     } else {
       strcpy(buffer, "--");

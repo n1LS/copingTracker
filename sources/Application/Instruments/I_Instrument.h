@@ -26,14 +26,35 @@ enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_MIDI, IT_SID, IT_OPAL, IT_CHIPT
 // non-linear volume (4-bit) mapping to volume scaler
 static const uint8_t volumeLUT[16] = {0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 160, 193, 228, 245, 255};
 
-static const char *InstrumentTypeNames[IT_LAST] = {"None", "Sample", "MIDI", "SID", "OPL3", "Chiptune"};
+typedef struct InstrumentTypeName {
+  const char *full;
+  const char *compact;
+} InstrumentTypeName;
+
+static const InstrumentTypeName InstrumentTypeNames[IT_LAST] = {
+  {.full = "None", .compact = "None"},
+  {.full = "Sample", .compact = "Smpl"},
+  {.full = "MIDI", .compact = "MIDI"},
+  {.full = "SID", .compact = "SID "},
+  {.full = "OPL3", .compact = "OPL3"},
+  {.full = "Chiptune", .compact = "Chip"},
+};
+
+static const char *LongInstrumentNames[IT_LAST] = {
+  InstrumentTypeNames[IT_NONE].full,
+  InstrumentTypeNames[IT_SAMPLE].full,
+  InstrumentTypeNames[IT_MIDI].full,
+  InstrumentTypeNames[IT_SID].full,
+  InstrumentTypeNames[IT_OPAL].full,
+  InstrumentTypeNames[IT_CHIPTUNE].full,
+};
 
 class I_Instrument : public VariableContainer, public Observable, public Persistent {
 protected:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name_;
 
 public:
-  I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = "Instrument", bool registerWithPersistence = false)
+  I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = XML_ELEM_INSTRUMENT, bool registerWithPersistence = false)
       : VariableContainer(list), Persistent(nodeName, registerWithPersistence) {};
   virtual ~I_Instrument();
 
@@ -63,7 +84,7 @@ public:
   virtual InstrumentType GetType() = 0;
 
   virtual etl::string<MAX_INSTRUMENT_NAME_LENGTH> GetDefaultName() {
-    return etl::string<MAX_INSTRUMENT_NAME_LENGTH>(InstrumentTypeNames[GetType()]);
+    return etl::string<MAX_INSTRUMENT_NAME_LENGTH>(InstrumentTypeNames[GetType()].full);
   };
 
   virtual etl::string<MAX_INSTRUMENT_NAME_LENGTH> GetUserSetName() {

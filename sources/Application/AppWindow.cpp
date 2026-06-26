@@ -22,7 +22,7 @@
 #include "Application/Views/ChainView.h"
 #include "Application/Views/DeviceView.h"
 #include "Application/Views/GrooveView.h"
-#include "Application/Views/ImportView.h"
+#include "Application/Views/SampleImportView.h"
 #include "Application/Views/InstrumentImportView.h"
 #include "Application/Views/InstrumentView.h"
 #include "Application/Views/MixerView.h"
@@ -93,7 +93,7 @@ struct AppWindowViews {
   ThemeView themeView;
   ThemeImportView themeImportView;
   ProjectView projectView;
-  ImportView importView;
+  SampleImportView importView;
   InstrumentImportView instrumentImportView;
   InstrumentView instrumentView;
   TableView tableView;

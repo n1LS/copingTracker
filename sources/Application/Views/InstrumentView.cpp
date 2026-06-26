@@ -15,7 +15,7 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Model/Config.h"
-#include "Application/Views/ImportView.h"
+#include "Application/Views/SampleImportView.h"
 #include "Application/Views/SampleEditorView.h"
 #include "BaseClasses/UIBigHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
@@ -34,7 +34,7 @@
 static constexpr InstrumentType kMaxSelectableInstrumentType = static_cast<InstrumentType>(IT_LAST - 1);
 
 InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
-    : FieldView(w, data), instrumentType_(FourCC::VarInstrumentType, InstrumentTypeNames, IT_LAST, 0),
+    : FieldView(w, data), instrumentType_(FourCC::VarInstrumentType, LongInstrumentNames, IT_LAST, 0),
       lastSampleIndex_(-1), suppressSampleChangeWarning_(false) {
   project_ = data->project_;
 
@@ -356,7 +356,7 @@ void InstrumentView::fillSampleParameters() {
 
   Variable *v = instrument->FindVariable(FourCC::SampleInstrumentSample);
   SamplePool *sp = SamplePool::GetInstance();
-  intVarField_.emplace_back(position, *v, "Sample      :%.17s", 0, sp->GetNameListSize() - 1, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "Sample        :%.12s", 0, sp->GetNameListSize() - 1, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -365,61 +365,66 @@ void InstrumentView::fillSampleParameters() {
   fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   GUIPoint actionPos = position;
-  actionPos.x_ = baseX + 13;
+  actionPos.x_ = baseX + 15;
   sampleActionField_.emplace_back("Adjust", FourCC::ActionShowSampleSlices, actionPos);
   fieldList_.insert(fieldList_.end(), &sampleActionField_.back());
   sampleActionField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentVolume);
-  intVarField_.emplace_back(position, *v, "Volume      :%d [%2.2X]", 0, 255, 1, 10);
+  intVarField_.emplace_back(position, *v, "Volume        :%d [%2.2X]", 0, 255, 1, 10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentPan);
-  intVarField_.emplace_back(position, *v, "Pan         :%2.2X", 0, 0xFE, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "Pan           :%2.2X", 0, 0xFE, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentRootNote);
-  noteVarField_.emplace_back(position, *v, "Root note   :%s", 0, 0x7F, 1, 0x0C);
+  noteVarField_.emplace_back(position, *v, "Root note     :%s", 0, 0x7F, 1, 0x0C);
   fieldList_.insert(fieldList_.end(), &(*noteVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentFineTune);
-  intVarField_.emplace_back(position, *v, "Detune      :%2.2X", 0, 255, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "Detune        :%2.2X", 0, 255, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentCrushVolume);
-  intVarField_.emplace_back(position, *v, "Drive       :%2.2X", 0, 0xFF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "Drive         :%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentCrush);
-  intVarField_.emplace_back(position, *v, "Crush       :%d", 1, 0x10, 1, 4);
+  intVarField_.emplace_back(position, *v, "Crush         :%d", 1, 0x10, 1, 4);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentDownsample);
-  intVarField_.emplace_back(position, *v, "Downsample  :%d", 0, 8, 1, 4);
+  intVarField_.emplace_back(position, *v, "Downsample    :%d", 0, 8, 1, 4);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+
+  position.y_ += 1;
+  v = instrument->FindVariable(FourCC::SampleInstrumentInterpolation);
+  intVarField_.emplace_back(position, *v, "Interpolate   :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentTable);
-  intVarOffField_.emplace_back(position, *v, "Table       :%2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
+  intVarOffField_.emplace_back(position, *v, "Table         :%2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentTableAutomation);
-  intVarField_.emplace_back(position, *v, "Auto        :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Automation :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  staticField_.emplace_back(position, "Filter   Cut    Res");
+  staticField_.emplace_back(position, "Filter     Cut    Res");
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
-  position.x_ += 13;
+  position.x_ += 15;
   v = instrument->FindVariable(FourCC::SampleInstrumentFilterCutOff);
   intVarField_.emplace_back(position, *v, "%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
@@ -428,44 +433,38 @@ void InstrumentView::fillSampleParameters() {
   v = instrument->FindVariable(FourCC::SampleInstrumentFilterResonance);
   intVarField_.emplace_back(position, *v, "%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.x_ -= 20;
+  position.x_ -= 22;
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentFilterType);
-  intVarField_.emplace_back(position, *v, "Type        :%2.2X", 0, 0xFF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Type       :%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentFilterMode);
-  intVarField_.emplace_back(position, *v, "Mode        :%s", 0, 2, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentInterpolation);
-  intVarField_.emplace_back(position, *v, "Interpolate :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Mode       :%s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
   v = instrument->FindVariable(FourCC::SampleInstrumentLoopMode);
-  intVarField_.emplace_back(position, *v, "Loop mode   :%s", 0, SILM_LAST - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Loop mode     :%s", 0, SILM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentStart);
-  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_verticalRight_s " start     :%7.7X", 0,
+  bigHexVarField_.emplace_back(position, *v, 7, " " char_border_single_verticalRight_s " Start      :%7.7X", 0,
                                instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentLoopStart);
-  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_verticalRight_s " loop start:%7.7X", 0,
+  bigHexVarField_.emplace_back(position, *v, 7, " " char_border_single_verticalRight_s " Loop start :%7.7X", 0,
                                instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentEnd);
-  bigHexVarField_.emplace_back(position, *v, 7, char_border_single_bottomLeft_s " loop end  :%7.7X", 0,
+  bigHexVarField_.emplace_back(position, *v, 7, " " char_border_single_bottomLeft_s " Loop end   :%7.7X", 0,
                                instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 }
@@ -493,23 +492,23 @@ void InstrumentView::fillSIDParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentPulseWidth);
-  intVarField_.emplace_back(position, *v, "  Pulsewidth  :%2.2X", 0, 0xFFF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Pulsewidth :%2.2X", 0, 0xFFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentWaveform);
 
-  intVarField_.emplace_back(position, *v, "  Waveform    :%s", 0, DWF_LAST - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Waveform   :%s", 0, DWF_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentVSync);
-  intVarField_.emplace_back(position, *v, "  Osc Sync    :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s" Osc Sync   :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentRingModulator);
-  intVarField_.emplace_back(position, *v, "  Ring Mod    :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Ring Mod   :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
@@ -535,7 +534,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterCut);
       break;
   }
-  intVarField_.emplace_back(position, *v, "  Cutoff      :%1.1X", 0, 0x7FF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Cutoff     :%1.1X", 0, 0x7FF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -547,7 +546,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterResonance);
       break;
   }
-  intVarField_.emplace_back(position, *v, "  Resonance   :%1.1X", 0, 0xF, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Resonance  :%1.1X", 0, 0xF, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -559,7 +558,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterMode);
       break;
   }
-  intVarField_.emplace_back(position, *v, "  Mode        :%s", 0, DFM_LAST - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Mode       :%s", 0, DFM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
@@ -589,32 +588,32 @@ void InstrumentView::fillMidiParameters() {
   position.y_ += 2;
 
   Variable *v = instrument->FindVariable(FourCC::MidiInstrumentChannel);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Channel     :%2.2d", 0, 0x0F, 1, 0x04, 1));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Channel       :%2.2d", 0, 0x0F, 1, 0x04, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentVolume);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Volume      :%2.2X", 0, 0xFF, 1, 0x10));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Volume        :%2.2X", 0, 0xFF, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentNoteLength);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Length      :%2.2X", 0, 0xFF, 1, 0x10));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Length        :%2.2X", 0, 0xFF, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentProgram);
-  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Program     :%2.2X", 0, 0x7F, 1, 0x10));
+  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Program       :%2.2X", 0, 0x7F, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   position.y_ += 2;
   v = instrument->FindVariable(FourCC::MidiInstrumentTable);
-  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Table       :%2.2X", 0, 0x7F, 1, 0x10));
+  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Table         :%2.2X", 0, 0x7F, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentTableAutomation);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Automation  :%s", 0, 1, 1, 1));
+  intVarField_.emplace_back(UIIntVarField(position, *v, " " char_border_single_bottomLeft_s " Automation :%s", 0, 1, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 }
 
@@ -791,7 +790,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
             MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
             DoModal(mb);
           } else {
-            ImportView::SetSourceViewType(VT_INSTRUMENT);
+            SampleImportView::SetSourceViewType(VT_INSTRUMENT);
             // set browser into sample import mode in top level samples dir
             viewData_->importViewStartDir = SAMPLES_LIB_DIR;
 
@@ -1004,10 +1003,9 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
           // Check if any instrument field has been modified
           bool instrumentModified = checkInstrumentModified();
           if (instrumentModified) {
-            MessageBox *mb = MessageBox::Create(*this, "Change Instrument &", "lose settings?", MBBF_YES | MBBF_NO);
+            MessageBox *mb = MessageBox::Create(*this, "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
             pendingInstrumentType_ = proposedType;
-            DoModal(mb,
-                    ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
+            DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
           } else {
             // Apply the proposed type change immediately if not modified
             instrumentType_.SetInt(proposedType, false);

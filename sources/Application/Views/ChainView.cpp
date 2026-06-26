@@ -638,7 +638,7 @@ void ChainView::DrawView() {
     if (d == EMPTY_CHAIN_VALUE) {
       DrawString(pos.x_, pos.y_ + j, "--");
     } else {
-      hex2char(d, row);
+      byteToHexString(d, row);
       DrawString(pos.x_, pos.y_ + j, row);
     }
   }
@@ -649,7 +649,7 @@ void ChainView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = base[j].transpose;
-    hex2char(d, row);
+    byteToHexString(d, row);
     setTextProps(1, j);
     DrawString(pos.x_, pos.y_, row);
 
@@ -794,37 +794,10 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
     unsigned char d = steps[j].note;
     unsigned char instr = steps[j].instrument;
 
-    if (d == NO_NOTE) {
-      DrawString(pos.x_, pos.y_, "---");
-    } else if (d == NOTE_OFF) {
-      DrawString(pos.x_, pos.y_, "off");
-    } else {
-      bool showSlice = false;
-      bool invalidSlice = false;
-      uint8_t sliceIndex = 0;
-      if (instr != 0xFF && bank) {
-        I_Instrument *instrObj = bank->GetInstrument(instr);
-        if (instrObj && instrObj->GetType() == IT_SAMPLE) {
-          SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instrObj);
-          if (sampleInstr->HasSlicesForPlayback()) {
-            if (sampleInstr->ShouldDisplaySliceForNote(d)) {
-              showSlice = true;
-              sliceIndex = static_cast<uint8_t>(d - SampleInstrument::SliceNoteBase);
-            } else {
-              invalidSlice = true;
-            }
-          }
-        }
-      }
-      if (showSlice) {
-        npf_snprintf(buffer, sizeof(buffer), "S%02u", static_cast<unsigned>(sliceIndex));
-      } else if (invalidSlice) {
-        npf_snprintf(buffer, sizeof(buffer), "S**");
-      } else {
-        note2char(d, buffer);
-      }
-      DrawString(pos.x_, pos.y_, buffer);
-    }
+    char noteDisplay[4];
+    formatNote(d, instr, bank, noteDisplay);
+
+    DrawString(pos.x_, pos.y_, noteDisplay);
     pos.y_++;
   }
 

@@ -28,7 +28,7 @@ void UINoteVarField::Draw(GUIWindow &w, int offset) {
   char note[5];
 
   unsigned char pitch = src_.GetInt();
-  note2char(pitch, note);
+  noteToString(pitch, note);
   note[4] = 0;
   npf_snprintf(buffer, sizeof(buffer), format_, note);
 

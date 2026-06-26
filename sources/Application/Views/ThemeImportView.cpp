@@ -192,15 +192,8 @@ void ThemeImportView::setCurrentFolder() {
   topIndex_ = 0;
   isDirty_ = true;
 
-  // get the directory listing
-  fs->list(&fileIndexList_, THEME_FILE_EXTENSION, false);
-
-  // remove directories from listing
-  for (int i = fileIndexList_.size() - 1; i >= 0; i--) {
-    if (fs->getFileType(fileIndexList_[i]) == PFT_DIR) {
-      fileIndexList_.erase(fileIndexList_.begin() + i);
-    }
-  }
+  // get the directory listing (files only, no hidden)
+  fs->list(&fileIndexList_, THEME_FILE_EXTENSION, loFiles);
 
   Trace::Debug("loaded %d files from %s", fileIndexList_.size(), THEMES_DIR);
 }

@@ -851,7 +851,7 @@ void SongView::DrawView() {
       if (d == 0xFF) {
         DrawString(pos.x_, pos.y_, "--");
       } else {
-        hex2char(d, row);
+        byteToHexString(d, row);
         DrawString(pos.x_, pos.y_, row);
       }
 
@@ -903,7 +903,7 @@ void SongView::drawChainPreview() {
     if (phraseId == EMPTY_CHAIN_VALUE) {
       DrawString(pos.x_ + 24, pos.y_ + i, "--");
     } else {
-      hex2char(phraseId, buffer);
+      byteToHexString(phraseId, buffer);
       DrawString(pos.x_ + 24, pos.y_ + i, buffer);
     }
   }

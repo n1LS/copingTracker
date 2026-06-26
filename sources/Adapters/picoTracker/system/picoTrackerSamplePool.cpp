@@ -9,6 +9,7 @@
  */
 
 #include "picoTrackerSamplePool.h"
+#include "Foundation/Constants/SpecialCharacters.h"
 #include "hardware/flash.h"
 #include "hardware/sync.h"
 #include "pico/multicore.h"
@@ -109,10 +110,10 @@ bool picoTrackerSamplePool::loadSample(const char *name) {
   nameStore_[count_][MAX_INSTRUMENT_FILENAME_LENGTH] = '\0';
   count_++;
 
-  updateStatus(importIndex, importCount, "Importing");
+  updateStatus(importIndex, importCount, "Copying to flash" char_indicator_ellipsis_s);
 
   if (!LoadInFlash(&wav_[count_ - 1])) {
-    Trace::Error("Failed to load sample into flash: %s", name);
+    Trace::Error("Failed loading sample into flash: %s", name);
     count_--;
     nameStore_[count_][0] = '\0';
     wav_[count_].Close();

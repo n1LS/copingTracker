@@ -33,13 +33,11 @@ public:
   // FileSystem interface implementation
   virtual FileHandle Open(const char *name, const char *mode) override;
   virtual bool chdir(const char *path) override;
-  virtual void list(etl::ivector<int> *fileIndexes, const char *filter, bool subDirOnly,
-                    bool includeHidden = false) override;
+  virtual void list(etl::ivector<int> *fileIndexes, const char *filter, uint8_t options = loDefault) override;
   virtual void getFileName(int index, char *name, int length) override;
   virtual PicoFileType getFileType(int index) override;
   virtual bool isParentRoot() override;
   virtual bool isCurrentRoot() override;
-  virtual bool isCurrent(const char *path) override;
   virtual bool DeleteFile(const char *name) override;
   virtual bool DeleteDir(const char *name) override;
   virtual bool exists(const char *path) override;
