@@ -1,6 +1,8 @@
 add_library(application_views_baseclasses
+  FileListView.cpp
   I_Action.cpp
   ModalView.cpp
+  ../ScreenView.cpp
   UIActionField.cpp
   UIBigHexVarField.cpp
   UIField.cpp
@@ -23,6 +25,9 @@ target_link_libraries(application_views_baseclasses PUBLIC
   system_console
 )
 
-target_include_directories(application_views_baseclasses PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(application_views_baseclasses PUBLIC 
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
 
 include_directories(${PROJECT_SOURCE_DIR})

@@ -12,43 +12,43 @@
 #ifndef _SELECTPROJECT_VIEW_H_
 #define _SELECTPROJECT_VIEW_H_
 
-#include "ScreenView.h"
-#include "System/FileSystem/FileSystem.h"
+#include "BaseClasses/FileListView.h"
 #include "ViewData.h"
-#include <string>
 
-class SelectProjectView : public ScreenView {
+/**
+ * SelectProjectView - Migrated to use FileListView base class
+ * 
+ * This view allows users to browse, load, and delete projects.
+ * Features two action tabs: Load and Delete.
+ */
+class SelectProjectView : public FileListView {
 public:
-  SelectProjectView(GUIWindow &w, ViewData *viewData);
-  ~SelectProjectView();
-  void Reset();
-
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
-  virtual void DrawView();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
-  virtual void OnFocus();
-  void getSelectedProjectName(char *name);
-  void getHighlightedProjectName(char *name);
-  void setCurrentFolder();
-  void LoadProject();
-  void ClearAutoSave();
-
+    SelectProjectView(GUIWindow& w, ViewData* viewData);
+    ~SelectProjectView();
+    
+    // Required FileListView overrides
+    const char* GetEmptyStateMessage() const override;
+    
+    // Tab action handler
+    void OnTabAction(int tabIndex, const char* filename) override;
+    
+    // Public methods
+    void getSelectedProjectName(char* name);
+    void getHighlightedProjectName(char* name);
+    void LoadProject();
+    void ClearAutoSave();
+    
 protected:
-  virtual const char *emptyStateMessage() const override;
-  void warpToNextProject(bool goUp);
+    virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) override;    
 
 private:
-  static const int numButtons_ = 2;
-  size_t topIndex_ = 0;
-  size_t currentIndex_ = 0;
-  char selection_[MAX_PROJECT_NAME_LENGTH + 1];
-  etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
-  int selectedButton_ = 0;
-
-  void AttemptDeletingSelectedProject();
-  void AttemptLoadingProject();
-  bool SelectionIsCurrentProject();
-  bool WarnPlayerRunning();
-  void SelectButton(int direction);
+    char selection_[MAX_PROJECT_NAME_LENGTH + 1] = {};
+    
+    // Internal helpers
+    void AttemptDeletingSelectedProject();
+    void AttemptLoadingProject();
+    bool SelectionIsCurrentProject();
+    bool WarnPlayerRunning();
 };
-#endif
+
+#endif // _SELECTPROJECT_VIEW_H_

@@ -12,33 +12,30 @@
 #ifndef _THEME_IMPORT_VIEW_H_
 #define _THEME_IMPORT_VIEW_H_
 
-#include "ScreenView.h"
-#include "System/FileSystem/FileSystem.h"
+#include "BaseClasses/FileListView.h"
+#include "ModalDialogs/MessageBox.h"
 #include "ViewData.h"
-#include <string>
 
-class ThemeImportView : public ScreenView {
+/**
+ * ThemeImportView - Migrated to use FileListView base class
+ * 
+ * This view allows users to browse and import theme files (.thm)
+ * from the themes directory.
+ */
+class ThemeImportView : public FileListView {
 public:
-  ThemeImportView(GUIWindow &w, ViewData *viewData);
-  ~ThemeImportView();
-  void Reset();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
-  virtual void DrawView();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
-  virtual void OnFocus();
-
-protected:
-  virtual const char *emptyStateMessage() const override;
-  void setCurrentFolder();
-  void changeSelection(int delta);
-  void onImportTheme(const char *filename);
-
+    ThemeImportView(GUIWindow& w, ViewData* viewData);
+    ~ThemeImportView();
+    
+    // Required FileListView overrides
+    const char* GetEmptyStateMessage() const override;
+    void OnItemSelected(const char* filename) override;
+    
+    // Custom methods
+    void onImportTheme(const char* filename);
+    
 private:
-  void onImportThemeModalDismiss(View &view, ModalView &dialog);
-  void OpenSelectedItem();
-
-  size_t topIndex_ = 0;
-  size_t currentIndex_ = 0;
-  etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
+    void onImportThemeModalDismiss(View& view, ModalView& dialog);
 };
-#endif
+
+#endif // _THEME_IMPORT_VIEW_H_

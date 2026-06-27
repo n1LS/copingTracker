@@ -17,7 +17,6 @@ add_library(application_views
   ThemeView.cpp
   UIController.cpp
   ViewData.cpp
-  ScreenView.cpp
   MixerView.cpp
   SampleEditorView.cpp
   SampleEditProgressDisplay.cpp
