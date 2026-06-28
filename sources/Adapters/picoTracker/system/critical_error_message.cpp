@@ -44,7 +44,7 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
   for (int i = 0;; i++) {
     bool border = i % 10 < 5;
     // prepare message lines with changing border
-    msgbuffer[0] = border ? GLYPH(char_border_double_vertical_s) : ' ';
+    msgbuffer[0] = border ? CHAR(char_border_double_vertical_s) : ' ';
     msgbuffer[31] = msgbuffer[0];
 
     chargfx_set_cursor(10, 2);
@@ -55,10 +55,10 @@ void critical_error_message(const char *message, int guruId, bool (*externalCall
       for (int x = 0; x < 32; x++) {
         chargfx_set_cursor(x, y + 10);
         if (y == 0 || y == 2) {
-          char c = GLYPH(char_border_double_horizontal_s);
+          char c = CHAR(char_border_double_horizontal_s);
           if (x == 0 || x == 31) {
-            c = (x == 0) ? (y == 0 ? GLYPH(char_border_double_topLeft_s) : GLYPH(char_border_double_bottomLeft_s))
-                         : (y == 0 ? GLYPH(char_border_double_topRight_s) : GLYPH(char_border_double_bottomRight_s));
+            c = (x == 0) ? (y == 0 ? CHAR(char_border_double_topLeft_s) : CHAR(char_border_double_bottomLeft_s))
+                         : (y == 0 ? CHAR(char_border_double_topRight_s) : CHAR(char_border_double_bottomRight_s));
           }
           chargfx_putc(border ? c : ' ');
         } else {

@@ -18,24 +18,24 @@
 
 /**
  * ThemeImportView - Migrated to use FileListView base class
- * 
+ *
  * This view allows users to browse and import theme files (.thm)
  * from the themes directory.
  */
 class ThemeImportView : public FileListView {
 public:
-    ThemeImportView(GUIWindow& w, ViewData* viewData);
-    ~ThemeImportView();
-    
-    // Required FileListView overrides
-    const char* GetEmptyStateMessage() const override;
-    void OnItemSelected(const char* filename) override;
-    
-    // Custom methods
-    void onImportTheme(const char* filename);
-    
+  ThemeImportView(GUIWindow &w, ViewData *viewData);
+  ~ThemeImportView();
+
+  // Required FileListView overrides
+  const char *GetEmptyStateMessage() const override;
+  void OnItemSelected(const char *filename) override;
+
+  // Custom methods
+  void onImportTheme(const char *filename);
+
 private:
-    void onImportThemeModalDismiss(View& view, ModalView& dialog);
+  void onImportThemeModalDismiss(View &view, ModalView &dialog);
 };
 
 #endif // _THEME_IMPORT_VIEW_H_

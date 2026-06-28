@@ -84,10 +84,10 @@ void SamplePool::Load(const char *projectName) {
 
       char progressBar[13];
       for (int j = 1; j < 11; j++) {
-        progressBar[j] = j >= prog10 ? GLYPH(char_battery_empty_s) : GLYPH(char_block_full_s);
+        progressBar[j] = j >= prog10 ? CHAR(char_battery_empty_s) : CHAR(char_block_full_s);
       }
-      progressBar[0] = GLYPH(char_button_border_left_s);
-      progressBar[11] = GLYPH(char_button_border_right_s);
+      progressBar[0] = CHAR(char_button_border_left_s);
+      progressBar[11] = CHAR(char_button_border_right_s);
       progressBar[12] = 0;
 
       Status::Set("Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", name, (const char *)progressBar, progress);

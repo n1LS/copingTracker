@@ -21,61 +21,58 @@
 #include <nanoprintf.h>
 
 // Configuration for the FileListView base class
-static const FileListConfig kThemeImportConfig{
-    .title = "Import Theme",
-    .startDirectory = THEMES_DIR,
-    .fileExtension = THEME_FILE_EXTENSION,
-    .listFlags = loFiles,
-    .backNavigationTarget = VT_THEME,
-    .pageSize = SCREEN_HEIGHT - 4,
-    .allowDirectoryNavigation = false,
-    .showDirectories = false,
-    .actionTabs = {},  // No tabs - ENTER directly imports
-    .allowTabSelection = false
-};
+static const FileListConfig kThemeImportConfig{.title = "Import Theme",
+                                               .startDirectory = THEMES_DIR,
+                                               .fileExtension = THEME_FILE_EXTENSION,
+                                               .listFlags = loFiles,
+                                               .backNavigationTarget = VT_THEME,
+                                               .pageSize = SCREEN_HEIGHT - 4,
+                                               .allowDirectoryNavigation = false,
+                                               .showDirectories = false,
+                                               .actionTabs = {}, // No tabs - ENTER directly imports
+                                               .allowTabSelection = false};
 
-ThemeImportView::ThemeImportView(GUIWindow& w, ViewData* viewData)
-    : FileListView(w, viewData, kThemeImportConfig) {
+ThemeImportView::ThemeImportView(GUIWindow &w, ViewData *viewData) : FileListView(w, viewData, kThemeImportConfig) {
 }
 
 ThemeImportView::~ThemeImportView() {
 }
 
-const char* ThemeImportView::GetEmptyStateMessage() const {
-    return "No themes to show";
+const char *ThemeImportView::GetEmptyStateMessage() const {
+  return "No themes to show";
 }
 
-void ThemeImportView::OnItemSelected(const char* filename) {
-    onImportTheme(filename);
+void ThemeImportView::OnItemSelected(const char *filename) {
+  onImportTheme(filename);
 }
 
-void ThemeImportView::onImportTheme(const char* filename) {
-    // Use Config's ImportTheme method directly
-    Config* config = Config::GetInstance();
-    bool result = config->ImportTheme(filename);
+void ThemeImportView::onImportTheme(const char *filename) {
+  // Use Config's ImportTheme method directly
+  Config *config = Config::GetInstance();
+  bool result = config->ImportTheme(filename);
 
-    if (result) {
-        // Get the AppWindow to update colors
-        AppWindow& app = (AppWindow&)w_;
-        app.UpdateColorsFromConfig();
+  if (result) {
+    // Get the AppWindow to update colors
+    AppWindow &app = (AppWindow &)w_;
+    app.UpdateColorsFromConfig();
 
-        // make sure we redraw everything with the new colors
-        Clear();
+    // make sure we redraw everything with the new colors
+    Clear();
 
-        // Show success message
-        MessageBox* mb = MessageBox::Create(*this, "Theme imported successfully", MBBF_OK);
-        DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
-    } else {
-        // Show error message
-        MessageBox* mb = MessageBox::Create(*this, "Failed to import theme", MBBF_OK);
-        DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
-    }
+    // Show success message
+    MessageBox *mb = MessageBox::Create(*this, "Theme imported successfully", MBBF_OK);
+    DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
+  } else {
+    // Show error message
+    MessageBox *mb = MessageBox::Create(*this, "Failed to import theme", MBBF_OK);
+    DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
+  }
 }
 
-void ThemeImportView::onImportThemeModalDismiss(View&, ModalView& dialog) {
-    if (dialog.GetReturnCode() != MBL_OK) {
-        return;
-    }
+void ThemeImportView::onImportThemeModalDismiss(View &, ModalView &dialog) {
+  if (dialog.GetReturnCode() != MBL_OK) {
+    return;
+  }
 
-    Navigate(VT_THEME);
+  Navigate(VT_THEME);
 }

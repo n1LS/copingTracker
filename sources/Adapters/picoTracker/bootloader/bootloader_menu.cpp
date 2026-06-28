@@ -48,34 +48,34 @@ static void draw_list_box(uint8_t top_y, uint8_t bot_y) {
   // Top border: ┌───...──┐
   gfx_set_foreground(LIGHT_GRAY);
   gfx_set_cursor(1, top_y);
-  gfx_putc(GLYPH(char_border_single_topLeft_s));
+  gfx_putc(CHAR(char_border_single_topLeft_s));
 
   uint8_t col = 2;
   gfx_set_foreground(LIGHT_GRAY);
   while (col < TEXT_WIDTH - 2) {
     gfx_set_cursor(col++, top_y);
-    gfx_putc(GLYPH(char_border_single_horizontal_s));
+    gfx_putc(CHAR(char_border_single_horizontal_s));
   }
   gfx_set_cursor(TEXT_WIDTH - 2, top_y);
-  gfx_putc(GLYPH(char_border_single_topRight_s));
+  gfx_putc(CHAR(char_border_single_topRight_s));
 
   // Vertical sides on every row between top and bottom.
   for (uint8_t y = top_y + 1; y < bot_y; ++y) {
     gfx_set_cursor(1, y);
-    gfx_putc(GLYPH(char_border_single_vertical_s));
+    gfx_putc(CHAR(char_border_single_vertical_s));
     gfx_set_cursor(TEXT_WIDTH - 2, y);
-    gfx_putc(GLYPH(char_border_single_vertical_s));
+    gfx_putc(CHAR(char_border_single_vertical_s));
   }
 
   // Bottom border.
   gfx_set_cursor(1, bot_y);
-  gfx_putc(GLYPH(char_border_single_bottomLeft_s));
+  gfx_putc(CHAR(char_border_single_bottomLeft_s));
   for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
     gfx_set_cursor(x, bot_y);
-    gfx_putc(GLYPH(char_border_single_horizontal_s));
+    gfx_putc(CHAR(char_border_single_horizontal_s));
   }
   gfx_set_cursor(TEXT_WIDTH - 2, bot_y);
-  gfx_putc(GLYPH(char_border_single_bottomRight_s));
+  gfx_putc(CHAR(char_border_single_bottomRight_s));
 }
 
 void menu_render_static(void) {
@@ -201,17 +201,17 @@ void menu_show_message_box(const char *line1, const char *line2, Color color) {
   gfx_set_foreground(color);
 
   gfx_set_cursor(1, y_top);
-  gfx_putc(GLYPH(char_border_single_topLeft_s));
+  gfx_putc(CHAR(char_border_single_topLeft_s));
   for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
     gfx_set_cursor(x, y_top);
-    gfx_putc(GLYPH(char_border_single_horizontal_s));
+    gfx_putc(CHAR(char_border_single_horizontal_s));
   }
   gfx_set_cursor(TEXT_WIDTH - 2, y_top);
-  gfx_putc(GLYPH(char_border_single_topRight_s));
+  gfx_putc(CHAR(char_border_single_topRight_s));
 
   auto render_row = [](uint8_t y, const char *text) {
     gfx_set_cursor(1, y);
-    gfx_putc(GLYPH(char_border_single_vertical_s));
+    gfx_putc(CHAR(char_border_single_vertical_s));
     uint8_t col = 2;
     const uint8_t end = TEXT_WIDTH - 2;
     gfx_set_cursor(col, y);
@@ -229,20 +229,20 @@ void menu_show_message_box(const char *line1, const char *line2, Color color) {
       put(' ');
     }
     gfx_set_cursor(TEXT_WIDTH - 2, y);
-    gfx_putc(GLYPH(char_border_single_vertical_s));
+    gfx_putc(CHAR(char_border_single_vertical_s));
   };
 
   render_row(y_line1, line1);
   render_row(y_line2, line2);
 
   gfx_set_cursor(1, y_bot);
-  gfx_putc(GLYPH(char_border_single_bottomLeft_s));
+  gfx_putc(CHAR(char_border_single_bottomLeft_s));
   for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
     gfx_set_cursor(x, y_bot);
-    gfx_putc(GLYPH(char_border_single_horizontal_s));
+    gfx_putc(CHAR(char_border_single_horizontal_s));
   }
   gfx_set_cursor(TEXT_WIDTH - 2, y_bot);
-  gfx_putc(GLYPH(char_border_single_bottomRight_s));
+  gfx_putc(CHAR(char_border_single_bottomRight_s));
 
   gfx_draw_changed();
 }
@@ -262,16 +262,16 @@ void menu_show_message(const char *message, const char *message2, Color color) {
 
   // Top border.
   gfx_set_cursor(1, y_top);
-  gfx_putc(GLYPH(char_border_single_topLeft_s));
+  gfx_putc(CHAR(char_border_single_topLeft_s));
   for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
     gfx_set_cursor(x, y_top);
-    gfx_putc(GLYPH(char_border_single_horizontal_s));
+    gfx_putc(CHAR(char_border_single_horizontal_s));
   }
   gfx_set_cursor(TEXT_WIDTH - 2, y_top);
-  gfx_putc(GLYPH(char_border_single_topRight_s));
+  gfx_putc(CHAR(char_border_single_topRight_s));
 
   gfx_set_cursor(1, y_mid);
-  gfx_putc(GLYPH(char_border_single_vertical_s));
+  gfx_putc(CHAR(char_border_single_vertical_s));
 
   uint8_t col = 2;
   const uint8_t end = TEXT_WIDTH - 2;
@@ -294,17 +294,17 @@ void menu_show_message(const char *message, const char *message2, Color color) {
     write_char(' ');
 
   gfx_set_cursor(TEXT_WIDTH - 2, y_mid);
-  gfx_putc(GLYPH(char_border_single_vertical_s));
+  gfx_putc(CHAR(char_border_single_vertical_s));
 
   // Bottom border.
   gfx_set_cursor(1, y_bot);
-  gfx_putc(GLYPH(char_border_single_bottomLeft_s));
+  gfx_putc(CHAR(char_border_single_bottomLeft_s));
   for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
     gfx_set_cursor(x, y_bot);
-    gfx_putc(GLYPH(char_border_single_horizontal_s));
+    gfx_putc(CHAR(char_border_single_horizontal_s));
   }
   gfx_set_cursor(TEXT_WIDTH - 2, y_bot);
-  gfx_putc(GLYPH(char_border_single_bottomRight_s));
+  gfx_putc(CHAR(char_border_single_bottomRight_s));
 
   gfx_draw_changed();
 }

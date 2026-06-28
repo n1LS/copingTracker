@@ -417,18 +417,18 @@ void SampleImportView::DrawView() {
     if (isDir) {
       SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::directory);
       bool upDir = strcmp(buffer, "..") == 0;
-      const char prefix[3] = {GLYPH(upDir ? char_symbol_return_s : char_file_folder_s), ' ', 0};
+      const char prefix[3] = {CHAR(upDir ? char_symbol_return_s : char_file_folder_s), ' ', 0};
       DrawString(x, y, prefix);
     } else {
       SetColor(isSelected ? Theme::View::Selection::fg : Theme::FileList::file);
       // regular file, check the fype
       int filesize = fs->getFileSize(fileIndex);
       bool isSingleCycle = IS_SINGLE_CYCLE(filesize);
-      const char fileTypeSymbol = GLYPH(isSingleCycle ? char_file_cycle_s : char_file_file_s);
+      const char fileTypeSymbol = CHAR(isSingleCycle ? char_file_cycle_s : char_file_file_s);
 
       // Format the display name with appropriate prefix
       const bool inUse = (inProjectSampleDir_ && viewData_->project_->SampleInUse(buffer));
-      const char usageSymbol = GLYPH(inUse ? char_symbol_indicatorFull_s : " ");
+      const char usageSymbol = CHAR(inUse ? char_symbol_indicatorFull_s : " ");
       const char prefix[3] = {fileTypeSymbol, usageSymbol, 0};
       DrawString(x, y, prefix);
     }
@@ -730,14 +730,14 @@ void SampleImportView::goToParentDirectory(FileSystem *fs) {
     dirIndexStack_.pop();
   }
 
+  // Recalculate atLocalRoot_ after popping from stack
+  atLocalRoot_ = (dirIndexStack_.size() == 0) || inProjectSampleDir_;
+
   refreshFileIndexList(fs);
 }
 
 void SampleImportView::jumpToDirectory(FileSystem *fs, const char *name, bool pushToStack) {
-  if (!changeDirectory(fs, name)) {
-    return;
-  }
-
+  // Push to stack before changing directory so atLocalRoot_ is calculated correctly
   if (pushToStack) {
     if (dirIndexStack_.full()) {
       Trace::Error("SampleImportView directory stack overflow at depth %d", DirectoryIndexStackDepth);
@@ -751,6 +751,11 @@ void SampleImportView::jumpToDirectory(FileSystem *fs, const char *name, bool pu
   } else {
     dirIndexStack_.clear();
   }
+
+  if (!changeDirectory(fs, name)) {
+    return;
+  }
+
   topIndex_ = 0;
   currentIndex_ = 0;
 

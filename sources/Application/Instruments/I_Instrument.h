@@ -32,21 +32,13 @@ typedef struct InstrumentTypeName {
 } InstrumentTypeName;
 
 static const InstrumentTypeName InstrumentTypeNames[IT_LAST] = {
-  {.full = "None", .compact = "None"},
-  {.full = "Sample", .compact = "Smpl"},
-  {.full = "MIDI", .compact = "MIDI"},
-  {.full = "SID", .compact = "SID "},
-  {.full = "OPL3", .compact = "OPL3"},
-  {.full = "Chiptune", .compact = "Chip"},
+    {.full = "None", .compact = "None"}, {.full = "Sample", .compact = "Smpl"}, {.full = "MIDI", .compact = "MIDI"},
+    {.full = "SID", .compact = "SID "},  {.full = "OPL3", .compact = "OPL3"},   {.full = "Chiptune", .compact = "Chip"},
 };
 
 static const char *LongInstrumentNames[IT_LAST] = {
-  InstrumentTypeNames[IT_NONE].full,
-  InstrumentTypeNames[IT_SAMPLE].full,
-  InstrumentTypeNames[IT_MIDI].full,
-  InstrumentTypeNames[IT_SID].full,
-  InstrumentTypeNames[IT_OPAL].full,
-  InstrumentTypeNames[IT_CHIPTUNE].full,
+    InstrumentTypeNames[IT_NONE].full, InstrumentTypeNames[IT_SAMPLE].full, InstrumentTypeNames[IT_MIDI].full,
+    InstrumentTypeNames[IT_SID].full,  InstrumentTypeNames[IT_OPAL].full,   InstrumentTypeNames[IT_CHIPTUNE].full,
 };
 
 class I_Instrument : public VariableContainer, public Observable, public Persistent {
@@ -54,7 +46,8 @@ protected:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name_;
 
 public:
-  I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = XML_ELEM_INSTRUMENT, bool registerWithPersistence = false)
+  I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = XML_ELEM_INSTRUMENT,
+               bool registerWithPersistence = false)
       : VariableContainer(list), Persistent(nodeName, registerWithPersistence) {};
   virtual ~I_Instrument();
 

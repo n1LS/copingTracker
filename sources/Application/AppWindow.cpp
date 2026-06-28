@@ -22,7 +22,6 @@
 #include "Application/Views/ChainView.h"
 #include "Application/Views/DeviceView.h"
 #include "Application/Views/GrooveView.h"
-#include "Application/Views/SampleImportView.h"
 #include "Application/Views/InstrumentImportView.h"
 #include "Application/Views/InstrumentView.h"
 #include "Application/Views/MixerView.h"
@@ -32,6 +31,7 @@
 #include "Application/Views/PhraseView.h"
 #include "Application/Views/ProjectView.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Application/Views/SampleImportView.h"
 #include "Application/Views/SampleSlicesView.h"
 #include "Application/Views/SelectProjectView.h"
 #include "Application/Views/SongView.h"
@@ -609,6 +609,7 @@ void AppWindow::AnimationUpdate() {
   // Increment the animation frame counter
   animationFrameCounter_++;
   char failedProjectName_[MAX_PROJECT_NAME_LENGTH + 1] = {0};
+  View *viewBeforeLoad = nullptr; // Track view before load attempt
 
   if (awaitingProjectLoadAck_) {
     if (_mask != 0) {
@@ -622,13 +623,17 @@ void AppWindow::AnimationUpdate() {
   }
 
   if (loadProject_) {
+    // Save current view before load attempt for error dialog
     LoadProjectResult loadResult = LoadProject(projectName_);
     loadProject_ = false;
     if (loadResult == LoadProjectResult::LOAD_FAILED) {
       npf_snprintf(failedProjectName_, sizeof(failedProjectName_), "%s", projectName_);
-      Status::SetMultiLine("Invalid Project:\n%s\n  \nPress any key\nto continue...", failedProjectName_);
       Trace::Error("Failed to load project '%s'. Waiting for key press to load untitled", failedProjectName_);
       awaitingProjectLoadAck_ = true;
+      // Use saved view for error dialog, fallback to songView if null
+      View &errorView = views_->songView;
+      MessageBox *mb = MessageBox::Create(errorView, "Invalid Project:", failedProjectName_, MBBF_OK);
+      errorView.DoModal(mb);
       return;
     }
   }
