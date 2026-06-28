@@ -88,19 +88,28 @@ void FileListView::RefreshFileList() {
 
   printf("[FileListView] After list(): count=%zu\n", fileIndexList_.size());
 
-  // Filter out "." and ".." entries and apply directory visibility filter
+  // Filter out "." and apply directory visibility filter
+  // Keep ".." when not at local root for navigation
   for (auto it = fileIndexList_.begin(); it != fileIndexList_.end();) {
     char name[PFILENAME_SIZE];
     fs_->getFileName(*it, name, PFILENAME_SIZE);
 
-    bool isDotEntry = (strcmp(name, ".") == 0) || (strcmp(name, "..") == 0);
+    bool isDot = (strcmp(name, ".") == 0);
+    bool isDotDot = (strcmp(name, "..") == 0);
     bool isDirectory = fs_->getFileType(*it) == PFT_DIR;
 
     printf("[FileListView] Item: %s (dir=%d)\n", name, isDirectory ? 1 : 0);
 
-    // Remove dot entries
-    if (isDotEntry) {
-      printf("[FileListView] Removing dot entry\n");
+    // Always remove "." entry
+    if (isDot) {
+      printf("[FileListView] Removing . entry\n");
+      it = fileIndexList_.erase(it);
+      continue;
+    }
+
+    // Remove ".." entry if we're at local root (no parent to navigate to)
+    if (isDotDot && atLocalRoot_) {
+      printf("[FileListView] Removing .. entry (at local root)\n");
       it = fileIndexList_.erase(it);
       continue;
     }
@@ -296,7 +305,8 @@ void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Col
 
   // Draw directory indicator
   char prefix = isDirectory ? CHAR(char_file_folder_s) : CHAR(char_file_file_s);
-  npf_snprintf(buffer, 32, "%c %*.s", prefix, FILE_LIST_LINE_LENGTH - 2, temp);
+  int len = FILE_LIST_LINE_LENGTH - 2;
+  npf_snprintf(buffer, 32, "%c %-*.*s", prefix, len, len, temp);
 }
 
 void FileListView::DrawActionTabs(int y, int selectedTab) {
@@ -507,6 +517,7 @@ bool FileListView::NavigateToParent() {
       currentIndex_ = 0;
     }
 
+    // Update atLocalRoot_ based on stack depth
     atLocalRoot_ = (dirIndexStack_.size() == 0);
 
     RefreshFileList();
@@ -522,7 +533,9 @@ bool FileListView::NavigateToDirectory(const char *name) {
       dirIndexStack_.push(static_cast<uint8_t>(currentIndex_));
     }
 
-    atLocalRoot_ = false;
+    // Update atLocalRoot_ based on stack depth
+    atLocalRoot_ = (dirIndexStack_.size() == 0);
+
     currentIndex_ = 0;
     topIndex_ = 0;
 

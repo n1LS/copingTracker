@@ -287,6 +287,17 @@ protected:
     atLocalRoot_ = value;
   }
 
+  /// Reset navigation state (clear directory stack, set at local root)
+  void ResetNavigationState() {
+    dirIndexStack_ = etl::stack<uint8_t, MAX_DIRECTORY_STACK_DEPTH>();
+    atLocalRoot_ = true;
+  }
+
+  /// Set the back navigation target (for dynamic back navigation)
+  void SetBackNavigationTarget(ViewType target) {
+    config_.backNavigationTarget = target;
+  }
+
 private:
   // === Internal helpers ===
 
@@ -312,16 +323,17 @@ private:
   size_t topIndex_ = 0;
   size_t currentIndex_ = 0;
   int selectedTab_ = 0;
-  int selectedButton_ = 0; // For button system
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
 
   // === Directory navigation state ===
   etl::stack<uint8_t, MAX_DIRECTORY_STACK_DEPTH> dirIndexStack_; // Track cursor position per directory level
   bool atLocalRoot_ = true;                                      // No parent navigation available
 
-  // === ENTER release handling state ===
-  bool enterKeyHeld_ = false;
-  bool pendingDirEnterOnRelease_ = false;
+  // === Protected state for subclass access ===
+protected:
+  int selectedButton_ = 0;           // For button system
+  bool enterKeyHeld_ = false;        // Track ENTER key state
+  bool pendingDirEnterOnRelease_ = false; // Pending directory enter on release
 };
 
 #endif // _FILE_LIST_VIEW_H_

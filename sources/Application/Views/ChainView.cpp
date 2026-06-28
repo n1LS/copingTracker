@@ -620,7 +620,7 @@ void ChainView::DrawView() {
 
   SetColor(Theme::View::inactive);
   SetBackgroundColor(Theme::View::bg);
-  DrawString(pos.x_, pos.y_ - 1, "Ph Transpose     Nte In");
+  DrawString(pos.x_, pos.y_ - 1, "Ph Tsp           Nte In");
 
   // Display row numbers
 
