@@ -39,7 +39,7 @@ void FileListView::Reset() {
 }
 
 void FileListView::OnFocus() {
-  printf("[FileListView] OnFocus: startDirectory=%s\n", config_.startDirectory ? config_.startDirectory : "(null)");
+  Trace::Debug("[FileListView] OnFocus: startDirectory=%s\n", config_.startDirectory ? config_.startDirectory : "(null)");
 
   // Handle multiple directory configuration
   if (config_.directoryCount > 0 && config_.directories) {
@@ -52,21 +52,21 @@ void FileListView::OnFocus() {
     }
   } else if (config_.startDirectory) {
     // Navigate to start directory (single directory mode)
-    printf("[FileListView] >>> Changing to directory: %s\n", config_.startDirectory);
+    Trace::Debug("[FileListView] >>> Changing to directory: %s\n", config_.startDirectory);
 
     // Check if directory exists first
     bool exists = fs_->exists(config_.startDirectory);
-    printf("[FileListView] Directory exists: %d\n", exists ? 1 : 0);
+    Trace::Debug("[FileListView] Directory exists: %d\n", exists ? 1 : 0);
 
     if (!exists) {
-      printf("[FileListView] ERROR: Directory does not exist!\n");
+      Trace::Debug("[FileListView] ERROR: Directory does not exist!\n");
     }
 
     bool result = fs_->chdir(config_.startDirectory);
-    printf("[FileListView] chdir result: %d\n", result ? 1 : 0);
+    Trace::Debug("[FileListView] chdir result: %d\n", result ? 1 : 0);
 
     if (!result) {
-      printf("[FileListView] ERROR: chdir failed!\n");
+      Trace::Debug("[FileListView] ERROR: chdir failed!\n");
     }
   }
 
@@ -80,13 +80,8 @@ void FileListView::OnFocus() {
 void FileListView::RefreshFileList() {
   fileIndexList_.clear();
 
-  printf("[FileListView] RefreshFileList: extension=%s, flags=%d\n",
-         config_.fileExtension ? config_.fileExtension : "(none)", config_.listFlags);
-
   // Get directory listing
   fs_->list(&fileIndexList_, config_.fileExtension, config_.listFlags);
-
-  printf("[FileListView] After list(): count=%zu\n", fileIndexList_.size());
 
   // Filter out "." and apply directory visibility filter
   // Keep ".." when not at local root for navigation
@@ -98,33 +93,26 @@ void FileListView::RefreshFileList() {
     bool isDotDot = (strcmp(name, "..") == 0);
     bool isDirectory = fs_->getFileType(*it) == PFT_DIR;
 
-    printf("[FileListView] Item: %s (dir=%d)\n", name, isDirectory ? 1 : 0);
-
     // Always remove "." entry
     if (isDot) {
-      printf("[FileListView] Removing . entry\n");
       it = fileIndexList_.erase(it);
       continue;
     }
 
     // Remove ".." entry if we're at local root (no parent to navigate to)
     if (isDotDot && atLocalRoot_) {
-      printf("[FileListView] Removing .. entry (at local root)\n");
-      it = fileIndexList_.erase(it);
+     it = fileIndexList_.erase(it);
       continue;
     }
 
     // Filter directories if configured
     if (isDirectory && !ShouldShowDirectories()) {
-      printf("[FileListView] Filtering directory\n");
       it = fileIndexList_.erase(it);
       continue;
     }
 
     ++it;
   }
-
-  printf("[FileListView] After filtering: count=%zu\n", fileIndexList_.size());
 
   // Reset selection to top
   currentIndex_ = 0;
@@ -134,6 +122,9 @@ void FileListView::RefreshFileList() {
   if (!fileIndexList_.empty() && currentIndex_ >= fileIndexList_.size()) {
     currentIndex_ = fileIndexList_.size() - 1;
   }
+
+  // Mark view as dirty to trigger redraw
+  isDirty_ = true;
 }
 
 void FileListView::ProcessButtonMask(uint16_t mask, bool pressed) {
@@ -231,6 +222,9 @@ void FileListView::DrawView() {
   // Draw action tabs if configured
   if (!config_.actionTabs.empty()) {
     DrawActionTabs(SCREEN_HEIGHT - 1, selectedTab_);
+  } else if (config_.useButtonSystem) {
+    // Draw buttons if button system is enabled
+    DrawButtons(selectedButton_);
   }
 }
 
@@ -260,8 +254,6 @@ void FileListView::DrawFileList() {
   // Draw visible items
   size_t pageSize = config_.pageSize;
   size_t total = fileIndexList_.size();
-
-  printf("[FileListView] DrawFileList: topIndex=%zu, pageSize=%zu, total=%zu\n", topIndex_, pageSize, total);
 
   char buffer[32];
 
@@ -310,46 +302,26 @@ void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Col
 }
 
 void FileListView::DrawActionTabs(int y, int selectedTab) {
-  int x = 0;
-  size_t tabCount = config_.actionTabs.size();
-
-  for (size_t i = 0; i < tabCount; i++) {
-    const ActionTab &tab = config_.actionTabs[i];
-    bool isSelected = (static_cast<int>(i) == selectedTab);
-
-    SetColor(Theme::View::fg);
-    SetBackgroundColor(Theme::View::bg);
-
-    if (isSelected) {
-      SwapColors();
-    }
-
-    DrawString(x, y, tab.label);
-    x += 2 + static_cast<int>(strlen(tab.label));
-  }
-}
-
-void FileListView::DrawButtons(int y, int selectedButton) {
-  if (!config_.buttons || config_.buttonCount == 0) {
+  if (config_.actionTabs.empty()) {
     return;
   }
 
   int x = 0;
-  size_t buttonCount = config_.buttonCount;
 
-  for (size_t i = 0; i < buttonCount; i++) {
-    const ButtonConfig &button = config_.buttons[i];
-    bool isSelected = (static_cast<int>(i) == selectedButton);
+  for (int i = 0; i < (int)config_.actionTabs.size(); i++) {
+    x += DrawTab(x, SCREEN_HEIGHT - 1, config_.actionTabs[i].label, i == selectedTab);
+  }
+}
 
-    SetColor(Theme::View::fg);
-    SetBackgroundColor(Theme::View::bg);
+void FileListView::DrawButtons(int selectedButton) {
+  if (config_.buttons.empty()) {
+    return;
+  }
 
-    if (isSelected) {
-      SwapColors();
-    }
-
-    DrawString(x, y, button.label);
-    x += 2 + static_cast<int>(strlen(button.label));
+  int x = 0;
+  
+  for (int i = 0; i < (int)config_.buttons.size(); i++) {
+    x += DrawButton(x, SCREEN_HEIGHT - 1, config_.buttons[i].label, i == selectedButton);
   }
 }
 
@@ -474,11 +446,6 @@ bool FileListView::OnDirectorySwitch(size_t newDirectoryIndex) {
   return true;
 }
 
-void FileListView::GetStatusInfo(char *buffer, size_t bufferSize) {
-  // Default: no status info
-  buffer[0] = '\0';
-}
-
 const char *FileListView::GetDynamicTitle() {
   // Default: return null to use static title
   return nullptr;
@@ -560,7 +527,6 @@ bool FileListView::SwitchToDirectory(size_t index) {
   // Navigate to the new directory
   if (index < config_.directoryCount && config_.directories) {
     const DirectoryConfig &dirConfig = config_.directories[index];
-    printf("[FileListView] Switching to directory: %s (%s)\n", dirConfig.name, dirConfig.path);
 
     if (fs_->chdir(dirConfig.path)) {
       config_.currentDirectoryIndex = index;
@@ -580,17 +546,18 @@ const DirectoryConfig *FileListView::GetDirectoryConfig(size_t index) const {
 }
 
 const ButtonConfig *FileListView::GetButtonConfig(size_t index) const {
-  if (index < config_.buttonCount && config_.buttons) {
+  if (index < config_.buttons.size()) {
     return &config_.buttons[index];
   }
   return nullptr;
 }
 
 void FileListView::SetSelectedButton(int index) {
-  if (config_.buttons && config_.buttonCount > 0) {
+  if (!config_.buttons.empty()) {
+    size_t buttonCount = config_.buttons.size();
     if (index < 0) {
-      selectedButton_ = static_cast<int>(config_.buttonCount) - 1;
-    } else if (index >= static_cast<int>(config_.buttonCount)) {
+      selectedButton_ = static_cast<int>(buttonCount) - 1;
+    } else if (index >= static_cast<int>(buttonCount)) {
       selectedButton_ = 0;
     } else {
       selectedButton_ = index;

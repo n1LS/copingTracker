@@ -10,6 +10,7 @@
  */
 
 #include "SamplePool.h"
+#include "Application/Instruments/InstrumentBank.h"
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Utils/DrawUtils.h"
@@ -26,6 +27,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <utility>
+
+// Static callback for sample removal notifications
+static SampleRemovedCallback g_sampleRemovedCallback = nullptr;
+
+// Call the sample removal callback if registered
+static void NotifySampleRemoved(int removedIndex) {
+  if (g_sampleRemovedCallback) {
+    g_sampleRemovedCallback(removedIndex);
+  }
+}
 
 SamplePool::SamplePool() : Observable(&observers_) {
   count_ = 0;
@@ -368,15 +379,23 @@ void SamplePool::PurgeSample(int i, const char *projectName) {
 
   // delete file
   FileSystem::GetInstance()->DeleteFile(delPath.str().c_str());
-  // shift all entries from deleted to end
+  
+  // Shift all entries from deleted to end
   for (uint32_t j = i; j < count_ - 1; j++) {
     wav_[j] = std::move(wav_[j + 1]);
     memcpy(nameStore_[j], nameStore_[j + 1], MAX_INSTRUMENT_FILENAME_LENGTH + 1);
   };
+  
   // decrease sample count
   count_--;
   wav_[count_].Close();
   nameStore_[count_][0] = '\0';
+
+  // Call defragmentation to reclaim flash space (derived classes override for storage-specific handling)
+  DefragmentAfterRemove(i);
+
+  // Notify instruments about the removed sample
+  NotifySampleRemoved(i);
 
   // now notify observers
   SetChanged();
@@ -384,6 +403,21 @@ void SamplePool::PurgeSample(int i, const char *projectName) {
   ev.index_ = i;
   ev.type_ = SPET_DELETE;
   NotifyObservers(&ev);
+}
+
+bool SamplePool::RemoveSample(const char *name, const char *projectName) {
+  // Find the sample index by name
+  uint32_t index = FindSampleIndexByName(name);
+  if (index >= count_) {
+    Trace::Error("SamplePool::RemoveSample: Sample not found: %s", name);
+    return false;
+  }
+
+  // Purge the sample (deletes file and shifts entries)
+  PurgeSample(static_cast<int>(index), projectName);
+  
+  Trace::Log("SamplePool", "Removed sample: %s", name);
+  return true;
 }
 
 // returns the new samples index or -1 on error
@@ -405,4 +439,13 @@ void SamplePool::swapEntries(int src, int dst) {
   memcpy(tmp, nameStore_[src], sizeof(tmp));
   memcpy(nameStore_[src], nameStore_[dst], sizeof(tmp));
   memcpy(nameStore_[dst], tmp, sizeof(tmp));
+}
+
+void SamplePool::DefragmentAfterRemove(int removedIndex) {
+  // Base implementation does nothing - derived classes override for storage-specific defragmentation
+  (void)removedIndex;
+}
+
+void SamplePool::SetSampleRemovedCallback(SampleRemovedCallback callback) {
+  g_sampleRemovedCallback = callback;
 }

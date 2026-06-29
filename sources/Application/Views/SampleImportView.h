@@ -16,8 +16,6 @@
 #include "ViewData.h"
 
 /**
- * SampleImportView - Migrated to use FileListView base class
- *
  * This view allows users to browse and import sample files.
  * Supports dual directory mode (project samples vs SD card library).
  */
@@ -35,18 +33,23 @@ public:
   // Custom methods
   void Reset() override;
 
+  virtual void DrawView() override;
+
   // Static method to set which view will open the SampleImportView
   static void SetSourceViewType(ViewType vt);
 
   // Track which view opened the SampleImportView (default to project view)
   static ViewType sourceViewType_;
 
+  // Callback for delete confirmation (called by static RemoveSampleCallback)
+  void ConfirmRemoveSample();
+
 protected:
   // Custom item drawing
   void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) override;
 
   // Custom status info (file size + storage indicator)
-  void GetStatusInfo(char *buffer, size_t bufferSize) override;
+  void GetStatusInfo(char *buffer, size_t bufferSize);
 
   // Called after directory setup completes
   void OnDirectorySetup() override;
@@ -55,7 +58,7 @@ protected:
   void OnFocus() override;
 
   // Custom button drawing (for import/project mode buttons)
-  void DrawButtons(int y, int selectedButton) override;
+  void DrawButtons(int selectedButton) override;
 
   // Handle custom button actions (return true if handled)
   bool OnButtonOverride(uint16_t mask, bool pressed) override;
@@ -70,6 +73,7 @@ private:
   // Internal helpers
   void warpToNextSample(bool goUp);
   void import();
+  void remove();
   void preview(char *name);
   void adjustPreviewVolume(int offset);
   void showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample);

@@ -25,8 +25,15 @@
 #include <memory>
 #include <nanoprintf.h>
 
+// Static callback for delete confirmation
+static void RemoveSampleCallback(View &v, ModalView &dialog) {
+  if (dialog.GetReturnCode() == MBL_YES) {
+    ((SampleImportView &)v).ConfirmRemoveSample();
+  }
+}
+
 // Configuration for the FileListView base class
-static const FileListConfig kSampleImportConfig{
+static FileListConfig kSampleImportConfig{
     .title = "Import Sample",
     .startDirectory = SAMPLES_LIB_DIR,
     .fileExtension = ".wav",
@@ -40,8 +47,6 @@ static const FileListConfig kSampleImportConfig{
     .directories = nullptr,
     .directoryCount = 0,
     .currentDirectoryIndex = 0,
-    .buttons = nullptr,
-    .buttonCount = 3,
     .useButtonSystem = true,
     .enterOnRelease = true}; // Open dir on ENTER release
 
@@ -65,6 +70,9 @@ void SampleImportView::Reset() {
   playKeyHeld_ = false;
   editKeyHeld_ = false;
   inProjectSampleDir_ = false;
+  
+  // Reset the import view preference when leaving the view
+  viewData_->importViewShowProjectPool = false;
 }
 
 const char *SampleImportView::GetEmptyStateMessage() const {
@@ -72,12 +80,20 @@ const char *SampleImportView::GetEmptyStateMessage() const {
 }
 
 void SampleImportView::OnFocus() {
-  // Override OnFocus to handle dual directory mode
-  // First, call base class to do initial setup
-  FileListView::OnFocus();
+  // Reset state before setup
+  inProjectSampleDir_ = false;
   
-  // Check if we should show project pool (set by ProjectView)
+  // Check if we should show project pool
+  // First check if coming from SampleEditorView (one-time override)
+  // Then fall back to user's saved preference
+  bool shouldShowProjectPool = viewData_->isShowingSampleEditorProjectPool || viewData_->importViewShowProjectPool;
+  
+  // Reset the one-time flag after using it
   if (viewData_->isShowingSampleEditorProjectPool) {
+    viewData_->isShowingSampleEditorProjectPool = false;
+  }
+  
+  if (shouldShowProjectPool) {
     inProjectSampleDir_ = true;
     
     // Set back navigation to return to ProjectView
@@ -102,13 +118,10 @@ void SampleImportView::OnFocus() {
     RefreshFileList();
   } else {
     // Not in project pool mode - ensure we're in the general library
-    // Reset the inProjectSampleDir_ flag to ensure correct button display
-    inProjectSampleDir_ = false;
-    
     // Set back navigation to return to InstrumentView
     SetBackNavigationTarget(VT_INSTRUMENT);
     
-    // Navigate back to the general samples library if we're not already there
+    // Navigate to the general samples library
     auto fs = GetFileSystem();
     if (!fs->chdir(SAMPLES_LIB_DIR)) {
       Trace::Error("SAMPLEIMPORT", "Failed to chdir to SAMPLES_LIB_DIR");
@@ -116,6 +129,9 @@ void SampleImportView::OnFocus() {
     ResetNavigationState();
     RefreshFileList();
   }
+  
+  // Call base class hook for any additional setup (but skip its directory setup)
+  OnDirectorySetup();
 }
 
 void SampleImportView::OnDirectorySetup() {
@@ -175,7 +191,18 @@ void SampleImportView::GetStatusInfo(char *buffer, size_t bufferSize) {
   npf_snprintf(buffer, bufferSize, "Size: %i/%i", filesize, availableSpace);
 }
 
-void SampleImportView::DrawButtons(int y, int selectedButton) {
+void SampleImportView::DrawView() {
+  FileListView::DrawView();
+
+  char buffer[33];
+  GetStatusInfo(buffer, sizeof(buffer));
+  SetColor(Theme::View::inactive);
+  SetBackgroundColor(Theme::View::bg);
+  DrawString(0, SCREEN_HEIGHT - 2, buffer);
+}
+
+void SampleImportView::DrawButtons(int selectedButton) {
+  int y = SCREEN_HEIGHT - 1;
   int x = 0;
 
   // ensure selectedButton is valid
@@ -191,16 +218,16 @@ void SampleImportView::DrawButtons(int y, int selectedButton) {
   }
 
   if (!inProjectSampleDir_) {
-    DrawButton(x, y, "Import", selectedButton_ == 0);
-    DrawButton(x + 8, y, "Edit", selectedButton_ == 1);
+    x += DrawButton(x, y, "Import", selectedButton_ == 0);
+    x += DrawButton(x, y, "Edit", selectedButton_ == 1);
   } else {
-    DrawButton(x, y, "Edit", selectedButton_ == 0);
-    DrawButton(x + 6, y, "N/A", selectedButton_ == 1); // todo: make remove available or remove the button
+    x += DrawButton(x, y, "Edit", selectedButton_ == 0);
+    x += DrawButton(x, y, "Remove", selectedButton_ == 1); 
   }
 
   char volField[12];
   npf_snprintf(volField, sizeof(volField), "Vol:%2d", previewVolume);
-  DrawButton(x + 24, y, volField, selectedButton_ == 2);
+  DrawButton(x, SCREEN_HEIGHT - 1, volField, selectedButton_ == 2);
 }
 
 bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
@@ -285,9 +312,11 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       // toggle from sdcard "import sample" & project pool listing
       if (inProjectSampleDir_) {
         inProjectSampleDir_ = false;
+        viewData_->importViewShowProjectPool = false;
         NavigateToDirectory(SAMPLES_LIB_DIR);
       } else {
         inProjectSampleDir_ = true;
+        viewData_->importViewShowProjectPool = true;
         NavigateToDirectory(PROJECT_SAMPLES_DIR);
       }
       selectedButton_ = 0;
@@ -331,7 +360,9 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
           unsigned fileIndex = GetFileList()[GetCurrentIndex()];
           char name[PFILENAME_SIZE];
           fs->getFileName(fileIndex, name, PFILENAME_SIZE);
-          // showSampleEditor would be called here
+          showSampleEditor(name, true);
+        } else if (selectedButton_ == 1) { // Remove
+          remove();
         }
         return true;
       }
@@ -367,7 +398,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
         } else if (selectedButton_ == 1) { // Edit
           char name[PFILENAME_SIZE];
           fs->getFileName(fileIndex, name, PFILENAME_SIZE);
-          // showSampleEditor would be called here
+          showSampleEditor(name, false);
         }
       }
       return true;
@@ -461,11 +492,15 @@ void SampleImportView::adjustPreviewVolume(int offset) {
     if (newVolume > 100) newVolume = 100;
     v->SetInt(newVolume);
     Trace::Log("SAMPLEIMPORT", "Preview volume adjusted to: %d", newVolume);
+    isDirty_ = true;
   }
 }
 
 void SampleImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample) {
   Trace::Log("SAMPLEIMPORT", "Opening sample editor for: %s", filename.c_str());
+  
+  // Set the filename in viewData so SampleEditorView knows which file to load
+  viewData_->sampleEditorFilename = filename;
   
   // Navigate to the sample editor view using ScreenView's Navigate method
   // The SampleEditorView will handle loading the sample from the current directory
@@ -474,5 +509,74 @@ void SampleImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENG
 
 void SampleImportView::onConfirmRemoveProjectSample(View &view, ModalView &dialog) {
   Trace::Log("SAMPLEIMPORT", "Confirm remove project sample");
-  // Remove logic would go here
+  
+  // Get the current sample filename
+  auto fs = GetFileSystem();
+  unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+  char name[PFILENAME_SIZE];
+  fs->getFileName(fileIndex, name, PFILENAME_SIZE);
+  
+  // Get project name
+  StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> &projectNameVar = 
+    const_cast<StringWatchedVariable<MAX_PROJECT_NAME_LENGTH>&>(viewData_->project_->GetProjectNameString());
+  etl::string<MAX_PROJECT_NAME_LENGTH> projectName = projectNameVar.GetString();
+  
+  // Remove the sample from the pool
+  bool success = SamplePool::GetInstance()->RemoveSample(name, projectName.c_str());
+  
+  if (success) {
+    Trace::Log("SAMPLEIMPORT", "Sample removed successfully: %s", name);
+    // Refresh the file list to reflect the change
+    RefreshFileList();
+  } else {
+    Trace::Error("SAMPLEIMPORT", "Failed to remove sample: %s", name);
+  }
+}
+
+void SampleImportView::remove() {
+  if (IsEmpty()) {
+    return;
+  }
+  
+  // Only allow removing from project pool, not from general library
+  if (!inProjectSampleDir_) {
+    Trace::Log("SAMPLEIMPORT", "Cannot remove samples from general library");
+    return;
+  }
+  
+  // Get the current sample filename
+  auto fs = GetFileSystem();
+  unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+  char name[PFILENAME_SIZE];
+  fs->getFileName(fileIndex, name, PFILENAME_SIZE);
+  
+  // Show confirmation dialog
+  etl::string<32> confirmMsg = "Delete ";
+  confirmMsg += name;
+  MessageBox *mb = MessageBox::Create(*this, confirmMsg.c_str(), "Confirm deletion?", MBBF_YES | MBBF_NO);
+  DoModal(mb, ModalViewCallback::create<&RemoveSampleCallback>());
+}
+
+void SampleImportView::ConfirmRemoveSample() {
+  // Get the current sample filename
+  auto fs = GetFileSystem();
+  unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+  char name[PFILENAME_SIZE];
+  fs->getFileName(fileIndex, name, PFILENAME_SIZE);
+  
+  // Get project name
+  StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> &projectNameVar = 
+    const_cast<StringWatchedVariable<MAX_PROJECT_NAME_LENGTH>&>(viewData_->project_->GetProjectNameString());
+  etl::string<MAX_PROJECT_NAME_LENGTH> projectName = projectNameVar.GetString();
+  
+  // Remove the sample from the pool
+  bool success = SamplePool::GetInstance()->RemoveSample(name, projectName.c_str());
+  
+  if (success) {
+    Trace::Log("SAMPLEIMPORT", "Sample removed successfully: %s", name);
+    // Refresh the file list to reflect the change
+    RefreshFileList();
+  } else {
+    Trace::Error("SAMPLEIMPORT", "Failed to remove sample: %s", name);
+  }
 }

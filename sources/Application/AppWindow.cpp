@@ -12,6 +12,7 @@
 #include "AppWindow.h"
 #include "Application/Commands/ApplicationCommandDispatcher.h"
 #include "Application/Commands/EventDispatcher.h"
+#include "Application/Instruments/InstrumentBank.h"
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Mixer/MixerService.h"
 #include "Application/Model/Mixer.h"
@@ -198,6 +199,17 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   // LoadProject() to be called from within the next time that AnimationUpdate()
   // is called
   loadProject_ = true;
+}
+
+// Static callback wrapper for SamplePool to notify InstrumentBank
+static void OnSampleRemovedFromPool(int removedIndex) {
+  AppWindow *window = instance;
+  if (window) {
+    InstrumentBank *bank = window->GetProject().GetInstrumentBank();
+    if (bank) {
+      bank->OnSampleRemoved(removedIndex);
+    }
+  }
 }
 
 AppWindow::~AppWindow() {
@@ -389,6 +401,9 @@ AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
 
   // load the projects samples
   pool->Load(projectName);
+
+  // Register callback to update instruments when samples are removed
+  SamplePool::SetSampleRemovedCallback(&OnSampleRemovedFromPool);
 
   bool succeeded = (persist->Load(projectName) == PERSIST_LOADED);
   if (!succeeded) {

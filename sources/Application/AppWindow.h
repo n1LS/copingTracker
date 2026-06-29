@@ -75,6 +75,9 @@ public:
   void SetSdCardPresent(bool present);
 
   char projectName_[MAX_PROJECT_NAME_LENGTH + 1];
+  
+  // Accessor for callback to update instruments
+  Project &GetProject() { return project_; }
 
   static GUIColor colorPalette_[16];
 

@@ -87,5 +87,6 @@ public:
 
   // Import File browser
   const char *importViewStartDir = nullptr;
+  bool importViewShowProjectPool = false; // Track user's preference for project pool vs library
 };
 #endif

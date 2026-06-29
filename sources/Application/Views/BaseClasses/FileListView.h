@@ -74,8 +74,7 @@ struct FileListConfig {
   size_t currentDirectoryIndex; // Current active directory index
 
   // Button system configuration (alternative to action tabs)
-  ButtonConfig *buttons; // Array of button configurations
-  size_t buttonCount;    // Number of buttons
+  etl::vector<ButtonConfig, 4> buttons; // Up to 4 buttons
   bool useButtonSystem;  // If true, use button system instead of action tabs
 
   // ENTER release handling
@@ -138,7 +137,7 @@ protected:
 
   /// Override for custom button drawing (when useButtonSystem is true)
   /// Default: draws standard buttons with labels from button config
-  virtual void DrawButtons(int y, int selectedButton);
+  virtual void DrawButtons(int selectedButton);
 
   /// Called after directory setup completes
   virtual void OnDirectorySetup();
@@ -146,10 +145,6 @@ protected:
   /// Called when switching between directories (for multiple directory views)
   /// Return true to allow the switch, false to cancel
   virtual bool OnDirectorySwitch(size_t newDirectoryIndex);
-
-  /// Get additional info to display (e.g., file size, storage indicator)
-  /// Called during DrawView for custom status line drawing
-  virtual void GetStatusInfo(char *buffer, size_t bufferSize);
 
   /// Get custom title based on current state (e.g., "Project Pool" vs "Import Sample")
   virtual const char *GetDynamicTitle();

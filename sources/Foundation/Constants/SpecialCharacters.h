@@ -77,6 +77,9 @@
 #define char_button_border_left_s "\x8E"
 #define char_button_border_right_s "\x8F"
 
+#define char_tab_border_left_s "\xAE"
+#define char_tab_border_right_s "\xAF"
+
 #define char_button_right_s "\x97"
 #define char_button_up_s "\x98"
 #define char_button_down_s "\x99"
