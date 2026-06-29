@@ -376,14 +376,14 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
         setPhrase((unsigned char)next);
         isDirty_ = true;
       }
-      mask &= (0xFFFF - BM_ENTER);
+      mask &= ~BM_ENTER;
     }
   }
 
   if (viewMode_ == VM_CLONE) {
     if ((mask & BM_ENTER) && (mask & BM_ALT)) {
       clonePosition();
-      mask &= (0xFFFF - (BM_ENTER | BM_ALT));
+      mask &= ~(BM_ENTER | BM_ALT);
     } else {
       viewMode_ = VM_SELECTION;
     }

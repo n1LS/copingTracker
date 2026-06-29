@@ -34,17 +34,17 @@
 
 #define NUM_COLORS 16
 
-enum ButtonMask {
-  BM_LEFT = 1,
-  BM_DOWN = 2,
-  BM_RIGHT = 4,
-  BM_UP = 8,
-  BM_ALT = 16,
-  BM_EDIT = 32,
-  BM_ENTER = 64,
-  BM_NAV = 128,
-  BM_PLAY = 256
-};
+typedef enum ButtonMask : uint16_t {
+  BM_LEFT = 1 << 0,  // LEFT button.
+  BM_DOWN = 1 << 1,  // DOWN button.
+  BM_RIGHT = 1 << 2, // RIGHT button.
+  BM_UP = 1 << 3,    // UP button.
+  BM_ALT = 1 << 4,   // ALT button.
+  BM_EDIT = 1 << 5,  // EDIT button.
+  BM_ENTER = 1 << 6, // ENTER button.
+  BM_NAV = 1 << 7,   // NAV button.
+  BM_PLAY = 1 << 8, // PLAY button.
+} ButtonMask;
 
 enum ViewType {
   // first layer screens

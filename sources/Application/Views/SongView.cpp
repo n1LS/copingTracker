@@ -530,7 +530,7 @@ void SongView::ProcessButtonMask(uint16_t mask, bool pressed) {
         setChain((unsigned char)next);
         isDirty_ = true;
       }
-      mask &= (0xFFFF - BM_ENTER);
+      mask &= ~BM_ENTER;
     }
   }
 

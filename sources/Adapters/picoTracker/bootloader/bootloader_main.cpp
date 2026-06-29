@@ -10,6 +10,7 @@
 #include "Adapters/picoTracker/display/ili9341.h"
 #include "Adapters/picoTracker/platform/platform.h"
 #include "Adapters/picoTracker/sdcard/sdcard.h"
+#include "Application/Views/BaseClasses/View.h"
 #include "Externals/SdFat/src/SdFat.h"
 #include "bootloader_gfx.h"
 #include "bootloader_log.h"
@@ -382,15 +383,15 @@ int main(int argc, char *argv[]) {
     }
 
     // up down -> change selection
-    constexpr uint8_t UP_OR_DOWN = KEY_UP | KEY_DOWN;
+    constexpr uint8_t UP_OR_DOWN = BM_UP | BM_DOWN;
     if ((pressed & UP_OR_DOWN) && uf2_count > 0) {
-      selected_file = (selected_file + (pressed & KEY_UP ? -1 : 1) + uf2_count) % uf2_count;
+      selected_file = (selected_file + (pressed & BM_UP ? -1 : 1) + uf2_count) % uf2_count;
       bootlog("Selected UF2: %s", uf2_files[selected_file].path);
       display_dirty = true;
     }
 
     // (install &) boot selected firmware
-    if (pressed & KEY_ENTER) {
+    if (pressed & BM_ENTER) {
       if (uf2_count <= 0) {
         menu_show_message("No firmware in /firmwares. Add a UF2 to SD root, reboot.", nullptr, LIGHT_YELLOW);
       } else {
@@ -433,7 +434,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (pressed & KEY_START) {
+    if (pressed & BM_PLAY) {
       menu_show_message("Booting app slot...");
       bootlog("BOOTDBG[%s]: handoff(manual) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, APP_SLOT_ADDR);
       if (!boot_firmware_slot(APP_SLOT_ADDR)) {
@@ -443,7 +444,7 @@ int main(int argc, char *argv[]) {
     }
 
     // reboot to firmware update
-    if (pressed & KEY_EDIT) {
+    if (pressed & BM_EDIT) {
       sleep_ms(100);
       platform_bootloader();
     }

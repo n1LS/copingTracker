@@ -842,7 +842,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
           DoModal(mb);
           return;
         }
-        mask &= (0xFFFF - BM_ENTER);
+        mask &= ~BM_ENTER;
       } else {
         if ((col_ == 3) && FourCC::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) ==
                                FourCC::InstrumentCommandTable) {
@@ -852,7 +852,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
             uint16_t *c = &phrase_->steps_[viewData_->currentPhrase_][row_].param1;
             *c = next;
             isDirty_ = true;
-            mask &= (0xFFFF - BM_ENTER);
+            mask &= ~BM_ENTER;
             cmdEdit_.SetInt(next);
           }
         }

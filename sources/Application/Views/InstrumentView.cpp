@@ -832,7 +832,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       default:
         break;
     }
-    mask &= (0xFFFF - BM_ENTER);
+    mask &= ~BM_ENTER;
   } else {
     // Clear the VM_NEW state if any key other than ENTER is pressed
     if (viewMode_ == VM_NEW) {
@@ -843,7 +843,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (viewMode_ == VM_CLONE) {
     if ((mask & BM_ENTER) && (mask & BM_ALT)) {
       UIIntVarField *field = (UIIntVarField *)GetFocus();
-      mask &= (0xFFFF - BM_ENTER);
+      mask &= ~BM_ENTER;
       Variable &v = field->GetVariable();
       int current = v.GetInt();
       if (current == -1)

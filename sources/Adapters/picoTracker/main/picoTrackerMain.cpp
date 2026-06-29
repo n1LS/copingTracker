@@ -11,6 +11,7 @@
 #include "Adapters/picoTracker/platform/platform.h"
 #include "Adapters/picoTracker/system/picoTrackerSystem.h"
 #include "Adapters/picoTracker/usb/msd_mode.h"
+#include "BaseClasses/View.h"
 #include "Application/Application.h"
 #include "bsp/board.h"
 #include "hardware/clocks.h"
@@ -51,7 +52,7 @@ int main(int argc, char *argv[]) {
   // Check for EDIT key hold on boot to force load untitled project
   {
     uint16_t keys = scanKeys();
-    if (keys & KEY_EDIT) { // Check for INPUT_EDIT (bit 6)
+    if (keys & BM_EDIT) { // Check for INPUT_EDIT (bit 6)
       forceLoadUntitledProject = true;
     }
   }

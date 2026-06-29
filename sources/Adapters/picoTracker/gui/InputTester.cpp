@@ -2,6 +2,7 @@
 #include "Adapters/picoTracker/display/chargfx.h"
 #include "Adapters/picoTracker/system/input.h"
 #include "Foundation/Constants/SpecialCharacters.h"
+#include "BaseClasses/View.h"
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 
@@ -30,17 +31,17 @@ void drawInputTester() {
   draw_string(12, 2, "Button Tester");
 
   // Row 1: Up, Play, Edit
-  draw_button(13, 14, CHAR(char_button_up_s), keys & KEY_UP);
-  draw_button(16, 14, CHAR(char_button_play_s), keys & KEY_START);
-  draw_button(19, 14, CHAR(char_button_edit_s), keys & KEY_EDIT);
+  draw_button(13, 14, CHAR(char_button_up_s), keys & BM_UP);
+  draw_button(16, 14, CHAR(char_button_play_s), keys & BM_PLAY);
+  draw_button(19, 14, CHAR(char_button_edit_s), keys & BM_EDIT);
 
   // Row 2: Left, Down, Right, Enter/Set
-  draw_button(10, 17, CHAR(char_button_left_s), keys & KEY_LEFT);
-  draw_button(13, 17, CHAR(char_button_down_s), keys & KEY_DOWN);
-  draw_button(16, 17, CHAR(char_button_right_s), keys & KEY_RIGHT);
-  draw_button(19, 17, CHAR(char_button_enter_s), keys & KEY_ENTER);
+  draw_button(10, 17, CHAR(char_button_left_s), keys & BM_LEFT);
+  draw_button(13, 17, CHAR(char_button_down_s), keys & BM_DOWN);
+  draw_button(16, 17, CHAR(char_button_right_s), keys & BM_RIGHT);
+  draw_button(19, 17, CHAR(char_button_enter_s), keys & BM_ENTER);
 
   // Row 3: Alt, Nav
-  draw_button(13, 20, CHAR(char_button_alt_s), keys & KEY_ALT);
-  draw_button(16, 20, CHAR(char_button_nav_s), keys & KEY_NAV);
+  draw_button(13, 20, CHAR(char_button_alt_s), keys & BM_ALT);
+  draw_button(16, 20, CHAR(char_button_nav_s), keys & BM_NAV);
 }

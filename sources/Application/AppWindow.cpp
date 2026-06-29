@@ -569,6 +569,9 @@ bool AppWindow::onEvent(GUIEvent &event) {
       if (_currentView)
         _currentView->ProcessButton(_mask, false);
       break;
+    
+    default:
+      break;
   }
 
   if (_closeProject) {
@@ -790,21 +793,22 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         break;
       }
 
-    case VET_PLAYER_POSITION_UPDATE: {
-      PlayerEvent *pt = (PlayerEvent *)ve;
-      if (_currentView) {
-        // Check if the current view has a modal view
-        const bool hasModal = _currentView->HasModalView();
-        if (hasModal) {
-          _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
-        } else {
-          _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+    case VET_PLAYER_POSITION_UPDATE:
+      {
+        PlayerEvent *pt = (PlayerEvent *)ve;
+        if (_currentView) {
+          // Check if the current view has a modal view
+          const bool hasModal = _currentView->HasModalView();
+          if (hasModal) {
+            _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+          } else {
+            _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+          }
         }
+        break;
       }
-      break;
-    }
 
-    case VET_LOAD_PROJECT: 
+    case VET_LOAD_PROJECT:
       {
         const char *name = static_cast<const char *>(ve->GetData());
         if (name && name[0] != '\0') {
@@ -830,6 +834,10 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
     default: // VET_LIST_SELECT, VET_UPDATE
       break;
   }
+}
+
+void AppWindow::Print(char *line) {
+  PrintMultiLine(line);
 }
 
 void AppWindow::PrintMultiLine(char *line) {

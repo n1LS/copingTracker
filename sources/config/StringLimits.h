@@ -26,7 +26,7 @@ constexpr std::size_t STRING_AUDIO_RENDER_PATH_MAX = 256;
 // MIDI naming
 constexpr std::size_t STRING_MIDI_OUT_NAME_MAX = 64;
 // MIDI input channel path fragments like "0:cc:127"
-constexpr std::size_t STRING_MIDI_IN_KEY_MAX = 24;
+constexpr std::size_t STRING_MIDI_IN_BM_MAX = 24;
 
 // UI / input mappings
 constexpr std::size_t STRING_EVENT_MAPPING_MAX = 32;
