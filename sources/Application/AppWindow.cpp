@@ -569,7 +569,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
       if (_currentView)
         _currentView->ProcessButton(_mask, false);
       break;
-    
+
     default:
       break;
   }

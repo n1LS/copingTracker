@@ -741,9 +741,9 @@ void InstrumentView::warpToNext(int offset) {
 }
 
 void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
-  if (!pressed)
+  if (!pressed) {
     return;
+  }
 
   isDirty_ = false;
   if (mask == (BM_EDIT | BM_ENTER)) {

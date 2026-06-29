@@ -1031,7 +1031,7 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  // B modifier
+  // Edit modifier
 
   if (mask & BM_EDIT) {
     if (mask & BM_ALT) {
@@ -1041,7 +1041,7 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
     }
   } else {
 
-    // A Modifer
+    // Enter Modifer
 
     if (mask & BM_ENTER) {
 

@@ -1,8 +1,8 @@
 #include "InputTester.h"
 #include "Adapters/picoTracker/display/chargfx.h"
 #include "Adapters/picoTracker/system/input.h"
-#include "Foundation/Constants/SpecialCharacters.h"
 #include "BaseClasses/View.h"
+#include "Foundation/Constants/SpecialCharacters.h"
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 

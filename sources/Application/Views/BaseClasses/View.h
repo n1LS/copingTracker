@@ -43,8 +43,18 @@ typedef enum ButtonMask : uint16_t {
   BM_EDIT = 1 << 5,  // EDIT button.
   BM_ENTER = 1 << 6, // ENTER button.
   BM_NAV = 1 << 7,   // NAV button.
-  BM_PLAY = 1 << 8, // PLAY button.
+  BM_PLAY = 1 << 8,  // PLAY button.
 } ButtonMask;
+
+namespace ButtonMaskOps {
+inline bool Has(ButtonMask m, ButtonMask f) {
+  return (m & f) != 0;
+}
+
+inline bool IsOnly(ButtonMask m, ButtonMask f) {
+  return m == f;
+}
+} // namespace ButtonMaskOps
 
 enum ViewType {
   // first layer screens
@@ -194,7 +204,7 @@ struct Theme {
   };
 };
 
-enum ViewUpdateDirection { VUD_LEFT = 0, VUD_RIGHT, VUD_UP, VUD_DOWN };
+enum ViewUpdateDirection { VUD_LEFT = BM_LEFT, VUD_RIGHT = BM_RIGHT, VUD_UP = BM_UP, VUD_DOWN = BM_DOWN };
 
 class View;
 class ModalView;
