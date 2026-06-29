@@ -24,17 +24,18 @@
 #define INVALID_PROJECT_NAME "INVALID NAME"
 
 // Configuration for the FileListView base class
-static const FileListConfig kSelectProjectConfig{.title = "Browse Projects",
-                                                 .startDirectory = PROJECTS_DIR,
-                                                 .fileExtension = "", // All folders
-                                                 .listFlags = loFolders,
-                                                 .backNavigationTarget = VT_PROJECT,
-                                                 .pageSize = SCREEN_HEIGHT - 4,
-                                                 .allowDirectoryNavigation = true, // Projects are folders
-                                                 .showDirectories = true,
-                                                 .directoriesAreSelectable = true, // Projects are directories but should be selected, not navigated into
-                                                 .actionTabs = {{"Load", 0}, {"Delete", 0}},
-                                                 .allowTabSelection = true};
+static const FileListConfig kSelectProjectConfig{
+    .title = "Browse Projects",
+    .startDirectory = PROJECTS_DIR,
+    .fileExtension = "", // All folders
+    .listFlags = loFolders,
+    .backNavigationTarget = VT_PROJECT,
+    .pageSize = SCREEN_HEIGHT - 4,
+    .allowDirectoryNavigation = true, // Projects are folders
+    .showDirectories = true,
+    .directoriesAreSelectable = true, // Projects are directories but should be selected, not navigated into
+    .actionTabs = {{"Load", 0}, {"Delete", 0}},
+    .allowTabSelection = true};
 
 // ============================================================================
 // Callbacks

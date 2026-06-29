@@ -75,7 +75,7 @@ struct FileListConfig {
 
   // Button system configuration (alternative to action tabs)
   etl::vector<ButtonConfig, 4> buttons; // Up to 4 buttons
-  bool useButtonSystem;  // If true, use button system instead of action tabs
+  bool useButtonSystem;                 // If true, use button system instead of action tabs
 
   // ENTER release handling
   bool enterOnRelease; // If true, enter directory on ENTER release (not press)
@@ -326,8 +326,8 @@ private:
 
   // === Protected state for subclass access ===
 protected:
-  int selectedButton_ = 0;           // For button system
-  bool enterKeyHeld_ = false;        // Track ENTER key state
+  int selectedButton_ = 0;                // For button system
+  bool enterKeyHeld_ = false;             // Track ENTER key state
   bool pendingDirEnterOnRelease_ = false; // Pending directory enter on release
 };
 

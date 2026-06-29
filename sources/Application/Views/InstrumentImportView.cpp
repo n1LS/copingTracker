@@ -84,7 +84,8 @@ void InstrumentImportView::PrepareItemDrawing(int index, bool isSelected, Color 
   // Ensure instrumentTypeList_ is properly sized before accessing
   // This can happen if DrawView() is called before OnDirectorySetup() completes
   if (instrumentTypeList_.size() != GetItemCount()) {
-    Trace::Log("INSTRUMENTIMPORT", "Re-syncing instrumentTypeList_: size=%zu, itemCount=%zu", instrumentTypeList_.size(), GetItemCount());
+    Trace::Log("INSTRUMENTIMPORT", "Re-syncing instrumentTypeList_: size=%zu, itemCount=%zu",
+               instrumentTypeList_.size(), GetItemCount());
     detectInstrumentTypes();
   }
 

@@ -31,7 +31,6 @@ enum GUIEventType {
   ET_PADBUTTONUP,
   ET_PADBUTTONDOWN,
   ET_PLAYERUPDATE,
-  ET_SYSQUIT
 };
 
 enum GUIEventKeyType {

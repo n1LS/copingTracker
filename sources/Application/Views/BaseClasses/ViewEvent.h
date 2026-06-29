@@ -21,8 +21,7 @@ enum ViewEventType {
   VET_LOAD_PROJECT,
   VET_NEW_PROJECT,
   VET_QUIT_PROJECT,
-  VET_UPDATE,
-  VET_QUIT_APP
+  VET_UPDATE
 };
 
 class ViewEvent : public I_ObservableData {

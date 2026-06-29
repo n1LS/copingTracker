@@ -294,7 +294,7 @@ protected:
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
   void DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half);
   int DrawButton(int x, int y, const char *title, bool selected); // returns width of the drawn button
-  int DrawTab(int x, int y, const char *title, bool selected); // returns width of the drawn tab
+  int DrawTab(int x, int y, const char *title, bool selected);    // returns width of the drawn tab
 
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
     // Extract both channels

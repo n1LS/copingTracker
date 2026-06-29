@@ -437,7 +437,8 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentFilterType);
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Type       :%2.2X", 0, 0xFF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Type       :%2.2X", 0, 0xFF, 1,
+                            0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -952,15 +953,16 @@ void InstrumentView::OnFocus() {
 
   // Check if we're returning from a sample import and need to assign the sample
   if (viewData_->shouldAssignImportedSample && viewData_->lastImportedSampleIndex >= 0) {
-    Trace::Log("INSTRUMENTVIEW", "Assigning imported sample index: %d to current instrument", viewData_->lastImportedSampleIndex);
-    
+    Trace::Log("INSTRUMENTVIEW", "Assigning imported sample index: %d to current instrument",
+               viewData_->lastImportedSampleIndex);
+
     I_Instrument *instr = getInstrument();
     if (instr && instr->GetType() == IT_SAMPLE) {
-      SampleInstrument *sampleInstr = static_cast<SampleInstrument*>(instr);
+      SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
       sampleInstr->AssignSample(viewData_->lastImportedSampleIndex);
       isDirty_ = true;
     }
-    
+
     // Reset the flag after assignment
     viewData_->shouldAssignImportedSample = false;
     viewData_->lastImportedSampleIndex = -1;

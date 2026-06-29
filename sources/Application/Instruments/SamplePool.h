@@ -52,7 +52,7 @@ public:
   virtual bool unloadSample(uint32_t i) = 0;
   virtual void DefragmentAfterRemove(int removedIndex);
   int8_t ReloadSample(uint8_t index, const char *name);
-  
+
   // Set callback for sample removal notifications
   static void SetSampleRemovedCallback(SampleRemovedCallback callback);
 

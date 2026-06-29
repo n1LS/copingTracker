@@ -451,12 +451,6 @@ void ProjectView::OnPurgeInstruments() {
   project_->PurgeInstruments();
 }
 
-void ProjectView::OnQuit() {
-  ViewEvent ve(VET_QUIT_APP);
-  SetChanged();
-  NotifyObservers(&ve);
-}
-
 void ProjectView::OnFocus() {
   // only store current project name for use in a "save as" operation if it's
   // not already been modified by the user pending a save which is indicated

@@ -39,7 +39,8 @@ void FileListView::Reset() {
 }
 
 void FileListView::OnFocus() {
-  Trace::Debug("[FileListView] OnFocus: startDirectory=%s\n", config_.startDirectory ? config_.startDirectory : "(null)");
+  Trace::Debug("[FileListView] OnFocus: startDirectory=%s\n",
+               config_.startDirectory ? config_.startDirectory : "(null)");
 
   // Handle multiple directory configuration
   if (config_.directoryCount > 0 && config_.directories) {
@@ -101,7 +102,7 @@ void FileListView::RefreshFileList() {
 
     // Remove ".." entry if we're at local root (no parent to navigate to)
     if (isDotDot && atLocalRoot_) {
-     it = fileIndexList_.erase(it);
+      it = fileIndexList_.erase(it);
       continue;
     }
 
@@ -319,7 +320,7 @@ void FileListView::DrawButtons(int selectedButton) {
   }
 
   int x = 0;
-  
+
   for (int i = 0; i < (int)config_.buttons.size(); i++) {
     x += DrawButton(x, SCREEN_HEIGHT - 1, config_.buttons[i].label, i == selectedButton);
   }

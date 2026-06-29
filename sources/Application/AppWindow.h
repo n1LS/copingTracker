@@ -75,9 +75,11 @@ public:
   void SetSdCardPresent(bool present);
 
   char projectName_[MAX_PROJECT_NAME_LENGTH + 1];
-  
+
   // Accessor for callback to update instruments
-  Project &GetProject() { return project_; }
+  Project &GetProject() {
+    return project_;
+  }
 
   static GUIColor colorPalette_[16];
 
@@ -101,8 +103,6 @@ protected: // GUIWindow implementation
   virtual void PrintMultiLine(char *);
 
   void defineColor(FourCC colorCode, GUIColor &color, int paletteIndex);
-
-  void onQuitApp();
 
 private:
   bool AutoSave();
