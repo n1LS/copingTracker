@@ -1124,6 +1124,8 @@ void PhraseView::setTextProps(int col, int row, Color textColor = Theme::View::f
 }
 
 void PhraseView::DrawView() {
+  FourCC helpLegendCommand = FourCC::InstrumentCommandNone;
+
   Clear();
 
   // Draw title
@@ -1251,7 +1253,7 @@ void PhraseView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == colCmd1 || col_ == colCmdVal1)) {
-      drawHelpLegend(command);
+      helpLegendCommand = command;
     }
   }
 
@@ -1281,7 +1283,7 @@ void PhraseView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == colCmd2 || col_ == colCmdVal2)) {
-      drawHelpLegend(command);
+      helpLegendCommand = command;
     }
   }
 
@@ -1301,7 +1303,15 @@ void PhraseView::DrawView() {
   }
 
   drawMap();
-  drawNotes();
+
+  // Set info area draw mode based on what will be drawn
+  if (helpLegendCommand != FourCC::InstrumentCommandNone) {
+    infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
+    drawHelpLegend(helpLegendCommand);
+  } else {
+    infoAreaMode_ = InfoAreaDrawMode::Notes;
+    drawNotes();
+  }
 
   if (Player::GetInstance()->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
@@ -1347,8 +1357,10 @@ void PhraseView::AnimationUpdate() {
   // Handle any pending updates from OnPlayerUpdate using the consolidated flag
   // This ensures all UI drawing happens on the "main" thread (core0)
   if (needsUIUpdate_) {
-    // Draw notes
-    drawNotes();
+    // Only draw notes if help legend is not being shown (mutually exclusive)
+    if (infoAreaMode_ == InfoAreaDrawMode::Notes) {
+      drawNotes();
+    }
 
     // Draw play position marker
     GUIPoint anchor = GetAnchor();

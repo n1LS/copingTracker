@@ -591,6 +591,8 @@ void TableView::setTextProps(int row, int col, Color color = Theme::View::fg) {
 }
 
 void TableView::DrawView() {
+  FourCC helpLegendCommand = FourCC::InstrumentCommandNone;
+
   Clear();
 
   // Draw title
@@ -620,7 +622,7 @@ void TableView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 0 || col_ == 1)) {
-      drawHelpLegend(command);
+      helpLegendCommand = command;
     }
   }
 
@@ -651,7 +653,7 @@ void TableView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 2 || col_ == 3)) {
-      drawHelpLegend(command);
+      helpLegendCommand = command;
     }
   }
 
@@ -681,7 +683,7 @@ void TableView::DrawView() {
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == 4 || col_ == 5)) {
-      drawHelpLegend(command);
+      helpLegendCommand = command;
     }
   }
 
@@ -706,7 +708,15 @@ void TableView::DrawView() {
   };
 
   drawMap();
-  drawNotes();
+
+  // Set info area draw mode based on what will be drawn
+  if (helpLegendCommand != FourCC::InstrumentCommandNone) {
+    infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
+    drawHelpLegend(helpLegendCommand);
+  } else {
+    infoAreaMode_ = InfoAreaDrawMode::Notes;
+    drawNotes();
+  }
 
   Player *player = Player::GetInstance();
 
@@ -744,22 +754,13 @@ void TableView::AnimationUpdate() {
   // This ensures all UI drawing happens on the "main" thread (core0)
   if (needsUIUpdate_) {
 
-    // Draw notes
-    drawNotes();
-
     // Get anchor position for drawing
     GUIPoint anchor = GetAnchor();
     GUIPoint pos = anchor;
 
-    // Clear all cursor columns first (positions 0, 9, 18 from anchor)
-    SetBackgroundColor(Theme::View::bg);
-
-    for (int i = 0; i < 3; i++) {
-      pos.x_ = anchor.x_ - 1 + (i * 9);
-      for (int row = 0; row < 16; row++) {
-        pos.y_ = anchor.y_ + row;
-        DrawString(pos.x_, pos.y_, " ");
-      }
+    // Only draw notes if help legend is not being shown (mutually exclusive)
+    if (infoAreaMode_ == InfoAreaDrawMode::Notes) {
+      drawNotes();
     }
 
     // Only update play position if player is running

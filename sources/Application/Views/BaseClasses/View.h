@@ -46,15 +46,11 @@ typedef enum ButtonMask : uint16_t {
   BM_PLAY = 1 << 8,  // PLAY button.
 } ButtonMask;
 
-namespace ButtonMaskOps {
-inline bool Has(ButtonMask m, ButtonMask f) {
-  return (m & f) != 0;
-}
-
-inline bool IsOnly(ButtonMask m, ButtonMask f) {
-  return m == f;
-}
-} // namespace ButtonMaskOps
+// Info area draw mode - ensures drawNotes() and drawHelpLegend() are mutually exclusive
+enum class InfoAreaDrawMode {
+  Notes,
+  HelpLegend
+};
 
 enum ViewType {
   // first layer screens
