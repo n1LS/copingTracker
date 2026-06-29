@@ -466,6 +466,10 @@ void SampleImportView::import() {
   int result = SamplePool::GetInstance()->ImportSample(name, projectName.c_str());
   if (result >= 0) {
     Trace::Log("SAMPLEIMPORT", "Sample imported successfully at index: %d", result);
+    // Store the imported sample index for auto-assignment
+    viewData_->lastImportedSampleIndex = result;
+    // Navigate back to the source view after successful import
+    Navigate(sourceViewType_);
   } else {
     Trace::Error("SAMPLEIMPORT", "Failed to import sample, error code: %d", result);
   }

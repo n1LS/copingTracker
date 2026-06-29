@@ -799,6 +799,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
             viewData_->importViewStartDir = SAMPLES_LIB_DIR;
 
             // Go to import sample
+            viewData_->shouldAssignImportedSample = true;
             Navigate(VT_IMPORT);
           }
         } else {
@@ -948,6 +949,22 @@ void InstrumentView::DrawView() {
 
 void InstrumentView::OnFocus() {
   Trace::Log("INSTRUMENTVIEW", "onFocus");
+
+  // Check if we're returning from a sample import and need to assign the sample
+  if (viewData_->shouldAssignImportedSample && viewData_->lastImportedSampleIndex >= 0) {
+    Trace::Log("INSTRUMENTVIEW", "Assigning imported sample index: %d to current instrument", viewData_->lastImportedSampleIndex);
+    
+    I_Instrument *instr = getInstrument();
+    if (instr && instr->GetType() == IT_SAMPLE) {
+      SampleInstrument *sampleInstr = static_cast<SampleInstrument*>(instr);
+      sampleInstr->AssignSample(viewData_->lastImportedSampleIndex);
+      isDirty_ = true;
+    }
+    
+    // Reset the flag after assignment
+    viewData_->shouldAssignImportedSample = false;
+    viewData_->lastImportedSampleIndex = -1;
+  }
 
   // Get latest selected instrument, ensures we display the instrument that was
   // selected in the PhraseView
