@@ -1265,7 +1265,7 @@ void PhraseView::DrawView() {
   for (int j = 0; j < 16; j++) {
     uint8_t p = stepsBase[j].param1;
     setTextProps(colCmdVal1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
-    byteToHexString(p, buffer);
+    wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
@@ -1295,7 +1295,7 @@ void PhraseView::DrawView() {
   for (int j = 0; j < 16; j++) {
     uint8_t p = stepsBase[j].param2;
     setTextProps(colCmdVal2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
-    byteToHexString(p, buffer);
+    wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
