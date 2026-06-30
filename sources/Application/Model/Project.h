@@ -54,6 +54,9 @@ public:
   int GetTranspose();
   void GetProjectName(char *name);
   void SetProjectName(char *name);
+  const StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> &GetProjectNameString() const {
+    return projectName_;
+  }
   bool SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename);
 
   void Trigger();

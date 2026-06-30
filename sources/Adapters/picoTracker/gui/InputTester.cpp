@@ -15,7 +15,7 @@ static void draw_string(int x, int y, const char *s) {
 
 static void draw_button(uint8_t x, uint8_t y, char label, bool active) {
   // todo: use active to set fg/bg
-  const char line[4] = {GLYPH(char_border_single_vertical_s), label, GLYPH(char_border_single_vertical_s), 0};
+  const char line[4] = {CHAR(char_border_single_vertical_s), label, CHAR(char_border_single_vertical_s), 0};
   draw_string(x, y + 0, char_border_single_topLeft_s char_border_single_horizontal_s char_border_single_topRight_s);
   draw_string(x, y + 1, (const char *)line);
   draw_string(x, y + 2,
@@ -30,17 +30,17 @@ void drawInputTester() {
   draw_string(12, 2, "Button Tester");
 
   // Row 1: Up, Play, Edit
-  draw_button(13, 14, GLYPH(char_button_up_s), keys & KEY_UP);
-  draw_button(16, 14, GLYPH(char_button_play_s), keys & KEY_START);
-  draw_button(19, 14, GLYPH(char_button_edit_s), keys & KEY_EDIT);
+  draw_button(13, 14, CHAR(char_button_up_s), keys & KEY_UP);
+  draw_button(16, 14, CHAR(char_button_play_s), keys & KEY_START);
+  draw_button(19, 14, CHAR(char_button_edit_s), keys & KEY_EDIT);
 
   // Row 2: Left, Down, Right, Enter/Set
-  draw_button(10, 17, GLYPH(char_button_left_s), keys & KEY_LEFT);
-  draw_button(13, 17, GLYPH(char_button_down_s), keys & KEY_DOWN);
-  draw_button(16, 17, GLYPH(char_button_right_s), keys & KEY_RIGHT);
-  draw_button(19, 17, GLYPH(char_button_enter_s), keys & KEY_ENTER);
+  draw_button(10, 17, CHAR(char_button_left_s), keys & KEY_LEFT);
+  draw_button(13, 17, CHAR(char_button_down_s), keys & KEY_DOWN);
+  draw_button(16, 17, CHAR(char_button_right_s), keys & KEY_RIGHT);
+  draw_button(19, 17, CHAR(char_button_enter_s), keys & KEY_ENTER);
 
   // Row 3: Alt, Nav
-  draw_button(13, 20, GLYPH(char_button_alt_s), keys & KEY_ALT);
-  draw_button(16, 20, GLYPH(char_button_nav_s), keys & KEY_NAV);
+  draw_button(13, 20, CHAR(char_button_alt_s), keys & KEY_ALT);
+  draw_button(16, 20, CHAR(char_button_nav_s), keys & KEY_NAV);
 }

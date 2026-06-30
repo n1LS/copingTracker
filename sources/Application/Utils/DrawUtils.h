@@ -15,11 +15,11 @@
 typedef char progressBar_t[13];
 
 inline void fillProgressBar(uint32_t progress, uint32_t max, progressBar_t *progressBar) {
-  const char states[6] = {GLYPH(char_propgress_bar_0_s), GLYPH(char_propgress_bar_1_s), GLYPH(char_propgress_bar_2_s),
-                          GLYPH(char_propgress_bar_3_s), GLYPH(char_propgress_bar_4_s), GLYPH(char_block_full_s)};
+  const char states[6] = {CHAR(char_propgress_bar_0_s), CHAR(char_propgress_bar_1_s), CHAR(char_propgress_bar_2_s),
+                          CHAR(char_propgress_bar_3_s), CHAR(char_propgress_bar_4_s), CHAR(char_block_full_s)};
 
-  (*progressBar)[0] = GLYPH(char_button_border_left_s);
-  (*progressBar)[11] = GLYPH(char_button_border_right_s);
+  (*progressBar)[0] = CHAR(char_button_border_left_s);
+  (*progressBar)[11] = CHAR(char_button_border_right_s);
   (*progressBar)[12] = 0;
 
   int32_t prog60 = (max == 0U) ? 60 : static_cast<int32_t>((progress * 60U) / max);

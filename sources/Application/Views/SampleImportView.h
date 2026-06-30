@@ -9,25 +9,31 @@
  * This file is part of the copingTracker firmware
  */
 
-#ifndef _IMPORT_VIEW_H_
-#define _IMPORT_VIEW_H_
+#ifndef _SAMPLE_IMPORT_VIEW_H_
+#define _SAMPLE_IMPORT_VIEW_H_
 
-#include "Application/Views/ScreenView.h"
-#include "Externals/etl/include/etl/stack.h"
-#include "Externals/etl/include/etl/vector.h"
-#include "System/FileSystem/FileSystem.h"
+#include "Application/Views/BaseClasses/FileListView.h"
 #include "ViewData.h"
-#include <string>
 
-class SampleImportView : public ScreenView {
+/**
+ * This view allows users to browse and import sample files.
+ * Supports dual directory mode (project samples vs SD card library).
+ */
+class SampleImportView : public FileListView {
 public:
   SampleImportView(GUIWindow &w, ViewData *viewData);
   ~SampleImportView();
-  void Reset();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
-  virtual void DrawView();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
-  virtual void OnFocus();
+
+  // Required FileListView overrides
+  const char *GetEmptyStateMessage() const override;
+
+  // File selection handler
+  void OnItemSelected(const char *filename) override;
+
+  // Custom methods
+  void Reset() override;
+
+  virtual void DrawView() override;
 
   // Static method to set which view will open the SampleImportView
   static void SetSourceViewType(ViewType vt);
@@ -35,41 +41,43 @@ public:
   // Track which view opened the SampleImportView (default to project view)
   static ViewType sourceViewType_;
 
+  // Callback for delete confirmation (called by static RemoveSampleCallback)
+  void ConfirmRemoveSample();
+
 protected:
-  void enterDirectory(FileSystem *fs, const char *name);
-  void goToParentDirectory(FileSystem *fs);
-  void jumpToDirectory(FileSystem *fs, const char *name, bool pushToStack = false);
+  // Custom item drawing
+  void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) override;
+
+  // Custom status info (file size + storage indicator)
+  void GetStatusInfo(char *buffer, size_t bufferSize);
+
+  // Called after directory setup completes
+  void OnDirectorySetup() override;
+
+  // Override OnFocus to handle dual directory mode
+  void OnFocus() override;
+
+  // Custom button drawing (for import/project mode buttons)
+  void DrawButtons(int selectedButton) override;
+
+  // Handle custom button actions (return true if handled)
+  bool OnButtonOverride(uint16_t mask, bool pressed) override;
+
+private:
+  // State
+  size_t previewPlayingIndex_ = 0;
+  bool playKeyHeld_ = false;
+  bool editKeyHeld_ = false;
+  bool inProjectSampleDir_ = false;
+
+  // Internal helpers
   void warpToNextSample(bool goUp);
   void import();
+  void remove();
   void preview(char *name);
   void adjustPreviewVolume(int offset);
   void showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample);
-  void removeProjectSample(uint8_t fileIndex, FileSystem *fs);
-  void refreshFileIndexList(FileSystem *fs);
-
-private:
-  void DrawBottomBar();
-
-  static const uint8_t DirectoryIndexStackDepth = 32;
-
-  bool changeDirectory(FileSystem *fs, const char *name);
   void onConfirmRemoveProjectSample(View &view, ModalView &dialog);
-  virtual const char *emptyStateMessage() const override;
-
-  size_t topIndex_ = 0;
-  size_t currentIndex_ = 0;
-  size_t previewPlayingIndex_ = 0;
-  short selectedButton_ = 0;
-  int toInstr_ = 0;
-  bool playKeyHeld_ = false;              // Flag to track when the play key is being held down
-  bool editKeyHeld_ = false;              // Flag to track when the edit key is being held down
-  bool enterKeyHeld_ = false;             // Track ENTER key state for deferred dir-enter
-  bool pendingDirEnterOnRelease_ = false; // Open dir on ENTER release
-  bool inProjectSampleDir_ = false;       // Flag to track if we're in the project's sample directory
-  etl::stack<uint8_t, DirectoryIndexStackDepth> dirIndexStack_;
-  FileSystem *pendingDeleteFs_ = nullptr;
-  char pendingDeleteFilename_[PFILENAME_SIZE] = {};
-  etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
-  bool atLocalRoot_ = true;
 };
-#endif
+
+#endif // _SAMPLE_IMPORT_VIEW_H_

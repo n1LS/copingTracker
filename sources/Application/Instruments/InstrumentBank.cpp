@@ -268,3 +268,32 @@ uint32_t InstrumentBank::UsedInstrumentCount() const {
   }
   return count;
 }
+
+void InstrumentBank::OnSampleRemoved(int removedIndex) {
+  // Iterate through all instruments and update their sample references
+  for (auto &instrument : instruments_) {
+    // Only need to check SampleInstrument types
+    if (instrument->GetType() == IT_SAMPLE) {
+      SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instrument);
+      
+      // Get the current sample index from the instrument's variable
+      Variable *vSample = sampleInstr->FindVariable(FourCC::SampleInstrumentSample);
+      if (vSample) {
+        int currentSampleIndex = vSample->GetInt();
+        
+        if (currentSampleIndex == removedIndex) {
+          // This instrument was using the removed sample - set to NO_SAMPLE
+          vSample->SetInt(NO_SAMPLE);
+          Trace::Log("InstrumentBank", "Instrument %p sample cleared (was using removed sample %d)", 
+                     sampleInstr, removedIndex);
+        } else if (currentSampleIndex > removedIndex) {
+          // This instrument was using a sample that shifted - decrement index
+          vSample->SetInt(currentSampleIndex - 1);
+          Trace::Log("InstrumentBank", "Instrument %p sample index updated from %d to %d", 
+                     sampleInstr, currentSampleIndex, currentSampleIndex - 1);
+        }
+        // If currentSampleIndex < removedIndex, no change needed
+      }
+    }
+  }
+}

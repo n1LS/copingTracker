@@ -52,6 +52,9 @@ public:
     return instruments_;
   }
 
+  // Called when a sample is removed from the pool to update instrument references
+  void OnSampleRemoved(int removedIndex);
+
 private:
   etl::array<I_Instrument *, MAX_INSTRUMENT_COUNT> instruments_;
   etl::variant_pool<MAX_INSTRUMENT_COUNT, SampleInstrument, SIDInstrument, OpalInstrument, MidiInstrument,

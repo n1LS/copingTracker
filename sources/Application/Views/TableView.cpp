@@ -635,7 +635,7 @@ void TableView::DrawView() {
   for (int j = 0; j < 16; j++) {
     uint16_t p = table.getParam(j, 0);
     setTextProps(1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
-    byteToHexString(p, buffer);
+    wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
@@ -665,7 +665,7 @@ void TableView::DrawView() {
   for (int j = 0; j < 16; j++) {
     uint16_t p = table.getParam(j, 1);
     setTextProps(3, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
-    byteToHexString(p, buffer);
+    wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
@@ -695,7 +695,7 @@ void TableView::DrawView() {
   for (int j = 0; j < 16; j++) {
     uint16_t p = table.getParam(j, 2);
     setTextProps(5, j, Theme::Phrase::command3(j % ALT_ROW_NUMBER == 0));
-    byteToHexString(p, buffer);
+    wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }

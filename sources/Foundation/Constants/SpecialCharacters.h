@@ -1,9 +1,9 @@
 #pragma once
 
 // Keep glyphs as string literals so they can be concatenated at compile time.
-// Use GLYPH(...) when a single-byte character value is needed instead.
+// Use CHAR(...) when a single-byte character value is needed instead.
 
-#define GLYPH(s) ((s)[0])
+#define CHAR(s) ((s)[0])
 
 #define char_battery_left_s "\x80"
 #define char_battery_full_s "\x81"
@@ -76,6 +76,9 @@
 
 #define char_button_border_left_s "\x8E"
 #define char_button_border_right_s "\x8F"
+
+#define char_tab_border_left_s "\xAE"
+#define char_tab_border_right_s "\xAF"
 
 #define char_button_right_s "\x97"
 #define char_button_up_s "\x98"

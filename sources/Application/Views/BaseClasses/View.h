@@ -149,6 +149,11 @@ struct Theme {
       SWITCHABLE(fg, BLACK, WHITE)
       SWITCHABLE(bg, LIGHT_GREEN, DARK_GRAY)
     };
+
+    struct Tab {
+      SWITCHABLE(fg, BLACK, BLACK)
+      SWITCHABLE(bg, LIGHT_YELLOW, DARK_GRAY)
+    };
   };
 
   struct FileList {
@@ -288,7 +293,8 @@ protected:
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
   void DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half);
-  void DrawButton(int x, int y, const char *title, bool selected);
+  int DrawButton(int x, int y, const char *title, bool selected); // returns width of the drawn button
+  int DrawTab(int x, int y, const char *title, bool selected); // returns width of the drawn tab
 
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
     // Extract both channels

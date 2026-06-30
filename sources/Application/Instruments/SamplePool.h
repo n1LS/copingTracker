@@ -28,6 +28,12 @@ struct SamplePoolEvent : public I_ObservableData {
   int index_;
 };
 
+// Forward declaration for callback
+class InstrumentBank;
+
+// Callback type for sample removal notification
+using SampleRemovedCallback = void (*)(int removedIndex);
+
 class SamplePool : public T_Factory<SamplePool>, public Observable {
 public:
   void Load(const char *projectName);
@@ -40,10 +46,15 @@ public:
   uint32_t FindSampleIndexByName(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &name);
   int ImportSample(const char *name, const char *projectName);
   void PurgeSample(int i, const char *projectName);
+  bool RemoveSample(const char *name, const char *projectName);
   virtual bool CheckSampleFits(int sampleSize) = 0;
   virtual uint32_t GetAvailableSampleStorageSpace() = 0;
   virtual bool unloadSample(uint32_t i) = 0;
+  virtual void DefragmentAfterRemove(int removedIndex);
   int8_t ReloadSample(uint8_t index, const char *name);
+  
+  // Set callback for sample removal notifications
+  static void SetSampleRemovedCallback(SampleRemovedCallback callback);
 
 protected:
   virtual void updateStatus(uint32_t current, uint32_t total, const char *message);

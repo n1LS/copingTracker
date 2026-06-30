@@ -357,8 +357,6 @@ void View::DoModal(ModalView *view, ModalViewCallback cb) {
   modalView_->OnFocus();
   modalViewCallback_ = cb;
   isDirty_ = true;
-  // Force immediate flush to ensure modal dialog is displayed
-  ((AppWindow &)w_).Flush();
 }
 
 void View::DismissModal() {
@@ -562,7 +560,9 @@ void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool 
   }
 }
 
-void View::DrawButton(int x, int y, const char *title, bool selected) {
+int View::DrawButton(int x, int y, const char *title, bool selected) {
+  int len = strlen(title);
+
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::Button::bg(selected));
   DrawString(x, y, char_button_border_left_s);
@@ -573,7 +573,27 @@ void View::DrawButton(int x, int y, const char *title, bool selected) {
 
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::Button::bg(selected));
-  DrawString(x + 1 + strlen(title), y, char_button_border_right_s);
+  DrawString(x + 1 + len, y, char_button_border_right_s);
+
+  return len + 2;
+}
+
+int View::DrawTab(int x, int y, const char *title, bool selected) {
+  int len = strlen(title);
+
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::Tab::bg(selected));
+  DrawString(x, y, char_tab_border_left_s);
+
+  SetBackgroundColor(Theme::View::Tab::bg(selected));
+  SetColor(Theme::View::Tab::fg(selected));
+  DrawString(x + 1, y, title);
+
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::Tab::bg(selected));
+  DrawString(x + 1 + len, y, char_tab_border_right_s);
+
+  return len + 2;
 }
 
 void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half = false) {

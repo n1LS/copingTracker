@@ -192,8 +192,8 @@ void picoTrackerFileSystem::list(etl::ivector<int> *fileIndexes, const char *fil
     if (shouldInclude && matchesFilter && entry.dirIndex() != 0) {
       fileIndexes->push_back(index);
       count++;
-    } 
-    
+    }
+
     entry.close();
   }
 

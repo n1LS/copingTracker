@@ -87,5 +87,10 @@ public:
 
   // Import File browser
   const char *importViewStartDir = nullptr;
+  bool importViewShowProjectPool = false; // Track user's preference for project pool vs library
+  
+  // Track last imported sample index for auto-assignment
+  int lastImportedSampleIndex = -1;
+  bool shouldAssignImportedSample = false;
 };
 #endif

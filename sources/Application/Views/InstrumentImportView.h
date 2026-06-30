@@ -12,35 +12,47 @@
 #ifndef _INSTRUMENT_IMPORT_VIEW_H_
 #define _INSTRUMENT_IMPORT_VIEW_H_
 
-#include "ScreenView.h"
-#include "System/FileSystem/FileSystem.h"
+#include "Application/Instruments/I_Instrument.h"
+#include "BaseClasses/FileListView.h"
+#include "ModalDialogs/MessageBox.h"
 #include "ViewData.h"
-#include <string>
 
-class InstrumentImportView : public ScreenView {
+/**
+ * InstrumentImportView - Migrated to use FileListView base class
+ *
+ * This view allows users to browse and import instrument files.
+ * Shows instrument type prefixes for each file.
+ */
+class InstrumentImportView : public FileListView {
 public:
   InstrumentImportView(GUIWindow &w, ViewData *viewData);
   ~InstrumentImportView();
+
+  // Required FileListView overrides
+  const char *GetEmptyStateMessage() const override;
+
+  // File selection handler
+  void OnItemSelected(const char *filename) override;
+
+  // Custom methods
   void Reset();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
-  virtual void DrawView();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
-  virtual void OnFocus();
 
 protected:
-  virtual const char *emptyStateMessage() const override;
-  void setCurrentFolder(FileSystem *fs, const char *name);
-  void warpToNextInstrument(bool goUp);
-  void importInstrument(char *name);
+  void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) override;
+  // Called after directory setup completes
+  void OnDirectorySetup() override;
 
 private:
-  void onImportSuccess(View &view, ModalView &dialog);
-
-  size_t topIndex_ = 0;
-  size_t currentIndex_ = 0;
-  short selected_ = 0;
   int toInstrID_ = 0;
-  etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
+
+  // Instrument type cache for files
   etl::vector<InstrumentType, MAX_FILE_INDEX_SIZE> instrumentTypeList_;
+
+  // Internal helpers
+  void warpToNextInstrument(bool goUp);
+  void importInstrument(const char *name);
+  void detectInstrumentTypes();
+  void onImportSuccess(View &view, ModalView &dialog);
 };
-#endif
+
+#endif // _INSTRUMENT_IMPORT_VIEW_H_

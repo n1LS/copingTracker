@@ -40,9 +40,9 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
     ((AppWindow &)w).SetColor(Theme::View::bg);
     ((AppWindow &)w).SwapColors();
     position.x_ -= 1;
-    w.DrawChar(GLYPH(char_button_border_left_s), position);
+    w.DrawChar(CHAR(char_button_border_left_s), position);
     position.x_ += strlen(buffer) + 1;
-    w.DrawChar(GLYPH(char_button_border_right_s), position);
+    w.DrawChar(CHAR(char_button_border_right_s), position);
   }
 }
 

@@ -15,8 +15,8 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Model/Config.h"
-#include "Application/Views/SampleImportView.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Application/Views/SampleImportView.h"
 #include "BaseClasses/UIBigHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UIIntVarOffField.h"
@@ -492,18 +492,20 @@ void InstrumentView::fillSIDParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentPulseWidth);
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Pulsewidth :%2.2X", 0, 0xFFF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Pulsewidth :%2.2X", 0, 0xFFF, 1,
+                            0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentWaveform);
 
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Waveform   :%s", 0, DWF_LAST - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Waveform   :%s", 0, DWF_LAST - 1, 1,
+                            1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentVSync);
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s" Osc Sync   :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Osc Sync   :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -534,7 +536,8 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterCut);
       break;
   }
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Cutoff     :%1.1X", 0, 0x7FF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Cutoff     :%1.1X", 0, 0x7FF, 1,
+                            0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -613,7 +616,8 @@ void InstrumentView::fillMidiParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentTableAutomation);
-  intVarField_.emplace_back(UIIntVarField(position, *v, " " char_border_single_bottomLeft_s " Automation :%s", 0, 1, 1, 1));
+  intVarField_.emplace_back(
+      UIIntVarField(position, *v, " " char_border_single_bottomLeft_s " Automation :%s", 0, 1, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 }
 
@@ -795,6 +799,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
             viewData_->importViewStartDir = SAMPLES_LIB_DIR;
 
             // Go to import sample
+            viewData_->shouldAssignImportedSample = true;
             Navigate(VT_IMPORT);
           }
         } else {
@@ -945,6 +950,22 @@ void InstrumentView::DrawView() {
 void InstrumentView::OnFocus() {
   Trace::Log("INSTRUMENTVIEW", "onFocus");
 
+  // Check if we're returning from a sample import and need to assign the sample
+  if (viewData_->shouldAssignImportedSample && viewData_->lastImportedSampleIndex >= 0) {
+    Trace::Log("INSTRUMENTVIEW", "Assigning imported sample index: %d to current instrument", viewData_->lastImportedSampleIndex);
+    
+    I_Instrument *instr = getInstrument();
+    if (instr && instr->GetType() == IT_SAMPLE) {
+      SampleInstrument *sampleInstr = static_cast<SampleInstrument*>(instr);
+      sampleInstr->AssignSample(viewData_->lastImportedSampleIndex);
+      isDirty_ = true;
+    }
+    
+    // Reset the flag after assignment
+    viewData_->shouldAssignImportedSample = false;
+    viewData_->lastImportedSampleIndex = -1;
+  }
+
   // Get latest selected instrument, ensures we display the instrument that was
   // selected in the PhraseView
   int currentID = viewData_->currentInstrumentID_;
@@ -1003,9 +1024,11 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
           // Check if any instrument field has been modified
           bool instrumentModified = checkInstrumentModified();
           if (instrumentModified) {
-            MessageBox *mb = MessageBox::Create(*this, "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
+            MessageBox *mb =
+                MessageBox::Create(*this, "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
             pendingInstrumentType_ = proposedType;
-            DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
+            DoModal(mb,
+                    ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
           } else {
             // Apply the proposed type change immediately if not modified
             instrumentType_.SetInt(proposedType, false);
