@@ -21,12 +21,199 @@
 #include "UIController.h"
 #include "ViewData.h"
 #include <Application/AppWindow.h>
+#include <algorithm>
 #include <cstdint>
 #include <etl/string.h>
 #include <nanoprintf.h>
 #include <stdlib.h>
 
 int16_t PhraseView::offsets_[2][4] = {-1, 1, 12, -12, -1, 1, 16, -16};
+
+// Column-specific value update handlers
+
+void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
+  unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].note;
+
+  // Get the offset based on direction (using proper sequential indices)
+  int offset = offsets_[colNote][direction];
+
+  // when changing notes from note off, always start from C3
+  if (*c == NOTE_OFF) {
+    *c = NOTE_C3;
+    offset = 0;
+  }
+
+  // Apply scale or slice range constraints
+  uint8_t instrId = 0;
+  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  SampleInstrument *sliceInstr = nullptr;
+  if (bank && getEffectiveInstrumentForRow(row_ + yOffset, instrId)) {
+    I_Instrument *instr = bank->GetInstrument(instrId);
+    if (instr && instr->GetType() == IT_SAMPLE) {
+      sliceInstr = static_cast<SampleInstrument *>(instr);
+    }
+  }
+
+  uint8_t sliceFirst = 0;
+  uint8_t sliceLast = 0;
+  if (sliceInstr && sliceInstr->GetSliceNoteRange(sliceFirst, sliceLast)) {
+    int newNote = *c + offset;
+    if (newNote < sliceFirst) {
+      newNote = sliceFirst;
+    } else if (newNote > sliceLast) {
+      newNote = sliceLast;
+    }
+    *c = static_cast<unsigned char>(newNote);
+  } else {
+    // Add/remove from offset to match selected scale
+    int scale = viewData_->project_->GetScale();
+    int scaleRoot = viewData_->project_->GetScaleRoot();
+
+    // Calculate the new note with the offset
+    int newNote = *c + offset;
+
+    // Check if the note is in the scale (adjusted for root)
+    while (newNote >= 0 && !scaleSteps[scale][(newNote + 12 - scaleRoot) % 12]) {
+      offset > 0 ? offset++ : offset--;
+      newNote = *c + offset;
+    }
+    updateData(c, offset, HIGHEST_NOTE, true);
+  }
+
+  lastNote_ = *c;
+  // Need to restart audition to update it with the new note
+  startAudition(false);
+}
+
+void PhraseView::updateInstrumentValue(ViewUpdateDirection direction, int yOffset) {
+  unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].instrument;
+  updateData(c, offsets_[colInstrument][direction], MAX_INSTRUMENT_COUNT - 1, false);
+  lastInstr_ = *c;
+}
+
+void PhraseView::updateVolumeValue(ViewUpdateDirection direction, int yOffset) {
+  uint8_t &vol = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].volume;
+
+  switch (direction) {
+    case VUD_UP:
+      vol = 0x0F;
+      break;
+    case VUD_DOWN:
+      vol = 0xFF;
+      break;
+    case VUD_LEFT:
+      if (vol == 0) {
+        // below 0 is no value
+        vol = NO_VOLUME;
+      } else if (vol != NO_VOLUME) {
+        vol--;
+      }
+      break;
+    case VUD_RIGHT:
+      if (vol == NO_VOLUME) {
+        vol = 0;
+      } else {
+        vol = std::min(0x0F, vol + 1);
+      }
+      break;
+  }
+  lastVolume_ = vol;
+}
+
+void PhraseView::updateCommand1Value(ViewUpdateDirection direction, int yOffset) {
+  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
+  FourCC cc = FourCC::enum_type(step.cmd1);
+
+  switch (direction) {
+    case VUD_LEFT:
+      cc = CommandList::GetPrev(cc);
+      break;
+    case VUD_RIGHT:
+      cc = CommandList::GetNext(cc);
+      break;
+    case VUD_UP:
+      cc = CommandList::GetNextAlpha(cc);
+      break;
+    case VUD_DOWN:
+      cc = CommandList::GetPrevAlpha(cc);
+      break;
+  }
+  step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
+  lastCmd_ = cc;
+}
+
+void PhraseView::updateCommand1Param(ViewUpdateDirection direction, int yOffset) {
+  switch (direction) {
+    case VUD_LEFT:
+      cmdEditField_.ProcessArrow(BM_LEFT);
+      break;
+    case VUD_RIGHT:
+      cmdEditField_.ProcessArrow(BM_RIGHT);
+      break;
+    case VUD_UP:
+      cmdEditField_.ProcessArrow(BM_UP);
+      break;
+    case VUD_DOWN:
+      cmdEditField_.ProcessArrow(BM_DOWN);
+      break;
+  }
+
+  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
+  FourCC currentCmd = FourCC::enum_type(step.cmd1);
+  uint8_t paramValue = cmdEdit_.GetInt();
+  paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
+  cmdEdit_.SetInt(paramValue);
+  step.param1 = paramValue;
+  lastParam_ = paramValue;
+}
+
+void PhraseView::updateCommand2Value(ViewUpdateDirection direction, int yOffset) {
+  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
+  FourCC cc = FourCC::enum_type(step.cmd2);
+
+  switch (direction) {
+    case VUD_LEFT:
+      cc = CommandList::GetPrev(cc);
+      break;
+    case VUD_RIGHT:
+      cc = CommandList::GetNext(cc);
+      break;
+    case VUD_UP:
+      cc = CommandList::GetNextAlpha(cc);
+      break;
+    case VUD_DOWN:
+      cc = CommandList::GetPrevAlpha(cc);
+      break;
+  }
+
+  step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
+  lastCmd_ = cc;
+}
+
+void PhraseView::updateCommand2Param(ViewUpdateDirection direction, int yOffset) {
+  switch (direction) {
+    case VUD_LEFT:
+      cmdEditField_.ProcessArrow(BM_LEFT);
+      break;
+    case VUD_RIGHT:
+      cmdEditField_.ProcessArrow(BM_RIGHT);
+      break;
+    case VUD_UP:
+      cmdEditField_.ProcessArrow(BM_UP);
+      break;
+    case VUD_DOWN:
+      cmdEditField_.ProcessArrow(BM_DOWN);
+      break;
+  }
+
+  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
+  FourCC currentCmd = FourCC::enum_type(step.cmd2);
+  uint8_t paramValue = cmdEdit_.GetInt();
+  paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
+  cmdEdit_.SetInt(paramValue);
+  step.param2 = paramValue;
+  lastParam_ = paramValue;
+}
 
 PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
     : ScreenView(w, viewData), cmdEdit_(FourCC::ActionEdit, 0), cmdEditPos_(0, 10),
@@ -70,6 +257,7 @@ void PhraseView::Reset() {
   clipboard_.height_ = 0;
   clipboard_.col_ = 0;
   clipboard_.row_ = 0;
+  
   for (int i = 0; i < 16; i++) {
     clipboard_.steps_[i] = {0xFF, 0, 0, 0, 0, 0, 0xFF};
   }
@@ -159,216 +347,29 @@ void PhraseView::updateCursor(int dx, int dy) {
 }
 
 void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, int yOffset) {
-
-  unsigned char *c = 0;
-  unsigned char limit = 0;
-
-  bool wrap = false;
-
   switch (col_ + xOffset) {
     case colNote:
-      c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].note;
-      limit = HIGHEST_NOTE;
-      wrap = true;
+      updateNoteValue(direction, yOffset);
       break;
-
     case colInstrument:
-      c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].instrument;
-      limit = MAX_INSTRUMENT_COUNT - 1;
-      wrap = true;
+      updateInstrumentValue(direction, yOffset);
       break;
-
     case colVolume:
-      {
-        uint8_t &vol = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].volume;
-        if (direction == VUD_UP) {
-          vol = 0x0F;
-        } else if (direction == VUD_DOWN) {
-          vol = 0xFF;
-        } else if (direction == VUD_LEFT) {
-          if (vol == 0) {
-            // below 0 is no value
-            vol = NO_VOLUME;
-          } else if (vol != NO_VOLUME) {
-            vol--;
-          }
-        } else if (direction == VUD_RIGHT) {
-          if (vol == NO_VOLUME) {
-            vol = 0;
-          } else {
-            vol = std::min(0x0F, vol + 1);
-          }
-        }
-        lastVolume_ = vol;
-        break;
-      }
-
+      updateVolumeValue(direction, yOffset);
+      break;
     case colCmd1:
-      {
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-        FourCC cc = FourCC::enum_type(step.cmd1);
-        switch (direction) {
-          case VUD_RIGHT:
-            cc = CommandList::GetNext(cc);
-            break;
-          case VUD_UP:
-            cc = CommandList::GetNextAlpha(cc);
-            break;
-          case VUD_LEFT:
-            cc = CommandList::GetPrev(cc);
-            break;
-          case VUD_DOWN:
-            cc = CommandList::GetPrevAlpha(cc);
-            break;
-        }
-        step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
-        lastCmd_ = cc;
-        break;
-      }
-
+      updateCommand1Value(direction, yOffset);
+      break;
     case colCmdVal1:
-      {
-        switch (direction) {
-          case VUD_RIGHT:
-            cmdEditField_.ProcessArrow(BM_RIGHT);
-            break;
-          case VUD_UP:
-            cmdEditField_.ProcessArrow(BM_UP);
-            break;
-          case VUD_LEFT:
-            cmdEditField_.ProcessArrow(BM_LEFT);
-            break;
-          case VUD_DOWN:
-            cmdEditField_.ProcessArrow(BM_DOWN);
-            break;
-        }
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-        FourCC currentCmd = FourCC::enum_type(step.cmd1);
-        uint8_t paramValue = cmdEdit_.GetInt();
-        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-        cmdEdit_.SetInt(paramValue);
-        step.param1 = paramValue;
-        lastParam_ = paramValue;
-        break;
-      }
+      updateCommand1Param(direction, yOffset);
+      break;
     case colCmd2:
-      {
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-        FourCC cc = FourCC::enum_type(step.cmd2);
-        switch (direction) {
-          case VUD_RIGHT:
-            cc = CommandList::GetNext(cc);
-            break;
-          case VUD_UP:
-            cc = CommandList::GetNextAlpha(cc);
-            break;
-          case VUD_LEFT:
-            cc = CommandList::GetPrev(cc);
-            break;
-          case VUD_DOWN:
-            cc = CommandList::GetPrevAlpha(cc);
-            break;
-        }
-        step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
-        lastCmd_ = cc;
-        break;
-      }
+      updateCommand2Value(direction, yOffset);
+      break;
     case colCmdVal2:
-      {
-        switch (direction) {
-          case VUD_RIGHT:
-            cmdEditField_.ProcessArrow(BM_RIGHT);
-            break;
-          case VUD_UP:
-            cmdEditField_.ProcessArrow(BM_UP);
-            break;
-          case VUD_LEFT:
-            cmdEditField_.ProcessArrow(BM_LEFT);
-            break;
-          case VUD_DOWN:
-            cmdEditField_.ProcessArrow(BM_DOWN);
-            break;
-        }
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-        FourCC currentCmd = FourCC::enum_type(step.cmd2);
-        uint8_t paramValue = cmdEdit_.GetInt();
-        paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-        cmdEdit_.SetInt(paramValue);
-        step.param2 = paramValue;
-        lastParam_ = paramValue;
-        break;
-      }
+      updateCommand2Param(direction, yOffset);
+      break;
   }
-
-  if ((c) && (*c != NO_NOTE)) {
-    int offset = offsets_[col_ + xOffset][direction];
-
-    // when changing notes from note off, always start from C3
-    if (*c == NOTE_OFF) {
-      *c = NOTE_C3;
-      offset = 0;
-    }
-
-    // if note column apply the set scale or slice range
-    if (col_ + xOffset == 0) {
-      uint8_t instrId = 0;
-      InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-      SampleInstrument *sliceInstr = nullptr;
-      if (bank && getEffectiveInstrumentForRow(row_ + yOffset, instrId)) {
-        I_Instrument *instr = bank->GetInstrument(instrId);
-        if (instr && instr->GetType() == IT_SAMPLE) {
-          sliceInstr = static_cast<SampleInstrument *>(instr);
-        }
-      }
-
-      uint8_t sliceFirst = 0;
-      uint8_t sliceLast = 0;
-      if (sliceInstr && sliceInstr->GetSliceNoteRange(sliceFirst, sliceLast)) {
-        int newNote = *c + offset;
-        if (newNote < sliceFirst) {
-          newNote = sliceFirst;
-        } else if (newNote > sliceLast) {
-          newNote = sliceLast;
-        }
-        *c = static_cast<unsigned char>(newNote);
-      } else {
-        // Add/remove from offset to match selected scale
-        int scale = viewData_->project_->GetScale();
-        int scaleRoot = viewData_->project_->GetScaleRoot();
-
-        // Calculate the new note with the offset
-        int newNote = *c + offset;
-
-        // Check if the note is in the scale (adjusted for root)
-        // For root = 0, (newNote + 12 - 0) % 12 simplifies to newNote % 12
-        while (newNote >= 0 && !scaleSteps[scale][(newNote + 12 - scaleRoot) % 12]) {
-          offset > 0 ? offset++ : offset--;
-          newNote = *c + offset;
-        }
-        updateData(c, offset, limit, wrap);
-      }
-    } else {
-      updateData(c, offset, limit, wrap);
-    }
-
-    switch (col_ + xOffset) {
-      case colNote:
-        lastNote_ = *c;
-        // Need to restart audition to update it with the new note
-        startAudition(false);
-        break;
-
-      case colInstrument:
-        lastInstr_ = *c;
-        break;
-
-        // TODO: store last volume as well?
-
-      default:
-        break;
-    }
-  }
-
   isDirty_ = true;
 }
 

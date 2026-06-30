@@ -200,7 +200,12 @@ struct Theme {
   };
 };
 
-enum ViewUpdateDirection { VUD_LEFT = BM_LEFT, VUD_RIGHT = BM_RIGHT, VUD_UP = BM_UP, VUD_DOWN = BM_DOWN };
+enum ViewUpdateDirection: int { 
+  VUD_LEFT = 0, 
+  VUD_RIGHT = 1, 
+  VUD_UP = 2, 
+  VUD_DOWN = 3
+};
 
 class View;
 class ModalView;

@@ -30,51 +30,51 @@ HelpLegend getHelpLegend(FourCC command) {
   switch (command) {
     case FourCC::InstrumentCommandKill:
       LEGEND(00,
-    "KILl: --bb                ",
-    "stop playback after after ",
-    "bb ticks                  ",
+    "KILl: --aa                ",
+    "Stop songn playback after ",
+    "aa ticks.                 ",
     "                          ");
     case FourCC::InstrumentCommandLoopOffset:
       LEGEND(01,
     "Loop OFset: aaaa          ",
     "Shift loop start & end by ",
-    "aaaa                      ",
+    "aaaa samples.             ",
     "                          ");
     case FourCC::InstrumentCommandArpeggiator:
       LEGEND(02,
     "ARPeggio: abcd            ",
-    "Cycle thru relative pitch ",
-    "abc                      B",
-    "D                        X");
+    "Cycle through the relative",
+    "offsets a,b,c&d. If a step",
+    "is 0 the arp starts over.");
     case FourCC::InstrumentCommandVolume:
       LEGEND(03,
     "VOLume: aabb              ",
-    "reach volume bb at speed  ",
-    "aa                        ",
+    "Move towards volume bb at ",
+    "the rate aa.              ",
     "                          ");
     case FourCC::InstrumentCommandVelocity:
       LEGEND(04,
     "VELocity: --bb            ",
-    "send MIDI velocity cmd bb ",
-    "                          ",
+    "send MIDI velocity command",
+    "bb                        ",
     "                          ");
     case FourCC::InstrumentCommandPitchSlide:
       LEGEND(05,
     "Pitch SLide: aabb         ",
-    "speed aa, slide to pitch  ",
-    "bb                        ",
+    "Slide to pitch bb at rate ",
+    "aa.                       ",
     "                          ");
     case FourCC::InstrumentCommandHop:
       LEGEND(06,
     "HOP: aabb                 ",
-    "hop to bb aa times        ",
-    "                          ",
+    "Hop to step bb for aa     ",
+    "times.                    ",
     "                          ");
     case FourCC::InstrumentCommandLegato:
       LEGEND(07,
     "LEGato: aabb              ",
-    "slide to pitch bb at speed",
-    "aa                        ",
+    "Slide to pitch bb at speed",
+    "aa.                       ",
     "                          ");
     case FourCC::InstrumentCommandRetrigger:
       LEGEND(08,
@@ -115,26 +115,26 @@ HelpLegend getHelpLegend(FourCC command) {
     case FourCC::InstrumentCommandLowPassFilter:
       LEGEND(14,
     "FiLTer: aabb              ",
-    "cutoff aa, resonance bb   ",
-    "                          ",
+    "Set filter cutoff aa and  ",
+    "resonance bb.             ",
     "                          ");
     case FourCC::InstrumentCommandTable:
       LEGEND(15,
     "TaBLe: --bb               ",
-    "run table bb              ",
+    "Run table bb.             ",
     "                          ",
     "                          ");
     case FourCC::InstrumentCommandCrush:
       LEGEND(16,
     "drive & CruSH: aa-b       ",
-    "drive aa crush -b         ",
-    "                          ",
+    "Set drive level to aa and ",
+    "Crush to -b (0-F)         ",
     "                          ");
     case FourCC::InstrumentCommandFilterCut:
       LEGEND(17,
     "Filter CuToff: aabb       ",
-    "speed aa, target cutoff bb",
-    "                          ",
+    "Move towards target cutoff",
+    "bb at rate aa.            ",
     "                          ");
     case FourCC::InstrumentCommandPan:;
       LEGEND(18,
@@ -175,8 +175,8 @@ HelpLegend getHelpLegend(FourCC command) {
     case FourCC::InstrumentCommandStop:
       LEGEND(24,
     "Stop Table Playback       ",
-    "                          ",
-    "                          ",
+    "Instantly stop playing the",
+    "current table.            ",
     "                          ");
     case FourCC::InstrumentCommandGateOff:
       LEGEND(25,

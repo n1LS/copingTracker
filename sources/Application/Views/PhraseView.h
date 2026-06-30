@@ -54,6 +54,15 @@ protected:
   void updateCursor(int dx, int dy);
   void updateCursorValue(ViewUpdateDirection offset, int xOffset = 0, int yOffset = 0);
   void updateSelectionValue(ViewUpdateDirection direction);
+
+  // Column-specific value update handlers
+  void updateNoteValue(ViewUpdateDirection direction, int yOffset = 0);
+  void updateInstrumentValue(ViewUpdateDirection direction, int yOffset = 0);
+  void updateVolumeValue(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommand1Value(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommand1Param(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommand2Value(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommand2Param(ViewUpdateDirection direction, int yOffset = 0);
   void warpToNeighbour(int offset);
   void warpInChain(int offset);
   void cutPosition();
