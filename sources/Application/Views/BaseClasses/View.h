@@ -17,6 +17,7 @@
 #include "Application/Model/Config.h"
 #include "Application/Model/Project.h"
 #include "Application/Player/Player.h"
+#include "Application/Utils/TintChar.h"
 #include "Application/Utils/mathutils.h"
 #include "Application/Utils/updateData.h"
 #include "Externals/etl/include/etl/delegate.h"
@@ -272,6 +273,7 @@ public:
   virtual void SetBackgroundColor(Color cd);
   virtual void ClearTextRect(int x, int y, int w, int h);
   virtual void DrawString(int x, int y, const char *text);
+  virtual void DrawTintString(int x, int y, const TintChar *data);
   virtual void DrawChar(int x, int y, const char character, bool transparent = false);
   virtual void DrawRect(GUIRect &r, Color color);
 

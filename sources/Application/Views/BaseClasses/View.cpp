@@ -438,6 +438,20 @@ void View::DrawString(int x, int y, const char *text) {
   w_.DrawString(text, pos);
 }
 
+void View::DrawTintString(int x, int y, const TintChar *data) {
+  GUIPoint pos(x, y);
+
+  TintChar *cell = (TintChar *)data;
+
+  while (cell->character != 0) {
+    w_.SetColor(cell->fgBg.fg);
+    w_.SetBackgroundColor(cell->fgBg.bg);
+    w_.DrawChar(cell->character, pos, false);
+    pos.x_++;
+    cell++;
+  }
+}
+
 void View::DrawChar(int x, int y, const char character, bool transparent) {
   GUIPoint pos(x, y);
   w_.DrawChar(character, pos, transparent);
@@ -672,22 +686,10 @@ void View::drawHelpLegend(FourCC command) {
 
   int y = SCREEN_HEIGHT - 4;
 
-  bool preColon = true;
-  for (size_t x = 0; x < strlen(help.line1); x++) {
-    unsigned char c = help.line1[x];
-
-    if (c == ':') {
-      preColon = false;
-    }
-
-    SetColor(Theme::View::help(preColon && c >= 'A' && c <= 'Z'));
-    DrawChar(5 + x, y, help.line1[x]);
-  }
-
-  SetColor(Theme::View::help(false));
-  DrawString(5, y + 1, help.line2);
-  DrawString(5, y + 2, help.line3);
-  DrawString(5, y + 3, help.line4);
+  DrawTintString(5, y + 0, help.line1.data());
+  DrawTintString(5, y + 1, help.line2.data());
+  DrawTintString(5, y + 2, help.line3.data());
+  DrawTintString(5, y + 3, help.line4.data());
 }
 
 void View::DrawTitle(const char *format, ...) {
