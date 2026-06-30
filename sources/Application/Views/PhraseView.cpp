@@ -257,7 +257,7 @@ void PhraseView::Reset() {
   clipboard_.height_ = 0;
   clipboard_.col_ = 0;
   clipboard_.row_ = 0;
-  
+
   for (int i = 0; i < 16; i++) {
     clipboard_.steps_[i] = {0xFF, 0, 0, 0, 0, 0, 0xFF};
   }
@@ -547,11 +547,11 @@ void PhraseView::warpToNeighbour(int offset) {
   }
 }
 
-/*******************************************************************************
+/*****************************************************************************
  getSelectionRect:
         gets the normalized rectangle of the current
         selection. Valid only while selection is drawn
-******************************************************************************/
+ *****************************************************************************/
 
 GUIRect PhraseView::getSelectionRect() {
   GUIRect r(clipboard_.col_, clipboard_.row_, col_, row_);
@@ -559,15 +559,14 @@ GUIRect PhraseView::getSelectionRect() {
   return r;
 }
 
-/*******************************************************************************
+/*****************************************************************************
  fillClipboardData:
-
         copies the necessary information from the
         current selection to the clipboard for future
         paste. We're copying data all across the row
         because we"re too lazy to try to figure a better
         procedure
-******************************************************************************/
+ *****************************************************************************/
 
 void PhraseView::fillClipboardData() {
 
@@ -633,11 +632,12 @@ void PhraseView::extendSelection() {
     isDirty_ = true;
   }
 }
-/*******************************************************************************
+
+/*****************************************************************************
  copySelection:
         copies data in the current selection to the
         clipboard & end selection process
-******************************************************************************/
+ *****************************************************************************/
 
 void PhraseView::copySelection() {
 
@@ -654,11 +654,11 @@ void PhraseView::copySelection() {
   isDirty_ = true;
 }
 
-/*******************************************************************************
+/*****************************************************************************
  cut:  copies data in the current selection to the
        clipboard, clear selection content & end selection
        process
-******************************************************************************/
+ *****************************************************************************/
 
 void PhraseView::cutSelection() {
 
@@ -711,10 +711,10 @@ void PhraseView::cutSelection() {
   isDirty_ = true;
 }
 
-/*******************************************************************************
+/*****************************************************************************
  pasteClipboard:
         copies data in the clipboard to the current step
-******************************************************************************/
+ *****************************************************************************/
 
 void PhraseView::pasteClipboard() {
 
