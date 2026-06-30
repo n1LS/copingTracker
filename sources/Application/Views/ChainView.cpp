@@ -376,14 +376,14 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
         setPhrase((unsigned char)next);
         isDirty_ = true;
       }
-      mask &= (0xFFFF - BM_ENTER);
+      mask &= ~BM_ENTER;
     }
   }
 
   if (viewMode_ == VM_CLONE) {
     if ((mask & BM_ENTER) && (mask & BM_ALT)) {
       clonePosition();
-      mask &= (0xFFFF - (BM_ENTER | BM_ALT));
+      mask &= ~(BM_ENTER | BM_ALT);
     } else {
       viewMode_ = VM_SELECTION;
     }
@@ -496,7 +496,7 @@ void ChainView::processSelectionButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  // B Modifier
+  // Edit Modifier
 
   if (mask & BM_EDIT) {
     if (mask == BM_EDIT)
@@ -507,10 +507,9 @@ void ChainView::processSelectionButtonMask(uint16_t mask) {
       extendSelection();
   } else {
 
-    // A modifier
+    // Enter modifier
 
     if (mask & BM_ENTER) {
-
       if (mask & BM_DOWN)
         updateSelectionValue(viewData_->chainCol_ == 0 ? -0x10 : -0x0C);
       if (mask & BM_UP)
@@ -620,7 +619,7 @@ void ChainView::DrawView() {
 
   SetColor(Theme::View::inactive);
   SetBackgroundColor(Theme::View::bg);
-  DrawString(pos.x_, pos.y_ - 1, "Ph Tsp           Nte In");
+  DrawString(pos.x_, pos.y_ - 1, "Ph Tsp");
 
   // Display row numbers
 
@@ -781,6 +780,9 @@ void ChainView::AnimationUpdate() {
 void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
   pos.x_ += 17;
+
+  SetColor(Theme::Song::preview(true));
+  DrawString(pos.x_, pos.y_ - 1, "Nte In");
 
   // Display notes
   PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];

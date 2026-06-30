@@ -556,51 +556,24 @@ bool AppWindow::onEvent(GUIEvent &event) {
   uint16_t v = 1 << event.GetValue();
 
   MixerService *sm = MixerService::GetInstance();
-  // TODO(democloid): this causes a deadlock, verify original intent
-  //  MixerService *ms = MixerService::GetInstance();
-  //  ms->Lock();
 
   switch (event.GetType()) {
-
     case ET_PADBUTTONDOWN:
-
       _mask |= v;
       if (_currentView)
         _currentView->ProcessButton(_mask, true);
       break;
 
     case ET_PADBUTTONUP:
-
-      _mask &= (0xFFFF - v);
+      _mask &= ~v;
       if (_currentView)
         _currentView->ProcessButton(_mask, false);
       break;
 
-    case ET_SYSQUIT:
-      _shouldQuit = true;
-      break;
-
-      /*		case ET_KEYDOWN:
-              if
-         (event.GetValue()==EKT_ESCAPE&&!Player::GetInstance()->IsRunning()) {
-         if
-         (_currentView!=_listView) {
-         CloseProject() ;
-         _currentView->SetDirty(true) ;
-         } else {
-                              System::GetInstance()->PostQuitMessage() ;
-                      };
-              } ;
-                  */
-
     default:
       break;
   }
-  //  ms->Unlock();
 
-  if (_shouldQuit) {
-    onQuitApp();
-  }
   if (_closeProject) {
     CloseProject();
     SetDirty();
@@ -858,21 +831,9 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         _closeProject = true;
         break;
       }
-    case VET_QUIT_APP:
-      _shouldQuit = true;
-      break;
     default: // VET_LIST_SELECT, VET_UPDATE
       break;
   }
-}
-
-void AppWindow::onQuitApp() {
-  Player *player = Player::GetInstance();
-  player->Stop();
-  player->RemoveObserver(*this);
-
-  player->Reset();
-  System::GetInstance()->PostQuitMessage();
 }
 
 void AppWindow::Print(char *line) {

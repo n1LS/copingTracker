@@ -54,6 +54,15 @@ protected:
   void updateCursor(int dx, int dy);
   void updateCursorValue(ViewUpdateDirection offset, int xOffset = 0, int yOffset = 0);
   void updateSelectionValue(ViewUpdateDirection direction);
+
+  // Column-specific value update handlers
+  void updateNoteValue(ViewUpdateDirection direction, int yOffset = 0);
+  void updateInstrumentValue(ViewUpdateDirection direction, int yOffset = 0);
+  void updateVolumeValue(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommand1Value(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommand1Param(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommand2Value(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommand2Param(ViewUpdateDirection direction, int yOffset = 0);
   void warpToNeighbour(int offset);
   void warpInChain(int offset);
   void cutPosition();
@@ -113,6 +122,9 @@ private:
                                // meter, positions, live indicators)
 
   bool needsLiveIndicatorUpdate_ = false;
+
+  // Info area draw mode - ensures drawNotes() and drawHelpLegend() are mutually exclusive
+  InfoAreaDrawMode infoAreaMode_ = InfoAreaDrawMode::Notes;
 
 #ifdef PICO_DEOPTIMIZED_DEBUG
   // These variables are specifically for thread synchronization in debug builds

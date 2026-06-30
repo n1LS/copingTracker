@@ -34,16 +34,22 @@
 
 #define NUM_COLORS 16
 
-enum ButtonMask {
-  BM_LEFT = 1,
-  BM_DOWN = 2,
-  BM_RIGHT = 4,
-  BM_UP = 8,
-  BM_ALT = 16,
-  BM_EDIT = 32,
-  BM_ENTER = 64,
-  BM_NAV = 128,
-  BM_PLAY = 256
+typedef enum ButtonMask : uint16_t {
+  BM_LEFT = 1 << 0,  // LEFT button.
+  BM_DOWN = 1 << 1,  // DOWN button.
+  BM_RIGHT = 1 << 2, // RIGHT button.
+  BM_UP = 1 << 3,    // UP button.
+  BM_ALT = 1 << 4,   // ALT button.
+  BM_EDIT = 1 << 5,  // EDIT button.
+  BM_ENTER = 1 << 6, // ENTER button.
+  BM_NAV = 1 << 7,   // NAV button.
+  BM_PLAY = 1 << 8,  // PLAY button.
+} ButtonMask;
+
+// Info area draw mode - ensures drawNotes() and drawHelpLegend() are mutually exclusive
+enum class InfoAreaDrawMode {
+  Notes,
+  HelpLegend
 };
 
 enum ViewType {
@@ -194,7 +200,12 @@ struct Theme {
   };
 };
 
-enum ViewUpdateDirection { VUD_LEFT = 0, VUD_RIGHT, VUD_UP, VUD_DOWN };
+enum ViewUpdateDirection: int { 
+  VUD_LEFT = 0, 
+  VUD_RIGHT = 1, 
+  VUD_UP = 2, 
+  VUD_DOWN = 3
+};
 
 class View;
 class ModalView;
@@ -294,7 +305,7 @@ protected:
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
   void DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half);
   int DrawButton(int x, int y, const char *title, bool selected); // returns width of the drawn button
-  int DrawTab(int x, int y, const char *title, bool selected); // returns width of the drawn tab
+  int DrawTab(int x, int y, const char *title, bool selected);    // returns width of the drawn tab
 
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
     // Extract both channels

@@ -24,7 +24,7 @@
 
 // Key debounce time in milliseconds. No state changes for this amount of time
 // means we accept the new key state.
-#define KEY_DEBOUNCE_TIME 10
+#define BM_DEBOUNCE_TIME 10
 
 bool picoTrackerEventManager::finished_ = false;
 bool picoTrackerEventManager::redrawing_ = false;
@@ -155,15 +155,15 @@ void picoTrackerEventManager::ProcessInputEvent() {
     return;
   } else {
     // Keys have not changed since the last scan. But we cannot
-    // continue unless they have not changed for at least KEY_DEBOUNCE_TIME ms
+    // continue unless they have not changed for at least BM_DEBOUNCE_TIME ms
     unsigned long settleTime = now - lastDebounceTime_;
-    if (settleTime < KEY_DEBOUNCE_TIME) {
+    if (settleTime < BM_DEBOUNCE_TIME) {
       return;
     }
   }
 
   // compute mask to send
-  sendMask = (newMask ^ buttonMask_) | (newMask & (KEY_LEFT | KEY_RIGHT | KEY_UP | KEY_DOWN));
+  sendMask = (newMask ^ buttonMask_) | (newMask & (BM_LEFT | BM_RIGHT | BM_UP | BM_DOWN));
 
   // see if we're repeating
   if (newMask == buttonMask_) {

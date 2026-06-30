@@ -379,13 +379,13 @@ void SamplePool::PurgeSample(int i, const char *projectName) {
 
   // delete file
   FileSystem::GetInstance()->DeleteFile(delPath.str().c_str());
-  
+
   // Shift all entries from deleted to end
   for (uint32_t j = i; j < count_ - 1; j++) {
     wav_[j] = std::move(wav_[j + 1]);
     memcpy(nameStore_[j], nameStore_[j + 1], MAX_INSTRUMENT_FILENAME_LENGTH + 1);
   };
-  
+
   // decrease sample count
   count_--;
   wav_[count_].Close();
@@ -415,7 +415,7 @@ bool SamplePool::RemoveSample(const char *name, const char *projectName) {
 
   // Purge the sample (deletes file and shifts entries)
   PurgeSample(static_cast<int>(index), projectName);
-  
+
   Trace::Log("SamplePool", "Removed sample: %s", name);
   return true;
 }

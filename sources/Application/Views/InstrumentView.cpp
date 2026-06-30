@@ -437,7 +437,8 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentFilterType);
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Type       :%2.2X", 0, 0xFF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Type       :%2.2X", 0, 0xFF, 1,
+                            0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -740,9 +741,9 @@ void InstrumentView::warpToNext(int offset) {
 }
 
 void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
-  if (!pressed)
+  if (!pressed) {
     return;
+  }
 
   isDirty_ = false;
   if (mask == (BM_EDIT | BM_ENTER)) {
@@ -831,7 +832,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       default:
         break;
     }
-    mask &= (0xFFFF - BM_ENTER);
+    mask &= ~BM_ENTER;
   } else {
     // Clear the VM_NEW state if any key other than ENTER is pressed
     if (viewMode_ == VM_NEW) {
@@ -842,7 +843,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (viewMode_ == VM_CLONE) {
     if ((mask & BM_ENTER) && (mask & BM_ALT)) {
       UIIntVarField *field = (UIIntVarField *)GetFocus();
-      mask &= (0xFFFF - BM_ENTER);
+      mask &= ~BM_ENTER;
       Variable &v = field->GetVariable();
       int current = v.GetInt();
       if (current == -1)
@@ -952,15 +953,16 @@ void InstrumentView::OnFocus() {
 
   // Check if we're returning from a sample import and need to assign the sample
   if (viewData_->shouldAssignImportedSample && viewData_->lastImportedSampleIndex >= 0) {
-    Trace::Log("INSTRUMENTVIEW", "Assigning imported sample index: %d to current instrument", viewData_->lastImportedSampleIndex);
-    
+    Trace::Log("INSTRUMENTVIEW", "Assigning imported sample index: %d to current instrument",
+               viewData_->lastImportedSampleIndex);
+
     I_Instrument *instr = getInstrument();
     if (instr && instr->GetType() == IT_SAMPLE) {
-      SampleInstrument *sampleInstr = static_cast<SampleInstrument*>(instr);
+      SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
       sampleInstr->AssignSample(viewData_->lastImportedSampleIndex);
       isDirty_ = true;
     }
-    
+
     // Reset the flag after assignment
     viewData_->shouldAssignImportedSample = false;
     viewData_->lastImportedSampleIndex = -1;

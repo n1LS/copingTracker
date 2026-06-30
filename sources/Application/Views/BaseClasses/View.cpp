@@ -670,6 +670,8 @@ void View::drawHelpLegend(FourCC command) {
   // highlight the letters that are the symbol for the command
   SetBackgroundColor(Theme::View::bg);
 
+  int y = SCREEN_HEIGHT - 4;
+
   bool preColon = true;
   for (size_t x = 0; x < strlen(help.line1); x++) {
     unsigned char c = help.line1[x];
@@ -679,11 +681,13 @@ void View::drawHelpLegend(FourCC command) {
     }
 
     SetColor(Theme::View::help(preColon && c >= 'A' && c <= 'Z'));
-    DrawChar(x, 0, help.line1[x]);
+    DrawChar(5 + x, y, help.line1[x]);
   }
 
   SetColor(Theme::View::help(false));
-  DrawString(0, 1, help.line2);
+  DrawString(5, y + 1, help.line2);
+  DrawString(5, y + 2, help.line3);
+  DrawString(5, y + 3, help.line4);
 }
 
 void View::DrawTitle(const char *format, ...) {

@@ -530,7 +530,7 @@ void SongView::ProcessButtonMask(uint16_t mask, bool pressed) {
         setChain((unsigned char)next);
         isDirty_ = true;
       }
-      mask &= (0xFFFF - BM_ENTER);
+      mask &= ~BM_ENTER;
     }
   }
 
@@ -895,6 +895,8 @@ void SongView::drawChainPreview() {
 
   GUIPoint pos = GetAnchor();
   SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::Song::preview(true));
+  DrawString(pos.x_ + 24, pos.y_ - 1, "Ch");
 
   for (int i = 0; i < PHRASES_PER_CHAIN; i++) {
     SetColor(Theme::Song::preview((i % ALT_ROW_NUMBER) == 0));
