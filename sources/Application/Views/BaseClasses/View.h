@@ -48,10 +48,7 @@ typedef enum ButtonMask : uint16_t {
 } ButtonMask;
 
 // Info area draw mode - ensures drawNotes() and drawHelpLegend() are mutually exclusive
-enum class InfoAreaDrawMode {
-  Notes,
-  HelpLegend
-};
+enum class InfoAreaDrawMode { Notes, HelpLegend };
 
 enum ViewType {
   // first layer screens
@@ -201,12 +198,7 @@ struct Theme {
   };
 };
 
-enum ViewUpdateDirection: int { 
-  VUD_LEFT = 0, 
-  VUD_RIGHT = 1, 
-  VUD_UP = 2, 
-  VUD_DOWN = 3
-};
+enum ViewUpdateDirection : int { VUD_LEFT = 0, VUD_RIGHT = 1, VUD_UP = 2, VUD_DOWN = 3 };
 
 class View;
 class ModalView;
@@ -275,7 +267,7 @@ public:
   virtual void DrawString(int x, int y, const char *text);
   virtual void DrawTintString(int x, int y, const TintChar *data);
   virtual void DrawChar(int x, int y, const char character, bool transparent = false);
-  virtual void DrawRect(GUIRect &r, Color color);
+  virtual void DrawRect(const GUIRect &r, Color color);
 
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
@@ -309,18 +301,20 @@ protected:
   int DrawButton(int x, int y, const char *title, bool selected); // returns width of the drawn button
   int DrawTab(int x, int y, const char *title, bool selected);    // returns width of the drawn tab
 
+  static int32_t amplitudeToBar(uint16_t level) {
+    int dB = amplitudeToDb(level);
+    // Map dB to bar levels  -60dB to 0dB range mapped to 0-159 bars
+    // Optimized 159/60 ≈ 2.65 = (2.65 * 256) / 256 = 678 / 256
+    // Using fixed-point: multiply by 678, then right-shift by 8 (divide by 256)
+    return std::clamp<int32_t>(((dB + 60) * 678) >> 8, 0, VU_METER_MAX);
+  }
+
   static inline void amplitudeToBars(stereosample level, int32_t *left, int32_t *right) {
     // Extract both channels
     uint16_t leftAmp = (level >> 16) & 0xFFFF;
     uint16_t rightAmp = level & 0xFFFF;
-    // Convert to dB
-    int leftDb = amplitudeToDb(leftAmp);
-    int rightDb = amplitudeToDb(rightAmp);
-    // Map dB to bar levels  -60dB to 0dB range mapped to 0-159 bars
-    // Optimized 159/60 ≈ 2.65 = (2.65 * 256) / 256 = 678 / 256
-    // Using fixed-point: multiply by 678, then right-shift by 8 (divide by 256)
-    *left = std::clamp<int32_t>(((leftDb + 60) * 678) >> 8, 0, VU_METER_MAX);
-    *right = std::clamp<int32_t>(((rightDb + 60) * 678) >> 8, 0, VU_METER_MAX);
+    *left = amplitudeToBar(leftAmp);
+    *right = amplitudeToBar(rightAmp);
   }
 
 public: // temp hack for modal window constructors

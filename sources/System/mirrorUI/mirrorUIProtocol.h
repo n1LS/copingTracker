@@ -16,10 +16,10 @@
 
 #define GUIColorToRGB565(color) ((color.r_ & 0b11111000) << 8) | ((color.g_ & 0b11111100) << 3) | (color.b_ >> 3)
 
-enum mirrorUICommandType { 
-  cmdPalette = 0x00, 
-  cmdData = 0x01, 
-  cmdFont = 0x02, 
+enum mirrorUICommandType {
+  cmdPalette = 0x00,
+  cmdData = 0x01,
+  cmdFont = 0x02,
   cmdInput = 0x03,
 };
 
@@ -36,10 +36,7 @@ enum MirrorUIKey {
   muikLastEntry = 0x09
 };
 
-enum MirrorUIKeyState {
-  muiksDown = 0x00,
-  muiksUp = 0x01
-};
+enum MirrorUIKeyState { muiksDown = 0x00, muiksUp = 0x01 };
 
 void mirrorUI_handleInput(uint8_t key, uint8_t state);
 

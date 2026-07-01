@@ -29,7 +29,7 @@
 class EventManager {
 public:
   EventManager() {};
-  
+
   static EventManager *instance_;
 
   virtual ~EventManager() {};

@@ -46,6 +46,5 @@ private:
   static SerialDebugUI serialDebugUI_;
 
   static uint16_t virtualButtonMask_;
-  
 };
 #endif

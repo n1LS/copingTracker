@@ -457,7 +457,7 @@ void View::DrawChar(int x, int y, const char character, bool transparent) {
   w_.DrawChar(character, pos, transparent);
 }
 
-void View::DrawRect(GUIRect &r, Color color) {
+void View::DrawRect(const GUIRect &r, Color color) {
   w_.SetCurrentRectColor(color);
   w_.DrawRect(r);
 }

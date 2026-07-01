@@ -1,7 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2024 xiphonics, inc.
  * Copyright (c) 2026 nILS Podewski
  *
 
@@ -10,10 +9,10 @@
 
 #include "mirrorUI.h"
 #include "Application/AppWindow.h"
-#include "mirrorUIProtocol.h"
 #include "EventManager.h"
-#include "tusb.h"
 #include "chargfx.h"
+#include "mirrorUIProtocol.h"
+#include "tusb.h"
 #include <cstdint>
 
 static mirrorUICommand command_;
@@ -155,7 +154,7 @@ void mirrorUI_connected() {
 void mirrorUI_handleInput(uint8_t key, uint8_t state) {
   // Map MirrorUIKey to ButtonMask
   uint16_t buttonMask = 0;
-  
+
   switch (key) {
     case muikUp:
       buttonMask = BM_UP;
@@ -190,7 +189,7 @@ void mirrorUI_handleInput(uint8_t key, uint8_t state) {
 
   // state: 0x00 = Down, 0x01 = Up
   bool pressed = (state == muiksDown);
-  
+
   // Update virtual button mask - this integrates with the existing key repeat system
   EventManager::instance_->SetVirtualButtonMask(buttonMask, pressed);
 }

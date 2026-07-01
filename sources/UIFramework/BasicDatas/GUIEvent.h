@@ -87,7 +87,6 @@ public:
     return _value;
   };
 
-
 private:
   GUIPoint _position; // The event's position
   GUIEventType _type; // The event's type

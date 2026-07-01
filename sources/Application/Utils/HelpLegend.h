@@ -9,15 +9,15 @@
  * This file is part of the copingTracker firmware
  */
 
+#include "Application/Utils/TintChar.h"
 #include <cstdio>
 #include <cstring>
-#include "Application/Utils/TintChar.h"
 
 struct HelpLegend {
-    etl::array<TintChar, 27> line1;
-    etl::array<TintChar, 27> line2;
-    etl::array<TintChar, 27> line3;
-    etl::array<TintChar, 27> line4;
+  etl::array<TintChar, 27> line1;
+  etl::array<TintChar, 27> line2;
+  etl::array<TintChar, 27> line3;
+  etl::array<TintChar, 27> line4;
 };
 
 #define LEGEND(N, A, B, C, D)                                                                                          \

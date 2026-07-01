@@ -190,5 +190,4 @@ void picoTrackerEventManager::ProcessInputEvent() {
     picoTrackerGUIWindowImp::ProcessButtonChange(sendMask, newMask);
     buttonMask_ = newMask;
   }
-
 }

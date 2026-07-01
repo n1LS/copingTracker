@@ -44,7 +44,7 @@ public: // I_GUIGraphics implementation
   virtual void ClearTextRect(GUIRect &rect);
   virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false);
   virtual void DrawString(const char *string, const GUIPoint &pos);
-  virtual void DrawRect(GUIRect &rect);
+  virtual void DrawRect(const GUIRect &rect);
   virtual void SetCurrentRectColor(Color color);
   virtual GUIRect GetRect();
   virtual void Invalidate();

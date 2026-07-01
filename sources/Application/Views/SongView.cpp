@@ -796,7 +796,7 @@ void SongView::DrawView() {
   }
 
   // Draw title
- 
+
   Player *player = Player::GetInstance();
   Variable *v = viewData_->project_->FindVariable(FourCC::VarProjectName);
   DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song %s" : "Live %s", v->GetString().c_str());

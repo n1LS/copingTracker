@@ -34,7 +34,7 @@ public:
   void SetWindow(GUIWindow &);
 
   virtual void PushEvent(GUIEvent &) = 0;
-  virtual void DrawRect(GUIRect &r) = 0;
+  virtual void DrawRect(const GUIRect &r) = 0;
 
   virtual void SendFont(uint8_t uifontIndex) = 0;
   virtual void SendPalette() = 0;

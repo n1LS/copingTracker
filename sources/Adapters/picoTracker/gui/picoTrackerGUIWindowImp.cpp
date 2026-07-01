@@ -19,8 +19,8 @@
 #include "UIFramework/Interfaces/I_GUIWindowFactory.h"
 #include "mirrorUI.h"
 #include "mirrorUIProtocol.h"
-#include "picoTrackerEventManager.h"
 #include "pico/stdlib.h"
+#include "picoTrackerEventManager.h"
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -126,7 +126,7 @@ void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos
   }
 }
 
-void picoTrackerGUIWindowImp::DrawRect(GUIRect &r) {
+void picoTrackerGUIWindowImp::DrawRect(const GUIRect &r) {
   // This is the local drawing command for the device's own screen.
   chargfx_fill_rect(r.Left(), r.Top(), r.Width(), r.Height());
   /*

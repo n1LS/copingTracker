@@ -51,7 +51,7 @@ void GUIWindow::SetCurrentRectColor(Color color) {
   _imp->SetColor(color);
 }
 
-void GUIWindow::DrawRect(GUIRect &r) {
+void GUIWindow::DrawRect(const GUIRect &r) {
   _imp->DrawRect(r);
 }
 

@@ -427,7 +427,6 @@ void MixerView::AnimationUpdate() {
 
 void MixerView::drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT> *levels, Player *player,
                                     bool forceRedraw) {
-
   // Quick optimization: If not forcing redraw, check if any levels have changed
   // This saves CPU cycles by avoiding unnecessary drawing operations
   if (!forceRedraw) {
@@ -458,6 +457,7 @@ void MixerView::drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT>
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     int32_t leftBars = 0;
     int32_t rightBars = 0;
+
     // if channel is muted just use default 0 values for bars
     if (!player->IsChannelMuted(i)) {
       // Convert amplitude to bar levels
