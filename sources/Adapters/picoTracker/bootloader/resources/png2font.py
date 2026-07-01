@@ -10,7 +10,7 @@ LAST_CHAR = 255
 
 EMPTY_CHAR = 63 # "?" character
 
-img = Image.open("font.png").convert("RGBA")
+img = Image.open("font_light.png").convert("RGBA")
 
 print("Image size:", img.width, img.height)
 
