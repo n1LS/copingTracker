@@ -23,20 +23,9 @@
 #include "Application/Model/Config.h"
 #include <cstring>
 
+EventManager *EventManager::instance_ = NULL;
+
 bool EventManager::Init() {
+  instance_ = this;
   return true;
-}
-
-void EventManager::MapAppButton(const char *mapping, AppButton button) {
-
-  etl::string<STRING_EVENT_MAPPING_MAX> mapString;
-  if (!strchr(mapping, ':')) {
-    mapString = "key:0:";
-  };
-  mapString += mapping;
-  mapping_[button] = mapString;
-}
-
-void EventManager::InstallMappings() {
-  // Controller mapping layer removed; nothing to install.
 }

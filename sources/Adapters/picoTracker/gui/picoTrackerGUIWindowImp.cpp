@@ -18,6 +18,8 @@
 #include "UIFramework/Framework/GUIColor.h"
 #include "UIFramework/Interfaces/I_GUIWindowFactory.h"
 #include "mirrorUI.h"
+#include "mirrorUIProtocol.h"
+#include "picoTrackerEventManager.h"
 #include "pico/stdlib.h"
 #include <stdio.h>
 #include <string.h>
@@ -58,6 +60,12 @@ picoTrackerGUIWindowImp::picoTrackerGUIWindowImp(GUICreateWindowParams &p) {
 };
 
 picoTrackerGUIWindowImp::~picoTrackerGUIWindowImp() {
+}
+
+void picoTrackerGUIWindowImp::mirrorUIConnectionChanged(bool connected) {
+  if (connected && mirrorUIEnabled_) {
+    mirrorUI_connected();
+  }
 }
 
 void picoTrackerGUIWindowImp::SendFont(uint8_t uifontIndex) {
@@ -160,7 +168,7 @@ void picoTrackerGUIWindowImp::Flush() {
     uint8_t *scr, *col;
     bool *chg;
     chargfx_get_screen_storage(&scr, &col, &chg);
-    mirrorUI_Flush(scr, col, chg);
+    mirrorUI_flush(scr, col, chg);
   }
 
   chargfx_draw_changed();

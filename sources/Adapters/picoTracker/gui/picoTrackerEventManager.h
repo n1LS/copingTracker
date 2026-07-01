@@ -24,8 +24,7 @@ public:
   ~picoTrackerEventManager();
   virtual bool Init();
   virtual int MainLoop();
-  virtual void PostQuitMessage();
-  virtual int GetKeyCode(const char *name);
+  virtual void SetVirtualButtonMask(uint16_t buttonMask, bool pressed) override;
 
 protected:
   static void ProcessInputEvent();
@@ -45,5 +44,8 @@ private:
   static unsigned long time_;
 
   static SerialDebugUI serialDebugUI_;
+
+  static uint16_t virtualButtonMask_;
+  
 };
 #endif

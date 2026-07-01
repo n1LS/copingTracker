@@ -23,34 +23,6 @@ uint8_t mirrorUI_calculateChecksum(uint8_t *buffer, int size) {
   return chk;
 }
 
-void mirrorUI_setChecksum(mirrorUICommand *command) {
-  /*
-  int size = 0;
-
-  switch (command->payload[0]) {
-    case cmdFont:
-      size = 1; // fontId
-      break;
-    case cmdPalette:
-      size = 16 * 2; // 16 colors, 2 bytes each
-      break;
-    case cmdData:
-      // length, x, y + data (2 bytes each)
-      // ----v-------
-      size = 3 + 2 * command->dataLength;
-      break;
-    default:
-      // input not handled in this direction
-      break;
-  }
-
-  // uint8_t checksum = mirrorUI_calculateChecksum((uint8_t *)&command->payload, size);
-  // uint8_t *chk =(uint8_t *)&command->payload + size + 1;
-  // *chk = checksum;
-  command->payloadSize = size + 1; // + 1 for header
-  */
-}
-
 void mirrorUI_command_Font(mirrorUICommand *command, uint8_t index) {
   command->payload[0] = cmdFont;
   command->payload[1] = index;

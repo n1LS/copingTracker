@@ -63,10 +63,13 @@ public: // I_GUIWindowImp implementation
 
   static picoTrackerGUIWindowImp *instance_;
 
+  // mirrorUI connection and input handling
+  virtual void mirrorUIConnectionChanged(bool connected);
+
 protected:
   virtual void Update(Observable &o, I_ObservableData *d);
 
 private:
-  bool mirrorUIEnabled_ = 0;
+  bool mirrorUIEnabled_ = false;
 };
 #endif

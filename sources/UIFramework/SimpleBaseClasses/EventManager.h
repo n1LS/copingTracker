@@ -26,22 +26,14 @@
 #define PICO_CLOCK_INTERVAL 33 // ~30Hz
 #define PICO_CLOCK_HZ (1000 / PICO_CLOCK_INTERVAL)
 
-enum AppButton { APP_BUTTON_PLAY, APP_BUTTON_VOLINC, APP_BUTTON_VOLDEC, APP_BUTTON_LAST };
-
 class EventManager {
 public:
   EventManager() {};
+  
+  static EventManager *instance_;
+
   virtual ~EventManager() {};
   virtual bool Init();
   virtual int MainLoop() = 0;
-  virtual void PostQuitMessage() = 0;
-  virtual int GetKeyCode(const char *name) = 0;
-  void MapAppButton(const char *mapping, AppButton button);
-  void InstallMappings();
-
-protected:
-  void mapConfigKey(AppButton button, const char *keyName);
-
-private:
-  etl::string<STRING_EVENT_MAPPING_MAX> mapping_[APP_BUTTON_LAST];
+  virtual void SetVirtualButtonMask(uint16_t buttonMask, bool pressed) = 0;
 };

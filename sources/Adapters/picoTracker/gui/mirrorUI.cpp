@@ -4,18 +4,23 @@
  * Copyright (c) 2024 xiphonics, inc.
  * Copyright (c) 2026 nILS Podewski
  *
- * This file was part of the picoTracker firmware
+
  * This file is part of the copingTracker firmware
  */
 
 #include "mirrorUI.h"
-#include "Adapters/picoTracker/display/chargfx.h"
 #include "Application/AppWindow.h"
 #include "mirrorUIProtocol.h"
+#include "EventManager.h"
 #include "tusb.h"
+#include "chargfx.h"
 #include <cstdint>
 
 static mirrorUICommand command_;
+
+// Buffer for receiving input data from USB
+static uint8_t inputBuffer[3];
+static size_t inputBufferIndex = 0;
 
 void mirrorUI_sendCommand(mirrorUICommand *command) {
   command->payload[command->payloadSize] = 0x7f;
@@ -54,7 +59,7 @@ void mirrorUI_sendCommand(mirrorUICommand *command) {
   tud_cdc_write_flush(); // flush once at end
 }
 
-void mirrorUI_Flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUpdate) {
+void mirrorUI_flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUpdate) {
   int index = 0;
 
 #define WAITING_FOR_CHANGED 0
@@ -93,7 +98,6 @@ void mirrorUI_Flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUp
             // done with this block, output
             command_.payload[1] = length;
             command_.payloadSize = length * 2 + 4;
-            // mirrorUI_setChecksum(&command_);
             mirrorUI_sendCommand(&command_);
             // clear
             length = 0;
@@ -109,7 +113,6 @@ void mirrorUI_Flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUp
       // ended with a block at the end of the row
       command_.payload[1] = length;
       command_.payloadSize = length * 2 + 4;
-      // mirrorUI_setChecksum(&command_);
       mirrorUI_sendCommand(&command_);
     }
   }
@@ -146,5 +149,68 @@ void mirrorUI_connected() {
   uint8_t *scr, *col;
   bool *chg;
   chargfx_get_screen_storage(&scr, &col, &chg);
-  mirrorUI_Flush(scr, col, chg, true);
+  mirrorUI_flush(scr, col, chg, true);
+}
+
+void mirrorUI_handleInput(uint8_t key, uint8_t state) {
+  // Map MirrorUIKey to ButtonMask
+  uint16_t buttonMask = 0;
+  
+  switch (key) {
+    case muikUp:
+      buttonMask = BM_UP;
+      break;
+    case muikLeft:
+      buttonMask = BM_LEFT;
+      break;
+    case muikDown:
+      buttonMask = BM_DOWN;
+      break;
+    case muikRight:
+      buttonMask = BM_RIGHT;
+      break;
+    case muikAlt:
+      buttonMask = BM_ALT;
+      break;
+    case muikNav:
+      buttonMask = BM_NAV;
+      break;
+    case muikPlay:
+      buttonMask = BM_PLAY;
+      break;
+    case muikEdit:
+      buttonMask = BM_EDIT;
+      break;
+    case muikEnter:
+      buttonMask = BM_ENTER;
+      break;
+    default:
+      return; // Unknown key
+  }
+
+  // state: 0x00 = Down, 0x01 = Up
+  bool pressed = (state == muiksDown);
+  
+  // Update virtual button mask - this integrates with the existing key repeat system
+  EventManager::instance_->SetVirtualButtonMask(buttonMask, pressed);
+}
+
+void mirrorUI_processCDCInput() {
+  if (!tud_cdc_available()) {
+    return;
+  }
+
+  while (tud_cdc_available() && inputBufferIndex < 3) {
+    inputBuffer[inputBufferIndex++] = tud_cdc_read_char();
+  }
+
+  if (inputBufferIndex == 3) {
+    uint8_t commandType = inputBuffer[0];
+    if (commandType == cmdInput) {
+      uint8_t key = inputBuffer[1];
+      uint8_t state = inputBuffer[2];
+      mirrorUI_handleInput(key, state);
+    }
+    inputBufferIndex = 0;
+  }
 }
