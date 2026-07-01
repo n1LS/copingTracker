@@ -40,6 +40,7 @@ public:
   virtual void SendPalette() = 0;
   virtual void SetPalette(const GUIColor *palette, int colorCount) = 0;
 
+  virtual void mirrorUIConnectionChanged(bool connected) = 0;
   //	virtual void Save()=0 ;
   //	virtual void Restore()=0 ;
 

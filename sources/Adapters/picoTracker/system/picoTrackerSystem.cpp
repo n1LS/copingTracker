@@ -14,6 +14,8 @@
 #include "Adapters/picoTracker/gui/GUIFactory.h"
 #include "Adapters/picoTracker/gui/mirrorUI.h"
 #include "Adapters/picoTracker/midi/picoTrackerMidiService.h"
+#include "Adapters/picoTracker/gui/picoTrackerEventManager.h"
+#include "Adapters/picoTracker/gui/picoTrackerGUIWindowImp.h"
 #include "Adapters/picoTracker/system/picoTrackerSamplePool.h"
 #include "Adapters/picoTracker/timer/picoTrackerTimer.h"
 #include "Application/Commands/NodeList.h"
@@ -44,7 +46,6 @@ bool picoTrackerSystem::invert_ = false;
 unsigned int picoTrackerSystem::lastBeatCount_ = 0;
 
 int picoTrackerSystem::MainLoop() {
-  eventManager_->InstallMappings();
   return eventManager_->MainLoop();
 }
 
@@ -55,10 +56,11 @@ void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
   if (dtr) {
     // Host application opened the serial port - connection established
     Trace::Log("USB_CDC", "Host connected (DTR set)");
-    mirrorUI_connected();
+    picoTrackerGUIWindowImp::instance_->mirrorUIConnectionChanged(true);
   } else {
     // Host application closed the serial port
     Trace::Log("USB_CDC", "Host disconnected (DTR cleared)");
+    picoTrackerGUIWindowImp::instance_->mirrorUIConnectionChanged(false);
   }
 }
 
@@ -182,10 +184,6 @@ void picoTrackerSystem::SetDisplayBrightness(unsigned char value) {
 void picoTrackerSystem::Sleep(int millisec) {
   //	if (millisec>0)
   //		assert(0) ;
-}
-
-void picoTrackerSystem::PostQuitMessage() {
-  eventManager_->PostQuitMessage();
 }
 
 unsigned int picoTrackerSystem::GetMemoryUsage() {

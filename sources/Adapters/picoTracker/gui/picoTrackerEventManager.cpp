@@ -38,6 +38,7 @@ unsigned int picoTrackerEventManager::keyKill_ = 5;
 
 unsigned int picoTrackerEventManager::lastDebounceTime_ = 0;
 uint16_t picoTrackerEventManager::debounceMask_ = 0;
+uint16_t picoTrackerEventManager::virtualButtonMask_ = 0;
 
 repeating_timer_t picoTrackerEventManager::timer_ = repeating_timer_t();
 SerialDebugUI picoTrackerEventManager::serialDebugUI_ = SerialDebugUI();
@@ -98,6 +99,9 @@ int picoTrackerEventManager::MainLoop() {
     // process usb interrupts, should this be done somewhere else??
     handleUSBInterrupts();
 
+    // Poll mirrorUI for incoming input commands from USB CDC
+    mirrorUI_processCDCInput();
+
     // Poll MIDI service to process any pending MIDI messages
     if (midiService) {
       picoTrackerMidiService *ptMidiService = (picoTrackerMidiService *)midiService;
@@ -127,13 +131,12 @@ int picoTrackerEventManager::MainLoop() {
   return 0;
 }
 
-void picoTrackerEventManager::PostQuitMessage() {
-  // Trace:Log("EVENT", "quit");
-  finished_ = true;
-}
-
-int picoTrackerEventManager::GetKeyCode(const char *name) {
-  return -1;
+void picoTrackerEventManager::SetVirtualButtonMask(uint16_t buttonMask, bool pressed) {
+  if (pressed) {
+    virtualButtonMask_ |= buttonMask;
+  } else {
+    virtualButtonMask_ &= ~buttonMask;
+  }
 }
 
 void picoTrackerEventManager::ProcessInputEvent() {
@@ -143,8 +146,8 @@ void picoTrackerEventManager::ProcessInputEvent() {
     return;
   bool gotEvent = false;
 
-  // Get current mask
-  newMask = scanKeys();
+  // Get current mask (physical buttons + virtual buttons for instance via mirrorUI)
+  newMask = scanKeys() | virtualButtonMask_;
 
   unsigned long now = gTime_;
 
@@ -184,20 +187,8 @@ void picoTrackerEventManager::ProcessInputEvent() {
   }
   if (gotEvent) {
     time_ = gTime_; // Get time here so delay is independant of processing speed
-
-    //                Trace::Debug("Pe") ;
     picoTrackerGUIWindowImp::ProcessButtonChange(sendMask, newMask);
     buttonMask_ = newMask;
-    //            Trace::Debug("%d: mask=%x",gTime_,sendMask) ;
-    //                Trace::Debug("~Pe") ;
   }
 
-#ifdef SERIAL_REPL
-  serialDebugUI_.readSerialIn(inBuffer, INPUT_BUFFER_SIZE);
-#endif
-  char inBuffer[16];
-  auto readbytes = readFromUSBCDC(inBuffer, 16);
-  if (readbytes > 0) {
-    // TODO
-  }
 }

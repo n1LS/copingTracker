@@ -32,7 +32,6 @@ public:                                 // Override in implementation
   virtual unsigned long GetClock() = 0; // millisecs
   virtual void GetBatteryState(BatteryState &state) = 0;
   virtual void SetDisplayBrightness(unsigned char value) = 0;
-  virtual void PostQuitMessage() = 0;
   virtual unsigned int GetMemoryUsage() = 0;
   virtual void SystemPutChar(int c) = 0;
   virtual void SystemBootloader() = 0;

@@ -30,7 +30,6 @@ public: // System implementation
   virtual void GetBatteryState(BatteryState &state);
   virtual void SetDisplayBrightness(unsigned char value);
   virtual void Sleep(int millisec);
-  virtual void PostQuitMessage();
   virtual unsigned int GetMemoryUsage();
   virtual void PowerDown() {};
   virtual void SystemBootloader();
