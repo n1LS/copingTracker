@@ -39,8 +39,6 @@ SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
       previewDurationMs_(0.0f), previewPlayheadSample_(0), previewCursorVisible_(false) {
   sliceIndexVar_.AddObserver(*this);
   sliceStartVar_.AddObserver(*this);
-  sliceIndexLabel_[0] = '\0';
-  zoomLabel_[0] = '\0';
   graphField_.SetShowBaseline(false);
 }
 
@@ -70,8 +68,6 @@ void SampleSlicesView::Reset() {
   autoSliceCountVar_.SetInt(4, false);
   graphField_.Reset();
   graphField_.SetShowBaseline(false);
-  sliceIndexLabel_[0] = '\0';
-  zoomLabel_[0] = '\0';
 }
 
 void SampleSlicesView::OnFocus() {
@@ -227,7 +223,7 @@ void SampleSlicesView::DrawView() {
     Clear();
   }
 
-  DrawTitle(char_back_s " Sample Slices");
+  DrawTitle(char_back_s " Sample Slicer");
 
   bool hasModal = HasModalView();
 
@@ -235,6 +231,9 @@ void SampleSlicesView::DrawView() {
     drawWaveform();
     ClearTextRect(0, 9, SCREEN_WIDTH, 3);
   }
+
+  drawStatusLabels();
+  drawHelpLegend();
 
   if (hasModal) {
     // Modal text cleanup does not cover the graph bitmap area, so avoid
@@ -252,6 +251,30 @@ void SampleSlicesView::DrawView() {
     FieldView::Redraw();
   }
   needsFullRedraw_ = false;
+}
+
+void SampleSlicesView::drawStatusLabels() {
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
+
+  char buffer[32];
+  npf_snprintf(buffer, sizeof(buffer), "Slice: %d", sliceIndexVar_.GetInt());
+  DrawString(1, SCREEN_HEIGHT - 10, buffer);
+
+  npf_snprintf(buffer, sizeof(buffer), "Zoom : %dx", graphField_.ZoomLevel());
+  DrawString(1, SCREEN_HEIGHT - 9, buffer);
+}
+
+void SampleSlicesView::drawHelpLegend() {
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::inactive);
+
+  DrawString(1, SCREEN_HEIGHT - 7, char_button_nav_s "+" char_button_left_s "   Exit slicer");
+  DrawString(1, SCREEN_HEIGHT - 6, "  " char_button_left_s "/" char_button_right_s "  Select slice");
+  DrawString(1, SCREEN_HEIGHT - 5, char_button_enter_s "+" char_button_up_s "/" char_button_down_s " Coarse move");
+  DrawString(1, SCREEN_HEIGHT - 4, char_button_enter_s "+" char_button_right_s "/" char_button_left_s " Fine move");
+  DrawString(1, SCREEN_HEIGHT - 3, char_button_edit_s "+" char_button_up_s "/" char_button_down_s " Zoom in/out");
+  DrawString(1, SCREEN_HEIGHT - 2, "  " char_button_play_s "   Preview slice");
 }
 
 void SampleSlicesView::AnimationUpdate() {
@@ -334,7 +357,6 @@ void SampleSlicesView::buildFieldLayout() {
 
   fieldList_.clear();
   intVarField_.clear();
-  staticField_.clear();
   actionField_.clear();
 
   fieldList_.insert(fieldList_.end(), &graphField_);
@@ -342,13 +364,7 @@ void SampleSlicesView::buildFieldLayout() {
   GUIPoint position = GetAnchor();
   position.x_ = 1;
   position.y_ = 8;
-  updateStatusLabels();
-  staticField_.emplace_back(position, sliceIndexLabel_);
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position.x_ += 21;
-  staticField_.emplace_back(position, zoomLabel_);
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
+ 
   position.x_ = 12;
   intVarField_.emplace_back(position, autoSliceCountVar_, "%2d", 1, static_cast<int32_t>(SampleInstrument::MaxSlices),
                             1, 4);
@@ -358,23 +374,6 @@ void SampleSlicesView::buildFieldLayout() {
   actionField_.emplace_back("slice", FourCC::ActionAutoSlice, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
-
-  position.y_ += 4;
-  position.x_ = 1;
-  staticField_.emplace_back(position, "RIGHT/LEFT: select slice");
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position.y_ += 1;
-  staticField_.emplace_back(position, "ENTER+UP/DOWN: coarse move");
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position.y_ += 1;
-  staticField_.emplace_back(position, "ENTER+RIGHT/LEFT: fine move");
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position.y_ += 1;
-  staticField_.emplace_back(position, "EDIT+UP/DOWN: zoom in/out");
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-  position.y_ += 1;
-  staticField_.emplace_back(position, "PLAY: preview slice");
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   SetFocus(&graphField_);
 }
@@ -527,7 +526,6 @@ void SampleSlicesView::applySliceStart(uint32_t start) {
   }
   if (updateZoomWindow()) {
     graphField_.InvalidateWaveform();
-    updateStatusLabels();
     isDirty_ = true;
   }
 }
@@ -558,7 +556,6 @@ void SampleSlicesView::autoSliceEvenly() {
     graphField_.InvalidateWaveform();
   }
   graphField_.RequestFullRedraw();
-  updateStatusLabels();
   isDirty_ = true;
   ((AppWindow &)w_).SetDirty();
 }
@@ -586,21 +583,6 @@ bool SampleSlicesView::refreshSampleSize() {
   return sampleSize_ > 0;
 }
 
-void SampleSlicesView::updateStatusLabels() {
-  int32_t sliceIndex = sliceIndexVar_.GetInt();
-  if (sliceIndex < 0) {
-    sliceIndex = 0;
-  }
-  npf_snprintf(sliceIndexLabel_, sizeof(sliceIndexLabel_), "slice: %2d", sliceIndex);
-
-  uint32_t zoom = 1u;
-  uint8_t level = graphField_.ZoomLevel();
-  if (level < 31) {
-    zoom = 1u << level;
-  }
-  npf_snprintf(zoomLabel_, sizeof(zoomLabel_), "zoom:%3ux", zoom);
-}
-
 void SampleSlicesView::AutoSliceConfirmCallback(View &v, ModalView &dialog) {
   auto &self = static_cast<SampleSlicesView &>(v);
   self.modalClearCount_ = 2;
@@ -618,9 +600,6 @@ void SampleSlicesView::updateZoomLimits() {
 
 bool SampleSlicesView::updateZoomWindow() {
   bool changed = graphField_.UpdateZoomWindow(selectedSliceStart());
-  if (changed) {
-    updateStatusLabels();
-  }
   return changed;
 }
 
@@ -631,7 +610,6 @@ void SampleSlicesView::adjustZoom(int32_t delta) {
   if (graphField_.AdjustZoom(delta, selectedSliceStart())) {
     graphField_.InvalidateWaveform();
     graphField_.RequestFullRedraw();
-    updateStatusLabels();
     isDirty_ = true;
     ((AppWindow &)w_).SetDirty();
   }

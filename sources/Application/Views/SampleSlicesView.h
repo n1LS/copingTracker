@@ -43,9 +43,10 @@ private:
   void buildFieldLayout();
   void rebuildWaveform();
   void drawWaveform();
+  void drawStatusLabels();
+  void drawHelpLegend();
   void clearWaveformRegion();
   bool refreshSampleSize();
-  void updateStatusLabels();
   SampleInstrument *currentInstrument();
   void updateSliceSelectionFromInstrument();
   void applySliceStart(uint32_t start);
@@ -65,10 +66,7 @@ private:
   Variable autoSliceCountVar_;
 
   etl::vector<UIIntVarField, 2> intVarField_;
-  etl::vector<UIStaticField, 7> staticField_;
   etl::vector<UIActionField, 1> actionField_;
-  char sliceIndexLabel_[16];
-  char zoomLabel_[16];
 
   bool needsFullRedraw_;
 

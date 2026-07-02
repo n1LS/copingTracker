@@ -1,3 +1,5 @@
+// TODO nILS: in drawing use columnPositions instead of int literals
+
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,7 +29,8 @@
 #include <nanoprintf.h>
 #include <stdlib.h>
 
-int16_t PhraseView::offsets_[2][4] = {-1, 1, 12, -12, -1, 1, 16, -16};
+static const int16_t offsets_[2][4] = {-1, 1, 12, -12, -1, 1, 16, -16};
+static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
 
 // Column-specific value update handlers
 
@@ -120,56 +123,9 @@ void PhraseView::updateVolumeValue(ViewUpdateDirection direction, int yOffset) {
   lastVolume_ = vol;
 }
 
-void PhraseView::updateCommand1Value(ViewUpdateDirection direction, int yOffset) {
+void PhraseView::updateCommandValue(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  FourCC cc = FourCC::enum_type(step.cmd1);
-
-  switch (direction) {
-    case VUD_LEFT:
-      cc = CommandList::GetPrev(cc);
-      break;
-    case VUD_RIGHT:
-      cc = CommandList::GetNext(cc);
-      break;
-    case VUD_UP:
-      cc = CommandList::GetNextAlpha(cc);
-      break;
-    case VUD_DOWN:
-      cc = CommandList::GetPrevAlpha(cc);
-      break;
-  }
-  step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
-  lastCmd_ = cc;
-}
-
-void PhraseView::updateCommand1Param(ViewUpdateDirection direction, int yOffset) {
-  switch (direction) {
-    case VUD_LEFT:
-      cmdEditField_.ProcessArrow(BM_LEFT);
-      break;
-    case VUD_RIGHT:
-      cmdEditField_.ProcessArrow(BM_RIGHT);
-      break;
-    case VUD_UP:
-      cmdEditField_.ProcessArrow(BM_UP);
-      break;
-    case VUD_DOWN:
-      cmdEditField_.ProcessArrow(BM_DOWN);
-      break;
-  }
-
-  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  FourCC currentCmd = FourCC::enum_type(step.cmd1);
-  uint8_t paramValue = cmdEdit_.GetInt();
-  paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-  cmdEdit_.SetInt(paramValue);
-  step.param1 = paramValue;
-  lastParam_ = paramValue;
-}
-
-void PhraseView::updateCommand2Value(ViewUpdateDirection direction, int yOffset) {
-  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  FourCC cc = FourCC::enum_type(step.cmd2);
+  FourCC cc = (col == colCmd1) ? FourCC::enum_type(step.cmd1) : FourCC::enum_type(step.cmd2);
 
   switch (direction) {
     case VUD_LEFT:
@@ -186,32 +142,27 @@ void PhraseView::updateCommand2Value(ViewUpdateDirection direction, int yOffset)
       break;
   }
 
-  step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
+  if (col == colCmd1) {
+    step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
+  } else {
+    step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
+  }
   lastCmd_ = cc;
 }
 
-void PhraseView::updateCommand2Param(ViewUpdateDirection direction, int yOffset) {
-  switch (direction) {
-    case VUD_LEFT:
-      cmdEditField_.ProcessArrow(BM_LEFT);
-      break;
-    case VUD_RIGHT:
-      cmdEditField_.ProcessArrow(BM_RIGHT);
-      break;
-    case VUD_UP:
-      cmdEditField_.ProcessArrow(BM_UP);
-      break;
-    case VUD_DOWN:
-      cmdEditField_.ProcessArrow(BM_DOWN);
-      break;
-  }
-
+void PhraseView::updateCommandParam(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  FourCC currentCmd = FourCC::enum_type(step.cmd2);
-  uint8_t paramValue = cmdEdit_.GetInt();
+  
+  // pick correct input and output for the selected column
+  FourCC currentCmd = (col == colCmdVal1) ? FourCC::enum_type(step.cmd1) : FourCC::enum_type(step.cmd2);
+  uint16_t *target = (col == colCmdVal1) ? &step.param1 : &step.param2;
+  
+  cmdEditField_.ProcessArrow(DirectionalButtons[direction]);
+  uint16_t paramValue = cmdEdit_.GetInt();
   paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
   cmdEdit_.SetInt(paramValue);
-  step.param2 = paramValue;
+
+  *target = paramValue;
   lastParam_ = paramValue;
 }
 
@@ -327,13 +278,13 @@ void PhraseView::updateCursor(int dx, int dy) {
 
   switch (col_) {
     case colCmdVal1:
-      p.x_ += 12; // TODO: pick from constant array
+      p.x_ += columnPositions_[colCmdVal1];
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param1);
       break;
     case colCmdVal2:
-      p.x_ += 20; // TODO: pick from constant array
+      p.x_ += columnPositions_[colCmdVal2];
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
@@ -358,16 +309,12 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
       updateVolumeValue(direction, yOffset);
       break;
     case colCmd1:
-      updateCommand1Value(direction, yOffset);
+    case colCmd2:
+      updateCommandValue(col_ + xOffset, direction, yOffset);
       break;
     case colCmdVal1:
-      updateCommand1Param(direction, yOffset);
-      break;
-    case colCmd2:
-      updateCommand2Value(direction, yOffset);
-      break;
     case colCmdVal2:
-      updateCommand2Param(direction, yOffset);
+      updateCommandParam(col_ + xOffset, direction, yOffset);
       break;
   }
   isDirty_ = true;
@@ -1040,66 +987,64 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
     } else {
       copySelection();
     }
+
+    return;
+  } 
+  // Enter Modifer
+
+  if (mask & BM_ENTER) {
+    if (mask & BM_DOWN)
+      updateSelectionValue(VUD_DOWN);
+    else if (mask & BM_UP)
+      updateSelectionValue(VUD_UP);
+    else if (mask & BM_LEFT)
+      updateSelectionValue(VUD_LEFT);
+    else if (mask & BM_RIGHT)
+      updateSelectionValue(VUD_RIGHT);
+    else if (mask & BM_ALT)
+      cutSelection();
+    else if (mask & BM_NAV)
+      switchSoloMode();
   } else {
 
-    // Enter Modifer
+    // R Modifier
 
-    if (mask & BM_ENTER) {
-
-      if (mask & BM_DOWN)
-        updateSelectionValue(VUD_DOWN);
-      if (mask & BM_UP)
-        updateSelectionValue(VUD_UP);
-      if (mask & BM_LEFT)
-        updateSelectionValue(VUD_LEFT);
-      if (mask & BM_RIGHT)
-        updateSelectionValue(VUD_RIGHT);
-
+    if (mask & BM_NAV) {
+      if (mask & BM_LEFT) {
+        Navigate(VT_CHAIN);
+      }
+      if (mask & BM_RIGHT) {
+        unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
+        if (*c != 0xFF) {
+          viewData_->currentInstrumentID_ = *c;
+        } else {
+          viewData_->currentInstrumentID_ = lastInstr_;
+        }
+        Navigate(VT_INSTRUMENT);
+      }
+      if (mask & BM_PLAY) {
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
+      }
       if (mask & BM_ALT)
-        cutSelection();
-      if (mask & BM_NAV)
-        switchSoloMode();
+        unMuteAll();
+
     } else {
-
-      // R Modifier
-
-      if (mask & BM_NAV) {
-        if (mask & BM_LEFT) {
-          Navigate(VT_CHAIN);
-        }
-        if (mask & BM_RIGHT) {
-          unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
-          if (*c != 0xFF) {
-            viewData_->currentInstrumentID_ = *c;
-          } else {
-            viewData_->currentInstrumentID_ = lastInstr_;
-          }
-          Navigate(VT_INSTRUMENT);
-        }
-        if (mask & BM_PLAY) {
-          player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
-        }
-        if (mask & BM_ALT)
-          unMuteAll();
+      // L Modifier
+      if (mask & BM_ALT) {
 
       } else {
-        // L Modifier
-        if (mask & BM_ALT) {
+        // No modifier
 
-        } else {
-          // No modifier
-
-          if (mask & BM_DOWN)
-            updateCursor(0, 1);
-          if (mask & BM_UP)
-            updateCursor(0, -1);
-          if (mask & BM_LEFT)
-            updateCursor(-1, 0);
-          if (mask & BM_RIGHT)
-            updateCursor(1, 0);
-          if (mask & BM_PLAY) {
-            player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
-          }
+        if (mask & BM_DOWN)
+          updateCursor(0, 1);
+        if (mask & BM_UP)
+          updateCursor(0, -1);
+        if (mask & BM_LEFT)
+          updateCursor(-1, 0);
+        if (mask & BM_RIGHT)
+          updateCursor(1, 0);
+        if (mask & BM_PLAY) {
+          player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
         }
       }
     }
@@ -1318,7 +1263,7 @@ void PhraseView::DrawView() {
     OnPlayerUpdate(PET_UPDATE);
   }
 
-  if ((viewMode_ != VM_SELECTION) && ((col_ == colCmdVal1) || (col_ == colCmdVal1))) {
+  if ((viewMode_ != VM_SELECTION) && ((col_ == colCmdVal1) || (col_ == colCmdVal2))) {
     cmdEditField_.SetFocus();
     cmdEditField_.Draw(w_);
   }

@@ -59,10 +59,8 @@ protected:
   void updateNoteValue(ViewUpdateDirection direction, int yOffset = 0);
   void updateInstrumentValue(ViewUpdateDirection direction, int yOffset = 0);
   void updateVolumeValue(ViewUpdateDirection direction, int yOffset = 0);
-  void updateCommand1Value(ViewUpdateDirection direction, int yOffset = 0);
-  void updateCommand1Param(ViewUpdateDirection direction, int yOffset = 0);
-  void updateCommand2Value(ViewUpdateDirection direction, int yOffset = 0);
-  void updateCommand2Param(ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommandValue(PhraseColumn col, ViewUpdateDirection direction, int yOffset = 0);
+  void updateCommandParam(PhraseColumn col, ViewUpdateDirection direction, int yOffset = 0);
   void warpToNeighbour(int offset);
   void warpInChain(int offset);
   void cutPosition();
@@ -113,8 +111,6 @@ private:
 
   PhraseColumn saveCol_;
   int saveRow_;
-
-  static short offsets_[2][4];
 
   // Flags to track which UI elements need updating
   // These prevent core1 from directly updating the UI
