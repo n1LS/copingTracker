@@ -463,8 +463,8 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
       break;
 
     case SILM_OSC:
+      //		case SILM_OSCFINE:
       {
-        //		case SILM_OSCFINE: {
 
         float freq = 261.6255653006f; // C3
         /*
@@ -504,80 +504,76 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
         break;
       }
     case SILM_LAST:
-      {
-        NAssert(0);
-        break;
-
-        if (sliceActive) {
-          rp->rendLoopStart_ = static_cast<int>(sliceStart);
-          rp->rendLoopEnd_ = static_cast<int>(sliceEnd);
-          rp->rendFirst_ = static_cast<int>(sliceStart);
-          rp->position_ = float(sliceStart);
-          rp->reverse_ = false;
-        }
-
-        // Compute octave & note difference from root
-
-        float fineTune = float(fineTune_.GetInt() - 0x7F);
-        fineTune /= float(0x80);
-        int offset = note - rootNote;
-        if (sliceActive) {
-          offset = 0;
-        }
-        while (offset > 127) {
-          offset -= 12;
-        }
-
-        fixed freqFactor = fl2fp(float(pow(2.0, (offset + fineTune) / 12.0)));
-        rp->baseSpeed_ = fp_mul(rp->baseSpeed_, freqFactor);
-        rp->speed_ = rp->baseSpeed_;
-
-        // Init k rate counter
-
-        rp->krateCount_ = 0;
-
-        // We allow processing
-
-        rp->finished_ = false;
-
-        // If we do a clean start (there was a instr number on the line)
-
-        if (retrigger) {
-          // Clear retrigger data
-
-          rp->retrig_ = false;
-          rp->retrigLoop_ = 0;
-          rp->retrigCount_ = 0;
-          rp->retrigOffset_ = 0;
-
-          // Could click
-
-          rp->couldClick_ = SHOULD_KILL_CLICKS;
-
-          // Init filter params
-
-          rp->cutoff_ = rp->baseFCut_ = fl2fp(cutoff_.GetInt() / 255.0f);
-          rp->reso_ = rp->baseFRes_ = fl2fp(reso_.GetInt() / 255.0f);
-
-          // Init crush params
-          rp->crush_ = crush_.GetInt();
-          rp->drive_ = drive_.GetInt();
-
-          // Init downsampling
-          rp->downsample_ = downsample_.GetInt();
-
-          // Disable all active updaters for new voice
-          for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
-            I_SRPUpdater *current = *it;
-            current->Disable();
-          }
-          rp->activeUpdaters_.clear();
-        }
-        return true;
-      }
+      NAssert(0);
+      break;
   }
 
-  return false;
+  if (sliceActive) {
+    rp->rendLoopStart_ = static_cast<int>(sliceStart);
+    rp->rendLoopEnd_ = static_cast<int>(sliceEnd);
+    rp->rendFirst_ = static_cast<int>(sliceStart);
+    rp->position_ = float(sliceStart);
+    rp->reverse_ = false;
+  }
+
+  // Compute octave & note difference from root
+
+  float fineTune = float(fineTune_.GetInt() - 0x7F);
+  fineTune /= float(0x80);
+  int offset = note - rootNote;
+  if (sliceActive) {
+    offset = 0;
+  }
+  while (offset > 127) {
+    offset -= 12;
+  }
+
+  fixed freqFactor = fl2fp(float(pow(2.0, (offset + fineTune) / 12.0)));
+  rp->baseSpeed_ = fp_mul(rp->baseSpeed_, freqFactor);
+  rp->speed_ = rp->baseSpeed_;
+
+  // Init k rate counter
+
+  rp->krateCount_ = 0;
+
+  // We allow processing
+
+  rp->finished_ = false;
+
+  // If we do a clean start (there was a instr number on the line)
+
+  if (retrigger) {
+    // Clear retrigger data
+
+    rp->retrig_ = false;
+    rp->retrigLoop_ = 0;
+    rp->retrigCount_ = 0;
+    rp->retrigOffset_ = 0;
+
+    // Could click
+
+    rp->couldClick_ = SHOULD_KILL_CLICKS;
+
+    // Init filter params
+
+    rp->cutoff_ = rp->baseFCut_ = fl2fp(cutoff_.GetInt() / 255.0f);
+    rp->reso_ = rp->baseFRes_ = fl2fp(reso_.GetInt() / 255.0f);
+
+    // Init crush params
+    rp->crush_ = crush_.GetInt();
+    rp->drive_ = drive_.GetInt();
+
+    // Init downsampling
+    rp->downsample_ = downsample_.GetInt();
+
+    // Disable all active updaters for new voice
+    for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
+      I_SRPUpdater *current = *it;
+      current->Disable();
+    }
+    rp->activeUpdaters_.clear();
+  }
+  return true;
 }
 
 void SampleInstrument::SetStepVolume(int channel, uint8_t volume) {
