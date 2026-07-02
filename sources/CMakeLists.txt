@@ -25,9 +25,9 @@ set(PICO_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Externals/pico-sdk)
 # Pull in SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(picoTracker C CXX ASM)
+project(copingTracker C CXX ASM)
 
-option(PICOTRACKER_SLOT_LINKED_APP "Build app for persistent-bootloader app slot" ON)
+option(COPINGTRACKER_SLOT_LINKED_APP "Build app for persistent-bootloader app slot" ON)
 
 if(PICO_SDK_VERSION_STRING VERSION_LESS "2.0.0")
   message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
@@ -59,33 +59,33 @@ set(CMAKE_CXX_FLAGS
 # Needed for ETL to pick up our etl_profile.h
 include_directories("config/")
 
-include_directories("Adapters/picoTracker/platform/")
+include_directories("Adapters/copingTracker/platform/")
 
 # Initialize the SDK
 pico_sdk_init()
 
 add_subdirectory(sdk_bundle)
 
-add_subdirectory(Adapters/picoTracker)
+add_subdirectory(Adapters/copingTracker)
 add_subdirectory(Externals/SdFat)
 
-if(PICOTRACKER_SLOT_LINKED_APP)
-  message(STATUS "Building picoTracker in single app-slot linked mode")
+if(COPINGTRACKER_SLOT_LINKED_APP)
+  message(STATUS "Building copingTracker in single app-slot linked mode")
  
-  target_link_options(picoTracker PRIVATE
+  target_link_options(copingTracker PRIVATE
     -L${CMAKE_CURRENT_SOURCE_DIR}/Externals/pico-sdk/src/rp2_common/pico_crt0/rp2040)
-  pico_set_linker_script(picoTracker
-    ${CMAKE_CURRENT_SOURCE_DIR}/Adapters/picoTracker/bootloader/memmap_app_slot.ld)
+  pico_set_linker_script(copingTracker
+    ${CMAKE_CURRENT_SOURCE_DIR}/Adapters/copingTracker/bootloader/memmap_app_slot.ld)
 endif()
 
-set_property(TARGET picoTracker APPEND_STRING PROPERTY LINK_FLAGS "-Wl,--print-memory-usage")
+set_property(TARGET copingTracker APPEND_STRING PROPERTY LINK_FLAGS "-Wl,--print-memory-usage")
 
-target_compile_options(picoTracker PRIVATE
+target_compile_options(copingTracker PRIVATE
   -fno-unwind-tables
   -fno-asynchronous-unwind-tables
 )
 
-target_compile_definitions(picoTracker PUBLIC
+target_compile_definitions(copingTracker PUBLIC
   #	PICO_HEAP_SIZE=204800
   PICO_DEBUG_MALLOC_LOW_WATER=1000
   PICO_MALLOC_PANIC=0
@@ -97,7 +97,7 @@ target_compile_definitions(picoTracker PUBLIC
   PICO_XOSC_STARTUP_DELAY_MULTIPLIER=64
 )
 
-target_compile_definitions(picoTracker PUBLIC
+target_compile_definitions(copingTracker PUBLIC
   PICO_DEFAULT_UART=1
   PICO_DEFAULT_UART_TX_PIN=24
   PICO_DEFAULT_UART_RX_PIN=25
@@ -115,7 +115,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions(ETL_DEBUG)
 endif()
 
-target_link_options(picoTracker PRIVATE
+target_link_options(copingTracker PRIVATE
     -Wl,--print-memory-usage
 )
 
