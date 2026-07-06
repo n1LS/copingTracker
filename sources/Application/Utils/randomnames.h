@@ -20,11 +20,12 @@ static const char *adjectives[] = {"glow", "soft", "snug", "tiny", "tofu", "lofi
                                    "cold", "warm", "dank", "sick", "fuzz", "vibe", "warp", "ping", "pong", "chip",
                                    "glit", "bzzz", "plop", "zoop", "meep", "boop", "red",  "gray"};
 
-static const char *verbs[] = {"bit", "zip", "zap", "tap", "pop", "mux", "bus", "ram", "rom", "osc", "dac", "adc", "vox", "sfx",
-                              "mod", "cpu", "gpu", "pad", "seq", "run", "sum", "jam", "wig", "bun", "cat", "dog", "fox", "bee",
-                              "cow", "pig", "ant", "owl", "rat", "bat", "cod", "yak", "emu", "eel", "pig", "yak", "ape", "ape",
-                              "bat", "rat", "bug", "fly", "mop", "ink", "oil", "gas", "ice", "ash", "mud", "fog", "sun", "sky",
-                              "sea", "sky", "ice", "mud", "log", "pit", "pit", "jam", "jam", "zap", "zap"};
+static const char *verbs[] = {"bit", "zip", "zap", "tap", "pop", "mux", "bus", "ram", "rom", "osc", "dac", "adc",
+                              "vox", "sfx", "mod", "cpu", "gpu", "pad", "seq", "run", "sum", "jam", "wig", "bun",
+                              "cat", "dog", "fox", "bee", "cow", "pig", "ant", "owl", "rat", "bat", "cod", "yak",
+                              "emu", "eel", "pig", "yak", "ape", "ape", "bat", "rat", "bug", "fly", "mop", "ink",
+                              "oil", "gas", "ice", "ash", "mud", "fog", "sun", "sky", "sea", "sky", "ice", "mud",
+                              "log", "pit", "pit", "jam", "jam", "zap", "zap"};
 
 // Generate a name made in the format of: "adjective-verb"
 // chosen from small word lists of words 3-4 chars in length
