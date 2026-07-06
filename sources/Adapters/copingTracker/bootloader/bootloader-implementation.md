@@ -28,7 +28,7 @@ Bootloader constants and range checks are implemented in:
 
 Bootloader target name:
 
-- copingTrackerBootloader
+- PatchBay
 
 Bootloader target definition:
 
@@ -36,9 +36,9 @@ Bootloader target definition:
 
 Primary output artifacts:
 
-- build/Adapters/copingTracker/bootloader/copingTrackerBootloader.elf
-- build/Adapters/copingTracker/bootloader/copingTrackerBootloader.bin
-- build/Adapters/copingTracker/bootloader/copingTrackerBootloader.uf2
+- build/Adapters/copingTracker/bootloader/PatchBay.elf
+- build/Adapters/copingTracker/bootloader/PatchBay.bin
+- build/Adapters/copingTracker/bootloader/PatchBay.uf2
 
 ## Current Runtime Flow
 

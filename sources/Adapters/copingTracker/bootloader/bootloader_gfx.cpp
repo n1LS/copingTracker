@@ -239,43 +239,40 @@ void gfx_draw_changed() {
   for (int idx = 0; idx < TEXT_HEIGHT * TEXT_WIDTH; idx++) {
     if (changed[idx]) {
       changed[idx] = false;
-      // check adjacent in order to find bigger rectangle
       uint16_t y = idx / TEXT_WIDTH;
       uint16_t x = idx - (TEXT_WIDTH * y);
 
+      // Expand height downward from the seed cell
       int height = 1;
-      // first pass tests the height
       for (int probe_y = y + 1; probe_y < TEXT_HEIGHT; probe_y++) {
         int probe_idx = probe_y * TEXT_WIDTH + x;
-        if (changed[idx]) {
-          changed[idx] = false;
+        if (changed[probe_idx]) {
+          changed[probe_idx] = false;
           height++;
-          continue;
+        } else {
+          break;
         }
-        break;
       }
 
-      int16_t width = 1;
-      // having the height, we can test every subsequent column
-      for (int probe_y = y; probe_y < y + height; probe_y++) {
-        for (int probe_x = x + 1; probe_x < TEXT_WIDTH; probe_x++) {
-
-          // if we don't get to max height, then abort
-          int probe_idx = probe_y * TEXT_WIDTH + probe_x;
-
-          if (!changed[probe_idx]) {
-            // undo last column
-            for (int undo_y = y; undo_y < probe_y; undo_y++) {
-              changed[undo_y * TEXT_WIDTH + probe_x] = true;
-            }
-            goto end;
+      // Expand width rightward: each new column must have all `height` rows dirty
+      int width = 1;
+      for (int probe_x = x + 1; probe_x < TEXT_WIDTH; probe_x++) {
+        bool col_ok = true;
+        for (int probe_y = y; probe_y < y + height; probe_y++) {
+          if (!changed[probe_y * TEXT_WIDTH + probe_x]) {
+            col_ok = false;
+            break;
           }
-
-          changed[probe_idx] = false;
+        }
+        if (!col_ok) {
+          break;
+        }
+        for (int probe_y = y; probe_y < y + height; probe_y++) {
+          changed[probe_y * TEXT_WIDTH + probe_x] = false;
         }
         width++;
       }
-    end:
+
       gfx_draw_region(x, y, width, height);
     }
   }

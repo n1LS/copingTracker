@@ -87,7 +87,7 @@ void menu_render_static(void) {
   char title[TEXT_WIDTH + 1];
   std::memset(title, ' ', TEXT_WIDTH);
   title[TEXT_WIDTH] = 0;
-  const char *t = "pBM - copingTracker Boot Manager";
+  const char *t = "PatchBay - Boot Manager";
   std::memcpy(title + 1, t, std::strlen(t));
   render_text(0, 0, title);
 
