@@ -310,8 +310,8 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
       }
     case FourCC::ActionRandomName:
       {
-        char name[10];
-        getRandomName(name, 10);
+        char name[17];
+        getRandomName(name, 17);
         project_->SetProjectName(name);
         saveAsFlag_ = true;
         break;
