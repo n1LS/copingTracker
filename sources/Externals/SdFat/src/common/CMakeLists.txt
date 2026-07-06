@@ -10,7 +10,9 @@ add_library(sdfat_common
 
 target_link_libraries(sdfat_common PUBLIC sdfat_sdcard)
 
-target_include_directories(sdfat_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+target_include_directories(sdfat_common PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/../SdCard
 )
 
 include_directories(${PROJECT_SOURCE_DIR})
