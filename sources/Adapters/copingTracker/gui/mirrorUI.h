@@ -4,11 +4,11 @@
  * Copyright (c) 2024 xiphonics, inc.
  * Copyright (c) 2026 nILS Podewski
  *
- * This file was part of the picoTracker firmware
  * This file is part of the copingTracker firmware
  */
 
 #include "System/mirrorUI/mirrorUIProtocol.h"
+#include "Foundation/Types/Colors.h"
 #include <cstdint>
 
 #ifndef PICO_REMOTE_UI_H_
@@ -20,6 +20,7 @@
 void mirrorUI_flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullscreenUpdate = false);
 void mirrorUI_sendCommand(mirrorUICommand *command);
 void mirrorUI_sendPalette(uint16_t *color);
+void mirrorUI_sendRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, Color color);
 void mirrorUI_connected();
 void mirrorUI_processCDCInput();
 

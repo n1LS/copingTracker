@@ -129,16 +129,10 @@ void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos
 void picoTrackerGUIWindowImp::DrawRect(const GUIRect &r) {
   // This is the local drawing command for the device's own screen.
   chargfx_fill_rect(r.Left(), r.Top(), r.Width(), r.Height());
-  /*
+
   if (mirrorUIEnabled_) {
-    // Now, send the DrawRect command with full byte-escaping.
-    // Worst-case buffer: 2 (header) + 9 payload bytes * 2 (if all are escaped)
-    // = 20  bytes.
-    char mirrorUIBuffer[20];
-    auto bufferIndex = mirrorUIDrawRectCommand(r.Left(), r.Top(), r.Width(), r.Height(), mirrorUIBuffer);
-    sendToUSBCDC(mirrorUIBuffer, bufferIndex);
+    mirrorUI_sendRect(r.Left(), r.Top(), r.Width(), r.Height(), chargfx_get_foreground());
   }
-  */
 };
 
 void picoTrackerGUIWindowImp::Clear() {

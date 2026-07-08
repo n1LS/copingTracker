@@ -31,6 +31,8 @@ void chargfx_set_background(Color color);
 void chargfx_set_cursor(uint8_t x, uint8_t y);
 uint8_t chargfx_get_cursor_x();
 uint8_t chargfx_get_cursor_y();
+Color chargfx_get_foreground();
+Color chargfx_get_background();
 void chargfx_putc(char c, bool transparent = false);
 void chargfx_set_palette_color(int idx, uint16_t rgb565_color);
 void chargfx_set_font_index(uint8_t idx);

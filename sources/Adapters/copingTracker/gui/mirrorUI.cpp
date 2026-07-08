@@ -3,7 +3,6 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
-
  * This file is part of the copingTracker firmware
  */
 
@@ -127,7 +126,7 @@ void mirrorUI_sendPalette(uint16_t *color) {
     command_.payload[2 + c * 2] = val;
   }
 
-  command_.payload[0] = 0;
+  command_.payload[0] = cmdPalette;
   command_.payloadSize = 33;
 
   mirrorUI_sendCommand(&command_);
@@ -135,6 +134,23 @@ void mirrorUI_sendPalette(uint16_t *color) {
 
 mirrorUICommand *mirrorUI_getCommand() {
   return &command_;
+}
+
+void mirrorUI_sendRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, Color color) {
+  command_.payload[0] = cmdRect;
+  command_.payload[1] = x;
+  command_.payload[2] = x >> 8;
+  command_.payload[3] = y;
+  command_.payload[4] = y >> 8;
+  command_.payload[5] = width;
+  command_.payload[6] = width >> 8;
+  command_.payload[7] = height;
+  command_.payload[8] = height >> 8;
+  command_.payload[9] = color;
+
+  command_.payloadSize = 10;
+
+  mirrorUI_sendCommand(&command_);
 }
 
 void mirrorUI_connected() {
