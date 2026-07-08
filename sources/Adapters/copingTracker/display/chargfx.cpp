@@ -84,6 +84,14 @@ void chargfx_set_background(Color color) {
   screen_bg_color = color;
 }
 
+Color chargfx_get_foreground() {
+  return screen_fg_color;
+}
+
+Color chargfx_get_background() {
+  return screen_bg_color;
+}
+
 void chargfx_set_cursor(uint8_t x, uint8_t y) {
   cursor_x = x;
   cursor_y = y;

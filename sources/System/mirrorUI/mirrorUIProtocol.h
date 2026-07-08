@@ -21,6 +21,7 @@ enum mirrorUICommandType {
   cmdData = 0x01,
   cmdFont = 0x02,
   cmdInput = 0x03,
+  cmdRect = 0x04,
 };
 
 enum MirrorUIKey {
