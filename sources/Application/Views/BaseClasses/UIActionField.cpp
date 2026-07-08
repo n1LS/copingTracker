@@ -43,6 +43,11 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
     w.DrawChar(CHAR(char_button_border_left_s), position);
     position.x_ += strlen(buffer) + 1;
     w.DrawChar(CHAR(char_button_border_right_s), position);
+  } else {
+    position.x_ -= 1;
+    w.DrawChar(' ', position);
+    position.x_ += strlen(buffer) + 1;
+    w.DrawChar(' ', position);
   }
 }
 

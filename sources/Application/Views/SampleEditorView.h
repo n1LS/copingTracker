@@ -142,10 +142,9 @@ private:
   enum SelectedMarker { MarkerStart = 0, MarkerEnd };
   SelectedMarker selectedMarker_ = MarkerStart;
 
-  uint8_t modalClearCount_ = 0;
-
   etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> workingFilename_;
   bool hasWorkingCopy_ = false;
   bool pendingOverwriteLoadToPool_ = false;
+  bool hadModal_ = false;
 };
 #endif

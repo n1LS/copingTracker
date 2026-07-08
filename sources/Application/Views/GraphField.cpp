@@ -28,22 +28,10 @@ GraphField::GraphField(GUIPoint &position, int32_t width, int32_t height)
 }
 
 void GraphField::Draw(GUIWindow &w, int offset) {
-  int32_t x = x_;
-  int32_t y = static_cast<int32_t>(y_) + offset;
-  int32_t right = x + width_;
-  int32_t bottom = y + height_;
+}
 
-  Color borderColor = focus_ ? borderFocused_ : borderNormal_;
-  w.SetCurrentRectColor(borderColor);
-  GUIRect top(x, y, right, y + 1);
-  GUIRect bottomLine(x, bottom - 1, right, bottom);
-  GUIRect left(x, y, x + 1, bottom);
-  GUIRect rightLine(right - 1, y, right, bottom);
-  w.DrawRect(top);
-  w.DrawRect(bottomLine);
-  w.DrawRect(left);
-  w.DrawRect(rightLine);
-  w.SetCurrentRectColor(Theme::View::fg);
+Color GraphField::colorForIndex(int i) {
+  return 1 + (8 + i) % 15;
 }
 
 void GraphField::Reset() {
@@ -237,45 +225,37 @@ void GraphField::RequestFullRedraw() {
   needsFullRedraw_ = true;
 }
 
-void GraphField::SetMarkerCount(size_t count) {
-  if (count > MaxMarkers) {
-    count = MaxMarkers;
-  }
-  if (count != markerCount_) {
-    markerCount_ = count;
-    resetMarkerCache();
-    needsFullRedraw_ = true;
-  }
-}
-
-void GraphField::SetMarker(size_t index, uint32_t sample, Color color, bool visible) {
+void GraphField::SetMarker(size_t index, uint32_t sample, bool visible) {
   if (index >= MaxMarkers) {
     return;
   }
+
   markers_[index].sample = sample;
-  markers_[index].color = color;
   markers_[index].visible = visible;
 }
 
 int32_t GraphField::SampleToPixel(uint32_t sample) const {
-  if (!hasValidWindow()) {
+  if (!hasValidWindow() || sample < viewStart_ || sample >= viewEnd_) {
     return -1;
   }
-  if (sample < viewStart_ || sample >= viewEnd_) {
-    return -1;
-  }
+
   uint32_t clamped = std::min(sample, sampleSize_ > 0 ? sampleSize_ - 1 : 0U);
   uint32_t viewSpan = viewEnd_ - viewStart_;
   uint32_t rel = clamped - viewStart_;
-  int32_t local = static_cast<int32_t>((static_cast<uint64_t>(rel) * (width_ - 2)) / viewSpan);
+  int32_t local = static_cast<int32_t>((static_cast<uint64_t>(rel) * width_) / viewSpan);
+  
   return static_cast<int32_t>(x_) + 1 + local;
 }
 
 void GraphField::DrawGraph(View &view) {
   if (needsFullRedraw_) {
-    GUIRect area(static_cast<int32_t>(x_) + 1, static_cast<int32_t>(y_) + 1, static_cast<int32_t>(x_) + width_ - 1,
-                 static_cast<int32_t>(y_) + height_ - 1);
+    // clear area
+
+    GUIRect area(static_cast<int32_t>(x_), static_cast<int32_t>(y_), static_cast<int32_t>(x_) + width_,
+                 static_cast<int32_t>(y_) + height_);
     view.DrawRect(area, Theme::View::bg);
+
+    // baseline
 
     if (showBaseline_) {
       int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
@@ -283,10 +263,11 @@ void GraphField::DrawGraph(View &view) {
       view.DrawRect(baseline, Theme::Waveform::baseline);
     }
 
+    // draw waveform
+
     if (waveformValid_ && hasValidWindow()) {
       int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
-      int32_t drawableWidth = width_ - 2;
-      int32_t maxColumns = std::min<int32_t>(drawableWidth, static_cast<int32_t>(CacheSize));
+      int32_t maxColumns = std::min<int32_t>(width_, static_cast<int32_t>(CacheSize));
       for (int32_t x = 0; x < maxColumns; ++x) {
         uint8_t amplitude = waveformCache_[x];
         if (amplitude == 0) {
@@ -297,38 +278,18 @@ void GraphField::DrawGraph(View &view) {
         if (startY < static_cast<int32_t>(y_) + 1) {
           startY = static_cast<int32_t>(y_) + 1;
         }
-        if (endY > static_cast<int32_t>(y_) + height_ - 2) {
-          endY = static_cast<int32_t>(y_) + height_ - 2;
+        if (endY > static_cast<int32_t>(y_) + height_) {
+          endY = static_cast<int32_t>(y_) + height_;
         }
         GUIRect column(static_cast<int32_t>(x_) + 1 + x, startY, static_cast<int32_t>(x_) + 2 + x, endY);
         view.DrawRect(column, Theme::View::fg);
       }
     }
 
+    // draw markers
     if (sampleSize_ > 0) {
-      for (size_t i = 0; i < markerCount_; ++i) {
-        if (!markers_[i].visible) {
-          markerPixelCache_[i] = -1;
-          markerColorCache_[i] = markers_[i].color;
-          markerVisibleCache_[i] = false;
-          continue;
-        }
-        int32_t markerX = SampleToPixel(markers_[i].sample);
-        if (markerX < 0) {
-          markerPixelCache_[i] = -1;
-          markerColorCache_[i] = markers_[i].color;
-          markerVisibleCache_[i] = false;
-          continue;
-        }
-        GUIRect marker(markerX, static_cast<int32_t>(y_) + 2, markerX + 1, static_cast<int32_t>(y_) + height_ - 2);
-        view.DrawRect(marker, markers_[i].color);
-        markerPixelCache_[i] = static_cast<int16_t>(markerX);
-        markerColorCache_[i] = markers_[i].color;
-        markerVisibleCache_[i] = true;
-      }
-    } else {
-      resetMarkerCache();
-    }
+      DrawMarkers(view);
+    } 
 
     needsFullRedraw_ = false;
     return;
@@ -338,59 +299,37 @@ void GraphField::DrawGraph(View &view) {
     return;
   }
 
-  int16_t redrawXs[MaxMarkers * 2 + 2];
-  size_t redrawCount = 0;
-  auto addRedrawX = [&redrawXs, &redrawCount](int16_t x) {
-    if (x < 0) {
-      return;
-    }
-    for (size_t i = 0; i < redrawCount; ++i) {
-      if (redrawXs[i] == x) {
-        return;
-      }
-    }
-    if (redrawCount < (MaxMarkers * 2 + 2)) {
-      redrawXs[redrawCount++] = x;
-    }
-  };
+  DrawMarkers(view);
+}
 
+void GraphField::DrawMarkers(View &view) {
   for (size_t i = 0; i < markerCount_; ++i) {
-    int16_t currentX = -1;
-    bool visible = markers_[i].visible;
-    if (visible) {
-      int32_t markerX = SampleToPixel(markers_[i].sample);
-      if (markerX >= 0) {
-        currentX = static_cast<int16_t>(markerX);
-      } else {
-        visible = false;
+    // Redraw waveform at old marker position
+    if (markers_[i].x >= 0) {
+      redrawWaveformColumn(view, markers_[i].x);
+    }
+    
+    // Draw marker at new position if visible
+    if (markers_[i].visible) {
+      int32_t x = SampleToPixel(markers_[i].sample);
+      if (x >= 0) {
+        GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_);
+        view.DrawRect(marker, colorForIndex(i));
       }
+      markers_[i].x = x;
+    } else {
+      markers_[i].x = -1;
     }
-
-    int16_t previousX = markerPixelCache_[i];
-    bool colorChanged = markerColorCache_[i] != markers_[i].color;
-    bool visChanged = markerVisibleCache_[i] != visible;
-    if (currentX != previousX || colorChanged || visChanged) {
-      addRedrawX(previousX);
-      addRedrawX(currentX);
-      markerPixelCache_[i] = currentX;
-      markerColorCache_[i] = markers_[i].color;
-      markerVisibleCache_[i] = visible;
-    }
-  }
-
-  for (size_t i = 0; i < redrawCount; ++i) {
-    redrawWaveformColumn(view, redrawXs[i]);
-    drawMarkersAt(view, redrawXs[i]);
   }
 }
 
 void GraphField::redrawWaveformColumn(View &view, int32_t x) {
   int32_t left = static_cast<int32_t>(x_);
-  int32_t right = static_cast<int32_t>(x_) + width_ - 1;
-  if (x <= left || x >= right) {
+  int32_t right = static_cast<int32_t>(x_) + width_;
+  if (x <= left || x > right) {
     return;
   }
-  GUIRect clearRect(x, static_cast<int32_t>(y_) + 1, x + 1, static_cast<int32_t>(y_) + height_ - 1);
+  GUIRect clearRect(x, static_cast<int32_t>(y_) + 1, x + 1, static_cast<int32_t>(y_) + height_);
   view.DrawRect(clearRect, Theme::View::bg);
 
   if (showBaseline_) {
@@ -413,12 +352,10 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
   int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
   int32_t startY = centerY - amplitude / 2;
   int32_t endY = startY + amplitude;
-  if (startY < static_cast<int32_t>(y_) + 1) {
-    startY = static_cast<int32_t>(y_) + 1;
-  }
-  if (endY > static_cast<int32_t>(y_) + height_ - 2) {
-    endY = static_cast<int32_t>(y_) + height_ - 2;
-  }
+  
+  startY = std::max(startY, static_cast<int32_t>(y_) + 1);
+  endY = std::min(endY, static_cast<int32_t>(y_) + height_ + 1);
+  
   GUIRect column(x, startY, x + 1, endY);
   view.DrawRect(column, Theme::View::fg);
 }
@@ -436,22 +373,30 @@ void GraphField::drawMarkersAt(View &view, int32_t x) {
     if (markerX != x) {
       continue;
     }
-    GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_ - 2);
-    view.DrawRect(marker, markers_[i].color);
+    GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_);
+    view.DrawRect(marker, colorForIndex(i));
   }
 }
 
 void GraphField::resetMarkerCache() {
   for (size_t i = 0; i < MaxMarkers; ++i) {
-    markerPixelCache_[i] = -1;
-    markerColorCache_[i] = Theme::Waveform::marker(false);
+    markers_[i].x = -1;
     markerVisibleCache_[i] = false;
-    markers_[i].sample = 0;
-    markers_[i].color = Theme::Waveform::marker(false);
-    markers_[i].visible = false;
   }
 }
 
 bool GraphField::hasValidWindow() const {
   return sampleSize_ > 0 && viewEnd_ > viewStart_;
+}
+
+void GraphField::SetMarkerCount(size_t count) {
+  if (count > MaxMarkers) {
+    count = MaxMarkers;
+  }
+
+  if (count != markerCount_) {
+    markerCount_ = count;
+    resetMarkerCache();
+    needsFullRedraw_ = true;
+  }
 }
