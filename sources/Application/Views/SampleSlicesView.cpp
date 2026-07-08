@@ -212,10 +212,6 @@ void SampleSlicesView::DrawView() {
   bool hasModal = HasModalView();
 
   if (!hasModal) {
-    drawWaveform();
-    // Flush immediately after drawing waveform graphics to prevent old text
-    // from being redrawn over the graphics when chargfx_draw_changed() runs
-    ((AppWindow &)w_).Flush();
     ClearTextRect(0, 9, SCREEN_WIDTH, 3);
   }
 
@@ -249,6 +245,13 @@ void SampleSlicesView::DrawView() {
     }
   } else {
     FieldView::Redraw();
+  }
+
+  // Draw waveform last: flush all text to LCD first so chargfx_draw_changed()
+  // has no pending changes left that could overwrite the graphics layer.
+  if (!hasModal) {
+    ((AppWindow &)w_).Flush();
+    drawWaveform();
   }
 }
 
