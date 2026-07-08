@@ -248,6 +248,8 @@ int32_t GraphField::SampleToPixel(uint32_t sample) const {
 }
 
 void GraphField::DrawGraph(View &view) {
+  Trace::Log("DEBUG", "Drawing graph");
+
   if (needsFullRedraw_) {
     // clear area
 

@@ -211,8 +211,6 @@ struct FourCC {
     // 184 is taken for ActionShowSampleSlices
     // 185 is taken for VarImportResampler
     // 186 is taken for ActionAutoSlice
-    // 188 is taken for InstrumentCommandSetInstrumentParameter
-    // 189 is taken for VarOutputVolume
 
     VarChannel1Volume = 163,
     VarChannel2Volume = 164,
@@ -253,7 +251,10 @@ struct FourCC {
     VarSampleEditEnd = 178,
     VarSampleEditOperation = 181,
     VarImportResampler = 185,
+    
     ActionAutoSlice = 186,
+    ActionSlicingRevert = 187,
+    ActionSlicingSave = 189,
 
     ChiptuneInstrumentWaveform = 200,
     ChiptuneInstrumentAttack = 201,
@@ -277,7 +278,6 @@ struct FourCC {
     // 176 is free
     // 182 is free
     // 183 is free
-    // 187 is free
 
     Default = 255, // "    "
   };

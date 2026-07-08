@@ -42,6 +42,9 @@ public:
 
 private:
   static void AutoSliceConfirmCallback(View &v, ModalView &dialog);
+  static void ResetSlicesConfirmCallback(View &v, ModalView &dialog);
+
+  void clearAfterModal(View &view);
   void buildFieldLayout();
   void rebuildWaveform();
   void drawWaveform();
@@ -58,13 +61,15 @@ private:
   void adjustZoom(int32_t delta);
   void startPreview();
   void stopPreview();
-  uint32_t sliceEndForIndex(size_t index, uint32_t start) const;
   void handleSliceSelectionChange();
+  uint32_t sliceEndForIndex(size_t index, uint32_t start) const;
   uint32_t selectedSliceStart();
   bool hasInstrumentSample() const;
 
   void clearSliceMarkers();
   void updateSliceMarkers();
+  void saveState();
+  void restoreState();
 
   WatchedVariable sliceIndexVar_;
   WatchedVariable sliceStartVar_;
@@ -72,6 +77,8 @@ private:
 
   etl::vector<UIIntVarField, 2> intVarField_;
   etl::vector<UIActionField, 4> actionField_;
+
+  size_t sliceSaveState_[SampleInstrument::MaxSlices];
 
   bool needsFullRedraw_;
 
