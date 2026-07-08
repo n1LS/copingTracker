@@ -99,13 +99,17 @@ void View::drawMap() {
   SetColor(Theme::View::Map::fg(false));
   SetBackgroundColor(Theme::View::Map::bg(false));
 
+  Player *player = Player::GetInstance();
+  const char *songViewChar = player->GetSequencerMode() == SM_LIVE ? "L" : "S";
+
   char buffer[5];
   // row1
   DrawString(pos.x_, pos.y_, "D   ");
   // row2
   DrawString(pos.x_, pos.y_ + 1, "P" char_dotted_horizontal_s "G ");
   // row3
-  DrawString(pos.x_, pos.y_ + 2, "SCPI");
+  DrawString(pos.x_, pos.y_ + 2, songViewChar);
+  DrawString(pos.x_ + 1, pos.y_ + 2, "CPI");
   // row4
   DrawString(pos.x_, pos.y_ + 3, "M" char_dotted_horizontal_s "TT");
 
@@ -121,49 +125,37 @@ void View::drawMap() {
   pos.y_ = anchor.y_ + View::songRowCount_ + 1;
   switch (viewType_) {
     case VT_CHAIN:
-      pos.x_ += 1;
-      pos.y_ += 2;
-      DrawString(pos.x_, pos.y_, "C");
+      DrawString(pos.x_ + 1, pos.y_ + 2, "C");
       break;
     case VT_PHRASE:
-      pos.x_ += 2;
-      pos.y_ += 2;
-      DrawString(pos.x_, pos.y_, "P");
+      DrawString(pos.x_ + 2, pos.y_ + 2, "P");
       break;
     case VT_DEVICE:
       DrawString(pos.x_, pos.y_, "D");
       break;
     case VT_PROJECT:
-      pos.y_ += 1;
-      DrawString(pos.x_, pos.y_, "P");
+      DrawString(pos.x_, pos.y_ + 1, "P");
       break;
     case VT_INSTRUMENT:
-      pos.x_ += 3;
-      pos.y_ += 2;
-      DrawString(pos.x_, pos.y_, "I");
+      DrawString(pos.x_ + 3, pos.y_ + 2, "I");
       break;
     case VT_TABLE: // under phrase
-      pos.x_ += 2;
-      pos.y_ += 3;
-      DrawString(pos.x_, pos.y_, "T");
+      DrawString(pos.x_ + 2, pos.y_ + 3, "T");
       break;
     case VT_TABLE2: // under instrument
-      pos.x_ += 3;
-      pos.y_ += 3;
-      DrawString(pos.x_, pos.y_, "T");
+      DrawString(pos.x_ + 3, pos.y_ + 3, "T");
       break;
     case VT_GROOVE:
-      pos.x_ += 2;
-      pos.y_ += 1;
-      DrawString(pos.x_, pos.y_, "G");
+      DrawString(pos.x_ + 2, pos.y_ + 1, "G");
       break;
     case VT_MIXER:
-      pos.y_ += 3;
-      DrawString(pos.x_, pos.y_, "M");
+      DrawString(pos.x_, pos.y_ + 3, "M");
       break;
-    default: // VT_SONG
-      pos.y_ += 2;
-      DrawString(pos.x_, pos.y_, "S");
+    case VT_SONG:
+      DrawString(pos.x_, pos.y_ + 2, songViewChar);
+      break;
+    default:
+    break;
   }
 }
 

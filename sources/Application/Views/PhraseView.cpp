@@ -150,11 +150,11 @@ void PhraseView::updateCommandValue(PhraseColumn col, ViewUpdateDirection direct
 
 void PhraseView::updateCommandParam(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  
+
   // pick correct input and output for the selected column
   FourCC currentCmd = (col == colCmdVal1) ? FourCC::enum_type(step.cmd1) : FourCC::enum_type(step.cmd2);
   uint16_t *target = (col == colCmdVal1) ? &step.param1 : &step.param2;
-  
+
   cmdEditField_.ProcessArrow(DirectionalButtons[direction]);
   uint16_t paramValue = cmdEdit_.GetInt();
   paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
@@ -987,7 +987,7 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
     }
 
     return;
-  } 
+  }
   // Enter Modifer
 
   if (mask & BM_ENTER) {

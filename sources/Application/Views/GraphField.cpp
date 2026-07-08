@@ -243,7 +243,7 @@ int32_t GraphField::SampleToPixel(uint32_t sample) const {
   uint32_t viewSpan = viewEnd_ - viewStart_;
   uint32_t rel = clamped - viewStart_;
   int32_t local = static_cast<int32_t>((static_cast<uint64_t>(rel) * width_) / viewSpan);
-  
+
   return static_cast<int32_t>(x_) + 1 + local;
 }
 
@@ -289,7 +289,7 @@ void GraphField::DrawGraph(View &view) {
     // draw markers
     if (sampleSize_ > 0) {
       DrawMarkers(view);
-    } 
+    }
 
     needsFullRedraw_ = false;
     return;
@@ -308,7 +308,7 @@ void GraphField::DrawMarkers(View &view) {
     if (markers_[i].x >= 0) {
       redrawWaveformColumn(view, markers_[i].x);
     }
-    
+
     // Draw marker at new position if visible
     if (markers_[i].visible) {
       int32_t x = SampleToPixel(markers_[i].sample);
@@ -352,10 +352,10 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
   int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
   int32_t startY = centerY - amplitude / 2;
   int32_t endY = startY + amplitude;
-  
+
   startY = std::max(startY, static_cast<int32_t>(y_) + 1);
   endY = std::min(endY, static_cast<int32_t>(y_) + height_ + 1);
-  
+
   GUIRect column(x, startY, x + 1, endY);
   view.DrawRect(column, Theme::View::fg);
 }
