@@ -56,11 +56,13 @@ public:
   void SetWaveformValid(bool valid);
   void RequestFullRedraw();
 
+  void SetMarker(size_t index, uint32_t sample, bool visible);
   void SetMarkerCount(size_t count);
-  void SetMarker(size_t index, uint32_t sample, Color color, bool visible);
 
   int32_t SampleToPixel(uint32_t sample) const;
   void DrawGraph(View &view);
+
+  Color colorForIndex(int i);
 
 private:
   void redrawWaveformColumn(View &view, int32_t x);
@@ -86,14 +88,12 @@ private:
 
   struct Marker {
     uint32_t sample = 0;
-    Color color = Theme::View::fg;
     bool visible = false;
+    uint32_t x;
   };
 
   Marker markers_[MaxMarkers];
   size_t markerCount_;
-  int16_t markerPixelCache_[MaxMarkers];
-  Color markerColorCache_[MaxMarkers];
   bool markerVisibleCache_[MaxMarkers];
 
   static int32_t rmsSumSquares_[CacheSize];

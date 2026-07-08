@@ -199,6 +199,7 @@ struct Theme {
 };
 
 enum ViewUpdateDirection : int { VUD_LEFT = 0, VUD_RIGHT = 1, VUD_UP = 2, VUD_DOWN = 3 };
+const ButtonMask DirectionalButtons[4] = {BM_LEFT, BM_RIGHT, BM_UP, BM_DOWN};
 
 class View;
 class ModalView;
@@ -216,7 +217,7 @@ public:
     OnFocus();
   };
 
-  virtual void LooseFocus() {
+  virtual void LoseFocus() {
     if (!hasFocus_) {
       return;
     }

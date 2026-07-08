@@ -66,7 +66,6 @@ SampleEditorView::SampleEditorView(GUIWindow &w, ViewData *data)
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight) {
   assignWorkingFilename();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(Theme::Waveform::border(false), Theme::Waveform::border(true));
 }
 
 SampleEditorView::~SampleEditorView() {
@@ -85,14 +84,12 @@ void SampleEditorView::Reset() {
   tempSampleSize_ = 0;
   headerInfo_ = WavHeaderInfo{};
   headerValid_ = false;
-  modalClearCount_ = 0;
   filename.clear();
   filenameVar_.SetString("", false);
   workingFilename_.clear();
   hasWorkingCopy_ = false;
   graphField_.Reset();
   graphField_.SetShowBaseline(true);
-  graphField_.SetBorderColors(Theme::Waveform::border(false), Theme::Waveform::border(true));
   selectedMarker_ = MarkerStart;
 
   fieldList_.clear();
@@ -645,17 +642,16 @@ void SampleEditorView::adjustZoom(int32_t delta) {
 }
 
 void SampleEditorView::updateGraphMarkers() {
-  graphField_.SetMarkerCount(3);
   bool hasSample = tempSampleSize_ > 0;
 
   if (hasSample) {
     Color startColor = Theme::Waveform::marker(selectedMarker_ == MarkerStart);
     Color endColor = Theme::Waveform::marker(selectedMarker_ == MarkerEnd);
-    graphField_.SetMarker(0, start_, startColor, true);
-    graphField_.SetMarker(1, end_, endColor, true);
+    graphField_.SetMarker(0, start_, true);
+    graphField_.SetMarker(1, end_, true);
   } else {
-    graphField_.SetMarker(0, 0, Theme::Waveform::marker(false), false);
-    graphField_.SetMarker(1, 0, Theme::Waveform::marker(false), false);
+    graphField_.SetMarker(0, 0, false);
+    graphField_.SetMarker(1, 0, false);
   }
 
   uint32_t playheadSample = 0;
@@ -667,7 +663,7 @@ void SampleEditorView::updateGraphMarkers() {
     }
     playheadVisible = true;
   }
-  graphField_.SetMarker(2, playheadSample, Theme::Waveform::normal, playheadVisible);
+  graphField_.SetMarker(2, playheadSample, playheadVisible);
 }
 
 void SampleEditorView::rebuildWaveform() {
@@ -675,15 +671,18 @@ void SampleEditorView::rebuildWaveform() {
   graphField_.BeginRmsBuild();
 
   if (!headerValid_ || tempSampleSize_ == 0) {
+    graphField_.FinalizeRmsBuild();
     return;
   }
   if (graphField_.ViewEnd() <= graphField_.ViewStart()) {
+    graphField_.FinalizeRmsBuild();
     return;
   }
 
   if (viewData_->isShowingSampleEditorProjectPool) {
     if (!goProjectSamplesDir(viewData_)) {
       Trace::Error("SampleEditorView: Failed to chdir for waveform rebuild");
+      graphField_.FinalizeRmsBuild();
       return;
     }
   }
@@ -691,6 +690,7 @@ void SampleEditorView::rebuildWaveform() {
   auto file = FileSystem::GetInstance()->Open(activeFilename().c_str(), "r");
   if (!file) {
     Trace::Error("SampleEditorView: Failed to open file for waveform rebuild");
+    graphField_.FinalizeRmsBuild();
     return;
   }
 
@@ -698,6 +698,7 @@ void SampleEditorView::rebuildWaveform() {
       static_cast<uint32_t>(headerInfo_.numChannels) * static_cast<uint32_t>(headerInfo_.bytesPerSample);
   if (bytesPerFrame == 0) {
     Trace::Error("SampleEditorView: Invalid WAV header for waveform rebuild");
+    graphField_.FinalizeRmsBuild();
     return;
   }
 
@@ -799,14 +800,15 @@ void SampleEditorView::AnimationUpdate() {
   // directly to pixel buffer repaint itself for *2* frames to ensure it paints
   // over the space chars that are drawn in the first frame after the dialog is
   // dismissed
-  if (modalClearCount_ > 0) {
+  if (hadModal_) {
     fullWaveformRedraw_ = true;
     // Redraw full fields for two frames as well so GraphField border pixels
     // that got cleared by modal text cleanup are restored.
     isDirty_ = true;
     ((AppWindow &)w_).SetDirty();
     DrawWaveForm();
-    modalClearCount_--;
+
+    hadModal_ = false;
   }
 
   ScreenView::AnimationUpdate();
@@ -875,7 +877,7 @@ void SampleEditorView::onConfirmApplyOperation(View &, ModalView &dialog) {
       DoModal(error, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onOperationFailedAck>(*this));
     }
   }
-  modalClearCount_ = 2;
+  hadModal_ = true;
   isDirty_ = true;
 }
 
@@ -888,17 +890,20 @@ void SampleEditorView::onConfirmOverwriteSave(View &, ModalView &dialog) {
     return;
   }
 
-  modalClearCount_ = 2;
+  // TODO nILS: clearTextRect?
+  hadModal_ = true;
   isDirty_ = true;
 }
 
 void SampleEditorView::onOperationFailedAck(View &, ModalView &) {
-  modalClearCount_ = 2;
+  // TODO nILS: clearTextRect?
+  hadModal_ = true;
   isDirty_ = true;
 }
 
-void SampleEditorView::onSimpleModalDismiss(View &, ModalView &) {
-  modalClearCount_ = 2;
+void SampleEditorView::onSimpleModalDismiss(View &view, ModalView &) {
+  // TODO nILS: clearTextRect?
+  hadModal_ = true;
   isDirty_ = true;
 }
 

@@ -726,7 +726,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
       {
         ViewType *vt = (ViewType *)ve->GetData();
         if (_currentView) {
-          _currentView->LooseFocus();
+          _currentView->LoseFocus();
         }
 
         switch (*vt) {

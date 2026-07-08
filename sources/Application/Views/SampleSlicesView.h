@@ -12,6 +12,7 @@
 #define _SAMPLE_SLICES_VIEW_H_
 
 #include "BaseClasses/UIActionField.h"
+#include "BaseClasses/UIBigHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UIStaticField.h"
 #include "FieldView.h"
@@ -35,6 +36,7 @@ public:
   void DrawView() override;
   void OnPlayerUpdate(PlayerEventType, unsigned int) override {};
   void OnFocus() override;
+  void LoseFocus() override;
   void AnimationUpdate() override;
   void Update(Observable &o, I_ObservableData *d) override;
 
@@ -61,12 +63,15 @@ private:
   uint32_t selectedSliceStart();
   bool hasInstrumentSample() const;
 
+  void clearSliceMarkers();
+  void updateSliceMarkers();
+
   WatchedVariable sliceIndexVar_;
   WatchedVariable sliceStartVar_;
-  Variable autoSliceCountVar_;
+  Variable sliceCountVar_;
 
   etl::vector<UIIntVarField, 2> intVarField_;
-  etl::vector<UIActionField, 1> actionField_;
+  etl::vector<UIActionField, 4> actionField_;
 
   bool needsFullRedraw_;
 
@@ -75,9 +80,8 @@ private:
   uint32_t sampleSize_;
   GUIPoint graphFieldPos_;
   GraphField graphField_;
-  bool modalWasOpen_;
-  uint8_t modalClearCount_;
-
+  bool hadModal_;
+  
   bool playKeyHeld_;
   bool previewActive_;
   uint8_t previewNote_;
