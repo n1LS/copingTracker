@@ -1,5 +1,3 @@
-// TODO nILS: in drawing use columnPositions instead of int literals
-
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  *
