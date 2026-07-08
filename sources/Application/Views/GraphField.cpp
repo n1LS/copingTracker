@@ -231,7 +231,7 @@ void GraphField::SetMarker(size_t index, uint32_t sample, bool visible) {
   }
 
   markers_[index].sample = sample;
-  markers_[index].visible = true; // visible;
+  markers_[index].visible = visible;
 }
 
 int32_t GraphField::SampleToPixel(uint32_t sample) const {
@@ -248,8 +248,6 @@ int32_t GraphField::SampleToPixel(uint32_t sample) const {
 }
 
 void GraphField::DrawGraph(View &view) {
-  Trace::Log("DEBUG", "Drawing graph");
-
   if (needsFullRedraw_) {
     // clear area
 
@@ -290,26 +288,8 @@ void GraphField::DrawGraph(View &view) {
 
     // draw markers
     if (sampleSize_ > 0) {
-      for (size_t i = 0; i < markerCount_; ++i) {
-        if (!markers_[i].visible) {
-          markers_[i].x = -1;
-          markerVisibleCache_[i] = false;
-          continue;
-        }
-        int32_t markerX = SampleToPixel(markers_[i].sample);
-        if (markerX < 0) {
-          markers_[i].x = -1;
-          markerVisibleCache_[i] = false;
-          continue;
-        }
-        GUIRect marker(markerX, static_cast<int32_t>(y_) + 2, markerX + 1, static_cast<int32_t>(y_) + height_);
-        view.DrawRect(marker, colorForIndex(i));
-        markers_[i].x = static_cast<int16_t>(markerX);
-        markerVisibleCache_[i] = true;
-      }
-    } else {
-      resetMarkerCache();
-    }
+      DrawMarkers(view);
+    } 
 
     needsFullRedraw_ = false;
     return;
@@ -319,21 +299,28 @@ void GraphField::DrawGraph(View &view) {
     return;
   }
 
-  for (size_t i = 0; i < 16; ++i) {
+  DrawMarkers(view);
+}
+
+void GraphField::DrawMarkers(View &view) {
+  for (size_t i = 0; i < markerCount_; ++i) {
+    // Redraw waveform at old marker position
     if (markers_[i].x >= 0) {
       redrawWaveformColumn(view, markers_[i].x);
     }
     
-    view.SetColor(Theme::View::fg);
-    int32_t x = SampleToPixel(markers_[i].sample);
-    if (x >= 0) {
-      GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_);
-      view.DrawRect(marker, colorForIndex(i));
+    // Draw marker at new position if visible
+    if (markers_[i].visible) {
+      int32_t x = SampleToPixel(markers_[i].sample);
+      if (x >= 0) {
+        GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_);
+        view.DrawRect(marker, colorForIndex(i));
+      }
+      markers_[i].x = x;
+    } else {
+      markers_[i].x = -1;
     }
-
-    markers_[i].x = x;
   }
-  return;
 }
 
 void GraphField::redrawWaveformColumn(View &view, int32_t x) {
@@ -395,8 +382,6 @@ void GraphField::resetMarkerCache() {
   for (size_t i = 0; i < MaxMarkers; ++i) {
     markers_[i].x = -1;
     markerVisibleCache_[i] = false;
-    markers_[i].sample = 0;
-    markers_[i].visible = false;
   }
 }
 

@@ -61,6 +61,7 @@ public:
 
   int32_t SampleToPixel(uint32_t sample) const;
   void DrawGraph(View &view);
+  void DrawMarkers(View &view);
 
   Color colorForIndex(int i);
 
@@ -89,7 +90,7 @@ private:
   struct Marker {
     uint32_t sample = 0;
     bool visible = false;
-    uint32_t x;
+    int32_t x;
   };
 
   Marker markers_[MaxMarkers];

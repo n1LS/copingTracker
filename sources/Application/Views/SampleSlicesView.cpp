@@ -31,7 +31,7 @@ constexpr int32_t SliceYOffset = 2 * CHAR_HEIGHT;
 
 SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
     : FieldView(w, data), sliceIndexVar_(FourCC::SampleInstrumentSlices, 0),
-      sliceStartVar_(FourCC::SampleInstrumentStart, 0), sliceCountVar_(FourCC::Default, 4), needsFullRedraw_(true),
+      sliceStartVar_(FourCC::SampleInstrumentStart, 0), sliceCountVar_(FourCC::Default, 4),
       instrument_(nullptr), instrumentIndex_(0), sampleSize_(0), graphFieldPos_(SliceXOffset, SliceYOffset),
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight), hadModal_(false),
       playKeyHeld_(false), previewActive_(false), previewNote_(SampleInstrument::SliceNoteBase),
@@ -61,7 +61,6 @@ void SampleSlicesView::Reset() {
   previewDurationMs_ = 0.0f;
   previewPlayheadSample_ = 0;
   previewCursorVisible_ = false;
-  needsFullRedraw_ = true;
   sliceIndexVar_.SetInt(0, false);
   sliceStartVar_.SetInt(0, false);
   sliceCountVar_.SetInt(4, false);
@@ -71,12 +70,13 @@ void SampleSlicesView::Reset() {
 }
 
 void SampleSlicesView::OnFocus() {
+  ((AppWindow &)w_).Flush();
+
   stopPreview();
   instrumentIndex_ = static_cast<int32_t>(viewData_->currentInstrumentID_);
   instrument_ = currentInstrument();
   playKeyHeld_ = false;
   previewActive_ = false;
-  needsFullRedraw_ = true;
   sampleSize_ = 0;
   hadModal_ = false;
   previewStartMs_ = 0;
@@ -85,6 +85,7 @@ void SampleSlicesView::OnFocus() {
   previewDurationMs_ = 0.0f;
   previewPlayheadSample_ = 0;
   previewCursorVisible_ = false;
+  clearWaveformRegion();
   graphField_.Reset();
   graphField_.SetShowBaseline(false);
 
@@ -102,9 +103,8 @@ void SampleSlicesView::OnFocus() {
   sliceIndexVar_.SetInt(0, false);
   updateSliceSelectionFromInstrument();
   updateZoomLimits();
-  updateZoomWindow();
-  clearWaveformRegion();
   rebuildWaveform();
+  updateZoomWindow();
   graphField_.RequestFullRedraw();
   sliceCountVar_.SetInt(4, false);
   buildFieldLayout();
@@ -206,10 +206,6 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
 }
 
 void SampleSlicesView::DrawView() {
-  if (needsFullRedraw_) {
-    Clear();
-  }
-
   // draw title
   DrawTitle(char_back_s " Sample Slicer");
 
@@ -217,6 +213,9 @@ void SampleSlicesView::DrawView() {
 
   if (!hasModal) {
     drawWaveform();
+    // Flush immediately after drawing waveform graphics to prevent old text
+    // from being redrawn over the graphics when chargfx_draw_changed() runs
+    ((AppWindow &)w_).Flush();
     ClearTextRect(0, 9, SCREEN_WIDTH, 3);
   }
 
@@ -251,12 +250,9 @@ void SampleSlicesView::DrawView() {
   } else {
     FieldView::Redraw();
   }
-
-  needsFullRedraw_ = false;
 }
 
 void SampleSlicesView::LoseFocus() {
-  Trace::Log("DEBUG", "Losing focus");
   clearWaveformRegion();
 }
 
@@ -496,6 +492,8 @@ void SampleSlicesView::drawWaveform() {
     rebuildWaveform();
   }
 
+  // Set marker count before updating markers so resetMarkerCache() doesn't wipe them
+  graphField_.SetMarkerCount(SampleInstrument::MaxSlices + 1);
   updateSliceMarkers();
 
   size_t playheadIndex = SampleInstrument::MaxSlices;
@@ -510,7 +508,7 @@ void SampleSlicesView::drawWaveform() {
 
 void SampleSlicesView::clearWaveformRegion() {
   // Clear the entire waveform graphics area by drawing it with background color
-  GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, graphFieldPos_.x_ + GraphField::BitmapWidth, graphFieldPos_.x_ + GraphField::BitmapHeight);
+  GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, graphFieldPos_.x_ + GraphField::BitmapWidth, graphFieldPos_.y_ + GraphField::BitmapHeight);
   DrawRect(rect, Theme::View::bg);
   
   isDirty_ = true;
@@ -577,11 +575,14 @@ void SampleSlicesView::applySliceStart(uint32_t start) {
   
   if (stored != start) {
     sliceStartVar_.SetInt(static_cast<int32_t>(stored), false);
+    graphField_.SetMarker(index, start, true);
   }
   
   if (updateZoomWindow()) {
     graphField_.InvalidateWaveform();
     isDirty_ = true;
+  } else {
+    graphField_.DrawMarkers(*this);
   }
 }
 
@@ -808,6 +809,5 @@ void SampleSlicesView::restoreState() {
 
   sliceStartVar_.SetInt(sliceSaveState_[sliceIndexVar_.GetInt()]);
 
-  needsFullRedraw_ = true;
   isDirty_ = true;
 }

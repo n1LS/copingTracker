@@ -80,8 +80,6 @@ private:
 
   size_t sliceSaveState_[SampleInstrument::MaxSlices];
 
-  bool needsFullRedraw_;
-
   SampleInstrument *instrument_;
   int32_t instrumentIndex_;
   uint32_t sampleSize_;
