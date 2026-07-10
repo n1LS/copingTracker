@@ -749,7 +749,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
     if (GetFocus() == *fieldList_.begin()) {
       bool instrumentModified = checkInstrumentModified();
       if (instrumentModified) {
-        MessageBox *mb = MessageBox::Create(*this, "Reset all settings?", MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Reset", "Reset all settings?", MBBF_YES | MBBF_NO);
         pendingPurgeInstrument_ = instr;
         DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmResetInstrument>(*this));
       }
@@ -1039,7 +1039,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
           break;
         }
 
-        MessageBox *mb = MessageBox::Create(*this, "Change sample &", "clear slices?", MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Sample", "Change sample &", "clear slices?", MBBF_YES | MBBF_NO);
         pendingSampleChangeInstrument_ = sampleInstr;
         pendingSampleChangeNewIndex_ = newIndex;
         DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmSampleChange>(*this));
@@ -1053,7 +1053,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
         }
         SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
         if (sampleInstr->GetSampleIndex() < 0) {
-          MessageBox *mb = MessageBox::Create(*this, "Assign a sample first", MBBF_OK);
+          MessageBox *mb = MessageBox::Create(*this, "Sample", "Assign a sample first", MBBF_OK);
           DoModal(mb);
           break;
         }
@@ -1158,7 +1158,7 @@ void InstrumentView::handleInstrumentExport() {
 
   if (name.empty() || name == defaultTypeName) {
     // Show error message if no name is set
-    MessageBox *mb = MessageBox::Create(*this, "Please set a name", "before exporting", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Export", "Please set a name", "before exporting", MBBF_OK);
     DoModal(mb);
   } else {
     // Export the instrument using the name field
@@ -1167,7 +1167,7 @@ void InstrumentView::handleInstrumentExport() {
     if (result == PERSIST_EXISTS) {
       // File already exists, ask user if they want to override it
       etl::string<strlen("Overwrite existing file: ")> confirmMsg = "Overwrite existing file?";
-      MessageBox *mb = MessageBox::Create(*this, confirmMsg.c_str(), name.c_str(), MBBF_YES | MBBF_NO);
+      MessageBox *mb = MessageBox::Create(*this, "Export", confirmMsg.c_str(), name.c_str(), MBBF_YES | MBBF_NO);
 
       exportInstrument_ = instrument;
       exportName_ = name;
@@ -1179,7 +1179,7 @@ void InstrumentView::handleInstrumentExport() {
 
       const char *message = result == PERSIST_SAVED ? successMsg.c_str() : "Failed to export instrument";
       // Show export result message
-      MessageBox *mb = MessageBox::Create(*this, message, MBBF_OK);
+      MessageBox *mb = MessageBox::Create(*this, "Export", message, MBBF_OK);
       DoModal(mb);
     }
   }
@@ -1248,7 +1248,7 @@ void InstrumentView::goToImport() {
   bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
 
   if (!samplelibExists) {
-    MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Error", "Can't access the samplelib", MBBF_OK);
     DoModal(mb);
   } else {
     SampleImportView::SetSourceViewType(VT_INSTRUMENT);
@@ -1265,7 +1265,7 @@ void InstrumentView::changeInstrumentType() {
   // Check if any instrument field has been modified
   bool instrumentModified = checkInstrumentModified();
   if (instrumentModified) {
-    MessageBox *mb = MessageBox::Create(*this, "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
+    MessageBox *mb = MessageBox::Create(*this, "Instrument", "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
     DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
   } else {
     // Apply the proposed type change immediately if not modified

@@ -798,7 +798,7 @@ bool View::ConfirmStopPlayback(FourCC source) {
   }
   
   stopPlaybackSource_ = source;
-  MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK | MBBF_STOP);
+  MessageBox *mb = MessageBox::Create(*this, "Playback", "Not while playing", MBBF_OK | MBBF_STOP);
   DoModal(mb, ModalViewCallback::create<View, &View::OnConfirmStopDialog>(*this));
 
   return false;

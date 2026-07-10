@@ -355,7 +355,7 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
 
     case FourCC::ActionAutoSlice:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
-        MessageBox *mb = MessageBox::Create(*this, "Replace current slices?", MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Slices", "Replace current slices?", MBBF_YES | MBBF_NO);
         ((AppWindow &)w_).InvalidateTextCache();
         DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
       } else {
@@ -369,7 +369,7 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
 
     case FourCC::ActionSlicingRevert:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
-        MessageBox *mb = MessageBox::Create(*this, "Restore slices?", MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Slices", "Restore slices?", MBBF_YES | MBBF_NO);
         ((AppWindow &)w_).InvalidateTextCache();
         DoModal(mb, ModalViewCallback::create<&SampleSlicesView::ResetSlicesConfirmCallback>());
       } else {

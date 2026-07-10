@@ -36,12 +36,13 @@ protected:
   // Override GetAnchor to account for modal window position
   virtual GUIPoint GetAnchor();
 
+  int left_;
+  int top_;
+
 private:
   static uint32_t nextInstanceId_;
   uint32_t instanceId_;
   bool finished_;
   int returnCode_;
-  int left_;
-  int top_;
 };
 #endif

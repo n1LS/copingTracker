@@ -21,27 +21,28 @@ bool MessageBox::inUse_ = false;
 alignas(MessageBox) static unsigned char MessageBoxStorage[sizeof(MessageBox)];
 void *MessageBox::storage_ = MessageBoxStorage;
 
-MessageBox *MessageBox::Create(View &view, const char *message, int btnFlags) {
+MessageBox *MessageBox::Create(View &view, const char *title, const char *message, int btnFlags) {
   if (inUse_) {
     auto *existing = reinterpret_cast<MessageBox *>(storage_);
     existing->~MessageBox();
     inUse_ = false;
   }
   inUse_ = true;
-  return new (storage_) MessageBox(view, message, btnFlags);
+  return new (storage_) MessageBox(view, title, message, btnFlags);
 }
 
-MessageBox *MessageBox::Create(View &view, const char *message, const char *message2, int btnFlags) {
+MessageBox *MessageBox::Create(View &view, const char *title, const char *message, const char *message2, int btnFlags) {
   if (inUse_) {
     auto *existing = reinterpret_cast<MessageBox *>(storage_);
     existing->~MessageBox();
     inUse_ = false;
   }
   inUse_ = true;
-  return new (storage_) MessageBox(view, message, message2, btnFlags);
+  return new (storage_) MessageBox(view, title, message, message2, btnFlags);
 }
 
-MessageBox::MessageBox(View &view, const char *message, int btnFlags) : ModalView(view), line1_(message) {
+MessageBox::MessageBox(View &view, const char *title, const char *message, int btnFlags)
+    : ModalView(view), title_(title), line1_(message) {
   buttonCount_ = 0;
 
   for (int i = 0; i < MBL_LAST; i++) {
@@ -56,8 +57,8 @@ MessageBox::MessageBox(View &view, const char *message, int btnFlags) : ModalVie
 }
 
 // Constructor for 2 line message
-MessageBox::MessageBox(View &view, const char *messageLine1, const char *messageLine2, int btnFlags)
-    : ModalView(view), line1_(messageLine1), line2_(messageLine2) {
+MessageBox::MessageBox(View &view, const char *title, const char *messageLine1, const char *messageLine2, int btnFlags)
+    : ModalView(view), title_(title), line1_(messageLine1), line2_(messageLine2) {
   buttonCount_ = 0;
 
   for (int i = 0; i < MBL_LAST; i++) {
@@ -85,42 +86,62 @@ void MessageBox::DrawView() {
   // message size
   int size1 = line1_.size();
   int size2 = line2_.size();
-  int size = (size1 > size2) ? size1 : size2;
+  int messageWidth = std::max(size1, size2);
 
-  // compute space needed for buttons
-  // and set window size
+  // Calculate total button text width for centering
+  int buttonWidth = 0;
 
-  int btnSize = 6;
-  int width = buttonCount_ * (btnSize + 1) + 1;
-  width = (size > width) ? size : width;
-  SetWindow(width, line2_.size() > 0 ? 4 : 3);
-
-  // draw text
-  int y = 0;
-  int x = (width - size) / 2;
-  SetColor(Theme::Dialog::fg);
-  DrawString(x, y, line1_.c_str());
-  if (line2_.size() > 0) {
-    y++;
-    DrawString(x, y, line2_.c_str());
+  for (int i = 0; i < buttonCount_; i++) {
+    const char *text = buttonText[button_[i]];
+    buttonWidth += strlen(text) + 2; // +2 for border chars
   }
 
-  y += 2;
-  int offset = width / (buttonCount_ + 1);
+  // Ensure width is at least as wide as the buttons, title and messages
+  int width = 2 + std::max(messageWidth, std::max(buttonWidth, (int)title_.size()));
+
+  int numMessageLines = (line2_.size() > 0) ? 2 : 1;
+  int height = 3 + numMessageLines + 1;
+
+  // Use DrawWindow instead of DrawFilledBorder to get a title bar
+  left_ = (SCREEN_WIDTH - width) / 2;
+  top_ = (SCREEN_HEIGHT - height) / 2;
+  DrawWindow(0, 0, width, height + 2, title_.c_str());
+
+  // draw text
+  int y = 3; // start after title bar
+  SetColor(Theme::Dialog::fg);
+  DrawString(1, y, line1_.c_str());
+  if (line2_.size() > 0) {
+    y++;
+    DrawString(1, y, line2_.c_str());
+  }
+
+  y += 2; // gap before buttons
+
+  // Center the buttons based on total calculated width
+  int buttonStartX = (width - buttonWidth) / 2;
 
   for (int i = 0; i < buttonCount_; i++) {
     bool sel = i == selected_;
     const char *text = buttonText[button_[i]];
-    x = offset * (i + 1) - strlen(text) / 2;
-    SetColor(Theme::Dialog::Button::fg(sel));
-    SetBackgroundColor(Theme::Dialog::Button::bg(sel));
-    DrawString(x, y, text);
+    int textLen = strlen(text);
 
-    // draw highlight button ends
+    // Draw left border
     SetColor(Theme::Dialog::Button::bg(sel));
     SetBackgroundColor(Theme::Dialog::bg);
-    DrawChar(x - 1, y, CHAR(char_button_border_left_s));
-    DrawChar(x + strlen(text), y, CHAR(char_button_border_right_s));
+    DrawChar(buttonStartX, y, CHAR(char_button_border_left_s));
+
+    // Draw button text
+    SetColor(Theme::Dialog::Button::fg(sel));
+    SetBackgroundColor(Theme::Dialog::Button::bg(sel));
+    DrawString(buttonStartX + 1, y, text);
+
+    // Draw right border
+    SetColor(Theme::Dialog::Button::bg(sel));
+    SetBackgroundColor(Theme::Dialog::bg);
+    DrawChar(buttonStartX + 1 + textLen, y, CHAR(char_button_border_right_s));
+
+    buttonStartX += textLen + 3; // text + left border + right border + 1 space between buttons
   }
 }
 

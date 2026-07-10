@@ -38,8 +38,8 @@ enum MessageBoxButtonFlag {
 
 class MessageBox : public ModalView {
 public:
-  static MessageBox *Create(View &view, const char *message, int btnFlags = MBBF_OK);
-  static MessageBox *Create(View &view, const char *message, const char *message2, int btnFlags = MBBF_OK);
+  static MessageBox *Create(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
+  static MessageBox *Create(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK);
   virtual ~MessageBox();
   virtual void Destroy() override;
 
@@ -50,8 +50,9 @@ public:
   virtual void AnimationUpdate() {};
 
 protected:
-  MessageBox(View &view, const char *message, int btnFlags = MBBF_OK);
-  MessageBox(View &view, const char *message, const char *message2, int btnFlags = MBBF_OK);
+  MessageBox(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
+  MessageBox(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK);
+  etl::string<SCREEN_WIDTH - 2> title_ = "";
   etl::string<SCREEN_WIDTH - 2> line1_ = "";
   etl::string<SCREEN_WIDTH - 2> line2_ = "";
   int button_[4];

@@ -459,7 +459,7 @@ void ThemeView::handleThemeExport() {
   auto fs = FileSystem::GetInstance();
   if (fs->exists(pathBuffer)) {
     // Theme exists, ask for confirmation
-    MessageBox *mb = MessageBox::Create(*this, "Theme already exists", "     Overwrite?", MBBF_YES | MBBF_NO);
+    MessageBox *mb = MessageBox::Create(*this, "Theme", "Theme already exists", "     Overwrite?", MBBF_YES | MBBF_NO);
 
     DoModal(mb, ModalViewCallback::create<ThemeView, &ThemeView::onConfirmThemeOverwrite>(*this));
   } else {
@@ -495,7 +495,7 @@ void ThemeView::exportThemeWithName(const char *themeName, bool overwrite) {
 
   // Show result message
   MessageBox *resultMb =
-      MessageBox::Create(*this, result ? "Theme exported successfully " : "Failed to export theme", MBBF_OK);
+      MessageBox::Create(*this, "Theme", result ? "Theme exported successfully " : "Failed to export theme", MBBF_OK);
   DoModal(resultMb);
 }
 

@@ -249,12 +249,12 @@ void DeviceView::OnFocusLost() {
 }
 
 void DeviceView::ConfirmMassStorage() {
-  MessageBox *mb = MessageBox::Create(*this, "Reboot to USB storage?", MBBF_YES | MBBF_NO);
+  MessageBox *mb = MessageBox::Create(*this, "USB", "Reboot to USB storage?", MBBF_YES | MBBF_NO);
   DoModal(mb, ModalViewCallback::create<&MassStorageCallback>());
 }
 
 void DeviceView::ConfirmReboot() {
-  MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
+  MessageBox *mb = MessageBox::Create(*this, "Reboot", "Reboot and lose changes?", MBBF_YES | MBBF_NO);
   DoModal(mb, ModalViewCallback::create<&BootselCallback>());
 }
 
