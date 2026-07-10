@@ -55,6 +55,9 @@ public:
   void OnPurge();
   void OnQuit();
 
+  virtual void ConfirmedStop(FourCC source) override;
+  void goToSampleImport();
+
 private:
   bool canRenderFromFirstSongRow() const;
 

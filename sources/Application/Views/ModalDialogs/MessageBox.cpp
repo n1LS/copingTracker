@@ -15,7 +15,7 @@
 #include <Application/AppWindow.h>
 #include <new>
 
-static const char *buttonText[MBL_LAST] = {"Ok", "Yes", "Cancel", "No"};
+static const char *buttonText[MBL_LAST] = {"Ok", "Yes", "Cancel", "No", "Stop"};
 
 bool MessageBox::inUse_ = false;
 alignas(MessageBox) static unsigned char MessageBoxStorage[sizeof(MessageBox)];

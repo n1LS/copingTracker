@@ -12,8 +12,6 @@
 #include <Application/AppWindow.h>
 #include <new>
 
-static const char *buttonText[MBL_LAST] = {"Ok", "Yes", "Cancel", "No"};
-
 static bool inUse = false;
 alignas(FullScreenBox) static unsigned char FullScreenBoxStorage[sizeof(FullScreenBox)];
 static void *storage = FullScreenBoxStorage;

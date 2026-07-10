@@ -424,7 +424,7 @@ void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & (BM_NAV | BM_LEFT)) {
+  if (mask == (BM_NAV | BM_LEFT)) {
     // Go back to Device view with NAV+LEFT
     Navigate(VT_DEVICE);
   } else if (mask & BM_PLAY) {

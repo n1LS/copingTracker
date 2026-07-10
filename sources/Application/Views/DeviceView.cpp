@@ -100,7 +100,7 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   (*actionField_.rbegin()).AddObserver(*this);
 
 #ifndef ADV
-  position.y_ += 2;
+  position.y_ += 1;
   actionField_.emplace_back(char_symbols_usb_s " USB Storage", FourCC::ActionMassStorage, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
@@ -174,32 +174,14 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
 
   switch (fourcc) {
     case FourCC::ActionBootSelect:
-      {
-        if (!player->IsRunning()) {
-          MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
-          DoModal(mb, ModalViewCallback::create<&BootselCallback>());
-        } else {
-          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-          DoModal(mb);
-        }
-        return;
-      }
+      ConfirmStopPlayback(FourCC::ActionBootSelect);
+      return;
     case FourCC::ActionMassStorage:
-      {
-        if (!player->IsRunning()) {
-          MessageBox *mb = MessageBox::Create(*this, "Reboot to USB storage?", MBBF_YES | MBBF_NO);
-          DoModal(mb, ModalViewCallback::create<&MassStorageCallback>());
-        } else {
-          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-          DoModal(mb);
-        }
-        return;
-      }
+      ConfirmStopPlayback(FourCC::ActionMassStorage);
+      return;
     case FourCC::ActionShowTheme:
-      {
-        Navigate(VT_THEME);
-        return;
-      }
+      Navigate(VT_THEME);
+      return;
     case FourCC::VarLineOut:
       {
         Config *config = Config::GetInstance();
@@ -263,5 +245,26 @@ void DeviceView::OnFocusLost() {
     }
     Trace::Log("DEVICEVIEW", "Saved device config on focus lost");
     configDirty_ = false;
+  }
+}
+
+void DeviceView::ConfirmMassStorage() {
+  MessageBox *mb = MessageBox::Create(*this, "Reboot to USB storage?", MBBF_YES | MBBF_NO);
+  DoModal(mb, ModalViewCallback::create<&MassStorageCallback>());
+}
+
+void DeviceView::ConfirmReboot() {
+  MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
+  DoModal(mb, ModalViewCallback::create<&BootselCallback>());
+}
+
+void DeviceView::ConfirmedStop(FourCC sender) {
+  switch (sender) {
+    case FourCC::ActionBootSelect:
+      ConfirmReboot();
+      return;
+    case FourCC::ActionMassStorage:
+      ConfirmMassStorage();
+      return;
   }
 }

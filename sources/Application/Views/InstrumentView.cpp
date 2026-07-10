@@ -783,26 +783,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
       if (viewMode_ == VM_NEW) {
         viewMode_ = VM_NORMAL; // clear the "enter double tap" state
-        if (!player->IsRunning()) {
-          // First check if the samplelib exists
-          bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
-
-          if (!samplelibExists) {
-            MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
-            DoModal(mb);
-          } else {
-            SampleImportView::SetSourceViewType(VT_INSTRUMENT);
-            // set browser into sample import mode in top level samples dir
-            viewData_->importViewStartDir = SAMPLES_LIB_DIR;
-
-            // Go to import sample
-            viewData_->shouldAssignImportedSample = true;
-            Navigate(VT_IMPORT);
-          }
-        } else {
-          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-          DoModal(mb);
-        }
+        ConfirmStopPlayback(FourCC::ActionImport);
       } else {
         // mark as "new" mode so a 2nd following ENTER will trigger the sample
         // import above
@@ -1015,27 +996,9 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
 
         // Revert the UI field back to the current type until confirmed
         instrumentType_.SetInt(currentType, false);
-
-        // Check if player is running
-        Player *player = Player::GetInstance();
-        if (!player->IsRunning()) {
-          // Check if any instrument field has been modified
-          bool instrumentModified = checkInstrumentModified();
-          if (instrumentModified) {
-            MessageBox *mb =
-                MessageBox::Create(*this, "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
-            pendingInstrumentType_ = proposedType;
-            DoModal(mb,
-                    ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
-          } else {
-            // Apply the proposed type change immediately if not modified
-            instrumentType_.SetInt(proposedType, false);
-            onInstrumentTypeChange();
-          }
-        } else {
-          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-          DoModal(mb);
-        }
+    
+        pendingInstrumentType_ = proposedType;
+        ConfirmStopPlayback(FourCC::VarInstrumentType);
         break;
       }
     case FourCC::ActionExport:
@@ -1278,4 +1241,46 @@ void InstrumentView::onConfirmExportOverwrite(View &, ModalView &dialog) {
 
   PersistencyService::GetInstance()->ExportInstrument(instrument, name, true);
   Trace::Log("INSTRUMENTVIEW", "Instrument '%s' exported with overwrite", name.c_str());
+}
+
+void InstrumentView::goToImport() {
+  // First check if the samplelib exists
+  bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
+
+  if (!samplelibExists) {
+    MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
+    DoModal(mb);
+  } else {
+    SampleImportView::SetSourceViewType(VT_INSTRUMENT);
+    // set browser into sample import mode in top level samples dir
+    viewData_->importViewStartDir = SAMPLES_LIB_DIR;
+
+    // Go to import sample
+    viewData_->shouldAssignImportedSample = true;
+    Navigate(VT_IMPORT);
+  }
+}
+
+void InstrumentView::changeInstrumentType() {
+  // Check if any instrument field has been modified
+  bool instrumentModified = checkInstrumentModified();
+  if (instrumentModified) {
+    MessageBox *mb = MessageBox::Create(*this, "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
+    DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
+  } else {
+    // Apply the proposed type change immediately if not modified
+    instrumentType_.SetInt(pendingInstrumentType_, false);
+    onInstrumentTypeChange();
+  }
+}
+
+void InstrumentView::ConfirmedStop(FourCC source) {
+  switch (source) {
+    case FourCC::ActionImport:
+      goToImport();
+      break;
+    case FourCC::VarInstrumentType:
+      changeInstrumentType();
+      break;
+  }
 }

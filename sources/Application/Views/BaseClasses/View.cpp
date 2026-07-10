@@ -16,6 +16,7 @@
 #include "Application/Utils/char.h"
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalView.h"
 #include "System/Console/Trace.h"
@@ -778,4 +779,27 @@ void View::drawRowNumbers(int x, int y, int start, int numRows) {
     byteToHexString(j, row);
     DrawString(x, y + j, row);
   }
+}
+
+void View::OnConfirmStopDialog(View &v, ModalView &dialog) {
+  if (dialog.GetReturnCode() == MBL_STOP) {
+    Player::GetInstance()->Stop();
+    v.ConfirmedStop(stopPlaybackSource_);
+  }
+}
+
+void View::ConfirmedStop(FourCC sender) {
+}
+
+bool View::ConfirmStopPlayback(FourCC source) {
+  if (!Player::GetInstance()->IsRunning()) {
+    ConfirmedStop(source);
+    return true;
+  }
+  
+  stopPlaybackSource_ = source;
+  MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK | MBBF_STOP);
+  DoModal(mb, ModalViewCallback::create<View, &View::OnConfirmStopDialog>(*this));
+
+  return false;
 }

@@ -255,6 +255,10 @@ public:
   virtual void DrawChar(int x, int y, const char character, bool transparent = false);
   virtual void DrawRect(const GUIRect &r, Color color);
 
+  virtual void ConfirmedStop(FourCC sender);
+  void OnConfirmStopDialog(View &v, ModalView &dialog);
+  bool ConfirmStopPlayback(FourCC source);
+
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
 
@@ -319,6 +323,8 @@ public: // temp hack for modal window constructors
   // Previous VU meter values for optimization (one pair per channel + master)
   int32_t prevLeftVU_[SONG_CHANNEL_COUNT + 1];
   int32_t prevRightVU_[SONG_CHANNEL_COUNT + 1];
+
+  FourCC stopPlaybackSource_;
 
 private:
   uint16_t mask_;

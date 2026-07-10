@@ -37,13 +37,6 @@ static void CreateNewProjectCallback(View &v, ModalView &dialog) {
   }
 }
 
-static void BootselCallback(View &v, ModalView &dialog) {
-  if (dialog.GetReturnCode() == MBL_YES) {
-    System *sys = System::GetInstance();
-    sys->SystemBootloader();
-  }
-}
-
 static void SaveAsOverwriteCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_CANCEL) {
     return;
@@ -190,17 +183,17 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position.x_ += 7;
+  position.x_ += 8;
   actionField_.emplace_back("Save", FourCC::ActionSave, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position.x_ += 5;
+  position.x_ += 6;
   actionField_.emplace_back("New", FourCC::ActionNewProject, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position.x_ += 4;
+  position.x_ += 5;
   actionField_.emplace_back("Random", FourCC::ActionRandomName, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
@@ -219,7 +212,7 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
-  position.x_ += 8;
+  position.x_ += 9;
   actionField_.emplace_back("Stems", FourCC::ActionRenderStems, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
@@ -367,18 +360,6 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
         DoModal(mb, ModalViewCallback::create<&CreateNewProjectCallback>());
         break;
       }
-    case FourCC::ActionBootSelect:
-      {
-        if (!player->IsRunning()) {
-          MessageBox *mb = MessageBox::Create(*this, "Reboot and lose changes?", MBBF_YES | MBBF_NO);
-          DoModal(mb, ModalViewCallback::create<&BootselCallback>());
-        } else {
-          MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-          DoModal(mb);
-        }
-        break;
-      }
-
     case FourCC::ActionBPMChanged:
       break;
     case FourCC::ActionRenderMixdown:
@@ -415,25 +396,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
       break;
     case FourCC::ActionImport:
       // Switch to the SampleImportView **BUT** to show the Project Pool by default
-      if (!player->IsRunning()) {
-        // First check if the samplelib exists
-        bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
-
-        if (!samplelibExists) {
-          MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
-          DoModal(mb);
-        } else {
-          SampleImportView::SetSourceViewType(VT_PROJECT);
-          // Set to show project pool dir in SampleImportView
-          viewData_->isShowingSampleEditorProjectPool = true;
-
-          // Go to import sample
-          Navigate(VT_IMPORT);
-        }
-      } else {
-        MessageBox *mb = MessageBox::Create(*this, "Not while playing", MBBF_OK);
-        DoModal(mb);
-      }
+      ConfirmStopPlayback(FourCC::ActionImport);
       break;
     default:
       NInvalid;
@@ -467,4 +430,29 @@ bool ProjectView::CanExit() {
     return false;
   }
   return true;
+}
+
+void ProjectView::goToSampleImport() {
+  // First check if the samplelib exists
+  bool samplelibExists = FileSystem::GetInstance()->exists(SAMPLES_LIB_DIR);
+
+  if (!samplelibExists) {
+    MessageBox *mb = MessageBox::Create(*this, "Can't access the samplelib", MBBF_OK);
+    DoModal(mb);
+  } else {
+    SampleImportView::SetSourceViewType(VT_PROJECT);
+    // Set to show project pool dir in SampleImportView
+    viewData_->isShowingSampleEditorProjectPool = true;
+
+    // Go to import sample
+    Navigate(VT_IMPORT);
+  }
+}
+
+void ProjectView::ConfirmedStop(FourCC source) {
+  switch (source) {
+    case FourCC::ActionImport:
+      goToSampleImport();
+      break;
+  }
 }
