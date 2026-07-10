@@ -97,23 +97,23 @@ void MessageBox::DrawView() {
   }
 
   // Ensure width is at least as wide as the buttons, title and messages
-  int width = 2 + std::max(messageWidth, std::max(buttonWidth, (int)title_.size()));
+  int width = 4 + std::max(messageWidth, std::max(buttonWidth, (int)title_.size()));
 
   int numMessageLines = (line2_.size() > 0) ? 2 : 1;
-  int height = 3 + numMessageLines + 1;
+  int height = 4 + numMessageLines + 3;
 
   // Use DrawWindow instead of DrawFilledBorder to get a title bar
   left_ = (SCREEN_WIDTH - width) / 2;
   top_ = (SCREEN_HEIGHT - height) / 2;
-  DrawWindow(0, 0, width, height + 2, title_.c_str());
+  DrawWindow(0, 0, width, height, title_.c_str());
 
   // draw text
   int y = 3; // start after title bar
   SetColor(Theme::Dialog::fg);
-  DrawString(1, y, line1_.c_str());
+  DrawString(2, y, line1_.c_str());
   if (line2_.size() > 0) {
     y++;
-    DrawString(1, y, line2_.c_str());
+    DrawString(2, y, line2_.c_str());
   }
 
   y += 2; // gap before buttons
