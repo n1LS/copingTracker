@@ -67,6 +67,8 @@ void CommandView::DrawView() {
     DrawChar(x + 3, y, active ? CHAR(char_button_border_right_s) : ' ');
   }
 
+  SetColor(Theme::Dialog::Title::fg);
+  DrawString(3, top + 10, "Command description:");
   drawCommandLegend(3, top + 11, CommandList::AllCommands[index_]);
 }
 
