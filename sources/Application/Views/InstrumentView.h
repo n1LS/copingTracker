@@ -64,6 +64,8 @@ protected:
   void addNameTextField(I_Instrument *instr, GUIPoint &position);
   void handleInstrumentExport();
 
+  virtual void ConfirmedStop(FourCC source); 
+
 private:
   void onConfirmInstrumentTypeChange(View &view, ModalView &dialog);
   void onConfirmResetInstrument(View &view, ModalView &dialog);
@@ -72,6 +74,8 @@ private:
 
   void goToModulationPage();
   void goToInstrumentPage();
+  void goToImport();
+  void changeInstrumentType();
 
   static constexpr size_t SliceCountLabelSize = 20;
   Project *project_;

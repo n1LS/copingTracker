@@ -22,6 +22,7 @@
 #include "Application/Utils/updateData.h"
 #include "Externals/etl/include/etl/delegate.h"
 #include "Foundation/Types/Colors.h"
+#include "Foundation/Types/ViewType.h"
 #include "I_Action.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
@@ -45,33 +46,12 @@ typedef enum ButtonMask : uint16_t {
   BM_ENTER = 1 << 6, // ENTER button.
   BM_NAV = 1 << 7,   // NAV button.
   BM_PLAY = 1 << 8,  // PLAY button.
+
+  BM_DIRECTIONAL = BM_LEFT | BM_RIGHT | BM_UP | BM_DOWN,
 } ButtonMask;
 
 // Info area draw mode - ensures drawNotes() and drawHelpLegend() are mutually exclusive
 enum class InfoAreaDrawMode { Notes, HelpLegend };
-
-enum ViewType {
-  // first layer screens
-  VT_SONG,
-  VT_CHAIN,
-  VT_PHRASE,
-  VT_PROJECT,
-  VT_DEVICE,
-  VT_INSTRUMENT,
-  VT_TABLE,  // Table screen under phrase
-  VT_TABLE2, // Table screen under instrument
-  VT_GROOVE,
-  VT_MIXER,
-  // second layer screens
-  VT_IMPORT,            // Sample file import
-  VT_INSTRUMENT_IMPORT, // Instrument file import
-  VT_SELECTPROJECT,     // Select project
-  VT_THEME,             // Theme settings
-  VT_SELECTTHEME,       // Theme selection
-  VT_THEME_IMPORT,      // Theme file import
-  VT_SAMPLE_EDITOR,     // Sample Editor
-  VT_SAMPLE_SLICES,     // Sample slice editor
-};
 
 enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
 
@@ -169,6 +149,11 @@ struct Theme {
   struct Dialog {
     FIXED(bg, LIGHT_GRAY)
     FIXED(fg, BLACK)
+
+    struct Title {
+      FIXED(fg, WHITE)
+      FIXED(bg, LIGHT_BLUE)
+    };
 
     struct Button {
       SWITCHABLE(fg, BLACK, WHITE)
@@ -270,6 +255,10 @@ public:
   virtual void DrawChar(int x, int y, const char character, bool transparent = false);
   virtual void DrawRect(const GUIRect &r, Color color);
 
+  virtual void ConfirmedStop(FourCC sender);
+  void OnConfirmStopDialog(View &v, ModalView &dialog);
+  bool ConfirmStopPlayback(FourCC source);
+
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
 
@@ -291,7 +280,7 @@ protected:
   void drawRegularNote(const GUIPoint &pos, uint8_t channel);
   void drawNotes();
   void drawRowNumbers(int x, int y, int start, int numRows);
-  void drawHelpLegend(FourCC command);
+  void drawCommandLegend(uint8_t x, uint8_t y, FourCC command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
@@ -299,6 +288,7 @@ protected:
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
   void DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half);
+  void DrawWindow(int32_t x, int32_t y, int32_t width, int32_t height, const char *title);
   int DrawButton(int x, int y, const char *title, bool selected); // returns width of the drawn button
   int DrawTab(int x, int y, const char *title, bool selected);    // returns width of the drawn tab
 
@@ -333,6 +323,8 @@ public: // temp hack for modal window constructors
   // Previous VU meter values for optimization (one pair per channel + master)
   int32_t prevLeftVU_[SONG_CHANNEL_COUNT + 1];
   int32_t prevRightVU_[SONG_CHANNEL_COUNT + 1];
+
+  FourCC stopPlaybackSource_;
 
 private:
   uint16_t mask_;

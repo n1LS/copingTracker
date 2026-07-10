@@ -557,7 +557,7 @@ void SampleImportView::remove() {
   // Show confirmation dialog
   etl::string<32> confirmMsg = "Delete ";
   confirmMsg += name;
-  MessageBox *mb = MessageBox::Create(*this, confirmMsg.c_str(), "Confirm deletion?", MBBF_YES | MBBF_NO);
+  MessageBox *mb = MessageBox::Create(*this, "Delete", confirmMsg.c_str(), "Confirm deletion?", MBBF_YES | MBBF_NO);
   DoModal(mb, ModalViewCallback::create<&RemoveSampleCallback>());
 }
 

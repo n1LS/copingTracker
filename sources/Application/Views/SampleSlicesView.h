@@ -86,7 +86,7 @@ private:
   GUIPoint graphFieldPos_;
   GraphField graphField_;
   bool hadModal_;
-  
+
   bool playKeyHeld_;
   bool previewActive_;
   uint8_t previewNote_;

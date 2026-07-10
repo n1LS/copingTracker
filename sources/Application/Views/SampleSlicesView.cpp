@@ -31,8 +31,8 @@ constexpr int32_t SliceYOffset = 2 * CHAR_HEIGHT;
 
 SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
     : FieldView(w, data), sliceIndexVar_(FourCC::SampleInstrumentSlices, 0),
-      sliceStartVar_(FourCC::SampleInstrumentStart, 0), sliceCountVar_(FourCC::Default, 4),
-      instrument_(nullptr), instrumentIndex_(0), sampleSize_(0), graphFieldPos_(SliceXOffset, SliceYOffset),
+      sliceStartVar_(FourCC::SampleInstrumentStart, 0), sliceCountVar_(FourCC::Default, 4), instrument_(nullptr),
+      instrumentIndex_(0), sampleSize_(0), graphFieldPos_(SliceXOffset, SliceYOffset),
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight), hadModal_(false),
       playKeyHeld_(false), previewActive_(false), previewNote_(SampleInstrument::SliceNoteBase),
       sys_(System::GetInstance()), previewStartMs_(0), previewStartSample_(0), previewEndSample_(0),
@@ -146,7 +146,7 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
       adjustZoom(-1);
       return;
     }
-    
+
     if (mask & (BM_LEFT | BM_RIGHT)) {
       uint32_t viewStart = graphField_.ViewStart();
       uint32_t viewEnd = graphField_.ViewEnd();
@@ -160,7 +160,7 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
       if (viewSpan > 0) {
         int32_t delta = 0;
-        
+
         if (mask & (BM_LEFT | BM_RIGHT)) {
           // We allow single sample movement at max zoom level
           if (graphField_.ZoomLevel() >= graphField_.MaxZoomLevel()) {
@@ -172,7 +172,7 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
             delta = -delta;
           }
         }
-        
+
         if (delta != 0) {
           int32_t start = sliceStartVar_.GetInt();
           int32_t newStart = start + delta;
@@ -223,14 +223,14 @@ void SampleSlicesView::DrawView() {
 
   SetColor(Theme::View::fg);
   SetBackgroundColor(Theme::View::bg);
-  
+
   // draw slice selection
 
   for (int s = 0; s < 16; ++s) {
     SetColor(graphField_.colorForIndex(s));
     DrawChar(2 * s, 12, 'A' + s);
   }
-  
+
   if (hasModal) {
     // Modal text cleanup does not cover the graph bitmap area, so avoid
     // redrawing the graph field frame behind the modal.
@@ -261,7 +261,7 @@ void SampleSlicesView::LoseFocus() {
 
 void SampleSlicesView::drawStatusLabels() {
   char buffer[32];
-  
+
   int slice = sliceIndexVar_.GetInt();
   int start = sliceStartVar_.GetInt();
 
@@ -278,7 +278,7 @@ void SampleSlicesView::drawStatusLabels() {
 
   npf_snprintf(buffer, sizeof(buffer), "Slice      %c=", 'A' + slice);
   DrawString(0, 14, buffer);
-  
+
   npf_snprintf(buffer, sizeof(buffer), "Start  %08x", start);
   DrawString(0, 15, buffer);
 
@@ -319,17 +319,17 @@ void SampleSlicesView::AnimationUpdate() {
   }
 
   bool hasModal = HasModalView();
-  
+
   if (hadModal_ && !hasModal) {
     graphField_.RequestFullRedraw();
     isDirty_ = true;
   }
-  
+
   // waveform always needs redrawing when previewing
-  if (!hasModal  && (previewActive_ || previewCursorVisible_)) {
+  if (!hasModal && (previewActive_ || previewCursorVisible_)) {
     drawWaveform();
   }
-  
+
   hadModal_ = hasModal;
 }
 
@@ -341,43 +341,43 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
   uintptr_t fourcc = (uintptr_t)d;
 
   switch (fourcc) {
-    
+
     case FourCC::SampleInstrumentSlices:
       handleSliceSelectionChange();
       ((AppWindow &)w_).SetDirty();
       break;
-    
-      case FourCC::SampleInstrumentStart:
+
+    case FourCC::SampleInstrumentStart:
       applySliceStart(static_cast<uint32_t>(sliceStartVar_.GetInt()));
       isDirty_ = true;
       ((AppWindow &)w_).SetDirty();
       break;
-    
-      case FourCC::ActionAutoSlice:
-        if (instrument_ && instrument_->HasSlicesForPlayback()) {
-          MessageBox *mb = MessageBox::Create(*this, "Replace current slices?", MBBF_YES | MBBF_NO);
-          ((AppWindow &)w_).InvalidateTextCache();
-          DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
-        } else {
-          autoSliceEvenly();
-        }
-        break;
 
-      case FourCC::ActionSlicingSave:
-        saveState();
-        break;
+    case FourCC::ActionAutoSlice:
+      if (instrument_ && instrument_->HasSlicesForPlayback()) {
+        MessageBox *mb = MessageBox::Create(*this, "Slices", "Replace current slices?", MBBF_YES | MBBF_NO);
+        ((AppWindow &)w_).InvalidateTextCache();
+        DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
+      } else {
+        autoSliceEvenly();
+      }
+      break;
 
-      case FourCC::ActionSlicingRevert:
-        if (instrument_ && instrument_->HasSlicesForPlayback()) {
-          MessageBox *mb = MessageBox::Create(*this, "Restore slices?", MBBF_YES | MBBF_NO);
-          ((AppWindow &)w_).InvalidateTextCache();
-          DoModal(mb, ModalViewCallback::create<&SampleSlicesView::ResetSlicesConfirmCallback>());
-        } else {
-          autoSliceEvenly();
-        }
-        break;
-    
-      default:
+    case FourCC::ActionSlicingSave:
+      saveState();
+      break;
+
+    case FourCC::ActionSlicingRevert:
+      if (instrument_ && instrument_->HasSlicesForPlayback()) {
+        MessageBox *mb = MessageBox::Create(*this, "Slices", "Restore slices?", MBBF_YES | MBBF_NO);
+        ((AppWindow &)w_).InvalidateTextCache();
+        DoModal(mb, ModalViewCallback::create<&SampleSlicesView::ResetSlicesConfirmCallback>());
+      } else {
+        autoSliceEvenly();
+      }
+      break;
+
+    default:
       break;
   }
 }
@@ -392,15 +392,17 @@ void SampleSlicesView::buildFieldLayout() {
   actionField_.clear();
 
   GUIPoint position;
- 
+
   position.x_ = 13;
   position.y_ = 14;
-  intVarField_.emplace_back(position, sliceIndexVar_, "%2d", 0, static_cast<int32_t>(SampleInstrument::MaxSlices) - 1, 1, 4);
+  intVarField_.emplace_back(position, sliceIndexVar_, "%2d", 0, static_cast<int32_t>(SampleInstrument::MaxSlices) - 1,
+                            1, 4);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
- 
+
   position.x_ = 13;
   position.y_ = 18;
-  intVarField_.emplace_back(position, sliceCountVar_, "%2d", 1, static_cast<int32_t>(SampleInstrument::MaxSlices), 1, 4);
+  intVarField_.emplace_back(position, sliceCountVar_, "%2d", 1, static_cast<int32_t>(SampleInstrument::MaxSlices), 1,
+                            4);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.x_ = 1;
@@ -467,7 +469,7 @@ void SampleSlicesView::updateSliceMarkers() {
     clearSliceMarkers();
     return;
   }
-  
+
   // update all markers
   for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
     // no slice
@@ -482,7 +484,7 @@ void SampleSlicesView::updateSliceMarkers() {
       graphField_.SetMarker(i, 0, false);
       continue;
     }
-    
+
     // regular slice
     graphField_.SetMarker(i, start, true);
   }
@@ -511,9 +513,10 @@ void SampleSlicesView::drawWaveform() {
 
 void SampleSlicesView::clearWaveformRegion() {
   // Clear the entire waveform graphics area by drawing it with background color
-  GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, graphFieldPos_.x_ + GraphField::BitmapWidth, graphFieldPos_.y_ + GraphField::BitmapHeight);
+  GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, graphFieldPos_.x_ + GraphField::BitmapWidth,
+               graphFieldPos_.y_ + GraphField::BitmapHeight);
   DrawRect(rect, Theme::View::bg);
-  
+
   isDirty_ = true;
   ((AppWindow &)w_).SetDirty();
 }
@@ -575,12 +578,12 @@ void SampleSlicesView::applySliceStart(uint32_t start) {
   size_t index = static_cast<size_t>(sliceIndexVar_.GetInt());
   instrument_->SetSlicePoint(index, start);
   uint32_t stored = instrument_->GetSlicePoint(index);
-  
+
   if (stored != start) {
     sliceStartVar_.SetInt(static_cast<int32_t>(stored), false);
     graphField_.SetMarker(index, start, true);
   }
-  
+
   if (updateZoomWindow()) {
     graphField_.InvalidateWaveform();
     isDirty_ = true;
@@ -660,7 +663,7 @@ void SampleSlicesView::AutoSliceConfirmCallback(View &v, ModalView &dialog) {
 void SampleSlicesView::ResetSlicesConfirmCallback(View &v, ModalView &dialog) {
   auto &self = static_cast<SampleSlicesView &>(v);
   self.clearAfterModal(v);
-  
+
   if (dialog.GetReturnCode() == MBL_YES) {
     self.restoreState();
   }
@@ -791,7 +794,7 @@ void SampleSlicesView::saveState() {
   if (!instrument_ || sampleSize_ == 0) {
     return;
   }
-  
+
   for (size_t i = 0; i < SampleInstrument::MaxSlices; i++) {
     if (!instrument_->IsSliceDefined(i)) {
       sliceSaveState_[i] = 0;

@@ -15,6 +15,7 @@
 #include "Application/Model/Scale.h"
 #include "Application/Model/Table.h"
 #include "Application/Utils/char.h"
+#include "Application/Views/CommandView.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
 #include "System/Console/Trace.h"
@@ -29,6 +30,27 @@
 
 static const int16_t offsets_[2][4] = {-1, 1, 12, -12, -1, 1, 16, -16};
 static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
+
+// static callback handlers
+
+static void SetCommandCallback(View &v, ModalView &dialog) {
+  PhraseView &view = (PhraseView &)v;
+  view.setCurrentlySelectedCommand(FourCC::enum_type(dialog.GetReturnCode()));
+}
+
+void PhraseView::setCurrentlySelectedCommand(FourCC command) {
+  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
+
+  if (col_ != colCmd1 && col_ != colCmd2) {
+    return;
+  }
+
+  uint8_t *cmd = (col_ == colCmd1) ? &step.cmd1 : &step.cmd2;
+  *cmd = command.raw();
+  lastCmd_ = *cmd;
+
+  SetDirty(true);
+}
 
 // Column-specific value update handlers
 
@@ -150,11 +172,11 @@ void PhraseView::updateCommandValue(PhraseColumn col, ViewUpdateDirection direct
 
 void PhraseView::updateCommandParam(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  
+
   // pick correct input and output for the selected column
   FourCC currentCmd = (col == colCmdVal1) ? FourCC::enum_type(step.cmd1) : FourCC::enum_type(step.cmd2);
   uint16_t *target = (col == colCmdVal1) ? &step.param1 : &step.param2;
-  
+
   cmdEditField_.ProcessArrow(DirectionalButtons[direction]);
   uint16_t paramValue = cmdEdit_.GetInt();
   paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
@@ -747,30 +769,34 @@ void PhraseView::OnFocus() {
 }
 
 void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
+  // Handle button release
   if (!pressed) {
-    // ENTER might now no longer be pressed so first check if we were in
-    // audition mode and if its not then stop auditioning, stopAudition does
-    // both those things
+    // Stop audition when ENTER is released
     if (!(mask & BM_ENTER)) {
       stopAudition();
     }
 
+    // Exit mute-on mode when NAV is released
     if (viewMode_ == VM_MUTEON) {
       if (mask & BM_NAV) {
         toggleMute();
       }
-    };
+    }
+
+    // Exit solo-on mode when NAV is released
     if (viewMode_ == VM_SOLOON) {
       if (mask & BM_NAV) {
         switchSoloMode();
       }
-    };
-    return;
-  };
+    }
 
+    return;
+  }
+
+  // Handle "new item" mode: create new instrument or table when ENTER is pressed
   if (viewMode_ == VM_NEW) {
     if (mask == BM_ENTER) {
-      // If note or Instrument, we request a new instr
+      // Create new instrument for note or instrument columns
       if (col_ < colVolume) {
         InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
 
@@ -784,12 +810,13 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
           isDirty_ = true;
         } else {
           // show error dialog that no more instruments are available
-          MessageBox *mb = MessageBox::Create(*this, "No more instruments!", MBBF_OK);
+          MessageBox *mb = MessageBox::Create(*this, "Error", "No more instruments!", MBBF_OK);
           DoModal(mb);
           return;
         }
         mask &= ~BM_ENTER;
       } else {
+        // Create new table for command parameter columns
         if ((col_ == 3) && FourCC::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) ==
                                FourCC::InstrumentCommandTable) {
           TableHolder *th = TableHolder::GetInstance();
@@ -806,10 +833,13 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
 
+  // Exit clone mode if ALT+ENTER are not both held
   if ((viewMode_ == VM_CLONE) && !((mask & BM_ENTER) && (mask & BM_ALT))) {
     viewMode_ = VM_SELECTION;
   }
 
+  // Clone trigger: ALT+EDIT+ENTER or (in VM_CLONE mode) ALT+ENTER
+  // Clones the current instrument or table
   if ((mask == (BM_ALT | BM_EDIT | BM_ENTER)) || ((viewMode_ == VM_CLONE) && (mask & BM_ENTER) && (mask & BM_ALT))) {
     if (col_ < colVolume) {
       InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
@@ -852,7 +882,9 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
+  // Route to selection or normal button handling
   if (viewMode_ == VM_SELECTION) {
+    // Initialize clipboard if starting a new selection
     if (!clipboard_.active_) {
       clipboard_.active_ = true;
       clipboard_.col_ = col_;
@@ -869,6 +901,26 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
 void PhraseView::processNormalButtonMask(uint16_t mask) {
   Player *player = Player::GetInstance();
+
+  if (mask == BM_ENTER) {
+    // enter only (check if picker for commands is enabled)
+    bool picker = Config::GetInstance()->FindVariable(FourCC::VarConfigCommandPicker)->GetInt();
+
+    if (picker) {
+      if (col_ == colCmd1 || col_ == colCmd2) {
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
+        uint8_t cmd = (col_ == colCmd1) ? step.cmd1 : step.cmd2;
+
+        // use lastCmd if we hit an empty command field
+        if (cmd == FourCC::InstrumentCommandNone) {
+          cmd = lastCmd_;
+        }
+
+        CommandView *cv = CommandView::Create(*this, FourCC::enum_type(cmd));
+        DoModal(cv, ModalViewCallback::create<&SetCommandCallback>());
+      }
+    }
+  }
 
   if (mask & BM_EDIT) {
     // EDIT Modifier
@@ -987,7 +1039,7 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
     }
 
     return;
-  } 
+  }
   // Enter Modifer
 
   if (mask & BM_ENTER) {
@@ -1251,7 +1303,7 @@ void PhraseView::DrawView() {
   // Set info area draw mode based on what will be drawn
   if (helpLegendCommand != FourCC::InstrumentCommandNone) {
     infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
-    drawHelpLegend(helpLegendCommand);
+    drawCommandLegend(5, SCREEN_HEIGHT - 4, helpLegendCommand);
   } else {
     infoAreaMode_ = InfoAreaDrawMode::Notes;
     drawNotes();
@@ -1286,6 +1338,11 @@ void PhraseView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 void PhraseView::AnimationUpdate() {
   // First call the parent class implementation to draw the battery gauge
   ScreenView::AnimationUpdate();
+
+  // do not draw above the modal
+  if (HasModalView()) {
+    return;
+  }
 
   // Get player instance safely
   Player *player = Player::GetInstance();

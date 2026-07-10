@@ -4,7 +4,7 @@
    version="1.1"
    id="svg4254"
    sodipodi:docname="font.svg"
-   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
    width="128"
    height="112"
    inkscape:export-filename="font.png"
@@ -25,14 +25,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="27.988383"
-     inkscape:cx="34.853747"
-     inkscape:cy="77.585762"
-     inkscape:window-width="1665"
+     inkscape:zoom="4.401697"
+     inkscape:cx="14.085476"
+     inkscape:cy="38.28069"
+     inkscape:window-width="1666"
      inkscape:window-height="1056"
-     inkscape:window-x="0"
-     inkscape:window-y="33"
-     inkscape:window-maximized="1"
+     inkscape:window-x="297"
+     inkscape:window-y="232"
+     inkscape:window-maximized="0"
      inkscape:current-layer="svg4254"
      showgrid="true">
     <inkscape:grid
@@ -825,29 +825,29 @@
      id="rect738"
      style="fill:#000000" />
   <rect
-     x="1"
+     x="2"
      y="8"
-     width="5"
+     width="4"
      height="1"
      fill="rgb(255,255,255)"
      id="rect741"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999996" />
   <rect
-     x="11"
+     x="12"
      y="8"
-     width="2"
-     height="1"
+     width="1"
+     height="7"
      fill="rgb(255,255,255)"
      id="rect743"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999999" />
   <rect
-     x="17"
+     x="18"
      y="8"
-     width="5"
+     width="4"
      height="1"
      fill="rgb(255,255,255)"
      id="rect745"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999996" />
   <rect
      x="24"
      y="8"
@@ -857,13 +857,13 @@
      id="rect747"
      style="fill:#000000" />
   <rect
-     x="36"
+     x="38"
      y="8"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect749"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="40"
      y="8"
@@ -929,85 +929,69 @@
      id="rect765"
      style="fill:#000000" />
   <rect
-     x="0"
+     x="6"
      y="9"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect767"
-     style="fill:#000000" />
-  <rect
-     x="4"
-     y="9"
-     width="3"
-     height="1"
+     width="1"
+     height="5"
      fill="rgb(255,255,255)"
      id="rect769"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
-     x="10"
+     x="17"
      y="9"
-     width="3"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect771"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="9"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect773"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="21"
+     x="22"
      y="9"
-     width="2"
-     height="1"
+     width="1"
+     height="2"
      fill="rgb(255,255,255)"
      id="rect775"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="29"
+     x="30"
      y="9"
-     width="2"
-     height="1"
+     width="1"
+     height="2"
      fill="rgb(255,255,255)"
      id="rect777"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="32"
      y="9"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect779"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="36"
+     x="38"
      y="9"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect781"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="40"
+     x="40.000004"
      y="9"
-     width="2"
+     width="0.99999875"
      height="1"
      fill="rgb(255,255,255)"
      id="rect783"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999998" />
   <rect
      x="48"
      y="9"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect785"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="61"
      y="9"
@@ -1097,61 +1081,21 @@
      id="rect807"
      style="fill:#000000" />
   <rect
-     x="0"
-     y="10"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect809"
-     style="fill:#000000" />
-  <rect
-     x="3"
-     y="10"
-     width="4"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect811"
-     style="fill:#000000" />
-  <rect
-     x="11"
-     y="10"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect813"
-     style="fill:#000000" />
-  <rect
-     x="21"
-     y="10"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect815"
-     style="fill:#000000" />
-  <rect
-     x="29"
-     y="10"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect817"
-     style="fill:#000000" />
-  <rect
      x="32"
      y="10"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect819"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="36"
+     x="38"
      y="10"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect821"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="40"
      y="10"
@@ -1163,11 +1107,11 @@
   <rect
      x="48"
      y="10"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect825"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="61"
      y="10"
@@ -1257,37 +1201,13 @@
      id="rect847"
      style="fill:#000000" />
   <rect
-     x="0"
+     x="18"
      y="11"
      width="4"
      height="1"
      fill="rgb(255,255,255)"
-     id="rect849"
-     style="fill:#000000" />
-  <rect
-     x="5"
-     y="11"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect851"
-     style="fill:#000000" />
-  <rect
-     x="11"
-     y="11"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect853"
-     style="fill:#000000" />
-  <rect
-     x="17"
-     y="11"
-     width="5"
-     height="1"
-     fill="rgb(255,255,255)"
      id="rect855"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999996" />
   <rect
      x="26"
      y="11"
@@ -1299,27 +1219,27 @@
   <rect
      x="32"
      y="11"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect859"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="36"
+     x="38"
      y="11"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect861"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="45"
+     x="46"
      y="11"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect863"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="48"
      y="11"
@@ -1377,45 +1297,21 @@
      id="rect877"
      style="fill:#000000" />
   <rect
-     x="0"
+     x="17"
      y="12"
-     width="3"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect879"
-     style="fill:#000000" />
-  <rect
-     x="5"
-     y="12"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect881"
-     style="fill:#000000" />
-  <rect
-     x="11"
-     y="12"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect883"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="12"
-     width="2"
-     height="1"
+     width="1"
+     height="2"
      fill="rgb(255,255,255)"
      id="rect885"
      style="fill:#000000" />
   <rect
-     x="29"
+     x="30"
      y="12"
-     width="2"
-     height="1"
+     width="1"
+     height="2"
      fill="rgb(255,255,255)"
      id="rect887"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="32"
      y="12"
@@ -1425,29 +1321,29 @@
      id="rect889"
      style="fill:#000000" />
   <rect
-     x="45"
+     x="46"
      y="12"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect891"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="48"
      y="12"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect893"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="53"
+     x="54"
      y="12"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect895"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="59"
      y="12"
@@ -1513,85 +1409,53 @@
      id="rect911"
      style="fill:#000000" />
   <rect
-     x="0"
-     y="13"
-     width="2"
-     height="1"
+     x="1"
+     y="9"
+     width="1"
+     height="5"
      fill="rgb(255,255,255)"
      id="rect913"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
-     x="5"
+     x="38"
      y="13"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect915"
-     style="fill:#000000" />
-  <rect
-     x="11"
-     y="13"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect917"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="13"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect919"
-     style="fill:#000000" />
-  <rect
-     x="29"
-     y="13"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect921"
-     style="fill:#000000" />
-  <rect
-     x="36"
-     y="13"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect923"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="40"
      y="13"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect925"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="45"
+     x="46"
      y="13"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect927"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="48"
      y="13"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect929"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="53"
+     x="54"
      y="13"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect931"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="58"
      y="13"
@@ -1657,29 +1521,29 @@
      id="rect947"
      style="fill:#000000" />
   <rect
-     x="1"
+     x="2"
+     y="14"
+     width="4"
+     height="1"
+     fill="rgb(255,255,255)"
+     id="rect950"
+     style="fill:#000000;stroke-width:0.999996" />
+  <rect
+     x="10"
      y="14"
      width="5"
      height="1"
      fill="rgb(255,255,255)"
-     id="rect950"
-     style="fill:#000000" />
+     id="rect952"
+     style="fill:#000000;stroke-width:1" />
   <rect
-     x="9"
+     x="17"
      y="14"
      width="6"
      height="1"
      fill="rgb(255,255,255)"
-     id="rect952"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="14"
-     width="7"
-     height="1"
-     fill="rgb(255,255,255)"
      id="rect954"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="24"
      y="14"
@@ -1689,13 +1553,13 @@
      id="rect956"
      style="fill:#000000" />
   <rect
-     x="36"
+     x="38"
      y="14"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect958"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="41"
      y="14"
@@ -1963,43 +1827,35 @@
   <rect
      x="9"
      y="17"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect1028"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
-     x="12"
+     x="13"
      y="17"
-     width="2"
+     width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect1030"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="16"
      y="17"
-     width="2"
-     height="1"
+     width="1"
+     height="5"
      fill="rgb(255,255,255)"
      id="rect1032"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999996" />
   <rect
-     x="21"
+     x="22"
      y="17"
-     width="2"
-     height="1"
+     width="1"
+     height="2"
      fill="rgb(255,255,255)"
      id="rect1034"
-     style="fill:#000000" />
-  <rect
-     x="24"
-     y="17"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1036"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="29"
      y="17"
@@ -2177,46 +2033,6 @@
      id="rect1080"
      style="fill:#000000" />
   <rect
-     x="8"
-     y="18"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1082"
-     style="fill:#000000" />
-  <rect
-     x="13"
-     y="18"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1084"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="18"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1086"
-     style="fill:#000000" />
-  <rect
-     x="21"
-     y="18"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1088"
-     style="fill:#000000" />
-  <rect
-     x="24"
-     y="18"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1090"
-     style="fill:#000000" />
-  <rect
      x="32"
      y="18"
      width="2"
@@ -2369,36 +2185,12 @@
      id="rect1128"
      style="fill:#000000" />
   <rect
-     x="8"
-     y="19"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1130"
-     style="fill:#000000" />
-  <rect
-     x="13"
-     y="19"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1132"
-     style="fill:#000000" />
-  <rect
      x="16"
      y="19"
      width="6"
      height="1"
      fill="rgb(255,255,255)"
      id="rect1134"
-     style="fill:#000000" />
-  <rect
-     x="24"
-     y="19"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1136"
      style="fill:#000000" />
   <rect
      x="32"
@@ -2545,29 +2337,13 @@
      id="rect1172"
      style="fill:#000000" />
   <rect
-     x="16"
+     x="22"
      y="20"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1174"
-     style="fill:#000000" />
-  <rect
-     x="21"
-     y="20"
-     width="2"
-     height="1"
+     width="1"
+     height="2"
      fill="rgb(255,255,255)"
      id="rect1176"
-     style="fill:#000000" />
-  <rect
-     x="24"
-     y="20"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1178"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999997" />
   <rect
      x="32"
      y="20"
@@ -2737,45 +2513,13 @@
      id="rect1220"
      style="fill:#000000" />
   <rect
-     x="8"
-     y="21"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1222"
-     style="fill:#000000" />
-  <rect
-     x="13"
-     y="21"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1224"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="21"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1226"
-     style="fill:#000000" />
-  <rect
-     x="21"
-     y="21"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1228"
-     style="fill:#000000" />
-  <rect
      x="24"
-     y="21"
-     width="2"
-     height="1"
+     y="17"
+     width="1"
+     height="5"
      fill="rgb(255,255,255)"
      id="rect1230"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
      x="29"
      y="21"
@@ -2954,20 +2698,20 @@
      style="fill:#000000" />
   <rect
      x="8"
-     y="22"
-     width="2"
-     height="1"
+     y="18"
+     width="1"
+     height="5"
      fill="rgb(255,255,255)"
      id="rect1277"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
-     x="13"
-     y="22"
-     width="2"
-     height="1"
+     x="14"
+     y="18"
+     width="1"
+     height="5"
      fill="rgb(255,255,255)"
      id="rect1279"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
      x="16"
      y="22"
@@ -3115,11 +2859,11 @@
   <rect
      x="0"
      y="24"
-     width="6"
-     height="1"
+     width="1"
+     height="7"
      fill="rgb(255,255,255)"
      id="rect1318"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
      x="9"
      y="24"
@@ -3265,50 +3009,42 @@
      id="rect1354"
      style="fill:#000000" />
   <rect
-     x="0"
+     x="6"
      y="25"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1356"
-     style="fill:#000000" />
-  <rect
-     x="5"
-     y="25"
-     width="2"
-     height="1"
+     width="1"
+     height="2"
      fill="rgb(255,255,255)"
      id="rect1358"
      style="fill:#000000" />
   <rect
      x="8"
      y="25"
-     width="2"
-     height="1"
+     width="1"
+     height="5"
      fill="rgb(255,255,255)"
      id="rect1360"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
-     x="13"
+     x="14"
      y="25"
-     width="2"
-     height="1"
+     width="1"
+     height="5"
      fill="rgb(255,255,255)"
      id="rect1362"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
      x="16"
      y="25"
-     width="2"
-     height="1"
+     width="1"
+     height="6"
      fill="rgb(255,255,255)"
      id="rect1364"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
-     x="21"
+     x="22"
      y="25"
-     width="2"
-     height="1"
+     width="1"
+     height="2"
      fill="rgb(255,255,255)"
      id="rect1366"
      style="fill:#000000" />
@@ -3457,54 +3193,6 @@
      id="rect1402"
      style="fill:#000000" />
   <rect
-     x="0"
-     y="26"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1404"
-     style="fill:#000000" />
-  <rect
-     x="5"
-     y="26"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1406"
-     style="fill:#000000" />
-  <rect
-     x="8"
-     y="26"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1408"
-     style="fill:#000000" />
-  <rect
-     x="13"
-     y="26"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1410"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="26"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1412"
-     style="fill:#000000" />
-  <rect
-     x="21"
-     y="26"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1414"
-     style="fill:#000000" />
-  <rect
      x="24"
      y="26"
      width="2"
@@ -3650,27 +3338,11 @@
      style="fill:#000000" />
   <rect
      x="0"
-     y="27"
+     y="24"
      width="6"
      height="1"
      fill="rgb(255,255,255)"
      id="rect1452"
-     style="fill:#000000" />
-  <rect
-     x="8"
-     y="27"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1454"
-     style="fill:#000000" />
-  <rect
-     x="13"
-     y="27"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1456"
      style="fill:#000000" />
   <rect
      x="16"
@@ -3809,52 +3481,12 @@
      id="rect1490"
      style="fill:#000000" />
   <rect
-     x="0"
-     y="28"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1492"
-     style="fill:#000000" />
-  <rect
-     x="8"
-     y="28"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1494"
-     style="fill:#000000" />
-  <rect
-     x="11"
-     y="28"
+     x="12"
+     y="29"
      width="1"
      height="1"
      fill="rgb(255,255,255)"
      id="rect1496"
-     style="fill:#000000" />
-  <rect
-     x="13"
-     y="28"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1498"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="28"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1500"
-     style="fill:#000000" />
-  <rect
-     x="19"
-     y="28"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1502"
      style="fill:#000000" />
   <rect
      x="29"
@@ -3985,46 +3617,6 @@
      id="rect1534"
      style="fill:#000000" />
   <rect
-     x="0"
-     y="29"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1536"
-     style="fill:#000000" />
-  <rect
-     x="8"
-     y="29"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1538"
-     style="fill:#000000" />
-  <rect
-     x="11"
-     y="29"
-     width="4"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1540"
-     style="fill:#000000" />
-  <rect
-     x="16"
-     y="29"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1542"
-     style="fill:#000000" />
-  <rect
-     x="20"
-     y="29"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1544"
-     style="fill:#000000" />
-  <rect
      x="24"
      y="29"
      width="2"
@@ -4137,37 +3729,21 @@
      id="rect1572"
      style="fill:#000000" />
   <rect
-     x="0"
-     y="30"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1574"
-     style="fill:#000000" />
-  <rect
      x="9"
      y="30"
-     width="5"
+     width="3"
      height="1"
      fill="rgb(255,255,255)"
      id="rect1576"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:1" />
   <rect
-     x="16"
-     y="30"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1578"
-     style="fill:#000000" />
-  <rect
-     x="21"
-     y="30"
-     width="2"
-     height="1"
+     x="22"
+     y="28"
+     width="1"
+     height="3"
      fill="rgb(255,255,255)"
      id="rect1580"
-     style="fill:#000000" />
+     style="fill:#000000;stroke-width:0.999998" />
   <rect
      x="25"
      y="30"
@@ -4271,14 +3847,6 @@
      height="1"
      fill="rgb(255,255,255)"
      id="rect1606"
-     style="fill:#000000" />
-  <rect
-     x="13"
-     y="31"
-     width="2"
-     height="1"
-     fill="rgb(255,255,255)"
-     id="rect1609"
      style="fill:#000000" />
   <rect
      x="120"
@@ -7003,4 +6571,44 @@
      id="rect4"
      style="fill:#000000;stroke-width:0.999996"
      transform="rotate(90)" />
+  <rect
+     x="11"
+     y="9"
+     width="2"
+     height="1"
+     fill="rgb(255,255,255)"
+     id="rect1"
+     style="fill:#000000" />
+  <rect
+     x="10"
+     y="10"
+     width="1"
+     height="1"
+     fill="rgb(255,255,255)"
+     id="rect5"
+     style="fill:#000000;stroke-width:0.999997" />
+  <rect
+     x="0"
+     y="27"
+     width="6"
+     height="1"
+     fill="rgb(255,255,255)"
+     id="rect19"
+     style="fill:#000000" />
+  <rect
+     x="11"
+     y="28"
+     width="1"
+     height="1"
+     fill="rgb(255,255,255)"
+     id="rect20"
+     style="fill:#000000" />
+  <rect
+     x="13"
+     y="30"
+     width="1"
+     height="1"
+     fill="rgb(255,255,255)"
+     id="rect21"
+     style="fill:#000000" />
 </svg>

@@ -13,6 +13,7 @@
 #include "Application/Instruments/CommandList.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
+#include "Application/Views/CommandView.h"
 #include "Application/Views/SampleEditorView.h"
 #include "ViewData.h"
 #include <nanoprintf.h>
@@ -45,11 +46,43 @@ inline uint16_t &getParamRef(Table &table, int row, int col) {
 }
 } // namespace
 
+// static callback handlers
+
+static void SetCommandCallback(View &v, ModalView &dialog) {
+  TableView &view = (TableView &)v;
+  view.setCurrentlySelectedCommand(FourCC::enum_type(dialog.GetReturnCode()));
+}
+
+void TableView::setCurrentlySelectedCommand(FourCC command) {
+  Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
+  TableStep &step = table.steps_[row_];
+
+  if (col_ != colCmd1 && col_ != colCmd2 && col_ != colCmd3) {
+    return;
+  }
+
+  switch (col_) {
+    case colCmd1:
+      step.cmd1 = command.raw();
+      break;
+    case colCmd2:
+      step.cmd2 = command.raw();
+      break;
+    case colCmd3:
+      step.cmd3 = command.raw();
+      break;
+  }
+
+  lastCmd_ = command.raw();
+  SetDirty(true);
+}
+
+// constructor
 TableView::TableView(GUIWindow &w, ViewData *viewData)
     : ScreenView(w, viewData), cmdEdit_(FourCC::ActionEdit, 0), cmdEditPos_(0, 10),
       cmdEditField_(cmdEditPos_, cmdEdit_, 4, "%4.4X", 0, 0xFFFF, 16, true) {
   row_ = 0;
-  col_ = 0;
+  col_ = colCmd1;
 
   lastVol_ = 0;
   lastTick_ = 0;
@@ -67,7 +100,7 @@ TableView::~TableView() {
 
 void TableView::Reset() {
   row_ = 0;
-  col_ = 0;
+  col_ = colCmd1;
   lastVol_ = 0;
   lastTick_ = 0;
   lastTsp_ = 0;
@@ -78,13 +111,13 @@ void TableView::Reset() {
   clipboard_.active_ = false;
   clipboard_.width_ = 0;
   clipboard_.height_ = 0;
-  clipboard_.col_ = 0;
+  clipboard_.col_ = colCmd1;
   clipboard_.row_ = 0;
   for (int i = 0; i < 16; i++) {
     clipboard_.steps_[i] = {};
   }
 
-  saveCol_ = 0;
+  saveCol_ = colCmd1;
   saveRow_ = 0;
   needsUIUpdate_ = false;
   needsPlayPositionUpdate_ = false;
@@ -109,9 +142,9 @@ void TableView::cutPosition() {
   saveRow_ = row_;
   saveCol_ = col_;
 
-  if ((col_ == 0) || (col_ == 2) || (col_ == 4))
-    col_ += 1; // This way, A+B on note cuts
-               // the instruments too and parameters get cut with commands
+  if ((col_ == colCmd1) || (col_ == colCmd2) || (col_ == colCmd3)) {
+    col_ += 1; // This way, A+B on note cuts the instruments too and parameters get cut with commands
+  }
   cutSelection();
 }
 
@@ -197,22 +230,22 @@ void TableView::cutSelection() {
     for (int j = 0; j < clipboard_.height_; j++) {
       const int row = j + clipboard_.row_;
       switch (i + clipboard_.col_) {
-        case 0:
+        case colCmd1:
           table.steps_[row].cmd1 = encodeCommand(FourCC::InstrumentCommandNone);
           break;
-        case 1:
+        case colCmdVal1:
           table.steps_[row].param1 = 0x0000;
           break;
-        case 2:
+        case colCmd2:
           table.steps_[row].cmd2 = encodeCommand(FourCC::InstrumentCommandNone);
           break;
-        case 3:
+        case colCmdVal2:
           table.steps_[row].param2 = 0x0000;
           break;
-        case 4:
+        case colCmd3:
           table.steps_[row].cmd3 = encodeCommand(FourCC::InstrumentCommandNone);
           break;
-        case 5:
+        case colCmdVal3:
           table.steps_[row].param3 = 0x0000;
           break;
       }
@@ -249,22 +282,22 @@ void TableView::pasteClipboard() {
     for (int j = 0; j < height; j++) {
       const int row = (j + row_) % 16;
       switch (i + clipboard_.col_) {
-        case 0:
+        case colCmd1:
           table.steps_[row].cmd1 = clipboard_.steps_[j].cmd1;
           break;
-        case 1:
+        case colCmdVal1:
           table.steps_[row].param1 = clipboard_.steps_[j].param1;
           break;
-        case 2:
+        case colCmd2:
           table.steps_[row].cmd2 = clipboard_.steps_[j].cmd2;
           break;
-        case 3:
+        case colCmdVal2:
           table.steps_[row].param2 = clipboard_.steps_[j].param2;
           break;
-        case 4:
+        case colCmd3:
           table.steps_[row].cmd3 = clipboard_.steps_[j].cmd3;
           break;
-        case 5:
+        case colCmdVal3:
           table.steps_[row].param3 = clipboard_.steps_[j].param3;
           break;
       }
@@ -295,19 +328,19 @@ void TableView::updateCursor(int dx, int dy) {
   GUIPoint p = GetAnchor();
 
   switch (col_) {
-    case 1:
+    case colCmdVal1:
       p.x_ += 3;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(table.steps_[row_].param1);
       break;
-    case 3:
+    case colCmdVal2:
       p.x_ += 11;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
       cmdEdit_.SetInt(table.steps_[row_].param2);
       break;
-    case 5:
+    case colCmdVal3:
       p.x_ += 19;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
@@ -342,12 +375,13 @@ void TableView::updateCursorValue(int offset) {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   switch (col_) {
-    case 0:
-    case 2:
-    case 4:
+    case colCmd1:
+    case colCmd2:
+    case colCmd3:
       {
         const int commandColumn = col_ / 2;
         FourCC command = table.getCmd(row_, commandColumn);
+        // TODO: clean this up, it's wild.
         switch (offset) {
           case 0x01:
             command = CommandList::GetNext(command);
@@ -379,11 +413,12 @@ void TableView::updateCursorValue(int offset) {
         break;
       }
 
-    case 1:
-    case 3:
-    case 5:
+    case colCmdVal1:
+    case colCmdVal2:
+    case colCmdVal3:
       {
         switch (offset) {
+          // TODO: clean this up, it's wild.
           case 0x01:
             cmdEditField_.ProcessArrow(BM_RIGHT);
             break;
@@ -414,9 +449,9 @@ void TableView::pasteLast() {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   switch (col_) {
-    case 0:
-    case 2:
-    case 4:
+    case colCmd1:
+    case colCmd2:
+    case colCmd3:
       {
         const int commandColumn = col_ / 2;
         uint8_t &command = getCmdRef(table, row_, commandColumn);
@@ -428,11 +463,6 @@ void TableView::pasteLast() {
         }
         break;
       }
-
-    case 1:
-    case 3:
-    case 5:
-      break;
   }
 }
 
@@ -458,6 +488,39 @@ void TableView::ProcessButtonMask(uint16_t mask, bool pressed) {
 void TableView::processNormalButtonMask(uint16_t mask) {
 
   Player *player = Player::GetInstance();
+
+  if (mask == BM_ENTER) {
+    // enter only (check if picker for commands is enabled)
+    bool picker = Config::GetInstance()->FindVariable(FourCC::VarConfigCommandPicker)->GetInt();
+
+    if (picker) {
+      if (col_ == colCmd1 || col_ == colCmd2 || col_ == colCmd3) {
+        Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
+        TableStep &step = table.steps_[row_];
+        uint8_t cmd = FourCC::InstrumentCommandNone;
+
+        switch (col_) {
+          case colCmd1:
+            cmd = step.cmd1;
+            break;
+          case colCmd2:
+            cmd = step.cmd2;
+            break;
+          case colCmd3:
+            cmd = step.cmd3;
+            break;
+        }
+
+        // use lastCmd if we hit an empty command field
+        if (cmd == FourCC::InstrumentCommandNone) {
+          cmd = lastCmd_;
+        }
+
+        CommandView *cv = CommandView::Create(*this, FourCC::enum_type(cmd));
+        DoModal(cv, ModalViewCallback::create<&SetCommandCallback>());
+      }
+    }
+  }
 
   if (mask & BM_EDIT) {
     if (mask & BM_LEFT)
@@ -580,10 +643,8 @@ void TableView::setTextProps(int row, int col, Color color = Theme::View::fg) {
     if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
       highlighted = true;
     }
-  } else {
-    if ((col_ == row) && (row_ == col)) {
-      highlighted = true;
-    }
+  } else if ((col_ == row) && (row_ == col)) {
+    highlighted = true;
   }
 
   SetColor(highlighted ? Theme::View::bg : color);
@@ -712,7 +773,7 @@ void TableView::DrawView() {
   // Set info area draw mode based on what will be drawn
   if (helpLegendCommand != FourCC::InstrumentCommandNone) {
     infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
-    drawHelpLegend(helpLegendCommand);
+    drawCommandLegend(5, SCREEN_HEIGHT - 4, helpLegendCommand);
   } else {
     infoAreaMode_ = InfoAreaDrawMode::Notes;
     drawNotes();
@@ -740,6 +801,11 @@ void TableView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 void TableView::AnimationUpdate() {
   // First call the parent class implementation to draw the battery gauge
   ScreenView::AnimationUpdate();
+
+  // do not draw above the modal
+  if (HasModalView()) {
+    return;
+  }
 
   // Get player instance safely
   Player *player = Player::GetInstance();

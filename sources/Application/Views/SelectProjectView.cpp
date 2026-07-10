@@ -57,7 +57,7 @@ static void DeleteProjectCallback(View &v, ModalView &dialog) {
     char buffer[MAX_PROJECT_NAME_LENGTH + 1];
     view.getHighlightedProjectName(buffer);
     if (!ps->DeleteProject(buffer)) {
-      MessageBox *mb = MessageBox::Create(view, "Project could not be deleted", MBBF_OK);
+      MessageBox *mb = MessageBox::Create(view, "Delete", "Project could not be deleted", MBBF_OK);
       view.DoModal(mb);
       return;
     }
@@ -180,7 +180,7 @@ void SelectProjectView::ClearAutoSave() {
 
 bool SelectProjectView::WarnPlayerRunning() {
   if (Player::GetInstance()->IsRunning()) {
-    MessageBox *mb = MessageBox::Create(*this, "Not while running!", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Error", "Not while running!", MBBF_OK);
     DoModal(mb);
     return true;
   }
@@ -208,7 +208,7 @@ void SelectProjectView::AttemptDeletingSelectedProject() {
   }
 
   if (SelectionIsCurrentProject()) {
-    MessageBox *mb = MessageBox::Create(*this, "Cannot delete the active", "project.", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Delete", "Cannot delete the active", "project.", MBBF_OK);
     DoModal(mb);
     return;
   }
@@ -225,6 +225,6 @@ void SelectProjectView::AttemptLoadingProject() {
     return;
   }
 
-  MessageBox *mb = MessageBox::Create(*this, "Load song and lose changes?", MBBF_YES | MBBF_NO);
+  MessageBox *mb = MessageBox::Create(*this, "Load", "Load song and lose changes?", MBBF_YES | MBBF_NO);
   DoModal(mb, ModalViewCallback::create<&LoadProjectCallback>());
 }

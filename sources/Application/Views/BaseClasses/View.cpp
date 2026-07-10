@@ -12,10 +12,11 @@
 #include "View.h"
 #include "Application/AppWindow.h"
 #include "Application/Player/Player.h"
-#include "Application/Utils/HelpLegend.h"
+#include "Application/Utils/CommandHelp.h"
 #include "Application/Utils/char.h"
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalView.h"
 #include "System/Console/Trace.h"
@@ -99,13 +100,17 @@ void View::drawMap() {
   SetColor(Theme::View::Map::fg(false));
   SetBackgroundColor(Theme::View::Map::bg(false));
 
+  Player *player = Player::GetInstance();
+  const char *songViewChar = player->GetSequencerMode() == SM_LIVE ? "L" : "S";
+
   char buffer[5];
   // row1
   DrawString(pos.x_, pos.y_, "D   ");
   // row2
   DrawString(pos.x_, pos.y_ + 1, "P" char_dotted_horizontal_s "G ");
   // row3
-  DrawString(pos.x_, pos.y_ + 2, "SCPI");
+  DrawString(pos.x_, pos.y_ + 2, songViewChar);
+  DrawString(pos.x_ + 1, pos.y_ + 2, "CPI");
   // row4
   DrawString(pos.x_, pos.y_ + 3, "M" char_dotted_horizontal_s "TT");
 
@@ -121,49 +126,37 @@ void View::drawMap() {
   pos.y_ = anchor.y_ + View::songRowCount_ + 1;
   switch (viewType_) {
     case VT_CHAIN:
-      pos.x_ += 1;
-      pos.y_ += 2;
-      DrawString(pos.x_, pos.y_, "C");
+      DrawString(pos.x_ + 1, pos.y_ + 2, "C");
       break;
     case VT_PHRASE:
-      pos.x_ += 2;
-      pos.y_ += 2;
-      DrawString(pos.x_, pos.y_, "P");
+      DrawString(pos.x_ + 2, pos.y_ + 2, "P");
       break;
     case VT_DEVICE:
       DrawString(pos.x_, pos.y_, "D");
       break;
     case VT_PROJECT:
-      pos.y_ += 1;
-      DrawString(pos.x_, pos.y_, "P");
+      DrawString(pos.x_, pos.y_ + 1, "P");
       break;
     case VT_INSTRUMENT:
-      pos.x_ += 3;
-      pos.y_ += 2;
-      DrawString(pos.x_, pos.y_, "I");
+      DrawString(pos.x_ + 3, pos.y_ + 2, "I");
       break;
     case VT_TABLE: // under phrase
-      pos.x_ += 2;
-      pos.y_ += 3;
-      DrawString(pos.x_, pos.y_, "T");
+      DrawString(pos.x_ + 2, pos.y_ + 3, "T");
       break;
     case VT_TABLE2: // under instrument
-      pos.x_ += 3;
-      pos.y_ += 3;
-      DrawString(pos.x_, pos.y_, "T");
+      DrawString(pos.x_ + 3, pos.y_ + 3, "T");
       break;
     case VT_GROOVE:
-      pos.x_ += 2;
-      pos.y_ += 1;
-      DrawString(pos.x_, pos.y_, "G");
+      DrawString(pos.x_ + 2, pos.y_ + 1, "G");
       break;
     case VT_MIXER:
-      pos.y_ += 3;
-      DrawString(pos.x_, pos.y_, "M");
+      DrawString(pos.x_, pos.y_ + 3, "M");
       break;
-    default: // VT_SONG
-      pos.y_ += 2;
-      DrawString(pos.x_, pos.y_, "S");
+    case VT_SONG:
+      DrawString(pos.x_, pos.y_ + 2, songViewChar);
+      break;
+    default:
+      break;
   }
 }
 
@@ -610,6 +603,65 @@ int View::DrawTab(int x, int y, const char *title, bool selected) {
   return len + 2;
 }
 
+void View::DrawWindow(int32_t x, int32_t y, int32_t width, int32_t height, const char *title) {
+  const char *chars =
+      char_filledHalfBorder_topLeft_s char_filledHalfBorder_topRight_s char_filledHalfBorder_bottomLeft_s
+          char_filledHalfBorder_bottomRight_s char_block_bottom_s char_block_left_s char_block_top_s char_block_right_s;
+
+  SetColor(Theme::Dialog::Title::bg);
+  SetBackgroundColor(Theme::Dialog::Title::bg);
+
+  // top corners
+  DrawChar(x, y, chars[0], true);
+  DrawChar(x + width - 1, y, chars[1], true);
+
+  // top border
+  for (int32_t i = x + 1; i < x + width - 1; i++) {
+    DrawChar(i, y, chars[4], true);
+  }
+
+  // title vertical borders
+  for (int j = 1; j < 3; j++) {
+    DrawChar(x, y + j, chars[5], true);
+    DrawChar(x + width - 1, y + j, chars[7], true);
+  }
+
+  // title
+  SetBackgroundColor(Theme::Dialog::Title::bg);
+  SetColor(Theme::Dialog::Title::fg);
+  char buffer[32];
+  npf_snprintf(buffer, sizeof(buffer), "%-*s", width - 2, title);
+  DrawString(x + 1, y + 1, buffer);
+
+  SetColor(Theme::Dialog::bg);
+  memset(buffer, CHAR(char_block_bottom_s), width - 2);
+  DrawString(x + 1, y + 2, buffer);
+
+  // bottom corners
+  DrawChar(x, y + height - 1, chars[2], true);
+  DrawChar(x + width - 1, y + height - 1, chars[3], true);
+
+  // bottom borders
+  for (int32_t i = x + 1; i < x + width - 1; i++) {
+    DrawChar(i, y + height - 1, chars[6], true);
+  }
+
+  // vertical borders
+  for (int32_t j = y + 3; j < y + height - 1; j++) {
+    DrawChar(x, j, chars[5], true);
+    DrawChar(x + width - 1, j, chars[7], true);
+  }
+
+  // fill
+  SetBackgroundColor(Theme::Dialog::bg);
+
+  for (int i = x + 1; i < x + width - 1; i++) {
+    for (int j = y + 3; j < y + height - 1; j++) {
+      DrawChar(i, j, ' ');
+    }
+  }
+}
+
 void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half = false) {
   // corners, top, right, bottom, left
   const char *halfChars =
@@ -673,23 +725,21 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
   }
 }
 
-void View::drawHelpLegend(FourCC command) {
+void View::drawCommandLegend(uint8_t x, uint8_t y, FourCC command) {
   if (command == FourCC::InstrumentCommandNone) {
     // no command -> no help text
     return;
   }
 
-  HelpLegend help = getHelpLegend(command);
+  CommandHelp help = getCommandHelp(command);
 
   // highlight the letters that are the symbol for the command
   SetBackgroundColor(Theme::View::bg);
 
-  int y = SCREEN_HEIGHT - 4;
-
-  DrawTintString(5, y + 0, help.line1.data());
-  DrawTintString(5, y + 1, help.line2.data());
-  DrawTintString(5, y + 2, help.line3.data());
-  DrawTintString(5, y + 3, help.line4.data());
+  DrawTintString(x, y + 0, help.line1.data());
+  DrawTintString(x, y + 1, help.line2.data());
+  DrawTintString(x, y + 2, help.line3.data());
+  DrawTintString(x, y + 3, help.line4.data());
 }
 
 void View::DrawTitle(const char *format, ...) {
@@ -729,4 +779,27 @@ void View::drawRowNumbers(int x, int y, int start, int numRows) {
     byteToHexString(j, row);
     DrawString(x, y + j, row);
   }
+}
+
+void View::OnConfirmStopDialog(View &v, ModalView &dialog) {
+  if (dialog.GetReturnCode() == MBL_STOP) {
+    Player::GetInstance()->Stop();
+    v.ConfirmedStop(stopPlaybackSource_);
+  }
+}
+
+void View::ConfirmedStop(FourCC sender) {
+}
+
+bool View::ConfirmStopPlayback(FourCC source) {
+  if (!Player::GetInstance()->IsRunning()) {
+    ConfirmedStop(source);
+    return true;
+  }
+  
+  stopPlaybackSource_ = source;
+  MessageBox *mb = MessageBox::Create(*this, "Playback", "Not while playing", MBBF_OK | MBBF_STOP);
+  DoModal(mb, ModalViewCallback::create<View, &View::OnConfirmStopDialog>(*this));
+
+  return false;
 }

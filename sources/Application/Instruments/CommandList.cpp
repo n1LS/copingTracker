@@ -13,7 +13,9 @@
 
 // Keep command entries grouped by displayed mnemonic first letter;
 // GetNextAlpha/GetPrevAlpha depend on this ordering.
-static FourCC _all[] = {
+const int CommandList::CommandCount = 29;
+
+const FourCC CommandList::AllCommands[CommandCount] = {
     FourCC::InstrumentCommandNone,
     FourCC::InstrumentCommandArpeggiator,
     FourCC::InstrumentCommandCrush,
@@ -45,6 +47,10 @@ static FourCC _all[] = {
     FourCC::InstrumentCommandVolume,
 };
 
+FourCC CommandList::GetFirst() {
+  return FourCC::InstrumentCommandArpeggiator;
+}
+
 static char GetCommandGroupLetter(FourCC command) {
   const char *name = FourCC(command).c_str();
   return (name && name[0]) ? name[0] : '\0';
@@ -70,19 +76,19 @@ uint16_t CommandList::RangeLimitCommandParam(FourCC command, uint16_t paramValue
 }
 
 FourCC CommandList::GetNext(FourCC current) {
-  for (uint32_t i = 0; i < sizeof(_all) / sizeof(FourCC) - 1; i++) {
-    if (_all[i] == current) {
-      return _all[i + 1];
+  for (uint32_t i = 0; i < sizeof(AllCommands) / sizeof(FourCC) - 1; i++) {
+    if (AllCommands[i] == current) {
+      return AllCommands[i + 1];
     };
   };
   return current;
 }
 
 FourCC CommandList::GetPrev(FourCC current) {
-  uint32_t count = sizeof(_all) / sizeof(FourCC);
+  uint32_t count = sizeof(AllCommands) / sizeof(FourCC);
   for (uint32_t i = 2; i < count; i++) {
-    if (_all[i] == current) {
-      return _all[i - 1];
+    if (AllCommands[i] == current) {
+      return AllCommands[i - 1];
     };
   };
   return current;
@@ -91,15 +97,15 @@ FourCC CommandList::GetPrev(FourCC current) {
 FourCC CommandList::GetNextAlpha(FourCC current) {
   char letter = GetCommandGroupLetter(current);
   bool found = false;
-  for (uint32_t i = 0; i < sizeof(_all) / sizeof(FourCC); i++) {
-    char tLetter = GetCommandGroupLetter(_all[i]);
+  for (uint32_t i = 0; i < sizeof(AllCommands) / sizeof(FourCC); i++) {
+    char tLetter = GetCommandGroupLetter(AllCommands[i]);
     if (!found) {
       if (tLetter == letter) {
         found = true;
       }
     } else {
       if (tLetter != letter) {
-        return _all[i];
+        return AllCommands[i];
       }
     };
   };
@@ -111,10 +117,10 @@ FourCC CommandList::GetPrevAlpha(FourCC current) {
   char letter = GetCommandGroupLetter(current);
   bool found = false;
   FourCC tReturn = FourCC::Default;
-  uint32_t count = sizeof(_all) / sizeof(FourCC);
+  uint32_t count = sizeof(AllCommands) / sizeof(FourCC);
 
   for (uint32_t i = count - 1; i > 0; i--) {
-    char tLetter = GetCommandGroupLetter(_all[i]);
+    char tLetter = GetCommandGroupLetter(AllCommands[i]);
     if (!found) {
       if (tLetter == letter) {
         found = true;
@@ -122,12 +128,12 @@ FourCC CommandList::GetPrevAlpha(FourCC current) {
     } else {
       if (tLetter != letter) {
         if (tReturn == 0xFF) {
-          tReturn = _all[i];
+          tReturn = AllCommands[i];
         } else {
           if (tLetter != GetCommandGroupLetter(tReturn)) {
             return tReturn;
           } else {
-            tReturn = _all[i];
+            tReturn = AllCommands[i];
           }
         }
       }

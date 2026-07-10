@@ -36,6 +36,11 @@ public:
   void Update(Observable &, I_ObservableData *);
 
 protected:
+
+  virtual void ConfirmedStop(FourCC sender) override;
+  void ConfirmReboot();
+  void ConfirmMassStorage();
+
 private:
   void addSwatchField(Color color, GUIPoint position);
 

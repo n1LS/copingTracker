@@ -424,7 +424,7 @@ void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
-  if (mask & (BM_NAV | BM_LEFT)) {
+  if (mask == (BM_NAV | BM_LEFT)) {
     // Go back to Device view with NAV+LEFT
     Navigate(VT_DEVICE);
   } else if (mask & BM_PLAY) {
@@ -459,7 +459,7 @@ void ThemeView::handleThemeExport() {
   auto fs = FileSystem::GetInstance();
   if (fs->exists(pathBuffer)) {
     // Theme exists, ask for confirmation
-    MessageBox *mb = MessageBox::Create(*this, "Theme already exists", "     Overwrite?", MBBF_YES | MBBF_NO);
+    MessageBox *mb = MessageBox::Create(*this, "Theme", "Theme already exists", "     Overwrite?", MBBF_YES | MBBF_NO);
 
     DoModal(mb, ModalViewCallback::create<ThemeView, &ThemeView::onConfirmThemeOverwrite>(*this));
   } else {
@@ -495,7 +495,7 @@ void ThemeView::exportThemeWithName(const char *themeName, bool overwrite) {
 
   // Show result message
   MessageBox *resultMb =
-      MessageBox::Create(*this, result ? "Theme exported successfully " : "Failed to export theme", MBBF_OK);
+      MessageBox::Create(*this, "Theme", result ? "Theme exported successfully " : "Failed to export theme", MBBF_OK);
   DoModal(resultMb);
 }
 

@@ -839,7 +839,7 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
         confirmLine.append(opName.c_str());
         confirmLine.append("?");
 
-        MessageBox *mb = MessageBox::Create(*this, confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Edit", confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
 
         // Modal cannot properly draw over the waveform gfx area because text
         // drawing doesn't know the area because ClearTextRect() is not yet
@@ -872,7 +872,7 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
 void SampleEditorView::onConfirmApplyOperation(View &, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
     if (!applySelectedOperation()) {
-      MessageBox *error = MessageBox::Create(*this, "Operation failed", MBBF_OK);
+      MessageBox *error = MessageBox::Create(*this, "Error", "Operation failed", MBBF_OK);
       clearWaveformRegion();
       DoModal(error, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onOperationFailedAck>(*this));
     }
@@ -1079,7 +1079,7 @@ bool SampleEditorView::applyNormalizeOperation() {
 bool SampleEditorView::reloadEditedSample() {
   loadSample(viewData_->sampleEditorFilename, viewData_->isShowingSampleEditorProjectPool);
 
-  MessageBox *warning = MessageBox::Create(*this, "Please reload project", "To apply changes", MBBF_OK);
+  MessageBox *warning = MessageBox::Create(*this, "Reload", "Please reload project", "To apply changes", MBBF_OK);
   clearWaveformRegion();
   DoModal(warning, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onSimpleModalDismiss>(*this));
   return true;
@@ -1128,7 +1128,7 @@ void SampleEditorView::attemptSave(bool loadToPool) {
   if (fileExists(filename)) {
     pendingOverwriteLoadToPool_ = loadToPool;
     MessageBox *confirmBox =
-        MessageBox::Create(*this, "Overwrite existing sample?", filename.c_str(), MBBF_OK | MBBF_CANCEL);
+        MessageBox::Create(*this, "Save", "Overwrite existing sample?", filename.c_str(), MBBF_OK | MBBF_CANCEL);
     clearWaveformRegion();
     DoModal(confirmBox, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onConfirmOverwriteSave>(*this));
     return;
@@ -1161,13 +1161,13 @@ void SampleEditorView::confirmSave(bool loadToPool) {
 }
 
 void SampleEditorView::showSaveFailedDialog() {
-  MessageBox *errorBox = MessageBox::Create(*this, "Save Failed", "Unable to save sample", MBBF_OK);
+  MessageBox *errorBox = MessageBox::Create(*this, "Error", "Save Failed", "Unable to save sample", MBBF_OK);
   clearWaveformRegion();
   DoModal(errorBox, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onSimpleModalDismiss>(*this));
 }
 
 void SampleEditorView::showLoadToPoolFailedDialog() {
-  MessageBox *errorBox = MessageBox::Create(*this, "Sample saved", "Pool load failed", MBBF_OK);
+  MessageBox *errorBox = MessageBox::Create(*this, "Pool", "Sample saved", "Pool load failed", MBBF_OK);
   clearWaveformRegion();
   DoModal(errorBox, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onSimpleModalDismiss>(*this));
 }

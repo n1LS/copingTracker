@@ -60,11 +60,11 @@ void ThemeImportView::onImportTheme(const char *filename) {
     Clear();
 
     // Show success message
-    MessageBox *mb = MessageBox::Create(*this, "Theme imported successfully", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Import", "Theme imported successfully", MBBF_OK);
     DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
   } else {
     // Show error message
-    MessageBox *mb = MessageBox::Create(*this, "Failed to import theme", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(*this, "Import", "Failed to import theme", MBBF_OK);
     DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
   }
 }

@@ -34,6 +34,7 @@ static const char *midiSendSync[2] = {"Off", "Send"};
 static const char *midiClockSyncOptions[2] = {"Internal", "External"};
 static const char *mirrorUIOnOff[2] = {"Off", "On"};
 static const char *importResamplerOptions[] = {"None", "Linear"};
+static const char *commandPickerOptions[] = {"Inline", "Picker"};
 static constexpr int kImportResamplerOptionCount = 2;
 
 // Param keys MUST fit in this length limit!
@@ -48,6 +49,7 @@ constexpr int DEFAULT_REMOTEUI = 0x1;
 constexpr int DEFAULT_BACKLIGHT_LEVEL = 0xFF; // Default to max brightness (255)
 constexpr int DEFAULT_OUTPUT_VOLUME = 40;
 constexpr int DEFAULT_IMPORT_RESAMPLER = 0; // default for picoTracker is none (as original)
+constexpr int DEFAULT_USE_COMMAND_PICKER = 1;
 
 // Use a struct to define parameter information
 struct ConfigParam {
@@ -107,6 +109,11 @@ static const ConfigParam configParams[] = {
      importResamplerOptions,
      kImportResamplerOptionCount,
      false},
+    {"UseCommandPicker",
+     {.intValue = DEFAULT_USE_COMMAND_PICKER},
+     FourCC::VarConfigCommandPicker,
+     commandPickerOptions,
+     2},
 };
 
 Config::Config()
@@ -134,6 +141,7 @@ Config::Config()
       mirrorUI_(FourCC::VarMirrorUI, mirrorUIOnOff, 2, DEFAULT_REMOTEUI),
       importResampler_(FourCC::VarImportResampler, importResamplerOptions, kImportResamplerOptionCount,
                        DEFAULT_IMPORT_RESAMPLER),
+      commandInputMode_(FourCC::VarConfigCommandPicker, commandPickerOptions, 2, DEFAULT_USE_COMMAND_PICKER),
       uiFont_(FourCC::VarUIFont, ThemeConstants::THEME_FONT_NAMES, ThemeConstants::THEME_FONT_COUNT,
               ThemeConstants::DEFAULT_UIFONT),
       themeName_(FourCC::VarThemeName, ThemeConstants::DEFAULT_THEME_NAME),
@@ -161,6 +169,7 @@ Config::Config()
   variables_.push_back(&midiSync_);
   variables_.push_back(&mirrorUI_);
   variables_.push_back(&importResampler_);
+  variables_.push_back(&commandInputMode_);
   variables_.push_back(&uiFont_);
   variables_.push_back(&themeName_);
   variables_.push_back(&backlightLevel_);

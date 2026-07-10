@@ -20,25 +20,7 @@
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
-#include "Application/Views/ChainView.h"
-#include "Application/Views/DeviceView.h"
-#include "Application/Views/GrooveView.h"
-#include "Application/Views/InstrumentImportView.h"
-#include "Application/Views/InstrumentView.h"
-#include "Application/Views/MixerView.h"
-#include "Application/Views/ModalDialogs/FullScreenBox.h"
-#include "Application/Views/ModalDialogs/MessageBox.h"
-#include "Application/Views/NullView.h"
-#include "Application/Views/PhraseView.h"
-#include "Application/Views/ProjectView.h"
-#include "Application/Views/SampleEditorView.h"
-#include "Application/Views/SampleImportView.h"
-#include "Application/Views/SampleSlicesView.h"
-#include "Application/Views/SelectProjectView.h"
-#include "Application/Views/SongView.h"
-#include "Application/Views/TableView.h"
-#include "Application/Views/ThemeImportView.h"
-#include "Application/Views/ThemeView.h"
+#include "Application/Views/Views.h"
 #include "BaseClasses/View.h"
 #include "Foundation/Variables/WatchedVariable.h"
 #include "Player/Player.h"
@@ -474,7 +456,7 @@ AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
   _currentView->OnFocus();
 
   if (!playerOK) {
-    MessageBox *mb = MessageBox::Create(views_->songView, "Failed to initialize audio", MBBF_OK);
+    MessageBox *mb = MessageBox::Create(views_->songView, "Audio", "Failed to initialize audio", MBBF_OK);
     views_->songView.DoModal(mb);
   }
 
@@ -620,7 +602,7 @@ void AppWindow::AnimationUpdate() {
       awaitingProjectLoadAck_ = true;
       // Use saved view for error dialog, fallback to songView if null
       View &errorView = views_->songView;
-      MessageBox *mb = MessageBox::Create(errorView, "Invalid Project:", failedProjectName_, MBBF_OK);
+      MessageBox *mb = MessageBox::Create(errorView, "Project", "Invalid Project:", failedProjectName_, MBBF_OK);
       errorView.DoModal(mb);
       return;
     }
@@ -628,7 +610,7 @@ void AppWindow::AnimationUpdate() {
 
   if (lowBatteryState_ && !lowBatteryMessageShown_) {
     if (!_currentView->HasModalView()) {
-      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "Low battery!", "Connect charger", 0);
+      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "Battery", "Low battery!", "Connect charger", 0);
       _currentView->DoModal(mb);
       lowBatteryMessageShown_ = true;
       SetDirty();
@@ -646,7 +628,7 @@ void AppWindow::AnimationUpdate() {
 
   if (sdCardMissing_ && !sdCardMessageShown_) {
     if (_currentView && !_currentView->HasModalView()) {
-      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "SD Card Missing", "Insert SD Card", 0);
+      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "SD Card", "SD Card Missing", "Insert SD Card", 0);
       _currentView->DoModal(mb);
       sdCardMessageShown_ = true;
       SetDirty();

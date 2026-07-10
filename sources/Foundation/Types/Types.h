@@ -251,7 +251,8 @@ struct FourCC {
     VarSampleEditEnd = 178,
     VarSampleEditOperation = 181,
     VarImportResampler = 185,
-    
+    VarConfigCommandPicker = 190,
+
     ActionAutoSlice = 186,
     ActionSlicingRevert = 187,
     ActionSlicingSave = 189,
