@@ -14,6 +14,7 @@
 
 #include "Application/Model/Project.h"
 #include "Application/Utils/updateData.h"
+#include "Foundation/Types/ViewType.h"
 #include "System/Console/Trace.h"
 
 enum PlayMode { PM_SONG, PM_CHAIN, PM_PHRASE, PM_LIVE, PM_AUDITION };

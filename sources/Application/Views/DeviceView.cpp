@@ -83,6 +83,12 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
+  position.y_ += 1;
+  v = config->FindVariable(FourCC::VarConfigCommandPicker);
+  intVarField_.emplace_back(position, *v, "Command input mode:%s", 0, v->GetListSize() - 1, 1, 1);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  (*intVarField_.rbegin()).AddObserver(*this);
+
   position.y_ += 2;
   actionField_.emplace_back("Theme settings", FourCC::ActionShowTheme, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
@@ -217,10 +223,8 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
     case FourCC::VarMidiSync:
     case FourCC::VarMirrorUI:
     case FourCC::VarImportResampler:
-      {
-        configDirty_ = true;
-        break;
-      }
+      configDirty_ = true;
+      break;
     case FourCC::VarOutputVolume:
       {
         Config *config = Config::GetInstance();

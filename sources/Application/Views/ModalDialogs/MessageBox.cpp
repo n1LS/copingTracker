@@ -71,7 +71,8 @@ MessageBox::MessageBox(View &view, const char *messageLine1, const char *message
   NAssert(buttonCount_ != 0);
 }
 
-MessageBox::~MessageBox() {};
+MessageBox::~MessageBox() {
+}
 
 void MessageBox::Destroy() {
   this->~MessageBox();

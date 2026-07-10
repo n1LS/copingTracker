@@ -31,6 +31,9 @@
 #include <etl/to_string.h>
 #include <nanoprintf.h>
 
+#define sub_item " " char_border_single_verticalRight_s char_border_single_horizontal_s " "
+#define last_sub_item " " char_border_single_bottomLeft_s char_border_single_horizontal_s " "
+
 static constexpr InstrumentType kMaxSelectableInstrumentType = static_cast<InstrumentType>(IT_LAST - 1);
 
 InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
@@ -437,13 +440,12 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentFilterType);
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Type       :%2.2X", 0, 0xFF, 1,
-                            0x10);
+  intVarField_.emplace_back(position, *v, sub_item "Type       :%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentFilterMode);
-  intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Mode       :%s", 0, 2, 1, 1);
+  intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
@@ -453,20 +455,18 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentStart);
-  bigHexVarField_.emplace_back(position, *v, 7, " " char_border_single_verticalRight_s " Start      :%7.7X", 0,
-                               instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, sub_item "Start     :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentLoopStart);
-  bigHexVarField_.emplace_back(position, *v, 7, " " char_border_single_verticalRight_s " Loop start :%7.7X", 0,
-                               instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, sub_item "Loop start:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SampleInstrumentEnd);
-  bigHexVarField_.emplace_back(position, *v, 7, " " char_border_single_bottomLeft_s " Loop end   :%7.7X", 0,
-                               instrument->GetSampleSize() - 1, 16);
+  bigHexVarField_.emplace_back(position, *v, 7, last_sub_item "Loop end  :%7.7X", 0, instrument->GetSampleSize() - 1,
+                               16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 }
 
@@ -493,25 +493,23 @@ void InstrumentView::fillSIDParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentPulseWidth);
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Pulsewidth :%2.2X", 0, 0xFFF, 1,
-                            0x10);
+  intVarField_.emplace_back(position, *v, sub_item "Pulsewidth:%2.2X", 0, 0xFFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentWaveform);
 
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Waveform   :%s", 0, DWF_LAST - 1, 1,
-                            1);
+  intVarField_.emplace_back(position, *v, sub_item "Waveform  :%s", 0, DWF_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentVSync);
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Osc Sync   :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, sub_item "Osc Sync  :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::SIDInstrumentRingModulator);
-  intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Ring Mod   :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, last_sub_item "Ring Mod  :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
@@ -537,8 +535,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterCut);
       break;
   }
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Cutoff     :%1.1X", 0, 0x7FF, 1,
-                            0x10);
+  intVarField_.emplace_back(position, *v, sub_item "Cutoff    :%1.1X", 0, 0x7FF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -550,7 +547,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterResonance);
       break;
   }
-  intVarField_.emplace_back(position, *v, " " char_border_single_verticalRight_s " Resonance  :%1.1X", 0, 0xF, 1, 1);
+  intVarField_.emplace_back(position, *v, sub_item "Resonance :%1.1X", 0, 0xF, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -562,7 +559,7 @@ void InstrumentView::fillSIDParameters() {
       v = instrument->FindVariable(FourCC::SIDInstrument2FilterMode);
       break;
   }
-  intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Mode       :%s", 0, DFM_LAST - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, DFM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
@@ -617,8 +614,7 @@ void InstrumentView::fillMidiParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(FourCC::MidiInstrumentTableAutomation);
-  intVarField_.emplace_back(
-      UIIntVarField(position, *v, " " char_border_single_bottomLeft_s " Automation :%s", 0, 1, 1, 1));
+  intVarField_.emplace_back(UIIntVarField(position, *v, last_sub_item "Automation:%s", 0, 1, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 }
 

@@ -17,6 +17,18 @@
 #include "ScreenView.h"
 #include "ViewData.h"
 
+namespace {
+
+typedef enum TableColumn {
+  colCmd1,
+  colCmdVal1,
+  colCmd2,
+  colCmdVal2,
+  colCmd3,
+  colCmdVal3,
+} TableColumn;
+
+};
 class TableView : public ScreenView {
 public:
   TableView(GUIWindow &w, ViewData *viewData);
@@ -27,6 +39,7 @@ public:
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
+  void setCurrentlySelectedCommand(FourCC command);
 
 protected:
   void processNormalButtonMask(uint16_t mask);

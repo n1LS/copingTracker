@@ -13,7 +13,7 @@
 #include <cstdio>
 #include <cstring>
 
-struct HelpLegend {
+struct CommandHelp {
   etl::array<TintChar, 27> line1;
   etl::array<TintChar, 27> line2;
   etl::array<TintChar, 27> line3;
@@ -21,17 +21,17 @@ struct HelpLegend {
 };
 
 #define LEGEND(N, A, B, C, D)                                                                                          \
-  static constexpr HelpLegend legend_##N = {A, B, C, D};                                                               \
+  static constexpr CommandHelp legend_##N = {A, B, C, D};                                                              \
   return legend_##N;
 
 // clang-format off
 
 // CAUTION: all strings must fit in the line length limits!
 // Second line is max 26 chars
-HelpLegend getHelpLegend(FourCC command) {
+CommandHelp getCommandHelp(FourCC command) {
   switch (command) {
     case FourCC::InstrumentCommandKill: 
-      return HelpLegend( 
+      return CommandHelp( 
         makeTintString(
           "f  7    a 7               ",
           "0                         ",
@@ -50,7 +50,7 @@ HelpLegend getHelpLegend(FourCC command) {
           "                          ")
       );
     case FourCC::InstrumentCommandArpeggiator:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f  7      abcd            ",
           "0                         ",
@@ -70,7 +70,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandVolume:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f  7    a b 7             ",
           "0                         ",
@@ -90,7 +90,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandVelocity:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f  7        b 7           ",
           "0                         ",
@@ -110,7 +110,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandPitchSlide:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7    f 7    a b 7        ",
           "0                         ",
@@ -130,7 +130,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandHop:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f  7 a b 7                ",
           "0                         ",
@@ -150,7 +150,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandLegato:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f  7    a b 7             ",
           "0                         ",
@@ -170,7 +170,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandRetrigger:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7f77f7    a b 7          ",
           "0                         ",
@@ -190,7 +190,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandLoopOffset:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7   f 7    a   7         ",
           "0                         ",
@@ -210,7 +210,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandTempo:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7 ff7  a  7              ",
           "0                         ",
@@ -230,7 +230,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandMidiCC:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7   f 7 a b 7            ",
           "0                         ",
@@ -250,7 +250,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandMidiPC:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7   f7      f7        b 7",
           "0                         ",
@@ -270,7 +270,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandPlayOfset:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7   f 7     a b 7        ",
           "0                         ",
@@ -290,7 +290,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandFilterResonance:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7       f7f  a b 7       ",
           "0                         ",
@@ -310,7 +310,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandLowPassFilter:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7f 7   a b 7             ",
           "0                         ",
@@ -330,7 +330,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandTable:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7f 7    b 7              ",
           "0                         ",
@@ -350,7 +350,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandCrush:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "7       f7 f 7 a 7b7      ",
           "0                         ",
@@ -370,7 +370,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandFilterCut:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7     f7f7    a b 7      ",
           "0                         ",
@@ -390,7 +390,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandPan:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f  7 a b 7                ",
           "0                         ",
@@ -410,7 +410,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandGroove:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f 7 f7  a b 7             ",
           "0                         ",
@@ -430,7 +430,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandInstrumentRetrigger:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7         f7f7         b ",
           "0                         ",
@@ -450,7 +450,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandPitchFineTune:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7   f7  f7    a b 7      ",
           "0                         ",
@@ -470,7 +470,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandDelay:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7f7f7    a7              ",
           "0                         ",
@@ -490,7 +490,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandSetInstrumentParameter:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7  f7         f7         ",
           "0                         ",
@@ -510,7 +510,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandStop:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7   f7    f7             ",
           "0                         ",
@@ -530,7 +530,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandGateOff:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7  f 7                   ",
           "0                         ",
@@ -550,7 +550,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandMidiChord:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f7   f 7    abcd7         ",
           "0                         ",
@@ -570,7 +570,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );
 
     case FourCC::InstrumentCommandVibrato:
-      return HelpLegend(
+      return CommandHelp(
         makeTintString(
           "f  7     a b 7            ",
           "0                         ",
@@ -590,7 +590,7 @@ HelpLegend getHelpLegend(FourCC command) {
       );      
   }
   
-  return HelpLegend( 
+  return CommandHelp( 
     makeTintString(
         "9                         ",
         "0                         ",
