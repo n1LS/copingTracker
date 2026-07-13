@@ -304,3 +304,7 @@ void InstrumentBank::OnSampleRemoved(int removedIndex) {
     }
   }
 }
+
+NoneInstrument *InstrumentBank::noneInstrument() {
+  return &none_;
+}

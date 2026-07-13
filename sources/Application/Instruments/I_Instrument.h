@@ -76,6 +76,8 @@ public:
 
   virtual bool IsEmpty() = 0;
 
+  virtual void noteDisplay(uint8_t note, char (&out)[4]);
+
   virtual InstrumentType GetType() = 0;
 
   virtual etl::string<MAX_INSTRUMENT_NAME_LENGTH> GetDefaultName() {

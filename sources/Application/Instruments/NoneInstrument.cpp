@@ -16,13 +16,15 @@
 NoneInstrument::NoneInstrument() : I_Instrument(&variables_) {
 }
 
-NoneInstrument::~NoneInstrument() {};
+NoneInstrument::~NoneInstrument() {
+}
 
 bool NoneInstrument::Init() {
   return true;
 }
 
-void NoneInstrument::OnStart() {};
+void NoneInstrument::OnStart() {
+}
 
 bool NoneInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   return true;
@@ -39,7 +41,8 @@ bool NoneInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void NoneInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {};
+void NoneInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
+}
 
 int NoneInstrument::GetTable() {
   return 0;
@@ -49,6 +52,9 @@ bool NoneInstrument::GetTableAutomation() {
   return false;
 }
 
-void NoneInstrument::GetTableState(TableSaveState &state) {};
+void NoneInstrument::GetTableState(TableSaveState &state) {
+}
 
-void NoneInstrument::SetTableState(TableSaveState &state) {};
+void NoneInstrument::SetTableState(TableSaveState &state) {
+}
+

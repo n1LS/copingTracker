@@ -6,22 +6,10 @@
  * This file is part of the copingTracker firmware
  */
 
-static const char *drumNames[12] = {
-  "BassDrum", // c
-  "Rimshot ",
-  "Snare   ", // d
-  "Clap    ",
-  "Snare 2 ", // e
-  "Tom 1   ",
-  "HHclosed", // f#
-  "Tom 2   ",
-  "HHalt   ", // g#
-  "Tom 3   ",
-  "HHopen  ", // a#
-  "Crash   ",
-};
 
-static const char *drumFormatStrings[12] = {
+ #include "DrumEnums.h"
+
+ static const char *drumFormatStrings[12] = {
   "BassDrum:%4.4X",
   "Rimshot :%4.4X",
   "Snare   :%4.4X",

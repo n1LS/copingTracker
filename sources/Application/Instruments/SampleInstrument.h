@@ -64,6 +64,8 @@ public:
     return &variables_;
   };
 
+  void noteDisplay(uint8_t note, char (&out)[4]) override;
+
   bool IsMulti();
 
   // Engine playback  start callback

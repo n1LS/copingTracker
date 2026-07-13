@@ -8,6 +8,36 @@
 
 #pragma once
 
+static const char drumNames[12][9] = {
+  "BassDrum", // c
+  "Rimshot ",
+  "Snare   ", // d
+  "Clap    ",
+  "Snare 2 ", // e
+  "Tom 1   ",
+  "HHclosed", // f#
+  "Tom 2   ",
+  "HHalt   ", // g#
+  "Tom 3   ",
+  "HHopen  ", // a#
+  "Crash   ",
+};
+
+static const char drumShortNames[12][4] = {
+  "BDr", // c
+  "Rim",
+  "Snr", // d
+  "Clp",
+  "Sn2", // e
+  "TmL",
+  "HHc", // f#
+  "TmM",
+  "HHp", // g#
+  "TmH",
+  "HHo", // a#
+  "Csh",
+};
+
 enum drum_constants_e {
   drumEnvAttackThreshold = 65530,
   drumEnvDecayThreshold = 10,

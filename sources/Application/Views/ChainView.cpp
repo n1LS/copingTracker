@@ -788,18 +788,23 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  int currentInstrument = NO_INSTRUMENT;
+  I_Instrument *instrument = bank->noneInstrument();
 
   char buffer[6];
   buffer[4] = 0;
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
-    unsigned char d = steps[j].note;
+    unsigned char note = steps[j].note;
     unsigned char instr = steps[j].instrument;
 
-    char noteDisplay[4];
-    formatNote(d, instr, bank, noteDisplay);
+    if (instr != NO_INSTRUMENT) {
+      instrument = bank->GetInstrument(instr);
+    }
 
-    DrawString(pos.x_, pos.y_, noteDisplay);
+    char buffer[4];
+    instrument->noteDisplay(note, buffer);
+    DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
   }
 

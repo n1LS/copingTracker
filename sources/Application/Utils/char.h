@@ -33,12 +33,12 @@ static inline char hexChar(unsigned char v) {
   return hexChars[v & 0x0F];
 }
 
-inline void noteToString(unsigned char d, char *s) {
+inline void noteToString(unsigned char d, char (&out)[4]) {
   int oct = d / 12;
   int note = d % 12;
-  strcpy(s, noteNames[note]);
-  s[2] = hexChars[oct];
-  s[3] = 0;
+  strcpy(out, noteNames[note]);
+  out[2] = hexChars[oct];
+  out[3] = 0;
 }
 
 inline uint8_t hexStringToByte(char *s) {
@@ -56,40 +56,6 @@ static inline void wordToHexString(uint16_t c, char *s) {
   s[2] = hexChar(c >> 4);
   s[3] = hexChar(c);
   s[4] = 0;
-}
-
-inline void formatNote(uint8_t note, uint8_t instrument, InstrumentBank *bank, char *buffer) {
-  if (note == NO_NOTE) {
-    npf_snprintf(buffer, sizeof(buffer), "---");
-  } else if (note == NOTE_OFF) {
-    npf_snprintf(buffer, sizeof(buffer), "off");
-  } else {
-    bool showSlice = false;
-    bool invalidSlice = false;
-    uint8_t sliceIndex = 0;
-    if (instrument != 0xFF && bank) {
-      I_Instrument *instrObj = bank->GetInstrument(instrument);
-      if (instrObj && instrObj->GetType() == IT_SAMPLE) {
-        SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instrObj);
-        if (sampleInstr->HasSlicesForPlayback()) {
-          if (sampleInstr->ShouldDisplaySliceForNote(note)) {
-            showSlice = true;
-            sliceIndex = static_cast<uint8_t>(note - SampleInstrument::SliceNoteBase);
-          } else {
-            invalidSlice = true;
-          }
-        }
-      }
-    }
-
-    if (showSlice) {
-      npf_snprintf(buffer, sizeof(buffer), "S%02u", static_cast<unsigned>(sliceIndex));
-    } else if (invalidSlice) {
-      npf_snprintf(buffer, sizeof(buffer), "S**");
-    } else {
-      noteToString(note, buffer);
-    }
-  }
 }
 
 #endif

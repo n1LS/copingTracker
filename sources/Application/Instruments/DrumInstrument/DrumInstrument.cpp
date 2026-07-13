@@ -128,3 +128,12 @@ drum_parameters_t DrumInstrument::getInstrumentParameters(uint8_t note) {
   Variable *var = *it;
   return std::bit_cast<drum_parameters_t>(var->GetInt());
 }
+
+void DrumInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
+  if (note >= LOWEST_NOTE && note <= HIGHEST_NOTE) {
+    strcpy(out, drumShortNames[note % 12]);
+    return;
+  }
+
+  I_Instrument::noteDisplay(note, out);
+}
