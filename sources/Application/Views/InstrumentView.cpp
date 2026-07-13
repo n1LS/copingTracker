@@ -927,6 +927,10 @@ void InstrumentView::DrawView() {
       SwapColors();
       DrawString(31, 1, char_button_border_right_s);
     }
+
+    if (type == IT_DRUM) {
+      DrawViewDrum();
+    }
   }
 }
 

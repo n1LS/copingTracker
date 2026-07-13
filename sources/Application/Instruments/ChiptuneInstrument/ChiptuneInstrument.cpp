@@ -11,11 +11,6 @@
 #include "I_Instrument.h"
 #include <string.h>
 
-static const char *waveShapes[numWaveforms] = {char_waveform_pulse_s " 12.5%",   char_waveform_pulse_s " 25%",
-                                               char_waveform_pulse_s " 50%",     char_waveform_tri_s " 4bit",
-                                               char_waveform_noise_s " GB7",     char_waveform_noise_s " NES",
-                                               char_waveform_noise_s " SN76489", char_waveform_noise_s " White"};
-
 voice_t ChiptuneInstrument::voices_[SONG_CHANNEL_COUNT];
 
 ChiptuneInstrument::ChiptuneInstrument()
@@ -29,7 +24,7 @@ ChiptuneInstrument::ChiptuneInstrument()
       vTranspose_(FourCC::ChiptuneInstrumentTranspose, defaultTranspose),
       vVibratoDelay_(FourCC::ChiptuneInstrumentVibratoDelay, defaultVibratoDelay),
       vVibratoDepth_(FourCC::ChiptuneInstrumentVibrato, defaultVibratoDepth),
-      vWaveform_(FourCC::ChiptuneInstrumentWaveform, waveShapes, numWaveforms, defaultWaveform) {
+      vWaveform_(FourCC::ChiptuneInstrumentWaveform, chiptune_waveforms, numWaveforms, defaultWaveform) {
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &vWaveform_);

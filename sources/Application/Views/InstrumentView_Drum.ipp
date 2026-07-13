@@ -127,3 +127,25 @@ void InstrumentView::fillDrumParameters() {
     f.SetWrap(false);
   }
 }
+
+void InstrumentView::DrawViewDrum() {
+  GUIPoint p = GetAnchor();
+
+  UIField *f = GetFocus();
+  UIBigHexVarField *field = (UIBigHexVarField *)(f);
+
+  char buffer[16];
+
+  int currentID = viewData_->currentInstrumentID_;
+  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  I_Instrument *instr = bank->GetInstrument(currentID);
+  
+  SetColor(Theme::View::fg);
+  SetBackgroundColor(Theme::View::bg);
+
+  for (int n = 0; n < 12; n++) {
+    Variable *v = instr->FindVariable(FourCC::enum_type(FourCC::DrumInstrumentParamsVoice0 + n));
+    uint32_t wave = v->GetInt() % drumNumWaveforms;
+    DrawString(p.x_ + 14, p.y_ + 7 + n, chiptune_waveforms[wave]);
+  }
+}
