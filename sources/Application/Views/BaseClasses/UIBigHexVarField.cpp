@@ -43,8 +43,8 @@ void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
 
 void UIBigHexVarField::ProcessArrow(uint16_t mask) {
 
-  int value = src_.GetInt();
-  int offset = 1;
+  int32_t value = src_.GetInt();
+  int32_t offset = 1;
   for (unsigned int i = 0; i < position_; i++) {
     offset *= power_;
   }
@@ -61,21 +61,51 @@ void UIBigHexVarField::ProcessArrow(uint16_t mask) {
       };
       break;
     case BM_UP:
-      value += offset;
+      if (wrapDigits_) {
+        value += offset;
+      } else {
+        uint32_t bits = position_ * 4;
+        uint32_t mask = 0xF << bits;
+        int32_t nibble = (value >> bits) & 0xF;
+        nibble = (nibble > 0xE) ? 0xF : nibble + 1;
+        value = (value & ~mask) | (nibble << bits);
+      }
       break;
-
     case BM_DOWN:
-      value -= offset;
+      if (wrapDigits_) {
+        value -= offset;
+      } else {
+        uint32_t bits = position_ * 4;
+        uint32_t mask = 0xF << bits;
+        int32_t nibble = (value >> bits) & 0xF;
+        nibble = (nibble > 0) ? nibble - 1 : 0;
+        value = (value & ~mask) | (nibble << bits);
+      }
       break;
-  };
+  }
+  
   if (value > max_) {
     value = (wrap_) ? value - max_ + min_ - 1 : max_;
-  };
+  }
+  
   if (value < min_) {
     value = (wrap_) ? max_ + (value - min_) + 1 : min_;
-  };
+  }
+
   src_.SetInt(value);
 
   SetChanged();
   NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(src_.GetID())));
+}
+
+void UIBigHexVarField::SetWrapDigits(bool wrapDigits) {
+  wrapDigits_ = wrapDigits;
+}
+
+void UIBigHexVarField::SetWrap(bool wrap) {
+  wrap_ = wrap;
+}
+
+void UIBigHexVarField::SetColumn(uint8_t index) {
+  position_ = (index > 7) ? 7 : index;
 }

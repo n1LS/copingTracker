@@ -116,5 +116,4 @@ void InstrumentView::fillChiptuneParameters() {
   addIndexToLine(11, position.y_);
 
   position = GetAnchor();
-
 }

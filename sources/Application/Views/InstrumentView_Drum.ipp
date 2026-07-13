@@ -121,4 +121,9 @@ void InstrumentView::fillDrumParameters() {
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[11], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
+  
+  for (auto &f : bigHexVarField_) {
+    f.SetWrapDigits(false);
+    f.SetWrap(false);
+  }
 }

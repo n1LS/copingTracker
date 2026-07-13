@@ -24,10 +24,15 @@ public:
   virtual void Draw(GUIWindow &w, int offset = 0);
   virtual void ProcessArrow(uint16_t mask);
 
+  void SetWrapDigits(bool wrapDigits);
+  void SetWrap(bool wrap);
+  void SetColumn(uint8_t index);
+
 private:
   unsigned int precision_;
   unsigned int power_;
   unsigned int position_;
   bool wrap_;
+  bool wrapDigits_ = true;
 };
 #endif
