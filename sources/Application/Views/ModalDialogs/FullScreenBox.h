@@ -16,7 +16,8 @@
 class FullScreenBox : public MessageBox {
 public:
   static FullScreenBox *Create(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
-  static FullScreenBox *Create(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK);
+  static FullScreenBox *Create(View &view, const char *title, const char *message, const char *message2,
+                               int btnFlags = MBBF_OK);
 
   FullScreenBox(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
   FullScreenBox(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK);

@@ -57,6 +57,7 @@ protected:
   void fillMidiParameters();
   void fillOpalParameters();
   void fillChiptuneParameters();
+  void fillDrumParameters();
   void fillNoneParameters();
   I_Instrument *getInstrument();
   void Update(Observable &o, I_ObservableData *d);
@@ -64,7 +65,7 @@ protected:
   void addNameTextField(I_Instrument *instr, GUIPoint &position);
   void handleInstrumentExport();
 
-  virtual void ConfirmedStop(FourCC source); 
+  virtual void ConfirmedStop(FourCC source);
 
 private:
   void onConfirmInstrumentTypeChange(View &view, ModalView &dialog);
@@ -98,7 +99,7 @@ private:
   etl::vector<UIIntVarField, 40> intVarField_;
   etl::vector<UINoteVarField, 1> noteVarField_;
   etl::vector<UIStaticField, 16> staticField_;
-  etl::vector<UIBigHexVarField, 4> bigHexVarField_;
+  etl::vector<UIBigHexVarField, 12> bigHexVarField_;
   etl::vector<UIIntVarOffField, 3> intVarOffField_;
   etl::vector<UIActionField, 1> sampleActionField_;
   etl::vector<UIBitmaskVarField, 3> bitmaskVarField_;

@@ -15,8 +15,8 @@
 #include "Application/Utils/CommandHelp.h"
 #include "Application/Utils/char.h"
 #include "Application/Utils/mathutils.h"
-#include "Application/Views/SampleEditorView.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
+#include "Application/Views/SampleEditorView.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalView.h"
 #include "System/Console/Trace.h"
@@ -796,7 +796,7 @@ bool View::ConfirmStopPlayback(FourCC source) {
     ConfirmedStop(source);
     return true;
   }
-  
+
   stopPlaybackSource_ = source;
   MessageBox *mb = MessageBox::Create(*this, "Playback", "Not while playing", MBBF_OK | MBBF_STOP);
   DoModal(mb, ModalViewCallback::create<View, &View::OnConfirmStopDialog>(*this));

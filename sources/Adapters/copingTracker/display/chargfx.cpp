@@ -264,7 +264,7 @@ inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
 }
 
 void chargfx_draw_changed() {
-  PROFILE_FUNCTION();
+  // PROFILE_FUNCTION();
 
   for (uint8_t y = 0; y < TEXT_HEIGHT; y++) {
     int start = -1;

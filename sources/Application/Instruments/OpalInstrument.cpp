@@ -166,7 +166,7 @@ void OpalInstrument::Stop(int c) {
 }
 
 bool OpalInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
-  PROFILE_SCOPE("OpalInstrument::Render");
+  // PROFILE_SCOPE("OpalInstrument::Render");
 
   // optimise to remove function calls in hot loop
   opl_.SampleBuffer(buffer, size, stepVolume_);

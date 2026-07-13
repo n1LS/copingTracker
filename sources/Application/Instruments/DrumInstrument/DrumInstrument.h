@@ -11,15 +11,15 @@
 #include "Application/Instruments/I_Instrument.h"
 #include "Application/Model/Song.h"
 #include "Application/Persistency/PersistenceConstants.h"
-#include "ChiptuneEngine.h"
+#include "DrumEngine.h"
 #include "System/Console/Trace.h"
 #include <cstdint>
 
-class ChiptuneInstrument : public I_Instrument {
+class DrumInstrument : public I_Instrument {
 
 public:
-  ChiptuneInstrument();
-  virtual ~ChiptuneInstrument() {};
+  DrumInstrument();
+  virtual ~DrumInstrument() {};
 
   virtual bool Init() {
     return true;
@@ -34,7 +34,7 @@ public:
   virtual bool SupportsCommand(FourCC cc);
 
   virtual InstrumentType GetType() {
-    return IT_CHIPTUNE;
+    return IT_DRUM;
   };
 
   // Start & stop the instument
@@ -52,10 +52,10 @@ public:
   virtual void ProcessCommand(int channel, FourCC cc, uint16_t value);
 
   virtual int GetTable() {
-    return vTable_.GetInt();
+    return 0;
   };
   virtual bool GetTableAutomation() {
-    return 0;
+    return false;
   };
   virtual void GetTableState(TableSaveState &state) {};
   virtual void SetTableState(TableSaveState &state) {};
@@ -66,25 +66,24 @@ public:
   void setChannel(uint8_t channel);
 
 private:
-  static voice_t voices_[SONG_CHANNEL_COUNT];
+  static drum_voice_t voices_[SONG_CHANNEL_COUNT];
 
-  etl::list<Variable *, 13> variables_;
+  etl::list<Variable *, 12> variables_;
 
-  Variable vArpSpeed_;
-  Variable vAttack_;
-  Variable vBurst_;
-  Variable vDecay_;
-  Variable vLength_;
-  Variable vLevel_;
-  Variable vSweepAmount_;
-  Variable vSweepTime_;
-  Variable vTable_;
-  Variable vTranspose_;
-  Variable vVibratoDelay_;
-  Variable vVibratoDepth_;
-  Variable vWaveform_;
+  Variable vVoice0_;
+  Variable vVoice1_;
+  Variable vVoice2_;
+  Variable vVoice3_;
+  Variable vVoice4_;
+  Variable vVoice5_;
+  Variable vVoice6_;
+  Variable vVoice7_;
+  Variable vVoice8_;
+  Variable vVoice9_;
+  Variable vVoice10_;
+  Variable vVoice11_;
 
   void RunCommand(int channel);
   void CommandInitArp(int channel, uint16_t value);
-  InstrumentParameters getInstrumentParameters();
+  drum_parameters_t getInstrumentParameters(uint8_t note);
 };

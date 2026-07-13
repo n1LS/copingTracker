@@ -271,6 +271,19 @@ struct FourCC {
     ChiptuneInstrumentSweepAmount = 211,
     ChiptuneInstrumentArpSpeed = 212,
 
+    DrumInstrumentParamsVoice0 = 214,
+    DrumInstrumentParamsVoice1 = 215,
+    DrumInstrumentParamsVoice2 = 216,
+    DrumInstrumentParamsVoice3 = 217,
+    DrumInstrumentParamsVoice4 = 218,
+    DrumInstrumentParamsVoice5 = 219,
+    DrumInstrumentParamsVoice6 = 220,
+    DrumInstrumentParamsVoice7 = 221,
+    DrumInstrumentParamsVoice8 = 222,
+    DrumInstrumentParamsVoice9 = 223,
+    DrumInstrumentParamsVoice10 = 224,
+    DrumInstrumentParamsVoice11 = 225,
+
     ActionMassStorage = 50,
     VarOutputVolume = 74,
     ActionModulation = 213,
@@ -451,6 +464,20 @@ struct FourCC {
   ETL_ENUM_TYPE(ChiptuneInstrumentSweepTime, "SweepTime")
   ETL_ENUM_TYPE(ChiptuneInstrumentSweepAmount, "SweepAmount")
   ETL_ENUM_TYPE(ChiptuneInstrumentArpSpeed, "ArpSpeed")
+
+  // Drum Instrument Variables
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice0, "DrumInstument0")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice1, "DrumInstument1")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice2, "DrumInstument2")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice3, "DrumInstument3")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice4, "DrumInstument4")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice5, "DrumInstument5")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice6, "DrumInstument6")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice7, "DrumInstument7")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice8, "DrumInstument8")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice9, "DrumInstument9")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice10, "DrumInstument10")
+  ETL_ENUM_TYPE(DrumInstrumentParamsVoice11, "DrumInstument11")
 
   ETL_ENUM_TYPE(Default, "   ")
   ETL_END_ENUM_TYPE
