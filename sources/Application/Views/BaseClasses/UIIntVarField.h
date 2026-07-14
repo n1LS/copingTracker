@@ -27,7 +27,7 @@ public:
   virtual void OnClick() {};
 
   void ProcessClear();
-  FourCC GetVariableID();
+  Token GetVariableID();
   Variable &GetVariable();
   void SetRange(int min, int max, int xOffset, int yOffset);
 

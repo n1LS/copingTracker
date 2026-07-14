@@ -96,7 +96,7 @@ struct AppWindowViews {
   }
 };
 
-void AppWindow::defineColor(FourCC colorCode, GUIColor &color, int paletteIndex) {
+void AppWindow::defineColor(Token colorCode, GUIColor &color, int paletteIndex) {
   Config *config = Config::GetInstance();
   auto rgbVar = config->FindVariable(colorCode);
   if (rgbVar) {
@@ -401,7 +401,7 @@ AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
 
   // Register as an observer of the project name variable to get notified of
   // changes
-  Variable *projectNameVar = project->FindVariable(FourCC::VarProjectName);
+  Variable *projectNameVar = project->FindVariable(Token::VarProjectName);
   if (projectNameVar) {
     WatchedVariable *watchedVar = (WatchedVariable *)projectNameVar;
     if (watchedVar) {
@@ -508,22 +508,22 @@ void AppWindow::SetDirty() {
 
 void AppWindow::UpdateColorsFromConfig() {
   // now assign custom colors if they have been set device config
-  defineColor(FourCC::VarColor_0, colorPalette_[0], 0);
-  defineColor(FourCC::VarColor_1, colorPalette_[1], 1);
-  defineColor(FourCC::VarColor_2, colorPalette_[2], 2);
-  defineColor(FourCC::VarColor_3, colorPalette_[3], 3);
-  defineColor(FourCC::VarColor_4, colorPalette_[4], 4);
-  defineColor(FourCC::VarColor_5, colorPalette_[5], 5);
-  defineColor(FourCC::VarColor_6, colorPalette_[6], 6);
-  defineColor(FourCC::VarColor_7, colorPalette_[7], 7);
-  defineColor(FourCC::VarColor_8, colorPalette_[8], 8);
-  defineColor(FourCC::VarColor_9, colorPalette_[9], 9);
-  defineColor(FourCC::VarColor_A, colorPalette_[10], 10);
-  defineColor(FourCC::VarColor_B, colorPalette_[11], 11);
-  defineColor(FourCC::VarColor_C, colorPalette_[12], 12);
-  defineColor(FourCC::VarColor_D, colorPalette_[13], 13);
-  defineColor(FourCC::VarColor_E, colorPalette_[14], 14);
-  defineColor(FourCC::VarColor_F, colorPalette_[15], 15);
+  defineColor(Token::VarColor_0, colorPalette_[0], 0);
+  defineColor(Token::VarColor_1, colorPalette_[1], 1);
+  defineColor(Token::VarColor_2, colorPalette_[2], 2);
+  defineColor(Token::VarColor_3, colorPalette_[3], 3);
+  defineColor(Token::VarColor_4, colorPalette_[4], 4);
+  defineColor(Token::VarColor_5, colorPalette_[5], 5);
+  defineColor(Token::VarColor_6, colorPalette_[6], 6);
+  defineColor(Token::VarColor_7, colorPalette_[7], 7);
+  defineColor(Token::VarColor_8, colorPalette_[8], 8);
+  defineColor(Token::VarColor_9, colorPalette_[9], 9);
+  defineColor(Token::VarColor_A, colorPalette_[10], 10);
+  defineColor(Token::VarColor_B, colorPalette_[11], 11);
+  defineColor(Token::VarColor_C, colorPalette_[12], 12);
+  defineColor(Token::VarColor_D, colorPalette_[13], 13);
+  defineColor(Token::VarColor_E, colorPalette_[14], 14);
+  defineColor(Token::VarColor_F, colorPalette_[15], 15);
 
   GetImpWindow()->SetPalette(colorPalette_, NUM_COLORS);
 }
@@ -688,7 +688,7 @@ void AppWindow::AnimationUpdate() {
 void AppWindow::LayoutChildren() {};
 
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
-  if (d && (uintptr_t)d == (uintptr_t)FourCC::VarProjectName) {
+  if (d && (uintptr_t)d == (uintptr_t)Token::VarProjectName) {
     // Update the stored project name from the project
     Project *project = viewData_.project_;
     if (project) {

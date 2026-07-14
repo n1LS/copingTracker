@@ -210,7 +210,7 @@ void SampleImportView::DrawButtons(int selectedButton) {
   }
 
   int previewVolume = 0;
-  Variable *v = viewData_->project_->FindVariable(FourCC::VarPreviewVolume);
+  Variable *v = viewData_->project_->FindVariable(Token::VarPreviewVolume);
   if (v) {
     previewVolume = v->GetInt();
   }
@@ -487,7 +487,7 @@ void SampleImportView::preview(char *name) {
 }
 
 void SampleImportView::adjustPreviewVolume(int offset) {
-  Variable *v = viewData_->project_->FindVariable(FourCC::VarPreviewVolume);
+  Variable *v = viewData_->project_->FindVariable(Token::VarPreviewVolume);
   if (v) {
     int newVolume = v->GetInt() + offset;
     if (newVolume < 0)

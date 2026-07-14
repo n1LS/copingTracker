@@ -40,16 +40,16 @@ public:
   void SetUsed(uint8_t c);
   void ClearAllocation();
 
-  inline FourCC getCmd1(int phrase, int step) const {
-    return FourCC::enum_type(steps_[phrase][step].cmd1);
+  inline Token getCmd1(int phrase, int step) const {
+    return Token::enum_type(steps_[phrase][step].cmd1);
   }
-  inline FourCC getCmd2(int phrase, int step) const {
-    return FourCC::enum_type(steps_[phrase][step].cmd2);
+  inline Token getCmd2(int phrase, int step) const {
+    return Token::enum_type(steps_[phrase][step].cmd2);
   }
-  inline void setCmd1(int phrase, int step, FourCC f) {
+  inline void setCmd1(int phrase, int step, Token f) {
     steps_[phrase][step].cmd1 = f.raw();
   }
-  inline void setCmd2(int phrase, int step, FourCC f) {
+  inline void setCmd2(int phrase, int step, Token f) {
     steps_[phrase][step].cmd2 = f.raw();
   }
 

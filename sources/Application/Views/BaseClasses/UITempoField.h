@@ -17,7 +17,7 @@
 
 class UITempoField : public UIIntVarField, public I_Observer {
 public:
-  UITempoField(FourCC action, const GUIPoint &position, Variable &variable, const char *format, int min, int max,
+  UITempoField(Token action, const GUIPoint &position, Variable &variable, const char *format, int min, int max,
                int xOffset, int yOffset);
   virtual void OnEditClick();
   void Update(Observable &, I_ObservableData *);
@@ -25,6 +25,6 @@ public:
   void ProcessEditArrow(uint16_t mask);
 
 private:
-  FourCC action_;
+  Token action_;
 };
 #endif

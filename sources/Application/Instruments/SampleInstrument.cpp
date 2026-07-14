@@ -43,17 +43,17 @@ signed char SampleInstrument::lastMidiNote_[SONG_CHANNEL_COUNT];
 #define KRATE_SAMPLE_COUNT 100
 
 SampleInstrument::SampleInstrument()
-    : I_Instrument(&variables_), sample_(FourCC::SampleInstrumentSample), volume_(FourCC::SampleInstrumentVolume, 0x80),
-      interpolation_(FourCC::SampleInstrumentInterpolation, interpolationTypes, 2, 0),
-      crush_(FourCC::SampleInstrumentCrush, 16), drive_(FourCC::SampleInstrumentCrushVolume, 0xFF),
-      downsample_(FourCC::SampleInstrumentDownsample, 0), rootNote_(FourCC::SampleInstrumentRootNote, 60),
-      fineTune_(FourCC::SampleInstrumentFineTune, 0x7F), pan_(FourCC::SampleInstrumentPan, 0x7F),
-      cutoff_(FourCC::SampleInstrumentFilterCutOff, 0xFF), reso_(FourCC::SampleInstrumentFilterResonance, 0x00),
-      filterMix_(FourCC::SampleInstrumentFilterType, 0x00),
-      filterMode_(FourCC::SampleInstrumentFilterMode, filterMode, 3, 0), start_(FourCC::SampleInstrumentStart, 0),
-      loopMode_(FourCC::SampleInstrumentLoopMode, loopTypes, SILM_LAST, 0),
-      loopStart_(FourCC::SampleInstrumentLoopStart, 0), loopEnd_(FourCC::SampleInstrumentEnd, 0),
-      table_(FourCC::SampleInstrumentTable, -1), tableAuto_(FourCC::SampleInstrumentTableAutomation, false) {
+    : I_Instrument(&variables_), sample_(Token::SampleInstrumentSample), volume_(Token::SampleInstrumentVolume, 0x80),
+      interpolation_(Token::SampleInstrumentInterpolation, interpolationTypes, 2, 0),
+      crush_(Token::SampleInstrumentCrush, 16), drive_(Token::SampleInstrumentCrushVolume, 0xFF),
+      downsample_(Token::SampleInstrumentDownsample, 0), rootNote_(Token::SampleInstrumentRootNote, 60),
+      fineTune_(Token::SampleInstrumentFineTune, 0x7F), pan_(Token::SampleInstrumentPan, 0x7F),
+      cutoff_(Token::SampleInstrumentFilterCutOff, 0xFF), reso_(Token::SampleInstrumentFilterResonance, 0x00),
+      filterMix_(Token::SampleInstrumentFilterType, 0x00),
+      filterMode_(Token::SampleInstrumentFilterMode, filterMode, 3, 0), start_(Token::SampleInstrumentStart, 0),
+      loopMode_(Token::SampleInstrumentLoopMode, loopTypes, SILM_LAST, 0),
+      loopStart_(Token::SampleInstrumentLoopStart, 0), loopEnd_(Token::SampleInstrumentEnd, 0),
+      table_(Token::SampleInstrumentTable, -1), tableAuto_(Token::SampleInstrumentTableAutomation, false) {
 
   // Initialize MIDI notes
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
@@ -335,7 +335,7 @@ void SampleInstrument::clampSlicePoints(uint32_t sampleSize) {
 
 bool SampleInstrument::Init() {
   SamplePool *pool = SamplePool::GetInstance();
-  Variable *vSample = FindVariable(FourCC::SampleInstrumentSample);
+  Variable *vSample = FindVariable(Token::SampleInstrumentSample);
   NAssert(vSample);
   int index = vSample->GetInt();
   if (index != NO_SAMPLE) {
@@ -1062,22 +1062,22 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
 void SampleInstrument::AssignSample(int i) {
 
-  Variable *v = FindVariable(FourCC::SampleInstrumentSample);
+  Variable *v = FindVariable(Token::SampleInstrumentSample);
   v->SetInt(i);
 }
 
 int SampleInstrument::GetSampleIndex() {
-  Variable *v = FindVariable(FourCC::SampleInstrumentSample);
+  Variable *v = FindVariable(Token::SampleInstrumentSample);
   return v->GetInt();
 }
 
 void SampleInstrument::SetVolume(int volume) {
-  Variable *v = FindVariable(FourCC::SampleInstrumentVolume);
+  Variable *v = FindVariable(Token::SampleInstrumentVolume);
   v->SetInt(volume);
 }
 
 int SampleInstrument::GetVolume() {
-  Variable *v = FindVariable(FourCC::SampleInstrumentVolume);
+  Variable *v = FindVariable(Token::SampleInstrumentVolume);
   return v->GetInt();
 }
 
@@ -1107,7 +1107,7 @@ void SampleInstrument::updateInstrumentData(bool search) {
 
   // Get the source index
 
-  Variable *vSample = FindVariable(FourCC::SampleInstrumentSample);
+  Variable *vSample = FindVariable(Token::SampleInstrumentSample);
   int index = vSample->GetInt();
   int instrSize = 0;
 
@@ -1127,11 +1127,11 @@ void SampleInstrument::updateInstrumentData(bool search) {
     }
   }
 
-  Variable *v = FindVariable(FourCC::SampleInstrumentEnd);
+  Variable *v = FindVariable(Token::SampleInstrumentEnd);
   v->SetInt(instrSize);
-  v = FindVariable(FourCC::SampleInstrumentLoopStart);
+  v = FindVariable(Token::SampleInstrumentLoopStart);
   v->SetInt(0);
-  v = FindVariable(FourCC::SampleInstrumentStart);
+  v = FindVariable(Token::SampleInstrumentStart);
   v->SetInt(0);
   clampSlicePoints(static_cast<uint32_t>(instrSize));
   dirty_ = false;
@@ -1139,10 +1139,10 @@ void SampleInstrument::updateInstrumentData(bool search) {
 
 void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
   WatchedVariable &v = (WatchedVariable &)o;
-  FourCC id = v.GetID();
+  Token id = v.GetID();
 
   switch (id) {
-    case FourCC::SampleInstrumentSample:
+    case Token::SampleInstrumentSample:
       {
         if (running_) {
           dirty_ = true; // we'll update later, when instrument gets re-triggered
@@ -1161,14 +1161,14 @@ void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
   };
 }
 
-void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
+void SampleInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
 
   renderParams *rp = renderParams_ + channel;
   if (!source_)
     return;
 
   switch (cc) {
-    case FourCC::InstrumentCommandLoopOffset:
+    case Token::InstrumentCommandLoopOffset:
 
       if (value > 0x8000) {
         value = 0x10000 - value;
@@ -1184,7 +1184,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandPlayOfset:
+    case Token::InstrumentCommandPlayOfset:
       {
         if (!source_)
           return;
@@ -1208,7 +1208,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandArpeggiator:
+    case Token::InstrumentCommandArpeggiator:
       {
         rp->arp_.SetData(value);
         if (!rp->arp_.Enabled()) {
@@ -1218,7 +1218,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandVolume:
+    case Token::InstrumentCommandVolume:
       {
         float targetVolume = float(value & 0xFF);
         float speed = float(value >> 8);
@@ -1235,7 +1235,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandPan:
+    case Token::InstrumentCommandPan:
       {
         float targetPan = float(value & 0xFF);
         if (targetPan == 0xFF) {
@@ -1254,7 +1254,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandFilterCut:
+    case Token::InstrumentCommandFilterCut:
       {
         float target = float(value & 0xFF) / 255.0f;
         float speed = float(value >> 8);
@@ -1270,7 +1270,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandFilterResonance:
+    case Token::InstrumentCommandFilterResonance:
       {
         float target = float(value & 0xFF) / 255.0f;
         float speed = float(value >> 8);
@@ -1285,7 +1285,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
         }
       }
       break;
-    case FourCC::InstrumentCommandPitchSlide:
+    case Token::InstrumentCommandPitchSlide:
       {
         int pitch = (char)(value & 0xFF); // number of semi tones
         float speed = float(value >> 8);  // get speed parameter
@@ -1311,7 +1311,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       };
       break;
 
-    case FourCC::InstrumentCommandLegato:
+    case Token::InstrumentCommandLegato:
       {
         int pitch = (char)(value & 0xFF); // number of semi tones
         float speed = float(value >> 8);  // get speed parameter
@@ -1346,7 +1346,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       };
       break;
 
-    case FourCC::InstrumentCommandPitchFineTune:
+    case Token::InstrumentCommandPitchFineTune:
       {
 
         float semi = (value & 0xFF) / float(0x80); // number of semi tones
@@ -1373,7 +1373,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       };
       break;
 
-    case FourCC::InstrumentCommandRetrigger:
+    case Token::InstrumentCommandRetrigger:
       {
         unsigned char loop = (value & 0xFF); // number of ticks before repeat
         unsigned char offset = (value >> 8); // number of ticks to offset at each repeat
@@ -1388,7 +1388,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
         }
       }
       break;
-    case FourCC::InstrumentCommandLowPassFilter:
+    case Token::InstrumentCommandLowPassFilter:
       {
         float cut = (value >> 8) / 255.0f;   // cutoff frequency (FF=all pass, 0=none pass)
         float res = (value & 0xFF) / 255.0f; // resonance, aka Q (0=none) so default is FF00
@@ -1420,7 +1420,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
         }
       }
       break;
-    case FourCC::InstrumentCommandCrush:
+    case Token::InstrumentCommandCrush:
       {
         unsigned char drive = (value >> 8);
         unsigned char crush = (value & 0x0F);
@@ -1430,7 +1430,7 @@ void SampleInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
           rp->crush_ = crush;
       }
 
-    case FourCC::InstrumentCommandVibrato:
+    case Token::InstrumentCommandVibrato:
       {
         uint8_t rate = value >> 8;
         uint8_t depth = value & 0xFF;
@@ -1456,7 +1456,7 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SampleInstrument::GetUserSetName() {
 
 // Get the sample file name from the SampleInstrumentSample variable
 etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> SampleInstrument::GetSampleFileName() {
-  Variable *v = this->FindVariable(FourCC::SampleInstrumentSample);
+  Variable *v = this->FindVariable(Token::SampleInstrumentSample);
   if (v) {
     return v->GetString();
   }
@@ -1565,7 +1565,7 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
     subelem = doc->NextSibling();
   }
 
-  Variable *nameVar = FindVariable(FourCC::InstrumentName);
+  Variable *nameVar = FindVariable(Token::InstrumentName);
   if (nameVar && !name_.empty()) {
     nameVar->SetString(name_.c_str());
   }
@@ -1581,7 +1581,7 @@ void SampleInstrument::Purge() {
   slicePoints_.fill(0);
 }
 bool SampleInstrument::IsEmpty() {
-  Variable *v = FindVariable(FourCC::SampleInstrumentSample);
+  Variable *v = FindVariable(Token::SampleInstrumentSample);
   return (v->GetInt() == -1);
 }
 

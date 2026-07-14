@@ -14,18 +14,18 @@
 drum_voice_t DrumInstrument::voices_[SONG_CHANNEL_COUNT];
 
 DrumInstrument::DrumInstrument()
-    : I_Instrument(&variables_), vVoice0_(FourCC::DrumInstrumentParamsVoice0, defaultInstrument0),
-      vVoice1_(FourCC::DrumInstrumentParamsVoice1, defaultInstrument1),
-      vVoice2_(FourCC::DrumInstrumentParamsVoice2, defaultInstrument2),
-      vVoice3_(FourCC::DrumInstrumentParamsVoice3, defaultInstrument3),
-      vVoice4_(FourCC::DrumInstrumentParamsVoice4, defaultInstrument4),
-      vVoice5_(FourCC::DrumInstrumentParamsVoice5, defaultInstrument5),
-      vVoice6_(FourCC::DrumInstrumentParamsVoice6, defaultInstrument6),
-      vVoice7_(FourCC::DrumInstrumentParamsVoice7, defaultInstrument7),
-      vVoice8_(FourCC::DrumInstrumentParamsVoice8, defaultInstrument8),
-      vVoice9_(FourCC::DrumInstrumentParamsVoice9, defaultInstrument9),
-      vVoice10_(FourCC::DrumInstrumentParamsVoice10, defaultInstrument10),
-      vVoice11_(FourCC::DrumInstrumentParamsVoice11, defaultInstrument11) {
+    : I_Instrument(&variables_), vVoice0_(Token::DrumInstrumentParamsVoice0, defaultInstrument0),
+      vVoice1_(Token::DrumInstrumentParamsVoice1, defaultInstrument1),
+      vVoice2_(Token::DrumInstrumentParamsVoice2, defaultInstrument2),
+      vVoice3_(Token::DrumInstrumentParamsVoice3, defaultInstrument3),
+      vVoice4_(Token::DrumInstrumentParamsVoice4, defaultInstrument4),
+      vVoice5_(Token::DrumInstrumentParamsVoice5, defaultInstrument5),
+      vVoice6_(Token::DrumInstrumentParamsVoice6, defaultInstrument6),
+      vVoice7_(Token::DrumInstrumentParamsVoice7, defaultInstrument7),
+      vVoice8_(Token::DrumInstrumentParamsVoice8, defaultInstrument8),
+      vVoice9_(Token::DrumInstrumentParamsVoice9, defaultInstrument9),
+      vVoice10_(Token::DrumInstrumentParamsVoice10, defaultInstrument10),
+      vVoice11_(Token::DrumInstrumentParamsVoice11, defaultInstrument11) {
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &vVoice0_);
@@ -70,50 +70,50 @@ bool DrumInstrument::Render(int channel, fixed *buffer, int size, bool updateTic
   return true;
 }
 
-void DrumInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
+void DrumInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
   switch (cc) {
-    case FourCC::InstrumentCommandSetInstrumentParameter:
+    case Token::InstrumentCommandSetInstrumentParameter:
       voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
       break;
 
-    case FourCC::InstrumentCommandArpeggiator:
+    case Token::InstrumentCommandArpeggiator:
       break;
 
-    case FourCC::InstrumentCommandKill:
-    case FourCC::InstrumentCommandGateOff:
+    case Token::InstrumentCommandKill:
+    case Token::InstrumentCommandGateOff:
       voices_[channel].stop();
       break;
 
-    case FourCC::InstrumentCommandCrush:
+    case Token::InstrumentCommandCrush:
       voices_[channel].bitcrush = value && 0x0f;
       voices_[channel].drive = value >> 8;
       break;
 
-    case FourCC::InstrumentCommandVibrato:
+    case Token::InstrumentCommandVibrato:
       break;
 
-    case FourCC::InstrumentCommandPan:
+    case Token::InstrumentCommandPan:
       break;
 
-    case FourCC::InstrumentCommandPitchSlide:
+    case Token::InstrumentCommandPitchSlide:
       break;
 
-    case FourCC::InstrumentCommandLegato:
+    case Token::InstrumentCommandLegato:
       break;
 
-    case FourCC::InstrumentCommandVolume:
+    case Token::InstrumentCommandVolume:
       voices_[channel].volume = value >> 8;
       break;
 
-    case FourCC::InstrumentCommandPitchFineTune:
+    case Token::InstrumentCommandPitchFineTune:
       break;
 
-    case FourCC::InstrumentCommandInstrumentRetrigger:
+    case Token::InstrumentCommandInstrumentRetrigger:
       break;
   }
 }
 
-bool DrumInstrument::SupportsCommand(FourCC cc) {
+bool DrumInstrument::SupportsCommand(Token cc) {
   return false;
 }
 

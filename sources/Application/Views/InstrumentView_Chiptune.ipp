@@ -27,43 +27,43 @@ void InstrumentView::fillChiptuneParameters() {
 
   // extra y spacing to allow for gap between export/import and parameters
   position.y_ += 2;
-  Variable *v = instrument->FindVariable(FourCC::ChiptuneInstrumentWaveform);
+  Variable *v = instrument->FindVariable(Token::ChiptuneInstrumentWaveform);
   intVarField_.emplace_back(position, *v, expand(wave));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(0, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentTranspose);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentTranspose);
   intVarField_.emplace_back(position, *v, expand(transpose));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(1, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentLevel);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentLevel);
   intVarField_.emplace_back(position, *v, expand(level));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(2, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentBurst);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentBurst);
   intVarOffField_.emplace_back(position, *v, expand(burst));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
   addIndexToLine(3, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentArpSpeed);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentArpSpeed);
   intVarField_.emplace_back(position, *v, expand(arp));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(4, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentLength);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentLength);
   intVarOffField_.emplace_back(position, *v, expand(length));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
   addIndexToLine(5, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentTable);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentTable);
   intVarOffField_.emplace_back(position, *v, expand(table));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
@@ -72,13 +72,13 @@ void InstrumentView::fillChiptuneParameters() {
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentAttack);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentAttack);
   intVarField_.emplace_back(position, *v, expand(attack));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(6, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentDecay);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentDecay);
   intVarField_.emplace_back(position, *v, expand(decay));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(7, position.y_);
@@ -88,13 +88,13 @@ void InstrumentView::fillChiptuneParameters() {
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentVibratoDelay);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentVibratoDelay);
   intVarField_.emplace_back(position, *v, expand(vibrato_delay));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(8, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentVibrato);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentVibrato);
   intVarField_.emplace_back(position, *v, expand(vibrato_amount));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(9, position.y_);
@@ -104,13 +104,13 @@ void InstrumentView::fillChiptuneParameters() {
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentSweepTime);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentSweepTime);
   intVarField_.emplace_back(position, *v, expand(sweep_time));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(10, position.y_);
 
   position.y_++;
-  v = instrument->FindVariable(FourCC::ChiptuneInstrumentSweepAmount);
+  v = instrument->FindVariable(Token::ChiptuneInstrumentSweepAmount);
   intVarField_.emplace_back(position, *v, expand(sweep_amount));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   addIndexToLine(11, position.y_);

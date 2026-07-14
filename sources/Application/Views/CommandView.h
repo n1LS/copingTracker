@@ -14,7 +14,7 @@
 class CommandView : public ModalView {
 
 public:
-  static CommandView *Create(View &view, FourCC command);
+  static CommandView *Create(View &view, Token command);
   virtual void Destroy() override;
   virtual ~CommandView();
 
@@ -25,13 +25,13 @@ public:
   virtual void AnimationUpdate() {};
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int currentTick);
 
-  void SetCommand(FourCC command);
-  FourCC GetCommmand();
+  void SetCommand(Token command);
+  Token GetCommmand();
 
   void Reset();
 
 protected:
-  CommandView(View &view, FourCC command);
+  CommandView(View &view, Token command);
 
 private:
   void ProcessSelection(uint16_t mask);

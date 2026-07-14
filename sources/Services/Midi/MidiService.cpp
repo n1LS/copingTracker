@@ -55,13 +55,13 @@ bool MidiService::Init() {
   }
 
   auto config = Config::GetInstance();
-  auto midiDevVar = (WatchedVariable *)config->FindVariable(FourCC::VarMidiDevice);
+  auto midiDevVar = (WatchedVariable *)config->FindVariable(Token::VarMidiDevice);
   midiDevVar->AddObserver(*this);
 
   auto activeDeviceConfig = midiDevVar->GetInt();
   updateActiveDevicesList(activeDeviceConfig);
 
-  auto midiSyncVar = (WatchedVariable *)config->FindVariable(FourCC::VarMidiSync);
+  auto midiSyncVar = (WatchedVariable *)config->FindVariable(Token::VarMidiSync);
   midiSyncVar->AddObserver(*this);
   auto sync = midiSyncVar->GetInt();
   sendSync_ = sync != 0;
@@ -118,7 +118,7 @@ void MidiService::Update(Observable &o, I_ObservableData *d) {
   switch (v.GetID()) {
       // need braces inside case statements due to:
       // https://stackoverflow.com/a/11578973/85472
-    case FourCC::VarMidiDevice:
+    case Token::VarMidiDevice:
       {
         auto activeDeviceConfig = v.GetInt();
         // note deviceID has 0 == OFF
@@ -129,7 +129,7 @@ void MidiService::Update(Observable &o, I_ObservableData *d) {
         startDevice();
       }
       break;
-    case FourCC::VarMidiSync:
+    case Token::VarMidiSync:
       {
         auto sync = v.GetInt();
         sendSync_ = sync != 0;

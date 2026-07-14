@@ -17,7 +17,7 @@ bool CommandView::inUse_ = false;
 alignas(CommandView) static unsigned char CommandViewStorage[sizeof(CommandView)];
 void *CommandView::storage_ = CommandViewStorage;
 
-CommandView *CommandView::Create(View &view, FourCC command) {
+CommandView *CommandView::Create(View &view, Token command) {
   if (inUse_) {
     auto *existing = reinterpret_cast<CommandView *>(storage_);
     existing->~CommandView();
@@ -38,7 +38,7 @@ void CommandView::Destroy() {
 void CommandView::OnFocus() {
 }
 
-CommandView::CommandView(View &view, FourCC command) : ModalView(view) {
+CommandView::CommandView(View &view, Token command) : ModalView(view) {
   SetCommand(command);
 }
 
@@ -48,7 +48,7 @@ void CommandView::DrawView() {
 
   for (int cmd = 0; cmd < CommandList::CommandCount; cmd++) {
     bool active = cmd == index_;
-    FourCC command = CommandList::AllCommands[cmd];
+    Token command = CommandList::AllCommands[cmd];
 
     SetColor(active ? Theme::Dialog::Button::fg(true) : Theme::Dialog::fg);
     SetBackgroundColor(active ? Theme::Dialog::Button::bg(true) : Theme::Dialog::bg);
@@ -98,7 +98,7 @@ void CommandView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 }
 
-void CommandView::SetCommand(FourCC command) {
+void CommandView::SetCommand(Token command) {
   for (int c = 0; c < CommandList::CommandCount; c++) {
     if (CommandList::AllCommands[c] == command) {
       index_ = c;
@@ -107,7 +107,7 @@ void CommandView::SetCommand(FourCC command) {
   }
 }
 
-FourCC CommandView::GetCommmand() {
+Token CommandView::GetCommmand() {
   return CommandList::AllCommands[index_];
 }
 

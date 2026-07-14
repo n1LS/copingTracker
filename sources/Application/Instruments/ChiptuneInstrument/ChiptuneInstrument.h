@@ -31,7 +31,7 @@ public:
     return false;
   };
 
-  virtual bool SupportsCommand(FourCC cc);
+  virtual bool SupportsCommand(Token cc);
 
   virtual InstrumentType GetType() {
     return IT_CHIPTUNE;
@@ -49,7 +49,7 @@ public:
   // size refers to the number of samples
   // should always fill interleaved stereo / 16bit
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick);
-  virtual void ProcessCommand(int channel, FourCC cc, uint16_t value);
+  virtual void ProcessCommand(int channel, Token cc, uint16_t value);
 
   virtual int GetTable() {
     return vTable_.GetInt();

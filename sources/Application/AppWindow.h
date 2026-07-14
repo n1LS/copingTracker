@@ -102,7 +102,7 @@ protected: // GUIWindow implementation
   virtual void Print(char *);
   virtual void PrintMultiLine(char *);
 
-  void defineColor(FourCC colorCode, GUIColor &color, int paletteIndex);
+  void defineColor(Token colorCode, GUIColor &color, int paletteIndex);
 
 private:
   bool AutoSave();

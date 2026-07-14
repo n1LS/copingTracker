@@ -16,7 +16,7 @@ VariableContainer::VariableContainer(etl::ilist<Variable *> *list) : list_(list)
 
 VariableContainer::~VariableContainer() {};
 
-Variable *VariableContainer::FindVariable(FourCC id) {
+Variable *VariableContainer::FindVariable(Token id) {
   auto it = list_->begin();
   for (size_t i = 0; i < list_->size(); i++) {
     if ((*it)->GetID() == id) {

@@ -15,8 +15,8 @@
 #include "Externals/etl/include/etl/enum_type.h"
 #include <stdint.h>
 
-struct FourCC {
-  // While the names of the FourCC codes can be changed, their values CANNOT.
+struct Token {
+  // While the names of the Token codes can be changed, their values CANNOT.
   // Values are used as is in save files, so any changes would cause save files
   // to break.
   enum enum_type {
@@ -25,7 +25,7 @@ struct FourCC {
     InstrumentCommandDelay = 4,                    // DLY
     InstrumentCommandFilterCut = 20,               // FCT
     InstrumentCommandLowPassFilter = 22,           // FLT
-    InstrumentCommandFilterResonance = 25,         // FRES
+    InstrumentCommandFilterResonance = 25,         // FRS
     InstrumentCommandGateOff = 92,                 // GOF
     InstrumentCommandGroove = 26,                  // GRV
     InstrumentCommandHop = 27,                     // HOP
@@ -108,17 +108,17 @@ struct FourCC {
 
     OPALInstrumentOp1Level = 127,
     OPALInstrumentOp1Multiplier = 128,
-    OPALInstrumentOp1KeyScaleLevel = 130,
-    OPALInstrumentOp1ADSR = 131,
-    OPALInstrumentOp1WaveShape = 132,
-    OPALInstrumentOp1TremVibSusKSR = 133,
+    OPALInstrumentOp1KeyScaleLevel = 129,
+    OPALInstrumentOp1ADSR = 130,
+    OPALInstrumentOp1WaveShape = 131,
+    OPALInstrumentOp1TremVibSusKSR = 132,
 
-    OPALInstrumentOp2Level = 134,
-    OPALInstrumentOp2Multiplier = 135,
-    OPALInstrumentOp2KeyScaleLevel = 136,
-    OPALInstrumentOp2ADSR = 137,
-    OPALInstrumentOp2WaveShape = 138,
-    OPALInstrumentOp2TremVibSusKSR = 139,
+    OPALInstrumentOp2Level = 133,
+    OPALInstrumentOp2Multiplier = 134,
+    OPALInstrumentOp2KeyScaleLevel = 135,
+    OPALInstrumentOp2ADSR = 136,
+    OPALInstrumentOp2WaveShape = 137,
+    OPALInstrumentOp2TremVibSusKSR = 138,
 
     ServicePersistency = 57,
 
@@ -168,49 +168,6 @@ struct FourCC {
     VarMidiClockSync = 151,
     VarMirrorUI = 140,
     VarUIFont = 141,
-
-    // 142 is taken for SIDInstrumentOSCNumber
-    // 143 is taken for InstrumentCommandMidiChord
-    // 144 is taken for InstrumentMidiName
-    // 145 is taken for ActionExport
-    // 146 is taken for ActionImport
-    // 147 is taken for ActionOK
-    // 148 is taken for InstrumentName
-    // 149 is taken for ActionRenderMixdown
-    // 150 is taken for ActionRenderStems
-    // 151 is taken for VarMidiClockSync
-    // 152 is taken for VarPlayColor
-    // 153 is taken for VarMuteColor
-    // 154 is taken for VarSongViewFEColor
-    // 155 is taken for VarSongView00Color
-    // 156 is taken for VarRowColor
-    // 157 is taken for VarRow2Color
-    // 158 is taken for VarMajorBeatColor
-    // 159 is taken for ActionShowTheme
-    // 160 is taken for MidiInstrumentProgram
-    // 161 is taken for VarScaleRoot
-    // 162 is taken for VarPreviewVolume
-    // 163 is taken for VarChannel1Volume
-    // 164 is taken for VarChannel2Volume
-    // 165 is taken for VarChannel3Volume
-    // 166 is taken for VarChannel4Volume
-    // 167 is taken for VarChannel5Volume
-    // 168 is taken for VarChannel6Volume
-    // 169 is taken for VarChannel7Volume
-    // 170 is taken for VarChannel8Volume
-    // 171 is taken for SampleInstrumentSlices
-    // 172 is taken for ActionThemeName
-    // 173 is taken for VarThemeName
-    // 174 is taken for VarBacklightLevel
-    // 175 is taken for ActionShowSampleEditor
-    // 177 is taken for VarSampleEditStart
-    // 178 is taken for VarSampleEditStop
-    // 179 is taken for ActionLoadAndSave
-    // 180 is taken for ActionCancel
-    // 181 is taken for VarSampleEditOperation
-    // 184 is taken for ActionShowSampleSlices
-    // 185 is taken for VarImportResampler
-    // 186 is taken for ActionAutoSlice
 
     VarChannel1Volume = 163,
     VarChannel2Volume = 164,
@@ -288,15 +245,24 @@ struct FourCC {
     VarOutputVolume = 74,
     ActionModulation = 213,
 
-    // 93-98 free (formerly MacroInstrument fields)
-    // 176 is free
-    // 182 is free
-    // 183 is free
+    // 93-98 free     6
+    // 139 is free    1
+    // 176 is free    1
+    // 182-183 free   2
+    // 191-199 free   9
+    // 226-254 free  29
+    // ----------------
+    //               48
 
     Default = 255, // "    "
   };
 
-  uint8_t raw() {
+  uint16_t raw() {
+    return static_cast<uint16_t>(*this);
+  }
+
+  uint8_t raw8() {
+    // this is not lossless and must be used with caution
     return static_cast<uint8_t>(*this);
   }
 
@@ -304,10 +270,10 @@ struct FourCC {
   static_assert(sizeof(name) <= 17, "ETL_ENUM_TYPE string \"" name "\" exceeds 16 characters");                        \
   ETL_ENUM_TYPE(value, name)
 
-  ETL_DECLARE_ENUM_TYPE(FourCC, uint8_t)
+  ETL_DECLARE_ENUM_TYPE(Token, uint8_t)
 
   // Not all enums need reflection. Only cases where we need reflection is the
-  // FourCC codes that need to be converted to text in order to display on
+  // Token codes that need to be converted to text in order to display on
   // screen
   ETL_ENUM_TYPE_16(InstrumentCommandArpeggiator, "ARP")
   ETL_ENUM_TYPE_16(InstrumentCommandCrush, "CSH")

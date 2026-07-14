@@ -49,7 +49,7 @@ public:
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
-  void setCurrentlySelectedCommand(FourCC command);
+  void setCurrentlySelectedCommand(Token command);
 
 protected:
   void updateCursor(int dx, int dy);

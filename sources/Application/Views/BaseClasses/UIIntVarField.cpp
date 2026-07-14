@@ -110,7 +110,7 @@ void UIIntVarField::ProcessClear() {
   NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(src_.GetID())));
 }
 
-FourCC UIIntVarField::GetVariableID() {
+Token UIIntVarField::GetVariableID() {
   return src_.GetID();
 }
 

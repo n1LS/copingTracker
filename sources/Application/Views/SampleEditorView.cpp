@@ -56,11 +56,11 @@ constexpr int32_t GraphYOffset = 2 * CHAR_HEIGHT;
 SampleEditorView::SampleEditorView(GUIWindow &w, ViewData *data)
     : FieldView(w, data), fullWaveformRedraw_(false), isPlaying_(false), isSingleCycle_(false), playKeyHeld_(false),
       playbackPosition_(0.0f), playbackStartFrame_(0), lastAnimationTime_(0), sys_(System::GetInstance()),
-      startVar_(FourCC::VarSampleEditStart, 0), endVar_(FourCC::VarSampleEditEnd, 0),
+      startVar_(Token::VarSampleEditStart, 0), endVar_(Token::VarSampleEditEnd, 0),
       // bit of a hack to use InstrumentName but we never actually persist this
       // in any config file here
-      filenameVar_(FourCC::InstrumentName, ""),
-      operationVar_(FourCC::VarSampleEditOperation, sampleEditOperationNames, sampleEditOperationCount,
+      filenameVar_(Token::InstrumentName, ""),
+      operationVar_(Token::VarSampleEditOperation, sampleEditOperationNames, sampleEditOperationCount,
                     static_cast<int>(SampleEditOperation::Trim)),
       win(w), graphFieldPos_(GraphXOffset, GraphYOffset),
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight) {
@@ -331,28 +331,28 @@ void SampleEditorView::addAllFields() {
 
   // Apply button
   position.x_ = baseX + 20;
-  actionField_.emplace_back("Apply", FourCC::ActionOK, position);
+  actionField_.emplace_back("Apply", Token::ActionOK, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   // Save button row
   position.y_ += 2; // want extra empty row between these buttons & prev Apply
   position.x_ = baseX;
-  actionField_.emplace_back("Save", FourCC::ActionSave, position);
+  actionField_.emplace_back("Save", Token::ActionSave, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
   position.x_ += 5;
 
   // load & save button
   if (!viewData_->isShowingSampleEditorProjectPool) {
-    actionField_.emplace_back("Save & Load", FourCC::ActionLoadAndSave, position);
+    actionField_.emplace_back("Save & Load", Token::ActionLoadAndSave, position);
     fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
     (*actionField_.rbegin()).AddObserver(*this);
     position.x_ += 12;
   }
 
   // discard button
-  actionField_.emplace_back("Discard", FourCC::ActionCancel, position);
+  actionField_.emplace_back("Discard", Token::ActionCancel, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
@@ -539,7 +539,7 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     if (mask & BM_ENTER) {
       UIField *focus = GetFocus();
       for (auto &field : bigHexVarField_) {
-        if (&field == focus && field.GetVariableID() == FourCC::VarSampleEditEnd) {
+        if (&field == focus && field.GetVariableID() == Token::VarSampleEditEnd) {
           Variable &var = field.GetVariable();
           var.SetInt(tempSampleSize_ - 1);
           isDirty_ = true;
@@ -600,9 +600,9 @@ void SampleEditorView::updateSelectedMarkerFromFocus() {
     if (&field != focus) {
       continue;
     }
-    if (field.GetVariableID() == FourCC::VarSampleEditStart) {
+    if (field.GetVariableID() == Token::VarSampleEditStart) {
       selectedMarker_ = MarkerStart;
-    } else if (field.GetVariableID() == FourCC::VarSampleEditEnd) {
+    } else if (field.GetVariableID() == Token::VarSampleEditEnd) {
       selectedMarker_ = MarkerEnd;
     }
     break;
@@ -825,7 +825,7 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
   uintptr_t fourcc = (uintptr_t)d;
 
   switch (fourcc) {
-    case FourCC::ActionOK:
+    case Token::ActionOK:
       {
         // Stop playback if active before applying any destructive operation
         if (Player::GetInstance()->IsPlaying()) {
@@ -850,17 +850,17 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
         DoModal(mb, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onConfirmApplyOperation>(*this));
         return;
       }
-    case FourCC::ActionSave:
+    case Token::ActionSave:
       {
         attemptSave(false);
         return;
       }
-    case FourCC::ActionLoadAndSave:
+    case Token::ActionLoadAndSave:
       {
         attemptSave(true);
         return;
       }
-    case FourCC::ActionCancel:
+    case Token::ActionCancel:
       {
         discardWorkingCopy();
         ViewType vt = SampleEditorView::sourceViewType_;

@@ -17,10 +17,10 @@
 
 class WatchedVariable : public Variable, public Observable {
 public:
-  WatchedVariable(FourCC id, int value = 0);
-  WatchedVariable(FourCC id, bool value);
-  WatchedVariable(FourCC id, const char *const *list, int size, int index = 0);
-  WatchedVariable(FourCC id, const char *value) = delete; // Use StringWatchedVariable
+  WatchedVariable(Token id, int value = 0);
+  WatchedVariable(Token id, bool value);
+  WatchedVariable(Token id, const char *const *list, int size, int index = 0);
+  WatchedVariable(Token id, const char *value) = delete; // Use StringWatchedVariable
   virtual ~WatchedVariable() {};
   static void Enable();
   static void Disable();

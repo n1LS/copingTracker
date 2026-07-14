@@ -37,7 +37,7 @@
 static constexpr InstrumentType kMaxSelectableInstrumentType = static_cast<InstrumentType>(IT_LAST - 1);
 
 InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
-    : FieldView(w, data), instrumentType_(FourCC::VarInstrumentType, LongInstrumentNames, IT_LAST, 0),
+    : FieldView(w, data), instrumentType_(Token::VarInstrumentType, LongInstrumentNames, IT_LAST, 0),
       lastSampleIndex_(-1), suppressSampleChangeWarning_(false) {
   project_ = data->project_;
 
@@ -46,7 +46,7 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
                                 static_cast<int>(kMaxSelectableInstrumentType), 1, 1);
   fieldList_.insert(fieldList_.end(), &(*typeIntVarField_.rbegin()));
   (*typeIntVarField_.rbegin()).AddObserver(*this);
-  lastFocusID_ = FourCC::VarInstrumentType;
+  lastFocusID_ = Token::VarInstrumentType;
 
   // Create the name field with the actual instrument variable
   I_Instrument *instr = getInstrument();
@@ -61,22 +61,22 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
   // add ui action fields for exporting and importing instrument settings
   position.y_ = 2;
 
-  persistentActionField_.emplace_back("Import", FourCC::ActionImport, position);
+  persistentActionField_.emplace_back("Import", Token::ActionImport, position);
   fieldList_.insert(fieldList_.end(), &(*persistentActionField_.rbegin()));
   (*persistentActionField_.rbegin()).AddObserver(*this);
-  lastFocusID_ = FourCC::ActionImport;
+  lastFocusID_ = Token::ActionImport;
 
   position.x_ += 8;
-  persistentActionField_.emplace_back("Export", FourCC::ActionExport, position);
+  persistentActionField_.emplace_back("Export", Token::ActionExport, position);
   fieldList_.insert(fieldList_.end(), &(*persistentActionField_.rbegin()));
   (*persistentActionField_.rbegin()).AddObserver(*this);
-  lastFocusID_ = FourCC::ActionExport;
+  lastFocusID_ = Token::ActionExport;
 
   position.x_ += 8;
-  persistentActionField_.emplace_back("Modulation", FourCC::ActionModulation, position);
+  persistentActionField_.emplace_back("Modulation", Token::ActionModulation, position);
   fieldList_.insert(fieldList_.end(), &(*persistentActionField_.rbegin()));
   (*persistentActionField_.rbegin()).AddObserver(*this);
-  lastFocusID_ = FourCC::ActionModulation;
+  lastFocusID_ = Token::ActionModulation;
 
   sliceCountLabel_.clear();
 }
@@ -89,7 +89,7 @@ void InstrumentView::Reset() {
   suppressSampleChangeWarning_ = false;
   exportInstrument_ = nullptr;
   exportName_.clear();
-  lastFocusID_ = FourCC::VarInstrumentType;
+  lastFocusID_ = Token::VarInstrumentType;
   instrumentType_.SetInt(0, false);
   sliceCountLabel_.clear();
 }
@@ -124,7 +124,7 @@ void InstrumentView::addNameTextField(I_Instrument *instr, GUIPoint &position) {
   // GetDisplayName()
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> defaultName;
 
-  nameTextField_.emplace_back(nameVar, position, label, FourCC::InstrumentName, defaultName);
+  nameTextField_.emplace_back(nameVar, position, label, Token::InstrumentName, defaultName);
   fieldList_.insert(fieldList_.end(), &(*nameTextField_.rbegin()));
 }
 
@@ -266,7 +266,7 @@ void InstrumentView::refreshInstrumentFields() {
 
   // first put back the type field as its shown on *all* instrument types
   fieldList_.insert(fieldList_.end(), &(*typeIntVarField_.rbegin()));
-  lastFocusID_ = FourCC::VarInstrumentType;
+  lastFocusID_ = Token::VarInstrumentType;
 
   // Re-add the action fields for export and import only if not IT_NONE
   if (instrumentType_.GetInt() != IT_NONE) {
@@ -360,7 +360,7 @@ void InstrumentView::fillSampleParameters() {
   // offset y to account for instrument type and export/import fields
   position.y_ += 1;
 
-  Variable *v = instrument->FindVariable(FourCC::SampleInstrumentSample);
+  Variable *v = instrument->FindVariable(Token::SampleInstrumentSample);
   SamplePool *sp = SamplePool::GetInstance();
   intVarField_.emplace_back(position, *v, "Sample        :%.12s", 0, sp->GetNameListSize() - 1, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
@@ -372,57 +372,57 @@ void InstrumentView::fillSampleParameters() {
 
   GUIPoint actionPos = position;
   actionPos.x_ = baseX + 15;
-  sampleActionField_.emplace_back("Adjust", FourCC::ActionShowSampleSlices, actionPos);
+  sampleActionField_.emplace_back("Adjust", Token::ActionShowSampleSlices, actionPos);
   fieldList_.insert(fieldList_.end(), &sampleActionField_.back());
   sampleActionField_.back().AddObserver(*this);
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentVolume);
+  v = instrument->FindVariable(Token::SampleInstrumentVolume);
   intVarField_.emplace_back(position, *v, "Volume        :%d [%2.2X]", 0, 255, 1, 10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentPan);
+  v = instrument->FindVariable(Token::SampleInstrumentPan);
   intVarField_.emplace_back(position, *v, "Pan           :%2.2X", 0, 0xFE, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentRootNote);
+  v = instrument->FindVariable(Token::SampleInstrumentRootNote);
   noteVarField_.emplace_back(position, *v, "Root note     :%s", 0, 0x7F, 1, 0x0C);
   fieldList_.insert(fieldList_.end(), &(*noteVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentFineTune);
+  v = instrument->FindVariable(Token::SampleInstrumentFineTune);
   intVarField_.emplace_back(position, *v, "Detune        :%2.2X", 0, 255, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentCrushVolume);
+  v = instrument->FindVariable(Token::SampleInstrumentCrushVolume);
   intVarField_.emplace_back(position, *v, "Drive         :%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentCrush);
+  v = instrument->FindVariable(Token::SampleInstrumentCrush);
   intVarField_.emplace_back(position, *v, "Crush         :%d", 1, 0x10, 1, 4);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentDownsample);
+  v = instrument->FindVariable(Token::SampleInstrumentDownsample);
   intVarField_.emplace_back(position, *v, "Downsample    :%d", 0, 8, 1, 4);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentInterpolation);
+  v = instrument->FindVariable(Token::SampleInstrumentInterpolation);
   intVarField_.emplace_back(position, *v, "Interpolate   :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentTable);
+  v = instrument->FindVariable(Token::SampleInstrumentTable);
   intVarOffField_.emplace_back(position, *v, "Table         :%2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentTableAutomation);
+  v = instrument->FindVariable(Token::SampleInstrumentTableAutomation);
   intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Automation :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
@@ -431,43 +431,43 @@ void InstrumentView::fillSampleParameters() {
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   position.x_ += 15;
-  v = instrument->FindVariable(FourCC::SampleInstrumentFilterCutOff);
+  v = instrument->FindVariable(Token::SampleInstrumentFilterCutOff);
   intVarField_.emplace_back(position, *v, "%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.x_ += 7;
-  v = instrument->FindVariable(FourCC::SampleInstrumentFilterResonance);
+  v = instrument->FindVariable(Token::SampleInstrumentFilterResonance);
   intVarField_.emplace_back(position, *v, "%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   position.x_ -= 22;
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentFilterType);
+  v = instrument->FindVariable(Token::SampleInstrumentFilterType);
   intVarField_.emplace_back(position, *v, sub_item "Type       :%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentFilterMode);
+  v = instrument->FindVariable(Token::SampleInstrumentFilterMode);
   intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
-  v = instrument->FindVariable(FourCC::SampleInstrumentLoopMode);
+  v = instrument->FindVariable(Token::SampleInstrumentLoopMode);
   intVarField_.emplace_back(position, *v, "Loop mode     :%s", 0, SILM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentStart);
+  v = instrument->FindVariable(Token::SampleInstrumentStart);
   bigHexVarField_.emplace_back(position, *v, 7, sub_item "Start     :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentLoopStart);
+  v = instrument->FindVariable(Token::SampleInstrumentLoopStart);
   bigHexVarField_.emplace_back(position, *v, 7, sub_item "Loop start:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SampleInstrumentEnd);
+  v = instrument->FindVariable(Token::SampleInstrumentEnd);
   bigHexVarField_.emplace_back(position, *v, 7, last_sub_item "Loop end  :%7.7X", 0, instrument->GetSampleSize() - 1,
                                16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
@@ -490,33 +490,33 @@ void InstrumentView::fillSIDParameters() {
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   position.y_ += 2;
-  Variable *v = instrument->FindVariable(FourCC::SIDInstrumentOSCNumber);
+  Variable *v = instrument->FindVariable(Token::SIDInstrumentOSCNumber);
   intVarField_.emplace_back(position, *v, "Oscillator    :%1.1X", 0, 0x2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SIDInstrumentPulseWidth);
+  v = instrument->FindVariable(Token::SIDInstrumentPulseWidth);
   intVarField_.emplace_back(position, *v, sub_item "Pulsewidth:%2.2X", 0, 0xFFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SIDInstrumentWaveform);
+  v = instrument->FindVariable(Token::SIDInstrumentWaveform);
 
   intVarField_.emplace_back(position, *v, sub_item "Waveform  :%s", 0, DWF_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SIDInstrumentVSync);
+  v = instrument->FindVariable(Token::SIDInstrumentVSync);
   intVarField_.emplace_back(position, *v, sub_item "Osc Sync  :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::SIDInstrumentRingModulator);
+  v = instrument->FindVariable(Token::SIDInstrumentRingModulator);
   intVarField_.emplace_back(position, *v, last_sub_item "Ring Mod  :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
-  v = instrument->FindVariable(FourCC::SIDInstrumentADSR);
+  v = instrument->FindVariable(Token::SIDInstrumentADSR);
   bigHexVarField_.emplace_back(UIBigHexVarField(position, *v, 4, "Env. A/D/S/R  :%4.4X", 0, 0xFFFF, 16, true));
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
@@ -525,17 +525,17 @@ void InstrumentView::fillSIDParameters() {
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   position.y_ += 2;
-  v = instrument->FindVariable(FourCC::SIDInstrumentFilterOn);
+  v = instrument->FindVariable(Token::SIDInstrumentFilterOn);
   intVarField_.emplace_back(position, *v, "Filter        :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   switch (instrument->GetChip()) {
     case SID1:
-      v = instrument->FindVariable(FourCC::SIDInstrument1FilterCut);
+      v = instrument->FindVariable(Token::SIDInstrument1FilterCut);
       break;
     case SID2:
-      v = instrument->FindVariable(FourCC::SIDInstrument2FilterCut);
+      v = instrument->FindVariable(Token::SIDInstrument2FilterCut);
       break;
   }
   intVarField_.emplace_back(position, *v, sub_item "Cutoff    :%1.1X", 0, 0x7FF, 1, 0x10);
@@ -544,10 +544,10 @@ void InstrumentView::fillSIDParameters() {
   position.y_ += 1;
   switch (instrument->GetChip()) {
     case SID1:
-      v = instrument->FindVariable(FourCC::SIDInstrument1FilterResonance);
+      v = instrument->FindVariable(Token::SIDInstrument1FilterResonance);
       break;
     case SID2:
-      v = instrument->FindVariable(FourCC::SIDInstrument2FilterResonance);
+      v = instrument->FindVariable(Token::SIDInstrument2FilterResonance);
       break;
   }
   intVarField_.emplace_back(position, *v, sub_item "Resonance :%1.1X", 0, 0xF, 1, 1);
@@ -556,10 +556,10 @@ void InstrumentView::fillSIDParameters() {
   position.y_ += 1;
   switch (instrument->GetChip()) {
     case SID1:
-      v = instrument->FindVariable(FourCC::SIDInstrument1FilterMode);
+      v = instrument->FindVariable(Token::SIDInstrument1FilterMode);
       break;
     case SID2:
-      v = instrument->FindVariable(FourCC::SIDInstrument2FilterMode);
+      v = instrument->FindVariable(Token::SIDInstrument2FilterMode);
       break;
   }
   intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, DFM_LAST - 1, 1, 1);
@@ -568,10 +568,10 @@ void InstrumentView::fillSIDParameters() {
   position.y_ += 2;
   switch (instrument->GetChip()) {
     case SID1:
-      v = instrument->FindVariable(FourCC::SIDInstrument1Volume);
+      v = instrument->FindVariable(Token::SIDInstrument1Volume);
       break;
     case SID2:
-      v = instrument->FindVariable(FourCC::SIDInstrument2Volume);
+      v = instrument->FindVariable(Token::SIDInstrument2Volume);
       break;
   }
   intVarField_.emplace_back(position, *v, "Volume        :%1.1X", 0, 0xF, 1, 1);
@@ -593,32 +593,32 @@ void InstrumentView::fillMidiParameters() {
   // offset y to account for instrument type, name and export/import fields
   position.y_ += 2;
 
-  Variable *v = instrument->FindVariable(FourCC::MidiInstrumentChannel);
+  Variable *v = instrument->FindVariable(Token::MidiInstrumentChannel);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Channel       :%2.2d", 0, 0x0F, 1, 0x04, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::MidiInstrumentVolume);
+  v = instrument->FindVariable(Token::MidiInstrumentVolume);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Volume        :%2.2X", 0, 0xFF, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::MidiInstrumentNoteLength);
+  v = instrument->FindVariable(Token::MidiInstrumentNoteLength);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Length        :%2.2X", 0, 0xFF, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::MidiInstrumentProgram);
+  v = instrument->FindVariable(Token::MidiInstrumentProgram);
   intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Program       :%2.2X", 0, 0x7F, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   position.y_ += 2;
-  v = instrument->FindVariable(FourCC::MidiInstrumentTable);
+  v = instrument->FindVariable(Token::MidiInstrumentTable);
   intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Table         :%2.2X", 0, 0x7F, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::MidiInstrumentTableAutomation);
+  v = instrument->FindVariable(Token::MidiInstrumentTableAutomation);
   intVarField_.emplace_back(UIIntVarField(position, *v, last_sub_item "Automation:%s", 0, 1, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 }
@@ -636,17 +636,17 @@ void InstrumentView::fillOpalParameters() {
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
   position.y_ += 2;
-  Variable *v = instrument->FindVariable(FourCC::OPALInstrumentAlgorithm);
+  Variable *v = instrument->FindVariable(Token::OPALInstrumentAlgorithm);
   intVarField_.emplace_back(position, *v, "Algorithm     :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::OPALInstrumentDeepTremeloVibrato);
+  v = instrument->FindVariable(Token::OPALInstrumentDeepTremeloVibrato);
   bitmaskVarField_.emplace_back(UIBitmaskVarField(position, *v, "Deep Trem/Vib :%02b", 2));
   fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::OPALInstrumentFeedback);
+  v = instrument->FindVariable(Token::OPALInstrumentFeedback);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Feedback      :%1.1X", 0, 0x07, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
@@ -672,56 +672,56 @@ void InstrumentView::fillOpalParameters() {
   }
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp1Level);
+  v = instrument->FindVariable(Token::OPALInstrumentOp1Level);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Level         :%2.2X", 0, 63, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp2Level);
+  v = instrument->FindVariable(Token::OPALInstrumentOp2Level);
   intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%2.2X", 0, 63, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp1Multiplier);
+  v = instrument->FindVariable(Token::OPALInstrumentOp1Multiplier);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Multiplier    :%1.1X", 0, 15, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp2Multiplier);
+  v = instrument->FindVariable(Token::OPALInstrumentOp2Multiplier);
   intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%1.1X", 0, 15, 1, 1, 0));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp1ADSR);
+  v = instrument->FindVariable(Token::OPALInstrumentOp1ADSR);
   bigHexVarField_.emplace_back(UIBigHexVarField(position, *v, 4, "A/D/S/R       :%4.4X", 0, 0xFFFF, 16, true));
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp2ADSR);
+  v = instrument->FindVariable(Token::OPALInstrumentOp2ADSR);
   bigHexVarField_.emplace_back(UIBigHexVarField(position + GUIPoint(20, 0), *v, 4, "%4.4X", 0, 0xFFFF, 16, true));
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp1WaveShape);
+  v = instrument->FindVariable(Token::OPALInstrumentOp1WaveShape);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Shape         :%s", 0, 7, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp2WaveShape);
+  v = instrument->FindVariable(Token::OPALInstrumentOp2WaveShape);
   intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 7, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp1TremVibSusKSR);
+  v = instrument->FindVariable(Token::OPALInstrumentOp1TremVibSusKSR);
   bitmaskVarField_.emplace_back(UIBitmaskVarField(position, *v, "TR/VB/SU/KSR  :%04b", 4));
   fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
 
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp2TremVibSusKSR);
+  v = instrument->FindVariable(Token::OPALInstrumentOp2TremVibSusKSR);
   bitmaskVarField_.emplace_back(UIBitmaskVarField(position + GUIPoint(20, 0), *v, "%04b", 4));
   fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
 
   position.y_ += 1;
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp1KeyScaleLevel);
+  v = instrument->FindVariable(Token::OPALInstrumentOp1KeyScaleLevel);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Keyscale      :%s", 0, 3, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  v = instrument->FindVariable(FourCC::OPALInstrumentOp2KeyScaleLevel);
+  v = instrument->FindVariable(Token::OPALInstrumentOp2KeyScaleLevel);
   intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 3, 1, 1));
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
@@ -762,7 +762,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
     if (getInstrument()->GetType() == IT_SAMPLE) {
       UIIntVarField *field = (UIIntVarField *)GetFocus();
-      if (field->GetVariableID() == FourCC::SampleInstrumentEnd) {
+      if (field->GetVariableID() == Token::SampleInstrumentEnd) {
         Variable &var = field->GetVariable();
         SampleInstrument *instrument = (SampleInstrument *)instr;
         var.SetInt(instrument->GetSampleSize() - 1);
@@ -784,11 +784,11 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
     // Only allow sample import when the sample field is selected
     if (getInstrument()->GetType() == IT_SAMPLE && currentField &&
-        currentField->GetVariableID() == FourCC::SampleInstrumentSample) {
+        currentField->GetVariableID() == Token::SampleInstrumentSample) {
 
       if (viewMode_ == VM_NEW) {
         viewMode_ = VM_NORMAL; // clear the "enter double tap" state
-        ConfirmStopPlayback(FourCC::ActionImport);
+        ConfirmStopPlayback(Token::ActionImport);
       } else {
         // mark as "new" mode so a 2nd following ENTER will trigger the sample
         // import above
@@ -802,7 +802,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
     UIIntVarField *field = (UIIntVarField *)GetFocus();
     Variable &v = field->GetVariable();
     switch (v.GetID()) {
-      case FourCC::SampleInstrumentTable:
+      case Token::SampleInstrumentTable:
         {
           int next = TableHolder::GetInstance()->GetNext();
           if (next != NO_MORE_TABLE) {
@@ -831,8 +831,8 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       if (current == -1)
         return;
 
-      if ((field->GetVariableID() == FourCC::SampleInstrumentTable) ||
-          (field->GetVariableID() == FourCC::MidiInstrumentTable)) {
+      if ((field->GetVariableID() == Token::SampleInstrumentTable) ||
+          (field->GetVariableID() == Token::MidiInstrumentTable)) {
         int next = TableHolder::GetInstance()->Clone(current);
         if (next != NO_MORE_TABLE) {
           v.SetInt(next);
@@ -994,7 +994,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
   uintptr_t fourcc = (uintptr_t)data;
 
   switch (fourcc) {
-    case FourCC::VarInstrumentType:
+    case Token::VarInstrumentType:
       {
         // Get the current instrument to determine its actual type
         I_Instrument *instr = getInstrument();
@@ -1007,20 +1007,20 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
         instrumentType_.SetInt(currentType, false);
 
         pendingInstrumentType_ = proposedType;
-        ConfirmStopPlayback(FourCC::VarInstrumentType);
+        ConfirmStopPlayback(Token::VarInstrumentType);
         break;
       }
-    case FourCC::ActionExport:
+    case Token::ActionExport:
       handleInstrumentExport();
       break;
-    case FourCC::ActionModulation:
+    case Token::ActionModulation:
       goToModulationPage();
       break;
-    case FourCC::ActionImport:
+    case Token::ActionImport:
       // Switch to the InstrumentImportView
       Navigate(VT_INSTRUMENT_IMPORT);
       break;
-    case FourCC::SampleInstrumentSample:
+    case Token::SampleInstrumentSample:
       {
         I_Instrument *instr = getInstrument();
         if (!instr || instr->GetType() != IT_SAMPLE) {
@@ -1054,7 +1054,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
         DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmSampleChange>(*this));
         break;
       }
-    case FourCC::ActionShowSampleSlices:
+    case Token::ActionShowSampleSlices:
       {
         I_Instrument *instr = getInstrument();
         if (!instr || instr->GetType() != IT_SAMPLE) {
@@ -1069,7 +1069,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
         Navigate(VT_SAMPLE_SLICES);
         break;
       }
-    case FourCC::MidiInstrumentProgram:
+    case Token::MidiInstrumentProgram:
       {
         // When program value changes, send a MIDI Program Change message during
         // playback
@@ -1082,8 +1082,8 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
           MidiInstrument *midiInstr = (MidiInstrument *)instr;
 
           // Get the channel and program values
-          Variable *channelVar = midiInstr->FindVariable(FourCC::MidiInstrumentChannel);
-          Variable *programVar = midiInstr->FindVariable(FourCC::MidiInstrumentProgram);
+          Variable *channelVar = midiInstr->FindVariable(Token::MidiInstrumentChannel);
+          Variable *programVar = midiInstr->FindVariable(Token::MidiInstrumentProgram);
 
           if (channelVar && programVar) {
             int channel = channelVar->GetInt();
@@ -1232,7 +1232,7 @@ void InstrumentView::onConfirmSampleChange(View &, ModalView &dialog) {
   }
 
   suppressSampleChangeWarning_ = true;
-  if (Variable *sampleVar = sampleInstr->FindVariable(FourCC::SampleInstrumentSample)) {
+  if (Variable *sampleVar = sampleInstr->FindVariable(Token::SampleInstrumentSample)) {
     sampleVar->SetInt(lastSampleIndex_);
   }
   isDirty_ = true;
@@ -1284,12 +1284,12 @@ void InstrumentView::changeInstrumentType() {
   }
 }
 
-void InstrumentView::ConfirmedStop(FourCC source) {
+void InstrumentView::ConfirmedStop(Token source) {
   switch (source) {
-    case FourCC::ActionImport:
+    case Token::ActionImport:
       goToImport();
       break;
-    case FourCC::VarInstrumentType:
+    case Token::VarInstrumentType:
       changeInstrumentType();
       break;
   }

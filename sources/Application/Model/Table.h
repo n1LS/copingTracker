@@ -41,14 +41,14 @@ public:
   bool IsEmpty();
   void Copy(const Table &other);
 
-  inline FourCC getCmd(int step, int col) const {
+  inline Token getCmd(int step, int col) const {
     switch (col) {
       case 0:
-        return FourCC::enum_type(steps_[step].cmd1);
+        return Token::enum_type(steps_[step].cmd1);
       case 1:
-        return FourCC::enum_type(steps_[step].cmd2);
+        return Token::enum_type(steps_[step].cmd2);
       default:
-        return FourCC::enum_type(steps_[step].cmd3);
+        return Token::enum_type(steps_[step].cmd3);
     }
   }
 

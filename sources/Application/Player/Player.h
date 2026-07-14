@@ -75,7 +75,7 @@ public:
   }
 
   void ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT] = nullptr);
-  bool ProcessChannelCommand(int channel, FourCC cmd, uint16_t param);
+  bool ProcessChannelCommand(int channel, Token cmd, uint16_t param);
 
   void StartStreaming(const char *name, int startSample = 0);
   void StartLoopingStreaming(const char *name);

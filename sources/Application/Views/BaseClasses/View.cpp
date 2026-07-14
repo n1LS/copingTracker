@@ -725,8 +725,8 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
   }
 }
 
-void View::drawCommandLegend(uint8_t x, uint8_t y, FourCC command) {
-  if (command == FourCC::InstrumentCommandNone) {
+void View::drawCommandLegend(uint8_t x, uint8_t y, Token command) {
+  if (command == Token::InstrumentCommandNone) {
     // no command -> no help text
     return;
   }
@@ -788,10 +788,10 @@ void View::OnConfirmStopDialog(View &v, ModalView &dialog) {
   }
 }
 
-void View::ConfirmedStop(FourCC sender) {
+void View::ConfirmedStop(Token sender) {
 }
 
-bool View::ConfirmStopPlayback(FourCC source) {
+bool View::ConfirmStopPlayback(Token source) {
   if (!Player::GetInstance()->IsRunning()) {
     ConfirmedStop(source);
     return true;

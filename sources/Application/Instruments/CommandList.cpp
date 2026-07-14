@@ -15,58 +15,58 @@
 // GetNextAlpha/GetPrevAlpha depend on this ordering.
 const int CommandList::CommandCount = 29;
 
-const FourCC CommandList::AllCommands[CommandCount] = {
-    FourCC::InstrumentCommandNone,
-    FourCC::InstrumentCommandArpeggiator,
-    FourCC::InstrumentCommandCrush,
-    FourCC::InstrumentCommandDelay,
-    FourCC::InstrumentCommandFilterCut,
-    FourCC::InstrumentCommandLowPassFilter,
-    FourCC::InstrumentCommandFilterResonance,
-    FourCC::InstrumentCommandGateOff,
-    FourCC::InstrumentCommandGroove,
-    FourCC::InstrumentCommandHop,
-    FourCC::InstrumentCommandInstrumentRetrigger,
-    FourCC::InstrumentCommandKill,
-    FourCC::InstrumentCommandLegato,
-    FourCC::InstrumentCommandLoopOffset,
-    FourCC::InstrumentCommandMidiCC,
-    FourCC::InstrumentCommandMidiChord,
-    FourCC::InstrumentCommandMidiPC,
-    FourCC::InstrumentCommandPan,
-    FourCC::InstrumentCommandPitchFineTune,
-    FourCC::InstrumentCommandPlayOfset,
-    FourCC::InstrumentCommandPitchSlide,
-    FourCC::InstrumentCommandRetrigger,
-    FourCC::InstrumentCommandStop,
-    FourCC::InstrumentCommandSetInstrumentParameter,
-    FourCC::InstrumentCommandTable,
-    FourCC::InstrumentCommandTempo,
-    FourCC::InstrumentCommandVelocity,
-    FourCC::InstrumentCommandVibrato,
-    FourCC::InstrumentCommandVolume,
+const Token CommandList::AllCommands[CommandCount] = {
+    Token::InstrumentCommandNone,
+    Token::InstrumentCommandArpeggiator,
+    Token::InstrumentCommandCrush,
+    Token::InstrumentCommandDelay,
+    Token::InstrumentCommandFilterCut,
+    Token::InstrumentCommandLowPassFilter,
+    Token::InstrumentCommandFilterResonance,
+    Token::InstrumentCommandGateOff,
+    Token::InstrumentCommandGroove,
+    Token::InstrumentCommandHop,
+    Token::InstrumentCommandInstrumentRetrigger,
+    Token::InstrumentCommandKill,
+    Token::InstrumentCommandLegato,
+    Token::InstrumentCommandLoopOffset,
+    Token::InstrumentCommandMidiCC,
+    Token::InstrumentCommandMidiChord,
+    Token::InstrumentCommandMidiPC,
+    Token::InstrumentCommandPan,
+    Token::InstrumentCommandPitchFineTune,
+    Token::InstrumentCommandPlayOfset,
+    Token::InstrumentCommandPitchSlide,
+    Token::InstrumentCommandRetrigger,
+    Token::InstrumentCommandStop,
+    Token::InstrumentCommandSetInstrumentParameter,
+    Token::InstrumentCommandTable,
+    Token::InstrumentCommandTempo,
+    Token::InstrumentCommandVelocity,
+    Token::InstrumentCommandVibrato,
+    Token::InstrumentCommandVolume,
 };
 
-FourCC CommandList::GetFirst() {
-  return FourCC::InstrumentCommandArpeggiator;
+Token CommandList::GetFirst() {
+  return Token::InstrumentCommandArpeggiator;
 }
 
-static char GetCommandGroupLetter(FourCC command) {
-  const char *name = FourCC(command).c_str();
+static char GetCommandGroupLetter(Token command) {
+  const char *name = Token(command).c_str();
   return (name && name[0]) ? name[0] : '\0';
 }
 
 // Applies command-specific range limits to parameter values
-uint16_t CommandList::RangeLimitCommandParam(FourCC command, uint16_t paramValue) {
+uint16_t CommandList::RangeLimitCommandParam(Token command, uint16_t paramValue) {
   // Each command type can have its own specific range limits
-  if (command == FourCC::InstrumentCommandVelocity) {
+  if (command == Token::InstrumentCommandVelocity) {
     // For VEL command, limit the bb part to 0x7F (127) while preserving the aa
     // part
     return (paramValue & 0xFF00) | (paramValue & 0x7F);
   }
   // Add more command-specific limits here as needed
   // Example:
-  // else if (command == FourCC::InstrumentCommandMidiCC) {
+  // else if (command == Token::InstrumentCommandMidiCC) {
   //   // MIDI CC values should also be limited to 0-127
   //   return (paramValue & 0xFF00) | (paramValue & 0x7F);
   // }
@@ -75,8 +75,8 @@ uint16_t CommandList::RangeLimitCommandParam(FourCC command, uint16_t paramValue
   return paramValue;
 }
 
-FourCC CommandList::GetNext(FourCC current) {
-  for (uint32_t i = 0; i < sizeof(AllCommands) / sizeof(FourCC) - 1; i++) {
+Token CommandList::GetNext(Token current) {
+  for (uint32_t i = 0; i < sizeof(AllCommands) / sizeof(Token) - 1; i++) {
     if (AllCommands[i] == current) {
       return AllCommands[i + 1];
     };
@@ -84,8 +84,8 @@ FourCC CommandList::GetNext(FourCC current) {
   return current;
 }
 
-FourCC CommandList::GetPrev(FourCC current) {
-  uint32_t count = sizeof(AllCommands) / sizeof(FourCC);
+Token CommandList::GetPrev(Token current) {
+  uint32_t count = sizeof(AllCommands) / sizeof(Token);
   for (uint32_t i = 2; i < count; i++) {
     if (AllCommands[i] == current) {
       return AllCommands[i - 1];
@@ -94,10 +94,10 @@ FourCC CommandList::GetPrev(FourCC current) {
   return current;
 }
 
-FourCC CommandList::GetNextAlpha(FourCC current) {
+Token CommandList::GetNextAlpha(Token current) {
   char letter = GetCommandGroupLetter(current);
   bool found = false;
-  for (uint32_t i = 0; i < sizeof(AllCommands) / sizeof(FourCC); i++) {
+  for (uint32_t i = 0; i < sizeof(AllCommands) / sizeof(Token); i++) {
     char tLetter = GetCommandGroupLetter(AllCommands[i]);
     if (!found) {
       if (tLetter == letter) {
@@ -112,12 +112,12 @@ FourCC CommandList::GetNextAlpha(FourCC current) {
   return current;
 }
 
-FourCC CommandList::GetPrevAlpha(FourCC current) {
+Token CommandList::GetPrevAlpha(Token current) {
 
   char letter = GetCommandGroupLetter(current);
   bool found = false;
-  FourCC tReturn = FourCC::Default;
-  uint32_t count = sizeof(AllCommands) / sizeof(FourCC);
+  Token tReturn = Token::Default;
+  uint32_t count = sizeof(AllCommands) / sizeof(Token);
 
   for (uint32_t i = count - 1; i > 0; i--) {
     char tLetter = GetCommandGroupLetter(AllCommands[i]);

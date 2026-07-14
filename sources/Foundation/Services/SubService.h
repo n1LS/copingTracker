@@ -16,7 +16,7 @@ class SubService {
 public:
   SubService(int fourCC, bool registerWithService = true);
   virtual ~SubService();
-  int GetFourCC() {
+  int GetToken() {
     return fourCC_;
   };
 

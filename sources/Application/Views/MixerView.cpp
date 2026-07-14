@@ -264,10 +264,10 @@ void MixerView::initChannelVolumeFields() {
   GUIPoint position = GetAnchor();
   position.y_ += VU_METER_HEIGHT + 1; // Position below VU meters
 
-  // Get FourCC codes for channel volumes
-  FourCC channelVolumeFourCCs[SONG_CHANNEL_COUNT] = {
-      FourCC::VarChannel1Volume, FourCC::VarChannel2Volume, FourCC::VarChannel3Volume, FourCC::VarChannel4Volume,
-      FourCC::VarChannel5Volume, FourCC::VarChannel6Volume, FourCC::VarChannel7Volume, FourCC::VarChannel8Volume};
+  // Get Token codes for channel volumes
+  Token channelVolumeTokens[SONG_CHANNEL_COUNT] = {
+      Token::VarChannel1Volume, Token::VarChannel2Volume, Token::VarChannel3Volume, Token::VarChannel4Volume,
+      Token::VarChannel5Volume, Token::VarChannel6Volume, Token::VarChannel7Volume, Token::VarChannel8Volume};
 
   // Clear any existing fields
   channelVolumeFields_.clear();
@@ -278,7 +278,7 @@ void MixerView::initChannelVolumeFields() {
     fieldPos.x_ = position.x_ + (i * CHANNELS_X_OFFSET_);
 
     // Find the variable for this channel's volume
-    Variable *v = project->FindVariable(channelVolumeFourCCs[i]);
+    Variable *v = project->FindVariable(channelVolumeTokens[i]);
     if (v) {
       // Create a 2-digit field (00-99) for the channel volume
       // NOTE: 99 is considered "unity" gain
@@ -296,7 +296,7 @@ void MixerView::initChannelVolumeFields() {
   // Position to the right of channel volumes
   masterPos.x_ += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
 
-  Variable *v = project->FindVariable(FourCC::VarMasterVolume);
+  Variable *v = project->FindVariable(Token::VarMasterVolume);
   if (v) {
     masterVolumeField_.emplace_back(masterPos, *v, "%2.2d", 0, 100, 1, 5);
     fieldList_.insert(fieldList_.end(), &(*masterVolumeField_.begin()));

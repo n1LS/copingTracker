@@ -14,7 +14,7 @@
 #include "Application/Player/Player.h"
 #include "System/System/System.h"
 
-UITempoField::UITempoField(FourCC action, const GUIPoint &position, Variable &v, const char *format, int min, int max,
+UITempoField::UITempoField(Token action, const GUIPoint &position, Variable &v, const char *format, int min, int max,
                            int xOffset, int yOffset)
     : UIIntVarField(position, v, format, min, max, xOffset, yOffset) {
   action_ = action;

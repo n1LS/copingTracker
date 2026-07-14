@@ -34,18 +34,18 @@
 
 Project::Project(const char *name)
     : Persistent("Project"), VariableContainer(&variables_), song_(), tempoNudge_(0),
-      tempo_(FourCC::VarTempo, DEFAULT_TEMPO), masterVolume_(FourCC::VarMasterVolume, DEFAULT_MASTER_VOLUME),
-      channelVolume1_(FourCC::VarChannel1Volume, DEFAULT_CHANNEL_VOLUME),
-      channelVolume2_(FourCC::VarChannel2Volume, DEFAULT_CHANNEL_VOLUME),
-      channelVolume3_(FourCC::VarChannel3Volume, DEFAULT_CHANNEL_VOLUME),
-      channelVolume4_(FourCC::VarChannel4Volume, DEFAULT_CHANNEL_VOLUME),
-      channelVolume5_(FourCC::VarChannel5Volume, DEFAULT_CHANNEL_VOLUME),
-      channelVolume6_(FourCC::VarChannel6Volume, DEFAULT_CHANNEL_VOLUME),
-      channelVolume7_(FourCC::VarChannel7Volume, DEFAULT_CHANNEL_VOLUME),
-      channelVolume8_(FourCC::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME), wrap_(FourCC::VarWrap, false),
-      transpose_(FourCC::VarTranspose, 0), scale_(FourCC::VarScale, scaleNames, numScales, 0),
-      scaleRoot_(FourCC::VarScaleRoot, noteNames, 12, 0), projectName_(FourCC::VarProjectName, name),
-      previewVolume_(FourCC::VarPreviewVolume, DEFAULT_PREVIEW_VOLUME) {
+      tempo_(Token::VarTempo, DEFAULT_TEMPO), masterVolume_(Token::VarMasterVolume, DEFAULT_MASTER_VOLUME),
+      channelVolume1_(Token::VarChannel1Volume, DEFAULT_CHANNEL_VOLUME),
+      channelVolume2_(Token::VarChannel2Volume, DEFAULT_CHANNEL_VOLUME),
+      channelVolume3_(Token::VarChannel3Volume, DEFAULT_CHANNEL_VOLUME),
+      channelVolume4_(Token::VarChannel4Volume, DEFAULT_CHANNEL_VOLUME),
+      channelVolume5_(Token::VarChannel5Volume, DEFAULT_CHANNEL_VOLUME),
+      channelVolume6_(Token::VarChannel6Volume, DEFAULT_CHANNEL_VOLUME),
+      channelVolume7_(Token::VarChannel7Volume, DEFAULT_CHANNEL_VOLUME),
+      channelVolume8_(Token::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME), wrap_(Token::VarWrap, false),
+      transpose_(Token::VarTranspose, 0), scale_(Token::VarScale, scaleNames, numScales, 0),
+      scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), projectName_(Token::VarProjectName, name),
+      previewVolume_(Token::VarPreviewVolume, DEFAULT_PREVIEW_VOLUME) {
 
   this->variables_.insert(variables_.end(), &tempo_);
   this->variables_.insert(variables_.end(), &masterVolume_);
@@ -124,26 +124,26 @@ void Project::Load(const char *name) {
 }
 
 int Project::GetScale() {
-  Variable *v = FindVariable(FourCC::VarScale);
+  Variable *v = FindVariable(Token::VarScale);
   NAssert(v);
   return v->GetInt();
 }
 
 uint8_t Project::GetScaleRoot() {
-  Variable *v = FindVariable(FourCC::VarScaleRoot);
+  Variable *v = FindVariable(Token::VarScaleRoot);
   NAssert(v);
   return v->GetInt();
 }
 
 int Project::GetTempo() {
-  Variable *v = FindVariable(FourCC::VarTempo);
+  Variable *v = FindVariable(Token::VarTempo);
   NAssert(v);
   int tempo = v->GetInt() + tempoNudge_;
   return tempo;
 }
 
 int Project::GetMasterVolume() {
-  Variable *v = FindVariable(FourCC::VarMasterVolume);
+  Variable *v = FindVariable(Token::VarMasterVolume);
   NAssert(v);
   return v->GetInt();
 }
@@ -174,13 +174,13 @@ int Project::GetChannelVolume(int channel) {
 }
 
 void Project::GetProjectName(char *name) {
-  Variable *v = FindVariable(FourCC::VarProjectName);
+  Variable *v = FindVariable(Token::VarProjectName);
   strncpy(name, v->GetString().c_str(), MAX_PROJECT_NAME_LENGTH);
   name[MAX_PROJECT_NAME_LENGTH] = '\0';
 }
 
 void Project::SetProjectName(char *name) {
-  Variable *v = FindVariable(FourCC::VarProjectName);
+  Variable *v = FindVariable(Token::VarProjectName);
   char buffer[MAX_PROJECT_NAME_LENGTH + 1];
   strncpy(buffer, name, MAX_PROJECT_NAME_LENGTH);
   buffer[MAX_PROJECT_NAME_LENGTH] = '\0';
@@ -204,7 +204,7 @@ void Project::Trigger() {
 }
 
 int Project::GetTranspose() {
-  Variable *v = FindVariable(FourCC::VarTranspose);
+  Variable *v = FindVariable(Token::VarTranspose);
   NAssert(v);
   int result = v->GetInt();
   if (result > 0x80) {
@@ -214,7 +214,7 @@ int Project::GetTranspose() {
 }
 
 bool Project::Wrap() {
-  Variable *v = FindVariable(FourCC::VarWrap);
+  Variable *v = FindVariable(Token::VarWrap);
   NAssert(v);
   return v->GetBool();
 }
@@ -257,7 +257,7 @@ void Project::Purge() {
     }
   }
 
-  static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(FourCC::InstrumentCommandNone));
+  static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
       if (!song_.phrase_.IsUsed(i)) {
@@ -384,7 +384,7 @@ void Project::RestoreContent(PersistencyDocument *doc) {
     }
     Variable *v = FindVariable(name);
     // Project name now comes from the directory, so ignore any persisted value.
-    if (v && v->GetID() != FourCC::VarProjectName) {
+    if (v && v->GetID() != Token::VarProjectName) {
       v->SetString(value);
     }
     elem = doc->NextSibling();
@@ -408,7 +408,7 @@ void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
     Variable *currentVar = *it;
     // Persist everything except the project name, which is derived from the
     // projects directory name
-    if (currentVar->GetID() == FourCC::VarProjectName) {
+    if (currentVar->GetID() == Token::VarProjectName) {
       it++;
       continue;
     }
@@ -438,7 +438,7 @@ void Project::OnTempoTap() {
         tempoTapCount_++;
       }
       int tempo = int(60000 * (tempoTapCount_ - 1) / (float)(now - lastTap_[0]));
-      Variable *v = FindVariable(FourCC::VarTempo);
+      Variable *v = FindVariable(Token::VarTempo);
       // ensure tempo is within range
       tempo = std::clamp((unsigned short)tempo, MIN_TEMPO, MAX_TEMPO);
       v->SetInt(tempo);

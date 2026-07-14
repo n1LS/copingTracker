@@ -16,22 +16,22 @@
 
 class CommandList {
 public:
-  static FourCC GetNext(FourCC current);
-  static FourCC GetPrev(FourCC current);
-  static FourCC GetNextAlpha(FourCC current);
-  static FourCC GetPrevAlpha(FourCC current);
+  static Token GetNext(Token current);
+  static Token GetPrev(Token current);
+  static Token GetNextAlpha(Token current);
+  static Token GetPrevAlpha(Token current);
 
-  static FourCC GetFirst();
-  static FourCC GetFirstAlpha();
+  static Token GetFirst();
+  static Token GetFirstAlpha();
 
   static const int CommandCount;
-  static const FourCC AllCommands[];
+  static const Token AllCommands[];
 
   // Applies command-specific range limits to parameter values
   // Currently handles:
   // - VEL: Ensures MIDI velocity values don't exceed 127 (0x7F)
   // Can be extended to handle other commands in the future
   // Returns the range-limited parameter value
-  static uint16_t RangeLimitCommandParam(FourCC command, uint16_t paramValue);
+  static uint16_t RangeLimitCommandParam(Token command, uint16_t paramValue);
 };
 #endif

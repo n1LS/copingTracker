@@ -39,7 +39,7 @@ public:
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
-  void setCurrentlySelectedCommand(FourCC command);
+  void setCurrentlySelectedCommand(Token command);
 
 protected:
   void processNormalButtonMask(uint16_t mask);

@@ -46,62 +46,62 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   Variable *v;
 
-  v = config->FindVariable(FourCC::VarMidiDevice);
+  v = config->FindVariable(Token::VarMidiDevice);
   intVarField_.emplace_back(position, *v, "MIDI device  :%s", 0, 3, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
-  v = config->FindVariable(FourCC::VarMidiSync);
+  v = config->FindVariable(Token::VarMidiSync);
   // just hardcode max of 1, as only settings are "off" & "send"
   intVarField_.emplace_back(position, *v, "MIDI sync    :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
-  v = config->FindVariable(FourCC::VarLineOut);
+  v = config->FindVariable(Token::VarLineOut);
   intVarField_.emplace_back(position, *v, "Line Out Mode:%s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
-  v = config->FindVariable(FourCC::VarMirrorUI);
+  v = config->FindVariable(Token::VarMirrorUI);
   intVarField_.emplace_back(position, *v, "mirrorUI     :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 2;
-  v = config->FindVariable(FourCC::VarBacklightLevel);
+  v = config->FindVariable(Token::VarBacklightLevel);
   // MIN brightness is 0xF (15)
   intVarField_.emplace_back(position, *v, "Display brightness:%2.2X", 0xF, 0xFF, 1, 16);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
-  v = config->FindVariable(FourCC::VarImportResampler);
+  v = config->FindVariable(Token::VarImportResampler);
   intVarField_.emplace_back(position, *v, "Import resampler  :%s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
-  v = config->FindVariable(FourCC::VarConfigCommandPicker);
+  v = config->FindVariable(Token::VarConfigCommandPicker);
   intVarField_.emplace_back(position, *v, "Command input mode:%s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 2;
-  actionField_.emplace_back("Theme settings", FourCC::ActionShowTheme, position);
+  actionField_.emplace_back("Theme settings", Token::ActionShowTheme, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   position.y_ += 2;
-  actionField_.emplace_back("Firmware update", FourCC::ActionBootSelect, position);
+  actionField_.emplace_back("Firmware update", Token::ActionBootSelect, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
 #ifndef ADV
   position.y_ += 1;
-  actionField_.emplace_back(char_symbols_usb_s " USB Storage", FourCC::ActionMassStorage, position);
+  actionField_.emplace_back(char_symbols_usb_s " USB Storage", Token::ActionMassStorage, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 #endif
@@ -165,9 +165,9 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   focus->SetFocus();
 
   // Handle brightness changes directly
-  if (fourcc == FourCC::VarBacklightLevel) {
+  if (fourcc == Token::VarBacklightLevel) {
     Config *config = Config::GetInstance();
-    Variable *v = config->FindVariable(FourCC::VarBacklightLevel);
+    Variable *v = config->FindVariable(Token::VarBacklightLevel);
     if (v) {
       unsigned char brightness = (unsigned char)v->GetInt();
       System::GetInstance()->SetDisplayBrightness(brightness);
@@ -178,19 +178,19 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   Player *player = Player::GetInstance();
 
   switch (fourcc) {
-    case FourCC::ActionBootSelect:
-      ConfirmStopPlayback(FourCC::ActionBootSelect);
+    case Token::ActionBootSelect:
+      ConfirmStopPlayback(Token::ActionBootSelect);
       return;
-    case FourCC::ActionMassStorage:
-      ConfirmStopPlayback(FourCC::ActionMassStorage);
+    case Token::ActionMassStorage:
+      ConfirmStopPlayback(Token::ActionMassStorage);
       return;
-    case FourCC::ActionShowTheme:
+    case Token::ActionShowTheme:
       Navigate(VT_THEME);
       return;
-    case FourCC::VarLineOut:
+    case Token::VarLineOut:
       {
         Config *config = Config::GetInstance();
-        Variable *lv = config->FindVariable(FourCC::VarLineOut);
+        Variable *lv = config->FindVariable(Token::VarLineOut);
         if (lv) {
           Audio *audio = Audio::GetInstance();
           if (audio) {
@@ -206,16 +206,16 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
         }
         break;
       }
-    case FourCC::VarMidiDevice:
-    case FourCC::VarMidiSync:
-    case FourCC::VarMirrorUI:
-    case FourCC::VarImportResampler:
+    case Token::VarMidiDevice:
+    case Token::VarMidiSync:
+    case Token::VarMirrorUI:
+    case Token::VarImportResampler:
       configDirty_ = true;
       break;
-    case FourCC::VarOutputVolume:
+    case Token::VarOutputVolume:
       {
         Config *config = Config::GetInstance();
-        Variable *v = config->FindVariable(FourCC::VarOutputVolume);
+        Variable *v = config->FindVariable(Token::VarOutputVolume);
         if (v) {
           Audio *audio = Audio::GetInstance();
           if (audio) {
@@ -263,12 +263,12 @@ void DeviceView::ConfirmReboot() {
   DoModal(mb, ModalViewCallback::create<&BootselCallback>());
 }
 
-void DeviceView::ConfirmedStop(FourCC sender) {
+void DeviceView::ConfirmedStop(Token sender) {
   switch (sender) {
-    case FourCC::ActionBootSelect:
+    case Token::ActionBootSelect:
       ConfirmReboot();
       return;
-    case FourCC::ActionMassStorage:
+    case Token::ActionMassStorage:
       ConfirmMassStorage();
       return;
   }
