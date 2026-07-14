@@ -17,7 +17,7 @@
 #include "Application/Model/Config.h"
 #include "Application/Views/SampleEditorView.h"
 #include "Application/Views/SampleImportView.h"
-#include "BaseClasses/UIBigHexVarField.h"
+#include "BaseClasses/UIHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UIIntVarOffField.h"
 #include "BaseClasses/UINoteVarField.h"
@@ -219,7 +219,6 @@ void InstrumentView::applyProposedTypeChangeUI() {
 }
 
 void InstrumentView::onInstrumentChange() {
-
   ClearFocus();
 
   I_Instrument *old = getInstrument();
@@ -239,7 +238,7 @@ void InstrumentView::refreshInstrumentFields() {
   for (auto &f : intVarField_) {
     f.RemoveObserver(*this);
   }
-  for (auto &f : bigHexVarField_) {
+  for (auto &f : hexVarField_) {
     f.RemoveObserver(*this);
   }
   for (auto &f : intVarOffField_) {
@@ -256,7 +255,7 @@ void InstrumentView::refreshInstrumentFields() {
   intVarField_.clear();
   noteVarField_.clear();
   staticField_.clear();
-  bigHexVarField_.clear();
+  hexVarField_.clear();
   intVarOffField_.clear();
   sampleActionField_.clear();
   bitmaskVarField_.clear();
@@ -331,7 +330,7 @@ void InstrumentView::refreshInstrumentFields() {
   for (auto &f : intVarField_) {
     f.AddObserver(*this);
   }
-  for (auto &f : bigHexVarField_) {
+  for (auto &f : hexVarField_) {
     f.AddObserver(*this);
   }
   for (auto &f : intVarOffField_) {
@@ -458,19 +457,18 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentStart);
-  bigHexVarField_.emplace_back(position, *v, 7, sub_item "Start     :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
+  hexVarField_.emplace_back(position, *v, 7, sub_item "Start     :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentLoopStart);
-  bigHexVarField_.emplace_back(position, *v, 7, sub_item "Loop start:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
+  hexVarField_.emplace_back(position, *v, 7, sub_item "Loop start:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentEnd);
-  bigHexVarField_.emplace_back(position, *v, 7, last_sub_item "Loop end  :%7.7X", 0, instrument->GetSampleSize() - 1,
-                               16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
+  hexVarField_.emplace_back(position, *v, 7, last_sub_item "Loop end  :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 }
 
 void InstrumentView::fillSIDParameters() {
@@ -517,8 +515,8 @@ void InstrumentView::fillSIDParameters() {
 
   position.y_ += 2;
   v = instrument->FindVariable(Token::SIDInstrumentADSR);
-  bigHexVarField_.emplace_back(UIBigHexVarField(position, *v, 4, "Env. A/D/S/R  :%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
+  hexVarField_.emplace_back(UIHexVarField(position, *v, 4, "Env. A/D/S/R  :%4.4X", 0, 0xFFFF, 16, true));
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 
   position.y_ += 2;
   staticField_.emplace_back(position, "Chip Settings" char_line_11_s);
@@ -691,12 +689,12 @@ void InstrumentView::fillOpalParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentOp1ADSR);
-  bigHexVarField_.emplace_back(UIBigHexVarField(position, *v, 4, "A/D/S/R       :%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
+  hexVarField_.emplace_back(UIHexVarField(position, *v, 4, "A/D/S/R       :%4.4X", 0, 0xFFFF, 16, true));
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 
   v = instrument->FindVariable(Token::OPALInstrumentOp2ADSR);
-  bigHexVarField_.emplace_back(UIBigHexVarField(position + GUIPoint(20, 0), *v, 4, "%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
+  hexVarField_.emplace_back(UIHexVarField(position + GUIPoint(20, 0), *v, 4, "%4.4X", 0, 0xFFFF, 16, true));
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentOp1WaveShape);
@@ -1293,4 +1291,26 @@ void InstrumentView::ConfirmedStop(Token source) {
       changeInstrumentType();
       break;
   }
+}
+
+// override to synchronize the position selection for DrumInstruments
+void InstrumentView::SetFocus(UIField *field) {
+  Trace::Log("Instrument", "setFocus to %d", field);
+
+  // Drum instrument, currently on a field and moving to a field?
+  UIField *focus = GetFocus();
+  I_Instrument *instr = getInstrument();
+
+  if (focus && field && instr && instr->GetType() == IT_DRUM) {
+    // is current field a hex field?
+    int sourceColumn = focus->GetColumn();
+    Trace::Log("Instrument", "inner at %d", sourceColumn);
+    if (sourceColumn != -1) {
+      Trace::Log("Instrument", "BAM!");
+      field->SetColumn(sourceColumn);
+    }
+  }
+
+  // call parent implementation
+  FieldView::SetFocus(field);
 }

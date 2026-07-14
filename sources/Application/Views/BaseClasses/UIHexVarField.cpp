@@ -9,13 +9,13 @@
  * This file is part of the copingTracker firmware
  */
 
-#include "UIBigHexVarField.h"
+#include "UIHexVarField.h"
 #include "Application/AppWindow.h"
 #include "ViewUtils.h"
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 
-UIBigHexVarField::UIBigHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min,
+UIHexVarField::UIHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min,
                                    int max, int power, bool wrap)
     : UIIntVarField(position, v, format, min, max, 0, 0) {
   precision_ = precision - 1;
@@ -24,7 +24,7 @@ UIBigHexVarField::UIBigHexVarField(const GUIPoint &position, Variable &v, int pr
   wrap_ = wrap;
 }
 
-void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
+void UIHexVarField::Draw(GUIWindow &w, int offset) {
 
   GUIPoint position = GetPosition();
   position.y_ += offset;
@@ -41,7 +41,7 @@ void UIBigHexVarField::Draw(GUIWindow &w, int offset) {
   DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
 }
 
-void UIBigHexVarField::ProcessArrow(uint16_t mask) {
+void UIHexVarField::ProcessArrow(uint16_t mask) {
 
   int32_t value = src_.GetInt();
   int32_t offset = 1;
@@ -98,14 +98,18 @@ void UIBigHexVarField::ProcessArrow(uint16_t mask) {
   NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(src_.GetID())));
 }
 
-void UIBigHexVarField::SetWrapDigits(bool wrapDigits) {
+void UIHexVarField::SetWrapDigits(bool wrapDigits) {
   wrapDigits_ = wrapDigits;
 }
 
-void UIBigHexVarField::SetWrap(bool wrap) {
+void UIHexVarField::SetWrap(bool wrap) {
   wrap_ = wrap;
 }
 
-void UIBigHexVarField::SetColumn(uint8_t index) {
+void UIHexVarField::SetColumn(uint8_t index) {
   position_ = (index > 7) ? 7 : index;
+}
+
+int UIHexVarField::GetColumn() {
+  return position_;
 }

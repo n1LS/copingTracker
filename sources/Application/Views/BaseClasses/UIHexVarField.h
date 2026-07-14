@@ -15,18 +15,19 @@
 #include "Foundation/Observable.h"
 #include "UIIntVarField.h"
 
-class UIBigHexVarField : public UIIntVarField {
+class UIHexVarField : public UIIntVarField {
 
 public:
-  UIBigHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min, int max,
+  UIHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min, int max,
                    int power, bool wrap = false);
-  virtual ~UIBigHexVarField() {};
+  virtual ~UIHexVarField() {};
   virtual void Draw(GUIWindow &w, int offset = 0);
   virtual void ProcessArrow(uint16_t mask);
 
   void SetWrapDigits(bool wrapDigits);
   void SetWrap(bool wrap);
   void SetColumn(uint8_t index);
+  int GetColumn() override;
 
 private:
   unsigned int precision_;

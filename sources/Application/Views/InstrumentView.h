@@ -14,8 +14,8 @@
 
 #include "Application/Instruments/InstrumentNameVariable.h"
 #include "BaseClasses/UIActionField.h"
-#include "BaseClasses/UIBigHexVarField.h"
 #include "BaseClasses/UIBitmaskVarField.h"
+#include "BaseClasses/UIHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UIIntVarOffField.h"
 #include "BaseClasses/UINoteVarField.h"
@@ -47,6 +47,7 @@ public:
   bool checkInstrumentModified();
   void resetInstrumentToDefaults();
   void applyProposedTypeChangeUI();
+  virtual void SetFocus(UIField *field) override;
 
 protected:
   void addIndexToLine(uint8_t index, uint8_t line);
@@ -100,7 +101,7 @@ private:
   etl::vector<UIIntVarField, 40> intVarField_;
   etl::vector<UINoteVarField, 1> noteVarField_;
   etl::vector<UIStaticField, 16> staticField_;
-  etl::vector<UIBigHexVarField, 12> bigHexVarField_;
+  etl::vector<UIHexVarField, 12> hexVarField_;
   etl::vector<UIIntVarOffField, 3> intVarOffField_;
   etl::vector<UIActionField, 1> sampleActionField_;
   etl::vector<UIBitmaskVarField, 3> bitmaskVarField_;

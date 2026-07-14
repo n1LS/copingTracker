@@ -63,66 +63,66 @@ void InstrumentView::fillDrumParameters() {
   position.y_++;  
 
   Variable *v = instrument->FindVariable(Token::DrumInstrumentParamsVoice0);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[0], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[0], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice1);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[1], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[1], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice2);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[2], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[2], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice3);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[3], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[3], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice4);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[4], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[4], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice5);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[5], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[5], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice6);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[6], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[6], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice7);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[7], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[7], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice8);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[8], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[8], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice9);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[9], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[9], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice10);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[10], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[10], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
 
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice11);
-  bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[11], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
+  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[11], 0x0000, 0xffff, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
   position.y_++;
   
-  for (auto &f : bigHexVarField_) {
+  for (auto &f : hexVarField_) {
     f.SetWrapDigits(false);
     f.SetWrap(false);
   }
@@ -132,7 +132,7 @@ void InstrumentView::DrawViewDrum() {
   GUIPoint p = GetAnchor();
 
   UIField *f = GetFocus();
-  UIBigHexVarField *field = (UIBigHexVarField *)(f);
+  UIHexVarField *field = (UIHexVarField *)(f);
 
   char buffer[16];
 

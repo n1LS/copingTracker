@@ -18,7 +18,7 @@
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/char.h"
-#include "BaseClasses/UIBigHexVarField.h"
+#include "BaseClasses/UIHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UIStaticField.h"
 #include "Foundation/Types/Types.h"
@@ -93,7 +93,7 @@ void SampleEditorView::Reset() {
   selectedMarker_ = MarkerStart;
 
   fieldList_.clear();
-  bigHexVarField_.clear();
+  hexVarField_.clear();
   intVarField_.clear();
   actionField_.clear();
   nameTextField_.clear();
@@ -297,7 +297,7 @@ void SampleEditorView::addAllFields() {
   // assigned so instead we need to first clear out all the previous fields
   // and then re-add them just like we do on the InstrumentView
   fieldList_.clear();
-  bigHexVarField_.clear();
+  hexVarField_.clear();
   intVarField_.clear();
   actionField_.clear();
   nameTextField_.clear();
@@ -311,15 +311,15 @@ void SampleEditorView::addAllFields() {
   const uint16_t baseX = position.x_;
 
   position.y_ += 1;
-  bigHexVarField_.emplace_back(position, startVar_, 7, "Start     :%7.7X", 0, tempSampleSize_ - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
-  (*bigHexVarField_.rbegin()).AddObserver(*this);
+  hexVarField_.emplace_back(position, startVar_, 7, "Start     :%7.7X", 0, tempSampleSize_ - 1, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
+  (*hexVarField_.rbegin()).AddObserver(*this);
 
   // Add end position control
   position.y_ += 1;
-  bigHexVarField_.emplace_back(position, endVar_, 7, "End       :%7.7X", 0, tempSampleSize_ - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));
-  (*bigHexVarField_.rbegin()).AddObserver(*this);
+  hexVarField_.emplace_back(position, endVar_, 7, "End       :%7.7X", 0, tempSampleSize_ - 1, 16);
+  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
+  (*hexVarField_.rbegin()).AddObserver(*this);
 
   // Operation selector
   position.y_ += 1;
@@ -538,7 +538,7 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (mask & BM_EDIT) {
     if (mask & BM_ENTER) {
       UIField *focus = GetFocus();
-      for (auto &field : bigHexVarField_) {
+      for (auto &field : hexVarField_) {
         if (&field == focus && field.GetVariableID() == Token::VarSampleEditEnd) {
           Variable &var = field.GetVariable();
           var.SetInt(tempSampleSize_ - 1);
@@ -596,7 +596,7 @@ void SampleEditorView::DrawWaveForm() {
 
 void SampleEditorView::updateSelectedMarkerFromFocus() {
   UIField *focus = GetFocus();
-  for (auto &field : bigHexVarField_) {
+  for (auto &field : hexVarField_) {
     if (&field != focus) {
       continue;
     }

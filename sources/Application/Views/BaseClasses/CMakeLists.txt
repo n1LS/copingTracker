@@ -4,7 +4,7 @@ add_library(application_views_baseclasses
   ModalView.cpp
   ../ScreenView.cpp
   UIActionField.cpp
-  UIBigHexVarField.cpp
+  UIHexVarField.cpp
   UIField.cpp
   UIIntField.cpp
   UIIntVarField.cpp

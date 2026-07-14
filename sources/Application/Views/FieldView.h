@@ -22,7 +22,7 @@ public:
   virtual void Redraw();
   virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
 
-  void SetFocus(UIField *);
+  virtual void SetFocus(UIField *field);
   UIField *GetFocus();
   void ClearFocus();
   int GetFocusIndex();

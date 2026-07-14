@@ -13,7 +13,7 @@
 #define _PHRASE_VIEW_H_
 
 #include "Application/Model/Phrase.h"
-#include "BaseClasses/UIBigHexVarField.h"
+#include "BaseClasses/UIHexVarField.h"
 #include "ScreenView.h"
 #include "ViewData.h"
 
@@ -99,7 +99,7 @@ private:
   int lastPlayingPos_;
   Variable cmdEdit_;
   GUIPoint cmdEditPos_;
-  UIBigHexVarField cmdEditField_;
+  UIHexVarField cmdEditField_;
 
   struct clipboard {
     bool active_;
