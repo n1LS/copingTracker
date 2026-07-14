@@ -30,7 +30,7 @@ constexpr uint8_t COLOR_COMPONENT_X_OFFSETS[COLOR_COMPONENT_COUNT] = {
     COLOR_LABEL_WIDTH, COLOR_LABEL_WIDTH + COMPONENT_WIDTH, COLOR_LABEL_WIDTH + 2 * COMPONENT_WIDTH};
 
 ThemeView::ThemeView(GUIWindow &w, ViewData *data)
-    : FieldView(w, data), colorComponentVar_(FourCC::VarColor_0_Black, 0),
+    : FieldView(w, data), colorComponentVar_(FourCC::VarColor_0, 0),
       themeNameVar_(FourCC::ActionThemeName, ThemeConstants::DEFAULT_THEME_NAME) {
 
   GUIPoint position = GetAnchor();
@@ -90,37 +90,37 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   // Colors 0..15
   position.y_ += 3;
-  addColorField("Black", config->FindVariable(FourCC::VarColor_0_Black), BLACK, position);
+  addColorField("Black", config->FindVariable(FourCC::VarColor_0), BLACK, position);
   position.y_ += 1;
-  addColorField("Maroon", config->FindVariable(FourCC::VarColor_1_Maroon), RED, position);
+  addColorField("Maroon", config->FindVariable(FourCC::VarColor_1), RED, position);
   position.y_ += 1;
-  addColorField("Green", config->FindVariable(FourCC::VarColor_2_Green), GREEN, position);
+  addColorField("Green", config->FindVariable(FourCC::VarColor_2), GREEN, position);
   position.y_ += 1;
-  addColorField("Olive", config->FindVariable(FourCC::VarColor_3_Olive), YELLOW, position);
+  addColorField("Olive", config->FindVariable(FourCC::VarColor_3), YELLOW, position);
   position.y_ += 1;
-  addColorField("Blue", config->FindVariable(FourCC::VarColor_4_Blue), BLUE, position);
+  addColorField("Blue", config->FindVariable(FourCC::VarColor_4), BLUE, position);
   position.y_ += 1;
-  addColorField("Purple", config->FindVariable(FourCC::VarColor_5_Purple), MAGENTA, position);
+  addColorField("Purple", config->FindVariable(FourCC::VarColor_5), MAGENTA, position);
   position.y_ += 1;
-  addColorField("Turqoise", config->FindVariable(FourCC::VarColor_6_Turqoise), CYAN, position);
+  addColorField("Turqoise", config->FindVariable(FourCC::VarColor_6), CYAN, position);
   position.y_ += 1;
-  addColorField("Silver", config->FindVariable(FourCC::VarColor_7_LightyGray), LIGHT_GRAY, position);
+  addColorField("Silver", config->FindVariable(FourCC::VarColor_7), LIGHT_GRAY, position);
   position.y_ += 1;
-  addColorField("Gray", config->FindVariable(FourCC::VarColor_8_Gray), DARK_GRAY, position);
+  addColorField("Gray", config->FindVariable(FourCC::VarColor_8), DARK_GRAY, position);
   position.y_ += 1;
-  addColorField("Red", config->FindVariable(FourCC::VarColor_9_Red), LIGHT_RED, position);
+  addColorField("Red", config->FindVariable(FourCC::VarColor_9), LIGHT_RED, position);
   position.y_ += 1;
-  addColorField("Lime", config->FindVariable(FourCC::VarColor_A_Lime), LIGHT_GREEN, position);
+  addColorField("Lime", config->FindVariable(FourCC::VarColor_A), LIGHT_GREEN, position);
   position.y_ += 1;
-  addColorField("Yellow", config->FindVariable(FourCC::VarColor_B_Yellow), LIGHT_YELLOW, position);
+  addColorField("Yellow", config->FindVariable(FourCC::VarColor_B), LIGHT_YELLOW, position);
   position.y_ += 1;
-  addColorField("Light Blue", config->FindVariable(FourCC::VarColor_C_LightBlue), LIGHT_BLUE, position);
+  addColorField("Light Blue", config->FindVariable(FourCC::VarColor_C), LIGHT_BLUE, position);
   position.y_ += 1;
-  addColorField("Magenta", config->FindVariable(FourCC::VarColor_D_Magenta), LIGHT_MAGENTA, position);
+  addColorField("Magenta", config->FindVariable(FourCC::VarColor_D), LIGHT_MAGENTA, position);
   position.y_ += 1;
-  addColorField("Cyan", config->FindVariable(FourCC::VarColor_E_Cyan), LIGHT_CYAN, position);
+  addColorField("Cyan", config->FindVariable(FourCC::VarColor_E), LIGHT_CYAN, position);
   position.y_ += 1;
-  addColorField("White", config->FindVariable(FourCC::VarColor_F_White), WHITE, position);
+  addColorField("White", config->FindVariable(FourCC::VarColor_F), WHITE, position);
 
   updateColorComponentField();
   intVarField_.emplace_back(colorComponentTargets_[0].position, colorComponentVar_, "%2.2X", 0, 248, 8, 16, 0);
@@ -260,7 +260,7 @@ void ThemeView::syncColorComponentVars(Variable *colorVar) {
     updateColorComponentField();
   }
 
-  if (colorVar->GetID() == FourCC::VarColor_0_Black) {
+  if (colorVar->GetID() == FourCC::VarColor_0) {
     // If the background color changed, we need to force a
     // redraw to update all the colors on the screen
     forceRedraw_ = true;
@@ -365,22 +365,22 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
         break;
       }
     // Handle color variable changes
-    case FourCC::VarColor_0_Black:
-    case FourCC::VarColor_1_Maroon:
-    case FourCC::VarColor_2_Green:
-    case FourCC::VarColor_3_Olive:
-    case FourCC::VarColor_4_Blue:
-    case FourCC::VarColor_5_Purple:
-    case FourCC::VarColor_6_Turqoise:
-    case FourCC::VarColor_7_LightyGray:
-    case FourCC::VarColor_A_Lime:
-    case FourCC::VarColor_8_Gray:
-    case FourCC::VarColor_9_Red:
-    case FourCC::VarColor_B_Yellow:
-    case FourCC::VarColor_C_LightBlue:
-    case FourCC::VarColor_D_Magenta:
-    case FourCC::VarColor_E_Cyan:
-    case FourCC::VarColor_F_White:
+    case FourCC::VarColor_0:
+    case FourCC::VarColor_1:
+    case FourCC::VarColor_2:
+    case FourCC::VarColor_3:
+    case FourCC::VarColor_4:
+    case FourCC::VarColor_5:
+    case FourCC::VarColor_6:
+    case FourCC::VarColor_7:
+    case FourCC::VarColor_A:
+    case FourCC::VarColor_8:
+    case FourCC::VarColor_9:
+    case FourCC::VarColor_B:
+    case FourCC::VarColor_C:
+    case FourCC::VarColor_D:
+    case FourCC::VarColor_E:
+    case FourCC::VarColor_F:
       {
         // Update the AppWindow's color values from Config
         ((AppWindow &)w_).UpdateColorsFromConfig();
