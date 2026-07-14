@@ -1,5 +1,6 @@
 add_library(application_instruments
   ChiptuneInstrument/ChiptuneInstrument.cpp
+  DrumInstrument/DrumInstrument.cpp
   CommandList.cpp
   Filters.cpp
   I_Instrument.cpp
@@ -33,6 +34,7 @@ target_link_libraries(application_instruments PUBLIC
 target_include_directories(application_instruments PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/ChiptuneInstrument
+  ${CMAKE_CURRENT_SOURCE_DIR}/DrumInstrument
 )
 
 include_directories(${PROJECT_SOURCE_DIR})

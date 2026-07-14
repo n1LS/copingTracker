@@ -839,7 +839,8 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
         confirmLine.append(opName.c_str());
         confirmLine.append("?");
 
-        MessageBox *mb = MessageBox::Create(*this, "Edit", confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
+        MessageBox *mb =
+            MessageBox::Create(*this, "Edit", confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
 
         // Modal cannot properly draw over the waveform gfx area because text
         // drawing doesn't know the area because ClearTextRect() is not yet

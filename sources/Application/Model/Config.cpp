@@ -22,11 +22,14 @@
 #include "System/FileSystem/I_File.h"
 #include "ThemeConstants.h"
 #include "Variable.h"
+#include "Foundation/Types/Types.h"
 #include <stdlib.h>
 
 #define CONFIG_VERSION_NUMBER 1
 
 #define MIDI_DEVICE_LEN 4
+
+#define CONFIG(X, A, B, D, E) {FourCC(X).c_str(), A, X, B, D, E}
 
 static const char *lineOutOptions[3] = {"HP Low", "HP High", "Line Level"};
 static const char *midiDeviceList[MIDI_DEVICE_LEN] = {"Off", "TRS", "USB", "TRS+USB"};
@@ -64,76 +67,66 @@ struct ConfigParam {
   bool isString;
 };
 
+
+
 // Define parameters as a static array instead of a ETL flat_map for example,
 // because using a flat_map static requires too much stack space for
 // initialization
 static const ConfigParam configParams[] = {
     // Color variables
-    {"Color0", {.intValue = ThemeConstants::DEFAULT_COLOR0}, FourCC::VarColor_0_Black, nullptr, 0, false},
-    {"Color1", {.intValue = ThemeConstants::DEFAULT_COLOR1}, FourCC::VarColor_1_Maroon, nullptr, 0, false},
-    {"Color2", {.intValue = ThemeConstants::DEFAULT_COLOR2}, FourCC::VarColor_2_Green, nullptr, 0, false},
-    {"Color3", {.intValue = ThemeConstants::DEFAULT_COLOR3}, FourCC::VarColor_3_Olive, nullptr, 0, false},
-    {"Color4", {.intValue = ThemeConstants::DEFAULT_COLOR4}, FourCC::VarColor_4_Blue, nullptr, 0, false},
-    {"Color5", {.intValue = ThemeConstants::DEFAULT_COLOR5}, FourCC::VarColor_5_Purple, nullptr, 0, false},
-    {"Color6", {.intValue = ThemeConstants::DEFAULT_COLOR6}, FourCC::VarColor_6_Turqoise, nullptr, 0, false},
-    {"Color7", {.intValue = ThemeConstants::DEFAULT_COLOR7}, FourCC::VarColor_7_LightyGray},
-    {"Color8", {.intValue = ThemeConstants::DEFAULT_COLOR8}, FourCC::VarColor_8_Gray, nullptr, 0, false},
-    {"Color9", {.intValue = ThemeConstants::DEFAULT_COLOR9}, FourCC::VarColor_9_Red, nullptr, 0, false},
-    {"Color10", {.intValue = ThemeConstants::DEFAULT_COLOR10}, FourCC::VarColor_A_Lime, nullptr, 0, false},
-    {"Color11", {.intValue = ThemeConstants::DEFAULT_COLOR11}, FourCC::VarColor_B_Yellow, nullptr, 0, false},
-    {"Color12", {.intValue = ThemeConstants::DEFAULT_COLOR12}, FourCC::VarColor_C_LightBlue, nullptr, 0, false},
-    {"Color13", {.intValue = ThemeConstants::DEFAULT_COLOR13}, FourCC::VarColor_D_Magenta, nullptr, 0, false},
-    {"Color14", {.intValue = ThemeConstants::DEFAULT_COLOR14}, FourCC::VarColor_E_Cyan, nullptr, 0, false},
-    {"Color15", {.intValue = ThemeConstants::DEFAULT_COLOR15}, FourCC::VarColor_F_White, nullptr, 0, false},
+    CONFIG(FourCC::VarColor_0, {.intValue = ThemeConstants::DEFAULT_COLOR0}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_1, {.intValue = ThemeConstants::DEFAULT_COLOR1}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_2, {.intValue = ThemeConstants::DEFAULT_COLOR2}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_3, {.intValue = ThemeConstants::DEFAULT_COLOR3}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_4, {.intValue = ThemeConstants::DEFAULT_COLOR4}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_5, {.intValue = ThemeConstants::DEFAULT_COLOR5}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_6, {.intValue = ThemeConstants::DEFAULT_COLOR6}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_7, {.intValue = ThemeConstants::DEFAULT_COLOR7}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_8, {.intValue = ThemeConstants::DEFAULT_COLOR8}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_9, {.intValue = ThemeConstants::DEFAULT_COLOR9}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_A, {.intValue = ThemeConstants::DEFAULT_COLOR10}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_B, {.intValue = ThemeConstants::DEFAULT_COLOR11}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_C, {.intValue = ThemeConstants::DEFAULT_COLOR12}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_D, {.intValue = ThemeConstants::DEFAULT_COLOR13}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_E, {.intValue = ThemeConstants::DEFAULT_COLOR14}, nullptr, 0, false),
+    CONFIG(FourCC::VarColor_F, {.intValue = ThemeConstants::DEFAULT_COLOR15}, nullptr, 0, false),
 
-    {"ThemeName", {.strValue = ThemeConstants::DEFAULT_THEME_NAME}, FourCC::VarThemeName, nullptr, 0, true},
+    CONFIG(FourCC::VarThemeName, {.strValue = ThemeConstants::DEFAULT_THEME_NAME}, nullptr, 0, true),
 
     // Device settings with options
-    {"LineOut", {.intValue = DEFAULT_LINEOUT}, FourCC::VarLineOut, lineOutOptions, 3, false},
-    {"MidiDevice", {.intValue = DEFAULT_MIDIDEVICE}, FourCC::VarMidiDevice, midiDeviceList, 4, false},
-    {"MidiSync", {.intValue = DEFAULT_MIDISYNC}, FourCC::VarMidiSync, midiSendSync, 2, false},
-    {"mirrorUI", {.intValue = DEFAULT_REMOTEUI}, FourCC::VarMirrorUI, mirrorUIOnOff, 2, false},
-    {"UIFont",
-     {.intValue = ThemeConstants::DEFAULT_UIFONT},
-     FourCC::VarUIFont,
-     ThemeConstants::THEME_FONT_NAMES,
-     ThemeConstants::THEME_FONT_COUNT,
-     false},
+    CONFIG(FourCC::VarLineOut, {.intValue = DEFAULT_LINEOUT}, lineOutOptions, 3, false),
+    CONFIG(FourCC::VarMidiDevice, {.intValue = DEFAULT_MIDIDEVICE}, midiDeviceList, 4, false),
+    CONFIG(FourCC::VarMidiSync, {.intValue = DEFAULT_MIDISYNC}, midiSendSync, 2, false),
+    CONFIG(FourCC::VarMirrorUI, {.intValue = DEFAULT_REMOTEUI}, mirrorUIOnOff, 2, false),
+    CONFIG(FourCC::VarUIFont, {.intValue = ThemeConstants::DEFAULT_UIFONT}, ThemeConstants::THEME_FONT_NAMES,
+           ThemeConstants::THEME_FONT_COUNT, false),
 
     // Display brightness setting
-    {"BacklightLevel", {.intValue = DEFAULT_BACKLIGHT_LEVEL}, FourCC::VarBacklightLevel, nullptr, 0, false},
-    {"OutputVolume", {.intValue = DEFAULT_OUTPUT_VOLUME}, FourCC::VarOutputVolume, nullptr, 0, false},
-    {"ImportResampling",
-     {.intValue = DEFAULT_IMPORT_RESAMPLER},
-     FourCC::VarImportResampler,
-     importResamplerOptions,
-     kImportResamplerOptionCount,
-     false},
-    {"UseCommandPicker",
-     {.intValue = DEFAULT_USE_COMMAND_PICKER},
-     FourCC::VarConfigCommandPicker,
-     commandPickerOptions,
-     2},
+    CONFIG(FourCC::VarBacklightLevel, {.intValue = DEFAULT_BACKLIGHT_LEVEL}, nullptr, 0, false),
+    CONFIG(FourCC::VarOutputVolume, {.intValue = DEFAULT_OUTPUT_VOLUME}, nullptr, 0, false),
+    CONFIG(FourCC::VarImportResampler, {.intValue = DEFAULT_IMPORT_RESAMPLER}, importResamplerOptions,
+           kImportResamplerOptionCount, false),
+    CONFIG(FourCC::VarConfigCommandPicker, {.intValue = DEFAULT_USE_COMMAND_PICKER}, commandPickerOptions, 2, false),
 };
 
 Config::Config()
     : VariableContainer(&variables_),
-      color0_(FourCC::VarColor_0_Black, static_cast<int>(ThemeConstants::DEFAULT_COLOR0)),
-      color1_(FourCC::VarColor_1_Maroon, static_cast<int>(ThemeConstants::DEFAULT_COLOR1)),
-      color2_(FourCC::VarColor_2_Green, static_cast<int>(ThemeConstants::DEFAULT_COLOR2)),
-      color3_(FourCC::VarColor_3_Olive, static_cast<int>(ThemeConstants::DEFAULT_COLOR3)),
-      color4_(FourCC::VarColor_4_Blue, static_cast<int>(ThemeConstants::DEFAULT_COLOR4)),
-      color5_(FourCC::VarColor_5_Purple, static_cast<int>(ThemeConstants::DEFAULT_COLOR5)),
-      color6_(FourCC::VarColor_6_Turqoise, static_cast<int>(ThemeConstants::DEFAULT_COLOR6)),
-      color7_(FourCC::VarColor_7_LightyGray, static_cast<int>(ThemeConstants::DEFAULT_COLOR7)),
-      color8_(FourCC::VarColor_8_Gray, static_cast<int>(ThemeConstants::DEFAULT_COLOR8)),
-      color9_(FourCC::VarColor_9_Red, static_cast<int>(ThemeConstants::DEFAULT_COLOR9)),
-      color10_(FourCC::VarColor_A_Lime, static_cast<int>(ThemeConstants::DEFAULT_COLOR10)),
-      color11_(FourCC::VarColor_B_Yellow, static_cast<int>(ThemeConstants::DEFAULT_COLOR11)),
-      color12_(FourCC::VarColor_C_LightBlue, static_cast<int>(ThemeConstants::DEFAULT_COLOR12)),
-      color13_(FourCC::VarColor_D_Magenta, static_cast<int>(ThemeConstants::DEFAULT_COLOR13)),
-      color14_(FourCC::VarColor_E_Cyan, static_cast<int>(ThemeConstants::DEFAULT_COLOR14)),
-      color15_(FourCC::VarColor_F_White, static_cast<int>(ThemeConstants::DEFAULT_COLOR15)),
+      color0_(FourCC::VarColor_0, static_cast<int>(ThemeConstants::DEFAULT_COLOR0)),
+      color1_(FourCC::VarColor_1, static_cast<int>(ThemeConstants::DEFAULT_COLOR1)),
+      color2_(FourCC::VarColor_2, static_cast<int>(ThemeConstants::DEFAULT_COLOR2)),
+      color3_(FourCC::VarColor_3, static_cast<int>(ThemeConstants::DEFAULT_COLOR3)),
+      color4_(FourCC::VarColor_4, static_cast<int>(ThemeConstants::DEFAULT_COLOR4)),
+      color5_(FourCC::VarColor_5, static_cast<int>(ThemeConstants::DEFAULT_COLOR5)),
+      color6_(FourCC::VarColor_6, static_cast<int>(ThemeConstants::DEFAULT_COLOR6)),
+      color7_(FourCC::VarColor_7, static_cast<int>(ThemeConstants::DEFAULT_COLOR7)),
+      color8_(FourCC::VarColor_8, static_cast<int>(ThemeConstants::DEFAULT_COLOR8)),
+      color9_(FourCC::VarColor_9, static_cast<int>(ThemeConstants::DEFAULT_COLOR9)),
+      color10_(FourCC::VarColor_A, static_cast<int>(ThemeConstants::DEFAULT_COLOR10)),
+      color11_(FourCC::VarColor_B, static_cast<int>(ThemeConstants::DEFAULT_COLOR11)),
+      color12_(FourCC::VarColor_C, static_cast<int>(ThemeConstants::DEFAULT_COLOR12)),
+      color13_(FourCC::VarColor_D, static_cast<int>(ThemeConstants::DEFAULT_COLOR13)),
+      color14_(FourCC::VarColor_E, static_cast<int>(ThemeConstants::DEFAULT_COLOR14)),
+      color15_(FourCC::VarColor_F, static_cast<int>(ThemeConstants::DEFAULT_COLOR15)),
 
       lineOut_(FourCC::VarLineOut, lineOutOptions, 3, DEFAULT_LINEOUT),
       midiDevice_(FourCC::VarMidiDevice, midiDeviceList, 4, DEFAULT_MIDIDEVICE),
@@ -269,12 +262,12 @@ void Config::WriteColorVariables(tinyxml2::XMLPrinter *printer) {
     FourCC id = var->GetID();
 
     // Check if this is a color variable
-    if (id == FourCC::VarColor_0_Black || id == FourCC::VarColor_1_Maroon || id == FourCC::VarColor_2_Green ||
-        id == FourCC::VarColor_3_Olive || id == FourCC::VarColor_4_Blue || id == FourCC::VarColor_5_Purple ||
-        id == FourCC::VarColor_6_Turqoise || id == FourCC::VarColor_7_LightyGray || id == FourCC::VarColor_8_Gray ||
-        id == FourCC::VarColor_9_Red || id == FourCC::VarColor_A_Lime || id == FourCC::VarColor_B_Yellow ||
-        id == FourCC::VarColor_C_LightBlue || id == FourCC::VarColor_D_Magenta || id == FourCC::VarColor_E_Cyan ||
-        id == FourCC::VarColor_F_White) {
+    if (id == FourCC::VarColor_0 || id == FourCC::VarColor_1 || id == FourCC::VarColor_2 ||
+        id == FourCC::VarColor_3 || id == FourCC::VarColor_4 || id == FourCC::VarColor_5 ||
+        id == FourCC::VarColor_6 || id == FourCC::VarColor_7 || id == FourCC::VarColor_8 ||
+        id == FourCC::VarColor_9 || id == FourCC::VarColor_A || id == FourCC::VarColor_B ||
+        id == FourCC::VarColor_C || id == FourCC::VarColor_D || id == FourCC::VarColor_E ||
+        id == FourCC::VarColor_F) {
 
       // Open a Color element
       printer->OpenElement(XML_ELEM_COLOR);
@@ -284,7 +277,7 @@ void Config::WriteColorVariables(tinyxml2::XMLPrinter *printer) {
 
       // Format color value in hex format with # prefix
       char hexValue[16];
-      npf_snprintf(hexValue, sizeof(hexValue), "#%X", var->GetInt());
+      npf_snprintf(hexValue, sizeof(hexValue), "#%06X", var->GetInt());
 
       // Add value attribute in hex format
       printer->PushAttribute(XML_ATTR_VALUE, hexValue);
@@ -349,40 +342,38 @@ void Config::ReadColorVariable(PersistencyDocument *doc) {
         // Find the variable by name and set its value
         FourCC fourcc = FourCC::Default; // Use Default as invalid marker
 
-        if (strcmp(colorName, "Color0") == 0) {
-          fourcc = FourCC::VarColor_0_Black;
-        } else if (strcmp(colorName, "Color1") == 0) {
-          fourcc = FourCC::VarColor_1_Maroon;
-        } else if (strcmp(colorName, "Color2") == 0) {
-          fourcc = FourCC::VarColor_2_Green;
-        } else if (strcmp(colorName, "Color3") == 0) {
-          fourcc = FourCC::VarColor_3_Olive;
-        } else if (strcmp(colorName, "Color4") == 0) {
-          fourcc = FourCC::VarColor_4_Blue;
-        } else if (strcmp(colorName, "Color5") == 0) {
-          fourcc = FourCC::VarColor_5_Purple;
-        } else if (strcmp(colorName, "Color6") == 0) {
-          fourcc = FourCC::VarColor_6_Turqoise;
-        } else if (strcmp(colorName, "Color7") == 0) {
-          fourcc = FourCC::VarColor_7_LightyGray;
-        } else if (strcmp(colorName, "Color8") == 0) {
-          fourcc = FourCC::VarColor_8_Gray;
-        } else if (strcmp(colorName, "Color9") == 0) {
-          fourcc = FourCC::VarColor_9_Red;
-        } else if (strcmp(colorName, "Color9") == 0) {
-          fourcc = FourCC::VarColor_9_Red;
-        } else if (strcmp(colorName, "Color10") == 0) {
-          fourcc = FourCC::VarColor_A_Lime;
-        } else if (strcmp(colorName, "Color11") == 0) {
-          fourcc = FourCC::VarColor_B_Yellow;
-        } else if (strcmp(colorName, "Color12") == 0) {
-          fourcc = FourCC::VarColor_C_LightBlue;
-        } else if (strcmp(colorName, "Color13") == 0) {
-          fourcc = FourCC::VarColor_D_Magenta;
-        } else if (strcmp(colorName, "Color14") == 0) {
-          fourcc = FourCC::VarColor_E_Cyan;
-        } else if (strcmp(colorName, "Color15") == 0) {
-          fourcc = FourCC::VarColor_F_White;
+        if (strcmp(colorName, FourCC(FourCC::VarColor_0).c_str()) == 0) {
+          fourcc = FourCC::VarColor_0;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_1).c_str()) == 0) {
+          fourcc = FourCC::VarColor_1;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_2).c_str()) == 0) {
+          fourcc = FourCC::VarColor_2;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_3).c_str()) == 0) {
+          fourcc = FourCC::VarColor_3;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_4).c_str()) == 0) {
+          fourcc = FourCC::VarColor_4;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_5).c_str()) == 0) {
+          fourcc = FourCC::VarColor_5;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_6).c_str()) == 0) {
+          fourcc = FourCC::VarColor_6;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_7).c_str()) == 0) {
+          fourcc = FourCC::VarColor_7;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_8).c_str()) == 0) {
+          fourcc = FourCC::VarColor_8;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_9).c_str()) == 0) {
+          fourcc = FourCC::VarColor_9;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_A).c_str()) == 0) {
+          fourcc = FourCC::VarColor_A;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_B).c_str()) == 0) {
+          fourcc = FourCC::VarColor_B;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_C).c_str()) == 0) {
+          fourcc = FourCC::VarColor_C;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_D).c_str()) == 0) {
+          fourcc = FourCC::VarColor_D;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_E).c_str()) == 0) {
+          fourcc = FourCC::VarColor_E;
+        } else if (strcmp(colorName, FourCC(FourCC::VarColor_F).c_str()) == 0) {
+          fourcc = FourCC::VarColor_F;
         }
 
         if (fourcc != FourCC::Default) { // If we found a valid color
@@ -391,6 +382,9 @@ void Config::ReadColorVariable(PersistencyDocument *doc) {
             var->SetInt(value);
             Trace::Log("CONFIG", "Read Color: %s = %d", colorName, value);
           }
+        }
+        else {
+            Trace::Log("CONFIG", "Failed to read Color: %s = %d", colorName, value);
         }
       }
     }
@@ -439,12 +433,12 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
     FourCC id = var->GetID();
 
     // Skip color variables as they will be handled by WriteColorVariables
-    if (id == FourCC::VarColor_0_Black || id == FourCC::VarColor_1_Maroon || id == FourCC::VarColor_2_Green ||
-        id == FourCC::VarColor_3_Olive || id == FourCC::VarColor_4_Blue || id == FourCC::VarColor_5_Purple ||
-        id == FourCC::VarColor_6_Turqoise || id == FourCC::VarColor_7_LightyGray || id == FourCC::VarColor_8_Gray ||
-        id == FourCC::VarColor_9_Red || id == FourCC::VarColor_A_Lime || id == FourCC::VarColor_B_Yellow ||
-        id == FourCC::VarColor_C_LightBlue || id == FourCC::VarColor_D_Magenta || id == FourCC::VarColor_E_Cyan ||
-        id == FourCC::VarColor_F_White) {
+    if (id == FourCC::VarColor_0 || id == FourCC::VarColor_1 || id == FourCC::VarColor_2 ||
+        id == FourCC::VarColor_3 || id == FourCC::VarColor_4 || id == FourCC::VarColor_5 ||
+        id == FourCC::VarColor_6 || id == FourCC::VarColor_7 || id == FourCC::VarColor_8 ||
+        id == FourCC::VarColor_9 || id == FourCC::VarColor_A || id == FourCC::VarColor_B ||
+        id == FourCC::VarColor_C || id == FourCC::VarColor_D || id == FourCC::VarColor_E ||
+        id == FourCC::VarColor_F) {
       it++;
       continue;
     }

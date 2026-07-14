@@ -1147,19 +1147,21 @@ void PhraseView::DrawView() {
   PhraseStep *stepsBase = phrase_->steps_[viewData_->currentPhrase_];
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  I_Instrument *instrObj = bank->noneInstrument();
 
-  char buffer[6];
-  buffer[3] = 0;
   for (int j = 0; j < 16; j++) {
+    char buffer[4];
+
     unsigned char d = stepsBase[j].note;
     unsigned char instr = stepsBase[j].instrument;
     if (instr != NO_INSTRUMENT) {
       lastInstr = instr;
+      instrObj = bank->GetInstrument(lastInstr);
     }
-
+    
     unsigned char effectiveInstr = lastInstr;
     setTextProps(colNote, j, Theme::Phrase::note(j % ALT_ROW_NUMBER == 0));
-
+    
     if (d == NO_NOTE) {
       DrawString(pos.x_, pos.y_, "---");
     } else if (d == NOTE_OFF) {
@@ -1168,37 +1170,18 @@ void PhraseView::DrawView() {
       bool showSlice = false;
       bool invalidSlice = false;
       uint8_t sliceIndex = 0;
-      if (effectiveInstr != 0xFF && bank) {
-        I_Instrument *instrObj = bank->GetInstrument(effectiveInstr);
-        if (instrObj && instrObj->GetType() == IT_SAMPLE) {
-          SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instrObj);
-          if (sampleInstr->HasSlicesForPlayback()) {
-            if (sampleInstr->ShouldDisplaySliceForNote(d)) {
-              showSlice = true;
-              sliceIndex = static_cast<uint8_t>(d - SampleInstrument::SliceNoteBase);
-            } else {
-              invalidSlice = true;
-            }
-          }
-        }
-      }
-      if (showSlice) {
-        npf_snprintf(buffer, sizeof(buffer), "S%02u", static_cast<unsigned>(sliceIndex));
-      } else if (invalidSlice) {
-        npf_snprintf(buffer, sizeof(buffer), "S**");
-      } else {
-        noteToString(d, buffer);
-      }
-      DrawString(pos.x_, pos.y_, buffer);
+      instrObj->noteDisplay(d, buffer);
+     DrawString(pos.x_, pos.y_, buffer);
     }
     pos.y_++;
   }
-
+  
   // Draw instruments
-
+  char buffer[6];
+  
   pos = GetAnchor();
   pos.x_ += 4;
-
+  
   for (int j = 0; j < 16; j++) {
     SetBackgroundColor(Theme::View::bg);
     setTextProps(colInstrument, j, Theme::Phrase::instrument(j % ALT_ROW_NUMBER == 0));

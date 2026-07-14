@@ -121,3 +121,13 @@ void I_Instrument::Purge() {
     (*it)->Reset();
   }
 }
+
+void I_Instrument::noteDisplay(uint8_t note, char (&out)[4]) {
+if (note == NO_NOTE) {
+    npf_snprintf(out, sizeof(out), "---");
+  } else if (note == NOTE_OFF) {
+    npf_snprintf(out, sizeof(out), "off");
+  } else {
+    noteToString(note, out);
+  }
+}

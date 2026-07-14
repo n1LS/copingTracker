@@ -21,7 +21,7 @@
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
 
-enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_MIDI, IT_SID, IT_OPAL, IT_CHIPTUNE, IT_LAST };
+enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_MIDI, IT_SID, IT_OPAL, IT_CHIPTUNE, IT_DRUM, IT_LAST };
 
 // non-linear volume (4-bit) mapping to volume scaler
 static const uint8_t volumeLUT[16] = {0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 160, 193, 228, 245, 255};
@@ -34,11 +34,13 @@ typedef struct InstrumentTypeName {
 static const InstrumentTypeName InstrumentTypeNames[IT_LAST] = {
     {.full = "None", .compact = "None"}, {.full = "Sample", .compact = "Smpl"}, {.full = "MIDI", .compact = "MIDI"},
     {.full = "SID", .compact = "SID "},  {.full = "OPL3", .compact = "OPL3"},   {.full = "Chiptune", .compact = "Chip"},
+    {.full = "Drum", .compact = "Drum"},
 };
 
 static const char *LongInstrumentNames[IT_LAST] = {
     InstrumentTypeNames[IT_NONE].full, InstrumentTypeNames[IT_SAMPLE].full, InstrumentTypeNames[IT_MIDI].full,
     InstrumentTypeNames[IT_SID].full,  InstrumentTypeNames[IT_OPAL].full,   InstrumentTypeNames[IT_CHIPTUNE].full,
+    InstrumentTypeNames[IT_DRUM].full,
 };
 
 class I_Instrument : public VariableContainer, public Observable, public Persistent {
@@ -73,6 +75,8 @@ public:
   virtual void SetStepVolume(int channel, uint8_t volume) = 0;
 
   virtual bool IsEmpty() = 0;
+
+  virtual void noteDisplay(uint8_t note, char (&out)[4]);
 
   virtual InstrumentType GetType() = 0;
 

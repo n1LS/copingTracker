@@ -25,11 +25,11 @@ void UINoteVarField::Draw(GUIWindow &w, int offset) {
   position.y_ += offset;
 
   char buffer[MAX_FIELD_WIDTH + 1];
-  char note[5];
+  char note[4];
 
   unsigned char pitch = src_.GetInt();
   noteToString(pitch, note);
-  note[4] = 0;
+  note[3] = 0;
   npf_snprintf(buffer, sizeof(buffer), format_, note);
 
   DrawLabeledField(w, position, buffer, focus_);

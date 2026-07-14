@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 xiphonics, inc.
  *
- * This file is part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #ifndef _DRAW_UTILS_H_

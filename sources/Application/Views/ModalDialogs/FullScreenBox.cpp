@@ -26,7 +26,8 @@ FullScreenBox *FullScreenBox::Create(View &view, const char *title, const char *
   return new (storage) FullScreenBox(view, title, message, btnFlags);
 }
 
-FullScreenBox *FullScreenBox::Create(View &view, const char *title, const char *message, const char *message2, int btnFlags) {
+FullScreenBox *FullScreenBox::Create(View &view, const char *title, const char *message, const char *message2,
+                                     int btnFlags) {
   if (inUse) {
     auto *existing = reinterpret_cast<FullScreenBox *>(storage);
     existing->~FullScreenBox();
@@ -36,7 +37,8 @@ FullScreenBox *FullScreenBox::Create(View &view, const char *title, const char *
   return new (storage) FullScreenBox(view, title, message, message2, btnFlags);
 }
 
-FullScreenBox::FullScreenBox(View &view, const char *title, const char *message, int btnFlags) : MessageBox(view, title, message, btnFlags) {
+FullScreenBox::FullScreenBox(View &view, const char *title, const char *message, int btnFlags)
+    : MessageBox(view, title, message, btnFlags) {
 }
 
 FullScreenBox::FullScreenBox(View &view, const char *title, const char *message, const char *message2, int btnFlags)

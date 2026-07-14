@@ -8,8 +8,8 @@
 
 #include "CommandView.h"
 
-#include "Application/Instruments/CommandList.h"
 #include "Application/AppWindow.h"
+#include "Application/Instruments/CommandList.h"
 
 const int commandsPerRow = 5;
 
@@ -38,14 +38,14 @@ void CommandView::Destroy() {
 void CommandView::OnFocus() {
 }
 
-CommandView::CommandView(View &view, FourCC command): ModalView(view) {
+CommandView::CommandView(View &view, FourCC command) : ModalView(view) {
   SetCommand(command);
 }
 
 void CommandView::DrawView() {
   int top = 3;
   DrawWindow(2, top, 28, 16, "Command Selector");
-  
+
   for (int cmd = 0; cmd < CommandList::CommandCount; cmd++) {
     bool active = cmd == index_;
     FourCC command = CommandList::AllCommands[cmd];
@@ -55,14 +55,14 @@ void CommandView::DrawView() {
 
     int x = 5 + (cmd % commandsPerRow) * 5;
     int y = top + 3 + (cmd / commandsPerRow);
-    
+
     DrawString(x, y, command.c_str());
 
     if (active) {
       SetColor(Theme::Dialog::Button::bg(true));
       SetBackgroundColor(Theme::Dialog::bg);
     }
-     
+
     DrawChar(x - 1, y, active ? CHAR(char_button_border_left_s) : ' ');
     DrawChar(x + 3, y, active ? CHAR(char_button_border_right_s) : ' ');
   }

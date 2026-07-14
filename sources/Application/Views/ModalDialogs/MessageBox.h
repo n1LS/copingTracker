@@ -20,26 +20,15 @@
 #endif
 #include <Application/AppWindow.h>
 
-enum MessageBoxList { 
-  MBL_OK = 0, 
-  MBL_YES, 
-  MBL_CANCEL, 
-  MBL_NO, 
-  MBL_STOP, 
-  MBL_LAST };
+enum MessageBoxList { MBL_OK = 0, MBL_YES, MBL_CANCEL, MBL_NO, MBL_STOP, MBL_LAST };
 
-enum MessageBoxButtonFlag { 
-  MBBF_OK = 0x01, 
-  MBBF_YES = 0x02, 
-  MBBF_CANCEL = 0x04, 
-  MBBF_NO = 0x08, 
-  MBBF_STOP = 0x10 
-};
+enum MessageBoxButtonFlag { MBBF_OK = 0x01, MBBF_YES = 0x02, MBBF_CANCEL = 0x04, MBBF_NO = 0x08, MBBF_STOP = 0x10 };
 
 class MessageBox : public ModalView {
 public:
   static MessageBox *Create(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
-  static MessageBox *Create(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK);
+  static MessageBox *Create(View &view, const char *title, const char *message, const char *message2,
+                            int btnFlags = MBBF_OK);
   virtual ~MessageBox();
   virtual void Destroy() override;
 

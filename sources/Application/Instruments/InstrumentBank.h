@@ -16,6 +16,7 @@
 #include "Application/Model/Song.h"
 #include "Application/Persistency/Persistent.h"
 #include "ChiptuneInstrument/ChiptuneInstrument.h"
+#include "DrumInstrument/DrumInstrument.h"
 #include "Externals/etl/include/etl/variant_pool.h"
 #include "MidiInstrument.h"
 #include "NoneInstrument.h"
@@ -55,10 +56,12 @@ public:
   // Called when a sample is removed from the pool to update instrument references
   void OnSampleRemoved(int removedIndex);
 
+  NoneInstrument *noneInstrument();
+
 private:
   etl::array<I_Instrument *, MAX_INSTRUMENT_COUNT> instruments_;
   etl::variant_pool<MAX_INSTRUMENT_COUNT, SampleInstrument, SIDInstrument, OpalInstrument, MidiInstrument,
-                    ChiptuneInstrument>
+                    ChiptuneInstrument, DrumInstrument>
       instrumentPool_;
   NoneInstrument none_ = NoneInstrument();
   uint16_t sidOscCount = 0;

@@ -508,22 +508,22 @@ void AppWindow::SetDirty() {
 
 void AppWindow::UpdateColorsFromConfig() {
   // now assign custom colors if they have been set device config
-  defineColor(FourCC::VarColor_0_Black, colorPalette_[0], 0);
-  defineColor(FourCC::VarColor_1_Maroon, colorPalette_[1], 1);
-  defineColor(FourCC::VarColor_2_Green, colorPalette_[2], 2);
-  defineColor(FourCC::VarColor_3_Olive, colorPalette_[3], 3);
-  defineColor(FourCC::VarColor_4_Blue, colorPalette_[4], 4);
-  defineColor(FourCC::VarColor_5_Purple, colorPalette_[5], 5);
-  defineColor(FourCC::VarColor_6_Turqoise, colorPalette_[6], 6);
-  defineColor(FourCC::VarColor_7_LightyGray, colorPalette_[7], 7);
-  defineColor(FourCC::VarColor_8_Gray, colorPalette_[8], 8);
-  defineColor(FourCC::VarColor_9_Red, colorPalette_[9], 9);
-  defineColor(FourCC::VarColor_A_Lime, colorPalette_[10], 10);
-  defineColor(FourCC::VarColor_B_Yellow, colorPalette_[11], 11);
-  defineColor(FourCC::VarColor_C_LightBlue, colorPalette_[12], 12);
-  defineColor(FourCC::VarColor_D_Magenta, colorPalette_[13], 13);
-  defineColor(FourCC::VarColor_E_Cyan, colorPalette_[14], 14);
-  defineColor(FourCC::VarColor_F_White, colorPalette_[15], 15);
+  defineColor(FourCC::VarColor_0, colorPalette_[0], 0);
+  defineColor(FourCC::VarColor_1, colorPalette_[1], 1);
+  defineColor(FourCC::VarColor_2, colorPalette_[2], 2);
+  defineColor(FourCC::VarColor_3, colorPalette_[3], 3);
+  defineColor(FourCC::VarColor_4, colorPalette_[4], 4);
+  defineColor(FourCC::VarColor_5, colorPalette_[5], 5);
+  defineColor(FourCC::VarColor_6, colorPalette_[6], 6);
+  defineColor(FourCC::VarColor_7, colorPalette_[7], 7);
+  defineColor(FourCC::VarColor_8, colorPalette_[8], 8);
+  defineColor(FourCC::VarColor_9, colorPalette_[9], 9);
+  defineColor(FourCC::VarColor_A, colorPalette_[10], 10);
+  defineColor(FourCC::VarColor_B, colorPalette_[11], 11);
+  defineColor(FourCC::VarColor_C, colorPalette_[12], 12);
+  defineColor(FourCC::VarColor_D, colorPalette_[13], 13);
+  defineColor(FourCC::VarColor_E, colorPalette_[14], 14);
+  defineColor(FourCC::VarColor_F, colorPalette_[15], 15);
 
   GetImpWindow()->SetPalette(colorPalette_, NUM_COLORS);
 }

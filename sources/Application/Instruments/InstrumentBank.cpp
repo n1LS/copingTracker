@@ -18,6 +18,7 @@
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Utils/char.h"
 #include "ChiptuneInstrument.h"
+#include "DrumInstrument.h"
 #include "Filters.h"
 #include "MidiInstrument.h"
 #include "OpalInstrument.h"
@@ -157,6 +158,9 @@ InstrumentAssignResult InstrumentBank::AssignInstrumentToSlot(InstrumentType typ
     case IT_CHIPTUNE:
       current = instrumentPool_.create<ChiptuneInstrument>();
       break;
+    case IT_DRUM:
+      current = instrumentPool_.create<DrumInstrument>();
+      break;
     case IT_NONE:
       instruments_[id] = &none_;
       return InstrumentAssignResult::Success;
@@ -195,6 +199,9 @@ void InstrumentBank::purgeInstrument(I_Instrument *instrument) {
       break;
     case IT_CHIPTUNE:
       instrumentPool_.destroy(static_cast<ChiptuneInstrument *>(instrument));
+      break;
+    case IT_DRUM:
+      instrumentPool_.destroy(static_cast<DrumInstrument *>(instrument));
       break;
     case IT_NONE:
       // NA: None is a "singleton" so no need to release from pool
@@ -296,4 +303,8 @@ void InstrumentBank::OnSampleRemoved(int removedIndex) {
       }
     }
   }
+}
+
+NoneInstrument *InstrumentBank::noneInstrument() {
+  return &none_;
 }

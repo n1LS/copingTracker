@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
  */
 
 #define inner(x) x.format, x.min, x.max, x.step, x.bigStep
@@ -116,5 +116,4 @@ void InstrumentView::fillChiptuneParameters() {
   addIndexToLine(11, position.y_);
 
   position = GetAnchor();
-
 }

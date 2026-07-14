@@ -311,6 +311,9 @@ void InstrumentView::refreshInstrumentFields() {
     case IT_CHIPTUNE:
       fillChiptuneParameters();
       break;
+    case IT_DRUM:
+      fillDrumParameters();
+      break;
     case IT_LAST:
       // NA
       break;
@@ -576,6 +579,8 @@ void InstrumentView::fillSIDParameters() {
 }
 
 #include "InstrumentView_Chiptune.ipp"
+
+#include "InstrumentView_Drum.ipp"
 
 void InstrumentView::fillMidiParameters() {
 
@@ -922,6 +927,10 @@ void InstrumentView::DrawView() {
       SwapColors();
       DrawString(31, 1, char_button_border_right_s);
     }
+
+    if (type == IT_DRUM) {
+      DrawViewDrum();
+    }
   }
 }
 
@@ -996,7 +1005,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
 
         // Revert the UI field back to the current type until confirmed
         instrumentType_.SetInt(currentType, false);
-    
+
         pendingInstrumentType_ = proposedType;
         ConfirmStopPlayback(FourCC::VarInstrumentType);
         break;
@@ -1265,7 +1274,8 @@ void InstrumentView::changeInstrumentType() {
   // Check if any instrument field has been modified
   bool instrumentModified = checkInstrumentModified();
   if (instrumentModified) {
-    MessageBox *mb = MessageBox::Create(*this, "Instrument", "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
+    MessageBox *mb =
+        MessageBox::Create(*this, "Instrument", "Change the instrument and", "lose the settings?", MBBF_YES | MBBF_NO);
     DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmInstrumentTypeChange>(*this));
   } else {
     // Apply the proposed type change immediately if not modified

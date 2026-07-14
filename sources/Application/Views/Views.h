@@ -10,6 +10,7 @@
 #define VIEWS_H
 
 #include "Application/Views/ChainView.h"
+#include "Application/Views/CommandView.h"
 #include "Application/Views/DeviceView.h"
 #include "Application/Views/GrooveView.h"
 #include "Application/Views/InstrumentImportView.h"
@@ -23,7 +24,6 @@
 #include "Application/Views/SampleEditorView.h"
 #include "Application/Views/SampleImportView.h"
 #include "Application/Views/SampleSlicesView.h"
-#include "Application/Views/CommandView.h"
 #include "Application/Views/SelectProjectView.h"
 #include "Application/Views/SongView.h"
 #include "Application/Views/TableView.h"

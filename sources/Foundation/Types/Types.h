@@ -147,22 +147,22 @@ struct FourCC {
     VarMidiDevice = 40,
     VarLineOut = 17,
     // colors
-    VarColor_0_Black = 104,
-    VarColor_1_Maroon = 105,
-    VarColor_2_Green = 106,
-    VarColor_3_Olive = 111,
-    VarColor_4_Blue = 152,
-    VarColor_5_Purple = 153,
-    VarColor_6_Turqoise = 154,
-    VarColor_7_LightyGray = 155,
-    VarColor_8_Gray = 107,
-    VarColor_9_Red = 110,
-    VarColor_A_Lime = 156,
-    VarColor_B_Yellow = 108,
-    VarColor_C_LightBlue = 157,
-    VarColor_D_Magenta = 158,
-    VarColor_E_Cyan = 109,
-    VarColor_F_White = 103,
+    VarColor_0 = 104,
+    VarColor_1 = 105,
+    VarColor_2 = 106,
+    VarColor_3 = 111,
+    VarColor_4 = 152,
+    VarColor_5 = 153,
+    VarColor_6 = 154,
+    VarColor_7 = 155,
+    VarColor_8 = 107,
+    VarColor_9 = 110,
+    VarColor_A = 156,
+    VarColor_B = 108,
+    VarColor_C = 157,
+    VarColor_D = 158,
+    VarColor_E = 109,
+    VarColor_F = 103,
 
     VarMidiSync = 112,
     VarMidiClockSync = 151,
@@ -271,6 +271,19 @@ struct FourCC {
     ChiptuneInstrumentSweepAmount = 211,
     ChiptuneInstrumentArpSpeed = 212,
 
+    DrumInstrumentParamsVoice0 = 214,
+    DrumInstrumentParamsVoice1 = 215,
+    DrumInstrumentParamsVoice2 = 216,
+    DrumInstrumentParamsVoice3 = 217,
+    DrumInstrumentParamsVoice4 = 218,
+    DrumInstrumentParamsVoice5 = 219,
+    DrumInstrumentParamsVoice6 = 220,
+    DrumInstrumentParamsVoice7 = 221,
+    DrumInstrumentParamsVoice8 = 222,
+    DrumInstrumentParamsVoice9 = 223,
+    DrumInstrumentParamsVoice10 = 224,
+    DrumInstrumentParamsVoice11 = 225,
+
     ActionMassStorage = 50,
     VarOutputVolume = 74,
     ActionModulation = 213,
@@ -287,172 +300,191 @@ struct FourCC {
     return static_cast<uint8_t>(*this);
   }
 
+#define ETL_ENUM_TYPE_16(value, name) \
+  static_assert(sizeof(name) <= 17, "ETL_ENUM_TYPE string \"" name "\" exceeds 16 characters"); \
+  ETL_ENUM_TYPE(value, name)
+
   ETL_DECLARE_ENUM_TYPE(FourCC, uint8_t)
 
   // Not all enums need reflection. Only cases where we need reflection is the
   // FourCC codes that need to be converted to text in order to display on
   // screen
-  ETL_ENUM_TYPE(InstrumentCommandArpeggiator, "ARP")
-  ETL_ENUM_TYPE(InstrumentCommandCrush, "CSH")
-  ETL_ENUM_TYPE(InstrumentCommandKill, "KIL")
-  ETL_ENUM_TYPE(InstrumentCommandLoopOffset, "LOF")
-  ETL_ENUM_TYPE(InstrumentCommandVelocity, "VEL")
-  ETL_ENUM_TYPE(InstrumentCommandVolume, "VOL")
-  ETL_ENUM_TYPE(InstrumentCommandPitchSlide, "PSL")
-  ETL_ENUM_TYPE(InstrumentCommandHop, "HOP")
-  ETL_ENUM_TYPE(InstrumentCommandLegato, "LEG")
-  ETL_ENUM_TYPE(InstrumentCommandRetrigger, "RTG")
-  ETL_ENUM_TYPE(InstrumentCommandTempo, "TPO")
-  ETL_ENUM_TYPE(InstrumentCommandMidiCC, "MCC")
-  ETL_ENUM_TYPE(InstrumentCommandMidiPC, "MPC")
-  ETL_ENUM_TYPE(InstrumentCommandPlayOfset, "POF")
-  ETL_ENUM_TYPE(InstrumentCommandLowPassFilter, "FLT")
-  ETL_ENUM_TYPE(InstrumentCommandTable, "TBL")
-  ETL_ENUM_TYPE(InstrumentCommandFilterCut, "FCT")
-  ETL_ENUM_TYPE(InstrumentCommandFilterResonance, "FRS")
-  ETL_ENUM_TYPE(InstrumentCommandPan, "PAN")
-  ETL_ENUM_TYPE(InstrumentCommandGateOff, "GOF")
-  ETL_ENUM_TYPE(InstrumentCommandGroove, "GRV")
-  ETL_ENUM_TYPE(InstrumentCommandSetInstrumentParameter, "SIP")
-  ETL_ENUM_TYPE(InstrumentCommandStop, "STP")
-  ETL_ENUM_TYPE(InstrumentCommandNone, "---")
-  ETL_ENUM_TYPE(InstrumentCommandPitchFineTune, "PFT")
-  ETL_ENUM_TYPE(InstrumentCommandDelay, "DLY")
-  ETL_ENUM_TYPE(InstrumentCommandInstrumentRetrigger, "IRT")
-  ETL_ENUM_TYPE(InstrumentCommandMidiChord, "MCH")
-  ETL_ENUM_TYPE(InstrumentCommandVibrato, "VIB")
+  ETL_ENUM_TYPE_16(InstrumentCommandArpeggiator, "ARP")
+  ETL_ENUM_TYPE_16(InstrumentCommandCrush, "CSH")
+  ETL_ENUM_TYPE_16(InstrumentCommandKill, "KIL")
+  ETL_ENUM_TYPE_16(InstrumentCommandLoopOffset, "LOF")
+  ETL_ENUM_TYPE_16(InstrumentCommandVelocity, "VEL")
+  ETL_ENUM_TYPE_16(InstrumentCommandVolume, "VOL")
+  ETL_ENUM_TYPE_16(InstrumentCommandPitchSlide, "PSL")
+  ETL_ENUM_TYPE_16(InstrumentCommandHop, "HOP")
+  ETL_ENUM_TYPE_16(InstrumentCommandLegato, "LEG")
+  ETL_ENUM_TYPE_16(InstrumentCommandRetrigger, "RTG")
+  ETL_ENUM_TYPE_16(InstrumentCommandTempo, "TPO")
+  ETL_ENUM_TYPE_16(InstrumentCommandMidiCC, "MCC")
+  ETL_ENUM_TYPE_16(InstrumentCommandMidiPC, "MPC")
+  ETL_ENUM_TYPE_16(InstrumentCommandPlayOfset, "POF")
+  ETL_ENUM_TYPE_16(InstrumentCommandLowPassFilter, "FLT")
+  ETL_ENUM_TYPE_16(InstrumentCommandTable, "TBL")
+  ETL_ENUM_TYPE_16(InstrumentCommandFilterCut, "FCT")
+  ETL_ENUM_TYPE_16(InstrumentCommandFilterResonance, "FRS")
+  ETL_ENUM_TYPE_16(InstrumentCommandPan, "PAN")
+  ETL_ENUM_TYPE_16(InstrumentCommandGateOff, "GOF")
+  ETL_ENUM_TYPE_16(InstrumentCommandGroove, "GRV")
+  ETL_ENUM_TYPE_16(InstrumentCommandSetInstrumentParameter, "SIP")
+  ETL_ENUM_TYPE_16(InstrumentCommandStop, "STP")
+  ETL_ENUM_TYPE_16(InstrumentCommandNone, "---")
+  ETL_ENUM_TYPE_16(InstrumentCommandPitchFineTune, "PFT")
+  ETL_ENUM_TYPE_16(InstrumentCommandDelay, "DLY")
+  ETL_ENUM_TYPE_16(InstrumentCommandInstrumentRetrigger, "IRT")
+  ETL_ENUM_TYPE_16(InstrumentCommandMidiChord, "MCH")
+  ETL_ENUM_TYPE_16(InstrumentCommandVibrato, "VIB")
 
-  ETL_ENUM_TYPE(VarLineOut, "LineOut")
-  ETL_ENUM_TYPE(VarMidiDevice, "MidiDevice")
-  ETL_ENUM_TYPE(VarMidiSync, "MidiSync")
-  ETL_ENUM_TYPE(VarMidiClockSync, "MidiClockSync")
-  ETL_ENUM_TYPE(VarMirrorUI, "mirrorUI")
-  ETL_ENUM_TYPE(VarUIFont, "UIFont")
-  ETL_ENUM_TYPE(VarThemeName, "ThemeName")
-  ETL_ENUM_TYPE(VarScaleRoot, "ScaleRoot")
-  ETL_ENUM_TYPE(SampleInstrumentSample, "Sample")
-  ETL_ENUM_TYPE(SampleInstrumentVolume, "Volume")
-  ETL_ENUM_TYPE(SampleInstrumentInterpolation, "Interpolation")
-  ETL_ENUM_TYPE(SampleInstrumentCrush, "Crush")
-  ETL_ENUM_TYPE(SampleInstrumentCrushVolume, "CrushDrive")
-  ETL_ENUM_TYPE(SampleInstrumentDownsample, "Downsample")
-  ETL_ENUM_TYPE(SampleInstrumentRootNote, "RootNote")
-  ETL_ENUM_TYPE(SampleInstrumentFineTune, "Finetune")
-  ETL_ENUM_TYPE(SampleInstrumentPan, "Pan")
-  ETL_ENUM_TYPE(SampleInstrumentFilterCutOff, "FilterCutoff")
-  ETL_ENUM_TYPE(SampleInstrumentFilterResonance, "FilterResonance")
-  ETL_ENUM_TYPE(SampleInstrumentFilterType, "FilterType")
-  ETL_ENUM_TYPE(SampleInstrumentFilterMode, "FilterMode")
-  ETL_ENUM_TYPE(SampleInstrumentStart, "Start")
-  ETL_ENUM_TYPE(SampleInstrumentLoopMode, "LoopMode")
-  ETL_ENUM_TYPE(SampleInstrumentLoopStart, "LoopStart")
-  ETL_ENUM_TYPE(SampleInstrumentEnd, "End")
-  ETL_ENUM_TYPE(SampleInstrumentTable, "Table")
-  ETL_ENUM_TYPE(SampleInstrumentTableAutomation, "TableAutomation")
-  ETL_ENUM_TYPE(MidiInstrumentChannel, "Channel")
-  ETL_ENUM_TYPE(InstrumentName, "Name")
-  ETL_ENUM_TYPE(MidiInstrumentName, "MidiName")
-  ETL_ENUM_TYPE(MidiInstrumentNoteLength, "NoteLength")
-  ETL_ENUM_TYPE(MidiInstrumentVolume, "Volume")
-  ETL_ENUM_TYPE(MidiInstrumentTable, "Table")
-  ETL_ENUM_TYPE(MidiInstrumentTableAutomation, "TableAutomation")
-  ETL_ENUM_TYPE(MidiInstrumentProgram, "Program")
-  ETL_ENUM_TYPE(SIDInstrumentWaveform, "OscWaveform")
-  ETL_ENUM_TYPE(SIDInstrument1FilterCut, "FilterCutoff1")
-  ETL_ENUM_TYPE(SIDInstrument1FilterResonance, "FilterResonance1")
-  ETL_ENUM_TYPE(SIDInstrument1FilterMode, "FilterMode1")
-  ETL_ENUM_TYPE(SIDInstrument1Volume, "Volume1")
-  ETL_ENUM_TYPE(SIDInstrument2FilterCut, "FilterCutoff2")
-  ETL_ENUM_TYPE(SIDInstrument2FilterResonance, "FilterResonance2")
-  ETL_ENUM_TYPE(SIDInstrument2FilterMode, "FilterMode2")
-  ETL_ENUM_TYPE(SIDInstrument2Volume, "Volume2")
-  ETL_ENUM_TYPE(SIDInstrumentPulseWidth, "OscPulseWidth")
-  ETL_ENUM_TYPE(SIDInstrumentVSync, "OscSync")
-  ETL_ENUM_TYPE(SIDInstrumentRingModulator, "OscRingMod")
-  ETL_ENUM_TYPE(SIDInstrumentADSR, "OscADSR")
-  ETL_ENUM_TYPE(SIDInstrumentFilterOn, "VoiceFilterOn")
-  ETL_ENUM_TYPE(SIDInstrumentTable, "Table")
-  ETL_ENUM_TYPE(SIDInstrumentTableAutomation, "table automation")
-  ETL_ENUM_TYPE(SIDInstrumentOSCNumber, "OscNum")
+  ETL_ENUM_TYPE_16(VarLineOut, "line-out")
+  ETL_ENUM_TYPE_16(VarMidiDevice, "midi-device")
+  ETL_ENUM_TYPE_16(VarMidiSync, "midi-sync")
+  ETL_ENUM_TYPE_16(VarMidiClockSync, "midi-clock-sync")
+  ETL_ENUM_TYPE_16(VarMirrorUI, "mirror-ui")
+  ETL_ENUM_TYPE_16(VarUIFont, "ui-font")
+  ETL_ENUM_TYPE_16(VarThemeName, "theme-name")
+  ETL_ENUM_TYPE_16(VarScaleRoot, "scale-root")
+  ETL_ENUM_TYPE_16(SampleInstrumentSample, "Sample")
+  ETL_ENUM_TYPE_16(SampleInstrumentVolume, "Volume")
+  ETL_ENUM_TYPE_16(SampleInstrumentInterpolation, "Interpolation")
+  ETL_ENUM_TYPE_16(SampleInstrumentCrush, "Crush")
+  ETL_ENUM_TYPE_16(SampleInstrumentCrushVolume, "CrushDrive")
+  ETL_ENUM_TYPE_16(SampleInstrumentDownsample, "Downsample")
+  ETL_ENUM_TYPE_16(SampleInstrumentRootNote, "RootNote")
+  ETL_ENUM_TYPE_16(SampleInstrumentFineTune, "Finetune")
+  ETL_ENUM_TYPE_16(SampleInstrumentPan, "Pan")
+  ETL_ENUM_TYPE_16(SampleInstrumentFilterCutOff, "FilterCutoff")
+  ETL_ENUM_TYPE_16(SampleInstrumentFilterResonance, "FilterResonance")
+  ETL_ENUM_TYPE_16(SampleInstrumentFilterType, "FilterType")
+  ETL_ENUM_TYPE_16(SampleInstrumentFilterMode, "FilterMode")
+  ETL_ENUM_TYPE_16(SampleInstrumentStart, "Start")
+  ETL_ENUM_TYPE_16(SampleInstrumentLoopMode, "LoopMode")
+  ETL_ENUM_TYPE_16(SampleInstrumentLoopStart, "LoopStart")
+  ETL_ENUM_TYPE_16(SampleInstrumentEnd, "End")
+  ETL_ENUM_TYPE_16(SampleInstrumentTable, "Table")
+  ETL_ENUM_TYPE_16(SampleInstrumentTableAutomation, "TableAutomation")
+  ETL_ENUM_TYPE_16(MidiInstrumentChannel, "Channel")
+  ETL_ENUM_TYPE_16(InstrumentName, "Name")
+  ETL_ENUM_TYPE_16(MidiInstrumentName, "MidiName")
+  ETL_ENUM_TYPE_16(MidiInstrumentNoteLength, "NoteLength")
+  ETL_ENUM_TYPE_16(MidiInstrumentVolume, "Volume")
+  ETL_ENUM_TYPE_16(MidiInstrumentTable, "Table")
+  ETL_ENUM_TYPE_16(MidiInstrumentTableAutomation, "TableAutomation")
+  ETL_ENUM_TYPE_16(MidiInstrumentProgram, "Program")
+  ETL_ENUM_TYPE_16(SIDInstrumentWaveform, "OscWaveform")
+  ETL_ENUM_TYPE_16(SIDInstrument1FilterCut, "FilterCutoff1")
+  ETL_ENUM_TYPE_16(SIDInstrument1FilterResonance, "FilterResonance1")
+  ETL_ENUM_TYPE_16(SIDInstrument1FilterMode, "FilterMode1")
+  ETL_ENUM_TYPE_16(SIDInstrument1Volume, "Volume1")
+  ETL_ENUM_TYPE_16(SIDInstrument2FilterCut, "FilterCutoff2")
+  ETL_ENUM_TYPE_16(SIDInstrument2FilterResonance, "FilterResonance2")
+  ETL_ENUM_TYPE_16(SIDInstrument2FilterMode, "FilterMode2")
+  ETL_ENUM_TYPE_16(SIDInstrument2Volume, "Volume2")
+  ETL_ENUM_TYPE_16(SIDInstrumentPulseWidth, "OscPulseWidth")
+  ETL_ENUM_TYPE_16(SIDInstrumentVSync, "OscSync")
+  ETL_ENUM_TYPE_16(SIDInstrumentRingModulator, "OscRingMod")
+  ETL_ENUM_TYPE_16(SIDInstrumentADSR, "OscADSR")
+  ETL_ENUM_TYPE_16(SIDInstrumentFilterOn, "VoiceFilterOn")
+  ETL_ENUM_TYPE_16(SIDInstrumentTable, "Table")
+  ETL_ENUM_TYPE_16(SIDInstrumentTableAutomation, "table automation")
+  ETL_ENUM_TYPE_16(SIDInstrumentOSCNumber, "OscNum")
 
   // channel variable not currently used by OPAL instruments but maybe in future
-  ETL_ENUM_TYPE(OPALInstrumentChannel, "Channel")
-  ETL_ENUM_TYPE(OPALInstrumentAlgorithm, "Algorithm")
-  ETL_ENUM_TYPE(OPALInstrumentFeedback, "Feedback")
-  ETL_ENUM_TYPE(OPALInstrumentDeepTremeloVibrato, "DeepTremoloVibrato")
+  ETL_ENUM_TYPE_16(OPALInstrumentChannel, "Channel")
+  ETL_ENUM_TYPE_16(OPALInstrumentAlgorithm, "Algorithm")
+  ETL_ENUM_TYPE_16(OPALInstrumentFeedback, "Feedback")
+  ETL_ENUM_TYPE_16(OPALInstrumentDeepTremeloVibrato, "DeepTremVibrato")
 
-  ETL_ENUM_TYPE(OPALInstrumentOp1Level, "Op1Level")
-  ETL_ENUM_TYPE(OPALInstrumentOp1Multiplier, "Op1Multiplier")
-  ETL_ENUM_TYPE(OPALInstrumentOp1KeyScaleLevel, "Op1KeyscaleLevel")
-  ETL_ENUM_TYPE(OPALInstrumentOp1ADSR, "Op1ADSR")
-  ETL_ENUM_TYPE(OPALInstrumentOp1WaveShape, "Op1Waveshape")
-  ETL_ENUM_TYPE(OPALInstrumentOp1TremVibSusKSR, "Op1TremVibSusKSR")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp1Level, "Op1Level")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp1Multiplier, "Op1Multiplier")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp1KeyScaleLevel, "Op1KeyscaleLevel")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp1ADSR, "Op1ADSR")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp1WaveShape, "Op1Waveshape")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp1TremVibSusKSR, "Op1TremVibSusKSR")
 
-  ETL_ENUM_TYPE(OPALInstrumentOp2Level, "Op2Level")
-  ETL_ENUM_TYPE(OPALInstrumentOp2Multiplier, "Op2Multiplier")
-  ETL_ENUM_TYPE(OPALInstrumentOp2KeyScaleLevel, "Op2KeyScaleLevel")
-  ETL_ENUM_TYPE(OPALInstrumentOp2ADSR, "Op2ADSR")
-  ETL_ENUM_TYPE(OPALInstrumentOp2WaveShape, "Op2Waveshape")
-  ETL_ENUM_TYPE(OPALInstrumentOp2TremVibSusKSR, "Op2TremVibSusKSR")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp2Level, "Op2Level")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp2Multiplier, "Op2Multiplier")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp2KeyScaleLevel, "Op2KeyScaleLevel")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp2ADSR, "Op2ADSR")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp2WaveShape, "Op2Waveshape")
+  ETL_ENUM_TYPE_16(OPALInstrumentOp2TremVibSusKSR, "Op2TremVibSusKSR")
 
-  ETL_ENUM_TYPE(VarColor_0_Black, "Color0")
-  ETL_ENUM_TYPE(VarColor_1_Maroon, "Color1")
-  ETL_ENUM_TYPE(VarColor_2_Green, "Color2")
-  ETL_ENUM_TYPE(VarColor_3_Olive, "Color3")
-  ETL_ENUM_TYPE(VarColor_4_Blue, "Color4")
-  ETL_ENUM_TYPE(VarColor_5_Purple, "Color5")
-  ETL_ENUM_TYPE(VarColor_6_Turqoise, "Color6")
-  ETL_ENUM_TYPE(VarColor_7_LightyGray, "Color7")
-  ETL_ENUM_TYPE(VarColor_8_Gray, "Color8")
-  ETL_ENUM_TYPE(VarColor_9_Red, "Color9")
-  ETL_ENUM_TYPE(VarColor_A_Lime, "Color10")
-  ETL_ENUM_TYPE(VarColor_B_Yellow, "Color11")
-  ETL_ENUM_TYPE(VarColor_C_LightBlue, "Color12")
-  ETL_ENUM_TYPE(VarColor_D_Magenta, "Color13")
-  ETL_ENUM_TYPE(VarColor_E_Cyan, "Color14")
-  ETL_ENUM_TYPE(VarColor_F_White, "Color15")
+  ETL_ENUM_TYPE_16(VarColor_0, "color0")
+  ETL_ENUM_TYPE_16(VarColor_1, "color1")
+  ETL_ENUM_TYPE_16(VarColor_2, "color2")
+  ETL_ENUM_TYPE_16(VarColor_3, "color3")
+  ETL_ENUM_TYPE_16(VarColor_4, "color4")
+  ETL_ENUM_TYPE_16(VarColor_5, "color5")
+  ETL_ENUM_TYPE_16(VarColor_6, "color6")
+  ETL_ENUM_TYPE_16(VarColor_7, "color7")
+  ETL_ENUM_TYPE_16(VarColor_8, "color8")
+  ETL_ENUM_TYPE_16(VarColor_9, "color9")
+  ETL_ENUM_TYPE_16(VarColor_A, "color10")
+  ETL_ENUM_TYPE_16(VarColor_B, "color11")
+  ETL_ENUM_TYPE_16(VarColor_C, "color12")
+  ETL_ENUM_TYPE_16(VarColor_D, "color13")
+  ETL_ENUM_TYPE_16(VarColor_E, "color14")
+  ETL_ENUM_TYPE_16(VarColor_F, "color15")
 
-  ETL_ENUM_TYPE(VarTempo, "Tempo")
-  ETL_ENUM_TYPE(VarMasterVolume, "Master")
-  ETL_ENUM_TYPE(VarPreviewVolume, "Preview")
-  ETL_ENUM_TYPE(VarWrap, "Wrap")
-  ETL_ENUM_TYPE(VarTranspose, "Transpose")
-  ETL_ENUM_TYPE(VarScale, "Scale")
-  ETL_ENUM_TYPE(VarProjectName, "ProjectName")
-  ETL_ENUM_TYPE(VarInstrumentType, "InstrumentType")
-  ETL_ENUM_TYPE(VarChannel1Volume, "channel1vol")
-  ETL_ENUM_TYPE(VarChannel2Volume, "channel2vol")
-  ETL_ENUM_TYPE(VarChannel3Volume, "channel3vol")
-  ETL_ENUM_TYPE(VarChannel4Volume, "channel4vol")
-  ETL_ENUM_TYPE(VarChannel5Volume, "channel5vol")
-  ETL_ENUM_TYPE(VarChannel6Volume, "channel6vol")
-  ETL_ENUM_TYPE(VarChannel7Volume, "channel7vol")
-  ETL_ENUM_TYPE(VarChannel8Volume, "channel8vol")
+  ETL_ENUM_TYPE_16(VarTempo, "Tempo")
+  ETL_ENUM_TYPE_16(VarMasterVolume, "Master")
+  ETL_ENUM_TYPE_16(VarPreviewVolume, "Preview")
+  ETL_ENUM_TYPE_16(VarWrap, "Wrap")
+  ETL_ENUM_TYPE_16(VarTranspose, "Transpose")
+  ETL_ENUM_TYPE_16(VarScale, "Scale")
+  ETL_ENUM_TYPE_16(VarProjectName, "ProjectName")
+  ETL_ENUM_TYPE_16(VarInstrumentType, "InstrumentType")
+  ETL_ENUM_TYPE_16(VarChannel1Volume, "channel1vol")
+  ETL_ENUM_TYPE_16(VarChannel2Volume, "channel2vol")
+  ETL_ENUM_TYPE_16(VarChannel3Volume, "channel3vol")
+  ETL_ENUM_TYPE_16(VarChannel4Volume, "channel4vol")
+  ETL_ENUM_TYPE_16(VarChannel5Volume, "channel5vol")
+  ETL_ENUM_TYPE_16(VarChannel6Volume, "channel6vol")
+  ETL_ENUM_TYPE_16(VarChannel7Volume, "channel7vol")
+  ETL_ENUM_TYPE_16(VarChannel8Volume, "channel8vol")
 
-  ETL_ENUM_TYPE(ActionEdit, "Edit")
-  ETL_ENUM_TYPE(ActionExport, "Export")
-  ETL_ENUM_TYPE(ActionImport, "Import")
-  ETL_ENUM_TYPE(ActionThemeName, "ThemeName")
-  ETL_ENUM_TYPE(VarBacklightLevel, "BacklightLevel")
-  ETL_ENUM_TYPE(VarOutputVolume, "OutputVolume")
-  ETL_ENUM_TYPE(VarImportResampler, "ImportResampling")
+  ETL_ENUM_TYPE_16(ActionEdit, "Edit")
+  ETL_ENUM_TYPE_16(ActionExport, "Export")
+  ETL_ENUM_TYPE_16(ActionImport, "Import")
+  ETL_ENUM_TYPE_16(ActionThemeName, "theme-name")
+  ETL_ENUM_TYPE_16(VarBacklightLevel, "backlight-level")
+  ETL_ENUM_TYPE_16(VarOutputVolume, "output-volume")
+  ETL_ENUM_TYPE_16(VarImportResampler, "import-resampler")
+  ETL_ENUM_TYPE_16(VarConfigCommandPicker, "command-picker")
 
   // Chiptune Instrument Variables
-  ETL_ENUM_TYPE(ChiptuneInstrumentWaveform, "Waveform")
-  ETL_ENUM_TYPE(ChiptuneInstrumentAttack, "Attack")
-  ETL_ENUM_TYPE(ChiptuneInstrumentDecay, "Decay")
-  ETL_ENUM_TYPE(ChiptuneInstrumentLevel, "Level")
-  ETL_ENUM_TYPE(ChiptuneInstrumentLength, "Length")
-  ETL_ENUM_TYPE(ChiptuneInstrumentBurst, "Burst")
-  ETL_ENUM_TYPE(ChiptuneInstrumentVibrato, "Vibrato")
-  ETL_ENUM_TYPE(ChiptuneInstrumentVibratoDelay, "VibratoDelay")
-  ETL_ENUM_TYPE(ChiptuneInstrumentTranspose, "Transpose")
-  ETL_ENUM_TYPE(ChiptuneInstrumentTable, "Table")
-  ETL_ENUM_TYPE(ChiptuneInstrumentSweepTime, "SweepTime")
-  ETL_ENUM_TYPE(ChiptuneInstrumentSweepAmount, "SweepAmount")
-  ETL_ENUM_TYPE(ChiptuneInstrumentArpSpeed, "ArpSpeed")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentWaveform, "Waveform")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentAttack, "Attack")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentDecay, "Decay")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentLevel, "Level")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentLength, "Length")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentBurst, "Burst")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentVibrato, "Vibrato")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentVibratoDelay, "VibratoDelay")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentTranspose, "Transpose")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentTable, "Table")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentSweepTime, "SweepTime")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentSweepAmount, "SweepAmount")
+  ETL_ENUM_TYPE_16(ChiptuneInstrumentArpSpeed, "ArpSpeed")
 
-  ETL_ENUM_TYPE(Default, "   ")
+  // Drum Instrument Variables
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice0, "DrumInstument0")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice1, "DrumInstument1")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice2, "DrumInstument2")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice3, "DrumInstument3")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice4, "DrumInstument4")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice5, "DrumInstument5")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice6, "DrumInstument6")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice7, "DrumInstument7")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice8, "DrumInstument8")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice9, "DrumInstument9")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice10, "DrumInstument10")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice11, "DrumInstument11")
+
+  ETL_ENUM_TYPE_16(Default, "Default")
   ETL_END_ENUM_TYPE
 };
 
