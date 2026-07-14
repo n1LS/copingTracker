@@ -22,9 +22,10 @@
 #include "Foundation/Variables/WatchedVariable.h"
 #include "Song.h"
 
-#define PROJECT_NUMBER "3.0-Alpha1"
-#define PROJECT_RELEASE "r"
-#define BUILD_COUNT "000"
+#define PROJECT_NUMBER "4.0.0"
+#define PROJECT_RELEASE "d"
+
+#define VERSION_STRING "copingTracker v" PROJECT_NUMBER PROJECT_RELEASE
 
 #define MAX_TAP 3
 

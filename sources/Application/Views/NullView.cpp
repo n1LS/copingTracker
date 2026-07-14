@@ -23,20 +23,12 @@ void NullView::ProcessButtonMask(uint16_t mask, bool pressed) {
 }
 
 void NullView::DrawView() {
-
   Clear();
 
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::inactive);
 
-  char buildString[SCREEN_WIDTH + 1];
-  // todo: update and merge with instance from appwindow
-  npf_snprintf(buildString, sizeof(buildString), "copingTracker build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE,
-               BUILD_COUNT);
-  GUIPoint pos;
-  pos.y_ = 22;
-  pos.x_ = (32 - strlen(buildString)) / 2;
-  DrawString(pos.x_, pos.y_, buildString);
+  DrawString((SCREEN_WIDTH - strlen(VERSION_STRING)) / 2, SCREEN_HEIGHT - 2, VERSION_STRING);
 }
 
 void NullView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {

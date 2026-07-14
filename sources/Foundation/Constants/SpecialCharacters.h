@@ -190,3 +190,8 @@ static const char *const char_bargraph_lookup[] = {char_bargraph_bar0_s, char_ba
 #define char_propgress_bar_2_s "\xE9"
 #define char_propgress_bar_3_s "\xEA"
 #define char_propgress_bar_4_s "\xEB"
+
+// logo
+#define char_logo_1 "\x01\x02\x03"
+#define char_logo_2 "\x04\x05\x06"
+#define char_logo_3 "\x07\x08\x09"

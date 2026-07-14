@@ -1624,13 +1624,12 @@ void SampleInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
       uint8_t sliceIndex = static_cast<uint8_t>(note - SampleInstrument::SliceNoteBase);
       npf_snprintf(out, sizeof(out), "S%02u", static_cast<unsigned>(sliceIndex));
       return;
-    } 
-    
+    }
+
     npf_snprintf(out, sizeof(out), "S**");
     return;
   }
-    
+
   // default handling regular notes
   I_Instrument::noteDisplay(note, out);
 }
-
