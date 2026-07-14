@@ -109,7 +109,7 @@ void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg
   }
 
   // Check if this is the current project
-  auto var = viewData_->project_->FindVariable(FourCC::VarProjectName);
+  auto var = viewData_->project_->FindVariable(Token::VarProjectName);
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = var->GetString();
   const char *currentProject = projectName.c_str();
 
@@ -168,7 +168,7 @@ void SelectProjectView::LoadProject() {
 }
 
 void SelectProjectView::ClearAutoSave() {
-  auto var = viewData_->project_->FindVariable(FourCC::VarProjectName);
+  auto var = viewData_->project_->FindVariable(Token::VarProjectName);
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = var->GetString();
   PersistencyService *ps = PersistencyService::GetInstance();
   if (!projectName.empty()) {
@@ -191,7 +191,7 @@ bool SelectProjectView::SelectionIsCurrentProject() {
   char selected[MAX_PROJECT_NAME_LENGTH + 1];
   getHighlightedProjectName(selected);
 
-  auto var = viewData_->project_->FindVariable(FourCC::VarProjectName);
+  auto var = viewData_->project_->FindVariable(Token::VarProjectName);
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = var->GetString();
   const char *current = projectName.c_str();
 

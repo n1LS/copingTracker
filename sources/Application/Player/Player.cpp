@@ -635,13 +635,13 @@ void Player::ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT]) {
         if (gs->TriggerChannel(i) || (delayExpired && delayExpired[i])) {
           int pos = viewData_->phrasePlayPos_[i];
           const PhraseStep &step = viewData_->song_->phrase_.steps_[phrase][pos];
-          FourCC cc = FourCC::enum_type(step.cmd1);
+          Token cc = Token::enum_type(step.cmd1);
           uint8_t param = step.param1;
 
           // if there's any command to trigger, first pass it on the player
           // then pass it on to the instrument
 
-          if (cc != FourCC::InstrumentCommandNone) {
+          if (cc != Token::InstrumentCommandNone) {
             if (!ProcessChannelCommand(i, cc, param)) {
               I_Instrument *instrument = mixer_.GetInstrument(i);
               if (instrument) {
@@ -652,13 +652,13 @@ void Player::ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT]) {
 
           // Now process second command row
 
-          cc = FourCC::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
+          cc = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
           param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
 
           // if there's any command to trigger, first pass it on the player
           // then pass it on to the instrument
 
-          if (cc != FourCC::InstrumentCommandNone) {
+          if (cc != Token::InstrumentCommandNone) {
             if (!ProcessChannelCommand(i, cc, param)) {
               I_Instrument *instrument = mixer_.GetInstrument(i);
               if (instrument) {
@@ -672,28 +672,28 @@ void Player::ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT]) {
   };
 }
 
-bool Player::ProcessChannelCommand(int channel, FourCC cmd, uint16_t param) {
+bool Player::ProcessChannelCommand(int channel, Token cmd, uint16_t param) {
 
   I_Instrument *instr = mixer_.GetInstrument(channel);
 
   switch (cmd) {
-    case FourCC::InstrumentCommandKill:
+    case Token::InstrumentCommandKill:
       if (instr) {
         int timeToLive = (param & 0xFF);
         timeToLive_[channel] = timeToLive + 1;
       }
       return true;
-    case FourCC::InstrumentCommandTempo:
+    case Token::InstrumentCommandTempo:
       {
         param = std::clamp(param, MIN_TEMPO, MAX_TEMPO);
-        Variable *v = project_->FindVariable(FourCC::VarTempo);
+        Variable *v = project_->FindVariable(Token::VarTempo);
         v->SetInt(param);
         SyncMaster *sync = SyncMaster::GetInstance();
         sync->SetTempo(project_->GetTempo());
         return true;
         break;
       }
-    case FourCC::InstrumentCommandTable:
+    case Token::InstrumentCommandTable:
       {
         TableHolder *th = TableHolder::GetInstance();
         TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
@@ -703,7 +703,7 @@ bool Player::ProcessChannelCommand(int channel, FourCC cmd, uint16_t param) {
         return true;
         break;
       }
-    case FourCC::InstrumentCommandGroove:
+    case Token::InstrumentCommandGroove:
       {
         Groove *gr = Groove::GetInstance();
         bool all = (param & 0xFF00) != 0;
@@ -798,14 +798,14 @@ void Player::updatePhrasePos(int pos, int channel) {
 
   // Check both param colum 1 & 2
 
-  FourCC cc = FourCC::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd1);
-  if (cc == FourCC::InstrumentCommandDelay) {
+  Token cc = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd1);
+  if (cc == Token::InstrumentCommandDelay) {
     uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param1;
     timeToStart_[channel] = (param & 0x0F) + 1;
   }
 
-  cc = FourCC::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
-  if (cc == FourCC::InstrumentCommandDelay) {
+  cc = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
+  if (cc == Token::InstrumentCommandDelay) {
     uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
     timeToStart_[channel] = (param & 0x0F) + 1;
   }
@@ -990,12 +990,12 @@ void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool st
 int Player::getChannelHop(int channel, int pos) {
 
   int phrase = viewData_->currentPlayPhrase_[channel];
-  FourCC cc = FourCC::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd1);
-  if (cc == FourCC::InstrumentCommandHop) {
+  Token cc = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd1);
+  if (cc == Token::InstrumentCommandHop) {
     return (viewData_->song_->phrase_.steps_[phrase][pos].param1) & 0xF;
   }
-  cc = FourCC::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
-  if (cc == FourCC::InstrumentCommandHop) {
+  cc = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
+  if (cc == Token::InstrumentCommandHop) {
     return (viewData_->song_->phrase_.steps_[phrase][pos].param2) & 0xF;
   }
   return -1;

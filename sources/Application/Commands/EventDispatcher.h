@@ -23,7 +23,7 @@ public:
   EventDispatcher();
   ~EventDispatcher();
   void SetWindow(GUIWindow *window);
-  virtual void Execute(FourCC id, float value);
+  virtual void Execute(Token id, float value);
   unsigned int OnTimerTick();
   int GetEventMask() {
     return eventMask_;

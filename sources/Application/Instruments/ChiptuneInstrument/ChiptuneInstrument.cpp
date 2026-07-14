@@ -14,17 +14,17 @@
 voice_t ChiptuneInstrument::voices_[SONG_CHANNEL_COUNT];
 
 ChiptuneInstrument::ChiptuneInstrument()
-    : I_Instrument(&variables_), vArpSpeed_(FourCC::ChiptuneInstrumentArpSpeed, defaultArpSpeed),
-      vAttack_(FourCC::ChiptuneInstrumentAttack, defaultAttack), vBurst_(FourCC::ChiptuneInstrumentBurst, defaultBurst),
-      vDecay_(FourCC::ChiptuneInstrumentDecay, defaultDecay), vLength_(FourCC::ChiptuneInstrumentLength, defaultLength),
-      vLevel_(FourCC::ChiptuneInstrumentLevel, defaultLevel),
-      vSweepAmount_(FourCC::ChiptuneInstrumentSweepAmount, defaultSweepAmount),
-      vSweepTime_(FourCC::ChiptuneInstrumentSweepTime, defaultSweepTime),
-      vTable_(FourCC::ChiptuneInstrumentTable, defaultTable),
-      vTranspose_(FourCC::ChiptuneInstrumentTranspose, defaultTranspose),
-      vVibratoDelay_(FourCC::ChiptuneInstrumentVibratoDelay, defaultVibratoDelay),
-      vVibratoDepth_(FourCC::ChiptuneInstrumentVibrato, defaultVibratoDepth),
-      vWaveform_(FourCC::ChiptuneInstrumentWaveform, chiptune_waveforms, numWaveforms, defaultWaveform) {
+    : I_Instrument(&variables_), vArpSpeed_(Token::ChiptuneInstrumentArpSpeed, defaultArpSpeed),
+      vAttack_(Token::ChiptuneInstrumentAttack, defaultAttack), vBurst_(Token::ChiptuneInstrumentBurst, defaultBurst),
+      vDecay_(Token::ChiptuneInstrumentDecay, defaultDecay), vLength_(Token::ChiptuneInstrumentLength, defaultLength),
+      vLevel_(Token::ChiptuneInstrumentLevel, defaultLevel),
+      vSweepAmount_(Token::ChiptuneInstrumentSweepAmount, defaultSweepAmount),
+      vSweepTime_(Token::ChiptuneInstrumentSweepTime, defaultSweepTime),
+      vTable_(Token::ChiptuneInstrumentTable, defaultTable),
+      vTranspose_(Token::ChiptuneInstrumentTranspose, defaultTranspose),
+      vVibratoDelay_(Token::ChiptuneInstrumentVibratoDelay, defaultVibratoDelay),
+      vVibratoDepth_(Token::ChiptuneInstrumentVibrato, defaultVibratoDepth),
+      vWaveform_(Token::ChiptuneInstrumentWaveform, chiptune_waveforms, numWaveforms, defaultWaveform) {
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &vWaveform_);
@@ -70,57 +70,57 @@ bool ChiptuneInstrument::Render(int channel, fixed *buffer, int size, bool updat
   return true;
 }
 
-void ChiptuneInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
+void ChiptuneInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
   switch (cc) {
-    case FourCC::InstrumentCommandSetInstrumentParameter:
+    case Token::InstrumentCommandSetInstrumentParameter:
       voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
       break;
 
-    case FourCC::InstrumentCommandArpeggiator:
+    case Token::InstrumentCommandArpeggiator:
       voices_[channel].command_init_arp(value);
       break;
 
-    case FourCC::InstrumentCommandKill:
-    case FourCC::InstrumentCommandGateOff:
+    case Token::InstrumentCommandKill:
+    case Token::InstrumentCommandGateOff:
       voices_[channel].stop();
       break;
 
-    case FourCC::InstrumentCommandCrush:
+    case Token::InstrumentCommandCrush:
       voices_[channel].bitcrush = value && 0x0f;
       voices_[channel].drive = value >> 8;
       break;
 
-    case FourCC::InstrumentCommandVibrato:
+    case Token::InstrumentCommandVibrato:
       voices_[channel].command_init_vibrato(value >> 8, value & 0xFF);
       break;
 
-    case FourCC::InstrumentCommandPan:
+    case Token::InstrumentCommandPan:
       voices_[channel].command_init_pan(value >> 8, value & 0xFF);
       break;
 
-    case FourCC::InstrumentCommandPitchSlide:
+    case Token::InstrumentCommandPitchSlide:
       voices_[channel].command_init_pitch_shift(value >> 8, value & 0xFF);
       break;
 
-    case FourCC::InstrumentCommandLegato:
+    case Token::InstrumentCommandLegato:
       voices_[channel].command_init_legato(value >> 8, (int8_t)(value & 0xFF));
       break;
 
-    case FourCC::InstrumentCommandVolume:
+    case Token::InstrumentCommandVolume:
       voices_[channel].command_init_volume(value >> 8, value & 0xFF);
       break;
 
-    case FourCC::InstrumentCommandPitchFineTune:
+    case Token::InstrumentCommandPitchFineTune:
       voices_[channel].command_init_finetune(value >> 8, (int8_t)(value & 0xFF));
       break;
 
-    case FourCC::InstrumentCommandInstrumentRetrigger:
+    case Token::InstrumentCommandInstrumentRetrigger:
       voices_[channel].command_init_instrument_retrigger(value >> 8, (int8_t)(value & 0xff));
       break;
   }
 }
 
-bool ChiptuneInstrument::SupportsCommand(FourCC cc) {
+bool ChiptuneInstrument::SupportsCommand(Token cc) {
   return false;
 }
 

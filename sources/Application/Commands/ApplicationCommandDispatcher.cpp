@@ -18,13 +18,13 @@ ApplicationCommandDispatcher::ApplicationCommandDispatcher() {
 
 ApplicationCommandDispatcher::~ApplicationCommandDispatcher() {};
 
-void ApplicationCommandDispatcher::Execute(FourCC id, float value) {
+void ApplicationCommandDispatcher::Execute(Token id, float value) {
   switch (id) {
-    case FourCC::TrigTempoTap:
+    case Token::TrigTempoTap:
       if (value > 0.5)
         OnTempoTap();
       break;
-    case FourCC::TrigSeqQueueRow:
+    case Token::TrigSeqQueueRow:
       if (value > 0.5)
         OnQueueRow();
       break;

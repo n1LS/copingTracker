@@ -19,7 +19,7 @@ class VariableContainer {
 public:
   VariableContainer(etl::ilist<Variable *> *list);
   virtual ~VariableContainer();
-  Variable *FindVariable(FourCC id);
+  Variable *FindVariable(Token id);
   Variable *FindVariable(const char *name);
 
 private:

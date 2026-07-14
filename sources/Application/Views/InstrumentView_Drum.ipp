@@ -62,62 +62,62 @@ void InstrumentView::fillDrumParameters() {
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
   position.y_++;  
 
-  Variable *v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice0);
+  Variable *v = instrument->FindVariable(Token::DrumInstrumentParamsVoice0);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[0], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice1);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice1);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[1], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice2);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice2);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[2], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice3);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice3);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[3], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice4);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice4);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[4], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice5);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice5);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[5], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice6);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice6);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[6], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice7);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice7);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[7], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice8);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice8);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[8], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice9);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice9);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[9], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice10);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice10);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[10], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
 
-  v = instrument->FindVariable(FourCC::DrumInstrumentParamsVoice11);
+  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice11);
   bigHexVarField_.emplace_back(position, *v, 4, drumFormatStrings[11], 0x0000, 0xffff, 16);
   fieldList_.insert(fieldList_.end(), &(*bigHexVarField_.rbegin()));  
   position.y_++;
@@ -144,7 +144,7 @@ void InstrumentView::DrawViewDrum() {
   SetBackgroundColor(Theme::View::bg);
 
   for (int n = 0; n < 12; n++) {
-    Variable *v = instr->FindVariable(FourCC::enum_type(FourCC::DrumInstrumentParamsVoice0 + n));
+    Variable *v = instr->FindVariable(Token::enum_type(Token::DrumInstrumentParamsVoice0 + n));
     uint32_t wave = v->GetInt() % drumNumWaveforms;
     DrawString(p.x_ + 14, p.y_ + 7 + n, chiptune_waveforms[wave]);
   }

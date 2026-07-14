@@ -24,10 +24,10 @@ TimerService *MidiInstrument::timerSvc_ = 0;
 MidiInstrument::NoteOffInfo MidiInstrument::NoteOffInfo::current = {0, 0};
 
 MidiInstrument::MidiInstrument()
-    : I_Instrument(&variables_), channel_(FourCC::MidiInstrumentChannel, 0),
-      noteLen_(FourCC::MidiInstrumentNoteLength, 0), volume_(FourCC::MidiInstrumentVolume, 255),
-      table_(FourCC::MidiInstrumentTable, VAR_OFF), tableAuto_(FourCC::MidiInstrumentTableAutomation, false),
-      program_(FourCC::MidiInstrumentProgram, VAR_OFF) {
+    : I_Instrument(&variables_), channel_(Token::MidiInstrumentChannel, 0),
+      noteLen_(Token::MidiInstrumentNoteLength, 0), volume_(Token::MidiInstrumentVolume, 255),
+      table_(Token::MidiInstrumentTable, VAR_OFF), tableAuto_(Token::MidiInstrumentTableAutomation, false),
+      program_(Token::MidiInstrumentProgram, VAR_OFF) {
 
   if (svc_ == 0) {
     svc_ = MidiService::GetInstance();
@@ -87,7 +87,7 @@ bool MidiInstrument::Start(int channel, unsigned char note, uint8_t volume, bool
   lastNotes_[channel][0] = note;
   lastVolumes_[channel] = volume == NO_VOLUME ? 256 : volumeLUT[volume];
 
-  Variable *v = FindVariable(FourCC::MidiInstrumentNoteLength);
+  Variable *v = FindVariable(Token::MidiInstrumentNoteLength);
   remainingTicks_ = v->GetInt();
   if (remainingTicks_ == 0) {
     remainingTicks_ = -1;
@@ -107,7 +107,7 @@ void MidiInstrument::Stop(int channel) {
 
   Trace::Debug("MIDI INSTR STOP!====");
 
-  Variable *v = FindVariable(FourCC::MidiInstrumentChannel);
+  Variable *v = FindVariable(Token::MidiInstrumentChannel);
   int midiChannel = v->GetInt();
 
   for (int i = 0; i < MAX_MIDI_CHORD_NOTES + 1; i++) {
@@ -127,13 +127,13 @@ void MidiInstrument::Stop(int channel) {
 }
 
 void MidiInstrument::SetChannel(int channel) {
-  Variable *v = FindVariable(FourCC::MidiInstrumentChannel);
+  Variable *v = FindVariable(Token::MidiInstrumentChannel);
   v->SetInt(channel);
 }
 
 bool MidiInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   // We do it here so we have the opportunity to send some command before
-  Variable *v = FindVariable(FourCC::MidiInstrumentChannel);
+  Variable *v = FindVariable(Token::MidiInstrumentChannel);
   int mchannel = v->GetInt();
   if (first_[channel]) {
     // send note
@@ -228,14 +228,14 @@ bool MidiInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
+void MidiInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
 
-  Variable *v = FindVariable(FourCC::MidiInstrumentChannel);
+  Variable *v = FindVariable(Token::MidiInstrumentChannel);
   int mchannel = v->GetInt();
 
   switch (cc) {
 
-    case FourCC::InstrumentCommandRetrigger:
+    case Token::InstrumentCommandRetrigger:
       {
         unsigned char loop = (value & 0xFF); // number of ticks before repeat
         if (loop != 0) {
@@ -248,7 +248,7 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandLegato:
+    case Token::InstrumentCommandLegato:
       {
         pitchBendTarget_ = uint8_t(value & 0xFF);
         pitchBendSpeed_ = uint8_t(value >> 8);
@@ -263,7 +263,7 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandPitchSlide:
+    case Token::InstrumentCommandPitchSlide:
       {
         pitchBendTarget_ = uint8_t(value & 0xFF);
         pitchBendSpeed_ = uint8_t(value >> 8);
@@ -273,7 +273,7 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       }
       break;
 
-    case FourCC::InstrumentCommandVelocity:
+    case Token::InstrumentCommandVelocity:
       {
         // VELM cmds set velocity for MIDI steps
         // Ensure velocity doesn't exceed 127 (MIDI spec maximum)
@@ -281,7 +281,7 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       };
       break;
 
-    case FourCC::InstrumentCommandVolume:
+    case Token::InstrumentCommandVolume:
       {
         MidiMessage msg;
         msg.status_ = MidiMessage::MIDI_CONTROL_CHANGE + mchannel;
@@ -291,7 +291,7 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       };
       break;
 
-    case FourCC::InstrumentCommandMidiCC:
+    case Token::InstrumentCommandMidiCC:
       {
         MidiMessage msg;
         msg.status_ = MidiMessage::MIDI_CONTROL_CHANGE + mchannel;
@@ -301,13 +301,13 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
       };
       break;
 
-    case FourCC::InstrumentCommandMidiPC:
+    case Token::InstrumentCommandMidiPC:
       {
         SendProgramChange(mchannel, value & 0x7F);
       };
       break;
 
-    case FourCC::InstrumentCommandMidiChord:
+    case Token::InstrumentCommandMidiChord:
       {
         // split into 4 note offsets
         for (int i = 0; i < MAX_MIDI_CHORD_NOTES; i++) {
@@ -344,7 +344,7 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
         }
       };
       break;
-    case FourCC::InstrumentCommandKill:
+    case Token::InstrumentCommandKill:
       {
         Stop(channel);
       };
@@ -354,7 +354,7 @@ void MidiInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
 
 etl::string<MAX_INSTRUMENT_NAME_LENGTH> MidiInstrument::GetDefaultName() {
   // use the channel number as a fallback
-  Variable *v = FindVariable(FourCC::MidiInstrumentChannel);
+  Variable *v = FindVariable(Token::MidiInstrumentChannel);
   int displayChannelNum = v->GetInt() + 1;
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name;
   etl::string_stream ss(name);
@@ -363,12 +363,12 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> MidiInstrument::GetDefaultName() {
 }
 
 int MidiInstrument::GetTable() {
-  Variable *v = FindVariable(FourCC::MidiInstrumentTable);
+  Variable *v = FindVariable(Token::MidiInstrumentTable);
   return v->GetInt();
 }
 
 bool MidiInstrument::GetTableAutomation() {
-  Variable *v = FindVariable(FourCC::MidiInstrumentTableAutomation);
+  Variable *v = FindVariable(Token::MidiInstrumentTableAutomation);
   return v->GetBool();
 }
 

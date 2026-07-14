@@ -23,7 +23,7 @@ Phrase::~Phrase() {
 }
 
 void Phrase::Reset() {
-  static const uint8_t NO_COMMAND = static_cast<uint8_t>(static_cast<char>(FourCC::InstrumentCommandNone));
+  static const uint8_t NO_COMMAND = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
 
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < STEPS_PER_PHRASE; j++) {

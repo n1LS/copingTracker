@@ -118,23 +118,23 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   GUIPoint position = GetAnchor();
 
-  Variable *v = project_->FindVariable(FourCC::VarTempo);
-  tempoField_.emplace_back(FourCC::ActionBPMChanged, position, *v, "Tempo     :" char_symbol_bpm_s " %d", MIN_TEMPO,
+  Variable *v = project_->FindVariable(Token::VarTempo);
+  tempoField_.emplace_back(Token::ActionBPMChanged, position, *v, "Tempo     :" char_symbol_bpm_s " %d", MIN_TEMPO,
                            MAX_TEMPO, 1, 10);
   fieldList_.insert(fieldList_.end(), &(*tempoField_.rbegin()));
   (*tempoField_.rbegin()).AddObserver(*this);
 
-  v = project_->FindVariable(FourCC::VarMasterVolume);
+  v = project_->FindVariable(Token::VarMasterVolume);
   position.y_ += 1;
   intVarField_.emplace_back(position, *v, "Master vol:%d%%", 0, 100, 1, 5);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  v = project_->FindVariable(FourCC::VarTranspose);
+  v = project_->FindVariable(Token::VarTranspose);
   position.y_ += 1;
   intVarField_.emplace_back(position, *v, "Transpose :%3.2d", -48, 48, 0x1, 0xC);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  v = project_->FindVariable(FourCC::VarScale);
+  v = project_->FindVariable(Token::VarScale);
   // if scale name is not found, set the default chromatic scale
   if (v->GetInt() < 0) {
     v->SetInt(0);
@@ -145,22 +145,22 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   // Add Scale Root field
   position.y_ += 1;
-  v = project_->FindVariable(FourCC::VarScaleRoot);
+  v = project_->FindVariable(Token::VarScaleRoot);
   intVarField_.emplace_back(position, *v, "Scale root:%s", 0, 11, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 2;
-  actionField_.emplace_back("Sample Pool", FourCC::ActionImport, position);
+  actionField_.emplace_back("Sample Pool", Token::ActionImport, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
-  actionField_.emplace_back("Remove Unused Samples", FourCC::ActionPurge, position);
+  actionField_.emplace_back("Remove Unused Samples", Token::ActionPurge, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   position.y_ += 1;
-  actionField_.emplace_back("Remove Unused Instruments", FourCC::ActionPurgeInstrument, position);
+  actionField_.emplace_back("Remove Unused Instruments", Token::ActionPurgeInstrument, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
@@ -169,32 +169,32 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   // save existing fields horizontal alignment
   int xalign = position.x_;
 
-  v = project_->FindVariable(FourCC::VarProjectName);
+  v = project_->FindVariable(Token::VarProjectName);
   auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Project   :");
   auto defaultName = etl::make_string_with_capacity<MAX_PROJECT_NAME_LENGTH>(UNNAMED_PROJECT_NAME);
-  textField_.emplace_back(*v, position, label, FourCC::ActionProjectRename, defaultName);
+  textField_.emplace_back(*v, position, label, Token::ActionProjectRename, defaultName);
   nameField_ = &(*textField_.rbegin());
 
   nameField_->AddObserver(*this);
   fieldList_.insert(fieldList_.end(), nameField_);
 
   position.y_ += 2;
-  actionField_.emplace_back("Browse", FourCC::ActionBrowse, position);
+  actionField_.emplace_back("Browse", Token::ActionBrowse, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   position.x_ += 8;
-  actionField_.emplace_back("Save", FourCC::ActionSave, position);
+  actionField_.emplace_back("Save", Token::ActionSave, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   position.x_ += 6;
-  actionField_.emplace_back("New", FourCC::ActionNewProject, position);
+  actionField_.emplace_back("New", Token::ActionNewProject, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   position.x_ += 5;
-  actionField_.emplace_back("Random", FourCC::ActionRandomName, position);
+  actionField_.emplace_back("Random", Token::ActionRandomName, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
   position.x_ = xalign;
@@ -208,12 +208,12 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   // Position the Mixdown action field to the right of the label
   position.x_ += 8;
-  actionField_.emplace_back("Mixdown", FourCC::ActionRenderMixdown, position);
+  actionField_.emplace_back("Mixdown", Token::ActionRenderMixdown, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
 
   position.x_ += 9;
-  actionField_.emplace_back("Stems", FourCC::ActionRenderStems, position);
+  actionField_.emplace_back("Stems", Token::ActionRenderStems, position);
   fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
   (*actionField_.rbegin()).AddObserver(*this);
   position.x_ = xalign;
@@ -261,7 +261,7 @@ void ProjectView::DrawView() {
 
   // Draw title
 
-  Variable *v = viewData_->project_->FindVariable(FourCC::VarProjectName);
+  Variable *v = viewData_->project_->FindVariable(Token::VarProjectName);
   DrawTitle("Project %s", v->GetString().c_str());
 
   // Draw fields and map
@@ -279,7 +279,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   uintptr_t fourcc = (uintptr_t)data;
 
   UIField *focus = GetFocus();
-  if (fourcc != FourCC::ActionBPMChanged) {
+  if (fourcc != Token::ActionBPMChanged) {
     focus->ClearFocus();
     focus->Draw(w_);
     focus->SetFocus();
@@ -289,19 +289,19 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   Player *player = Player::GetInstance();
 
   switch (fourcc) {
-    case FourCC::ActionPurge:
+    case Token::ActionPurge:
       {
         MessageBox *mb = MessageBox::Create(*this, "Purge", "Remove unused samples?", MBBF_YES | MBBF_NO);
         DoModal(mb, ModalViewCallback::create<&PurgeCallback>());
         break;
       }
-    case FourCC::ActionPurgeInstrument:
+    case Token::ActionPurgeInstrument:
       {
         MessageBox *mb = MessageBox::Create(*this, "Purge", "Remove unused instruments?", MBBF_YES | MBBF_NO);
         DoModal(mb, ModalViewCallback::create<&PurgeInstrumentsCallback>());
         break;
       }
-    case FourCC::ActionRandomName:
+    case Token::ActionRandomName:
       {
         char name[17];
         getRandomName(name, 17);
@@ -309,7 +309,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
         saveAsFlag_ = true;
         break;
       }
-    case FourCC::ActionSave:
+    case Token::ActionSave:
       {
         PersistencyService *persist = PersistencyService::GetInstance();
         char projName[MAX_PROJECT_NAME_LENGTH + 1];
@@ -342,27 +342,27 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
         persist->SaveProjectState(projName);
         break;
       }
-    case FourCC::ActionProjectRename:
+    case Token::ActionProjectRename:
       Trace::Log("PROJECTVIEW", "Project renamed! prev name:%s", nameField_->GetString().c_str());
       saveAsFlag_ = true;
       break;
-    case FourCC::ActionBrowse:
+    case Token::ActionBrowse:
       {
         if (CanExit()) {
           Navigate(VT_SELECTPROJECT);
         }
         break;
       }
-    case FourCC::ActionNewProject:
+    case Token::ActionNewProject:
       {
         MessageBox *mb = MessageBox::Create(*this, "New Project", "Create a new project and", "   lose all changes?",
                                             MBBF_YES | MBBF_NO);
         DoModal(mb, ModalViewCallback::create<&CreateNewProjectCallback>());
         break;
       }
-    case FourCC::ActionBPMChanged:
+    case Token::ActionBPMChanged:
       break;
-    case FourCC::ActionRenderMixdown:
+    case Token::ActionRenderMixdown:
       if (!player->IsRunning()) {
         if (!canRenderFromFirstSongRow()) {
           MessageBox *mb =
@@ -379,7 +379,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
         player->Start(PM_SONG, true, MSM_FILE, true);
       }
       break;
-    case FourCC::ActionRenderStems:
+    case Token::ActionRenderStems:
       if (!player->IsRunning()) {
         if (!canRenderFromFirstSongRow()) {
           MessageBox *mb =
@@ -396,9 +396,9 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
         player->Start(PM_SONG, true, MSM_FILESPLIT, true);
       }
       break;
-    case FourCC::ActionImport:
+    case Token::ActionImport:
       // Switch to the SampleImportView **BUT** to show the Project Pool by default
-      ConfirmStopPlayback(FourCC::ActionImport);
+      ConfirmStopPlayback(Token::ActionImport);
       break;
     default:
       NInvalid;
@@ -451,9 +451,9 @@ void ProjectView::goToSampleImport() {
   }
 }
 
-void ProjectView::ConfirmedStop(FourCC source) {
+void ProjectView::ConfirmedStop(Token source) {
   switch (source) {
-    case FourCC::ActionImport:
+    case Token::ActionImport:
       goToSampleImport();
       break;
   }

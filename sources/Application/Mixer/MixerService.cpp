@@ -235,16 +235,16 @@ bool MixerService::configureRenderPaths() {
   return true;
 }
 
-void MixerService::Execute(FourCC id, float value) {
+void MixerService::Execute(Token id, float value) {
   if (value > 0.5) {
     Audio *audio = Audio::GetInstance();
     int volume = audio->GetMixerVolume();
     switch (id) {
-      case FourCC::TrigVolumeIncrease:
+      case Token::TrigVolumeIncrease:
         if (volume < 100)
           volume += 1;
         break;
-      case FourCC::TrigVolumeDecrease:
+      case Token::TrigVolumeDecrease:
         if (volume > 0)
           volume -= 1;
         break;

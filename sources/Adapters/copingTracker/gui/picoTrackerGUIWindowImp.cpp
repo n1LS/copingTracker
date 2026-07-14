@@ -39,14 +39,14 @@ picoTrackerGUIWindowImp::picoTrackerGUIWindowImp(GUICreateWindowParams &p) {
 
   Config *config = Config::GetInstance();
 
-  auto mirrorUIVar = (WatchedVariable *)config->FindVariable(FourCC::VarMirrorUI);
+  auto mirrorUIVar = (WatchedVariable *)config->FindVariable(Token::VarMirrorUI);
 
   // register to receive updates to mirrorUI setting
   mirrorUIVar->AddObserver(*this);
   auto mirrorUI = mirrorUIVar->GetInt();
   mirrorUIEnabled_ = mirrorUI != 0;
 
-  auto uiFontVar = (WatchedVariable *)config->FindVariable(FourCC::VarUIFont);
+  auto uiFontVar = (WatchedVariable *)config->FindVariable(Token::VarUIFont);
 
   // register to receive updates to mirrorUI setting
   uiFontVar->AddObserver(*this);
@@ -188,7 +188,7 @@ void picoTrackerGUIWindowImp::ProcessEvent(picoTrackerEvent &event) {
       // send font update
       if (instance_->mirrorUIEnabled_) {
         Config *config = Config::GetInstance();
-        auto uiFontVar = config->FindVariable(FourCC::VarUIFont);
+        auto uiFontVar = config->FindVariable(Token::VarUIFont);
         int uifontIndex = uiFontVar->GetInt();
         instance_->SendFont(uifontIndex);
       }
@@ -222,13 +222,13 @@ void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t 
 void picoTrackerGUIWindowImp::Update(Observable &o, I_ObservableData *d) {
   WatchedVariable &v = (WatchedVariable &)o;
   switch (v.GetID()) {
-    case FourCC::VarMirrorUI:
+    case Token::VarMirrorUI:
       {
         auto mirrorUI = v.GetInt();
         mirrorUIEnabled_ = mirrorUI != 0;
         break;
       }
-    case FourCC::VarUIFont:
+    case Token::VarUIFont:
       {
         auto uifont = v.GetInt();
         chargfx_set_font_index(uifont);

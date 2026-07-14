@@ -30,8 +30,8 @@ constexpr int32_t SliceYOffset = 2 * CHAR_HEIGHT;
 } // namespace
 
 SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
-    : FieldView(w, data), sliceIndexVar_(FourCC::SampleInstrumentSlices, 0),
-      sliceStartVar_(FourCC::SampleInstrumentStart, 0), sliceCountVar_(FourCC::Default, 4), instrument_(nullptr),
+    : FieldView(w, data), sliceIndexVar_(Token::SampleInstrumentSlices, 0),
+      sliceStartVar_(Token::SampleInstrumentStart, 0), sliceCountVar_(Token::Default, 4), instrument_(nullptr),
       instrumentIndex_(0), sampleSize_(0), graphFieldPos_(SliceXOffset, SliceYOffset),
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight), hadModal_(false),
       playKeyHeld_(false), previewActive_(false), previewNote_(SampleInstrument::SliceNoteBase),
@@ -342,18 +342,18 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
 
   switch (fourcc) {
 
-    case FourCC::SampleInstrumentSlices:
+    case Token::SampleInstrumentSlices:
       handleSliceSelectionChange();
       ((AppWindow &)w_).SetDirty();
       break;
 
-    case FourCC::SampleInstrumentStart:
+    case Token::SampleInstrumentStart:
       applySliceStart(static_cast<uint32_t>(sliceStartVar_.GetInt()));
       isDirty_ = true;
       ((AppWindow &)w_).SetDirty();
       break;
 
-    case FourCC::ActionAutoSlice:
+    case Token::ActionAutoSlice:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
         MessageBox *mb = MessageBox::Create(*this, "Slices", "Replace current slices?", MBBF_YES | MBBF_NO);
         ((AppWindow &)w_).InvalidateTextCache();
@@ -363,11 +363,11 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
       }
       break;
 
-    case FourCC::ActionSlicingSave:
+    case Token::ActionSlicingSave:
       saveState();
       break;
 
-    case FourCC::ActionSlicingRevert:
+    case Token::ActionSlicingRevert:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
         MessageBox *mb = MessageBox::Create(*this, "Slices", "Restore slices?", MBBF_YES | MBBF_NO);
         ((AppWindow &)w_).InvalidateTextCache();
@@ -407,17 +407,17 @@ void SampleSlicesView::buildFieldLayout() {
 
   position.x_ = 1;
   position.y_ = 23;
-  actionField_.emplace_back("Reset", FourCC::ActionSlicingRevert, position);
+  actionField_.emplace_back("Reset", Token::ActionSlicingRevert, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
   position.x_ += 7;
-  actionField_.emplace_back("Save", FourCC::ActionSlicingSave, position);
+  actionField_.emplace_back("Save", Token::ActionSlicingSave, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
   position.x_ += 6;
-  actionField_.emplace_back("Auto slice", FourCC::ActionAutoSlice, position);
+  actionField_.emplace_back("Auto slice", Token::ActionAutoSlice, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
@@ -709,7 +709,7 @@ void SampleSlicesView::startPreview() {
     // slice note in that state is interpreted as a pitched note, which makes
     // preview play at the wrong speed because for slices we set the "root note"
     // to C2 for the first slice when we enter the slicer
-    Variable *rootNoteVar = instrument_->FindVariable(FourCC::SampleInstrumentRootNote);
+    Variable *rootNoteVar = instrument_->FindVariable(Token::SampleInstrumentRootNote);
     note = static_cast<uint8_t>(rootNoteVar->GetInt());
   }
 

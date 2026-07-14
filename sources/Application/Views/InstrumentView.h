@@ -66,7 +66,7 @@ protected:
   void addNameTextField(I_Instrument *instr, GUIPoint &position);
   void handleInstrumentExport();
 
-  virtual void ConfirmedStop(FourCC source);
+  virtual void ConfirmedStop(Token source);
 
 private:
   void onConfirmInstrumentTypeChange(View &view, ModalView &dialog);
@@ -81,7 +81,7 @@ private:
 
   static constexpr size_t SliceCountLabelSize = 20;
   Project *project_;
-  FourCC lastFocusID_;
+  Token lastFocusID_;
   WatchedVariable instrumentType_;
   int lastSampleIndex_;
   bool suppressSampleChangeWarning_;

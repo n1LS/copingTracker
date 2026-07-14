@@ -199,7 +199,7 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
   memset(buffer, 0, samplecount * 2 * sizeof(fixed));
 
   // Get preview volume from project
-  Variable *v = project_->FindVariable(FourCC::VarPreviewVolume);
+  Variable *v = project_->FindVariable(Token::VarPreviewVolume);
   int previewVol = v->GetInt();
 
   // Apply logarithmic scaling to match human hearing perception

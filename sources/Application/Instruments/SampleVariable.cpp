@@ -12,7 +12,7 @@
 #include "SampleVariable.h"
 #include "SamplePool.h"
 
-SampleVariable::SampleVariable(FourCC id) : WatchedVariable(id, 0, 0, -1) {
+SampleVariable::SampleVariable(Token id) : WatchedVariable(id, 0, 0, -1) {
   SamplePool *pool = SamplePool::GetInstance();
   list_ = pool->GetNameList();
   listSize_ = pool->GetNameListSize();

@@ -284,7 +284,7 @@ void InstrumentBank::OnSampleRemoved(int removedIndex) {
       SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instrument);
 
       // Get the current sample index from the instrument's variable
-      Variable *vSample = sampleInstr->FindVariable(FourCC::SampleInstrumentSample);
+      Variable *vSample = sampleInstr->FindVariable(Token::SampleInstrumentSample);
       if (vSample) {
         int currentSampleIndex = vSample->GetInt();
 

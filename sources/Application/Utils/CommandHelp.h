@@ -28,9 +28,9 @@ struct CommandHelp {
 
 // CAUTION: all strings must fit in the line length limits!
 // Second line is max 26 chars
-CommandHelp getCommandHelp(FourCC command) {
+CommandHelp getCommandHelp(Token command) {
   switch (command) {
-    case FourCC::InstrumentCommandKill: 
+    case Token::InstrumentCommandKill: 
       return CommandHelp( 
         makeTintString(
           "f  7    a 7               ",
@@ -49,7 +49,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "0                         ",
           "                          ")
       );
-    case FourCC::InstrumentCommandArpeggiator:
+    case Token::InstrumentCommandArpeggiator:
       return CommandHelp(
         makeTintString(
           "f  7      abcd            ",
@@ -69,7 +69,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "is 0 the arp starts over. ")
       );
 
-    case FourCC::InstrumentCommandVolume:
+    case Token::InstrumentCommandVolume:
       return CommandHelp(
         makeTintString(
           "f  7    a b 7             ",
@@ -89,7 +89,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandVelocity:
+    case Token::InstrumentCommandVelocity:
       return CommandHelp(
         makeTintString(
           "f  7        b 7           ",
@@ -109,7 +109,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandPitchSlide:
+    case Token::InstrumentCommandPitchSlide:
       return CommandHelp(
         makeTintString(
           "f7    f 7    a b 7        ",
@@ -129,7 +129,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandHop:
+    case Token::InstrumentCommandHop:
       return CommandHelp(
         makeTintString(
           "f  7 a b 7                ",
@@ -149,7 +149,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandLegato:
+    case Token::InstrumentCommandLegato:
       return CommandHelp(
         makeTintString(
           "f  7    a b 7             ",
@@ -169,7 +169,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandRetrigger:
+    case Token::InstrumentCommandRetrigger:
       return CommandHelp(
         makeTintString(
           "f7f77f7    a b 7          ",
@@ -189,7 +189,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandLoopOffset:
+    case Token::InstrumentCommandLoopOffset:
       return CommandHelp(
         makeTintString(
           "f7   f 7    a   7         ",
@@ -209,7 +209,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandTempo:
+    case Token::InstrumentCommandTempo:
       return CommandHelp(
         makeTintString(
           "f7 ff7  a  7              ",
@@ -229,7 +229,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandMidiCC:
+    case Token::InstrumentCommandMidiCC:
       return CommandHelp(
         makeTintString(
           "f7   f 7 a b 7            ",
@@ -249,7 +249,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandMidiPC:
+    case Token::InstrumentCommandMidiPC:
       return CommandHelp(
         makeTintString(
           "f7   f7      f7        b 7",
@@ -269,7 +269,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandPlayOfset:
+    case Token::InstrumentCommandPlayOfset:
       return CommandHelp(
         makeTintString(
           "f7   f 7     a b 7        ",
@@ -289,7 +289,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandFilterResonance:
+    case Token::InstrumentCommandFilterResonance:
       return CommandHelp(
         makeTintString(
           "f7       f7f  a b 7       ",
@@ -309,7 +309,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandLowPassFilter:
+    case Token::InstrumentCommandLowPassFilter:
       return CommandHelp(
         makeTintString(
           "f7f 7   a b 7             ",
@@ -329,7 +329,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandTable:
+    case Token::InstrumentCommandTable:
       return CommandHelp(
         makeTintString(
           "f7f 7    b 7              ",
@@ -349,7 +349,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandCrush:
+    case Token::InstrumentCommandCrush:
       return CommandHelp(
         makeTintString(
           "7       f7 f 7 a 7b7      ",
@@ -369,7 +369,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandFilterCut:
+    case Token::InstrumentCommandFilterCut:
       return CommandHelp(
         makeTintString(
           "f7     f7f7    a b 7      ",
@@ -389,7 +389,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandPan:
+    case Token::InstrumentCommandPan:
       return CommandHelp(
         makeTintString(
           "f  7 a b 7                ",
@@ -409,7 +409,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "FF=left                   ")
       );
 
-    case FourCC::InstrumentCommandGroove:
+    case Token::InstrumentCommandGroove:
       return CommandHelp(
         makeTintString(
           "f 7 f7  a b 7             ",
@@ -429,7 +429,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandInstrumentRetrigger:
+    case Token::InstrumentCommandInstrumentRetrigger:
       return CommandHelp(
         makeTintString(
           "f7         f7f7         b ",
@@ -449,7 +449,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandPitchFineTune:
+    case Token::InstrumentCommandPitchFineTune:
       return CommandHelp(
         makeTintString(
           "f7   f7  f7    a b 7      ",
@@ -469,7 +469,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandDelay:
+    case Token::InstrumentCommandDelay:
       return CommandHelp(
         makeTintString(
           "f7f7f7    a7              ",
@@ -489,7 +489,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandSetInstrumentParameter:
+    case Token::InstrumentCommandSetInstrumentParameter:
       return CommandHelp(
         makeTintString(
           "f7  f7         f7         ",
@@ -509,7 +509,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandStop:
+    case Token::InstrumentCommandStop:
       return CommandHelp(
         makeTintString(
           "f7   f7    f7             ",
@@ -529,7 +529,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandGateOff:
+    case Token::InstrumentCommandGateOff:
       return CommandHelp(
         makeTintString(
           "f7  f 7                   ",
@@ -549,7 +549,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandMidiChord:
+    case Token::InstrumentCommandMidiChord:
       return CommandHelp(
         makeTintString(
           "f7   f 7    abcd7         ",
@@ -569,7 +569,7 @@ CommandHelp getCommandHelp(FourCC command) {
           "                          ")
       );
 
-    case FourCC::InstrumentCommandVibrato:
+    case Token::InstrumentCommandVibrato:
       return CommandHelp(
         makeTintString(
           "f  7     a b 7            ",

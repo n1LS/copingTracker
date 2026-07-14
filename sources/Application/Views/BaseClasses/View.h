@@ -255,9 +255,9 @@ public:
   virtual void DrawChar(int x, int y, const char character, bool transparent = false);
   virtual void DrawRect(const GUIRect &r, Color color);
 
-  virtual void ConfirmedStop(FourCC sender);
+  virtual void ConfirmedStop(Token sender);
   void OnConfirmStopDialog(View &v, ModalView &dialog);
-  bool ConfirmStopPlayback(FourCC source);
+  bool ConfirmStopPlayback(Token source);
 
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
@@ -280,7 +280,7 @@ protected:
   void drawRegularNote(const GUIPoint &pos, uint8_t channel);
   void drawNotes();
   void drawRowNumbers(int x, int y, int start, int numRows);
-  void drawCommandLegend(uint8_t x, uint8_t y, FourCC command);
+  void drawCommandLegend(uint8_t x, uint8_t y, Token command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
@@ -324,7 +324,7 @@ public: // temp hack for modal window constructors
   int32_t prevLeftVU_[SONG_CHANNEL_COUNT + 1];
   int32_t prevRightVU_[SONG_CHANNEL_COUNT + 1];
 
-  FourCC stopPlaybackSource_;
+  Token stopPlaybackSource_;
 
 private:
   uint16_t mask_;

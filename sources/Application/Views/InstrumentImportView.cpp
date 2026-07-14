@@ -256,7 +256,7 @@ void InstrumentImportView::importInstrument(const char *name) {
     instrument->NotifyObservers();
 
     // Log the final state of the instrument for debugging
-    Variable *channelVar = instrument->FindVariable(FourCC::MidiInstrumentChannel);
+    Variable *channelVar = instrument->FindVariable(Token::MidiInstrumentChannel);
     if (channelVar) {
       Trace::Log("INSTRUMENTIMPORT", "Final MIDI channel: %d", channelVar->GetInt());
     }

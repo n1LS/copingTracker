@@ -36,7 +36,7 @@ public:
   void Update(Observable &, I_ObservableData *);
 
 protected:
-  virtual void ConfirmedStop(FourCC sender) override;
+  virtual void ConfirmedStop(Token sender) override;
   void ConfirmReboot();
   void ConfirmMassStorage();
 

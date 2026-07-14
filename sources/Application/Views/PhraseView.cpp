@@ -35,10 +35,10 @@ static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
 
 static void SetCommandCallback(View &v, ModalView &dialog) {
   PhraseView &view = (PhraseView &)v;
-  view.setCurrentlySelectedCommand(FourCC::enum_type(dialog.GetReturnCode()));
+  view.setCurrentlySelectedCommand(Token::enum_type(dialog.GetReturnCode()));
 }
 
-void PhraseView::setCurrentlySelectedCommand(FourCC command) {
+void PhraseView::setCurrentlySelectedCommand(Token command) {
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
 
   if (col_ != colCmd1 && col_ != colCmd2) {
@@ -145,7 +145,7 @@ void PhraseView::updateVolumeValue(ViewUpdateDirection direction, int yOffset) {
 
 void PhraseView::updateCommandValue(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  FourCC cc = (col == colCmd1) ? FourCC::enum_type(step.cmd1) : FourCC::enum_type(step.cmd2);
+  Token cc = (col == colCmd1) ? Token::enum_type(step.cmd1) : Token::enum_type(step.cmd2);
 
   switch (direction) {
     case VUD_LEFT:
@@ -174,7 +174,7 @@ void PhraseView::updateCommandParam(PhraseColumn col, ViewUpdateDirection direct
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
 
   // pick correct input and output for the selected column
-  FourCC currentCmd = (col == colCmdVal1) ? FourCC::enum_type(step.cmd1) : FourCC::enum_type(step.cmd2);
+  Token currentCmd = (col == colCmdVal1) ? Token::enum_type(step.cmd1) : Token::enum_type(step.cmd2);
   uint16_t *target = (col == colCmdVal1) ? &step.param1 : &step.param2;
 
   cmdEditField_.ProcessArrow(DirectionalButtons[direction]);
@@ -187,7 +187,7 @@ void PhraseView::updateCommandParam(PhraseColumn col, ViewUpdateDirection direct
 }
 
 PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData), cmdEdit_(FourCC::ActionEdit, 0), cmdEditPos_(0, 10),
+    : ScreenView(w, viewData), cmdEdit_(Token::ActionEdit, 0), cmdEditPos_(0, 10),
       cmdEditField_(cmdEditPos_, cmdEdit_, 4, "%4.4X", 0, 0xFFFF, 16, true) {
   phrase_ = &(viewData_->song_->phrase_);
   lastPlayingPos_ = 0;
@@ -196,7 +196,7 @@ PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
   col_ = colNote;
   lastNote_ = NOTE_C3;
   lastInstr_ = 0;
-  lastCmd_ = FourCC::InstrumentCommandNone;
+  lastCmd_ = Token::InstrumentCommandNone;
   lastParam_ = 0;
   lastVolume_ = 0xFF;
 
@@ -218,7 +218,7 @@ void PhraseView::Reset() {
   col_ = colNote;
   lastNote_ = NOTE_C3;
   lastInstr_ = 0;
-  lastCmd_ = FourCC::InstrumentCommandNone;
+  lastCmd_ = Token::InstrumentCommandNone;
   lastParam_ = 0;
   lastVolume_ = 0xFF;
   viewData_->phraseCurPos_ = 0;
@@ -387,8 +387,8 @@ void PhraseView::pasteLast() {
     case colCmd1:
       {
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        FourCC cmd1 = FourCC::enum_type(step.cmd1);
-        if (cmd1 == FourCC::InstrumentCommandNone) {
+        Token cmd1 = Token::enum_type(step.cmd1);
+        if (cmd1 == Token::InstrumentCommandNone) {
           step.cmd1 = static_cast<uint8_t>(static_cast<char>(lastCmd_));
           isDirty_ = true;
         } else {
@@ -410,8 +410,8 @@ void PhraseView::pasteLast() {
     case colCmd2:
       {
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        FourCC cmd2 = FourCC::enum_type(step.cmd2);
-        if (cmd2 == FourCC::InstrumentCommandNone) {
+        Token cmd2 = Token::enum_type(step.cmd2);
+        if (cmd2 == Token::InstrumentCommandNone) {
           step.cmd2 = static_cast<uint8_t>(static_cast<char>(lastCmd_));
           isDirty_ = true;
         } else {
@@ -636,7 +636,7 @@ void PhraseView::cutSelection() {
 
   // Loop over selection col, row & clear data inside it
 
-  static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(FourCC::InstrumentCommandNone));
+  static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
   PhraseStep *base = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
 
   for (int i = 0; i < clipboard_.width_; i++) {
@@ -817,8 +817,8 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
         mask &= ~BM_ENTER;
       } else {
         // Create new table for command parameter columns
-        if ((col_ == 3) && FourCC::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) ==
-                               FourCC::InstrumentCommandTable) {
+        if ((col_ == 3) &&
+            Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) == Token::InstrumentCommandTable) {
           TableHolder *th = TableHolder::GetInstance();
           uint16_t next = th->GetNext();
           if (next != NO_MORE_TABLE) {
@@ -854,7 +854,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
       }
     } else {
       if ((col_ == colCmdVal1) &&
-          FourCC::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) == FourCC::InstrumentCommandTable) {
+          Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) == Token::InstrumentCommandTable) {
         TableHolder *th = TableHolder::GetInstance();
         int current = phrase_->steps_[viewData_->currentPhrase_][row_].param1;
         if (current != -1) {
@@ -865,7 +865,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
         }
       }
       if ((col_ == colCmdVal2) &&
-          FourCC::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd2) == FourCC::InstrumentCommandTable) {
+          Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd2) == Token::InstrumentCommandTable) {
         TableHolder *th = TableHolder::GetInstance();
         uint16_t next = th->Clone(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
         if (next != NO_MORE_TABLE) {
@@ -904,7 +904,7 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
 
   if (mask == BM_ENTER) {
     // enter only (check if picker for commands is enabled)
-    bool picker = Config::GetInstance()->FindVariable(FourCC::VarConfigCommandPicker)->GetInt();
+    bool picker = Config::GetInstance()->FindVariable(Token::VarConfigCommandPicker)->GetInt();
 
     if (picker) {
       if (col_ == colCmd1 || col_ == colCmd2) {
@@ -912,11 +912,11 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
         uint8_t cmd = (col_ == colCmd1) ? step.cmd1 : step.cmd2;
 
         // use lastCmd if we hit an empty command field
-        if (cmd == FourCC::InstrumentCommandNone) {
+        if (cmd == Token::InstrumentCommandNone) {
           cmd = lastCmd_;
         }
 
-        CommandView *cv = CommandView::Create(*this, FourCC::enum_type(cmd));
+        CommandView *cv = CommandView::Create(*this, Token::enum_type(cmd));
         DoModal(cv, ModalViewCallback::create<&SetCommandCallback>());
       }
     }
@@ -984,11 +984,11 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
       // Go to table view
       {
         PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        FourCC cmd1 = FourCC::enum_type(step.cmd1);
-        FourCC cmd2 = FourCC::enum_type(step.cmd2);
-        if (cmd1 == FourCC::InstrumentCommandTable) {
+        Token cmd1 = Token::enum_type(step.cmd1);
+        Token cmd2 = Token::enum_type(step.cmd2);
+        if (cmd1 == Token::InstrumentCommandTable) {
           viewData_->currentTable_ = step.param1 & (TABLE_COUNT - 1);
-        } else if (cmd2 == FourCC::InstrumentCommandTable) {
+        } else if (cmd2 == Token::InstrumentCommandTable) {
           viewData_->currentTable_ = step.param2 & (TABLE_COUNT - 1);
         }
       }
@@ -1120,7 +1120,7 @@ void PhraseView::setTextProps(int col, int row, Color textColor = Theme::View::f
 }
 
 void PhraseView::DrawView() {
-  FourCC helpLegendCommand = FourCC::InstrumentCommandNone;
+  Token helpLegendCommand = Token::InstrumentCommandNone;
 
   Clear();
 
@@ -1227,7 +1227,7 @@ void PhraseView::DrawView() {
   pos.x_ += 9;
 
   for (int j = 0; j < 16; j++) {
-    FourCC command = FourCC::enum_type(stepsBase[j].cmd1);
+    Token command = Token::enum_type(stepsBase[j].cmd1);
     setTextProps(colCmd1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
@@ -1257,7 +1257,7 @@ void PhraseView::DrawView() {
   pos.x_ += 17;
 
   for (int j = 0; j < 16; j++) {
-    FourCC command = FourCC::enum_type(stepsBase[j].cmd2);
+    Token command = Token::enum_type(stepsBase[j].cmd2);
     setTextProps(colCmd2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
@@ -1284,7 +1284,7 @@ void PhraseView::DrawView() {
   drawMap();
 
   // Set info area draw mode based on what will be drawn
-  if (helpLegendCommand != FourCC::InstrumentCommandNone) {
+  if (helpLegendCommand != Token::InstrumentCommandNone) {
     infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
     drawCommandLegend(5, SCREEN_HEIGHT - 4, helpLegendCommand);
   } else {

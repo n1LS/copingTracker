@@ -22,7 +22,7 @@ void ServiceRegistry::Register(Service *s) {
 
 void ServiceRegistry::Register(SubService *s) {
   for (auto *svc : services_) {
-    if (svc && svc->GetFourCC() == s->GetFourCC()) {
+    if (svc && svc->GetToken() == s->GetToken()) {
       svc->Register(s);
     };
   };
@@ -30,7 +30,7 @@ void ServiceRegistry::Register(SubService *s) {
 
 void ServiceRegistry::Unregister(SubService *s) {
   for (auto *svc : services_) {
-    if (svc && svc->GetFourCC() == s->GetFourCC()) {
+    if (svc && svc->GetToken() == s->GetToken()) {
       svc->Unregister(s);
     };
   };

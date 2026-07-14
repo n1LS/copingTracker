@@ -23,9 +23,9 @@ Table::Table() {
 
 void Table::Reset() {
   for (int i = 0; i < TABLE_STEPS; i++) {
-    steps_[i].cmd1 = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
-    steps_[i].cmd2 = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
-    steps_[i].cmd3 = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
+    steps_[i].cmd1 = Token(Token::InstrumentCommandNone).raw8();
+    steps_[i].cmd2 = Token(Token::InstrumentCommandNone).raw8();
+    steps_[i].cmd3 = Token(Token::InstrumentCommandNone).raw8();
     steps_[i]._pad = 0;
     steps_[i].param1 = 0;
     steps_[i].param2 = 0;
@@ -40,7 +40,7 @@ void Table::Copy(const Table &other) {
 }
 
 bool Table::IsEmpty() {
-  const uint8_t none = static_cast<uint8_t>(FourCC::InstrumentCommandNone);
+  const uint8_t none = static_cast<uint8_t>(Token::InstrumentCommandNone);
   for (int i = 0; i < TABLE_STEPS; i++) {
     if (steps_[i].cmd1 != none || steps_[i].cmd2 != none || steps_[i].cmd3 != none)
       return false;

@@ -35,22 +35,22 @@ SIDInstrument *SIDInstrument::SID1RenderMaster = 0;
 cRSID SIDInstrument::sid2_(44100);
 SIDInstrument *SIDInstrument::SID2RenderMaster = 0;
 
-Variable SIDInstrument::fltcut1_(FourCC::SIDInstrument1FilterCut, 0x1FF);
-Variable SIDInstrument::fltres1_(FourCC::SIDInstrument1FilterResonance, 0x0);
-Variable SIDInstrument::fltmode1_(FourCC::SIDInstrument1FilterMode, sidFilterModeText, DFM_LAST, 0x0);
-Variable SIDInstrument::vol1_(FourCC::SIDInstrument1Volume, 0xF);
+Variable SIDInstrument::fltcut1_(Token::SIDInstrument1FilterCut, 0x1FF);
+Variable SIDInstrument::fltres1_(Token::SIDInstrument1FilterResonance, 0x0);
+Variable SIDInstrument::fltmode1_(Token::SIDInstrument1FilterMode, sidFilterModeText, DFM_LAST, 0x0);
+Variable SIDInstrument::vol1_(Token::SIDInstrument1Volume, 0xF);
 
-Variable SIDInstrument::fltcut2_(FourCC::SIDInstrument2FilterCut, 0x1FF);
-Variable SIDInstrument::fltres2_(FourCC::SIDInstrument2FilterResonance, 0x0);
-Variable SIDInstrument::fltmode2_(FourCC::SIDInstrument2FilterMode, sidFilterModeText, DFM_LAST, 0x0);
-Variable SIDInstrument::vol2_(FourCC::SIDInstrument2Volume, 0xF);
+Variable SIDInstrument::fltcut2_(Token::SIDInstrument2FilterCut, 0x1FF);
+Variable SIDInstrument::fltres2_(Token::SIDInstrument2FilterResonance, 0x0);
+Variable SIDInstrument::fltmode2_(Token::SIDInstrument2FilterMode, sidFilterModeText, DFM_LAST, 0x0);
+Variable SIDInstrument::vol2_(Token::SIDInstrument2Volume, 0xF);
 
 SIDInstrument::SIDInstrument(SIDInstrumentInstance chip)
-    : I_Instrument(&variables_), chip_(chip), vpw_(FourCC::SIDInstrumentPulseWidth, 0x800),
-      vwf_(FourCC::SIDInstrumentWaveform, sidWaveformText, DWF_LAST, 0x1), vsync_(FourCC::SIDInstrumentVSync, false),
-      vring_(FourCC::SIDInstrumentRingModulator, false), vadsr_(FourCC::SIDInstrumentADSR, 0x2282),
-      vfon_(FourCC::SIDInstrumentFilterOn, false), table_(FourCC::SIDInstrumentTable, -1),
-      tableAuto_(FourCC::SIDInstrumentTableAutomation, false), osc_(FourCC::SIDInstrumentOSCNumber, 0) {
+    : I_Instrument(&variables_), chip_(chip), vpw_(Token::SIDInstrumentPulseWidth, 0x800),
+      vwf_(Token::SIDInstrumentWaveform, sidWaveformText, DWF_LAST, 0x1), vsync_(Token::SIDInstrumentVSync, false),
+      vring_(Token::SIDInstrumentRingModulator, false), vadsr_(Token::SIDInstrumentADSR, 0x2282),
+      vfon_(Token::SIDInstrumentFilterOn, false), table_(Token::SIDInstrumentTable, -1),
+      tableAuto_(Token::SIDInstrumentTableAutomation, false), osc_(Token::SIDInstrumentOSCNumber, 0) {
 
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &vpw_);
@@ -230,9 +230,9 @@ bool SIDInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void SIDInstrument::ProcessCommand(int channel, FourCC cc, uint16_t value) {
+void SIDInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
   switch (cc) {
-    case FourCC::InstrumentCommandGateOff:
+    case Token::InstrumentCommandGateOff:
       int osc = GetOsc();
       sid_->Register[4 + osc * 7] &= ~1; // Set gate bit off
       gate_ = false;
@@ -250,12 +250,12 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SIDInstrument::GetName() {
 }
 
 int SIDInstrument::GetTable() {
-  Variable *v = FindVariable(FourCC::SIDInstrumentTable);
+  Variable *v = FindVariable(Token::SIDInstrumentTable);
   return v->GetInt();
 }
 
 bool SIDInstrument::GetTableAutomation() {
-  Variable *v = FindVariable(FourCC::SIDInstrumentTableAutomation);
+  Variable *v = FindVariable(Token::SIDInstrumentTableAutomation);
   return v->GetBool();
 }
 

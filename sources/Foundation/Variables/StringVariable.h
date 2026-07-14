@@ -18,7 +18,7 @@
 // Stores string data in an internal ETL string buffer.
 template <size_t MaxLen = MAX_VARIABLE_STRING_LENGTH> class StringVariable : public Variable {
 public:
-  explicit StringVariable(FourCC id, const char *value = "") : Variable(id, 0) {
+  explicit StringVariable(Token id, const char *value = "") : Variable(id, 0) {
     type_ = STRING;
     stringValue_ = &storage_;
     setStringValue(value ? value : "");
@@ -44,7 +44,7 @@ private:
 
 template <size_t MaxLen = MAX_VARIABLE_STRING_LENGTH> class StringWatchedVariable : public WatchedVariable {
 public:
-  explicit StringWatchedVariable(FourCC id, const char *value = "") : WatchedVariable(id, false) {
+  explicit StringWatchedVariable(Token id, const char *value = "") : WatchedVariable(id, false) {
     type_ = STRING;
     stringValue_ = &storage_;
     setStringValue(value ? value : "");

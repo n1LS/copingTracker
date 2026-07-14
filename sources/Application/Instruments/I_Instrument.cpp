@@ -110,7 +110,7 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
   //            paramCount);
 
   // Update any UI variables that represent the instrument name
-  Variable *nameVar = FindVariable(FourCC::InstrumentName);
+  Variable *nameVar = FindVariable(Token::InstrumentName);
   if (nameVar && !name_.empty()) {
     nameVar->SetString(name_.c_str());
   }

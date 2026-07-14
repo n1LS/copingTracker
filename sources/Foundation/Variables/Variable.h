@@ -25,15 +25,15 @@ public:
   enum Type { INT, FLOAT, BOOL, CHAR_LIST, STRING };
 
 public:
-  Variable(FourCC id, int value = 0);
-  Variable(FourCC id, float value = 0.0f);
-  Variable(FourCC id, bool value = false);
-  Variable(FourCC id, const char *value) = delete; // Use StringVariable
-  Variable(FourCC id, const char *const *list, int size, int index = -1);
+  Variable(Token id, int value = 0);
+  Variable(Token id, float value = 0.0f);
+  Variable(Token id, bool value = false);
+  Variable(Token id, const char *value) = delete; // Use StringVariable
+  Variable(Token id, const char *const *list, int size, int index = -1);
 
   virtual ~Variable();
 
-  FourCC GetID();
+  Token GetID();
   const char *GetName();
 
   Type GetType();
@@ -58,7 +58,7 @@ protected:
   virtual void onChange() {};
   void setStringValue(const char *value);
 
-  FourCC id_;
+  Token id_;
   Type type_;
   uint8_t listSize_ = 0;
 

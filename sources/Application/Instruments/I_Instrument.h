@@ -114,7 +114,7 @@ public:
     return GetDefaultName();
   }
 
-  virtual void ProcessCommand(int channel, FourCC cc, uint16_t value) = 0;
+  virtual void ProcessCommand(int channel, Token cc, uint16_t value) = 0;
 
   virtual void Purge();
 

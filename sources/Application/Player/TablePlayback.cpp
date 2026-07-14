@@ -132,13 +132,13 @@ bool TablePlayback::ProcessLocalCommand(int row, const Table &table, TablePlayer
 
   bool hopped = false;
 
-  FourCC command = table.getCmd(position_[row], row);
+  Token command = table.getCmd(position_[row], row);
   uint16_t param = table.getParam(position_[row], row);
 
   // First process any positional command
 
   switch (command) {
-    case FourCC::InstrumentCommandHop:
+    case Token::InstrumentCommandHop:
       {
         int count = param >> 8;
         if (hopCount_[position_[row]][row] == 0) {
@@ -167,19 +167,19 @@ bool TablePlayback::ProcessLocalCommand(int row, const Table &table, TablePlayer
   // Now process local command on possibly hopped row
 
   switch (command) {
-    case FourCC::InstrumentCommandKill:
+    case Token::InstrumentCommandKill:
       tpc.timeToLive_ = (param & 0xFF) + 1;
       break;
-    case FourCC::InstrumentCommandInstrumentRetrigger:
+    case Token::InstrumentCommandInstrumentRetrigger:
       tpc.instrRetrigger_ = (param & 0xFF);
       break;
-    case FourCC::InstrumentCommandGroove:
+    case Token::InstrumentCommandGroove:
       param = param & 0x1F;
       groove_.groove_ = (unsigned char)param;
       groove_.position_ = 0;
       groove_.ticks_ = 0;
       break;
-    case FourCC::InstrumentCommandStop:
+    case Token::InstrumentCommandStop:
       Stop();
       break;
   }
@@ -226,13 +226,13 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
 
       if (gs->UpdateGroove(groove_, true)) {
 
-        if ((table_->getCmd(position_[0], 0) != FourCC::InstrumentCommandHop) || (!hopped_[0])) {
+        if ((table_->getCmd(position_[0], 0) != Token::InstrumentCommandHop) || (!hopped_[0])) {
           position_[0] = (position_[0] + 1) % 16;
         }
-        if ((table_->getCmd(position_[1], 1) != FourCC::InstrumentCommandHop) || (!hopped_[1])) {
+        if ((table_->getCmd(position_[1], 1) != Token::InstrumentCommandHop) || (!hopped_[1])) {
           position_[1] = (position_[1] + 1) % 16;
         }
-        if ((table_->getCmd(position_[2], 2) != FourCC::InstrumentCommandHop) || (!hopped_[2])) {
+        if ((table_->getCmd(position_[2], 2) != Token::InstrumentCommandHop) || (!hopped_[2])) {
           position_[2] = (position_[2] + 1) % 16;
         }
 

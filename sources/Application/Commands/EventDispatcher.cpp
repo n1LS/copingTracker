@@ -42,36 +42,36 @@ EventDispatcher::~EventDispatcher() {
   timer_ = nullptr;
 }
 
-void EventDispatcher::Execute(FourCC id, float value) {
+void EventDispatcher::Execute(Token id, float value) {
 
   if (window_) {
     GUIEventPadButtonType mapping = EPBT_INVALID;
     switch (id) {
-      case FourCC::TrigEventEnter:
+      case Token::TrigEventEnter:
         mapping = EPBT_A;
         break;
-      case FourCC::TrigEventEdit:
+      case Token::TrigEventEdit:
         mapping = EPBT_B;
         break;
-      case FourCC::TrigEventLeft:
+      case Token::TrigEventLeft:
         mapping = EPBT_LEFT;
         break;
-      case FourCC::TrigEventRight:
+      case Token::TrigEventRight:
         mapping = EPBT_RIGHT;
         break;
-      case FourCC::TrigEventUp:
+      case Token::TrigEventUp:
         mapping = EPBT_UP;
         break;
-      case FourCC::TrigEventDown:
+      case Token::TrigEventDown:
         mapping = EPBT_DOWN;
         break;
-      case FourCC::TrigEventAlt:
+      case Token::TrigEventAlt:
         mapping = EPBT_L;
         break;
-      case FourCC::TrigEventNav:
+      case Token::TrigEventNav:
         mapping = EPBT_R;
         break;
-      case FourCC::TrigEventPlay:
+      case Token::TrigEventPlay:
         mapping = EPBT_START;
         break;
         //	EPBT_SELECT

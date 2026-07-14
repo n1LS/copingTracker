@@ -13,7 +13,7 @@
 #include "Foundation/Types/Types.h"
 
 Persistent::Persistent(const char *nodeName, bool registerWithService)
-    : SubService(FourCC::ServicePersistency, registerWithService), nodeName_(nodeName) {
+    : SubService(Token::ServicePersistency, registerWithService), nodeName_(nodeName) {
 }
 
 void Persistent::Save(tinyxml2::XMLPrinter *printer) {

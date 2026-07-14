@@ -54,7 +54,7 @@ public:
   void SetMasterVolume(int);
   int GetPlayedBufferPercentage();
 
-  virtual void Execute(FourCC id, float value);
+  virtual void Execute(Token id, float value);
 
   AudioOut *GetAudioOut();
   MixerServiceMode GetMode() const {

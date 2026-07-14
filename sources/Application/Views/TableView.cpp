@@ -19,9 +19,6 @@
 #include <nanoprintf.h>
 
 namespace {
-inline uint8_t encodeCommand(FourCC command) {
-  return static_cast<uint8_t>(static_cast<char>(command));
-}
 
 inline uint8_t &getCmdRef(Table &table, int row, int col) {
   switch (col) {
@@ -44,16 +41,17 @@ inline uint16_t &getParamRef(Table &table, int row, int col) {
       return table.steps_[row].param3;
   }
 }
+
 } // namespace
 
 // static callback handlers
 
 static void SetCommandCallback(View &v, ModalView &dialog) {
   TableView &view = (TableView &)v;
-  view.setCurrentlySelectedCommand(FourCC::enum_type(dialog.GetReturnCode()));
+  view.setCurrentlySelectedCommand(Token::enum_type(dialog.GetReturnCode()));
 }
 
-void TableView::setCurrentlySelectedCommand(FourCC command) {
+void TableView::setCurrentlySelectedCommand(Token command) {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
   TableStep &step = table.steps_[row_];
 
@@ -79,7 +77,7 @@ void TableView::setCurrentlySelectedCommand(FourCC command) {
 
 // constructor
 TableView::TableView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData), cmdEdit_(FourCC::ActionEdit, 0), cmdEditPos_(0, 10),
+    : ScreenView(w, viewData), cmdEdit_(Token::ActionEdit, 0), cmdEditPos_(0, 10),
       cmdEditField_(cmdEditPos_, cmdEdit_, 4, "%4.4X", 0, 0xFFFF, 16, true) {
   row_ = 0;
   col_ = colCmd1;
@@ -87,7 +85,7 @@ TableView::TableView(GUIWindow &w, ViewData *viewData)
   lastVol_ = 0;
   lastTick_ = 0;
   lastTsp_ = 0;
-  lastCmd_ = FourCC::InstrumentCommandNone;
+  lastCmd_ = Token::InstrumentCommandNone;
   lastParam_ = 0;
 
   clipboard_.active_ = false;
@@ -104,7 +102,7 @@ void TableView::Reset() {
   lastVol_ = 0;
   lastTick_ = 0;
   lastTsp_ = 0;
-  lastCmd_ = FourCC::InstrumentCommandNone;
+  lastCmd_ = Token::InstrumentCommandNone;
   lastParam_ = 0;
   cmdEdit_.SetInt(0, false);
 
@@ -231,19 +229,19 @@ void TableView::cutSelection() {
       const int row = j + clipboard_.row_;
       switch (i + clipboard_.col_) {
         case colCmd1:
-          table.steps_[row].cmd1 = encodeCommand(FourCC::InstrumentCommandNone);
+          table.steps_[row].cmd1 = Token(Token::InstrumentCommandNone).raw8();
           break;
         case colCmdVal1:
           table.steps_[row].param1 = 0x0000;
           break;
         case colCmd2:
-          table.steps_[row].cmd2 = encodeCommand(FourCC::InstrumentCommandNone);
+          table.steps_[row].cmd2 = Token(Token::InstrumentCommandNone).raw8();
           break;
         case colCmdVal2:
           table.steps_[row].param2 = 0x0000;
           break;
         case colCmd3:
-          table.steps_[row].cmd3 = encodeCommand(FourCC::InstrumentCommandNone);
+          table.steps_[row].cmd3 = Token(Token::InstrumentCommandNone).raw8();
           break;
         case colCmdVal3:
           table.steps_[row].param3 = 0x0000;
@@ -371,7 +369,7 @@ void TableView::updateCursorValue(int offset) {
   unsigned char *c = 0;
   unsigned char limit = 0;
   bool wrap = false;
-  FourCC *cc;
+  Token *cc;
 
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
@@ -381,35 +379,35 @@ void TableView::updateCursorValue(int offset) {
     case colCmd3:
       {
         const int commandColumn = col_ / 2;
-        FourCC command = table.getCmd(row_, commandColumn);
+        Token command = table.getCmd(row_, commandColumn);
         // TODO: clean this up, it's wild.
         switch (offset) {
           case 0x01:
             command = CommandList::GetNext(command);
-            if (command == FourCC::InstrumentCommandTable) {
+            if (command == Token::InstrumentCommandTable) {
               command = CommandList::GetNext(command);
             }
             break;
           case 0x10:
             command = CommandList::GetNextAlpha(command);
-            if (command == FourCC::InstrumentCommandTable) {
+            if (command == Token::InstrumentCommandTable) {
               command = CommandList::GetNextAlpha(command);
             }
             break;
           case -0x01:
             command = CommandList::GetPrev(command);
-            if (command == FourCC::InstrumentCommandTable) {
+            if (command == Token::InstrumentCommandTable) {
               command = CommandList::GetPrev(command);
             }
             break;
           case -0x10:
             command = CommandList::GetPrevAlpha(command);
-            if (command == FourCC::InstrumentCommandTable) {
+            if (command == Token::InstrumentCommandTable) {
               command = CommandList::GetPrevAlpha(command);
             }
             break;
         }
-        getCmdRef(table, row_, commandColumn) = encodeCommand(command);
+        getCmdRef(table, row_, commandColumn) = Token(command).raw8();
         lastCmd_ = command;
         break;
       }
@@ -434,7 +432,7 @@ void TableView::updateCursorValue(int offset) {
             break;
         }
         const int commandColumn = col_ / 2;
-        FourCC currentCmd = table.getCmd(row_, commandColumn);
+        Token currentCmd = table.getCmd(row_, commandColumn);
         uint16_t paramValue = cmdEdit_.GetInt();
         paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
         cmdEdit_.SetInt(paramValue);
@@ -456,7 +454,7 @@ void TableView::pasteLast() {
       {
         const int commandColumn = col_ / 2;
         uint8_t &command = getCmdRef(table, row_, commandColumn);
-        if (command == encodeCommand(FourCC::InstrumentCommandNone)) {
+        if (command == Token(Token::InstrumentCommandNone).raw8()) {
           command = static_cast<uint8_t>(lastCmd_);
           isDirty_ = true;
         } else {
@@ -492,13 +490,13 @@ void TableView::processNormalButtonMask(uint16_t mask) {
 
   if (mask == BM_ENTER) {
     // enter only (check if picker for commands is enabled)
-    bool picker = Config::GetInstance()->FindVariable(FourCC::VarConfigCommandPicker)->GetInt();
+    bool picker = Config::GetInstance()->FindVariable(Token::VarConfigCommandPicker)->GetInt();
 
     if (picker) {
       if (col_ == colCmd1 || col_ == colCmd2 || col_ == colCmd3) {
         Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
         TableStep &step = table.steps_[row_];
-        uint8_t cmd = FourCC::InstrumentCommandNone;
+        uint8_t cmd = Token::InstrumentCommandNone;
 
         switch (col_) {
           case colCmd1:
@@ -513,11 +511,11 @@ void TableView::processNormalButtonMask(uint16_t mask) {
         }
 
         // use lastCmd if we hit an empty command field
-        if (cmd == FourCC::InstrumentCommandNone) {
+        if (cmd == Token::InstrumentCommandNone) {
           cmd = lastCmd_;
         }
 
-        CommandView *cv = CommandView::Create(*this, FourCC::enum_type(cmd));
+        CommandView *cv = CommandView::Create(*this, Token::enum_type(cmd));
         DoModal(cv, ModalViewCallback::create<&SetCommandCallback>());
       }
     }
@@ -653,7 +651,7 @@ void TableView::setTextProps(int row, int col, Color color = Theme::View::fg) {
 }
 
 void TableView::DrawView() {
-  FourCC helpLegendCommand = FourCC::InstrumentCommandNone;
+  Token helpLegendCommand = Token::InstrumentCommandNone;
 
   Clear();
 
@@ -679,7 +677,7 @@ void TableView::DrawView() {
   GUIPoint pos = anchor;
 
   for (int j = 0; j < 16; j++) {
-    FourCC command = table.getCmd(j, 0);
+    Token command = table.getCmd(j, 0);
     setTextProps(0, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
@@ -710,7 +708,7 @@ void TableView::DrawView() {
   pos.x_ += 8;
 
   for (int j = 0; j < 16; j++) {
-    FourCC command = table.getCmd(j, 1);
+    Token command = table.getCmd(j, 1);
     setTextProps(2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
@@ -740,7 +738,7 @@ void TableView::DrawView() {
   pos.x_ += 16;
 
   for (int j = 0; j < 16; j++) {
-    FourCC command = table.getCmd(j, 2);
+    Token command = table.getCmd(j, 2);
     setTextProps(4, j, Theme::Phrase::command3(j % ALT_ROW_NUMBER == 0));
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
@@ -772,7 +770,7 @@ void TableView::DrawView() {
   drawMap();
 
   // Set info area draw mode based on what will be drawn
-  if (helpLegendCommand != FourCC::InstrumentCommandNone) {
+  if (helpLegendCommand != Token::InstrumentCommandNone) {
     infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
     drawCommandLegend(5, SCREEN_HEIGHT - 4, helpLegendCommand);
   } else {

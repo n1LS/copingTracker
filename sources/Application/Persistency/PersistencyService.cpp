@@ -23,7 +23,7 @@
 #define PROJECT_STATE_FILE SD_BASE_DIR "/.current"
 #define MAX_DELETE_DEPTH 3
 
-PersistencyService::PersistencyService() : Service(FourCC::ServicePersistency) {};
+PersistencyService::PersistencyService() : Service(Token::ServicePersistency) {};
 
 PersistencyResult PersistencyService::CreateProject() {
   Trace::Log("APPLICATION", "create new project");
@@ -528,7 +528,7 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
   }
 
   // Set the instrument name
-  Variable *nameVar = instrument->FindVariable(FourCC::InstrumentName);
+  Variable *nameVar = instrument->FindVariable(Token::InstrumentName);
   if (nameVar) {
     nameVar->SetString(instrumentName.c_str());
   }

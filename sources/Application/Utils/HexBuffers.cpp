@@ -74,8 +74,8 @@ void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, uint16_t
   saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(uint16_t));
 }
 
-void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, FourCC *src, unsigned len) {
-  saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(FourCC::enum_type));
+void saveHexBuffer(tinyxml2::XMLPrinter *printer, const char *nodeName, Token *src, unsigned len) {
+  saveHexBuffer(printer, nodeName, (unsigned char *)src, len * sizeof(Token::enum_type));
 }
 
 void restoreHexBuffer(PersistencyDocument *doc, unsigned char *destination) {

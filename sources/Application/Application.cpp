@@ -44,7 +44,7 @@ bool Application::Init(GUICreateWindowParams &params) {
   Config *config = Config::GetInstance();
 
   if (config) {
-    Variable *v = config->FindVariable(FourCC::VarBacklightLevel);
+    Variable *v = config->FindVariable(Token::VarBacklightLevel);
     if (v) {
       unsigned char brightness = (unsigned char)v->GetInt();
       System::GetInstance()->SetDisplayBrightness(brightness);

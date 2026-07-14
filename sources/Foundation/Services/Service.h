@@ -23,7 +23,7 @@ public:
   virtual ~Service();
   virtual void Register(SubService *);
   virtual void Unregister(SubService *);
-  int GetFourCC() {
+  int GetToken() {
     return fourCC_;
   };
   etl::vector<SubService *, MaxSubServices> &SubServices() {

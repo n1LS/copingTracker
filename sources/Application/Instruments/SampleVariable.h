@@ -17,7 +17,7 @@
 
 class SampleVariable : public WatchedVariable, public I_Observer {
 public:
-  SampleVariable(FourCC id);
+  SampleVariable(Token id);
   ~SampleVariable();
 
 protected:

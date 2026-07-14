@@ -18,25 +18,25 @@
 #include <stdlib.h>
 #include <string.h>
 
-Variable::Variable(FourCC id, float value) : id_(id) {
+Variable::Variable(Token id, float value) : id_(id) {
   value_.float_ = value;
   defaultValue_.float_ = value;
   type_ = FLOAT;
 }
 
-Variable::Variable(FourCC id, int value) : id_(id) {
+Variable::Variable(Token id, int value) : id_(id) {
   value_.int_ = value;
   defaultValue_.int_ = value;
   type_ = INT;
 }
 
-Variable::Variable(FourCC id, bool value) : id_(id) {
+Variable::Variable(Token id, bool value) : id_(id) {
   value_.bool_ = value;
   defaultValue_.bool_ = value;
   type_ = BOOL;
 }
 
-Variable::Variable(FourCC id, const char *const *list, int size, int index) : id_(id) {
+Variable::Variable(Token id, const char *const *list, int size, int index) : id_(id) {
   list_ = list;
   listSize_ = size;
   value_.index_ = index;
@@ -50,12 +50,12 @@ Variable::Type Variable::GetType() {
   return type_;
 }
 
-FourCC Variable::GetID() {
+Token Variable::GetID() {
   return id_;
 }
 
 const char *Variable::GetName() {
-  return FourCC(id_).c_str();
+  return Token(id_).c_str();
 }
 
 void Variable::SetFloat(float value, bool notify) {
