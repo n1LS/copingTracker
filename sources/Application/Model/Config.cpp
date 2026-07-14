@@ -15,6 +15,7 @@
 #include "Externals/etl/include/etl/flat_map.h"
 #include "Externals/etl/include/etl/string.h"
 #include "Externals/etl/include/etl/string_utilities.h"
+#include "Foundation/Types/Types.h"
 #include "Services/Midi/MidiService.h"
 #include "System/Console/Trace.h"
 #include "System/Console/nanoprintf.h"
@@ -22,7 +23,6 @@
 #include "System/FileSystem/I_File.h"
 #include "ThemeConstants.h"
 #include "Variable.h"
-#include "Foundation/Types/Types.h"
 #include <stdlib.h>
 
 #define CONFIG_VERSION_NUMBER 1
@@ -67,8 +67,6 @@ struct ConfigParam {
   bool isString;
 };
 
-
-
 // Define parameters as a static array instead of a ETL flat_map for example,
 // because using a flat_map static requires too much stack space for
 // initialization
@@ -110,8 +108,7 @@ static const ConfigParam configParams[] = {
 };
 
 Config::Config()
-    : VariableContainer(&variables_),
-      color0_(FourCC::VarColor_0, static_cast<int>(ThemeConstants::DEFAULT_COLOR0)),
+    : VariableContainer(&variables_), color0_(FourCC::VarColor_0, static_cast<int>(ThemeConstants::DEFAULT_COLOR0)),
       color1_(FourCC::VarColor_1, static_cast<int>(ThemeConstants::DEFAULT_COLOR1)),
       color2_(FourCC::VarColor_2, static_cast<int>(ThemeConstants::DEFAULT_COLOR2)),
       color3_(FourCC::VarColor_3, static_cast<int>(ThemeConstants::DEFAULT_COLOR3)),
@@ -262,12 +259,10 @@ void Config::WriteColorVariables(tinyxml2::XMLPrinter *printer) {
     FourCC id = var->GetID();
 
     // Check if this is a color variable
-    if (id == FourCC::VarColor_0 || id == FourCC::VarColor_1 || id == FourCC::VarColor_2 ||
-        id == FourCC::VarColor_3 || id == FourCC::VarColor_4 || id == FourCC::VarColor_5 ||
-        id == FourCC::VarColor_6 || id == FourCC::VarColor_7 || id == FourCC::VarColor_8 ||
-        id == FourCC::VarColor_9 || id == FourCC::VarColor_A || id == FourCC::VarColor_B ||
-        id == FourCC::VarColor_C || id == FourCC::VarColor_D || id == FourCC::VarColor_E ||
-        id == FourCC::VarColor_F) {
+    if (id == FourCC::VarColor_0 || id == FourCC::VarColor_1 || id == FourCC::VarColor_2 || id == FourCC::VarColor_3 ||
+        id == FourCC::VarColor_4 || id == FourCC::VarColor_5 || id == FourCC::VarColor_6 || id == FourCC::VarColor_7 ||
+        id == FourCC::VarColor_8 || id == FourCC::VarColor_9 || id == FourCC::VarColor_A || id == FourCC::VarColor_B ||
+        id == FourCC::VarColor_C || id == FourCC::VarColor_D || id == FourCC::VarColor_E || id == FourCC::VarColor_F) {
 
       // Open a Color element
       printer->OpenElement(XML_ELEM_COLOR);
@@ -382,9 +377,8 @@ void Config::ReadColorVariable(PersistencyDocument *doc) {
             var->SetInt(value);
             Trace::Log("CONFIG", "Read Color: %s = %d", colorName, value);
           }
-        }
-        else {
-            Trace::Log("CONFIG", "Failed to read Color: %s = %d", colorName, value);
+        } else {
+          Trace::Log("CONFIG", "Failed to read Color: %s = %d", colorName, value);
         }
       }
     }
@@ -433,12 +427,10 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
     FourCC id = var->GetID();
 
     // Skip color variables as they will be handled by WriteColorVariables
-    if (id == FourCC::VarColor_0 || id == FourCC::VarColor_1 || id == FourCC::VarColor_2 ||
-        id == FourCC::VarColor_3 || id == FourCC::VarColor_4 || id == FourCC::VarColor_5 ||
-        id == FourCC::VarColor_6 || id == FourCC::VarColor_7 || id == FourCC::VarColor_8 ||
-        id == FourCC::VarColor_9 || id == FourCC::VarColor_A || id == FourCC::VarColor_B ||
-        id == FourCC::VarColor_C || id == FourCC::VarColor_D || id == FourCC::VarColor_E ||
-        id == FourCC::VarColor_F) {
+    if (id == FourCC::VarColor_0 || id == FourCC::VarColor_1 || id == FourCC::VarColor_2 || id == FourCC::VarColor_3 ||
+        id == FourCC::VarColor_4 || id == FourCC::VarColor_5 || id == FourCC::VarColor_6 || id == FourCC::VarColor_7 ||
+        id == FourCC::VarColor_8 || id == FourCC::VarColor_9 || id == FourCC::VarColor_A || id == FourCC::VarColor_B ||
+        id == FourCC::VarColor_C || id == FourCC::VarColor_D || id == FourCC::VarColor_E || id == FourCC::VarColor_F) {
       it++;
       continue;
     }

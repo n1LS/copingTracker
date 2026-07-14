@@ -139,12 +139,17 @@ void DeviceView::DrawView() {
   FieldView::Redraw();
   drawMap();
 
-  // todo: also merge this with the other 2 instances in nullview and the other one
-  char buffer[33];
-  npf_snprintf(buffer, sizeof(buffer), "Build %s%s_%s", PROJECT_NUMBER, PROJECT_RELEASE, BUILD_COUNT);
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);
-  DrawString(SCREEN_MAP_WIDTH + 1, SCREEN_HEIGHT - 1, buffer);
+  DrawString(9, SCREEN_HEIGHT - 3, VERSION_STRING);
+  DrawString(9, SCREEN_HEIGHT - 2, "props-north.com/one");
+  DrawString(9, SCREEN_HEIGHT - 1, "props-north.com/discord");
+
+  // Draw Logo
+
+  DrawString(5, SCREEN_HEIGHT - 3, char_logo_1);
+  DrawString(5, SCREEN_HEIGHT - 2, char_logo_2);
+  DrawString(5, SCREEN_HEIGHT - 1, char_logo_3);
 }
 
 void DeviceView::Update(Observable &, I_ObservableData *data) {

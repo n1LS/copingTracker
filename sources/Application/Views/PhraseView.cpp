@@ -1158,10 +1158,10 @@ void PhraseView::DrawView() {
       lastInstr = instr;
       instrObj = bank->GetInstrument(lastInstr);
     }
-    
+
     unsigned char effectiveInstr = lastInstr;
     setTextProps(colNote, j, Theme::Phrase::note(j % ALT_ROW_NUMBER == 0));
-    
+
     if (d == NO_NOTE) {
       DrawString(pos.x_, pos.y_, "---");
     } else if (d == NOTE_OFF) {
@@ -1171,17 +1171,17 @@ void PhraseView::DrawView() {
       bool invalidSlice = false;
       uint8_t sliceIndex = 0;
       instrObj->noteDisplay(d, buffer);
-     DrawString(pos.x_, pos.y_, buffer);
+      DrawString(pos.x_, pos.y_, buffer);
     }
     pos.y_++;
   }
-  
+
   // Draw instruments
   char buffer[6];
-  
+
   pos = GetAnchor();
   pos.x_ += 4;
-  
+
   for (int j = 0; j < 16; j++) {
     SetBackgroundColor(Theme::View::bg);
     setTextProps(colInstrument, j, Theme::Phrase::instrument(j % ALT_ROW_NUMBER == 0));

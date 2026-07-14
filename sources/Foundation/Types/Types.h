@@ -300,8 +300,8 @@ struct FourCC {
     return static_cast<uint8_t>(*this);
   }
 
-#define ETL_ENUM_TYPE_16(value, name) \
-  static_assert(sizeof(name) <= 17, "ETL_ENUM_TYPE string \"" name "\" exceeds 16 characters"); \
+#define ETL_ENUM_TYPE_16(value, name)                                                                                  \
+  static_assert(sizeof(name) <= 17, "ETL_ENUM_TYPE string \"" name "\" exceeds 16 characters");                        \
   ETL_ENUM_TYPE(value, name)
 
   ETL_DECLARE_ENUM_TYPE(FourCC, uint8_t)

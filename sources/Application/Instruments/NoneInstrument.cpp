@@ -57,4 +57,3 @@ void NoneInstrument::GetTableState(TableSaveState &state) {
 
 void NoneInstrument::SetTableState(TableSaveState &state) {
 }
-

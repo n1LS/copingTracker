@@ -83,11 +83,11 @@ void UIBigHexVarField::ProcessArrow(uint16_t mask) {
       }
       break;
   }
-  
+
   if (value > max_) {
     value = (wrap_) ? value - max_ + min_ - 1 : max_;
   }
-  
+
   if (value < min_) {
     value = (wrap_) ? max_ + (value - min_) + 1 : min_;
   }

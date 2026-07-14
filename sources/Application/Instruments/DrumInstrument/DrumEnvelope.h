@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "DrumEnums.h"
-#include "Application/Instruments/ChiptuneInstrument/ChiptuneTables.h"
 #include "Application/Instruments/ChiptuneInstrument/ChiptuneMath.h"
+#include "Application/Instruments/ChiptuneInstrument/ChiptuneTables.h"
+#include "DrumEnums.h"
 
 #pragma pack(push, 1)
 typedef struct drum_envelope_t {

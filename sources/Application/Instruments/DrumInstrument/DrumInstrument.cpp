@@ -14,18 +14,18 @@
 drum_voice_t DrumInstrument::voices_[SONG_CHANNEL_COUNT];
 
 DrumInstrument::DrumInstrument()
-    : I_Instrument(&variables_), vVoice0_(FourCC::DrumInstrumentParamsVoice0, defaultInstrument0), 
-    vVoice1_(FourCC::DrumInstrumentParamsVoice1, defaultInstrument1), 
-    vVoice2_(FourCC::DrumInstrumentParamsVoice2, defaultInstrument2), 
-    vVoice3_(FourCC::DrumInstrumentParamsVoice3, defaultInstrument3), 
-    vVoice4_(FourCC::DrumInstrumentParamsVoice4, defaultInstrument4), 
-    vVoice5_(FourCC::DrumInstrumentParamsVoice5, defaultInstrument5), 
-    vVoice6_(FourCC::DrumInstrumentParamsVoice6, defaultInstrument6), 
-    vVoice7_(FourCC::DrumInstrumentParamsVoice7, defaultInstrument7), 
-    vVoice8_(FourCC::DrumInstrumentParamsVoice8, defaultInstrument8), 
-    vVoice9_(FourCC::DrumInstrumentParamsVoice9, defaultInstrument9), 
-    vVoice10_(FourCC::DrumInstrumentParamsVoice10, defaultInstrument10), 
-    vVoice11_(FourCC::DrumInstrumentParamsVoice11, defaultInstrument11) {
+    : I_Instrument(&variables_), vVoice0_(FourCC::DrumInstrumentParamsVoice0, defaultInstrument0),
+      vVoice1_(FourCC::DrumInstrumentParamsVoice1, defaultInstrument1),
+      vVoice2_(FourCC::DrumInstrumentParamsVoice2, defaultInstrument2),
+      vVoice3_(FourCC::DrumInstrumentParamsVoice3, defaultInstrument3),
+      vVoice4_(FourCC::DrumInstrumentParamsVoice4, defaultInstrument4),
+      vVoice5_(FourCC::DrumInstrumentParamsVoice5, defaultInstrument5),
+      vVoice6_(FourCC::DrumInstrumentParamsVoice6, defaultInstrument6),
+      vVoice7_(FourCC::DrumInstrumentParamsVoice7, defaultInstrument7),
+      vVoice8_(FourCC::DrumInstrumentParamsVoice8, defaultInstrument8),
+      vVoice9_(FourCC::DrumInstrumentParamsVoice9, defaultInstrument9),
+      vVoice10_(FourCC::DrumInstrumentParamsVoice10, defaultInstrument10),
+      vVoice11_(FourCC::DrumInstrumentParamsVoice11, defaultInstrument11) {
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &vVoice0_);

@@ -13,9 +13,9 @@
 
 #include "System/Console/Trace.h"
 
+#include "../ChiptuneInstrument/ChiptuneTables.h"
 #include "DrumEnums.h"
 #include "DrumEnvelope.h"
-#include "../ChiptuneInstrument/ChiptuneTables.h"
 
 #define SAMPLE_LEVEL 0x0FFF'FFFF
 #define HALF_SAMPLE_LEVEL (SAMPLE_LEVEL >> 1)
@@ -26,10 +26,10 @@
  ******************************************************************************/
 
 typedef struct drum_parameters_t {
-  uint8_t wave:4;
-  uint8_t decay:4;
-  uint8_t note:4;
-  uint8_t pitch:4;
+  uint8_t wave : 4;
+  uint8_t decay : 4;
+  uint8_t note : 4;
+  uint8_t pitch : 4;
   uint16_t padding;
 } drum_parameters_t;
 
@@ -59,22 +59,22 @@ static_assert(sizeof(drum_parameters_t) == 4, "Check sizeof(drum_parameters_t) i
 typedef struct drum_voice_t {
   drum_parameters_t parameters; // parameters passed from instrument
 
-  uint32_t phase = 0;        // oscillator phase
-  int32_t frequency = 0;     // precomp'd oscillator frequency
-  int32_t base_frequency = 0;     // precomp'd oscillator frequency
-  uint32_t lastSample = 0; // used for both the last sample for pulse smoothing
-                           // and as the lcg register for the noise
+  uint32_t phase = 0;         // oscillator phase
+  int32_t frequency = 0;      // precomp'd oscillator frequency
+  int32_t base_frequency = 0; // precomp'd oscillator frequency
+  uint32_t lastSample = 0;    // used for both the last sample for pulse smoothing
+                              // and as the lcg register for the noise
 
   uint8_t drive;    // unused currently
   uint8_t bitcrush; // bitcrush setting (only settable via command)
 
-  uint8_t note;              // current base note
+  uint8_t note;          // current base note
   drum_wave_type_e wave; // selected waveform
 
   uint16_t lfsr = 17; // shift register for the noise generators
 
   drum_envelope_t envelope; // volume envelope, size is 9 bytes
-  pitch_envelope_t pitch; // pitch envelope
+  pitch_envelope_t pitch;   // pitch envelope
 
   uint16_t tick; // sample counter for 100Hz updates
   uint32_t time; // sample counter
@@ -85,8 +85,8 @@ typedef struct drum_voice_t {
   uint32_t timeToLive;
 
   struct flags {
-    uint8_t retrigger:1;
-    uint8_t padding:7;
+    uint8_t retrigger : 1;
+    uint8_t padding : 7;
   } flags;
 
   uint8_t padding[3];
@@ -100,10 +100,10 @@ typedef struct drum_voice_t {
 
   inline void tick_100Hz() {
     // processing at ~100Hz
-    
+
     // volume
     envelope.tick();
-    
+
     // recompute combined gain when envelope, pan or volume changes
     level = (volume * envelope.value) >> 16;
 
@@ -185,7 +185,7 @@ typedef struct drum_voice_t {
       case drumWaveNoiseSN76489: // noise: SN76489
         sample = voice_noise_lfsr(3, 14);
         break;
-      case drumWaveNoiseWhite:  // noise: white noise
+      case drumWaveNoiseWhite:                            // noise: white noise
         lastSample = (lastSample * 1664525) + 1013904223; // frequency independent
         sample = lastSample & SAMPLE_LEVEL;
         break;
@@ -209,11 +209,13 @@ typedef struct drum_voice_t {
     *right = sample;
   }
 
-  inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const drum_parameters_t inParameters, bool keepClocks = false) {
-    Trace::Log("Note On", "%d: %d %d %d %d", note % 12, inParameters.wave, inParameters.decay, inParameters.pitch, inParameters.note);
+  inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const drum_parameters_t inParameters,
+                      bool keepClocks = false) {
+    Trace::Log("Note On", "%d: %d %d %d %d", note % 12, inParameters.wave, inParameters.decay, inParameters.pitch,
+               inParameters.note);
     // bool retrigger is currently unused
     parameters = inParameters;
-    
+
     // store volume
     volume = inVolume;
 
