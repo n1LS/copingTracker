@@ -30,13 +30,14 @@ void FieldView::SetFocus(UIField *field) {
     return;
 
   focus_->SetFocus();
+  isDirty_ = true;
 }
 
 void FieldView::ClearFocus() {
   if (focus_) {
     focus_->ClearFocus();
   };
-  focus_ = 0;
+  focus_ = nullptr;
 }
 
 UIField *FieldView::GetFocus() {
@@ -128,34 +129,22 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
         if (mask & BM_DOWN) {
           UIField *next = findAdjacentField(true, +1);
-          focus_->ClearFocus();
-          focus_ = next;
-          focus_->SetFocus();
-          isDirty_ = true;
+          SetFocus(next);
         }
 
         if (mask & BM_UP) {
           UIField *prev = findAdjacentField(true, -1);
-          focus_->ClearFocus();
-          focus_ = prev;
-          focus_->SetFocus();
-          isDirty_ = true;
+          SetFocus(prev);
         }
 
         if (mask & BM_RIGHT) {
           UIField *next = findAdjacentField(false, +1);
-          focus_->ClearFocus();
-          focus_ = next;
-          focus_->SetFocus();
-          isDirty_ = true;
+          SetFocus(next);
         }
 
         if (mask & BM_LEFT) {
           UIField *prev = findAdjacentField(false, -1);
-          focus_->ClearFocus();
-          focus_ = prev;
-          focus_->SetFocus();
-          isDirty_ = true;
+          SetFocus(prev);
         }
       }
     }

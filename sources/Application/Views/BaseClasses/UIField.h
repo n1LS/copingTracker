@@ -30,8 +30,15 @@ public:
   void SetFocus();
   void ClearFocus();
   bool HasFocus();
+
   void SetPosition(const GUIPoint &);
   GUIPoint GetPosition();
+
+  virtual int GetColumn() {
+    return -1;
+  }
+  virtual void SetColumn(uint8_t column) {
+  }
 
   virtual bool IsStatic();
 

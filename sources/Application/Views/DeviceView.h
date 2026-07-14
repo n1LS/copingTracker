@@ -13,7 +13,7 @@
 #define _DEVICE_VIEW_H_
 
 #include "BaseClasses/UIActionField.h"
-#include "BaseClasses/UIBigHexVarField.h"
+#include "BaseClasses/UIHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UISwatchField.h"
 #include "FieldView.h"
@@ -45,7 +45,7 @@ private:
 
   etl::vector<UIIntVarField, 7> intVarField_;
   etl::vector<UIActionField, 3> actionField_;
-  etl::vector<UIBigHexVarField, 16> bigHexVarField_;
+  etl::vector<UIHexVarField, 16> hexVarField_;
   etl::vector<UISwatchField, 16> swatchField_;
   bool configDirty_ = false;
 };

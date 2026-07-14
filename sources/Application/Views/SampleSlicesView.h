@@ -12,7 +12,7 @@
 #define _SAMPLE_SLICES_VIEW_H_
 
 #include "BaseClasses/UIActionField.h"
-#include "BaseClasses/UIBigHexVarField.h"
+#include "BaseClasses/UIHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UIStaticField.h"
 #include "FieldView.h"

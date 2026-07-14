@@ -133,7 +133,6 @@ void TableView::OnFocus() {
 }
 
 void TableView::cutPosition() {
-
   clipboard_.active_ = true;
   clipboard_.row_ = row_;
   clipboard_.col_ = col_;
