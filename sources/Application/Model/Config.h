@@ -23,7 +23,7 @@ class Config : public T_Singleton<Config>, public VariableContainer {
 public:
   Config();
   ~Config();
-  int GetValue(const char *key);
+  int GetValue(Token token);
   void ProcessArguments(int argc, char **argv);
   bool Save();
 

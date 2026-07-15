@@ -70,7 +70,7 @@ public:
 private:
   static drum_voice_t voices_[SONG_CHANNEL_COUNT];
 
-  etl::list<Variable *, 12> variables_;
+  etl::list<Variable *, 13> variables_;
 
   Variable vVoice0_;
   Variable vVoice1_;
@@ -84,6 +84,8 @@ private:
   Variable vVoice9_;
   Variable vVoice10_;
   Variable vVoice11_;
+
+  Variable vCharacter_;
 
   void RunCommand(int channel);
   void CommandInitArp(int channel, uint16_t value);

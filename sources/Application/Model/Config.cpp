@@ -204,8 +204,7 @@ Config::Config()
       elem = doc.NextSibling();
       continue;
     }
-    bool hasAttr = doc.NextAttribute();
-    while (hasAttr) {
+    while (doc.NextAttribute()) {
       // Special handling for Theme Name sadly because it is a string and no
       // easy way to look that that up in configParams data above
       if (!strcmp(doc.ElemName(), XML_ELEM_THEME_NAME)) {
@@ -225,7 +224,6 @@ Config::Config()
           }
         }
       }
-      hasAttr = doc.NextAttribute();
     }
     elem = doc.NextSibling();
   }
@@ -502,12 +500,12 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
   return true;
 }
 
-int Config::GetValue(const char *key) {
-  Variable *v = FindVariable(key);
+int Config::GetValue(Token token) {
+  Variable *v = FindVariable(token);
   if (v) {
-    Trace::Log("CONFIG", "Got value for %s=%s", key, v->GetString().c_str());
+    Trace::Log("CONFIG", "Got value for %s=%s", token.c_str(), v->GetString().c_str());
   } else {
-    Trace::Log("CONFIG", "No value for requested key:%s", key);
+    Trace::Log("CONFIG", "No value for requested key: %s", token.c_str());
   }
   return v ? v->GetInt() : 0;
 }

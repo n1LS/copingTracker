@@ -184,6 +184,26 @@ static const char *const char_bargraph_lookup[] = {char_bargraph_bar0_s, char_ba
 
 #define char_bargraph_s(x) (char_bargraph_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
 
+#define char_bargraph_s(x) (char_bargraph_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
+
+static inline void horizontal_bargraph_5(char *buffer, uint8_t value) {
+  int32_t v = value / 5;
+
+  for (int n = 0; n < 5; n++) {
+    if (v >= 10) {
+      buffer[n] = CHAR(char_block_full_s);
+    } else if (v > 0) {
+      buffer[n] = 15 + v;
+    } else {
+      buffer[n] = ' ';
+    }
+
+    v -= 10;
+  }
+
+  buffer[5] = 0;
+}
+
 // progress bar parts
 #define char_propgress_bar_0_s "\xEC"
 #define char_propgress_bar_1_s "\xE8"
