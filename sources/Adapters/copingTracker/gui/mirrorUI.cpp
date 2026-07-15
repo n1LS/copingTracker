@@ -207,7 +207,7 @@ void mirrorUI_handleInput(uint8_t key, uint8_t state) {
   bool pressed = (state == muiksDown);
 
   // Update virtual button mask - this integrates with the existing key repeat system
-  EventManager::instance_->SetVirtualButtonMask(buttonMask, pressed);
+  EventManager::Instance()->SetVirtualButtonMask(buttonMask, pressed);
 }
 
 void mirrorUI_processCDCInput() {

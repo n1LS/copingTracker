@@ -12,6 +12,7 @@
 #include "DeviceView.h"
 #include "Application/AppWindow.h"
 #include "Application/Model/Scale.h"
+#include "Application/Commands/EventDispatcher.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
@@ -22,6 +23,7 @@
 #include "Services/Audio/Audio.h"
 #include "Services/Midi/MidiService.h"
 #include "System/System/System.h"
+#include "UIFramework/SimpleBaseClasses/EventManager.h"
 #include <nanoprintf.h>
 
 static void BootselCallback(View &v, ModalView &dialog) {
@@ -67,6 +69,17 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   position.y_ += 1;
   v = config->FindVariable(Token::VarMirrorUI);
   intVarField_.emplace_back(position, *v, "mirrorUI     :%s", 0, 1, 1, 1);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  (*intVarField_.rbegin()).AddObserver(*this);
+
+  position.y_ += 1;
+  v = config->FindVariable(Token::VarKeyDelay);
+  intVarField_.emplace_back(position, *v, "Key delay/rep:%3d", 250, 750, 1, 100);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  (*intVarField_.rbegin()).AddObserver(*this);
+
+  v = config->FindVariable(Token::VarKeyRepeat);
+  intVarField_.emplace_back(position + GUIPoint(18, 0), *v, "/:%d", 10, 200, 1, 10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
   (*intVarField_.rbegin()).AddObserver(*this);
 
@@ -176,8 +189,19 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   }
 
   Player *player = Player::GetInstance();
+  Config *config = Config::GetInstance();
 
   switch (fourcc) {
+    case Token::VarKeyRepeat:
+    case Token::VarKeyDelay:
+    {
+      int repeat = config->FindVariable(Token::VarKeyRepeat)->GetInt();
+      int delay = config->FindVariable(Token::VarKeyDelay)->GetInt();
+      EventDispatcher::GetInstance()->SetKeyRepeatAndDelay(repeat, delay);
+      EventManager::Instance()->SetKeyRepeatAndDelay(repeat, delay);
+      Trace::Log("Settings", "Delay %d, Repeat %d", delay, repeat);
+      break;
+    }
     case Token::ActionBootSelect:
       ConfirmStopPlayback(Token::ActionBootSelect);
       return;
@@ -189,7 +213,6 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
       return;
     case Token::VarLineOut:
       {
-        Config *config = Config::GetInstance();
         Variable *lv = config->FindVariable(Token::VarLineOut);
         if (lv) {
           Audio *audio = Audio::GetInstance();

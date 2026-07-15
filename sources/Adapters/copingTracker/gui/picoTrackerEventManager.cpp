@@ -16,6 +16,7 @@
 #include "Application/AppWindow.h"
 #include "Application/Application.h"
 #include "Application/Model/Config.h"
+#include "Foundation/Types/Types.h"
 #include "Services/Midi/MidiService.h"
 #include "System/FileSystem/FileSystem.h"
 #include "mirrorUI.h"
@@ -82,9 +83,19 @@ picoTrackerEventManager::~picoTrackerEventManager() {
 bool picoTrackerEventManager::Init() {
   EventManager::Init();
 
+  // Read config file key repeat/delay
+  Config *config = Config::GetInstance();
+  keyDelay_ = config->GetValue(Token::VarKeyDelay);
+  keyRepeat_ = config->GetValue(Token::VarKeyRepeat);
+
   // setup a repeating timer for 1ms ticks
   add_repeating_timer_ms(1, timerHandler, NULL, &timer_);
   return true;
+}
+
+void picoTrackerEventManager::SetKeyRepeatAndDelay(int repeat, int delay) {
+  keyRepeat_ = repeat;
+  keyDelay_ = delay;
 }
 
 int picoTrackerEventManager::MainLoop() {

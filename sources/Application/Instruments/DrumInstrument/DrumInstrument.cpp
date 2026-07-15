@@ -25,7 +25,9 @@ DrumInstrument::DrumInstrument()
       vVoice8_(Token::DrumInstrumentParamsVoice8, defaultInstrument8),
       vVoice9_(Token::DrumInstrumentParamsVoice9, defaultInstrument9),
       vVoice10_(Token::DrumInstrumentParamsVoice10, defaultInstrument10),
-      vVoice11_(Token::DrumInstrumentParamsVoice11, defaultInstrument11) {
+      vVoice11_(Token::DrumInstrumentParamsVoice11, defaultInstrument11),
+      vCharacter_(Token::DrumInstrumentParamsCharacter, defaultCharacter) {
+
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &vVoice0_);
@@ -40,6 +42,8 @@ DrumInstrument::DrumInstrument()
   variables_.insert(variables_.end(), &vVoice9_);
   variables_.insert(variables_.end(), &vVoice10_);
   variables_.insert(variables_.end(), &vVoice11_);
+
+  variables_.insert(variables_.end(), &vCharacter_);
 }
 
 void DrumInstrument::Stop(int channel) {
@@ -126,7 +130,9 @@ drum_parameters_t DrumInstrument::getInstrumentParameters(uint8_t note) {
   auto it = variables_.begin();
   std::advance(it, note % 12);
   Variable *var = *it;
-  return std::bit_cast<drum_parameters_t>(var->GetInt());
+  drum_parameters_t params = std::bit_cast<drum_parameters_t>(var->GetInt());
+  params.character = vCharacter_.GetInt();
+  return params;
 }
 
 void DrumInstrument::noteDisplay(uint8_t note, char (&out)[4]) {

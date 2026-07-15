@@ -30,10 +30,15 @@ class EventManager {
 public:
   EventManager() {};
 
-  static EventManager *instance_;
+  static EventManager *Instance() { return instance_; }
 
   virtual ~EventManager() {};
   virtual bool Init();
   virtual int MainLoop() = 0;
   virtual void SetVirtualButtonMask(uint16_t buttonMask, bool pressed) = 0;
+  virtual void SetKeyRepeatAndDelay(int repeat, int delay) {};
+
+private:
+
+  static EventManager *instance_;
 };

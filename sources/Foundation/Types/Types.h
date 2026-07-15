@@ -240,17 +240,19 @@ struct Token {
     DrumInstrumentParamsVoice9 = 223,
     DrumInstrumentParamsVoice10 = 224,
     DrumInstrumentParamsVoice11 = 225,
+    DrumInstrumentParamsCharacter = 226,
 
     ActionMassStorage = 50,
     VarOutputVolume = 74,
     ActionModulation = 213,
 
+    VarKeyDelay = 139,
+    VarKeyRepeat = 176,
+
     // 93-98 free     6
-    // 139 is free    1
-    // 176 is free    1
     // 182-183 free   2
     // 191-199 free   9
-    // 226-254 free  29
+    // 227-254 free  29
     // ----------------
     //               48
 
@@ -305,6 +307,8 @@ struct Token {
   ETL_ENUM_TYPE_16(InstrumentCommandMidiChord, "MCH")
   ETL_ENUM_TYPE_16(InstrumentCommandVibrato, "VIB")
 
+  ETL_ENUM_TYPE_16(VarKeyDelay, "key-delay")
+  ETL_ENUM_TYPE_16(VarKeyRepeat, "key-repeat")
   ETL_ENUM_TYPE_16(VarLineOut, "line-out")
   ETL_ENUM_TYPE_16(VarMidiDevice, "midi-device")
   ETL_ENUM_TYPE_16(VarMidiSync, "midi-sync")
@@ -449,6 +453,7 @@ struct Token {
   ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice9, "DrumInstument9")
   ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice10, "DrumInstument10")
   ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice11, "DrumInstument11")
+  ETL_ENUM_TYPE_16(DrumInstrumentParamsCharacter, "DrumCharacter")
 
   ETL_ENUM_TYPE_16(Default, "Default")
   ETL_END_ENUM_TYPE

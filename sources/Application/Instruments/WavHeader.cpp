@@ -191,7 +191,7 @@ etl::expected<WavHeaderInfo, WAVEFILE_ERROR> WavHeaderWriter::ReadHeader(I_File 
     return etl::unexpected(INVALID_HEADER);
   }
 
-  bool enableResampling = Config::GetInstance()->GetValue("ImportResampling") > 0;
+  bool enableResampling = Config::GetInstance()->GetValue(Token::VarImportResampler) > 0;
   if ((!enableResampling && info.sampleRate > 44100) || (info.sampleRate < 44100 / SRC_MAX_RATIO) ||
       (info.sampleRate > 44100 * SRC_MAX_RATIO)) {
     Trace::Error("WavHeaderWriter: Unsupported sample rate %u", info.sampleRate);

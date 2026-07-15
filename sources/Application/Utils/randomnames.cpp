@@ -77,7 +77,7 @@ static bool getRandomNameFromFile(char *buffer, size_t bufferSize) {
 
 void getRandomName(char *name, size_t nameSize) {
   // try getting a random name from the SD card first, if available
-  if (!getRandomNameFromFile(name, nameSize))
+  if (getRandomNameFromFile(name, nameSize))
     return;
 
   uint32_t randNum = System::GetInstance()->GetRandomNumber();

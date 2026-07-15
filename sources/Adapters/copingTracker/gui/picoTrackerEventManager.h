@@ -25,6 +25,7 @@ public:
   virtual bool Init();
   virtual int MainLoop();
   virtual void SetVirtualButtonMask(uint16_t buttonMask, bool pressed) override;
+  virtual void SetKeyRepeatAndDelay(int repeat, int delay) override;
 
 protected:
   static void ProcessInputEvent();

@@ -30,7 +30,8 @@ typedef struct drum_parameters_t {
   uint8_t decay : 4;
   uint8_t note : 4;
   uint8_t pitch : 4;
-  uint16_t padding;
+  uint8_t character : 8;
+  uint8_t padding : 8;
 } drum_parameters_t;
 
 typedef struct pitch_envelope_t {
@@ -89,9 +90,16 @@ typedef struct drum_voice_t {
     uint8_t padding : 7;
   } flags;
 
-  uint8_t padding[3];
+  // character settings
+  uint8_t glitch_trigger_delay;
+  uint16_t glitch = 17; // shift register for the glitch randomizer
 
   // implementation ------------------------------------------------------------
+
+  inline uint16_t get_glitch() {
+    glitch = (glitch * 1664525) + 1013904223;
+    return glitch;
+  }
 
   inline void stop() {
     frequency = 0;
@@ -194,6 +202,11 @@ typedef struct drum_voice_t {
         break;
     }
 
+    if (glitch_trigger_delay) {
+      glitch_trigger_delay--;
+      sample = 0;
+    }
+
     // apply combined gain (volume * envelope) in single operation
     sample = (sample >> 8) * level;
 
@@ -253,6 +266,20 @@ typedef struct drum_voice_t {
     // reset pitch envelope
     pitch.set_rate(parameters.pitch << 4);
     pitch.trigger();
+
+    // glitch/character settings
+    if (parameters.character) {
+      // delay
+      glitch_trigger_delay = get_glitch() % (parameters.character << 4);
+
+      // pitch
+      uint32_t amount = (get_glitch() & 0xfff) * parameters.character;
+      frequency += (amount - 524287);
+
+      // volume
+      amount = (get_glitch() & 0xff) * parameters.character;
+      envelope.value -= amount;
+    }
   }
 
   /****************************************************************************

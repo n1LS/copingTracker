@@ -8,20 +8,21 @@
 
 #pragma once
 
-static const char drumNames[12][9] = {
-    "BassDrum", // c
-    "Rimshot ",
-    "Snare   ", // d
-    "Clap    ",
-    "Snare 2 ", // e
-    "Tom 1   ",
-    "HHclosed", // f#
-    "Tom 2   ",
-    "HHalt   ", // g#
-    "Tom 3   ",
-    "HHopen  ", // a#
-    "Crash   ",
-};
+#define Drum_Name_0 "BassDrum"
+#define Drum_Name_1 "Rim shot"
+#define Drum_Name_2 "Snare 1 "
+#define Drum_Name_3 "Clap    "
+#define Drum_Name_4 "Snare 2 "
+#define Drum_Name_5 "Tom Low "
+#define Drum_Name_6 "Hihat cl"
+#define Drum_Name_7 "Low tom "
+#define Drum_Name_8 "Hihat pd"
+#define Drum_Name_9 "Mid tom "
+#define Drum_Name_A "Hihat op"
+#define Drum_Name_B "High tom"
+
+static const char drumNames[12][9] = {Drum_Name_0, Drum_Name_1, Drum_Name_2, Drum_Name_3, Drum_Name_4, Drum_Name_5,
+                                      Drum_Name_6, Drum_Name_7, Drum_Name_8, Drum_Name_A, Drum_Name_B};
 
 static const char drumShortNames[12][4] = {
     "BDr", // c
@@ -63,18 +64,19 @@ enum drum_wave_type_e : uint8_t {
 enum drum_env_state_e : uint8_t { drumEnvIdle, drumEnvDecay };
 
 enum drum_instrument_defaults_e {
-  defaultInstrument0 = 0x1234,
-  defaultInstrument1 = 0x5463,
-  defaultInstrument2 = 0x1234,
-  defaultInstrument3 = 0xfff3,
-  defaultInstrument4 = 0x2145,
-  defaultInstrument5 = 0x2345,
-  defaultInstrument6 = 0x8653,
-  defaultInstrument7 = 0x3242,
-  defaultInstrument8 = 0x3423,
-  defaultInstrument9 = 0x8888,
-  defaultInstrument10 = 0x8888,
-  defaultInstrument11 = 0x8888,
+  defaultInstrument0 = 0x4562,
+  defaultInstrument1 = 0x0845,
+  defaultInstrument2 = 0x0464,
+  defaultInstrument3 = 0x4F95,
+  defaultInstrument4 = 0x2B64,
+  defaultInstrument5 = 0x1452,
+  defaultInstrument6 = 0x0F37,
+  defaultInstrument7 = 0x1652,
+  defaultInstrument8 = 0x0944,
+  defaultInstrument9 = 0x1852,
+  defaultInstrument10 = 0x0B6F,
+  defaultInstrument11 = 0x1F84,
+  defaultCharacter = 0x00
 };
 
 typedef union drumFlags {

@@ -837,25 +837,42 @@ void TableView::AnimationUpdate() {
 
       if (viewData_->playMode_ != PM_AUDITION) {
         SetBackgroundColor(Theme::View::bg);
+
+        // Clear previous playback position indicators
+        for (int i = 0; i < 3; i++) {
+          if (lastPosition_[i] < 16) {
+            pos.x_ = anchor.x_ - 1 + (i * 8);
+            pos.y_ = anchor.y_ + lastPosition_[i];
+            DrawString(pos.x_, pos.y_, " ");
+          }
+        }
+
         SetColor(Theme::Song::Playback::active);
 
         if (tpb.GetTable() == &viewTable) {
           for (int i = 0; i < 3; i++) {
             int yPos = tpb.GetPlaybackPosition(i);
             if (yPos >= 0 && yPos < 16) {
-              pos.x_ = anchor.x_ - 1 + (i * 9);
+              pos.x_ = anchor.x_ - 1 + (i * 8);
               pos.y_ = anchor.y_ + yPos;
               DrawString(pos.x_, pos.y_, char_indicator_position_s);
+              lastPosition_[i] = yPos;
+            } else {
+              lastPosition_[i] = 0xFF;
             }
           }
         }
+
         if (atp.GetTable() == &viewTable) {
           for (int i = 0; i < 3; i++) {
             int yPos = atp.GetPlaybackPosition(i);
             if (yPos >= 0 && yPos < 16) {
-              pos.x_ = anchor.x_ - 1 + (i * 9);
+              pos.x_ = anchor.x_ - 1 + (i * 8);
               pos.y_ = anchor.y_ + yPos;
               DrawString(pos.x_, pos.y_, char_indicator_position_s);
+              lastPosition_[i] = yPos;
+            } else {
+              lastPosition_[i] = 0xFF;
             }
           }
         }
