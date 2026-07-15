@@ -29,6 +29,7 @@ public:
     return eventMask_;
   };
   virtual void Update(Observable &o, I_ObservableData *d);
+  void SetKeyRepeatAndDelay(int repeat, int delay);
 
 private:
   GUIWindow *window_;

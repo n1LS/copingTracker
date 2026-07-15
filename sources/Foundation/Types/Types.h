@@ -246,9 +246,10 @@ struct Token {
     VarOutputVolume = 74,
     ActionModulation = 213,
 
+    VarKeyDelay = 139,
+    VarKeyRepeat = 176,
+
     // 93-98 free     6
-    // 139 is free    1
-    // 176 is free    1
     // 182-183 free   2
     // 191-199 free   9
     // 227-254 free  29
@@ -306,6 +307,8 @@ struct Token {
   ETL_ENUM_TYPE_16(InstrumentCommandMidiChord, "MCH")
   ETL_ENUM_TYPE_16(InstrumentCommandVibrato, "VIB")
 
+  ETL_ENUM_TYPE_16(VarKeyDelay, "key-delay")
+  ETL_ENUM_TYPE_16(VarKeyRepeat, "key-repeat")
   ETL_ENUM_TYPE_16(VarLineOut, "line-out")
   ETL_ENUM_TYPE_16(VarMidiDevice, "midi-device")
   ETL_ENUM_TYPE_16(VarMidiSync, "midi-sync")

@@ -53,6 +53,8 @@ constexpr int DEFAULT_BACKLIGHT_LEVEL = 0xFF; // Default to max brightness (255)
 constexpr int DEFAULT_OUTPUT_VOLUME = 40;
 constexpr int DEFAULT_IMPORT_RESAMPLER = 0; // default for picoTracker is none (as original)
 constexpr int DEFAULT_USE_COMMAND_PICKER = 1;
+constexpr int DEFAULT_KEY_DELAY = 500;
+constexpr int DEFAULT_KEY_REPEAT = 30;
 
 // Use a struct to define parameter information
 struct ConfigParam {
@@ -105,6 +107,8 @@ static const ConfigParam configParams[] = {
     CONFIG(Token::VarImportResampler, {.intValue = DEFAULT_IMPORT_RESAMPLER}, importResamplerOptions,
            kImportResamplerOptionCount, false),
     CONFIG(Token::VarConfigCommandPicker, {.intValue = DEFAULT_USE_COMMAND_PICKER}, commandPickerOptions, 2, false),
+    CONFIG(Token::VarKeyDelay, {.intValue = DEFAULT_KEY_DELAY}, nullptr, 0, false),
+    CONFIG(Token::VarKeyRepeat, {.intValue = DEFAULT_KEY_REPEAT}, nullptr, 0, false),
 };
 
 Config::Config()
@@ -136,7 +140,9 @@ Config::Config()
               ThemeConstants::DEFAULT_UIFONT),
       themeName_(Token::VarThemeName, ThemeConstants::DEFAULT_THEME_NAME),
       backlightLevel_(Token::VarBacklightLevel, DEFAULT_BACKLIGHT_LEVEL),
-      outputVolume_(Token::VarOutputVolume, DEFAULT_OUTPUT_VOLUME) {
+      outputVolume_(Token::VarOutputVolume, DEFAULT_OUTPUT_VOLUME),
+      keyDelay_(Token::VarKeyDelay, DEFAULT_KEY_DELAY),
+      keyRepeat_(Token::VarKeyRepeat, DEFAULT_KEY_REPEAT) {
 
   variables_.push_back(&color0_);
   variables_.push_back(&color1_);
@@ -164,6 +170,8 @@ Config::Config()
   variables_.push_back(&themeName_);
   variables_.push_back(&backlightLevel_);
   variables_.push_back(&outputVolume_);
+  variables_.push_back(&keyDelay_);
+  variables_.push_back(&keyRepeat_);
 
   PersistencyDocument doc;
 

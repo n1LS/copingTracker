@@ -23,8 +23,8 @@ EventDispatcher::EventDispatcher() {
   // Read config file key repeat
 
   Config *config = Config::GetInstance();
-  keyDelay_ = config->GetValue("KeyDelay");
-  keyRepeat_ = config->GetValue("KeyRepeat");
+  keyDelay_ = config->GetValue(Token::VarKeyDelay);
+  keyRepeat_ = config->GetValue(Token::VarKeyRepeat);
 
   repeatMask_ = 0;
   repeatMask_ |= (1 << EPBT_LEFT);
@@ -106,7 +106,6 @@ void EventDispatcher::SetWindow(GUIWindow *window) {
 }
 
 unsigned int EventDispatcher::OnTimerTick() {
-
   unsigned sendMask = (eventMask_ & repeatMask_);
   unsigned long now = System::GetInstance()->GetClock();
 
@@ -132,4 +131,9 @@ void EventDispatcher::Update(Observable &o, I_ObservableData *d) {
   } else {
     timer_->Stop();
   };
+}
+
+void EventDispatcher::SetKeyRepeatAndDelay(int repeat, int delay) {
+  keyRepeat_ = repeat;
+  keyDelay_ = delay;
 }
