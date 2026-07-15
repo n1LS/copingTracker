@@ -18,8 +18,8 @@
 class UIHexVarField : public UIIntVarField {
 
 public:
-  UIHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min, int max,
-                   int power, bool wrap = false);
+  UIHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min, int max, int power,
+                bool wrap = false);
   virtual ~UIHexVarField() {};
   virtual void Draw(GUIWindow &w, int offset = 0);
   virtual void ProcessArrow(uint16_t mask);

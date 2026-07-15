@@ -15,8 +15,8 @@
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 
-UIHexVarField::UIHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min,
-                                   int max, int power, bool wrap)
+UIHexVarField::UIHexVarField(const GUIPoint &position, Variable &v, int precision, const char *format, int min, int max,
+                             int power, bool wrap)
     : UIIntVarField(position, v, format, min, max, 0, 0) {
   precision_ = precision - 1;
   power_ = power;
