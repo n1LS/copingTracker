@@ -298,7 +298,7 @@ void MixerView::initChannelVolumeFields() {
 
   Variable *v = project->FindVariable(Token::VarMasterVolume);
   if (v) {
-    masterVolumeField_.emplace_back(masterPos, *v, "%2.2d", 0, 100, 1, 5);
+    masterVolumeField_.emplace_back(masterPos, *v, "%2.2d", 0, 99, 1, 5);
     fieldList_.insert(fieldList_.end(), &(*masterVolumeField_.begin()));
   }
 

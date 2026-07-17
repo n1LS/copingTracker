@@ -108,10 +108,10 @@ void HelpView::drawTabs() {
     x += DrawTab(x, SCREEN_HEIGHT - 1, documentation[i].title, i == selectedTab_);
   }
 
-  if (x >= SCREEN_WIDTH) {
-    SetColor(Theme::View::fg);
+  SetColor(Theme::View::fg);
+  if (x >= SCREEN_WIDTH || tabOffset_ < 0) {
     DrawString(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, tabOffset_ < 0 ? char_indicator_leftRight_s : char_indicator_rightNoLeft_s);
-  } 
+  }
 }
 
 void HelpView::OnFocus() {
