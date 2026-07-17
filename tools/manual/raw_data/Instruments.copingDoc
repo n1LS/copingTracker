@@ -1,0 +1,153 @@
+F                          9  
+9                          0  
+Instruments                ²±°
+7                             
+0                             
+                              
+7                             
+0                             
+copingTracker's selection of  
+7                             
+0                             
+instruments is very much evol-
+7                             
+0                             
+ving and this documentation is
+7                             
+0                             
+most likely always outdate.   
+7                             
+0                             
+                              
+F                          9  
+9                          0  
+MIDI INSTRUMENT            ²±°
+9                             
+0                             
+                              
+7 F              7            
+0                             
+A MIDI instrument has the fol-
+7                             
+0                             
+lowing settings:              
+7                             
+0                             
+                              
+F      7                      
+0                             
+CHANNEL  This can be set 01-16
+7                             
+0                             
+  (in decimal not hex!) which 
+7                             
+0                             
+  is midi channel 1-16 respec-
+7                             
+0                             
+  tively                      
+7                             
+0                             
+                              
+F     7                       
+0                             
+VOLUME  The volume any NOTE ON
+7                             
+0                             
+  will be sent to your device:
+7 C 7C  7 C 7C  7             
+0                             
+  FF=127, 00=00               
+7                             
+0                             
+                              
+F      7                      
+0                             
+PROGRAM  MIDI program change  
+7                C        7   
+0                             
+  value to send (0x00-0x7F).  
+7                             
+0                             
+  Program changes for each    
+7                             
+0                             
+  MIDI instrument are sent    
+7                             
+0                             
+  only once at sequencer      
+7                             
+0                             
+  start. Setting this to --   
+7                             
+0                             
+  will disable sending        
+7                             
+0                             
+  program change messages     
+7                             
+0                             
+  entirely.                   
+7                             
+0                             
+                              
+F     7                       
+0                             
+LENGTH  Sets note gate length 
+7                             
+0                             
+  in number of ticks          
+7                             
+0                             
+                              
+F         7                   
+0                             
+AUTOMATION  When on, the      
+7                             
+0                             
+  table play arrows will adv- 
+7                             
+0                             
+  ance one row every time the 
+7                             
+0                             
+  instrument is triggered, and
+7                             
+0                             
+  execute only the commands on
+7                             
+0                             
+  the new rows. If this is Off
+7                             
+0                             
+  table behavior is normal    
+7                             
+0                             
+  (play arrows will move at   
+7                             
+0                             
+  the speed of 1 row per tick)
+7                             
+0                             
+                              
+F    7                        
+0                             
+TABLE  As above, select a     
+7                             
+0                             
+  table the instrument will   
+7                             
+0                             
+  always run. Clone a table   
+7       F                  7  
+0                             
+  here: ALT + (EDIT, ENTER).  
+7                             
+0                             
+  Make a new table by selec-  
+7                             
+0                             
+  ting a higher number not yet
+7                             
+0                             
+  in use                      

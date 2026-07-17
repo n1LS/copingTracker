@@ -13,6 +13,7 @@
 #include "Application/Views/CommandView.h"
 #include "Application/Views/DeviceView.h"
 #include "Application/Views/GrooveView.h"
+#include "Application/Views/HelpView.h"
 #include "Application/Views/InstrumentImportView.h"
 #include "Application/Views/InstrumentView.h"
 #include "Application/Views/MixerView.h"

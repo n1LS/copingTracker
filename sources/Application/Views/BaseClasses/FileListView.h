@@ -23,34 +23,26 @@
 // Forward declaration for file type
 using FileType = PicoFileType;
 
-/**
- * Action tab configuration
- */
+// Action tab configuration
 struct ActionTab {
   const char *label;   // Button label (e.g., "Open", "Delete", "Import")
   uint8_t shortcutKey; // Optional shortcut key (kKeyNone, kKeyPlay, etc.)
 };
 
-/**
- * Button configuration for flexible button system
- */
+// Button configuration for flexible button system
 struct ButtonConfig {
   const char *label;   // Button label
   uint8_t shortcutKey; // Optional shortcut key
 };
 
-/**
- * Multiple directory configuration for views that need to switch between directories
- */
+// Multiple directory configuration for views that need to switch between directories
 struct DirectoryConfig {
   const char *name; // Human-readable name for this directory
   const char *path; // Directory path
   bool isDefault;   // Is this the default directory on focus?
 };
 
-/**
- * Configuration structure for FileListView
- */
+// Configuration structure for FileListView
 struct FileListConfig {
   const char *title;             // Title displayed at top of view
   const char *startDirectory;    // Initial directory to browse (used if directoryCount == 0)
@@ -104,198 +96,142 @@ public:
 
   // Note: Reset() is not in ScreenView, kept for compatibility
   virtual void Reset();
-
-  /// Refresh the file list from current directory (public for callback access)
   void RefreshFileList();
 
 protected:
-  // === Required virtual hooks ===
-
-  /// Get empty state message when no files found
+  // Get empty state message when no files found
   virtual const char *GetEmptyStateMessage() const = 0;
-
-  /// Called when user confirms selection (ENTER on a file)
-  /// Default implementation calls OnTabAction with current tab if tabs exist
+  // Default implementation calls OnTabAction with current tab if tabs exist
   virtual void OnItemSelected(const char *filename);
-
-  // === Optional virtual hooks ===
-
-  /// Called when a tab action is triggered
-  /// Default implementation calls OnItemSelected
+  // Default implementation calls OnItemSelected
   virtual void OnTabAction(int tabIndex, const char *filename);
-
-  /// Override for custom button handling (return true if handled)
+  // Override for custom button handling (return true if handled)
   virtual bool OnButtonOverride(uint16_t mask, bool pressed);
-
-  /// Override for custom item rendering
-  /// Default: draws filename with selection highlight
+  // Default: draws filename with selection highlight
   virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer);
-
-  /// Override for custom action tab drawing
-  /// Default: draws standard buttons
+  // Default: draws standard buttons
   virtual void DrawActionTabs(int y, int selectedTab);
-
-  /// Override for custom button drawing (when useButtonSystem is true)
-  /// Default: draws standard buttons with labels from button config
+  // Default: draws standard buttons with labels from button config
   virtual void DrawButtons(int selectedButton);
-
-  /// Called after directory setup completes
+  // Called after directory setup completes
   virtual void OnDirectorySetup();
-
-  /// Called when switching between directories (for multiple directory views)
-  /// Return true to allow the switch, false to cancel
+  // Called when switching between directories (for multiple directory views)
+  // Return true to allow the switch, false to cancel
   virtual bool OnDirectorySwitch(size_t newDirectoryIndex);
-
-  /// Get custom title based on current state (e.g., "Project Pool" vs "Import Sample")
+  // Get custom title based on current state (e.g., "Project Pool" vs "Import Sample")
   virtual const char *GetDynamicTitle();
 
-  // === Protected helpers ===
-
-  /// Get the current file system instance
+  // Get the current file system instance
   FileSystem *GetFileSystem() const {
     return fs_;
   }
-
-  /// Get current directory listing
+  // Get current directory listing
   const etl::vector<int, MAX_FILE_INDEX_SIZE> &GetFileList() const {
     return fileIndexList_;
   }
-
-  /// Get current selection index
+  // Get current selection index
   size_t GetCurrentIndex() const {
     return currentIndex_;
   }
-
-  /// Set current selection index
+  // Set current selection index
   void SetCurrentIndex(size_t index);
-
-  /// Navigate to parent directory
+  // Navigate to parent directory
   bool NavigateToParent();
-
-  /// Navigate to a specific directory
+  // Navigate to a specific directory
   bool NavigateToDirectory(const char *name);
-
-  /// Check if item at index is a directory
+  // Check if item at index is a directory
   bool IsDirectory(size_t index) const;
-
-  /// Get filename at index
+  // Get filename at index
   void GetFileName(size_t index, char *buffer, size_t bufferSize) const;
-
-  /// Get file type at index
+  // Get file type at index
   FileType GetFileType(size_t index) const;
-
-  /// Get file size at index
+  // Get file size at index
   uint32_t GetFileSize(size_t index) const;
-
-  /// Check if list is empty
+  // Check if list is empty
   bool IsEmpty() const {
     return fileIndexList_.empty();
   }
-
-  /// Get total item count
+  // Get total item count
   size_t GetItemCount() const {
     return fileIndexList_.size();
   }
-
-  /// Get page size
+  // Get page size
   size_t GetPageSize() const {
     return config_.pageSize;
   }
-
-  /// Get selected tab index
+  // Get selected tab index
   int GetSelectedTab() const {
     return selectedTab_;
   }
-
-  /// Set selected tab index
+  // Set selected tab index
   void SetSelectedTab(int index);
-
-  /// Get number of action tabs
+  // Get number of action tabs
   size_t GetTabCount() const {
     return config_.actionTabs.size();
   }
-
-  /// Get action tab at index
+  // Get action tab at index
   const ActionTab &GetActionTab(size_t index) const {
     return config_.actionTabs[index];
   }
-
-  /// Check if tab selection is enabled
+  // Check if tab selection is enabled
   bool HasTabSelection() const {
     return config_.allowTabSelection;
   }
-
-  /// Check if directory navigation is allowed
+  // Check if directory navigation is allowed
   bool CanNavigateDirectories() const {
     return config_.allowDirectoryNavigation;
   }
-
-  /// Check if directories should be shown
+  // Check if directories should be shown
   bool ShouldShowDirectories() const {
     return config_.showDirectories;
   }
-
-  /// Check if button system is enabled
+  // Check if button system is enabled
   bool HasButtonSystem() const {
     return config_.useButtonSystem;
   }
-
-  /// Check if ENTER on release mode is enabled
+  // Check if ENTER on release mode is enabled
   bool EnterOnRelease() const {
     return config_.enterOnRelease;
   }
-
-  /// Get current directory index (for multiple directory views)
+  // Get current directory index (for multiple directory views)
   size_t GetCurrentDirectoryIndex() const {
     return config_.currentDirectoryIndex;
   }
-
-  /// Switch to a specific directory (for multiple directory views)
+  // Switch to a specific directory (for multiple directory views)
   bool SwitchToDirectory(size_t index);
-
-  /// Get directory config at index
+  // Get directory config at index
   const DirectoryConfig *GetDirectoryConfig(size_t index) const;
-
-  /// Get button config at index
+  // Get button config at index
   const ButtonConfig *GetButtonConfig(size_t index) const;
-
-  /// Get current selected button
+  // Get current selected button
   int GetSelectedButton() const {
     return selectedButton_;
   }
-
-  /// Set current selected button
+  // Set current selected button
   void SetSelectedButton(int index);
-
-  /// Get directory stack depth
+  // Get directory stack depth
   size_t GetDirectoryStackDepth() const {
     return dirIndexStack_.size();
   }
-
-  /// Check if at local root (no parent navigation)
+  // Check if at local root (no parent navigation)
   bool AtLocalRoot() const {
     return atLocalRoot_;
   }
-
-  /// Set at local root flag
+  // Set at local root flag
   void SetAtLocalRoot(bool value) {
     atLocalRoot_ = value;
   }
-
-  /// Reset navigation state (clear directory stack, set at local root)
+  // Set the back navigation target (for dynamic back navigation)
+  void SetBackNavigationTarget(ViewType target) {
+    config_.backNavigationTarget = target;
+  }
+  // Reset navigation state (clear directory stack, set at local root)
   void ResetNavigationState() {
     dirIndexStack_ = etl::stack<uint8_t, MAX_DIRECTORY_STACK_DEPTH>();
     atLocalRoot_ = true;
   }
 
-  /// Set the back navigation target (for dynamic back navigation)
-  void SetBackNavigationTarget(ViewType target) {
-    config_.backNavigationTarget = target;
-  }
-
 private:
-  // === Internal helpers ===
-
   void HandleUp(bool page);
   void HandleDown(bool page);
   void HandleEnter();
@@ -309,22 +245,17 @@ private:
   void DrawScrollBar();
   void DrawEmptyState();
 
-  // === Configuration ===
-
   FileListConfig config_;
   FileSystem *fs_;
 
-  // === State ===
   size_t topIndex_ = 0;
   size_t currentIndex_ = 0;
   int selectedTab_ = 0;
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
 
-  // === Directory navigation state ===
   etl::stack<uint8_t, MAX_DIRECTORY_STACK_DEPTH> dirIndexStack_; // Track cursor position per directory level
   bool atLocalRoot_ = true;                                      // No parent navigation available
 
-  // === Protected state for subclass access ===
 protected:
   int selectedButton_ = 0;                // For button system
   bool enterKeyHeld_ = false;             // Track ENTER key state

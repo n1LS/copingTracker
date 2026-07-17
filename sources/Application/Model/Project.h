@@ -39,8 +39,8 @@ public:
   ~Project();
   void Load(const char *name);
   void Purge();
-  void PurgeInstruments();
-  void PurgeSamples();
+  int PurgeInstruments();
+  int PurgeSamples();
 
   Song song_;
 

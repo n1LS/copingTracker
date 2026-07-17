@@ -140,8 +140,7 @@ Config::Config()
               ThemeConstants::DEFAULT_UIFONT),
       themeName_(Token::VarThemeName, ThemeConstants::DEFAULT_THEME_NAME),
       backlightLevel_(Token::VarBacklightLevel, DEFAULT_BACKLIGHT_LEVEL),
-      outputVolume_(Token::VarOutputVolume, DEFAULT_OUTPUT_VOLUME),
-      keyDelay_(Token::VarKeyDelay, DEFAULT_KEY_DELAY),
+      outputVolume_(Token::VarOutputVolume, DEFAULT_OUTPUT_VOLUME), keyDelay_(Token::VarKeyDelay, DEFAULT_KEY_DELAY),
       keyRepeat_(Token::VarKeyRepeat, DEFAULT_KEY_REPEAT) {
 
   variables_.push_back(&color0_);

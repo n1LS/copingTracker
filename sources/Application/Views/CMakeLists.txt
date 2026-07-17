@@ -4,6 +4,7 @@ add_library(application_views
   GraphField.cpp
   ChainView.cpp
   GrooveView.cpp
+  HelpView.cpp
   SampleImportView.cpp
   InstrumentImportView.cpp
   InstrumentView.cpp
