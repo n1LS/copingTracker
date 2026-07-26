@@ -1429,6 +1429,7 @@ void SampleInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
         if (crush > 0)
           rp->crush_ = crush;
       }
+      break;
 
     case Token::InstrumentCommandVibrato:
       {
