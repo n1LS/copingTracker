@@ -11,8 +11,8 @@
 
 #include "DeviceView.h"
 #include "Application/AppWindow.h"
-#include "Application/Model/Scale.h"
 #include "Application/Commands/EventDispatcher.h"
+#include "Application/Model/Scale.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
@@ -194,14 +194,14 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   switch (fourcc) {
     case Token::VarKeyRepeat:
     case Token::VarKeyDelay:
-    {
-      int repeat = config->FindVariable(Token::VarKeyRepeat)->GetInt();
-      int delay = config->FindVariable(Token::VarKeyDelay)->GetInt();
-      EventDispatcher::GetInstance()->SetKeyRepeatAndDelay(repeat, delay);
-      EventManager::Instance()->SetKeyRepeatAndDelay(repeat, delay);
-      Trace::Log("Settings", "Delay %d, Repeat %d", delay, repeat);
-      break;
-    }
+      {
+        int repeat = config->FindVariable(Token::VarKeyRepeat)->GetInt();
+        int delay = config->FindVariable(Token::VarKeyDelay)->GetInt();
+        EventDispatcher::GetInstance()->SetKeyRepeatAndDelay(repeat, delay);
+        EventManager::Instance()->SetKeyRepeatAndDelay(repeat, delay);
+        Trace::Log("Settings", "Delay %d, Repeat %d", delay, repeat);
+        break;
+      }
     case Token::ActionBootSelect:
       ConfirmStopPlayback(Token::ActionBootSelect);
       return;

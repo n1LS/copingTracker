@@ -10,6 +10,7 @@
  */
 
 #include "InstrumentView.h"
+#include "Application/Instruments/GMBank_data.generated.h"
 #include "Application/Instruments/MidiInstrument.h"
 #include "Application/Instruments/SIDInstrument.h"
 #include "Application/Instruments/SampleInstrument.h"
@@ -365,6 +366,11 @@ void InstrumentView::fillSampleParameters() {
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
+  v = instrument->FindVariable(Token::SampleInstrumentGMInstrument);
+  intVarField_.emplace_back(position, *v, "GM Instrument :%d", 0, kGMInstrumentCount - 1, 1, 0x10);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+
+  position.y_ += 1;
   updateSliceCountLabel(sliceCountLabel_, instrument);
   staticField_.emplace_back(position, sliceCountLabel_.c_str());
   fieldList_.insert(fieldList_.end(), &staticField_.back());
@@ -422,7 +428,7 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentTableAutomation);
-  intVarField_.emplace_back(position, *v, " " char_border_single_bottomLeft_s " Automation :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, last_sub_item "Automation:%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
@@ -450,7 +456,7 @@ void InstrumentView::fillSampleParameters() {
   intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  position.y_ += 2;
+  position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentLoopMode);
   intVarField_.emplace_back(position, *v, "Loop mode     :%s", 0, SILM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
@@ -1018,8 +1024,28 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       // Switch to the InstrumentImportView
       Navigate(VT_INSTRUMENT_IMPORT);
       break;
+    case Token::SampleInstrumentGMInstrument:
+      {
+        // changing the GM instrument clears the sample
+        Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
+        if (sampleVar) {
+          sampleVar->SetInt(-1);
+        }
+
+        // TODO nILS: warn about losing slices when changing GM instrument if sample was assigned and slices exist
+        // like below
+
+        isDirty_ = true;
+        break;
+      }
     case Token::SampleInstrumentSample:
       {
+        // changing the sample clears the GM Isntrument
+        Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
+        if (gmVar) {
+          gmVar->SetInt(NO_GM_INSTRUMENT);
+        }
+
         I_Instrument *instr = getInstrument();
         if (!instr || instr->GetType() != IT_SAMPLE) {
           break;

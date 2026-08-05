@@ -3,6 +3,8 @@ add_library(application_instruments
   DrumInstrument/DrumInstrument.cpp
   CommandList.cpp
   Filters.cpp
+  GMBank.cpp
+  GMBankSource.cpp
   I_Instrument.cpp
   InstrumentBank.cpp
   InstrumentNameVariable.cpp

@@ -69,6 +69,7 @@ struct Token {
     SampleInstrumentEnd = 6,
     SampleInstrumentTable = 117,
     SampleInstrumentTableAutomation = 60,
+    SampleInstrumentGMInstrument = 191, // GM bank instrument index (0..kGMInstrumentCount-1), -1 = off
 
     MidiInstrumentChannel = 1,
     MidiInstrumentNoteLength = 32,
@@ -251,10 +252,10 @@ struct Token {
 
     // 93-98 free     6
     // 182-183 free   2
-    // 191-199 free   9
+    // 192-199 free   8
     // 227-254 free  29
     // ----------------
-    //               48
+    //               45
 
     Default = 255, // "    "
   };
@@ -336,6 +337,7 @@ struct Token {
   ETL_ENUM_TYPE_16(SampleInstrumentEnd, "End")
   ETL_ENUM_TYPE_16(SampleInstrumentTable, "Table")
   ETL_ENUM_TYPE_16(SampleInstrumentTableAutomation, "TableAutomation")
+  ETL_ENUM_TYPE_16(SampleInstrumentGMInstrument, "GMInstrument")
   ETL_ENUM_TYPE_16(MidiInstrumentChannel, "Channel")
   ETL_ENUM_TYPE_16(InstrumentName, "Name")
   ETL_ENUM_TYPE_16(MidiInstrumentName, "MidiName")
