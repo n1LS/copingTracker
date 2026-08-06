@@ -961,8 +961,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
               // interpolate
 
-              s1 = fp_mul(s1, inveta);
-              s2 = fp_mul(s2, eta);
+              s1 = fp_mul_coef(s1, inveta);
+              s2 = fp_mul_coef(s2, eta);
 
               // Compute interpolated sample
 
@@ -979,7 +979,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
           // crush predrive
 
-          s2 = fp_mul(s1, fpcrushvol);
+          s2 = fp_mul_coef(s1, fpcrushvol);
 
           // store result, applying crush
 
@@ -993,8 +993,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
           if (filtering) {
 
-            fixed lpin = fp_mul(s2, fltMixInv);
-            fixed hpin = -fp_mul(s2, fltMix);
+            fixed lpin = fp_mul_coef(s2, fltMixInv);
+            fixed hpin = -fp_mul_coef(s2, fltMix);
 
             fixed difr = fp_sub(lpin, *fltHeightPtr);
 
@@ -1009,9 +1009,9 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
               *fltSpeedPtr = fp_mul(*fltSpeedPtr, fltDirt);
             }
 
-            *fltSpeedPtr = fp_mul(*fltSpeedPtr, fltParm2);                         // mul by res, it's some kind
+            *fltSpeedPtr = fp_mul_coef(*fltSpeedPtr, fltParm2);                    // mul by res, it's some kind
                                                                                    // of inertia.
-            /*HOG:5*/ *fltSpeedPtr = fp_add(*fltSpeedPtr, fp_mul(difr, fltParm1)); // mul by cutoff, less cutoff = no
+            /*HOG:5*/ *fltSpeedPtr = fp_add(*fltSpeedPtr, fp_mul_coef(difr, fltParm1)); // mul by cutoff, less cutoff = no
                                                                                    // sound, so it's better not be 0.
 
             *fltHeightPtr += *fltSpeedPtr;
@@ -1031,8 +1031,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
         // introduce panning & vol - store result
 
-        s2 = fp_mul(s2, fixedpanl);
-        t2 = fp_mul(t2, fixedpanr);
+        s2 = fp_mul_coef(s2, fixedpanl);
+        t2 = fp_mul_coef(t2, fixedpanr);
 
         *result++ = s2;
         *result++ = t2;
