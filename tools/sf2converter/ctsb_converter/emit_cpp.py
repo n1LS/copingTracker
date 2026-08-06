@@ -28,7 +28,8 @@ def _escape_string(text: str) -> str:
 def _format_sample_entry(entry, index: int) -> str:
     return (
         f"    /* [{index}] */ {{ {entry.pcm_offset}u, {entry.length}u, {entry.loop_start}u, "
-        f"{entry.loop_end}u, {entry.root_note}u, {entry.fine_tune}, {entry.flags}u }},"
+        f"{entry.loop_end}u, {entry.root_note}u, {entry.fine_tune}, {entry.flags}u, 255u, "
+        f"{entry.attack}u, {entry.decay}u, {entry.sustain}u, {entry.release}u }},"
     )
 
 
@@ -57,7 +58,8 @@ def generate_header(bank: GMBankData) -> str:
     lines.append("// Expected companion declarations (handwritten GMBank.h):")
     lines.append("//   struct SampleEntry {")
     lines.append("//     uint32_t pcmOffset, length, loopStart, loopEnd;")
-    lines.append("//     uint8_t rootNote; int8_t fineTune; uint16_t flags;")
+    lines.append("//     uint8_t rootNote; int8_t fineTune; uint16_t flags; uint8_t volume;")
+    lines.append("//     uint16_t attack, decay, sustain, release;")
     lines.append("//   };")
     lines.append('//   struct PresetInfo { const char *name; uint16_t instrumentIndex; uint8_t bank; uint8_t preset; };')
     lines.append("//")

@@ -46,6 +46,10 @@ class RawSample:
     root_note: int
     fine_tune: int  # signed, matches SampleEntry.fineTune range [-128, 127]
     loop_mode: LoopMode
+    attack: int  # uint16_t envelope stage time in ms
+    decay: int  # uint16_t envelope stage time in ms
+    sustain: int  # uint16_t sustain level, 0 (silent) .. 0xFFFF (full volume)
+    release: int  # uint16_t envelope stage time in ms
 
     @property
     def frame_count(self) -> int:
@@ -95,6 +99,10 @@ class SampleEntryOut:
     root_note: int
     fine_tune: int
     flags: int
+    attack: int
+    decay: int
+    sustain: int
+    release: int
 
 
 @dataclass

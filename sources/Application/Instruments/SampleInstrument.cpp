@@ -1167,6 +1167,13 @@ void SampleInstrument::updateInstrumentData(bool search) {
   entry.rootNote = static_cast<uint8_t>(rootNote_.GetInt());
   entry.fineTune = static_cast<int8_t>(fineTune_.GetInt() - 0x7F);
   entry.flags = static_cast<uint16_t>(loopMode_.GetInt()) & SEF_LOOP_MODE_MASK;
+  // WAV-loaded samples get a flat "no shaping" envelope (instant attack,
+  // full sustain, no decay/release), unlike GM entries which carry their
+  // own SF2-derived ADSR.
+  entry.attack = 0;
+  entry.decay = 0;
+  entry.sustain = 0xFFFF;
+  entry.release = 0;
 
   initFromSampleEntry(&entry, sampleStorageBase);
 }

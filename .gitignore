@@ -34,3 +34,4 @@ TODO.md
 tools/sf2converter/2GMGSMT.SF2
 tools/sf2converter/ctsb_converter/__pycache__
 tools/sf2converter/ctsb_converter/__pycache__
+sources/Application/Instruments/GMBank_data.generated.h

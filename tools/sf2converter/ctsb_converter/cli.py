@@ -10,9 +10,10 @@ Pipeline order (see module docstring of each stage for details):
   6. Downsample 44100 Hz -> 22050 Hz    -> audio.convert_sample_rate
   7. Adjust loop points                 -> _get_or_create_variant
   8. Trim silence (optional)            -> audio.trim_silence
-  9. Remove unused samples (optional)   -> _add_orphan_variants (skipped if enabled)
+  9. Add unused samples (optional)      -> _add_orphan_variants (skipped by default)
  10. Deduplicate identical samples      -> optimize.deduplicate
- 11. Build contiguous PCM blob          -> _build_pcm_blob
+ 11. Build contiguous PCM blob, sharing -> _build_pcm_blob
+     PCM bytes across variants that only differ in loop points/tuning
  12. Generate SampleEntry table         -> _build_sample_entries
  13. Generate lookup table              -> _resolve_lookup
  14. Generate preset metadata           -> _build_preset_infos
@@ -60,7 +61,12 @@ def _parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument("output_directory", type=Path, help="directory to write GMBank_data.generated.h into")
     parser.add_argument("--mono", action="store_true", help="(accepted for compatibility; output is always mono)")
     parser.add_argument("--trim-silence", action="store_true", help="trim leading/trailing silence from samples")
-    parser.add_argument("--remove-unused", action="store_true", help="drop samples not referenced by any preset")
+    parser.add_argument(
+        "--include-unused",
+        action="store_true",
+        help="also emit a natural-pitch variant of every raw SF2 sample, even ones no preset/instrument "
+        "region references (increases PCM data size; off by default)",
+    )
     parser.add_argument("--verbose", action="store_true", help="print progress information to stderr")
     parser.add_argument("--max-size", type=parse_size, default=None, help="warn if the PCM blob exceeds this many bytes")
     return parser.parse_args(argv)
@@ -75,6 +81,10 @@ def _dummy_sample() -> RawSample:
         root_note=60,
         fine_tune=0,
         loop_mode=LoopMode.ONESHOT,
+        attack=0,
+        decay=0,
+        sustain=0xFFFF,
+        release=0,
     )
 
 
@@ -158,6 +168,10 @@ class _VariantBuilder:
         loop_start_offset: int,
         loop_end_offset: int,
         sample_modes: int,
+        attack: int = 0,
+        decay: int = 0,
+        sustain: int = 0xFFFF,
+        release: int = 0,
     ) -> Optional[int]:
         channel = self._channels.get(shdr_index)
         if channel is None:
@@ -190,7 +204,19 @@ class _VariantBuilder:
         fine_tune = _cents_to_fine_tune_units(fine_tune_cents)
         loop_mode = LoopMode.LOOP if has_loop else LoopMode.ONESHOT
 
-        cache_key = (shdr_index, loop_start, loop_end, loop_mode, root_note, fine_tune, self._trim_silence)
+        cache_key = (
+            shdr_index,
+            loop_start,
+            loop_end,
+            loop_mode,
+            root_note,
+            fine_tune,
+            self._trim_silence,
+            attack,
+            decay,
+            sustain,
+            release,
+        )
         cached = self._cache.get(cache_key)
         if cached is not None:
             return cached
@@ -212,6 +238,10 @@ class _VariantBuilder:
                 root_note=root_note,
                 fine_tune=fine_tune,
                 loop_mode=loop_mode,
+                attack=attack,
+                decay=decay,
+                sustain=sustain,
+                release=release,
             )
         )
         self._cache[cache_key] = index
@@ -232,6 +262,10 @@ def _build_instrument_defs(
                 region.loop_start_offset,
                 region.loop_end_offset,
                 region.sample_modes,
+                region.attack,
+                region.decay,
+                region.sustain,
+                region.release,
             )
             if sample_index is None:
                 continue  # unsupported sample (bad rate/type); notes fall back to the dummy
@@ -242,8 +276,10 @@ def _build_instrument_defs(
 
 def _add_orphan_variants(sf2_data: sf2.Sf2Data, variants: _VariantBuilder) -> None:
     """Ensures every SF2 sample is represented in the output even if no
-    preset/instrument region references it, unless --remove-unused is set.
-    Uses each sample's own natural (un-overridden) loop points and pitch.
+    preset/instrument region references it. Only called when --include-unused
+    is passed, since these variants are never reachable via sampleLookup and
+    only add dead weight to the PCM blob. Uses each sample's own natural
+    (un-overridden) loop points and pitch.
     """
     for shdr_index, shdr in enumerate(sf2_data.samples):
         variants.get_or_create(
@@ -308,23 +344,41 @@ def _build_preset_infos_and_lookup(
 
 
 def _build_pcm_blob_and_entries(samples: List[RawSample]) -> Tuple[bytes, List[SampleEntryOut]]:
+    # Many RawSample instances only differ in loop points/root note/fine
+    # tune while carrying byte-for-byte identical PCM (e.g. the same SF2
+    # sample header referenced by several key/velocity-split regions with
+    # different loop overrides). SampleEntry already stores pcmOffset/length
+    # independently of those fields, so such instances can safely share one
+    # copy of the audio in the blob instead of each duplicating it.
     pcm_parts: List[bytes] = []
     entries: List[SampleEntryOut] = []
     offset = 0
+    pcm_offsets: Dict[bytes, Tuple[int, int]] = {}
     for sample in samples:
+        cached = pcm_offsets.get(sample.pcm)
+        if cached is not None:
+            pcm_offset, frame_count = cached
+        else:
+            pcm_offset = offset
+            frame_count = sample.frame_count
+            pcm_parts.append(sample.pcm)
+            offset += frame_count
+            pcm_offsets[sample.pcm] = (pcm_offset, frame_count)
         entries.append(
             SampleEntryOut(
-                pcm_offset=offset,
-                length=sample.frame_count,
+                pcm_offset=pcm_offset,
+                length=frame_count,
                 loop_start=sample.loop_start,
                 loop_end=sample.loop_end,
                 root_note=sample.root_note,
                 fine_tune=sample.fine_tune,
                 flags=int(sample.loop_mode),
+                attack=sample.attack,
+                decay=sample.decay,
+                sustain=sample.sustain,
+                release=sample.release,
             )
         )
-        pcm_parts.append(sample.pcm)
-        offset += sample.frame_count
     return b"".join(pcm_parts), entries
 
 
@@ -355,7 +409,7 @@ def convert(sf2_bytes: bytes, args: argparse.Namespace, warnings: Warnings, log:
 
     instruments = _build_instrument_defs(sf_instruments, variants)
 
-    if not args.remove_unused:
+    if args.include_unused:
         _add_orphan_variants(sf2_data, variants)
 
     presets, lookup = _build_preset_infos_and_lookup(sf_presets, instruments)

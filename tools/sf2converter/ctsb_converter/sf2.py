@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Tuple
 
 from .model import PresetDef, PresetZone
 from .riff import RiffChunk, parse_riff
-from .util import Logger, Warnings, sanitize_name
+from .util import Logger, Warnings, clamp, sanitize_name
 
 # --------------------------------------------------------------------------
 # Raw chunk record shapes
@@ -35,7 +35,8 @@ _SHDR_SIZE = struct.calcsize(_SHDR_FORMAT)
 
 
 class Generator(enum.IntEnum):
-    """SF2 generator operator IDs that this converter understands."""
+    """SF2 generator operator IDs that this converter understands (values
+    match the SoundFont 2.01 spec, section 8.1.2)."""
 
     START_ADDRS_OFFSET = 0
     END_ADDRS_OFFSET = 1
@@ -44,6 +45,12 @@ class Generator(enum.IntEnum):
     START_ADDRS_COARSE_OFFSET = 4
     END_ADDRS_COARSE_OFFSET = 12
     PAN = 17
+    DELAY_VOL_ENV = 33
+    ATTACK_VOL_ENV = 34
+    HOLD_VOL_ENV = 35
+    DECAY_VOL_ENV = 36
+    SUSTAIN_VOL_ENV = 37
+    RELEASE_VOL_ENV = 38
     STARTLOOP_ADDRS_COARSE_OFFSET = 45
     KEY_RANGE = 43
     VEL_RANGE = 44
@@ -57,6 +64,46 @@ class Generator(enum.IntEnum):
     OVERRIDING_ROOT_KEY = 58
     INSTRUMENT = 41
     END_OPER = 60
+
+
+# Human-readable labels for SF2 generators that are not in the Generator enum
+# (i.e. generators that are intentionally ignored). Used in warnings.
+_GENERATOR_LABELS: dict[int, str] = {
+    5: "modLfoToPitch",
+    6: "vibLfoToPitch",
+    7: "modEnvToPitch",
+    8: "initialFilterFc (cutoff)",
+    9: "initialFilterQ (resonance)",
+    10: "modLfoToFilterFc",
+    11: "modEnvToFilterFc",
+    13: "modLfoToVolume",
+    14: "unused",
+    15: "chorusEffectsSend",
+    16: "reverbEffectsSend",
+    18: "unused",
+    19: "unused",
+    20: "unused",
+    21: "delayModLFO",
+    22: "freqModLFO",
+    23: "delayVibLFO",
+    24: "freqVibLFO",
+    25: "delayModEnv",
+    26: "attackModEnv",
+    27: "holdModEnv",
+    28: "decayModEnv",
+    29: "sustainModEnv",
+    30: "releaseModEnv",
+    31: "keynumToModEnvHold",
+    32: "keynumToModEnvDecay",
+    39: "keynumToVolEnvHold",
+    40: "keynumToVolEnvDecay",
+    46: "keynum",
+    47: "velocity",
+    48: "initialAttenuation",
+    49: "unused",
+    55: "unused",
+    59: "unused",
+}
 
 
 # Generators that are read explicitly and never reported as "ignored".
@@ -76,10 +123,22 @@ _HANDLED_GENERATORS = {
     Generator.SAMPLE_MODES,
     Generator.OVERRIDING_ROOT_KEY,
     Generator.INSTRUMENT,
+    Generator.ATTACK_VOL_ENV,
+    Generator.DECAY_VOL_ENV,
+    Generator.SUSTAIN_VOL_ENV,
+    Generator.RELEASE_VOL_ENV,
 }
 # Generators that are intentionally ignored (per spec) but do not, on their
-# own, warrant a per-region "may affect playback" warning.
-_SILENTLY_IGNORED_GENERATORS = {Generator.VEL_RANGE, Generator.END_OPER}
+# own, warrant a per-region "may affect playback" warning. DELAY_VOL_ENV and
+# HOLD_VOL_ENV are read implicitly (they are folded away: the converted ADSR
+# has no delay/hold stage, per the firmware's envelope design), so they are
+# silently dropped rather than warned about.
+_SILENTLY_IGNORED_GENERATORS = {
+    Generator.VEL_RANGE,
+    Generator.END_OPER,
+    Generator.DELAY_VOL_ENV,
+    Generator.HOLD_VOL_ENV,
+}
 
 _SAMPLE_MODE_LOOP_VALUES = {1, 3}  # 1 = loop continuously, 3 = loop then play to end
 
@@ -277,6 +336,12 @@ def _warn_ignored_generators(
         return
     already_warned.add(key)
     def gen_label(oper: int) -> str:
+        # Prefer the descriptive label from the lookup table (which includes
+        # extra context like "(cutoff)" for filters), then fall back to the
+        # Generator enum name, then to a raw number.
+        label = _GENERATOR_LABELS.get(oper)
+        if label is not None:
+            return label
         try:
             return Generator(oper).name
         except ValueError:
@@ -309,6 +374,10 @@ class RawRegion:
     loop_start_offset: int
     loop_end_offset: int
     sample_modes: int
+    attack: int
+    decay: int
+    sustain: int
+    release: int
 
 
 @dataclass
@@ -344,10 +413,63 @@ def _combine_pitch(
     return root_note, remainder
 
 
+# SF2 defaults (spec section 8.1.3) for the vol-env generators when absent
+# from a zone: -12000 timecents is ~1ms (as close to "instant" as the
+# timecents encoding gets), 0 centibels of attenuation is full volume.
+_DEFAULT_ENV_TIMECENTS = -12000
+_DEFAULT_SUSTAIN_CENTIBELS = 0
+
+# Firmware-side envelope stage times are stored as milliseconds in a
+# uint16_t, so anything at/above this is clamped (~65.5 seconds).
+_MAX_ENV_MS = 0xFFFF
+
+
+def _timecents_to_ms(timecents: int) -> int:
+    """SF2 timecents -> milliseconds: time = 2^(timecents/1200) seconds."""
+    seconds = 2.0 ** (timecents / 1200.0)
+    return clamp(round(seconds * 1000.0), 0, _MAX_ENV_MS)
+
+
+def _centibels_to_level(centibels: int) -> int:
+    """SF2 sustain-vol-env centibels (0 = no attenuation/full volume, up to
+    1000 cB = full attenuation/silence) -> a linear uint16_t amplitude level
+    (0 = silent, 0xFFFF = full volume), matching how the firmware's envelope
+    scales output samples.
+    """
+    centibels = clamp(centibels, 0, 1000)
+    amplitude = 10.0 ** (-centibels / 200.0)
+    return clamp(round(amplitude * _MAX_ENV_MS), 0, _MAX_ENV_MS)
+
+
+def _resolve_envelope(merged: Dict[int, bytes]) -> Tuple[int, int, int, int]:
+    """Resolve the DAHDSR vol-env generators (delay/hold intentionally
+    dropped, per the firmware's plain-ADSR envelope) into (attack, decay,
+    sustain, release), each scaled to a uint16_t."""
+    attack_tc = (
+        _amount_short(merged[Generator.ATTACK_VOL_ENV]) if Generator.ATTACK_VOL_ENV in merged else _DEFAULT_ENV_TIMECENTS
+    )
+    decay_tc = (
+        _amount_short(merged[Generator.DECAY_VOL_ENV]) if Generator.DECAY_VOL_ENV in merged else _DEFAULT_ENV_TIMECENTS
+    )
+    release_tc = (
+        _amount_short(merged[Generator.RELEASE_VOL_ENV]) if Generator.RELEASE_VOL_ENV in merged else _DEFAULT_ENV_TIMECENTS
+    )
+    sustain_cb = (
+        _amount_short(merged[Generator.SUSTAIN_VOL_ENV]) if Generator.SUSTAIN_VOL_ENV in merged else _DEFAULT_SUSTAIN_CENTIBELS
+    )
+
+    attack = _timecents_to_ms(attack_tc)
+    decay = _timecents_to_ms(decay_tc)
+    release = _timecents_to_ms(release_tc)
+    sustain = _centibels_to_level(sustain_cb)
+    return attack, decay, sustain, release
+
+
 def build_instruments(sf2: Sf2Data, warnings: Warnings, log: Logger) -> List[SfInstrument]:
     zones_per_instrument = _zone_generator_dicts(sf2.inst_bags, sf2.inst_gens)
     already_warned: set = set()
     instruments: List[SfInstrument] = []
+
 
     for inst_index, inst in enumerate(sf2.instruments):
         start = inst.bag_index
@@ -401,6 +523,7 @@ def build_instruments(sf2: Sf2Data, warnings: Warnings, log: Logger) -> List[SfI
 
             shdr = sf2.samples[sample_id]
             root_note, fine_tune_cents = _combine_pitch(shdr, coarse_tune, fine_tune, overriding_root_key)
+            attack, decay, sustain, release = _resolve_envelope(merged)
 
             region = RawRegion(
                 key_low=key_low,
@@ -411,6 +534,10 @@ def build_instruments(sf2: Sf2Data, warnings: Warnings, log: Logger) -> List[SfI
                 loop_start_offset=loop_start_offset,
                 loop_end_offset=loop_end_offset,
                 sample_modes=sample_modes,
+                attack=attack,
+                decay=decay,
+                sustain=sustain,
+                release=release,
             )
             instrument.regions.append(region)
 

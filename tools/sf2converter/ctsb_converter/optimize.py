@@ -22,7 +22,18 @@ def deduplicate(samples: List[RawSample]) -> Tuple[List[RawSample], Dict[int, in
     remap: Dict[int, int] = {}
 
     for old_index, sample in enumerate(samples):
-        key = (sample.pcm, sample.loop_start, sample.loop_end, sample.root_note, sample.fine_tune, int(sample.loop_mode))
+        key = (
+            sample.pcm,
+            sample.loop_start,
+            sample.loop_end,
+            sample.root_note,
+            sample.fine_tune,
+            int(sample.loop_mode),
+            sample.attack,
+            sample.decay,
+            sample.sustain,
+            sample.release,
+        )
         existing = seen.get(key)
         if existing is not None:
             remap[old_index] = existing

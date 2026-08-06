@@ -19,7 +19,9 @@ Options:
 ```
 --mono            accepted for compatibility; output is always mono
 --trim-silence    trim leading/trailing silence (never into a loop region)
---remove-unused   drop samples not referenced by any preset/instrument
+--include-unused  also emit a natural-pitch variant of every raw SF2 sample,
+                  even ones no preset/instrument references (off by default,
+                  since these are never reachable and only bloat PCM data)
 --verbose         print progress information to stderr
 --max-size=<n>    warn if the generated PCM blob exceeds <n> bytes (accepts k/m suffixes)
 ```
