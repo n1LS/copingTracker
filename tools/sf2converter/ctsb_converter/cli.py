@@ -181,8 +181,10 @@ class _VariantBuilder:
 
         loop_start_rel = (shdr.loop_start + loop_start_offset) - shdr.start
         loop_end_rel = (shdr.loop_end + loop_end_offset) - shdr.start
-        loop_start = clamp(loop_start_rel // scale, 0, len(samples))
-        loop_end = clamp(loop_end_rel // scale, 0, len(samples))
+        # SF2 loopEnd is inclusive (points to last frame); convert to exclusive (one-past-end)
+        loop_end_rel += 1
+        loop_start = clamp(round(loop_start_rel / scale), 0, len(samples))
+        loop_end = clamp(round(loop_end_rel / scale), 0, len(samples))
 
         has_loop = sample_modes in _LOOP_SAMPLE_MODES
         if sample_modes not in (0, 1, 2, 3):
@@ -343,7 +345,7 @@ def _build_preset_infos_and_lookup(
     return presets, lookup
 
 
-def _build_pcm_blob_and_entries(samples: List[RawSample]) -> Tuple[bytes, List[SampleEntryOut]]:
+def _build_pcm_blob_and_entries(samples: List[RawSample], warnings: Warnings = None) -> Tuple[bytes, List[SampleEntryOut]]:
     # Many RawSample instances only differ in loop points/root note/fine
     # tune while carrying byte-for-byte identical PCM (e.g. the same SF2
     # sample header referenced by several key/velocity-split regions with
@@ -364,12 +366,16 @@ def _build_pcm_blob_and_entries(samples: List[RawSample]) -> Tuple[bytes, List[S
             pcm_parts.append(sample.pcm)
             offset += frame_count
             pcm_offsets[sample.pcm] = (pcm_offset, frame_count)
+        loop_start = clamp(sample.loop_start, 0, frame_count)
+        loop_end = clamp(sample.loop_end, 0, frame_count)
+        if (sample.loop_start != loop_start or sample.loop_end != loop_end) and warnings is not None:
+            warnings.add(f"sample '{sample.name}': loop points clamped from ({sample.loop_start}, {sample.loop_end}) to ({loop_start}, {loop_end})")
         entries.append(
             SampleEntryOut(
                 pcm_offset=pcm_offset,
                 length=frame_count,
-                loop_start=sample.loop_start,
-                loop_end=sample.loop_end,
+                loop_start=loop_start,
+                loop_end=loop_end,
                 root_note=sample.root_note,
                 fine_tune=sample.fine_tune,
                 flags=int(sample.loop_mode),
@@ -418,7 +424,7 @@ def convert(sf2_bytes: bytes, args: argparse.Namespace, warnings: Warnings, log:
     lookup = _remap_lookup(lookup, remap)
     log.log(f"{len(variants.instances)} sample instance(s) deduplicated to {len(unique_samples)}")
 
-    pcm_data, sample_entries = _build_pcm_blob_and_entries(unique_samples)
+    pcm_data, sample_entries = _build_pcm_blob_and_entries(unique_samples, warnings)
 
     if args.max_size is not None and len(pcm_data) > args.max_size:
         warnings.add(f"PCM data is {len(pcm_data)} bytes, exceeding --max-size={args.max_size} bytes")

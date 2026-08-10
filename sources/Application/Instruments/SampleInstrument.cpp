@@ -532,7 +532,11 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
 
   // Compute octave & note difference from root
 
-  float fineTune = float(fineTune_.GetInt() - 0x7F);
+  int fineTuneValue = fineTune_.GetInt() - 0x7F;
+  if (source_->IsMulti()) {
+    fineTuneValue += source_->GetFineTune(rp->midiNote_);
+  }
+  float fineTune = float(fineTuneValue);
   fineTune /= float(0x80);
   int offset = note - rootNote;
   if (sliceActive) {

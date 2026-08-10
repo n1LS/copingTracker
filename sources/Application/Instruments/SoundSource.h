@@ -12,6 +12,8 @@
 #ifndef _SOUND_SOURCE_H_
 #define _SOUND_SOURCE_H_
 
+#include <cstdint>
+
 class SoundSource {
 public:
   SoundSource() {};
@@ -28,6 +30,9 @@ public:
   virtual void *GetSampleBuffer(int note) = 0;
   virtual bool IsMulti() = 0;
   virtual int GetRootNote(int note) = 0;
+  virtual int8_t GetFineTune(int note) {
+    return 0;
+  };
   virtual float GetLengthInSec() = 0;
 };
 

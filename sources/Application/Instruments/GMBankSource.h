@@ -52,6 +52,7 @@ public:
   uint8_t GetDecay(int note);
   uint8_t GetSustain(int note);
   uint8_t GetRelease(int note);
+  int8_t GetFineTune(int note);
 
 private:
   bool lookup(int note, const SampleEntry **entry) const;

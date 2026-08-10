@@ -21,7 +21,7 @@ typedef struct adsr_envelope_t {
   uint16_t coefficient; // q0.16
   uint16_t attack;
   uint16_t decay;
-  uint16_t sustain; // sustain level (0-65535)
+  uint16_t sustain;
   uint16_t release;
   adsr_env_state_e state;
 
@@ -32,12 +32,12 @@ typedef struct adsr_envelope_t {
 
   void set_decay(uint8_t d) {
     // map 8 bit decay value to 16 bit coefficient using LUT and interpolation
-    decay = interpolateU16(decayCoeffLUT.data(), d);
+    decay = interpolateU16(decayCoeffLUT.data(), d) >> 2;
   }
 
   void set_sustain(uint8_t s) {
     // map 8 bit sustain level (0-255) to 16 bit value (0-65535)
-    sustain = (uint16_t)s << 8;
+    sustain = s << 8;
   }
 
   void set_release(uint8_t r) {

@@ -106,3 +106,11 @@ uint8_t GMBankSource::GetRelease(int note) {
   }
   return entry->release;
 }
+
+int8_t GMBankSource::GetFineTune(int note) {
+  const SampleEntry *entry;
+  if (!lookup(note, &entry)) {
+    return 0;
+  }
+  return entry->fineTune;
+}

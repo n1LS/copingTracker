@@ -348,7 +348,7 @@ def _warn_ignored_generators(
             return f"gen#{oper}"
 
     names = ", ".join(gen_label(o) for o in sorted(ignored))
-    warnings.add(f"{context}: ignoring generator(s) that may affect playback: {names}")
+    # warnings.add(f"{context}: ignoring generator(s) that may affect playback: {names}")
     if Generator.VEL_RANGE in zone_gens:
         low, high = _amount_range(zone_gens[Generator.VEL_RANGE])
         if (low, high) != (0, 127):
@@ -401,10 +401,11 @@ def _combine_pitch(
     root_note = overriding_root_key if overriding_root_key is not None else shdr.original_pitch
     total_cents = coarse_tune * 100 + fine_tune + shdr.pitch_correction
 
-    semitone_shift, remainder = divmod(total_cents, 100)
-    if remainder > 50:
-        semitone_shift += 1
-        remainder -= 100
+    # Round to nearest semitone: if the fractional cents >= 50, round up to
+    # the next semitone and store the negative remainder (e.g., 75 cents ->
+    # 1 semitone + (-25) cents = "almost a semitone higher").
+    semitone_shift = round(total_cents / 100.0)
+    remainder = total_cents - semitone_shift * 100
 
     # A positive coarse/fine tune raises the perceived pitch, which is
     # equivalent to *lowering* the effective root note for a given played
