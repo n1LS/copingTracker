@@ -422,6 +422,27 @@ void InstrumentView::fillSampleParameters() {
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
+  v = instrument->FindVariable(Token::SampleInstrumentAttack);
+  intVarField_.emplace_back(position, *v, "A/D/S/R       :%2.2X", 0, 0xFF, 1, 0x10);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+
+  position.x_ += 17;
+  v = instrument->FindVariable(Token::SampleInstrumentDecay);
+  intVarField_.emplace_back(position, *v, ":%2.2X", 0, 0xFF, 1, 0x10);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+
+  position.x_ += 3;
+  v = instrument->FindVariable(Token::SampleInstrumentSustain);
+  intVarField_.emplace_back(position, *v, ":%2.2X", 0, 0xFF, 1, 0x10);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+
+  position.x_ += 3;
+  v = instrument->FindVariable(Token::SampleInstrumentRelease);
+  intVarField_.emplace_back(position, *v, ":%2.2X", 0, 0xFF, 1, 0x10);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+
+  position.y_ += 1;
+  position.x_ = baseX;
   v = instrument->FindVariable(Token::SampleInstrumentTable);
   intVarOffField_.emplace_back(position, *v, "Table         :%2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
@@ -468,12 +489,12 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentLoopStart);
-  hexVarField_.emplace_back(position, *v, 7, sub_item "Loop start:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  hexVarField_.emplace_back(position, *v, 7, sub_item "Loop:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 
-  position.y_ += 1;
+  position.x_ += 17;
   v = instrument->FindVariable(Token::SampleInstrumentEnd);
-  hexVarField_.emplace_back(position, *v, 7, last_sub_item "Loop end  :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  hexVarField_.emplace_back(position, *v, 7, ">:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 }
 

@@ -839,7 +839,7 @@ void Player::playCursorPosition(int channel) {
     // note on *******************************************************************************************************
 
     // Stop instrument if playing
-    mixer_.StopInstrument(channel);
+    mixer_.StopInstrument(channel, true);
     InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
 
     // get instrument for next note
