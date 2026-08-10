@@ -126,7 +126,7 @@ protected:
   void initFromSampleEntry(const SampleEntry *entry, const void *sampleStorageBase);
 
 private:
-  etl::list<Variable *, 21> variables_;
+  etl::list<Variable *, 24> variables_;
 
   SoundSource *source_;
   __attribute__((section(".DTCMRAM"))) static struct renderParams renderParams_[SONG_CHANNEL_COUNT];
@@ -136,6 +136,8 @@ private:
 
   static signed char lastMidiNote_[SONG_CHANNEL_COUNT];
   static fixed lastSample_[SONG_CHANNEL_COUNT][2];
+  adsr_envelope_t envelope_[SONG_CHANNEL_COUNT];
+
   SampleVariable sample_;
   Variable volume_;
   Variable interpolation_;
@@ -155,6 +157,10 @@ private:
   WatchedVariable loopEnd_;
   Variable table_;
   Variable tableAuto_;
+  Variable attack_;
+  Variable decay_;
+  Variable sustain_;
+  Variable release_;
   // GM bank instrument index (0..kGMInstrumentCount-1), NO_GM_INSTRUMENT
   // (-1) when this instrument isn't playing from the GM bank. Only
   // meaningful while sample_ == NO_SAMPLE; see updateInstrumentData().

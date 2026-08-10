@@ -14,15 +14,16 @@
 #include "ChiptuneInstrument/ChiptuneMath.h"
 #include "ChiptuneInstrument/ChiptuneTables.h"
 
-#pragma pack(push, 1)
+enum adsr_env_state_e : uint8_t { adsrIdle, adsrAttack, adsrDecay, adsrSustain, adsrRelease };
+
 typedef struct adsr_envelope_t {
-  uint16_t value;
+  uint16_t value;       // q0.16
   uint16_t coefficient; // q0.16
   uint16_t attack;
   uint16_t decay;
   uint16_t sustain; // sustain level (0-65535)
   uint16_t release;
-  chiptune_env_state_e state;
+  adsr_env_state_e state;
 
   void set_attack(uint8_t a) {
     // map 8 bit attack value to 16 bit coefficient using LUT and interpolation
@@ -46,62 +47,64 @@ typedef struct adsr_envelope_t {
 
   void trigger() {
     coefficient = attack;
-    state = envAttack;
+    state = adsrAttack;
     value = 0;
   }
 
   void release_note() {
-    if (state == envAttack || state == envDecay || state == envSustain) {
+    if (state == adsrAttack || state == adsrDecay || state == adsrSustain) {
       coefficient = release;
-      state = envRelease;
+      state = adsrRelease;
     }
   }
 
-  void tick() {
-    if (state == envIdle)
-      return;
+  // returns true if envelope is idle (finished)
+  bool tick() {
+    if (state == adsrIdle) {
+      return true;
+    }
 
     uint32_t diff;
     int32_t tmp;
 
     switch (state) {
-      case envAttack:
+      case adsrAttack:
         diff = 0xFFFF - value;
         tmp = value + ((diff * coefficient) >> 16);
         if (tmp >= envAttackThreshold) {
           tmp = 0xFFFF;
           coefficient = decay;
-          state = envDecay;
+          state = adsrDecay;
         }
         break;
 
-      case envDecay:
+      case adsrDecay:
         diff = value; // decay from 0xFFFF down to sustain level
         tmp = value - ((diff * coefficient) >> 16);
         if (tmp <= sustain) {
           tmp = sustain;
-          state = envSustain;
+          state = adsrSustain;
         }
         break;
 
-      case envSustain:
+      case adsrSustain:
         // hold at sustain level until release_note() is called
-        return;
+        return false;
 
-      case envRelease:
+      case adsrRelease:
         diff = value; // release from current level down to 0
         tmp = value - ((diff * coefficient) >> 16);
         if (tmp <= envDecayThreshold) {
           tmp = 0;
-          state = envIdle;
+          state = adsrIdle;
         }
         break;
 
       default:
-        return;
+        return true;
     }
 
     value = tmp;
+    return (value == 0 && state == adsrIdle);
   }
 } adsr_envelope_t;
-#pragma pack(pop)

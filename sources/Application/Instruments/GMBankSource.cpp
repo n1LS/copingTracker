@@ -74,3 +74,35 @@ float GMBankSource::GetLengthInSec() {
   // report here.
   return 0.0f;
 }
+
+uint8_t GMBankSource::GetAttack(int note) {
+  const SampleEntry *entry;
+  if (!lookup(note, &entry)) {
+    return 0;
+  }
+  return entry->attack;
+}
+
+uint8_t GMBankSource::GetDecay(int note) {
+  const SampleEntry *entry;
+  if (!lookup(note, &entry)) {
+    return 0;
+  }
+  return entry->decay;
+}
+
+uint8_t GMBankSource::GetSustain(int note) {
+  const SampleEntry *entry;
+  if (!lookup(note, &entry)) {
+    return 0xFF;
+  }
+  return entry->sustain;
+}
+
+uint8_t GMBankSource::GetRelease(int note) {
+  const SampleEntry *entry;
+  if (!lookup(note, &entry)) {
+    return 0;
+  }
+  return entry->release;
+}

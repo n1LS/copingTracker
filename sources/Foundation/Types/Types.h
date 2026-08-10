@@ -70,6 +70,10 @@ struct Token {
     SampleInstrumentTable = 117,
     SampleInstrumentTableAutomation = 60,
     SampleInstrumentGMInstrument = 191, // GM bank instrument index (0..kGMInstrumentCount-1), -1 = off
+    SampleInstrumentAttack = 93,
+    SampleInstrumentDecay = 94,
+    SampleInstrumentSustain = 95,
+    SampleInstrumentRelease = 96,
 
     MidiInstrumentChannel = 1,
     MidiInstrumentNoteLength = 32,
@@ -250,7 +254,7 @@ struct Token {
     VarKeyDelay = 139,
     VarKeyRepeat = 176,
 
-    // 93-98 free     6
+    // 97-98 free     2
     // 182-183 free   2
     // 192-199 free   8
     // 227-254 free  29
@@ -338,8 +342,15 @@ struct Token {
   ETL_ENUM_TYPE_16(SampleInstrumentTable, "Table")
   ETL_ENUM_TYPE_16(SampleInstrumentTableAutomation, "TableAutomation")
   ETL_ENUM_TYPE_16(SampleInstrumentGMInstrument, "GMInstrument")
+  ETL_ENUM_TYPE_16(SampleInstrumentAttack, "Attack")
+  ETL_ENUM_TYPE_16(SampleInstrumentDecay, "Decay")
+  ETL_ENUM_TYPE_16(SampleInstrumentSustain, "Sustain")
+  ETL_ENUM_TYPE_16(SampleInstrumentRelease, "Release")
+
   ETL_ENUM_TYPE_16(MidiInstrumentChannel, "Channel")
+
   ETL_ENUM_TYPE_16(InstrumentName, "Name")
+
   ETL_ENUM_TYPE_16(MidiInstrumentName, "MidiName")
   ETL_ENUM_TYPE_16(MidiInstrumentNoteLength, "NoteLength")
   ETL_ENUM_TYPE_16(MidiInstrumentVolume, "Volume")

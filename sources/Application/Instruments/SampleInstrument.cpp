@@ -56,6 +56,8 @@ SampleInstrument::SampleInstrument()
       loopMode_(Token::SampleInstrumentLoopMode, loopTypes, SILM_LAST, 0),
       loopStart_(Token::SampleInstrumentLoopStart, 0), loopEnd_(Token::SampleInstrumentEnd, 0),
       table_(Token::SampleInstrumentTable, -1), tableAuto_(Token::SampleInstrumentTableAutomation, false),
+      attack_(Token::SampleInstrumentAttack, 0), decay_(Token::SampleInstrumentDecay, 0),
+      sustain_(Token::SampleInstrumentSustain, 0xFF), release_(Token::SampleInstrumentRelease, 0),
       gmInstrument_(Token::SampleInstrumentGMInstrument, NO_GM_INSTRUMENT) {
 
   // Initialize MIDI notes
@@ -98,6 +100,10 @@ SampleInstrument::SampleInstrument()
   variables_.insert(variables_.end(), &table_);
   variables_.insert(variables_.end(), &tableAuto_);
   variables_.insert(variables_.end(), &gmInstrument_);
+  variables_.insert(variables_.end(), &attack_);
+  variables_.insert(variables_.end(), &decay_);
+  variables_.insert(variables_.end(), &sustain_);
+  variables_.insert(variables_.end(), &release_);
 
   tableState_.Reset();
   slicePoints_.fill(0);
@@ -540,6 +546,34 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
   rp->baseSpeed_ = fp_mul(rp->baseSpeed_, freqFactor);
   rp->speed_ = rp->baseSpeed_;
 
+  // set envelope
+
+  uint8_t attackVal, decayVal, sustainVal, releaseVal;
+
+  // If using GMBank source, retrieve ADSR from the sample entry; otherwise use variables
+  if (source_ == &gmBankSource_) {
+    attackVal = gmBankSource_.GetAttack(rp->midiNote_);
+    decayVal = gmBankSource_.GetDecay(rp->midiNote_);
+    sustainVal = gmBankSource_.GetSustain(rp->midiNote_);
+    releaseVal = gmBankSource_.GetRelease(rp->midiNote_);
+  } else {
+    Variable *a = FindVariable(Token::SampleInstrumentAttack);
+    Variable *d = FindVariable(Token::SampleInstrumentDecay);
+    Variable *s = FindVariable(Token::SampleInstrumentSustain);
+    Variable *r = FindVariable(Token::SampleInstrumentRelease);
+
+    attackVal = static_cast<uint8_t>(a->GetInt());
+    decayVal = static_cast<uint8_t>(d->GetInt());
+    sustainVal = static_cast<uint8_t>(s->GetInt());
+    releaseVal = static_cast<uint8_t>(r->GetInt());
+  }
+
+  rp->envelope_.set_attack(attackVal);
+  rp->envelope_.set_decay(decayVal);
+  rp->envelope_.set_sustain(sustainVal);
+  rp->envelope_.set_release(releaseVal);
+  rp->envelope_.trigger();
+
   // Init k rate counter
 
   rp->krateCount_ = 0;
@@ -594,7 +628,7 @@ void SampleInstrument::SetStepVolume(int channel, uint8_t volume) {
 
 void SampleInstrument::Stop(int channel) {
   renderParams *rp = renderParams_ + channel;
-  rp->finished_ = true; // Mark this channel as finished
+  rp->envelope_.release_note();
 }
 
 void SampleInstrument::doTickUpdate(int channel) {
@@ -633,8 +667,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
       return false;
 
     // clear the fixed point buffer
-
-    memset(buffer, 0, size * 2 * sizeof(fixed));
+    // memset(buffer, 0, size * 2 * sizeof(fixed));
 
     bool hasUpdaters = !(rp->activeUpdaters_.empty());
 
@@ -730,6 +763,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
     fixed volscale = fl2fp(0.003921568627450980392156862745098f);
     fixed volfactor = fp_mul(rp->volume_, volscale);
+    fixed env = rp->envelope_.value >> 1;
+    volfactor = fp_mul(volfactor, env);
     int pan = fp2i(rp->pan_);
     fixed fixedpanl = panlaw[pan];
     fixed fixedpanr = panlaw[254 - pan];
@@ -893,6 +928,12 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
         if (rpKrateCount-- == 0) {
           rpKrateCount = KRATE_SAMPLE_COUNT;
 
+          // update the envelope as well
+          // TODO POD
+          if (!rp->envelope_.tick()) {
+            //            rp->finished_ = true; // Mark this channel as finished
+          }
+
           if (hasUpdaters) {
             doKRateUpdate(channel);
             struct RUParams rup;
@@ -924,7 +965,17 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
             } else {
               fpSpeed = rp->speed_;
             }
+          } else {
+            // No active updaters: still need to recompute volfactor from the
+            // base volume before applying the envelope, otherwise the
+            // envelope value would get re-multiplied onto an already
+            // enveloped volfactor every k-rate tick, causing volume to
+            // decay/flutter exponentially instead of following the envelope.
+            volfactor = fp_mul(rp->volume_, volscale);
           }
+
+          fixed env = rp->envelope_.value >> 1;
+          volfactor = fp_mul(volfactor, env);
         }
 
         // get input sample to interpolate from
@@ -1055,14 +1106,16 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
         count--;
       }
     }
-    // Update 'reverse' mode if changed
 
+    // Update 'reverse' mode if changed
     rp->reverse_ = rpReverse;
 
     // Update final sample position
     rp->position_ = (((char *)input) - wavbuf) / (2 * channelCount) + fp2fl(fpPos);
 
     somethingToMix = true;
+
+    rp->krateCount_ = rpKrateCount;
   }
 
   return somethingToMix;
@@ -1110,7 +1163,6 @@ bool SampleInstrument::IsInitialized() {
 }
 
 void SampleInstrument::updateInstrumentData(bool search) {
-
   SamplePool *pool = SamplePool::GetInstance();
 
   // Get the source index
@@ -1167,13 +1219,10 @@ void SampleInstrument::updateInstrumentData(bool search) {
   entry.rootNote = static_cast<uint8_t>(rootNote_.GetInt());
   entry.fineTune = static_cast<int8_t>(fineTune_.GetInt() - 0x7F);
   entry.flags = static_cast<uint16_t>(loopMode_.GetInt()) & SEF_LOOP_MODE_MASK;
-  // WAV-loaded samples get a flat "no shaping" envelope (instant attack,
-  // full sustain, no decay/release), unlike GM entries which carry their
-  // own SF2-derived ADSR.
-  entry.attack = 0;
-  entry.decay = 0;
-  entry.sustain = 0xFFFF;
-  entry.release = 0;
+  entry.attack = static_cast<uint8_t>(FindVariable(Token::SampleInstrumentAttack)->GetInt());
+  entry.decay = static_cast<uint8_t>(FindVariable(Token::SampleInstrumentDecay)->GetInt());
+  entry.sustain = static_cast<uint8_t>(FindVariable(Token::SampleInstrumentSustain)->GetInt());
+  entry.release = static_cast<uint8_t>(FindVariable(Token::SampleInstrumentRelease)->GetInt());
 
   initFromSampleEntry(&entry, sampleStorageBase);
 }

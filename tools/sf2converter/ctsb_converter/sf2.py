@@ -444,7 +444,9 @@ def _centibels_to_level(centibels: int) -> int:
 def _resolve_envelope(merged: Dict[int, bytes]) -> Tuple[int, int, int, int]:
     """Resolve the DAHDSR vol-env generators (delay/hold intentionally
     dropped, per the firmware's plain-ADSR envelope) into (attack, decay,
-    sustain, release), each scaled to a uint16_t."""
+    sustain, release), each scaled to a uint8_t. Attack/decay/release map to
+    LUT indices via interpolation in the firmware; sustain maps from 0-65535
+    to 0-255 (255 = full volume)."""
     attack_tc = (
         _amount_short(merged[Generator.ATTACK_VOL_ENV]) if Generator.ATTACK_VOL_ENV in merged else _DEFAULT_ENV_TIMECENTS
     )
@@ -458,11 +460,22 @@ def _resolve_envelope(merged: Dict[int, bytes]) -> Tuple[int, int, int, int]:
         _amount_short(merged[Generator.SUSTAIN_VOL_ENV]) if Generator.SUSTAIN_VOL_ENV in merged else _DEFAULT_SUSTAIN_CENTIBELS
     )
 
-    attack = _timecents_to_ms(attack_tc)
-    decay = _timecents_to_ms(decay_tc)
-    release = _timecents_to_ms(release_tc)
-    sustain = _centibels_to_level(sustain_cb)
-    return attack, decay, sustain, release
+    attack_ms = _timecents_to_ms(attack_tc)
+    decay_ms = _timecents_to_ms(decay_tc)
+    release_ms = _timecents_to_ms(release_tc)
+    sustain_level = _centibels_to_level(sustain_cb)
+
+    # Quantize to uint8_t: sustain is divided by 256 to map from 0-65535 to 0-255.
+    # For attack/decay/release, we map the millisecond values to 0-255 range
+    # where 0 represents the fastest and 255 the slowest. The exact interpretation
+    # depends on the firmware's LUT, but a simple linear scaling works:
+    # We use 255 * (1 - e^(-t/tau)) where tau=256ms gives reasonable behavior.
+    attack_u8 = clamp(round(attack_ms / 256.0 * 255), 0, 255)
+    decay_u8 = clamp(round(decay_ms / 256.0 * 255), 0, 255)
+    release_u8 = clamp(round(release_ms / 256.0 * 255), 0, 255)
+    sustain_u8 = clamp(sustain_level >> 8, 0, 255)
+
+    return attack_u8, decay_u8, sustain_u8, release_u8
 
 
 def build_instruments(sf2: Sf2Data, warnings: Warnings, log: Logger) -> List[SfInstrument]:

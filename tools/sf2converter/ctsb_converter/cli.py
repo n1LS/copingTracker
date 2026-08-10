@@ -83,7 +83,7 @@ def _dummy_sample() -> RawSample:
         loop_mode=LoopMode.ONESHOT,
         attack=0,
         decay=0,
-        sustain=0xFFFF,
+        sustain=0xFF,
         release=0,
     )
 
@@ -170,7 +170,7 @@ class _VariantBuilder:
         sample_modes: int,
         attack: int = 0,
         decay: int = 0,
-        sustain: int = 0xFFFF,
+        sustain: int = 0xFF,
         release: int = 0,
     ) -> Optional[int]:
         channel = self._channels.get(shdr_index)

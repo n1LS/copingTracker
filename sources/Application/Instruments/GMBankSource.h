@@ -48,6 +48,11 @@ public:
   virtual int GetRootNote(int note);
   virtual float GetLengthInSec();
 
+  uint8_t GetAttack(int note);
+  uint8_t GetDecay(int note);
+  uint8_t GetSustain(int note);
+  uint8_t GetRelease(int note);
+
 private:
   bool lookup(int note, const SampleEntry **entry) const;
   uint16_t instrument_ = 0;

@@ -23,13 +23,13 @@ struct SampleEntry {
 
   uint8_t volume;
 
-  // Plain ADSR envelope (SF2 DAHDSR with delay/hold folded away). attack,
-  // decay and release are stage durations in milliseconds; sustain is the
-  // held amplitude level, 0 (silent) .. 0xFFFF (full volume).
-  uint16_t attack;
-  uint16_t decay;
-  uint16_t sustain;
-  uint16_t release;
+  // Plain ADSR envelope (SF2 DAHDSR with delay/hold folded away).
+  // attack, decay, release: 0-255 LUT indices for envelope coefficients
+  // sustain: 0-255 sustain level (255 = full volume, 0 = silent)
+  uint8_t attack;
+  uint8_t decay;
+  uint8_t sustain;
+  uint8_t release;
 };
 
 struct PresetInfo {
@@ -37,6 +37,10 @@ struct PresetInfo {
   uint16_t instrumentIndex;
   uint8_t bank;
   uint8_t preset;
+  uint8_t attack;
+  uint8_t decay;
+  uint8_t sustain;
+  uint8_t release;
 };
 
 class GMBank {
