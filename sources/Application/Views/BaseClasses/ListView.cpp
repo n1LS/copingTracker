@@ -13,8 +13,10 @@
 #include "ViewUtils.h"
 #include <cstdio>
 
-ListView::ListView(GUIWindow &w, ViewData *viewData, DataSource *dataSource, Delegate *delegate, size_t pageSize, int initialTab)
-    : ScreenView(w, viewData), dataSource_(dataSource), delegate_(delegate), pageSize_(pageSize), selectedTab_(initialTab) {
+ListView::ListView(GUIWindow &w, ViewData *viewData, DataSource *dataSource, Delegate *delegate, size_t pageSize,
+                   int initialTab)
+    : ScreenView(w, viewData), dataSource_(dataSource), delegate_(delegate), pageSize_(pageSize),
+      selectedTab_(initialTab) {
 }
 
 ListView::~ListView() {

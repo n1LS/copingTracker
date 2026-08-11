@@ -136,7 +136,8 @@ void SampleImportView::OnDirectorySetup() {
   // No additional setup needed after directory switch
 }
 
-void SampleImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) {
+void SampleImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
+                                          size_t bufferSize) {
   (void)bufferSize; // Unused - use fixed size
   auto fs = GetFileSystem();
 

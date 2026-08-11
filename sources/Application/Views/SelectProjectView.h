@@ -39,7 +39,8 @@ public:
   void ClearAutoSave();
 
 protected:
-  virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) override;
+  virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
+                                  size_t bufferSize) override;
 
 private:
   char selection_[MAX_PROJECT_NAME_LENGTH + 1] = {};
