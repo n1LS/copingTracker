@@ -83,6 +83,12 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   (*intVarField_.rbegin()).AddObserver(*this);
 
   position.y_ += 2;
+  v = config->FindVariable(Token::VarPreviewVolume);
+  intVarField_.emplace_back(position, *v, "Preview volume    :%2d", 0, 99, 1, 10);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  (*intVarField_.rbegin()).AddObserver(*this);
+
+  position.y_ += 1;
   v = config->FindVariable(Token::VarBacklightLevel);
   // MIN brightness is 0xF (15)
   intVarField_.emplace_back(position, *v, "Display brightness:%2.2X", 0xF, 0xFF, 1, 16);

@@ -61,6 +61,10 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
     return false;
   }
 
+  // Get preview volume from config (or use default if not initialized yet)
+  Variable *v = Config::GetInstance()->FindVariable(Token::VarPreviewVolume);
+  previewVolume_ = v ? v->GetInt() : DEFAULT_PREVIEW_VOLUME; // Default preview volume
+
   // Get sample rate information and calculate speed factor
   fileSampleRate_ = wav_.GetSampleRate(-1);
   systemSampleRate_ = Audio::GetInstance()->GetSampleRate();
@@ -198,14 +202,10 @@ bool AudioFileStreamer::Render(fixed *buffer, int samplecount) {
   // Clear the output buffer
   memset(buffer, 0, samplecount * 2 * sizeof(fixed));
 
-  // Get preview volume from project
-  Variable *v = project_->FindVariable(Token::VarPreviewVolume);
-  int previewVol = v->GetInt();
-
   // Apply logarithmic scaling to match human hearing perception
   // Using a formula that gives a more natural volume curve: volume =
   // (value/100)^2 This gives more fine control at lower volumes
-  float normalizedVol = (float)previewVol / 100.0f;
+  float normalizedVol = (float)previewVolume_ / 100.0f;
   float logVol = normalizedVol * normalizedVol; // Quadratic curve
 
   // Convert to fixed point

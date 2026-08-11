@@ -64,7 +64,6 @@ SampleImportView::~SampleImportView() {
 
 void SampleImportView::Reset() {
   FileListView::Reset();
-  previewPlayingIndex_ = 0;
   playKeyHeld_ = false;
   editKeyHeld_ = false;
   inProjectSampleDir_ = false;
@@ -110,10 +109,6 @@ void SampleImportView::OnFocus() {
     fs->chdir(PROJECTS_DIR);
     fs->chdir(projectName.c_str());
     fs->chdir(PROJECT_SAMPLES_DIR);
-
-    // Reset navigation state and refresh
-    ResetNavigationState();
-    RefreshFileList();
   } else {
     // Not in project pool mode - ensure we're in the general library
     // Set back navigation to return to InstrumentView
@@ -124,9 +119,11 @@ void SampleImportView::OnFocus() {
     if (!fs->chdir(SAMPLES_LIB_DIR)) {
       Trace::Error("SAMPLEIMPORT", "Failed to chdir to SAMPLES_LIB_DIR");
     }
-    ResetNavigationState();
-    RefreshFileList();
   }
+
+  // Reset navigation state and refresh
+  ResetNavigationState();
+  RefreshFileList();
 
   // Call base class hook for any additional setup (but skip its directory setup)
   OnDirectorySetup();
@@ -205,15 +202,9 @@ void SampleImportView::DrawButtons(int selectedButton) {
   int x = 0;
 
   // ensure selectedButton is valid
-  uint8_t buttonCount = (uint8_t)(inProjectSampleDir_ ? 3 : 3);
+  uint8_t buttonCount = (uint8_t)(inProjectSampleDir_ ? 2 : 2); // Import/Edit or Edit/Remove
   if (selectedButton_ < 0 || selectedButton_ >= buttonCount) {
     selectedButton_ = 0;
-  }
-
-  int previewVolume = 0;
-  Variable *v = viewData_->project_->FindVariable(Token::VarPreviewVolume);
-  if (v) {
-    previewVolume = v->GetInt();
   }
 
   if (!inProjectSampleDir_) {
@@ -223,10 +214,6 @@ void SampleImportView::DrawButtons(int selectedButton) {
     x += DrawButton(x, y, "Edit", selectedButton_ == 0);
     x += DrawButton(x, y, "Remove", selectedButton_ == 1);
   }
-
-  char volField[12];
-  npf_snprintf(volField, sizeof(volField), "Vol:%2d", previewVolume);
-  DrawButton(x, SCREEN_HEIGHT - 1, volField, selectedButton_ == 2);
 }
 
 bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
@@ -257,7 +244,6 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       playKeyHeld_ = false;
       if (Player::GetInstance()->IsPlaying()) {
         Player::GetInstance()->StopStreaming();
-        previewPlayingIndex_ = (size_t)-1;
       }
       return true;
     }
@@ -300,7 +286,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       if (mask & BM_ALT) {
         Trace::Log("IMPORT", "SHIFT play - import");
         import();
-      } else {
+    } else if (mask == BM_PLAY) {
         Trace::Log("IMPORT", "play key pressed - start preview");
         preview(name);
       }
@@ -332,25 +318,6 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       }
 
       if (inProjectSampleDir_) {
-        if (selectedButton_ == 2) { // Volume
-          int volumeOffset = 0;
-          if (mask & BM_LEFT) {
-            volumeOffset -= 1;
-          }
-          if (mask & BM_RIGHT) {
-            volumeOffset += 1;
-          }
-          if (mask & BM_DOWN) {
-            volumeOffset -= 5;
-          }
-          if (mask & BM_UP) {
-            volumeOffset += 5;
-          }
-          if (volumeOffset != 0) {
-            adjustPreviewVolume(volumeOffset);
-          }
-          return true;
-        }
         if (!hasFiles) {
           pendingDirEnterOnRelease_ = false;
           return false;
@@ -366,25 +333,6 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
         return true;
       }
 
-      if (selectedButton_ == 2) { // Volume
-        int volumeOffset = 0;
-        if (mask & BM_LEFT) {
-          volumeOffset -= 1;
-        }
-        if (mask & BM_RIGHT) {
-          volumeOffset += 1;
-        }
-        if (mask & BM_DOWN) {
-          volumeOffset -= 5;
-        }
-        if (mask & BM_UP) {
-          volumeOffset += 5;
-        }
-        if (volumeOffset != 0) {
-          adjustPreviewVolume(volumeOffset);
-        }
-        return true;
-      }
       if (!hasFiles) {
         pendingDirEnterOnRelease_ = false;
         return false;
@@ -408,12 +356,9 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       if (inProjectSampleDir_ && IsEmpty()) {
         return false;
       }
-      uint8_t buttonCount = (uint8_t)(inProjectSampleDir_ ? 3 : 3);
-      if (mask & BM_LEFT) {
-        selectedButton_ = (selectedButton_ + buttonCount - 1) % buttonCount;
-      } else {
-        selectedButton_ = (selectedButton_ + 1) % buttonCount;
-      }
+      uint8_t buttonCount = (uint8_t)(inProjectSampleDir_ ? 2 : 2);
+      int direction = mask & BM_LEFT ? -1 : 1;
+      selectedButton_ = (selectedButton_ + buttonCount + direction) % buttonCount;
       isDirty_ = true;
       return true;
     }
@@ -484,21 +429,6 @@ void SampleImportView::preview(char *name) {
 
   // Start preview using Player's StartStreaming method
   Player::GetInstance()->StartStreaming(name);
-  previewPlayingIndex_ = GetCurrentIndex();
-}
-
-void SampleImportView::adjustPreviewVolume(int offset) {
-  Variable *v = viewData_->project_->FindVariable(Token::VarPreviewVolume);
-  if (v) {
-    int newVolume = v->GetInt() + offset;
-    if (newVolume < 0)
-      newVolume = 0;
-    if (newVolume > 100)
-      newVolume = 100;
-    v->SetInt(newVolume);
-    Trace::Log("SAMPLEIMPORT", "Preview volume adjusted to: %d", newVolume);
-    isDirty_ = true;
-  }
 }
 
 void SampleImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample) {
