@@ -38,6 +38,7 @@ protected:
   WavFile wav_;
   float position_;
   Project *project_;
+  int previewVolume_;
 
   // Sample rate conversion
   int fileSampleRate_;

@@ -65,7 +65,6 @@ protected:
 
 private:
   // State
-  size_t previewPlayingIndex_ = 0;
   bool playKeyHeld_ = false;
   bool editKeyHeld_ = false;
   bool inProjectSampleDir_ = false;
@@ -75,7 +74,6 @@ private:
   void import();
   void remove();
   void preview(char *name);
-  void adjustPreviewVolume(int offset);
   void showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename, bool isProjectSample);
   void onConfirmRemoveProjectSample(View &view, ModalView &dialog);
 };

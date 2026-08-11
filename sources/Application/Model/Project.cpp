@@ -26,7 +26,6 @@
 #include <math.h>
 
 #define DEFAULT_CHANNEL_VOLUME 99
-#define DEFAULT_PREVIEW_VOLUME 60
 
 #define DEFAULT_MASTER_VOLUME 60
 
@@ -44,8 +43,7 @@ Project::Project(const char *name)
       channelVolume7_(Token::VarChannel7Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume8_(Token::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME), wrap_(Token::VarWrap, false),
       transpose_(Token::VarTranspose, 0), scale_(Token::VarScale, scaleNames, numScales, 0),
-      scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), projectName_(Token::VarProjectName, name),
-      previewVolume_(Token::VarPreviewVolume, DEFAULT_PREVIEW_VOLUME) {
+      scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), projectName_(Token::VarProjectName, name) {
 
   this->variables_.insert(variables_.end(), &tempo_);
   this->variables_.insert(variables_.end(), &masterVolume_);
@@ -67,7 +65,6 @@ Project::Project(const char *name)
   this->variables_.insert(variables_.end(), &scaleRoot_);
   scaleRoot_.SetInt(0); // Default to C (0)
   this->variables_.insert(variables_.end(), &projectName_);
-  this->variables_.insert(variables_.end(), &previewVolume_);
 
   // Project name is now managed through the WatchedVariable
 
@@ -112,7 +109,6 @@ void Project::Load(const char *name) {
   transpose_.Reset();
   scale_.Reset();
   scaleRoot_.Reset();
-  previewVolume_.Reset();
 
   if (name) {
     projectName_.SetString(name, true);

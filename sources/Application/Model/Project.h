@@ -99,7 +99,6 @@ private:
   Variable scale_;
   Variable scaleRoot_;
   StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> projectName_;
-  Variable previewVolume_;
 };
 
 #endif
