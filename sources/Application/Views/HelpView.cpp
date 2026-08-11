@@ -110,7 +110,8 @@ void HelpView::drawTabs() {
 
   SetColor(Theme::View::fg);
   if (x >= SCREEN_WIDTH || tabOffset_ < 0) {
-    DrawString(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, tabOffset_ < 0 ? char_indicator_leftRight_s : char_indicator_rightNoLeft_s);
+    DrawString(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1,
+               tabOffset_ < 0 ? char_indicator_leftRight_s : char_indicator_rightNoLeft_s);
   }
 }
 
@@ -148,9 +149,9 @@ void HelpView::setTab(int tab) {
   }
 
   data_ = page->data;
-  dataSize_ = page ->size;
-  numLines_ = page->size / 60;  
-  
+  dataSize_ = page->size;
+  numLines_ = page->size / 60;
+
   offset_ = 0;
 
   SetDirty(true);

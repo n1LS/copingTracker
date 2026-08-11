@@ -29,8 +29,8 @@ private:
   int offset_;
   int tabOffset_;
   const uint8_t *data_;
-  int numLines_; 
-  unsigned int dataSize_; 
+  int numLines_;
+  unsigned int dataSize_;
   bool navDown_;
 };
 #endif
