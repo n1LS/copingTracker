@@ -11,7 +11,7 @@
 
 #include "Externals/etl/include/etl/stack.h"
 #include "Externals/etl/include/etl/vector.h"
-#include "ScreenView.h"
+#include "ListView.h"
 #include "System/FileSystem/FileSystem.h"
 #include "ViewData.h"
 #include <algorithm>
@@ -84,7 +84,7 @@ struct FileListConfig {
  * - Action tabs at bottom
  * - Custom item drawing via override
  */
-class FileListView : public ScreenView {
+class FileListView : public ListView, public ListView::DataSource, public ListView::Delegate {
 public:
   FileListView(GUIWindow &w, ViewData *viewData, const FileListConfig &config);
   virtual ~FileListView();
@@ -94,32 +94,41 @@ public:
   void DrawView() override;
   void OnFocus() override;
 
+  // ListView::DataSource implementation
+  size_t GetItemCount() const override final;
+  void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) override;
+  void DrawItem(int x, int y, int index, bool isSelected, Color fg, Color bg, const char *buffer) override final;
+  const char *GetEmptyStateMessage() const override = 0; // Subclass must implement
+
+  // ListView::Delegate implementation
+  void OnItemSelected(int index, int selectedTab = 0) override;
+  void OnItemNavigated(int index) override;
+
   // Note: Reset() is not in ScreenView, kept for compatibility
   virtual void Reset();
   void RefreshFileList();
 
 protected:
-  // Get empty state message when no files found
-  virtual const char *GetEmptyStateMessage() const = 0;
-  // Default implementation calls OnTabAction with current tab if tabs exist
-  virtual void OnItemSelected(const char *filename);
-  // Default implementation calls OnItemSelected
-  virtual void OnTabAction(int tabIndex, const char *filename);
-  // Override for custom button handling (return true if handled)
+  // Subclass hook: Get custom title based on current state (e.g., "Project Pool" vs "Import Sample")
+  virtual const char *GetDynamicTitle();
+  // Subclass hook: called after directory setup completes
+  virtual void OnDirectorySetup();
+  // Subclass hook: called when switching between directories
+  // Return true to allow the switch, false to cancel
+  virtual bool OnDirectorySwitch(size_t newDirectoryIndex);
+  // Subclass hook: override for custom button handling (return true if handled)
   virtual bool OnButtonOverride(uint16_t mask, bool pressed);
-  // Default: draws filename with selection highlight
-  virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer);
+  // Subclass hook: override item drawing for custom appearance
+  // Default: draws filename with directory/file icon
+  virtual void DrawItemCustom(int x, int y, int index, bool isSelected, Color fg, Color bg, const char *buffer);
+  // Subclass hook: called when file item is selected (receives filename)
+  virtual void OnFileSelected(const char *filename);
+  // Subclass hook: called for action tab selection
+  virtual void OnTabAction(int tabIndex, const char *filename);
   // Default: draws standard buttons
   virtual void DrawActionTabs(int y, int selectedTab);
   // Default: draws standard buttons with labels from button config
   virtual void DrawButtons(int selectedButton);
-  // Called after directory setup completes
-  virtual void OnDirectorySetup();
-  // Called when switching between directories (for multiple directory views)
-  // Return true to allow the switch, false to cancel
-  virtual bool OnDirectorySwitch(size_t newDirectoryIndex);
-  // Get custom title based on current state (e.g., "Project Pool" vs "Import Sample")
-  virtual const char *GetDynamicTitle();
 
   // Get the current file system instance
   FileSystem *GetFileSystem() const {
@@ -128,10 +137,6 @@ protected:
   // Get current directory listing
   const etl::vector<int, MAX_FILE_INDEX_SIZE> &GetFileList() const {
     return fileIndexList_;
-  }
-  // Get current selection index
-  size_t GetCurrentIndex() const {
-    return currentIndex_;
   }
   // Set current selection index
   void SetCurrentIndex(size_t index);
@@ -151,20 +156,10 @@ protected:
   bool IsEmpty() const {
     return fileIndexList_.empty();
   }
-  // Get total item count
-  size_t GetItemCount() const {
-    return fileIndexList_.size();
-  }
   // Get page size
   size_t GetPageSize() const {
     return config_.pageSize;
   }
-  // Get selected tab index
-  int GetSelectedTab() const {
-    return selectedTab_;
-  }
-  // Set selected tab index
-  void SetSelectedTab(int index);
   // Get number of action tabs
   size_t GetTabCount() const {
     return config_.actionTabs.size();
@@ -239,18 +234,11 @@ private:
   void HandleTabRight();
   void HandleBackNavigation();
 
-  void EnsureVisible();
   void DrawTitleBar();
-  void DrawFileList();
-  void DrawScrollBar();
-  void DrawEmptyState();
 
   FileListConfig config_;
   FileSystem *fs_;
 
-  size_t topIndex_ = 0;
-  size_t currentIndex_ = 0;
-  int selectedTab_ = 0;
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
 
   etl::stack<uint8_t, MAX_DIRECTORY_STACK_DEPTH> dirIndexStack_; // Track cursor position per directory level

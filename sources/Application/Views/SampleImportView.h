@@ -28,7 +28,7 @@ public:
   const char *GetEmptyStateMessage() const override;
 
   // File selection handler
-  void OnItemSelected(const char *filename) override;
+  void OnFileSelected(const char *filename) override;
 
   // Custom methods
   void Reset() override;
@@ -46,7 +46,7 @@ public:
 
 protected:
   // Custom item drawing
-  void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) override;
+  void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) override;
 
   // Custom status info (file size + storage indicator)
   void GetStatusInfo(char *buffer, size_t bufferSize);

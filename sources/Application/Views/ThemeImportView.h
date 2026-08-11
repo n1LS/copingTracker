@@ -29,7 +29,7 @@ public:
 
   // Required FileListView overrides
   const char *GetEmptyStateMessage() const override;
-  void OnItemSelected(const char *filename) override;
+  void OnFileSelected(const char *filename) override;
 
   // Custom methods
   void onImportTheme(const char *filename);
