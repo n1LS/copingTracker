@@ -25,10 +25,9 @@
 #include "Variable.h"
 #include <stdlib.h>
 
-#define CONFIG_VERSION_NUMBER 1
+#define CONFIG_VERSION_NUMBER 2
 
 #define MIDI_DEVICE_LEN 4
-
 #define CONFIG(X, A, B, D, E) {Token(X).c_str(), A, X, B, D, E}
 
 static const char *lineOutOptions[3] = {"HP Low", "HP High", "Line Level"};
@@ -109,6 +108,7 @@ static const ConfigParam configParams[] = {
     CONFIG(Token::VarConfigCommandPicker, {.intValue = DEFAULT_USE_COMMAND_PICKER}, commandPickerOptions, 2, false),
     CONFIG(Token::VarKeyDelay, {.intValue = DEFAULT_KEY_DELAY}, nullptr, 0, false),
     CONFIG(Token::VarKeyRepeat, {.intValue = DEFAULT_KEY_REPEAT}, nullptr, 0, false),
+    CONFIG(Token::VarPreviewVolume, {.intValue = DEFAULT_PREVIEW_VOLUME}, nullptr, 0, false),
 };
 
 Config::Config()
@@ -141,7 +141,8 @@ Config::Config()
       themeName_(Token::VarThemeName, ThemeConstants::DEFAULT_THEME_NAME),
       backlightLevel_(Token::VarBacklightLevel, DEFAULT_BACKLIGHT_LEVEL),
       outputVolume_(Token::VarOutputVolume, DEFAULT_OUTPUT_VOLUME), keyDelay_(Token::VarKeyDelay, DEFAULT_KEY_DELAY),
-      keyRepeat_(Token::VarKeyRepeat, DEFAULT_KEY_REPEAT) {
+      keyRepeat_(Token::VarKeyRepeat, DEFAULT_KEY_REPEAT),
+      previewVolume_(Token::VarPreviewVolume, DEFAULT_PREVIEW_VOLUME) {
 
   variables_.push_back(&color0_);
   variables_.push_back(&color1_);
@@ -171,6 +172,7 @@ Config::Config()
   variables_.push_back(&outputVolume_);
   variables_.push_back(&keyDelay_);
   variables_.push_back(&keyRepeat_);
+  variables_.push_back(&previewVolume_);
 
   PersistencyDocument doc;
 

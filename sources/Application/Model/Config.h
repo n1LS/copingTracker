@@ -19,6 +19,8 @@
 #include "Foundation/Variables/WatchedVariable.h"
 #include "System/Console/Trace.h"
 
+#define DEFAULT_PREVIEW_VOLUME 60
+
 class Config : public T_Singleton<Config>, public VariableContainer {
 public:
   Config();
@@ -38,7 +40,7 @@ public:
   bool ImportTheme(const char *themeName);
 
 private:
-  etl::list<Variable *, 30> variables_;
+  etl::list<Variable *, 29> variables_;
   // Config variables (kept as members to avoid heap allocation)
   WatchedVariable color0_;
   WatchedVariable color1_;
@@ -69,6 +71,7 @@ private:
   WatchedVariable outputVolume_;
   WatchedVariable keyDelay_;
   WatchedVariable keyRepeat_;
+  WatchedVariable previewVolume_;
 
   void SaveContent(tinyxml2::XMLPrinter *printer);
   void useDefaultConfig();
