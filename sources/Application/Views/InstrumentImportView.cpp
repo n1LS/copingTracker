@@ -61,9 +61,9 @@ void InstrumentImportView::detectInstrumentTypes() {
   char filePath[PFILENAME_SIZE];
 
   // Pre-reserve space to avoid reallocation issues
-  instrumentTypeList_.reserve(GetItemCount());
+  instrumentTypeList_.reserve(ListView::GetItemCount());
 
-  for (size_t i = 0; i < GetItemCount(); i++) {
+  for (size_t i = 0; i < ListView::GetItemCount(); i++) {
     // For directories, use IT_NONE as placeholder
     if (IsDirectory(i)) {
       instrumentTypeList_.push_back(IT_NONE);
@@ -78,14 +78,15 @@ void InstrumentImportView::detectInstrumentTypes() {
   Trace::Log("INSTRUMENTIMPORT", "Detected %zu instrument types", instrumentTypeList_.size());
 }
 
-void InstrumentImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) {
+void InstrumentImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) {
+  (void)bufferSize; // Unused - use fixed size
   auto fs = GetFileSystem();
 
   // Ensure instrumentTypeList_ is properly sized before accessing
   // This can happen if DrawView() is called before OnDirectorySetup() completes
-  if (instrumentTypeList_.size() != GetItemCount()) {
+  if (instrumentTypeList_.size() != ListView::GetItemCount()) {
     Trace::Log("INSTRUMENTIMPORT", "Re-syncing instrumentTypeList_: size=%zu, itemCount=%zu",
-               instrumentTypeList_.size(), GetItemCount());
+               instrumentTypeList_.size(), ListView::GetItemCount());
     detectInstrumentTypes();
   }
 
@@ -146,7 +147,7 @@ void InstrumentImportView::PrepareItemDrawing(int index, bool isSelected, Color 
   npf_snprintf(buffer, SCREEN_WIDTH, "%c %-*s %s", symbol, SCREEN_WIDTH - 10, temp, typePrefix);
 }
 
-void InstrumentImportView::OnItemSelected(const char *filename) {
+void InstrumentImportView::OnFileSelected(const char *filename) {
   importInstrument(filename);
 }
 
@@ -160,7 +161,7 @@ void InstrumentImportView::warpToNextInstrument(bool goUp) {
       SetCurrentIndex(GetCurrentIndex() - 1);
     }
   } else {
-    if (GetCurrentIndex() < GetItemCount() - 1) {
+    if (GetCurrentIndex() < ListView::GetItemCount() - 1) {
       SetCurrentIndex(GetCurrentIndex() + 1);
     }
   }

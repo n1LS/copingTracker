@@ -1,0 +1,309 @@
+F       7     F 7F   7        
+0             8 0             
+   Black         Gray         
+4 7F   7      4 7F         7  
+4 0           C 0             
+   Blue          Light Blue   
+4 7F    7     4 7F   7        
+2 0           A 0             
+   Green         Lime         
+4 7F   7      4 7F   7        
+6 0           E 0             
+   Teal          Aqua         
+4 7F     7    4 7F   7        
+1 0           9 0             
+   Maroon        Red          
+4 7F     7    4 7F      7     
+5 0           D 0             
+   Purple        Magenta      
+4 7F     7    4 7F     7      
+3 0           B 0             
+   Orange        Yellow       
+F 7F     7    4 7F    7       
+7 0           F 0             
+   Silver        White        
+7                             
+0                             
+                              
+F                          C  
+C                          0  
+ WELCOME                   ²±°
+7                             
+0                             
+                              
+7                             
+0                             
+Welcome to copingTracker, a   
+7                             
+0                             
+small, portable music making  
+7                             
+0                             
+device based on the tracker   
+7                             
+0                             
+workflow.                     
+7                             
+0                             
+                              
+7                             
+0                             
+But what is a "tracker"?      
+7                             
+0                             
+                              
+7                             
+0                             
+Trackers are music production 
+7                             
+0                             
+applications that started     
+7                             
+0                             
+life on 16bit home computers  
+7                             
+0                             
+such as the legendary Amiga   
+7                             
+0                             
+500. Trackers later evolved   
+7                             
+0                             
+to also run on devices such   
+7                             
+0                             
+as the Gameboy as popularised 
+7                             
+0                             
+by LSDJ and this then         
+7                             
+0                             
+inspired the LittleGPTracker  
+7                             
+0                             
+(LGPT) which was designed to  
+7                             
+0                             
+run on portable Linux-based   
+7                             
+0                             
+gaming handheld devices. LGPT 
+7                             
+0                             
+then served as the starting   
+7                             
+0                             
+point for the firmware for    
+7                             
+0                             
+the picoTracker, though it    
+7                             
+0                             
+has now substantially         
+7                             
+0                             
+diverged from those roots,    
+7                             
+0                             
+being customised for the      
+7                             
+0                             
+specific hardware of the      
+7                             
+0                             
+picoTracker and gaining many  
+7                             
+0                             
+new features and improvements.
+7                             
+0                             
+                              
+F                          C  
+C                          0  
+ OVERVIEW                  ²±°
+7                             
+0                             
+                              
+7                             
+0                             
+The copingTracker features    
+7                             
+0                             
+include:                      
+7                             
+0                             
+                              
+F  7                          
+0                             
+  8 song channels             
+F  7                          
+0                             
+256 chains                    
+F  7                          
+0                             
+128 phrases                   
+F  7                          
+0                             
+ 32 tables                    
+F   7                         
+0                             
+ 32 instrument:               
+7                             
+0                             
+      Sample instruments      
+7                             
+0                             
+      MIDI instruments        
+7                             
+0                             
+      emulated SID synth      
+7                             
+0                             
+      emulated OPL3 synth     
+7                             
+0                             
+      chiptune synth          
+F 7                           
+0                             
+      chipdrum synth          
+F 7                           
+0                             
+                              
+F7    F  7                    
+0                             
+-Upto 15 MB of sample memory  
+F7                            
+0                             
+ per open project             
+F7                            
+0                             
+-8bit or 16bit samples up to  
+F7                            
+0                             
+ 44.1kHz, mono or stereo      
+F7                            
+0                             
+ 16bit 44.1kHz stereo audio   
+F 7                           
+0                             
+  output                      
+7                             
+0                             
+                              
+7                             
+0                             
+copingTracker is powered by   
+7                             
+0                             
+an RP2040/RP2350 microcon-    
+7                             
+0                             
+troller supporting the follow-
+7                             
+0                             
+ing hardware:                 
+F 7                           
+0                             
+                              
+F7                            
+0                             
+-Headphone/Lineout            
+F7                            
+0                             
+-TRS MIDI In & Out, USB MIDI  
+F7                            
+0                             
+ Out                          
+F7                            
+0                             
+-320x240 2.8in LCD display    
+F7                            
+0                             
+-16MB of Flash                
+F7                            
+0                             
+-MicroSD cards upto 128GB for 
+F7                            
+0                             
+ project & sample library     
+F7                            
+0                             
+ storage                      
+F7                            
+0                             
+-USB-C for MIDI, charging,    
+F7                            
+0                             
+ mass storage, mirrorUI and   
+7                             
+0                             
+ simple drag&drop firmware    
+7                             
+0                             
+ updates.                     
+7                             
+0                             
+                              
+0F                         C  
+C                          0  
+ APP NAVIGATION            ²±°
+7                             
+0                             
+                              
+7                F7           
+0                             
+ ÚÄ¿ ÚÄ¿         Device       
+7 F787F7         F7           
+0                             
+ ³D³Ä³H³                      
+7                F7           
+0                             
+ ÀÄÙ ÀÄÙ         Help         
+7 87             F7           
+0                             
+  ³                           
+7                F7           
+0                             
+ ÚÄ¿     ÚÄ¿     Workspace    
+7 F78    7F7     F7           
+0                             
+ ³W³ÄÄÄÄÄ³G³                  
+7   87           F7           
+0                             
+ ÀÄÙ     ÀÄÙ     Groove       
+7 87      87     F7           
+0                             
+  ³       ³                   
+7                F7           
+0                             
+ ÚÄ¿ ÚÄ¿ ÚÄ¿ ÚÄ¿ Song         
+7 F787F787F787F7 F7           
+0                             
+ ³S³Ä³C³Ä³P³Ä³I³              
+7                F7           
+0                             
+ ÀÄÙ ÀÄÙ ÀÄÙ ÀÄÙ Chain        
+7 87      87  87              
+0                             
+  ³       ³   ³               
+7                F7           
+0                             
+ ÚÄ¿     ÚÄ¿ ÚÄ¿ Phrase       
+7 F78    7F787F7 F7           
+0                             
+ ³M³ÄÄÄÄÄ³T³Ä³T³              
+7                F7           
+0                             
+ ÀÄÙ     ÀÄÙ ÀÄÙ Instrument   
+7                F7           
+0                             
+                              
+7                F7           
+0                             
+                 Mixer        
+7                F7           
+0                             
+                              
+7                F7           
+0                             
+                 Table        

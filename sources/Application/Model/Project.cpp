@@ -290,8 +290,8 @@ bool Project::SampleInUse(etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> filename) 
   return false;
 }
 
-// remove all samples that are not in use by an instrument
-void Project::PurgeSamples() {
+// remove all samples that are not in use by an instrument and returns the number of samples removed
+int Project::PurgeSamples() {
   // clear used flag
   bool isUsed[MAX_SAMPLES] = {false};
 
@@ -320,11 +320,14 @@ void Project::PurgeSamples() {
     }
   };
   Trace::Debug("Purged %d samples", purged);
+
+  return purged;
 }
 
-void Project::PurgeInstruments() {
-
+int Project::PurgeInstruments() {
   bool used[MAX_INSTRUMENT_COUNT] = {false};
+  int purged = 0;
+
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
       uint8_t instr = song_.phrase_.steps_[i][j].instrument;
@@ -346,8 +349,12 @@ void Project::PurgeInstruments() {
       // we dont reorder indexes on release so safe to call inside this loop
       bank->releaseInstrument(i);
       Trace::Debug("Set unused instrument slot [%d] to NONE", i);
+
+      purged++;
     }
   }
+
+  return purged;
 }
 
 void Project::RestoreContent(PersistencyDocument *doc) {

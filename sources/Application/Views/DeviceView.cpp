@@ -41,7 +41,6 @@ static void MassStorageCallback(View &v, ModalView &dialog) {
 }
 
 DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
-
   GUIPoint position = GetAnchor();
 
   auto config = Config::GetInstance();
@@ -124,7 +123,6 @@ DeviceView::~DeviceView() {
 }
 
 void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
   if (!pressed)
     return;
 
@@ -133,6 +131,8 @@ void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (mask & BM_NAV) {
     if (mask & BM_DOWN) {
       Navigate(VT_PROJECT);
+    } else if (mask & BM_RIGHT) {
+      Navigate(VT_HELP);
     }
   } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();

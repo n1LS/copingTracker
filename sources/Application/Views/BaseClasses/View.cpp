@@ -105,9 +105,9 @@ void View::drawMap() {
 
   char buffer[5];
   // row1
-  DrawString(pos.x_, pos.y_, "D   ");
+  DrawString(pos.x_, pos.y_, "DH  ");
   // row2
-  DrawString(pos.x_, pos.y_ + 1, "P" char_dotted_horizontal_s "G ");
+  DrawString(pos.x_, pos.y_ + 1, "W" char_dotted_horizontal_s "G ");
   // row3
   DrawString(pos.x_, pos.y_ + 2, songViewChar);
   DrawString(pos.x_ + 1, pos.y_ + 2, "CPI");
@@ -134,8 +134,11 @@ void View::drawMap() {
     case VT_DEVICE:
       DrawString(pos.x_, pos.y_, "D");
       break;
+    case VT_HELP:
+      DrawString(pos.x_ + 1, pos.y_, "H");
+      break;
     case VT_PROJECT:
-      DrawString(pos.x_, pos.y_ + 1, "P");
+      DrawString(pos.x_, pos.y_ + 1, "W");
       break;
     case VT_INSTRUMENT:
       DrawString(pos.x_ + 3, pos.y_ + 2, "I");
