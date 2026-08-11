@@ -20,7 +20,7 @@
 #endif
 
 FileListView::FileListView(GUIWindow &w, ViewData *viewData, const FileListConfig &config)
-    : ScreenView(w, viewData), config_(config), fs_(FileSystem::GetInstance()) {
+    : ListView(w, viewData, this, this, config.pageSize, 0), config_(config), fs_(FileSystem::GetInstance()) {
 }
 
 FileListView::~FileListView() {
@@ -29,7 +29,7 @@ FileListView::~FileListView() {
 void FileListView::Reset() {
   topIndex_ = 0;
   currentIndex_ = 0;
-  selectedTab_ = 0;
+  SetSelectedTab(0);
   selectedButton_ = 0;
   fileIndexList_.clear();
   dirIndexStack_.clear();
@@ -76,6 +76,9 @@ void FileListView::OnFocus() {
 
   // Call subclass hook
   OnDirectorySetup();
+
+  // Call ListView's OnFocus
+  ListView::OnFocus();
 }
 
 void FileListView::RefreshFileList() {
@@ -208,21 +211,12 @@ void FileListView::DrawView() {
   // Draw title bar (with dynamic title support)
   DrawTitleBar();
 
-  // Check for empty state
-  if (fileIndexList_.empty()) {
-    DrawEmptyState();
-    return;
-  }
-
-  // Draw file list
-  DrawFileList();
-
-  // Draw scrollbar if enabled
-  DrawScrollBar();
+  // Let ListView handle the list drawing (items, scrollbar, empty state)
+  ListView::DrawView();
 
   // Draw action tabs if configured
   if (!config_.actionTabs.empty()) {
-    DrawActionTabs(SCREEN_HEIGHT - 1, selectedTab_);
+    DrawActionTabs(SCREEN_HEIGHT - 1, GetSelectedTab());
   } else if (config_.useButtonSystem) {
     // Draw buttons if button system is enabled
     DrawButtons(selectedButton_);
@@ -243,63 +237,6 @@ void FileListView::DrawTitleBar() {
   if (title) {
     DrawTitle(char_back_s " %s", title);
   }
-}
-
-void FileListView::DrawFileList() {
-  int x = 1;
-  int y = 2;
-
-  // Ensure current selection is visible
-  EnsureVisible();
-
-  // Draw visible items
-  size_t pageSize = config_.pageSize;
-  size_t total = fileIndexList_.size();
-
-  char buffer[32];
-
-  for (size_t i = topIndex_; i < topIndex_ + pageSize && i < total; i++) {
-    bool isSelected = (i == currentIndex_);
-
-    Color bg = isSelected ? Theme::View::Selection::bg : Theme::View::bg;
-    Color fg = isSelected ? Theme::View::Selection::fg : Theme::FileList::file;
-
-    PrepareItemDrawing(i, isSelected, &fg, &bg, buffer);
-    SetColor(fg);
-    SetBackgroundColor(bg);
-    DrawString(x, y, buffer);
-
-    // draw selection ends if selected
-    if (isSelected) {
-      SwapColors();
-      DrawString(0, y, char_button_border_left_s);
-      DrawString(SCREEN_WIDTH - 2, y, char_button_border_right_s);
-    }
-
-    y++;
-  }
-}
-
-void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) {
-  // Default implementation: draw filename with selection highlight
-  char temp[32];
-  GetFileName(index, temp, PFILENAME_SIZE);
-
-  bool isDirectory = IsDirectory(index);
-
-  // Set colors based on selection and type
-  if (isSelected) {
-    *fg = Theme::View::Selection::fg;
-    *bg = Theme::View::Selection::bg;
-  } else {
-    *fg = isDirectory ? Theme::FileList::directory : Theme::FileList::file;
-    *bg = Theme::View::bg;
-  }
-
-  // Draw directory indicator
-  char prefix = isDirectory ? CHAR(char_file_folder_s) : CHAR(char_file_file_s);
-  int len = FILE_LIST_LINE_LENGTH - 2;
-  npf_snprintf(buffer, 32, "%c %-*.*s", prefix, len, len, temp);
 }
 
 void FileListView::DrawActionTabs(int y, int selectedTab) {
@@ -323,32 +260,6 @@ void FileListView::DrawButtons(int selectedButton) {
 
   for (int i = 0; i < (int)config_.buttons.size(); i++) {
     x += DrawButton(x, SCREEN_HEIGHT - 1, config_.buttons[i].label, i == selectedButton);
-  }
-}
-
-void FileListView::DrawScrollBar() {
-  if (fileIndexList_.empty()) {
-    return;
-  }
-
-  size_t pageSize = config_.pageSize;
-  size_t total = fileIndexList_.size();
-
-  drawScrollBar(SCREEN_WIDTH - 1, 2, pageSize, topIndex_, total);
-}
-
-void FileListView::DrawEmptyState() {
-  drawEmptyState();
-}
-
-void FileListView::EnsureVisible() {
-  size_t pageSize = config_.pageSize;
-
-  // Ensure current selection is in visible range
-  if (currentIndex_ < topIndex_) {
-    topIndex_ = currentIndex_;
-  } else if (currentIndex_ >= topIndex_ + pageSize) {
-    topIndex_ = currentIndex_ - pageSize + 1;
   }
 }
 
@@ -387,40 +298,32 @@ void FileListView::HandleEnter() {
     return;
   }
 
-  char name[PFILENAME_SIZE];
-  GetFileName(currentIndex_, name, PFILENAME_SIZE);
-
   // Check if selected item is a directory
   bool isDirectory = IsDirectory(currentIndex_);
 
-  if (isDirectory) {
-    // If directories are selectable, treat them as items
-    if (config_.directoriesAreSelectable) {
-      OnItemSelected(name);
-      return;
-    }
-    // Handle directory navigation
+  if (isDirectory && !config_.directoriesAreSelectable) {
+    // Handle directory navigation (not selectable directories)
+    char name[PFILENAME_SIZE];
+    GetFileName(currentIndex_, name, PFILENAME_SIZE);
     if (CanNavigateDirectories()) {
       NavigateToDirectory(name);
     }
     return;
   }
 
-  // Call subclass handler for file selection
-  OnItemSelected(name);
+  // For files and selectable directories, let ListView's HandleEnter call the delegate
+  ListView::HandleEnter();
 }
 
 void FileListView::HandleTabLeft() {
-  if (selectedTab_ > 0) {
-    selectedTab_--;
-    isDirty_ = true;
+  if (GetSelectedTab() > 0) {
+    SetSelectedTab(GetSelectedTab() - 1);
   }
 }
 
 void FileListView::HandleTabRight() {
-  if (selectedTab_ < static_cast<int>(config_.actionTabs.size()) - 1) {
-    selectedTab_++;
-    isDirty_ = true;
+  if (GetSelectedTab() < static_cast<int>(config_.actionTabs.size()) - 1) {
+    SetSelectedTab(GetSelectedTab() + 1);
   }
 }
 
@@ -429,8 +332,9 @@ void FileListView::HandleBackNavigation() {
 }
 
 void FileListView::OnTabAction(int tabIndex, const char *filename) {
-  // Default: just call OnItemSelected
-  OnItemSelected(filename);
+  // Default: just call OnFileSelected (subclass hook, not the delegate method)
+  (void)tabIndex; // Unused in default implementation
+  OnFileSelected(filename);
 }
 
 bool FileListView::OnButtonOverride(uint16_t mask, bool pressed) {
@@ -452,25 +356,10 @@ const char *FileListView::GetDynamicTitle() {
   return nullptr;
 }
 
-void FileListView::OnItemSelected(const char *filename) {
-  // Default implementation: if tabs exist, call OnTabAction with current tab
-  // Otherwise, do nothing (subclasses should override)
-  if (config_.actionTabs.size() > 0) {
-    OnTabAction(selectedTab_, filename);
-  }
-}
-
 void FileListView::SetCurrentIndex(size_t index) {
   if (index < fileIndexList_.size()) {
     currentIndex_ = index;
     EnsureVisible();
-    isDirty_ = true;
-  }
-}
-
-void FileListView::SetSelectedTab(int index) {
-  if (index >= 0 && static_cast<size_t>(index) < config_.actionTabs.size()) {
-    selectedTab_ = index;
     isDirty_ = true;
   }
 }
@@ -594,4 +483,84 @@ uint32_t FileListView::GetFileSize(size_t index) const {
     return 0;
   }
   return static_cast<uint32_t>(fs_->getFileSize(fileIndexList_[index]));
+}
+
+// ListView::DataSource implementation
+size_t FileListView::GetItemCount() const {
+  return fileIndexList_.size();
+}
+
+void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
+                                      size_t bufferSize) {
+  // Default implementation: draw filename with directory/file icon
+  char temp[32];
+  GetFileName(index, temp, PFILENAME_SIZE);
+
+  bool isDirectory = IsDirectory(index);
+
+  // Set colors based on selection and type
+  if (isSelected) {
+    *fg = Theme::View::Selection::fg;
+    *bg = Theme::View::Selection::bg;
+  } else {
+    *fg = isDirectory ? Theme::FileList::directory : Theme::FileList::file;
+    *bg = Theme::View::bg;
+  }
+
+  // Draw directory indicator
+  char prefix = isDirectory ? CHAR(char_file_folder_s) : CHAR(char_file_file_s);
+  int len = FILE_LIST_LINE_LENGTH - 2;
+  npf_snprintf(buffer, bufferSize, "%c %-*.*s", prefix, len, len, temp);
+}
+
+void FileListView::DrawItem(int x, int y, int index, bool isSelected, Color fg, Color bg, const char *buffer) {
+  // Default: draw the prepared buffer, but allow subclass override
+  DrawItemCustom(x, y, index, isSelected, fg, bg, buffer);
+}
+
+void FileListView::DrawItemCustom(int x, int y, int index, bool isSelected, Color fg, Color bg, const char *buffer) {
+  // Default: just draw the text
+  (void)index;      // Unused in default implementation
+  (void)isSelected; // Unused
+  DrawString(x, y, buffer);
+}
+
+// ListView::Delegate implementation
+void FileListView::OnItemSelected(int index, int selectedTab) {
+  if (index >= (int)fileIndexList_.size()) {
+    return;
+  }
+
+  char name[PFILENAME_SIZE];
+  GetFileName(index, name, PFILENAME_SIZE);
+
+  // Check if selected item is a directory
+  bool isDirectory = IsDirectory(index);
+
+  if (isDirectory) {
+    // If directories are selectable, treat them as items
+    if (config_.directoriesAreSelectable) {
+      OnTabAction(selectedTab, name);
+      return;
+    }
+    // Handle directory navigation
+    if (CanNavigateDirectories()) {
+      NavigateToDirectory(name);
+    }
+    return;
+  }
+
+  // Call action handler for file selection
+  OnTabAction(selectedTab, name);
+}
+
+void FileListView::OnItemNavigated(int index) {
+  (void)index; // Default: just notify, no action needed
+}
+
+void FileListView::OnFileSelected(const char *filename) {
+  // Default implementation: if tabs exist, call OnTabAction with current tab
+  if (config_.actionTabs.size() > 0) {
+    OnTabAction(GetSelectedTab(), filename);
+  }
 }

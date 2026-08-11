@@ -136,7 +136,8 @@ void SampleImportView::OnDirectorySetup() {
   // No additional setup needed after directory switch
 }
 
-void SampleImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) {
+void SampleImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) {
+  (void)bufferSize; // Unused - use fixed size
   auto fs = GetFileSystem();
 
   // Get filename
@@ -421,7 +422,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
   return false;
 }
 
-void SampleImportView::OnItemSelected(const char *filename) {
+void SampleImportView::OnFileSelected(const char *filename) {
   // For now, just import the sample
   // This can be customized later
   Trace::Log("SAMPLEIMPORT", "Selected: %s", filename);
@@ -437,7 +438,7 @@ void SampleImportView::warpToNextSample(bool goUp) {
       SetCurrentIndex(GetCurrentIndex() - 1);
     }
   } else {
-    if (GetCurrentIndex() < GetItemCount() - 1) {
+    if (GetCurrentIndex() < ListView::GetItemCount() - 1) {
       SetCurrentIndex(GetCurrentIndex() + 1);
     }
   }

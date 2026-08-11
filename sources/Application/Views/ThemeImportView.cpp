@@ -42,7 +42,7 @@ const char *ThemeImportView::GetEmptyStateMessage() const {
   return "No themes to show";
 }
 
-void ThemeImportView::OnItemSelected(const char *filename) {
+void ThemeImportView::OnFileSelected(const char *filename) {
   onImportTheme(filename);
 }
 

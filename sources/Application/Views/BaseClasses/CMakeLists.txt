@@ -1,4 +1,5 @@
 add_library(application_views_baseclasses
+  ListView.cpp
   FileListView.cpp
   I_Action.cpp
   ModalView.cpp

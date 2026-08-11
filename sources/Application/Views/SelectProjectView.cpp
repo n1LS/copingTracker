@@ -82,7 +82,8 @@ const char *SelectProjectView::GetEmptyStateMessage() const {
   return "No projects to show";
 }
 
-void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer) {
+void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) {
+  (void)bufferSize; // Unused - use fixed size
   // Get filename
   char temp[MAX_PROJECT_NAME_LENGTH + 1];
   memset(temp, '\0', sizeof(temp));
@@ -141,7 +142,7 @@ void SelectProjectView::getSelectedProjectName(char *name) {
 
 void SelectProjectView::getHighlightedProjectName(char *name) {
   name[0] = '\0';
-  if (GetCurrentIndex() >= GetItemCount()) {
+  if (GetCurrentIndex() >= ListView::GetItemCount()) {
     return;
   }
 
@@ -149,7 +150,7 @@ void SelectProjectView::getHighlightedProjectName(char *name) {
 }
 
 void SelectProjectView::LoadProject() {
-  if (GetCurrentIndex() >= GetItemCount()) {
+  if (GetCurrentIndex() >= ListView::GetItemCount()) {
     return;
   }
 
@@ -199,7 +200,7 @@ bool SelectProjectView::SelectionIsCurrentProject() {
 }
 
 void SelectProjectView::AttemptDeletingSelectedProject() {
-  if (GetCurrentIndex() >= GetItemCount()) {
+  if (GetCurrentIndex() >= ListView::GetItemCount()) {
     return;
   }
 
@@ -221,7 +222,7 @@ void SelectProjectView::AttemptDeletingSelectedProject() {
 }
 
 void SelectProjectView::AttemptLoadingProject() {
-  if (GetCurrentIndex() >= GetItemCount() || WarnPlayerRunning()) {
+  if (GetCurrentIndex() >= ListView::GetItemCount() || WarnPlayerRunning()) {
     return;
   }
 
