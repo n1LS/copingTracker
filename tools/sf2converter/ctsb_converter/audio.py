@@ -43,7 +43,7 @@ def merge_stereo(left: List[int], right: List[int]) -> List[int]:
     return [(left[i] + right[i]) // 2 for i in range(n)]
 
 
-def downsample_44100_to_22050(samples: List[int]) -> List[int]:
+def _downsample_44100_to_22050(samples: List[int]) -> List[int]:
     """Simple 2:1 decimation (pairwise average, a mild low-pass filter)."""
     out: List[int] = []
     n = len(samples)
@@ -56,19 +56,73 @@ def downsample_44100_to_22050(samples: List[int]) -> List[int]:
     return out
 
 
+def resample(samples: List[int], source_rate: int, target_rate: int) -> List[int]:
+    """Resample from *source_rate* Hz to *target_rate* Hz using linear
+    interpolation. Both rates must be positive integers.
+
+    The ratio ``target_rate / source_rate`` determines the output length; the
+    very last input sample is faithfully duplicated so the output never drops
+    trailing values at near-unity ratios.
+    """
+    if source_rate == target_rate:
+        return samples[:]
+    if not samples:
+        return []
+
+    ratio = target_rate / source_rate
+    out_len = int(round(len(samples) * ratio))
+    if out_len < 1:
+        return [samples[0]]
+
+    out: List[int] = []
+    max_src_index = len(samples) - 1
+    for i in range(out_len):
+        src_pos = i / ratio
+        src_idx = int(src_pos)
+        frac = src_pos - src_idx
+        if src_idx >= max_src_index:
+            out.append(samples[max_src_index])
+        else:
+            a = samples[src_idx]
+            b = samples[src_idx + 1]
+            out.append(int(round(a + (b - a) * frac)))
+    return out
+
+
 def convert_sample_rate(
     samples: List[int], sample_rate: int, name: str, warnings: Warnings
-) -> Tuple[List[int], int, bool]:
-    """Returns (samples, scale_factor, ok). ``scale_factor`` is the integer
-    divisor that must also be applied to any pre-computed (pre-conversion)
-    sample-unit offset, such as loop points. ``ok`` is False when the sample
-    rate is unsupported and the sample should be skipped entirely."""
+) -> Tuple[List[int], float, bool]:
+    """Returns (samples, scale_factor, ok).
+
+    *scale_factor* is a float that must be divided into any pre-resampling
+    sample-unit offset (e.g. loop points).
+
+    When the source rate is an exact integer submultiple of the target
+    (e.g. 11025 → 22050) the PCM is returned unchanged and *scale_factor* is
+    1.0 — the caller should compensate by shifting the sample's root note down
+    by the corresponding number of semitones (12 per octave).
+
+    *ok* is always ``True``: every sample rate is supported via either
+    pass-through (integer submultiple), pairwise decimation (44100 Hz) or
+    general linear-interpolation resampling (everything else).
+    """
     if sample_rate == RUNTIME_SAMPLE_RATE_HZ:
-        return samples, 1, True
+        # Already at the target rate — nothing to do.
+        return samples, 1.0, True
+
+    if RUNTIME_SAMPLE_RATE_HZ % sample_rate == 0:
+        # Integer submultiple: the sample plays back at a higher pitch
+        # naturally when run at the target rate.  Return unchanged PCM;
+        # the caller adjusts root note by:
+        #   semitones = 12 * log2(RUNTIME_SAMPLE_RATE_HZ / sample_rate)
+        return samples, 1.0, True
+
     if sample_rate == SOURCE_SAMPLE_RATE_HZ:
-        return downsample_44100_to_22050(samples), 2, True
-    warnings.add(f"sample '{name}': unsupported sample rate {sample_rate} Hz, skipping")
-    return samples, 1, False
+        # 44100 → 22050: pairwise average (acts as a simple low-pass).
+        return _downsample_44100_to_22050(samples), 2.0, True
+
+    # General case: linear-interpolation resampling.
+    return resample(samples, sample_rate, RUNTIME_SAMPLE_RATE_HZ), sample_rate / RUNTIME_SAMPLE_RATE_HZ, True
 
 
 def trim_silence(

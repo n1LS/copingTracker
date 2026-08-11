@@ -23,6 +23,8 @@ Pipeline order (see module docstring of each stage for details):
 from __future__ import annotations
 
 import argparse
+import math
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -36,6 +38,7 @@ from .model import (
     PresetInfoOut,
     RawSample,
     ResolvedRegion,
+    RUNTIME_SAMPLE_RATE_HZ,
     SampleEntryOut,
 )
 from .util import Logger, Warnings, clamp, parse_size
@@ -101,9 +104,9 @@ class _ChannelAudioCache:
     def __init__(self, sf2_data: sf2.Sf2Data, warnings: Warnings) -> None:
         self._sf2 = sf2_data
         self._warnings = warnings
-        self._cache: Dict[int, Optional[Tuple[List[int], int]]] = {}
+        self._cache: Dict[int, Optional[Tuple[List[int], float]]] = {}
 
-    def get(self, shdr_index: int) -> Optional[Tuple[List[int], int]]:
+    def get(self, shdr_index: int) -> Optional[Tuple[List[int], float]]:
         if shdr_index in self._cache:
             return self._cache[shdr_index]
         result = self._build(shdr_index)
@@ -113,7 +116,7 @@ class _ChannelAudioCache:
     def _slice(self, start: int, end: int) -> List[int]:
         return audio.pcm_to_samples(self._sf2.pcm[start * 2 : end * 2])
 
-    def _build(self, shdr_index: int) -> Optional[Tuple[List[int], int]]:
+    def _build(self, shdr_index: int) -> Optional[Tuple[List[int], float]]:
         shdr = self._sf2.samples[shdr_index]
 
         if shdr.sample_type & audio.SAMPLE_TYPE_ROM_FLAG:
@@ -178,6 +181,22 @@ class _VariantBuilder:
             return None
         samples, scale = channel
         shdr = self._sf2.samples[shdr_index]
+
+        # When the source sample rate is an exact integer submultiple of the
+        # runtime rate (e.g. 11025 Hz → 22050 Hz) the audio module returns the
+        # PCM unchanged with scale=1.0.  At the runtime output rate the sample
+        # sounds proportionally higher, so we shift the root note down by the
+        # corresponding number of semitones to compensate.
+        if scale == 1.0 and shdr.sample_rate != RUNTIME_SAMPLE_RATE_HZ:
+            # Integer-submultiple case: PCM is returned unchanged but will
+            # play back at a higher pitch at the runtime rate.  Shift root
+            # note down by the nearest semitone and fold any remainder into
+            # fine_tune_cents.
+            pitch_ratio = RUNTIME_SAMPLE_RATE_HZ / shdr.sample_rate
+            total_cents = 1200.0 * math.log2(pitch_ratio)
+            semitone_shift = int(round(total_cents / 100.0))
+            root_note -= semitone_shift
+            fine_tune_cents -= round(total_cents - semitone_shift * 100.0)
 
         loop_start_rel = (shdr.loop_start + loop_start_offset) - shdr.start
         loop_end_rel = (shdr.loop_end + loop_end_offset) - shdr.start
@@ -458,5 +477,20 @@ def main(argv: List[str]) -> int:
 
     output_path = emit_cpp.write_header(bank, args.output_directory)
     log.log(f"wrote {output_path}")
+
     warnings.emit()
+
+    # Flash memory usage summary (32-bit ARM layout assumed).
+    sample_bytes = len(bank.pcm_data)
+    sample_entry_bytes = len(bank.sample_entries) * 24  # sizeof(SampleEntry)
+    lookup_bytes = len(bank.lookup) * 128 * 2           # uint16_t[128][N]
+    preset_bytes = len(bank.presets) * 12                # sizeof(PresetInfo) on 32-bit
+    preset_section = sample_entry_bytes + lookup_bytes + preset_bytes
+    total_bytes = sample_bytes + preset_section
+    print(
+        f"sample data  {sample_bytes:>8} B    {int(sample_bytes/1024):>6} KB\n"
+        f"preset data  {preset_section:>8} B    {int(preset_section/1024):>6} KB\n"
+        f"total        {total_bytes:>8} B    {int(total_bytes/1024):>6} KB",
+        file=sys.stderr,
+    )
     return 0
