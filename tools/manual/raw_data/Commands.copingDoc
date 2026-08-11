@@ -1,0 +1,420 @@
+F  7                  CAE98F  
+0                             
+ARPeggio              abcd³ARP
+7                         87F 
+0                             
+Cycle through the relative³   
+7       C7A7E797          87F7
+0                             
+offsets a,b,c&d. If a step³   
+7                         87  
+0                             
+is 0 the arp starts over. ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+7       F7 F 7        C 7A8F  
+0                             
+drive & CruSH         aa-b³CSH
+7                  C 7    87 F
+0                             
+Set Drive level to aa and ³   
+7         A78                F
+0                             
+Crush to -b (0-F)         ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7F7F7                   C8F  
+0                             
+DeLaY                 ---a³DLY
+7                   C7    87 F
+0                             
+Delay this event by a + 1 ³   
+7                         87 F
+0                             
+steps                     ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7     F7F7           C A 8F  
+0                             
+Filter CuToff         aabb³FCT
+7                         87 F
+0                             
+Move towards target cutoff³   
+A 7        C 7            87 F
+0                             
+bb at rate aa.            ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7F 7                 C A 8F  
+0                             
+FiLTer                aabb³FLT
+7                 C 7     87 F
+0                             
+Set filter cutoff aa and  ³   
+7         A B             8B F
+0                             
+resonance bb.             ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7       F7F7        FC A 8F  
+0                             
+Filter & ReS          aabb³FRS
+7     C 7           A 7   87 F
+0                             
+speed aa, resonance bb    ³   
+7                         87F7
+0                             
+                          ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7  F 7                   8F  
+0                             
+GateOFf               ----³GOF
+7                         87F 
+0                             
+Synth only!               ³   
+7                         87 F
+0                             
+                          ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F 7 F7                C A 8F  
+0                             
+GRooVe                aabb³GRV
+7   A 7    C 7            87  
+0                             
+set bb. If aa > 0 set this³   
+7                         87  
+0                             
+groove on all tracks      ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F  7                  C A 8F  
+0                             
+HOP                   aabb³HOP
+7           A 7    C 7    87  
+0                             
+Hop to step bb for aa     ³   
+7                         87  
+0                             
+times.                    ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7         F7F7         A 8F  
+0                             
+Instrument ReTrigger  --bb³IRT
+7                         87  
+0                             
+retrigger & transpose by  ³   
+A 7                       87  
+0                             
+bb semitones              ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F  7                    C 8F  
+0                             
+KILl                  --aa³KIL
+7                         87  
+0                             
+Stop song playback after  ³   
+C 7                       87  
+0                             
+aa ticks.                 ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F  7                  C A 8F  
+0                             
+LEGato                aabb³LEG
+7              A 7        87  
+0                             
+Slide to pitch bb at speed³   
+C 7                       87  
+0                             
+aa.                       ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7   F 7              C   8F  
+0                             
+Loop OFset            aaaa³LOF
+7                         87  
+0                             
+Shift loop start & end    ³   
+7         C   7           87  
+0                             
+values by aaaa            ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7   F 7              C A 8F  
+0                             
+Midi CC               aabb³MCC
+7          C 7      A 7   87  
+0                             
+CC message aa value bb    ³   
+7                         87  
+0                             
+                          ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7   F 7              CAE98F  
+0                             
+Midi CHord            abcd³MCH
+7                         87  
+0                             
+Play a chord with the rel-³   
+7              C7 A7 E7 9787  
+0                             
+ative pitches +a,+b,+c,+d ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7   F7      F7         C 8F  
+0                             
+Midi Program Change   --aa³MPC
+7                   C 7   87  
+0                             
+send program change aa    ³   
+7                         87  
+0                             
+                          ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F  7                  C A 8F  
+0                             
+PAN                   aabb³PAN
+7     C 7       A 7       87  
+0                             
+speed aa, value bb        ³   
+8                             
+0                             
+00=right, 80=center,      ³   
+8                             
+0                             
+FF=left                   ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7   F7  F7           C A 8F  
+0                             
+PitchFineTune         aabb³PFT
+7               A 7       87  
+0                             
+Reach fine tune bb with   ³   
+7     C 7 8                   
+0                             
+speed aa. Max ~1 semitone.³   
+0     7                   87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7    F 7             C A 8F  
+0                             
+Pitch SLide           aabb³PSL
+7              A 7        87  
+0                             
+Slide to pitch bb at rate ³   
+C 7                       87  
+0                             
+aa.                       ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7   F 7              C A 8F  
+0                             
+Play OFfset           aabb³POF
+7                C 7      87  
+0                             
+jump absolute to aa & move³   
+7               A 7       87  
+0                             
+relative signed bb        ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7F7 F7               C A 8F  
+0                             
+ReTriGger             aabb³RTG
+7       A 7     C 7       87  
+0                             
+Sample: bb loop+aa offset ³   
+7     A 7                 87  
+0                             
+MIDI: bb                  ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7  F7         F7     C A 8F  
+0                             
+Set Instrument Param  aabb³SIP
+7             C  7        87  
+0                             
+set parameter aa to value ³   
+A 7B        7             87  
+0                             
+bb                        ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7   F7    F7             8F  
+0                             
+Stop Table Playback   ----³STP
+7                         87  
+0                             
+Instantly stop playing the³   
+7                         87  
+0                             
+current table.            ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7F 7                   C 8F  
+0                             
+TaBLe                 --aa³TBL
+7         C 7             87  
+0                             
+Run table aa.             ³   
+7                         87  
+0                             
+                          ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F7 F 7                 C  8F  
+0                             
+TemPO                 -aaa³TPO
+7                      C  8A  
+0                             
+set tempo to hex value aaa³   
+7          8                  
+0                             
+Max is 12C == 300bpm      ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F  7                    A 8F  
+0                             
+VELocity              --bb³VEL
+7                         87  
+0                             
+send MIDI velocity command³   
+A 7                       87  
+0                             
+bb                        ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F  7                  C A 8F  
+0                             
+VIBrato               aabb³VIB
+7                       A 8B  
+0                             
+Play a vibrato of depth bb³   
+7       C 7               87  
+0                             
+at rate aa                ³   
+7                         87  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+F  7                  C A 8F  
+0                             
+VOLume                aabb³VOL
+7                   A 7   87  
+0                             
+Move towards volume bb at ³   
+7        C 7              87  
+0                             
+the rate aa.              ³   
+7F                        8F  
+0                             
+                          ³   
+8                             
+0                             
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ   

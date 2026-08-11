@@ -13,6 +13,7 @@ enum ViewType {
   // first layer screens
   VT_SONG,
   VT_CHAIN,
+  VT_HELP,
   VT_PHRASE,
   VT_PROJECT,
   VT_DEVICE,

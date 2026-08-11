@@ -30,7 +30,9 @@ class EventManager {
 public:
   EventManager() {};
 
-  static EventManager *Instance() { return instance_; }
+  static EventManager *Instance() {
+    return instance_;
+  }
 
   virtual ~EventManager() {};
   virtual bool Init();
@@ -39,6 +41,5 @@ public:
   virtual void SetKeyRepeatAndDelay(int repeat, int delay) {};
 
 private:
-
   static EventManager *instance_;
 };

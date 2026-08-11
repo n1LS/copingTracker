@@ -262,7 +262,7 @@ void ProjectView::DrawView() {
   // Draw title
 
   Variable *v = viewData_->project_->FindVariable(Token::VarProjectName);
-  DrawTitle("Project %s", v->GetString().c_str());
+  DrawTitle("Workspace %s", v->GetString().c_str());
 
   // Draw fields and map
 
@@ -409,11 +409,17 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
 }
 
 void ProjectView::OnPurge() {
-  project_->PurgeSamples();
+  int removed = project_->PurgeSamples();
+  char buffer[32];
+  npf_snprintf(buffer, sizeof(buffer), "Removed %d sample%s.", removed, removed == 1 ? "" : "s");
+  MessageBox *mb = MessageBox::Create(*this, "Done", buffer, MBBF_OK);
 }
 
 void ProjectView::OnPurgeInstruments() {
-  project_->PurgeInstruments();
+  int removed = project_->PurgeInstruments();
+  char buffer[32];
+  npf_snprintf(buffer, sizeof(buffer), "Removed %d instrument%s.", removed, removed == 1 ? "" : "s");
+  MessageBox *mb = MessageBox::Create(*this, "Done", buffer, MBBF_OK);
 }
 
 void ProjectView::OnFocus() {

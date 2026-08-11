@@ -11,8 +11,8 @@
 
 #include "DeviceView.h"
 #include "Application/AppWindow.h"
-#include "Application/Model/Scale.h"
 #include "Application/Commands/EventDispatcher.h"
+#include "Application/Model/Scale.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
@@ -41,7 +41,6 @@ static void MassStorageCallback(View &v, ModalView &dialog) {
 }
 
 DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
-
   GUIPoint position = GetAnchor();
 
   auto config = Config::GetInstance();
@@ -124,7 +123,6 @@ DeviceView::~DeviceView() {
 }
 
 void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
   if (!pressed)
     return;
 
@@ -133,6 +131,8 @@ void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (mask & BM_NAV) {
     if (mask & BM_DOWN) {
       Navigate(VT_PROJECT);
+    } else if (mask & BM_RIGHT) {
+      Navigate(VT_HELP);
     }
   } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
@@ -194,14 +194,14 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   switch (fourcc) {
     case Token::VarKeyRepeat:
     case Token::VarKeyDelay:
-    {
-      int repeat = config->FindVariable(Token::VarKeyRepeat)->GetInt();
-      int delay = config->FindVariable(Token::VarKeyDelay)->GetInt();
-      EventDispatcher::GetInstance()->SetKeyRepeatAndDelay(repeat, delay);
-      EventManager::Instance()->SetKeyRepeatAndDelay(repeat, delay);
-      Trace::Log("Settings", "Delay %d, Repeat %d", delay, repeat);
-      break;
-    }
+      {
+        int repeat = config->FindVariable(Token::VarKeyRepeat)->GetInt();
+        int delay = config->FindVariable(Token::VarKeyDelay)->GetInt();
+        EventDispatcher::GetInstance()->SetKeyRepeatAndDelay(repeat, delay);
+        EventManager::Instance()->SetKeyRepeatAndDelay(repeat, delay);
+        Trace::Log("Settings", "Delay %d, Repeat %d", delay, repeat);
+        break;
+      }
     case Token::ActionBootSelect:
       ConfirmStopPlayback(Token::ActionBootSelect);
       return;

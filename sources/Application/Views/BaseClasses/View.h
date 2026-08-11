@@ -136,7 +136,7 @@ struct Theme {
 
     struct Tab {
       SWITCHABLE(fg, BLACK, BLACK)
-      SWITCHABLE(bg, LIGHT_YELLOW, DARK_GRAY)
+      SWITCHABLE(bg, LIGHT_YELLOW, LIGHT_GRAY)
     };
   };
 

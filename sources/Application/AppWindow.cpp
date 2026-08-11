@@ -73,6 +73,7 @@ struct AppWindowViews {
   ChainView chainView;
   PhraseView phraseView;
   DeviceView deviceView;
+  HelpView helpView;
   ThemeView themeView;
   ThemeImportView themeImportView;
   ProjectView projectView;
@@ -89,9 +90,9 @@ struct AppWindowViews {
 
   AppWindowViews(GUIWindow &w, ViewData &viewData)
       : songView(w, &viewData), chainView(w, &viewData), phraseView(w, &viewData), deviceView(w, &viewData),
-        themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData), importView(w, &viewData),
-        instrumentImportView(w, &viewData), instrumentView(w, &viewData), tableView(w, &viewData),
-        grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
+        helpView(w, &viewData), themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData),
+        importView(w, &viewData), instrumentImportView(w, &viewData), instrumentView(w, &viewData),
+        tableView(w, &viewData), grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
         sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), nullView(w, &viewData) {
   }
 };
@@ -156,6 +157,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   views_->chainView.AddObserver(*this);
   views_->phraseView.AddObserver(*this);
   views_->deviceView.AddObserver(*this);
+  views_->helpView.AddObserver(*this);
   views_->themeView.AddObserver(*this);
   views_->themeImportView.AddObserver(*this);
   views_->projectView.AddObserver(*this);
@@ -724,6 +726,9 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
           case VT_DEVICE:
             _currentView = &views_->deviceView;
             break;
+          case VT_HELP:
+            _currentView = &views_->helpView;
+            break;
           case VT_PROJECT:
             _currentView = &views_->projectView;
             break;
@@ -887,11 +892,12 @@ bool AppWindow::AutoSave() {
     return false;
   }
   // only auto save when sequencer is not running and the user is in an autosave-safe view.
+  // todo: maybe work with a negative list?
   bool autosaveSafeView = _currentView == &views_->songView || _currentView == &views_->chainView ||
                           _currentView == &views_->phraseView || _currentView == &views_->tableView ||
                           _currentView == &views_->grooveView || _currentView == &views_->instrumentView ||
                           _currentView == &views_->deviceView || _currentView == &views_->themeView ||
-                          _currentView == &views_->mixerView;
+                          _currentView == &views_->mixerView || _currentView == &views_->helpView;
 
   if (!player->IsRunning() && autosaveSafeView) {
     Trace::Log("APPWINDOW", "AutoSaving Project Data");
