@@ -65,7 +65,7 @@ public:
   virtual InstrumentType GetType() {
     return IT_SAMPLE;
   };
-  virtual void ProcessCommand(int channel, Token cc, uint16_t value);
+  virtual void ProcessCommand(int channel, Token token, uint16_t value);
   virtual int GetTable();
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);

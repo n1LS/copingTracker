@@ -15,6 +15,7 @@
 #include "Application/Instruments/SIDInstrument.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
+#include "Application/Instruments/StackInstrument/StackInstrument.h"
 #include "Application/Model/Config.h"
 #include "Application/Views/SampleEditorView.h"
 #include "Application/Views/SampleImportView.h"
@@ -314,6 +315,9 @@ void InstrumentView::refreshInstrumentFields() {
     case IT_DRUM:
       fillDrumParameters();
       break;
+    case IT_STACK:
+      fillStackParameters();
+      break;
     case IT_LAST:
       // NA
       break;
@@ -604,8 +608,8 @@ void InstrumentView::fillSIDParameters() {
 }
 
 #include "InstrumentView_Chiptune.ipp"
-
 #include "InstrumentView_Drum.ipp"
+#include "InstrumentView_Stack.ipp"
 
 void InstrumentView::fillMidiParameters() {
 
@@ -639,7 +643,7 @@ void InstrumentView::fillMidiParameters() {
 
   position.y_ += 2;
   v = instrument->FindVariable(Token::MidiInstrumentTable);
-  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Table         :%2.2X", 0, 0x7F, 1, 0x10));
+  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Table         :%2.2X", 0, TABLE_COUNT - 1, 1, 0x10));
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
 
   position.y_ += 1;
@@ -955,6 +959,8 @@ void InstrumentView::DrawView() {
 
     if (type == IT_DRUM) {
       DrawViewDrum();
+    } else if (type == IT_STACK) {
+      DrawViewStack();
     }
   }
 }
@@ -1016,9 +1022,9 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
     return;
   }
 
-  uintptr_t fourcc = (uintptr_t)data;
+  uintptr_t token = (uintptr_t)data;
 
-  switch (fourcc) {
+  switch (token) {
     case Token::VarInstrumentType:
       {
         // Get the current instrument to determine its actual type

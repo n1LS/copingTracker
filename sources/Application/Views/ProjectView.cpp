@@ -276,10 +276,10 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
     return;
   }
 
-  uintptr_t fourcc = (uintptr_t)data;
+  uintptr_t token = (uintptr_t)data;
 
   UIField *focus = GetFocus();
-  if (fourcc != Token::ActionBPMChanged) {
+  if (token != Token::ActionBPMChanged) {
     focus->ClearFocus();
     focus->Draw(w_);
     focus->SetFocus();
@@ -288,7 +288,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   }
   Player *player = Player::GetInstance();
 
-  switch (fourcc) {
+  switch (token) {
     case Token::ActionPurge:
       {
         MessageBox *mb = MessageBox::Create(*this, "Purge", "Remove unused samples?", MBBF_YES | MBBF_NO);

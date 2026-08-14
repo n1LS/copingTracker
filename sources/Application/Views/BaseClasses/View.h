@@ -74,8 +74,8 @@ struct Theme {
   };
 
   struct Data {
-    FIXED(negative, RED)
-    FIXED(positive, GREEN)
+    FIXED(negative, LIGHT_RED)
+    FIXED(positive, LIGHT_GREEN)
   };
 
   struct Waveform {

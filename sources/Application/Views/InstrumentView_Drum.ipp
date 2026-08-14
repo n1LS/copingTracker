@@ -149,7 +149,7 @@ void InstrumentView::DrawViewDrum() {
 
   // character display
   char buffer[14];
-  horizontal_bargraph_5(buffer, instr->FindVariable(Token::DrumInstrumentParamsCharacter)->GetInt());
+  horizontal_bar_graph_6(buffer, instr->FindVariable(Token::DrumInstrumentParamsCharacter)->GetInt());
   SetBackgroundColor(Theme::View::inactive);
   SetColor(Theme::View::fg);
   DrawString(p.x_ + 14, p.y_ + 18, buffer);
