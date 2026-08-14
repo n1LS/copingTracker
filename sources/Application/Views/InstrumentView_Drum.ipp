@@ -149,11 +149,10 @@ void InstrumentView::DrawViewDrum() {
 
   // character display
   char buffer[14];
-  horizontal_bar_graph_6(buffer, instr->FindVariable(Token::DrumInstrumentParamsCharacter)->GetInt());
-  SetBackgroundColor(Theme::View::inactive);
+  int value = instr->FindVariable(Token::DrumInstrumentParamsCharacter)->GetInt();
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph(value));
   SetColor(Theme::View::fg);
   DrawString(p.x_ + 14, p.y_ + 18, buffer);
-  SetBackgroundColor(Theme::View::bg);
 
   // legend labels up top
   SetColor(Theme::View::inactive);
