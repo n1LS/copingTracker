@@ -74,7 +74,7 @@ void InstrumentView::fillStackParameters() {
 
   // Brightness
   v = instrument->FindVariable(Token::StackInstrumentBrightness);
-  intVarField_.emplace_back(position, *v, "Brightness    : %01X", 0, stackBrightnessMax, 1, stackBrightnessMax);
+  intVarField_.emplace_back(position, *v, "Brightness    : %01X", 0, stackBrightnessMax, 1, stackBrightnessMax / 2);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
   addIndexToLine(8, position.y_);
   position.y_++;
