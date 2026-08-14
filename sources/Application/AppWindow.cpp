@@ -20,6 +20,7 @@
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
+#include "Application/Views/ToastView.h"
 #include "Application/Views/Views.h"
 #include "BaseClasses/View.h"
 #include "Foundation/Variables/WatchedVariable.h"
@@ -176,6 +177,8 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   memset(_screenColor, 0, SCREEN_CHARS);
   memset(_preScreenColor, 0, SCREEN_CHARS);
 
+  ToastView::Init(*this, &viewData_);
+
   Redraw();
 
   // there is some sort of race that if we call LoadProject() from here directly
@@ -297,6 +300,8 @@ void AppWindow::InvalidateTextCache() {
 // Flush current screen to display
 //
 void AppWindow::Flush() {
+  // draw the ToastView, it handles its own visibility
+  ToastView::getInstance()->Draw(*this);
 
   Lock();
 
@@ -610,6 +615,10 @@ void AppWindow::AnimationUpdate() {
     }
   }
 
+  // Check for ToastView animation updates (needs to run frequently for smooth
+  // animation)
+  ToastView::getInstance()->UpdateTimer();
+
   if (lowBatteryState_ && !lowBatteryMessageShown_) {
     if (!_currentView->HasModalView()) {
       FullScreenBox *mb = FullScreenBox::Create(*_currentView, "Battery", "Low battery!", "Connect charger", 0);
@@ -824,10 +833,6 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
 }
 
 void AppWindow::Print(char *line) {
-  PrintMultiLine(line);
-}
-
-void AppWindow::PrintMultiLine(char *line) {
   Clear();
 
   SetBackgroundColor(Theme::View::bg);

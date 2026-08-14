@@ -17,6 +17,7 @@
 #include "Application/Views/ModalDialogs/RenderProgressModal.h"
 #include "Application/Views/SampleEditorView.h"
 #include "Application/Views/SampleImportView.h"
+#include "Application/Views/ToastView.h"
 #include "BaseClasses/UIActionField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UIStaticField.h"
@@ -25,6 +26,9 @@
 #include "BaseClasses/ViewEvent.h"
 #include "Services/Midi/MidiService.h"
 #include <nanoprintf.h>
+
+#define TOAST_SAVE_SUCCESS() { ToastView::getInstance()->Show("Project saved successfully.", &ttSuccess, ToastDuration::regular); }
+#define TOAST_SAVE_FAILURE() { ToastView::getInstance()->Show("Failed to save project.", &ttError, ToastDuration::regular); }
 
 static void CreateNewProjectCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
@@ -37,6 +41,20 @@ static void CreateNewProjectCallback(View &v, ModalView &dialog) {
   }
 }
 
+static bool Save(const char *projName, const char *oldName, bool saveAs) {
+  PersistencyService *persist = PersistencyService::GetInstance();
+
+  if (persist->Save(projName, oldName, true) != PERSIST_SAVED) {
+    return false;
+  }
+
+  if (persist->SaveProjectState(projName) != PERSIST_SAVED) {
+    return false;
+  }
+
+  return true;
+}
+
 static void SaveAsOverwriteCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_CANCEL) {
     return;
@@ -46,17 +64,12 @@ static void SaveAsOverwriteCallback(View &v, ModalView &dialog) {
   const char *projName = ((ProjectView &)v).getProjectName().c_str();
   const char *oldProjName = ((ProjectView &)v).getOldProjectName().c_str();
 
-  if (persist->Save(projName, oldProjName, true) != PERSIST_SAVED) {
-    Trace::Error("failed to save renamed project %s [old: %s]", projName, oldProjName);
-    MessageBox *mb = MessageBox::Create(((ProjectView &)v), "Save", "Failed to save project", MBBF_OK | MBBF_CANCEL);
-    ((ProjectView &)v).DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
-    return;
-  }
-  if (persist->SaveProjectState(projName) != PERSIST_SAVED) {
-    Trace::Error("Failed to save project state");
-  } else {
-    Trace::Log("PROJECTVIEW-STATIC", "OVERWROTE:%s", projName);
+  if (Save(projName, oldProjName, true)) {
     ((ProjectView &)v).clearSaveAsFlag(); // clear flag after saving
+    ((ProjectView &)v).getProject()->SetProjectName(projName);
+    TOAST_SAVE_SUCCESS();
+  } else {
+    TOAST_SAVE_FAILURE();
   }
 }
 
@@ -223,9 +236,9 @@ ProjectView::~ProjectView() {
 }
 
 void ProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
-  if (!pressed)
+  if (!pressed) {
     return;
+  }
 
   FieldView::ProcessButtonMask(mask, pressed);
 
@@ -260,12 +273,10 @@ void ProjectView::DrawView() {
   Clear();
 
   // Draw title
-
   Variable *v = viewData_->project_->FindVariable(Token::VarProjectName);
   DrawTitle("Workspace %s", v->GetString().c_str());
 
   // Draw fields and map
-
   FieldView::Redraw();
   drawMap();
 }
@@ -289,77 +300,68 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   Player *player = Player::GetInstance();
 
   switch (fourcc) {
-    case Token::ActionPurge:
-      {
-        MessageBox *mb = MessageBox::Create(*this, "Purge", "Remove unused samples?", MBBF_YES | MBBF_NO);
-        DoModal(mb, ModalViewCallback::create<&PurgeCallback>());
-        break;
-      }
-    case Token::ActionPurgeInstrument:
-      {
-        MessageBox *mb = MessageBox::Create(*this, "Purge", "Remove unused instruments?", MBBF_YES | MBBF_NO);
-        DoModal(mb, ModalViewCallback::create<&PurgeInstrumentsCallback>());
-        break;
-      }
-    case Token::ActionRandomName:
-      {
-        char name[17];
-        getRandomName(name, 17);
-        project_->SetProjectName(name);
-        saveAsFlag_ = true;
-        break;
-      }
-    case Token::ActionSave:
-      {
-        PersistencyService *persist = PersistencyService::GetInstance();
-        char projName[MAX_PROJECT_NAME_LENGTH + 1];
-        project_->GetProjectName(projName);
+    case Token::ActionPurge: {
+      MessageBox *mb = MessageBox::Create(*this, "Purge", "Remove unused samples?", MBBF_YES | MBBF_NO);
+      DoModal(mb, ModalViewCallback::create<&PurgeCallback>());
+      break;
+    }
+    case Token::ActionPurgeInstrument: {
+      MessageBox *mb = MessageBox::Create(*this, "Purge", "Remove unused instruments?", MBBF_YES | MBBF_NO);
+      DoModal(mb, ModalViewCallback::create<&PurgeInstrumentsCallback>());
+      break;
+    }
+    case Token::ActionRandomName: {
+      char name[17];
+      getRandomName(name, 17);
+      project_->SetProjectName(name);
+      saveAsFlag_ = true;
+      break;
+    }
+    case Token::ActionSave: {
+      PersistencyService *persist = PersistencyService::GetInstance();
+      char projName[MAX_PROJECT_NAME_LENGTH + 1];
+      project_->GetProjectName(projName);
 
-        if (saveAsFlag_) {
-          // first need to check if project with this name already exists
-          if (persist->Exists(projName)) {
-            Trace::Error("project already exists ask user to confirm overwrite");
-            MessageBox *mb = MessageBox::Create(*this, "Save", "Overwrite EXISTING project?", MBBF_OK | MBBF_CANCEL);
-            DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
-            return;
-          }
-          if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) != PERSIST_SAVED) {
-            Trace::Error("failed to save project state");
-            MessageBox *mb = MessageBox::Create(*this, "Error", "Error saving Project", MBBF_OK);
-            DoModal(mb);
-            return;
-          }
-          clearSaveAsFlag();
-        } else {
-          if (persist->Save(projName, oldProjName_.c_str(), saveAsFlag_) != PERSIST_SAVED) {
-            Trace::Error("failed to save project state");
-            MessageBox *mb = MessageBox::Create(*this, "Error", "Error saving Project", MBBF_OK);
-            DoModal(mb);
-            return;
-          }
+      if (saveAsFlag_) {
+        // first need to check if project with this name already exists
+        if (persist->Exists(projName)) {
+          Trace::Error("project already exists ask user to confirm overwrite");
+          MessageBox *mb = MessageBox::Create(*this, "Save", "Overwrite EXISTING project?", MBBF_OK | MBBF_CANCEL);
+          DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
+          return;
         }
-        // all good so now persist the new project name in project state
-        persist->SaveProjectState(projName);
-        break;
+
+        if (Save(projName, oldProjName_.c_str(), saveAsFlag_)) {
+          clearSaveAsFlag();
+          TOAST_SAVE_SUCCESS();
+        } else {
+          TOAST_SAVE_FAILURE();
+        }
       }
+      // all good so now persist the new project name in project state
+      if (persist->SaveProjectState(projName) == PERSIST_SAVED) {
+        TOAST_SAVE_SUCCESS();
+      } else {
+        TOAST_SAVE_FAILURE();
+      }
+      break;
+    }
     case Token::ActionProjectRename:
       Trace::Log("PROJECTVIEW", "Project renamed! prev name:%s", nameField_->GetString().c_str());
       saveAsFlag_ = true;
       break;
-    case Token::ActionBrowse:
-      {
-        if (CanExit()) {
-          Navigate(VT_SELECTPROJECT);
-        }
-        break;
+    case Token::ActionBrowse: {
+      if (CanExit()) {
+        Navigate(VT_SELECTPROJECT);
       }
-    case Token::ActionNewProject:
-      {
-        MessageBox *mb = MessageBox::Create(*this, "New Project", "Create a new project and", "   lose all changes?",
-                                            MBBF_YES | MBBF_NO);
-        DoModal(mb, ModalViewCallback::create<&CreateNewProjectCallback>());
-        break;
-      }
+      break;
+    }
+    case Token::ActionNewProject: {
+      MessageBox *mb = MessageBox::Create(*this, "New Project", "Create a new project and", "   lose all changes?",
+                                          MBBF_YES | MBBF_NO);
+      DoModal(mb, ModalViewCallback::create<&CreateNewProjectCallback>());
+      break;
+    }
     case Token::ActionBPMChanged:
       break;
     case Token::ActionRenderMixdown:
