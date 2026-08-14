@@ -100,7 +100,6 @@ protected: // GUIWindow implementation
   // Status implementation
 
   virtual void Print(char *);
-  virtual void PrintMultiLine(char *);
 
   void defineColor(Token colorCode, GUIColor &color, int paletteIndex);
 

@@ -42,6 +42,11 @@ public:
   etl::string<MAX_PROJECT_NAME_LENGTH> getOldProjectName() {
     return oldProjName_;
   };
+
+  Project *getProject() {
+    return viewData_->GetProject();
+  }
+
   void clearSaveAsFlag() {
     saveAsFlag_ = false;
     oldProjName_ = getProjectName();

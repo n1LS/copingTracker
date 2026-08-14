@@ -25,7 +25,8 @@
 class ListView : public ScreenView {
 public:
   /**
-   * DataSource protocol: provides data and rendering for list items. Implementers may override DrawItem() for custom appearance.
+   * DataSource protocol: provides data and rendering for list items. Implementers may override DrawItem() for custom
+   * appearance.
    */
   class DataSource {
   public:
@@ -37,11 +38,13 @@ public:
      * Prepare item for drawing. Called before DrawItem(). Sets display properties (colors, text content).
      * Default stores these in the buffer and sets fg/bg. Override if you need custom preparation logic.
      */
-    virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) = 0;
+    virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
+                                    size_t bufferSize) = 0;
 
     /**
      * Draw a single item at screen position (x, y). Called by ListView after PrepareItemDrawing().
-     * Default implementation draws the buffer text with prepared colors. Override for completely custom item rendering (icons, multi-line, etc).
+     * Default implementation draws the buffer text with prepared colors. Override for completely custom item rendering
+     * (icons, multi-line, etc).
      */
     virtual void DrawItem(int x, int y, int index, bool isSelected, Color fg, Color bg, const char *buffer) = 0;
 
@@ -55,11 +58,14 @@ public:
   public:
     virtual ~Delegate() = default;
 
-    virtual void OnItemSelected(int index, int selectedTab = 0) {}
-    virtual void OnItemNavigated(int index) {}
+    virtual void OnItemSelected(int index, int selectedTab = 0) {
+    }
+    virtual void OnItemNavigated(int index) {
+    }
   };
 
-  ListView(GUIWindow &w, ViewData *viewData, DataSource *dataSource, Delegate *delegate, size_t pageSize, int initialTab = 0);
+  ListView(GUIWindow &w, ViewData *viewData, DataSource *dataSource, Delegate *delegate, size_t pageSize,
+           int initialTab = 0);
   virtual ~ListView();
 
   void ProcessButtonMask(uint16_t mask, bool pressed) override;
@@ -67,18 +73,35 @@ public:
   void OnFocus() override;
 
 protected:
-  DataSource *GetDataSource() const { return dataSource_; }
-  Delegate *GetDelegate() const { return delegate_; }
+  DataSource *GetDataSource() const {
+    return dataSource_;
+  }
+  Delegate *GetDelegate() const {
+    return delegate_;
+  }
 
-  size_t GetCurrentIndex() const { return currentIndex_; }
+  size_t GetCurrentIndex() const {
+    return currentIndex_;
+  }
   void SetCurrentIndex(size_t index);
 
-  size_t GetTopIndex() const { return topIndex_; }
-  size_t GetPageSize() const { return pageSize_; }
-  size_t GetItemCount() const { return dataSource_->GetItemCount(); }
+  size_t GetTopIndex() const {
+    return topIndex_;
+  }
+  size_t GetPageSize() const {
+    return pageSize_;
+  }
+  size_t GetItemCount() const {
+    return dataSource_->GetItemCount();
+  }
 
-  int GetSelectedTab() const { return selectedTab_; }
-  void SetSelectedTab(int index) { selectedTab_ = index; isDirty_ = true; }
+  int GetSelectedTab() const {
+    return selectedTab_;
+  }
+  void SetSelectedTab(int index) {
+    selectedTab_ = index;
+    isDirty_ = true;
+  }
 
   void HandleUp(bool page);
   void HandleDown(bool page);

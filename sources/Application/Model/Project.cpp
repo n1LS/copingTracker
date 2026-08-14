@@ -175,7 +175,7 @@ void Project::GetProjectName(char *name) {
   name[MAX_PROJECT_NAME_LENGTH] = '\0';
 }
 
-void Project::SetProjectName(char *name) {
+void Project::SetProjectName(const char *name) {
   Variable *v = FindVariable(Token::VarProjectName);
   char buffer[MAX_PROJECT_NAME_LENGTH + 1];
   strncpy(buffer, name, MAX_PROJECT_NAME_LENGTH);
