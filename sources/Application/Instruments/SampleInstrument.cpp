@@ -1009,10 +1009,11 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
               *fltSpeedPtr = fp_mul(*fltSpeedPtr, fltDirt);
             }
 
-            *fltSpeedPtr = fp_mul_coef(*fltSpeedPtr, fltParm2);                    // mul by res, it's some kind
-                                                                                   // of inertia.
-            /*HOG:5*/ *fltSpeedPtr = fp_add(*fltSpeedPtr, fp_mul_coef(difr, fltParm1)); // mul by cutoff, less cutoff = no
-                                                                                   // sound, so it's better not be 0.
+            *fltSpeedPtr = fp_mul_coef(*fltSpeedPtr, fltParm2); // mul by res, it's some kind
+                                                                // of inertia.
+            /*HOG:5*/ *fltSpeedPtr =
+                fp_add(*fltSpeedPtr, fp_mul_coef(difr, fltParm1)); // mul by cutoff, less cutoff = no
+                                                                   // sound, so it's better not be 0.
 
             *fltHeightPtr += *fltSpeedPtr;
             *fltHeightPtr += *fltDelayPtr - hpin;

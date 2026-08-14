@@ -82,7 +82,8 @@ const char *SelectProjectView::GetEmptyStateMessage() const {
   return "No projects to show";
 }
 
-void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) {
+void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
+                                           size_t bufferSize) {
   (void)bufferSize; // Unused - use fixed size
   // Get filename
   char temp[MAX_PROJECT_NAME_LENGTH + 1];

@@ -133,7 +133,8 @@ void SampleImportView::OnDirectorySetup() {
   // No additional setup needed after directory switch
 }
 
-void SampleImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) {
+void SampleImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
+                                          size_t bufferSize) {
   (void)bufferSize; // Unused - use fixed size
   auto fs = GetFileSystem();
 
@@ -286,7 +287,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       if (mask & BM_ALT) {
         Trace::Log("IMPORT", "SHIFT play - import");
         import();
-    } else if (mask == BM_PLAY) {
+      } else if (mask == BM_PLAY) {
         Trace::Log("IMPORT", "play key pressed - start preview");
         preview(name);
       }

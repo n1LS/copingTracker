@@ -78,7 +78,8 @@ void InstrumentImportView::detectInstrumentTypes() {
   Trace::Log("INSTRUMENTIMPORT", "Detected %zu instrument types", instrumentTypeList_.size());
 }
 
-void InstrumentImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer, size_t bufferSize) {
+void InstrumentImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
+                                              size_t bufferSize) {
   (void)bufferSize; // Unused - use fixed size
   auto fs = GetFileSystem();
 

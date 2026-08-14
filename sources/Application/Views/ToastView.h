@@ -47,9 +47,9 @@ private:
   void WrapText(const char *message);
 
   // view virtual methods
-  virtual void OnFocus() override{};
-  virtual void DrawView() override{};
-  virtual void AnimationUpdate() override{};
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick) override{};
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed) override{};
+  virtual void OnFocus() override {};
+  virtual void DrawView() override {};
+  virtual void AnimationUpdate() override {};
+  virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick) override {};
+  virtual void ProcessButtonMask(unsigned short mask, bool pressed) override {};
 };

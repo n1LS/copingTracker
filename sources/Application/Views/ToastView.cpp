@@ -23,13 +23,15 @@ ToastView::ToastView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {
   }
 };
 
-ToastView::~ToastView() {}
-ToastView *ToastView::getInstance() { return instance_; }
+ToastView::~ToastView() {
+}
+ToastView *ToastView::getInstance() {
+  return instance_;
+}
 
 void ToastView::Init(GUIWindow &w, ViewData *viewData) {
   if (!instance_) {
-    __attribute__((
-        section(".DATA_RAM"))) static char toastStorage[sizeof(ToastView)];
+    __attribute__((section(".DATA_RAM"))) static char toastStorage[sizeof(ToastView)];
     instance_ = new (toastStorage) ToastView(w, viewData);
   }
 }
@@ -37,56 +39,56 @@ void ToastView::Init(GUIWindow &w, ViewData *viewData) {
 // splits the message into multiple lines fitting into the toast width and pads
 // with spaces on both sides
 void ToastView::WrapText(const char *message) {
-    lineCount_ = 0;
+  lineCount_ = 0;
 
-    constexpr int prefixWidth = 3;
-    constexpr int lineWidth = prefixWidth + TOAST_MAX_LINE_WIDTH;
-    constexpr int lineSize = lineWidth + 1; // + '\0'
+  constexpr int prefixWidth = 3;
+  constexpr int lineWidth = prefixWidth + TOAST_MAX_LINE_WIDTH;
+  constexpr int lineSize = lineWidth + 1; // + '\0'
 
-    auto addEmptyLine = [&]() {
-        memset(lines_[lineCount_], ' ', lineWidth);
-        lines_[lineCount_][lineWidth] = '\0';
-        lineCount_++;
-    };
+  auto addEmptyLine = [&]() {
+    memset(lines_[lineCount_], ' ', lineWidth);
+    lines_[lineCount_][lineWidth] = '\0';
+    lineCount_++;
+  };
 
-    addEmptyLine();
+  addEmptyLine();
 
-    const int msgLen = strlen(message);
-    int pos = 0;
+  const int msgLen = strlen(message);
+  int pos = 0;
 
-    while (pos < msgLen && lineCount_ < maxLines - 1) {
-        int len = msgLen - pos;
+  while (pos < msgLen && lineCount_ < maxLines - 1) {
+    int len = msgLen - pos;
 
-        if (len > TOAST_MAX_LINE_WIDTH)
-            len = TOAST_MAX_LINE_WIDTH;
+    if (len > TOAST_MAX_LINE_WIDTH)
+      len = TOAST_MAX_LINE_WIDTH;
 
-        // Prefer breaking at a space.
-        if (len == TOAST_MAX_LINE_WIDTH) {
-            for (int i = len - 1; i >= len / 2; i--) {
-                if (message[pos + i] == ' ') {
-                    len = i;
-                    break;
-                }
-            }
+    // Prefer breaking at a space.
+    if (len == TOAST_MAX_LINE_WIDTH) {
+      for (int i = len - 1; i >= len / 2; i--) {
+        if (message[pos + i] == ' ') {
+          len = i;
+          break;
         }
-
-        // Start with the entire line padded with spaces.
-        memset(lines_[lineCount_], ' ', lineWidth);
-
-        // Copy the actual text after the 3-character prefix.
-        memcpy(lines_[lineCount_] + prefixWidth, message + pos, len);
-
-        lines_[lineCount_][lineWidth] = '\0';
-        lineCount_++;
-
-        pos += len;
-
-        while (pos < msgLen && message[pos] == ' ') {
-            pos++;
-        }
+      }
     }
 
-    addEmptyLine();
+    // Start with the entire line padded with spaces.
+    memset(lines_[lineCount_], ' ', lineWidth);
+
+    // Copy the actual text after the 3-character prefix.
+    memcpy(lines_[lineCount_] + prefixWidth, message + pos, len);
+
+    lines_[lineCount_][lineWidth] = '\0';
+    lineCount_++;
+
+    pos += len;
+
+    while (pos < msgLen && message[pos] == ' ') {
+      pos++;
+    }
+  }
+
+  addEmptyLine();
 }
 
 void ToastView::UpdateTimer() {
@@ -143,11 +145,11 @@ void ToastView::Draw(GUIWindow &w) {
   SetColor(Theme::Dialog::bg);
   DrawChar(0, y, CHAR(char_filledHalfBorder_topLeft_s), true);
   DrawChar(SCREEN_WIDTH - 1, y, CHAR(char_filledHalfBorder_topRight_s), true);
-  
+
   for (int x = 1; x < SCREEN_WIDTH - 1; x++) {
     DrawChar(x, y, CHAR(char_block_bottom_s), true);
   }
-  
+
   // border left and right
   for (int i = 0; i < lineCount_ && y + i < SCREEN_HEIGHT; i++) {
     DrawChar(0, y + 1 + i, CHAR(char_block_left_s), true);
