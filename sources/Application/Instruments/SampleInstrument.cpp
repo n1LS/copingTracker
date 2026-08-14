@@ -55,7 +55,7 @@ SampleInstrument::SampleInstrument()
       filterMode_(Token::SampleInstrumentFilterMode, filterMode, 3, 0), start_(Token::SampleInstrumentStart, 0),
       loopMode_(Token::SampleInstrumentLoopMode, loopTypes, SILM_LAST, 0),
       loopStart_(Token::SampleInstrumentLoopStart, 0), loopEnd_(Token::SampleInstrumentEnd, 0),
-      table_(Token::SampleInstrumentTable, -1), tableAuto_(Token::SampleInstrumentTableAutomation, false),
+      table_(Token::SampleInstrumentTable, VAR_OFF), tableAuto_(Token::SampleInstrumentTableAutomation, false),
       attack_(Token::SampleInstrumentAttack, 0), decay_(Token::SampleInstrumentDecay, 0),
       sustain_(Token::SampleInstrumentSustain, 0xFF), release_(Token::SampleInstrumentRelease, 0),
       gmInstrument_(Token::SampleInstrumentGMInstrument, NO_GM_INSTRUMENT) {
@@ -1282,18 +1282,18 @@ void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
 
     default:
       //         Trace::Dump("Got notification from
-      //         %c%c%c%c",fourcc[0],fourcc[1],fourcc[2],fourcc[3]) ;
+      //         %c%c%c%c",token[0],token[1],token[2],token[3]) ;
       break;
   };
 }
 
-void SampleInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
+void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 
   renderParams *rp = renderParams_ + channel;
   if (!source_)
     return;
 
-  switch (cc) {
+  switch (token) {
     case Token::InstrumentCommandLoopOffset:
 
       if (value > 0x8000) {

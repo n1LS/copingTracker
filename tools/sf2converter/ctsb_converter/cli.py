@@ -44,6 +44,7 @@ from .model import (
 from .util import Logger, Warnings, clamp, parse_size
 
 _DUMMY_SAMPLE_FRAMES = 32
+_MINIMAL_GM_FRAMES = 16
 _DEFAULT_SAMPLE_MODES_NO_LOOP = 0
 _LOOP_SAMPLE_MODES = {1, 3}
 # Sentinel lookup-table value meaning "no sample region covers this note",
@@ -72,6 +73,11 @@ def _parse_args(argv: List[str]) -> argparse.Namespace:
     )
     parser.add_argument("--verbose", action="store_true", help="print progress information to stderr")
     parser.add_argument("--max-size", type=parse_size, default=None, help="warn if the PCM blob exceeds this many bytes")
+    parser.add_argument(
+        "--minimal-gm",
+        action="store_true",
+        help="truncate every sample to its first 16 frames (32 bytes) to minimize output size",
+    )
     return parser.parse_args(argv)
 
 
@@ -155,10 +161,11 @@ class _VariantBuilder:
     """Builds finalized :class:`RawSample` instances (steps 7-8) and
     memoizes identical requests."""
 
-    def __init__(self, sf2_data: sf2.Sf2Data, channels: _ChannelAudioCache, trim_silence: bool, warnings: Warnings) -> None:
+    def __init__(self, sf2_data: sf2.Sf2Data, channels: _ChannelAudioCache, trim_silence: bool, minimal_gm: bool, warnings: Warnings) -> None:
         self._sf2 = sf2_data
         self._channels = channels
         self._trim_silence = trim_silence
+        self._minimal_gm = minimal_gm
         self._warnings = warnings
         self.instances: List[RawSample] = [_dummy_sample()]
         self._cache: Dict[tuple, int] = {}
@@ -233,6 +240,7 @@ class _VariantBuilder:
             root_note,
             fine_tune,
             self._trim_silence,
+            self._minimal_gm,
             attack,
             decay,
             sustain,
@@ -248,6 +256,17 @@ class _VariantBuilder:
             final_samples, final_loop_start, final_loop_end, _ = audio.trim_silence(
                 samples, loop_start, loop_end, has_loop
             )
+
+        if self._minimal_gm:
+            kept = min(_MINIMAL_GM_FRAMES, len(final_samples))
+            final_samples = final_samples[:kept]
+            final_loop_start = min(final_loop_start, kept)
+            final_loop_end = min(final_loop_end, kept)
+            if has_loop and final_loop_start >= final_loop_end:
+                # Loop cannot be preserved after truncation; treat as one-shot.
+                final_loop_start = 0
+                final_loop_end = 0
+                loop_mode = LoopMode.ONESHOT
 
         index = len(self.instances)
         self.instances.append(
@@ -430,7 +449,7 @@ def convert(sf2_bytes: bytes, args: argparse.Namespace, warnings: Warnings, log:
     sf_presets = sf2.build_presets(sf2_data, warnings, log)
 
     channels = _ChannelAudioCache(sf2_data, warnings)
-    variants = _VariantBuilder(sf2_data, channels, args.trim_silence, warnings)
+    variants = _VariantBuilder(sf2_data, channels, args.trim_silence, args.minimal_gm, warnings)
 
     instruments = _build_instrument_defs(sf_instruments, variants)
 

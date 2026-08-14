@@ -822,9 +822,9 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
     return;
   }
 
-  uintptr_t fourcc = (uintptr_t)d;
+  uintptr_t token = (uintptr_t)d;
 
-  switch (fourcc) {
+  switch (token) {
     case Token::ActionOK:
       {
         // Stop playback if active before applying any destructive operation

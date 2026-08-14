@@ -41,7 +41,7 @@ bool NoneInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void NoneInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
+void NoneInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 }
 
 int NoneInstrument::GetTable() {

@@ -19,19 +19,19 @@ class Service {
 public:
   static constexpr size_t MaxSubServices = 16;
 
-  Service(int fourCC);
+  Service(int token);
   virtual ~Service();
   virtual void Register(SubService *);
   virtual void Unregister(SubService *);
   int GetToken() {
-    return fourCC_;
+    return token_;
   };
   etl::vector<SubService *, MaxSubServices> &SubServices() {
     return subs_;
   }
 
 private:
-  int fourCC_;
+  int token_;
   etl::vector<SubService *, MaxSubServices> subs_;
 };
 #endif

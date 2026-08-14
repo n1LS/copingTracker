@@ -14,14 +14,14 @@
 
 class SubService {
 public:
-  SubService(int fourCC, bool registerWithService = true);
+  SubService(int token, bool registerWithService = true);
   virtual ~SubService();
   int GetToken() {
-    return fourCC_;
+    return token_;
   };
 
 private:
-  int fourCC_;
+  int token_;
   bool registerWithService_;
 };
 #endif

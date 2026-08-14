@@ -41,6 +41,7 @@ public:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
   void DrawViewDrum();
+  void DrawViewStack();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   virtual void OnFocus();
   void onInstrumentTypeChange(bool updateUI = false);
@@ -60,6 +61,7 @@ protected:
   void fillOpalParameters();
   void fillChiptuneParameters();
   void fillDrumParameters();
+  void fillStackParameters();
   void fillNoneParameters();
   I_Instrument *getInstrument();
   void Update(Observable &o, I_ObservableData *d);

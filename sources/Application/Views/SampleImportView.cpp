@@ -287,7 +287,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       if (mask & BM_ALT) {
         Trace::Log("IMPORT", "SHIFT play - import");
         import();
-    } else if (mask == BM_PLAY) {
+      } else if (mask == BM_PLAY) {
         Trace::Log("IMPORT", "play key pressed - start preview");
         preview(name);
       }

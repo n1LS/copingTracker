@@ -34,5 +34,6 @@ TODO.md
 tools/sf2converter/*.SF2
 tools/sf2converter/*.sf2
 tools/sf2converter/ctsb_converter/__pycache__
-tools/sf2converter/ctsb_converter/__pycache__
-sources/Application/Instruments/GMBank_data.generated.h
+
+## ignore all generated code
+*.generated.h

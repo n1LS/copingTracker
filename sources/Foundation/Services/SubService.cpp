@@ -12,8 +12,7 @@
 #include "SubService.h"
 #include "ServiceRegistry.h"
 
-SubService::SubService(int fourCC, bool registerWithService)
-    : fourCC_(fourCC), registerWithService_(registerWithService) {
+SubService::SubService(int token, bool registerWithService) : token_(token), registerWithService_(registerWithService) {
   if (registerWithService_) {
     ServiceRegistry::GetInstance()->Register(this);
   }

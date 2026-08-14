@@ -296,7 +296,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   focus->Draw(w_);
   isDirty_ = true;
 
-  uintptr_t fourcc = (uintptr_t)d;
+  uintptr_t token = (uintptr_t)d;
 
   if (&o == colorComponentField_) {
     ColorComponentTarget *componentField = selectedColorComponentTarget();
@@ -311,10 +311,10 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
     colorValue |= newComponentValue << componentField->shift;
     colorVar->SetInt(static_cast<int>(colorValue));
     syncColorComponentVars(colorVar);
-    fourcc = colorVar->GetID();
+    token = colorVar->GetID();
   }
 
-  switch (fourcc) {
+  switch (token) {
     // Handle theme import action
     case Token::ActionImport:
       {
