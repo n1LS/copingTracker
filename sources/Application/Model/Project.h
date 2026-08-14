@@ -54,7 +54,7 @@ public:
   int GetTempo(); // Takes nudging into account
   int GetTranspose();
   void GetProjectName(char *name);
-  void SetProjectName(char *name);
+  void SetProjectName(const char *name);
   const StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> &GetProjectNameString() const {
     return projectName_;
   }

@@ -37,6 +37,10 @@ public:
   void SetChainPhrase(unsigned char value);
   unsigned char *GetCurrentChainPointer();
 
+  Project *GetProject() {
+    return project_;
+  }
+
 protected:
   void checkSongBoundaries();
 

@@ -14,6 +14,7 @@
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Utils/DrawUtils.h"
+#include "Application/Views/ToastView.h"
 #include "Externals/SRC/common.h"
 #include "Externals/etl/include/etl/string.h"
 #include "Externals/etl/include/etl/string_stream.h"
@@ -56,9 +57,7 @@ void SamplePool::updateStatus(uint32_t index, uint32_t total, const char *messag
   progressBar_t progressBar;
   uint32_t percentage = (total > 0) ? (index * 100U) / total : 100U;
   fillProgressBar(index, total, &progressBar);
-  Status::SetMultiLine("%s %.19s" char_indicator_ellipsis_s " \n \n %s %3d%%", message, importName, progressBar,
-                       static_cast<int>(percentage));
-  Status::Flush();
+  Status::Set("Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", message, (const char *)progressBar, percentage);
 }
 
 void SamplePool::Load(const char *projectName) {
@@ -184,8 +183,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   projectSamplePath.append(projectName);
   projectSamplePath.append("/" PROJECT_SAMPLES_DIR "/");
   projectSamplePath.append(projSampleFilename);
-  Status::SetMultiLine("Loading %s->\n%s", name, projSampleFilename);
-  Status::Flush();
+  Status::Set("Loading %s->\n%s", name, projSampleFilename);
 
   auto fout = FileSystem::GetInstance()->Open(projectSamplePath.c_str(), "w");
   if (!fout) {
@@ -365,6 +363,9 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   ev.index_ = count_ - 1;
   ev.type_ = SPET_INSERT;
   NotifyObservers(&ev);
+
+  ToastView *t = ToastView::getInstance();
+  t->Show(status ? "Loaded successfully." : "Loading failed.", status ? &ttSuccess : &ttError, 1500);
 
   return status ? (count_ - 1) : -1;
 }

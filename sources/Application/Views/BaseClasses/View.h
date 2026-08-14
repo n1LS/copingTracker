@@ -143,12 +143,19 @@ struct Theme {
   struct FileList {
     FIXED(directory, LIGHT_YELLOW)
     FIXED(file, Theme::View::fg)
-    FIXED(icon, LIGHT_GRAY);
+    FIXED(icon, LIGHT_GRAY)
   };
 
   struct Dialog {
     FIXED(bg, LIGHT_GRAY)
     FIXED(fg, BLACK)
+
+    struct Icon {
+      FIXED(info, LIGHT_YELLOW);
+      FIXED(error, LIGHT_RED)
+      FIXED(success, LIGHT_GREEN)
+      FIXED(warning, YELLOW)
+    };
 
     struct Title {
       FIXED(fg, WHITE)
