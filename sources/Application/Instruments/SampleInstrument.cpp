@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "System/Profiler/Profiler.h"
+
 #include "Application/Instruments/Filters.h"
 #include "Application/Model/Table.h"
 #include "Application/Persistency/PersistenceConstants.h"
@@ -611,7 +613,7 @@ void SampleInstrument::doKRateUpdate(int channel) {
 // Size in samples
 
 bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
-
+  PROFILE_SCOPE("SampleInstrument::Render");
   bool somethingToMix = false;
 
   // Get Current render parameters
@@ -692,8 +694,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
     // Crush vol
 
-    int crushvol = rp->drive_;
-    fixed fpcrushvol = fl2fp(crushvol / 255.0F);
+    fixed fpcrushvol = rp->drive_ << (FIXED_SHIFT - 8);
 
     // downsample
 

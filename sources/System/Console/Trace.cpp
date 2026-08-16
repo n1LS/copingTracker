@@ -14,6 +14,8 @@
 #include "System/System/System.h"
 #include <string.h>
 
+#undef NDEBUG
+
 // be explicit about the nanoprintf configuration
 #define NANOPRINTF_IMPLEMENTATION
 #define NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS 1
