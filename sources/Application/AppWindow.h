@@ -85,7 +85,7 @@ public:
 public:
   void Flush();
   void FlushTransition();
-
+  
 protected: // GUIWindow implementation
   virtual bool onEvent(GUIEvent &event);
   virtual void onUpdate(bool redraw);
@@ -105,6 +105,11 @@ protected: // GUIWindow implementation
 
 private:
   bool AutoSave();
+
+  void DrawTransitionLeft(int previous, int width);
+  void DrawTransitionRight(int previous, int width);
+  void DrawTransitionUp(int previous, int height);
+  void DrawTransitionDown(int previous, int height);
 
   Project project_;
   ViewData viewData_;
@@ -134,7 +139,7 @@ private:
   static int charHeight_;
 
   int transitionFrame_ = -1;
-  ViewTransition transistionType_ = vtNone;
+  ViewTransition transitionType_ = vtNone;
 
   void SetTransition(ViewTransition type);
 
