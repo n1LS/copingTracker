@@ -164,7 +164,7 @@ void SelectProjectView::LoadProject() {
 
   Trace::Log("SELECTPROJECTVIEW", "Select Project:%s", selection_);
 
-  ViewEvent ve(VET_LOAD_PROJECT, selection_);
+  ViewEvent ve(vetLoadProject, selection_);
   SetChanged();
   NotifyObservers(&ve);
 }

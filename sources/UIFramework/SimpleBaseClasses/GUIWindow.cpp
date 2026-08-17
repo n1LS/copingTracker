@@ -63,14 +63,6 @@ void GUIWindow::Clear() {
   _imp->Clear();
 }
 
-/*void GUIWindow::Save() {
-        _imp->Save() ;
-} ;
-
-void GUIWindow::Restore() {
-        _imp->Restore() ;
-} ;*/
-
 GUIRect GUIWindow::GetRect() {
   return _imp->GetRect();
 }

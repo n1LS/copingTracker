@@ -136,9 +136,9 @@ void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (mask & BM_NAV) {
     if (mask & BM_DOWN) {
-      Navigate(VT_PROJECT);
+      Navigate(VT_PROJECT, vtRevealFromBottom);
     } else if (mask & BM_RIGHT) {
-      Navigate(VT_HELP);
+      Navigate(VT_HELP, vtRevealFromRight);
     }
   } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
@@ -215,7 +215,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
       ConfirmStopPlayback(Token::ActionMassStorage);
       return;
     case Token::ActionShowTheme:
-      Navigate(VT_THEME);
+      Navigate(VT_THEME, vtRevealFromCenter);
       return;
     case Token::VarLineOut:
       {

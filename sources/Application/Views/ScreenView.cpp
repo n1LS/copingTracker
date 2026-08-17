@@ -26,9 +26,11 @@ void ScreenView::AnimationUpdate() {
   drawBattery();
 }
 
-void ScreenView::Navigate(ViewType target) {
-  ViewEvent ve(VET_SWITCH_VIEW, &target);
+void ScreenView::Navigate(ViewType target, ViewTransition transition) {
   SetChanged();
+  
+  ViewEventData ved = {target, transition};
+  ViewEvent ve(vetSwitchView, &ved);
   NotifyObservers(&ve);
 }
 

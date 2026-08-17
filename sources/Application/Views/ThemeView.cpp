@@ -319,7 +319,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
     case Token::ActionImport:
       {
         // Switch to the ThemeImportView
-        Navigate(VT_THEME_IMPORT);
+        Navigate(VT_THEME_IMPORT, vtRevealFromCenter);
         return;
       }
     // Handle theme export action
@@ -426,7 +426,7 @@ void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (mask == (BM_NAV | BM_LEFT)) {
     // Go back to Device view with NAV+LEFT
-    Navigate(VT_DEVICE);
+    Navigate(VT_DEVICE, vtCollapse);
   } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
@@ -531,7 +531,7 @@ void ThemeView::exportTheme() {
 
 void ThemeView::importTheme() {
   // Switch to the theme import view
-  Navigate(VT_THEME_IMPORT);
+  Navigate(VT_THEME_IMPORT, vtRevealFromCenter);
 }
 void ThemeView::AnimationUpdate() {
   if (forceRedraw_) {

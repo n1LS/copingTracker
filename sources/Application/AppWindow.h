@@ -68,7 +68,6 @@ public:
   virtual void SwapColors();
   virtual void SetColor(Color color);
   virtual void SetBackgroundColor(Color color);
-  void InvalidateTextCache();
 
   void SetDirty();
   void UpdateColorsFromConfig();
@@ -85,6 +84,7 @@ public:
 
 public:
   void Flush();
+  void FlushTransition();
 
 protected: // GUIWindow implementation
   virtual bool onEvent(GUIEvent &event);
@@ -123,7 +123,7 @@ private:
   bool sdCardMissing_;
   bool sdCardMessageShown_;
 
-  static unsigned char _charScreen[SCREEN_CHARS];
+  static unsigned char _screenChar[SCREEN_CHARS];
   static color_t _screenColor[SCREEN_CHARS];
   static unsigned char _preScreen[SCREEN_CHARS];
   static color_t _preScreenColor[SCREEN_CHARS];
@@ -132,6 +132,11 @@ private:
 
   static int charWidth_;
   static int charHeight_;
+
+  int transitionFrame_ = -1;
+  ViewTransition transistionType_ = vtNone;
+
+  void SetTransition(ViewTransition type);
 
   bool loadProject_ = false;
   bool awaitingProjectLoadAck_ = false;

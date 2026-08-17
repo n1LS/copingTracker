@@ -1280,7 +1280,7 @@ void SampleEditorView::navigateToView(ViewType vt) {
   discardWorkingCopy();
   clearWaveformRegion();
 
-  Navigate(vt);
+  Navigate(vt, vtCollapse);
 }
 
 void SampleEditorView::updateSampleParameters() {

@@ -36,7 +36,7 @@ void HelpView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (mask & BM_NAV) {
     if (mask & BM_LEFT) {
-      Navigate(VT_DEVICE);
+      Navigate(VT_DEVICE, vtRevealFromLeft);
     }
   } else {
     if (mask & (BM_UP | BM_DOWN)) {
