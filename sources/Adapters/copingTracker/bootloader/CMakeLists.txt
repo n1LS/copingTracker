@@ -1,3 +1,5 @@
+### bootloader ################################################################
+
 add_executable(PatchBay
   bootloader_main.cpp
   bootloader_gfx.cpp
@@ -14,6 +16,11 @@ add_executable(PatchBay
   ${PROJECT_SOURCE_DIR}/Adapters/copingTracker/system/input.cpp
 )
 
+
+pico_set_linker_script(PatchBay
+  ${CMAKE_CURRENT_SOURCE_DIR}/bootloader_memmap.ld
+)
+
 target_link_libraries(PatchBay PUBLIC
     # Keep bootloader deps minimal and self-contained.
     platform_sdcard
@@ -24,7 +31,18 @@ target_link_libraries(PatchBay PUBLIC
     
     # External and SDK libraries
     pico_sdk_bundle
+    pico_stdlib
 )
+
+pico_define_boot_stage2(boot2_custom
+  "${CMAKE_CURRENT_SOURCE_DIR}/boot2_custom.S"
+)
+
+target_compile_definitions(boot2_custom PRIVATE
+  BOOTLOADER_START=0x10FF0000
+)
+
+pico_set_boot_stage2(PatchBay boot2_custom)
 
 target_include_directories(PatchBay PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
