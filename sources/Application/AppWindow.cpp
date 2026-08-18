@@ -283,97 +283,18 @@ void AppWindow::ClearTextRect(GUIRect &r) {
 }
 
 #define GUI(f, c, p) { GUIWindow::SetColor(f->fg); GUIWindow::SetBackgroundColor(f->bg); GUIWindow::DrawChar(*c, p); }
-const color_t bar = { BLACK, DARK_GRAY };
-const color_t *transitionColor = &bar;
-
-void AppWindow::DrawTransitionLeft(int previousWidth, int width) {
-  for (int y = 0; y < SCREEN_HEIGHT; y++) {
-    unsigned char *current = _screenChar + y * SCREEN_WIDTH + previousWidth;
-    color_t *currentColor = _screenColor + y * SCREEN_WIDTH + previousWidth;
-    GUIPoint pos = {previousWidth, y};
-
-    for (int x = previousWidth; x < width; x++, current++, currentColor++, pos.x_++) {
-      GUI(currentColor, current, pos);
-    }
-
-    GUI(transitionColor, current, pos);
-  }
-}
-
-void AppWindow::DrawTransitionRight(int previousWidth, int width) {
-  for (int y = 0; y < SCREEN_HEIGHT; y++) {
-    unsigned char *current = _screenChar + y * SCREEN_WIDTH + previousWidth;
-    color_t *currentColor = _screenColor + y * SCREEN_WIDTH + previousWidth;
-    GUIPoint pos = {previousWidth, y};
-
-    for (int x = previousWidth; x > width; x--, current--, currentColor--, pos.x_--) {
-      GUI(currentColor, current, pos);
-    }
-
-    GUI(transitionColor, current, pos);
-  }
-}
-
-void AppWindow::DrawTransitionDown(int previousHeight, int height) {
-  for (int x = 0; x < SCREEN_WIDTH; x++) {
-    unsigned char *current = _screenChar + previousHeight * SCREEN_WIDTH + x;
-    color_t *currentColor = _screenColor + previousHeight * SCREEN_WIDTH + x;
-    GUIPoint pos = {x, previousHeight};
-
-    for (int y = previousHeight; y < height; y++, current += SCREEN_WIDTH, currentColor += SCREEN_WIDTH, pos.y_++) {
-      GUI(currentColor, current, pos);
-    }
-
-    GUI(transitionColor, current, pos);
-  }
-}
-
-void AppWindow::DrawTransitionUp(int previousHeight, int height) {
-  for (int x = 0; x < SCREEN_WIDTH; x++) {
-    unsigned char *current = _screenChar + previousHeight * SCREEN_WIDTH + x;
-    color_t *currentColor = _screenColor + previousHeight * SCREEN_WIDTH + x;
-    GUIPoint pos = {x, previousHeight};
-
-    for (int y = previousHeight; y > height; y--, current -= SCREEN_WIDTH, currentColor -= SCREEN_WIDTH, pos.y_--) {
-      GUI(currentColor, current, pos);
-    }
-
-    GUI(transitionColor, current, pos);
-  }
-}
 
 void AppWindow::FlushTransition() {
-  static const int x_progress[5] = {12, 22, 27, 29, 30};
-  static const int y_progress[5] = {7, 15, 19, 21, 22};
-
-  int previousWidth = 0;
-  int width = 0;
-  int previousHeight = 0;
-  int height = 0;
-
-  if (transitionFrame_ == 0) {
-    previousWidth = 0;
-    previousHeight = 0;
-  }
-  else {
-    previousWidth = x_progress[transitionFrame_ - 1];
-    previousHeight = y_progress[transitionFrame_ - 1];
-  }
-
-  width = x_progress[transitionFrame_];
-  height = y_progress[transitionFrame_];
-  
-  if (transitionType_ == vtRevealFromLeft) {
-    DrawTransitionLeft(previousWidth, width);
-  }
-  else if (transitionType_ == vtRevealFromRight) {
-    DrawTransitionRight(SCREEN_WIDTH - previousWidth, SCREEN_WIDTH - width);
-  }
-  else if (transitionType_ == vtRevealFromTop) {
-    DrawTransitionDown(previousHeight, height);
-  }
-  else if (transitionType_ == vtRevealFromBottom) {
-    DrawTransitionUp(SCREEN_HEIGHT - previousHeight, SCREEN_HEIGHT - height);
+  for (int y = 0; y < SCREEN_HEIGHT; y++) {
+    for (int x = 0; x < SCREEN_WIDTH; x++) {
+      unsigned char *current = _screenChar + y * SCREEN_WIDTH + x;
+      color_t *currentColor = _screenColor + y * SCREEN_WIDTH + x;
+      GUIPoint pos = {x, y};
+      bool draw = ((x & 1) == 0 && (y & 1) == 0) || (transitionFrame_ >= 1 && (x & 1) == 1 && (y & 1) == 1);
+      if (draw) {
+        GUI(currentColor, current, pos);
+      }
+    }
   }
 }
 
@@ -408,7 +329,7 @@ void AppWindow::Flush() {
 
   // skip flipping during transitions
   if (transitionType_ != vtNone) {
-    if (transitionFrame_ < 3) {
+    if (transitionFrame_ < 1) {
       transitionFrame_++;
     } else {
       transitionType_ = vtNone;
