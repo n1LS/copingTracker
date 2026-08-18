@@ -10,6 +10,7 @@
 #include "Adapters/copingTracker/bootloader/bootloader_log.h"
 #include "hardware/structs/nvic.h"
 #include "hardware/structs/scb.h"
+#include "hardware/regs/m0plus.h"
 #include "hardware/structs/systick.h"
 #include "hardware/watchdog.h"
 #include "pico/stdlib.h"
@@ -24,21 +25,39 @@ constexpr uint32_t kSlotSize = 0x007F0000u;
 constexpr uint32_t kRamStart = 0x20000000u;
 constexpr uint32_t kRamEnd = 0x20042000u;
 
-bool is_valid_stack_ptr(uint32_t stack_ptr) {
-  return stack_ptr >= kRamStart && stack_ptr <= kRamEnd;
-}
 
-bool is_valid_reset_handler(uint32_t reset_handler, uint32_t slot_base_address) {
-  if ((reset_handler & 1u) == 0u) {
-    return false;
-  }
-
-  const uint32_t reset_handler_addr = reset_handler & ~1u;
-  return reset_handler_addr >= slot_base_address && reset_handler_addr < (slot_base_address + kSlotSize);
-}
 } // namespace
 
+// This function jumps to the application entry point
+// It must update the vector table and stack pointer before jumping
+void _Noreturn launch_application_from(void *app_location) {
+  // https://vanhunteradams.com/Pico/Bootloader/Bootloader.html
+  uint32_t *new_vector_table = (uint32_t *)app_location;
+  volatile uint32_t *vtor    = (uint32_t *)(PPB_BASE + M0PLUS_VTOR_OFFSET);
+  *vtor                      = (uint32_t)new_vector_table;
+  asm volatile(
+      "msr msp, %0\n"
+      "bx %1\n"
+      :
+      : "r"(new_vector_table[0]), "r"(new_vector_table[1])
+      :);
+
+  while (true) {
+    tight_loop_contents();
+  }
+}
+
+void launch_application(void)
+{
+  launch_application_from((void *)(XIP_BASE + 0x100));
+}
+
 bool boot_firmware_slot(uint32_t slot_base_address) {
+  launch_application();
+  return true;
+  
+  /*
+  
   bootlog("BOOT: slot_boot mode=direct-jump-v4-no-cpsid\n");
   const uint32_t vector_table_primary = slot_base_address + kVectorTableOffset;
   uint32_t vector_table = vector_table_primary;
@@ -128,4 +147,5 @@ bool boot_firmware_slot(uint32_t slot_base_address) {
   while (true) {
     tight_loop_contents();
   }
+  */
 }

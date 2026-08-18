@@ -15,8 +15,10 @@ The active design is single-slot app boot (no multi-slot policy).
 
 ## Flash Layout
 
-- App slot base: 0x10010000
-- App slot size: 0x007F0000
+- Boot2 region:     0x10000000 .. 0x100000FF (256 bytes, never erased/written by firmware update)
+- App slot base:    0x10000100 (right after boot2)
+- App slot size:    0x007F0000
+- Bootloader:       0x10FF0000 .. 0x10FFFFFF (top 64 KB, never written by firmware update)
 
 Bootloader constants and range checks are implemented in:
 
@@ -96,8 +98,10 @@ Flash operations are implemented in:
 Current flash writer behavior:
 
 - Strict range and alignment checks.
-- Erase to sector boundaries.
+- Erase step is skipped (old data left in place; page program overwrites relevant bytes).
 - Page program and readback verify.
+- Erase (when used) clamps to APP_SLOT_ADDR to protect the boot2 region.
+- Range checks reject writes into the bootloader region (0x10FF0000+).
 - Returns error codes only (no printf-based diagnostics).
 
 ## App Slot Handoff

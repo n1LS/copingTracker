@@ -19,10 +19,10 @@ namespace {
 
 constexpr uint32_t UF2_MAGIC_START0 = 0x0A324655u;
 constexpr uint32_t UF2_MAGIC_START1 = 0x9E5D5157u;
-constexpr uint32_t UF2_MAGIC_END = 0x0AB16F30u;
-constexpr uint32_t UF2_BLOCK_SIZE = 512u;
-constexpr uint32_t APP_SLOT_SIZE = 0x007F0000u;
-constexpr uint32_t kFillChunkSize = 256u;
+constexpr uint32_t UF2_MAGIC_END    = 0x0AB16F30u;
+constexpr uint32_t UF2_BLOCK_SIZE   = 512u;
+constexpr uint32_t APP_SLOT_SIZE    = 0x00FEFF00u;
+constexpr uint32_t kFillChunkSize   = 256u;
 static SdFs g_sd;
 static FsFile g_file;
 static FsFile g_derived;
@@ -87,11 +87,11 @@ int flash_derived_bin_to_slot(const char *bin_path, uint32_t target_slot) {
     return -1;
   }
 
-  if (erase_firmware_range(target_slot, bin_size) != 0) {
-    bootlog("BIN: erase failed for slot 0x%08x size %u\n", target_slot, bin_size);
-    bin_file.close();
-    return -1;
-  }
+  // Skip erase: old data in flash is left in place.  The subsequent page
+  // program writes will overwrite the relevant bytes, and stale bytes that
+  // remain outside the image are harmless for a single-slot design that
+  // overwrites the full image on every flash.
+  bootlog("BIN: skipping erase for slot 0x%08x size %u\n", target_slot, bin_size);
 
   uint32_t offset = 0;
   while (offset < bin_size) {

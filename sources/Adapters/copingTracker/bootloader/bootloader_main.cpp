@@ -26,7 +26,7 @@
 #include "slot_boot.h"
 #include <cstring>
 
-#define APP_SLOT_ADDR 0x10010000u
+#define APP_SLOT_ADDR 0x10000100u
 #define FIRMWARE_DIR "/firmwares"
 #define FIRMWARE_INFO_FILE "/firmwares/firmware_info.txt"
 
@@ -378,7 +378,7 @@ int main(int argc, char *argv[]) {
       menu_show_message("Auto-booting app slot...");
 
       if (!boot_firmware_slot(APP_SLOT_ADDR)) {
-        menu_show_message("App-slot boot failed. Check flashed firmware image.", nullptr, LIGHT_RED);
+        menu_show_message("App-slot boot failed.", "Check flashed firmware image.", LIGHT_RED);
       }
     }
 
@@ -438,7 +438,7 @@ int main(int argc, char *argv[]) {
       menu_show_message("Booting app slot...");
       bootlog("BOOTDBG[%s]: handoff(manual) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, APP_SLOT_ADDR);
       if (!boot_firmware_slot(APP_SLOT_ADDR)) {
-        menu_show_message("App-slot boot failed. Check flashed firmware image.", "Error-code 0x00", LIGHT_RED);
+        menu_show_message("App-slot boot failed.", "Check flashed firmware image.", LIGHT_YELLOW);
         bootlog("BOOTDBG: handoff(manual) returned failure");
       }
     }

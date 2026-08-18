@@ -9,9 +9,16 @@
 #include "hardware/flash.h"
 #include "hardware/sync.h"
 #include <cstdint>
+#include <algorithm>
 
-#define APP_SLOT_ADDR 0x10010000u
-#define APP_SLOT_SIZE 0x007F0000u
+// Application slot: starts right after the boot2 region.
+// boot2 occupies 0x10000000 .. 0x100000FF.
+#define APP_SLOT_ADDR    0x10000100u
+#define APP_SLOT_SIZE    0x00FEFF00u
+
+// The bootloader itself lives in the top 64 KB of flash
+// (0x10FF0000 .. 0x10FFFFFF).  Never write to it.
+#define BOOTLOADER_BASE  0x10FF0000u
 
 static bool is_in_slot_range(uint32_t absolute_address, uint32_t length) {
   if (length == 0) {
@@ -30,32 +37,12 @@ static bool is_in_slot_range(uint32_t absolute_address, uint32_t length) {
     return false;
   }
 
+  // Also guard against accidentally reaching the bootloader's own flash region.
+  if (absolute_address >= BOOTLOADER_BASE) {
+    return false;
+  }
+
   return true;
-}
-
-int erase_firmware_range(uint32_t slot_address, uint32_t image_size) {
-  if (image_size == 0 || image_size > APP_SLOT_SIZE) {
-    return -1;
-  }
-
-  if (slot_address < APP_SLOT_ADDR || slot_address >= (APP_SLOT_ADDR + APP_SLOT_SIZE)) {
-    return -1;
-  }
-
-  if (!is_in_slot_range(slot_address, image_size)) {
-    return -1;
-  }
-
-  const uint32_t erase_start = slot_address & ~(FLASH_SECTOR_SIZE - 1u);
-  const uint32_t erase_end = (slot_address + image_size + (FLASH_SECTOR_SIZE - 1u)) & ~(FLASH_SECTOR_SIZE - 1u);
-  const uint32_t erase_size = erase_end - erase_start;
-
-  const uint32_t flash_offset = erase_start - XIP_BASE;
-  uint32_t irq_state = save_and_disable_interrupts();
-  flash_range_erase(flash_offset, erase_size);
-  restore_interrupts(irq_state);
-
-  return 0;
 }
 
 int write_firmware_chunk(uint32_t absolute_address, const uint8_t *data, uint32_t length) {
