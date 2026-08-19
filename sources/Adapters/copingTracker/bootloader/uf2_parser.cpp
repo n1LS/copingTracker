@@ -3,8 +3,10 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the copingTracker Boot Manager
+ * This file is part of the PatchBay Boot Manager
  */
+
+#include "uf2_parser.h"
 
 #include "Adapters/copingTracker/bootloader/bootloader_log.h"
 #include "Adapters/copingTracker/sdcard/sdcard.h"
@@ -15,15 +17,15 @@
 #include <cstdio>
 #include <cstring>
 
-namespace {
+constexpr uint32_t BOOT2_ADDRESS = 0x10000000u;
+constexpr uint32_t BOOT2_SIZE = 256u;
 
 constexpr uint32_t UF2_MAGIC_START0 = 0x0A324655u;
 constexpr uint32_t UF2_MAGIC_START1 = 0x9E5D5157u;
-constexpr uint32_t UF2_MAGIC_END    = 0x0AB16F30u;
-constexpr uint32_t UF2_BLOCK_SIZE   = 512u;
-constexpr uint32_t APP_SLOT_SIZE    = 0x00FEFF00u;
-constexpr uint32_t kFillChunkSize   = 256u;
-static SdFs g_sd;
+constexpr uint32_t UF2_MAGIC_END = 0x0AB16F30u;
+constexpr uint32_t UF2_BLOCK_SIZE = 512u;
+constexpr uint32_t APP_SLOT_SIZE = 0x00FEFF00;
+constexpr uint32_t kFillChunkSize = 256u;
 static FsFile g_file;
 static FsFile g_derived;
 static uint8_t g_uf2_block[UF2_BLOCK_SIZE];
@@ -42,21 +44,19 @@ bool is_valid_uf2_block(const uint8_t *block) {
   return magic0 == UF2_MAGIC_START0 && magic1 == UF2_MAGIC_START1 && magic_end == UF2_MAGIC_END;
 }
 
-bool mount_sd() {
-  if (g_sd.begin(SD_CONFIG)) {
-    return true;
-  }
-  if (!g_sd.card() || g_sd.sdErrorCode() != 0) {
+bool is_sd_ready(SdFs *sd) {
+  if (!sd) {
     return false;
   }
-  return static_cast<FsVolume *>(&g_sd)->begin(g_sd.card(), true, 0);
+  // Assume SD is already mounted by the caller; just verify it's valid
+  return sd->card() != nullptr;
 }
 
 bool validate_uf2_targets_for_app_slot(uint32_t min_addr, uint32_t max_addr, uint32_t target_slot) {
   const uint32_t slot_start = target_slot;
   const uint32_t slot_end = target_slot + APP_SLOT_SIZE;
 
-  if (min_addr < slot_start || max_addr > slot_end) {
+  if (max_addr > slot_end) {
     bootlog("UF2: image address range [0x%08x .. 0x%08x) is outside app slot "
             "[0x%08x .. 0x%08x)\n",
             min_addr, max_addr, slot_start, slot_end);
@@ -68,14 +68,14 @@ bool validate_uf2_targets_for_app_slot(uint32_t min_addr, uint32_t max_addr, uin
   return true;
 }
 
-int flash_derived_bin_to_slot(const char *bin_path, uint32_t target_slot) {
-  if (!mount_sd()) {
-    bootlog("BIN: SD mount failed\n");
+int flash_derived_bin_to_slot(SdFs *sd, const char *bin_path) {
+  if (!is_sd_ready(sd)) {
+    bootlog("BIN: SD not ready\n");
     return -1;
   }
 
   FsFile bin_file;
-  if (!bin_file.open(bin_path, O_RDONLY)) {
+  if (!bin_file.open(sd, bin_path, O_RDONLY)) {
     bootlog("BIN: failed to open %s\n", bin_path);
     return -1;
   }
@@ -87,13 +87,14 @@ int flash_derived_bin_to_slot(const char *bin_path, uint32_t target_slot) {
     return -1;
   }
 
-  // Skip erase: old data in flash is left in place.  The subsequent page
-  // program writes will overwrite the relevant bytes, and stale bytes that
-  // remain outside the image are harmless for a single-slot design that
-  // overwrites the full image on every flash.
-  bootlog("BIN: skipping erase for slot 0x%08x size %u\n", target_slot, bin_size);
+  if (erase_firmware_range(XIP_BASE, bin_size) != 0) {
+    bootlog("BIN: erase failed for slot 0x%08x size %u\n", XIP_BASE, bin_size);
+    bin_file.close();
+    return -1;
+  }
 
   uint32_t offset = 0;
+  bootlog("BIN: flashing %u bytes from %s starting at 0x%08x\n", bin_size, bin_path, XIP_BASE);
   while (offset < bin_size) {
     std::memset(g_flash_page, 0xFF, sizeof(g_flash_page));
 
@@ -106,14 +107,15 @@ int flash_derived_bin_to_slot(const char *bin_path, uint32_t target_slot) {
       return -1;
     }
 
-    const uint32_t absolute = target_slot + offset;
-    if (write_firmware_chunk(absolute, g_flash_page, FLASH_PAGE_SIZE) != 0) {
+    const uint32_t absolute = XIP_BASE + offset;
+    bootlog("BIN: flashing chunk at offset=%u absolute=0x%08x to_read=%u\n", offset, absolute, to_read);
+    if (write_firmware_chunk(absolute, g_flash_page, to_read) != 0) {
       bootlog("BIN: write failed at 0x%08x\n", absolute);
       bin_file.close();
       return -1;
     }
 
-    if (verify_firmware_chunk(absolute, g_flash_page, FLASH_PAGE_SIZE) != 0) {
+    if (verify_firmware_chunk(absolute, g_flash_page, to_read) != 0) {
       bootlog("BIN: verify failed at 0x%08x\n", absolute);
       bin_file.close();
       return -1;
@@ -123,27 +125,21 @@ int flash_derived_bin_to_slot(const char *bin_path, uint32_t target_slot) {
   }
 
   bin_file.close();
-  bootlog("BIN: flashed %u bytes from %s to app slot 0x%08x\n", bin_size, bin_path, target_slot);
+  bootlog("BIN: flashed %u bytes from %s to app slot 0x%08x\n", bin_size, bin_path, XIP_BASE);
   return 0;
 }
 
-} // namespace
-
 // Parse UF2 from SD, validate slot range, write derived .bin, and
 // optionally flash app slot.
-int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *derived_output_path, bool do_flash) {
-  if (do_flash) {
-    return flash_derived_bin_to_slot(derived_output_path, target_slot);
+int convert_uf2_to_bin(SdFs *sd, const char *filename, uint32_t target_slot, const char *derived_output_path) {
+  if (!is_sd_ready(sd)) {
+    bootlog("UF2: SD not ready\n");
+    return -1;
   }
 
   bootlog("UF2: converting %s -> %s\n", filename, derived_output_path);
 
-  if (!mount_sd()) {
-    bootlog("UF2: SD mount failed\n");
-    return -1;
-  }
-
-  if (!g_file.open(filename, O_RDONLY)) {
+  if (!g_file.open(sd, filename, O_RDONLY)) {
     bootlog("UF2: failed to open %s\n", filename);
     return -1;
   }
@@ -175,20 +171,23 @@ int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *de
   }
 
   if (block_count == 0 || min_addr == 0xFFFFFFFFu || max_addr <= min_addr) {
-    bootlog("UF2: no valid UF2 blocks");
+    bootlog("UF2: no valid UF2 blocks\n");
     g_file.close();
     return -1;
   }
 
   const uint32_t image_size = max_addr - min_addr;
-  const uint32_t derived_size = max_addr - target_slot;
-  if (image_size > APP_SLOT_SIZE) {
+
+  // The derived file starts at 0x10000000 because it contains boot2.
+  const uint32_t derived_size = max_addr - BOOT2_ADDRESS;
+
+  if (image_size > APP_SLOT_SIZE + BOOT2_SIZE) {
     bootlog("UF2: image too large (%u bytes)\n", image_size);
     g_file.close();
     return -1;
   }
 
-  if (derived_size == 0 || derived_size > APP_SLOT_SIZE) {
+  if (derived_size == 0 || derived_size > APP_SLOT_SIZE + BOOT2_SIZE) {
     bootlog("UF2: invalid derived size (%u bytes)\n", derived_size);
     g_file.close();
     return -1;
@@ -199,26 +198,32 @@ int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *de
     return -1;
   }
 
-  if (!g_derived.open(derived_output_path, O_WRONLY | O_CREAT | O_TRUNC)) {
+  // create target
+  if (!g_derived.open(sd, derived_output_path, O_WRONLY | O_CREAT | O_TRUNC)) {
     bootlog("UF2: failed to create derived artifact %s\n", derived_output_path);
     g_file.close();
     return -1;
   }
 
-  std::memset(g_fill_chunk, 0xFF, sizeof(g_fill_chunk));
-  uint32_t remaining_fill = derived_size;
-  while (remaining_fill > 0) {
-    const uint32_t chunk = (remaining_fill < sizeof(g_fill_chunk)) ? remaining_fill : sizeof(g_fill_chunk);
-    if (g_derived.write(g_fill_chunk, chunk) != chunk) {
-      bootlog("UF2: failed pre-filling derived artifact\n");
-      g_derived.close();
-      g_file.close();
-      return -1;
-    }
-    remaining_fill -= chunk;
+  /*
+   * The derived image starts at 0x10000000.
+   *
+   * Copy the currently installed boot2 into the first 256 bytes.
+   * This is important because erasing the first flash sector will
+   * also erase boot2.
+   */
+  const uint8_t *current_boot2 = reinterpret_cast<const uint8_t *>(BOOT2_ADDRESS);
+  bootlog("UF2: copying current boot2 from 0x%08x\n", BOOT2_ADDRESS);
+  if (g_derived.write(current_boot2, BOOT2_SIZE) != BOOT2_SIZE) {
+    bootlog("UF2: failed writing current boot2 to derived artifact\n");
+    g_derived.close();
+    g_file.close();
+    return -1;
   }
 
   g_file.rewind();
+  uint32_t current_file_pos = BOOT2_SIZE;
+
   while (g_file.read(g_uf2_block, UF2_BLOCK_SIZE) == static_cast<int>(UF2_BLOCK_SIZE)) {
     if (!is_valid_uf2_block(g_uf2_block)) {
       continue;
@@ -226,39 +231,60 @@ int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *de
 
     const uint32_t target_addr = read_le32(g_uf2_block + 12);
     const uint32_t payload_size = read_le32(g_uf2_block + 16);
+
     if (payload_size == 0 || payload_size > 476u) {
       continue;
     }
 
-    const uint32_t relative = target_addr - target_slot;
+    // Skip blocks that target boot2 range (first 256 bytes).
+    const uint32_t boot2_end = BOOT2_ADDRESS + BOOT2_SIZE;
+    if (target_addr < boot2_end) {
+      const uint32_t overlap = boot2_end - target_addr;
+      if (overlap >= payload_size) {
+        continue; // Entire block is in boot2 range; skip it.
+      }
+      // Partial overlap: write only the part after boot2.
+      const uint32_t write_offset = overlap;
+      const uint32_t write_size = payload_size - overlap;
+      const uint32_t file_offset = BOOT2_SIZE;
 
-    if (relative + payload_size > APP_SLOT_SIZE) {
-      bootlog("UF2: invalid app-slot range at 0x%08x\n", target_addr);
-      g_derived.close();
-      g_file.close();
-      return -1;
-    }
+      if (current_file_pos != file_offset) {
+        g_derived.seekSet(file_offset);
+        current_file_pos = file_offset;
+      }
 
-    std::memset(g_flash_page, 0xFF, sizeof(g_flash_page));
-    if (payload_size > FLASH_PAGE_SIZE) {
-      bootlog("UF2: payload %u exceeds flash page size\n", payload_size);
-      g_derived.close();
-      g_file.close();
-      return -1;
-    }
+      if (g_derived.write(g_uf2_block + 32 + write_offset, write_size) != write_size) {
+        bootlog("UF2: write failed at 0x%08x\n", target_addr);
+        g_derived.close();
+        g_file.close();
+        return -1;
+      }
+      current_file_pos += write_size;
+    } else {
+      // Block is entirely in app range.
+      uint32_t file_offset = target_addr - BOOT2_ADDRESS;
 
-    if (!g_derived.seekSet(relative) || g_derived.write(g_uf2_block + 32, payload_size) != payload_size) {
-      bootlog("UF2: failed writing derived artifact at offset %u\n", relative);
-      g_derived.close();
-      g_file.close();
-      return -1;
+      if (current_file_pos != file_offset) {
+        g_derived.seekSet(file_offset);
+        current_file_pos = file_offset;
+      }
+
+      if (g_derived.write(g_uf2_block + 32, payload_size) != payload_size) {
+        bootlog("UF2: write failed at 0x%08x\n", target_addr);
+        g_derived.close();
+        g_file.close();
+        return -1;
+      }
+      current_file_pos += payload_size;
     }
   }
 
   g_derived.sync();
   g_derived.close();
   g_file.close();
+
   bootlog("UF2: imported %u blocks from %s\n", block_count, filename);
   bootlog("UF2: derived artifact created at %s\n", derived_output_path);
+
   return 0;
 }

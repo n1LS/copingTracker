@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the copingTracker Boot Manager
+ * This file is part of the PatchBay Boot Manager
  */
 
 #include "../system/input.h"
@@ -24,9 +24,10 @@
 #include "pico/stdlib.h"
 #include "pico/time.h"
 #include "slot_boot.h"
+#include "uf2_parser.h"
 #include <cstring>
 
-#define APP_SLOT_ADDR 0x10000100u
+#define APP_SLOT_ADDR 0x10000000u
 #define FIRMWARE_DIR "/firmwares"
 #define FIRMWARE_INFO_FILE "/firmwares/firmware_info.txt"
 
@@ -35,9 +36,6 @@ constexpr uint32_t kMaxUf2Files = 16;
 constexpr uint32_t kHeartbeatPeriodMs = 1000;
 constexpr uint32_t kAppBootTraceMagic = 0x41505452u; // 'APTR'
 constexpr const char *kBootloaderBuildTag = "BLD-2026-06-05-library-v4";
-
-extern int copy_uf2_to_flash(const char *filename, uint32_t target_slot, const char *derived_output_path,
-                             bool do_flash);
 
 // Convert "/foo.uf2" -> "/firmwares/foo.bin".
 static void uf2_to_firmware_bin_path(const char *uf2_path, char *out, size_t out_size) {
@@ -221,20 +219,26 @@ static int scan_firmware_bins(Uf2FileEntry *entries, int capacity) {
 }
 
 // Import new UF2 files from SD root to /firmwares/*.bin if not already present.
-static void import_uf2_to_firmwares(const Uf2FileEntry *inbox, int inbox_count) {
+static bool import_uf2_to_firmwares(const Uf2FileEntry *inbox, int inbox_count) {
   if (inbox_count <= 0) {
-    return;
+    return false;
   }
+
   if (!ensure_firmware_dir()) {
-    return;
+    return false;
   }
 
   char bin_path[80];
   for (int i = 0; i < inbox_count; ++i) {
     uf2_to_firmware_bin_path(inbox[i].path, bin_path, sizeof(bin_path));
 
+    // skip
+    if (g_sd.exists(bin_path)) {
+      continue;
+    }
+
     menu_show_message("Converting", inbox[i].path, WHITE);
-    const int rc = copy_uf2_to_flash(inbox[i].path, APP_SLOT_ADDR, bin_path, false);
+    const int rc = convert_uf2_to_bin(&g_sd, inbox[i].path, APP_SLOT_ADDR, bin_path);
     if (rc != 0) {
       // on failure, remove the failed .bin (if any) and rename the .uf2 to
       // .uf2.fail to prevent repeated failed import attempts.
@@ -244,7 +248,10 @@ static void import_uf2_to_firmwares(const Uf2FileEntry *inbox, int inbox_count) 
       // on success, remove the .uf2 from the inbox.
       g_sd.remove(inbox[i].path);
     }
+    menu_show_message("Done.", nullptr, WHITE);
   }
+
+  return true;
 }
 
 static void report_app_boot_trace() {
@@ -311,7 +318,10 @@ int main(int argc, char *argv[]) {
   int uf2_count = 0;
   if (sd_ready) {
     const int inbox_count = scan_uf2_files(uf2_files, kMaxUf2Files);
-    import_uf2_to_firmwares(uf2_files, inbox_count);
+    if (import_uf2_to_firmwares(uf2_files, inbox_count)) {
+      // abort auto boot
+      auto_boot_armed = false;
+    }
 
     uf2_count = scan_firmware_bins(uf2_files, kMaxUf2Files);
 
@@ -390,8 +400,28 @@ int main(int argc, char *argv[]) {
       display_dirty = true;
     }
 
-    // (install &) boot selected firmware
-    if (pressed & BM_ENTER) {
+    // delete binary (ALT+PLAY)
+    if ((pressed & BM_PLAY) && (keys & BM_ALT)) {
+      if (uf2_count > 0) {
+        menu_show_message("No firmware in /firmwares. Add a UF2 to SD root, reboot.", nullptr, LIGHT_YELLOW);
+        const char *bin_path = uf2_files[selected_file].path;
+        g_sd.remove(bin_path);
+        display_dirty = true;
+      }
+    }
+
+    // reflash (ALT+ENTER)
+    if ((pressed & BM_ENTER) && (keys & BM_ALT)) {
+      if (uf2_count > 0) {
+        menu_show_message("No firmware in /firmwares. Add a UF2 to SD root, reboot.", nullptr, LIGHT_YELLOW);
+        const char *bin_path = uf2_files[selected_file].path;
+        flash_derived_bin_to_slot(&g_sd, bin_path);
+        display_dirty = true;
+      }
+    }
+
+    if ((pressed & BM_ENTER) && !(keys & BM_ALT)) {
+      // (install &) boot selected firmware
       if (uf2_count <= 0) {
         menu_show_message("No firmware in /firmwares. Add a UF2 to SD root, reboot.", nullptr, LIGHT_YELLOW);
       } else {
@@ -419,7 +449,8 @@ int main(int argc, char *argv[]) {
           (void)bl_strip_extension_ci(display_name, ".bin");
           menu_show_message("Flashing", display_name);
 
-          const int rc = copy_uf2_to_flash(source_uf2, APP_SLOT_ADDR, bin_path, true);
+          // The derived BIN is a complete flash image starting at 0x10000000.
+          int rc = flash_derived_bin_to_slot(&g_sd, bin_path);
           if (rc == 0) {
             if (!write_firmware_info(source_uf2, bin_path)) {
               menu_show_message("Warning: could not persist firmware_info metadata.", nullptr, LIGHT_YELLOW);
@@ -434,7 +465,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (pressed & BM_PLAY) {
+    if (pressed == BM_PLAY) {
       menu_show_message("Booting app slot...");
       bootlog("BOOTDBG[%s]: handoff(manual) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, APP_SLOT_ADDR);
       if (!boot_firmware_slot(APP_SLOT_ADDR)) {
@@ -444,7 +475,7 @@ int main(int argc, char *argv[]) {
     }
 
     // reboot to firmware update
-    if (pressed & BM_EDIT) {
+    if (pressed == BM_EDIT) {
       sleep_ms(100);
       platform_bootloader();
     }

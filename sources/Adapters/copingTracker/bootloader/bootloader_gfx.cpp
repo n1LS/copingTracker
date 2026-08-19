@@ -5,11 +5,11 @@
  * Copyright (c) 2026 nILS Podewski
  *
  * This file was part of the picoTracker firmware
- * This file is part of the copingTracker firmware
+ * This file is part of the PatchBay firmware
  */
 
 #include "bootloader_gfx.h"
-#include "bootloader_font.h"
+#include "bootloader_font.generated.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
 #include <stdio.h>
