@@ -3,10 +3,10 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the copingTracker Boot Manager
+ * This file is part of the PatchBay Boot Manager
  */
 
-#include "path_utils.h"
+#include "bl_path_utils.h"
 #include <cstring>
 
 namespace {

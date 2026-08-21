@@ -3,18 +3,14 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the copingTracker Boot Manager
+ * This file is part of the PatchBay Boot Manager
  */
 
-#include "bootloader_menu.h"
-#include "bootloader_gfx.h"
-#include "path_utils.h"
+#include "bl_menu.h"
+#include "bl_gfx.h"
+#include "bl_path_utils.h"
 #include <cstdint>
 #include <cstring>
-
-int menu_show_firmware_selection(void) {
-  return 0;
-}
 
 static void render_text(uint8_t x, uint8_t y, const char *s) {
   gfx_set_cursor(x, y);
@@ -40,22 +36,27 @@ static void render_text_padded(uint8_t x, uint8_t y, const char *s, uint8_t widt
   }
 }
 
-// GRUB-style single-line box with the section label embedded in the top
-// border. Cols 0 and TEXT_WIDTH-1 of every row between top_y..bot_y hold the
-// vertical sides; the dynamic list renderer must keep cols 1..TEXT_WIDTH-2
-// to itself so it doesn't paint over the borders.
-static void draw_list_box(uint8_t top_y, uint8_t bot_y) {
+// ── Shared border-drawing helpers ───────────────────────────────────────────
+
+// Draw a horizontal line from col_left to col_right (inclusive) at row y.
+static void draw_h_line(uint8_t y, uint8_t col_left, uint8_t col_right,
+                         char ch) {
+  for (uint8_t x = col_left; x <= col_right; ++x) {
+    gfx_set_cursor(x, y);
+    gfx_putc(ch);
+  }
+}
+
+// Draw the full single-line border rectangle spanning top_y..bot_y.  The
+// border occupies columns 1..TEXT_WIDTH-2 (TEXT_WIDTH-2 columns wide).
+// Vertical sides are drawn on all interior rows.
+static void draw_border_rect(uint8_t top_y, uint8_t bot_y, Color color) {
+  gfx_set_foreground(color);
+
   // Top border: ┌───...──┐
-  gfx_set_foreground(LIGHT_GRAY);
   gfx_set_cursor(1, top_y);
   gfx_putc(CHAR(char_border_single_topLeft_s));
-
-  uint8_t col = 2;
-  gfx_set_foreground(LIGHT_GRAY);
-  while (col < TEXT_WIDTH - 2) {
-    gfx_set_cursor(col++, top_y);
-    gfx_putc(CHAR(char_border_single_horizontal_s));
-  }
+  draw_h_line(top_y, 2, TEXT_WIDTH - 2, CHAR(char_border_single_horizontal_s));
   gfx_set_cursor(TEXT_WIDTH - 2, top_y);
   gfx_putc(CHAR(char_border_single_topRight_s));
 
@@ -67,15 +68,35 @@ static void draw_list_box(uint8_t top_y, uint8_t bot_y) {
     gfx_putc(CHAR(char_border_single_vertical_s));
   }
 
-  // Bottom border.
+  // Bottom border: └───...──┘
   gfx_set_cursor(1, bot_y);
   gfx_putc(CHAR(char_border_single_bottomLeft_s));
-  for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
-    gfx_set_cursor(x, bot_y);
-    gfx_putc(CHAR(char_border_single_horizontal_s));
-  }
+  draw_h_line(bot_y, 2, TEXT_WIDTH - 2, CHAR(char_border_single_horizontal_s));
   gfx_set_cursor(TEXT_WIDTH - 2, bot_y);
   gfx_putc(CHAR(char_border_single_bottomRight_s));
+}
+
+// Render one text row inside a bordered box with vertical edges and padding.
+static void render_box_row(uint8_t y, const char *text) {
+  gfx_set_cursor(1, y);
+  gfx_putc(CHAR(char_border_single_vertical_s));
+  uint8_t col = 2;
+  const uint8_t end = TEXT_WIDTH - 2;
+  auto put = [&](char c) {
+    if (col < end) {
+      col++;
+      gfx_putc(c);
+    }
+  };
+  put(' ');
+  while (text && *text) {
+    put(*text++);
+  }
+  while (col < end) {
+    put(' ');
+  }
+  gfx_set_cursor(TEXT_WIDTH - 2, y);
+  gfx_putc(CHAR(char_border_single_vertical_s));
 }
 
 void menu_render_static(void) {
@@ -87,7 +108,7 @@ void menu_render_static(void) {
   char title[TEXT_WIDTH + 1];
   std::memset(title, ' ', TEXT_WIDTH);
   title[TEXT_WIDTH] = 0;
-  const char *t = "PatchBay - Boot Manager";
+  const char *t = "PatchBay - Boot Manager - b13";
   std::memcpy(title + 1, t, std::strlen(t));
   render_text(0, 0, title);
 
@@ -98,7 +119,7 @@ void menu_render_static(void) {
 
   // box around the firmware list. Box spans rows 4..23; the
   // dynamic list lives on rows 5..22 inside it.
-  draw_list_box(4, 23);
+  draw_border_rect(4, 23, LIGHT_GRAY);
 
   // Key legend at the bottom
   gfx_set_foreground(LIGHT_GRAY);
@@ -191,58 +212,13 @@ void menu_render_main(const Uf2FileEntry *uf2_files, int uf2_count, int selected
 }
 
 void menu_show_message_box(const char *line1, const char *line2, Color color) {
-  // 4-row yellow info box: same layout as menu_show_sd_warning but YELLOW (informational, not error).
+  // 4-row info box with two text lines.
   const uint8_t y_top = 13;
-  const uint8_t y_line1 = y_top + 1;
-  const uint8_t y_line2 = y_line1 + 1;
-  const uint8_t y_bot = y_line2 + 1;
 
   gfx_set_background(BLACK);
-  gfx_set_foreground(color);
-
-  gfx_set_cursor(1, y_top);
-  gfx_putc(CHAR(char_border_single_topLeft_s));
-  for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
-    gfx_set_cursor(x, y_top);
-    gfx_putc(CHAR(char_border_single_horizontal_s));
-  }
-  gfx_set_cursor(TEXT_WIDTH - 2, y_top);
-  gfx_putc(CHAR(char_border_single_topRight_s));
-
-  auto render_row = [](uint8_t y, const char *text) {
-    gfx_set_cursor(1, y);
-    gfx_putc(CHAR(char_border_single_vertical_s));
-    uint8_t col = 2;
-    const uint8_t end = TEXT_WIDTH - 2;
-    gfx_set_cursor(col, y);
-    auto put = [&](char c) {
-      if (col < end) {
-        col++;
-        gfx_putc(c);
-      }
-    };
-    put(' ');
-    while (*text) {
-      put(*text++);
-    }
-    while (col < end) {
-      put(' ');
-    }
-    gfx_set_cursor(TEXT_WIDTH - 2, y);
-    gfx_putc(CHAR(char_border_single_vertical_s));
-  };
-
-  render_row(y_line1, line1);
-  render_row(y_line2, line2);
-
-  gfx_set_cursor(1, y_bot);
-  gfx_putc(CHAR(char_border_single_bottomLeft_s));
-  for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
-    gfx_set_cursor(x, y_bot);
-    gfx_putc(CHAR(char_border_single_horizontal_s));
-  }
-  gfx_set_cursor(TEXT_WIDTH - 2, y_bot);
-  gfx_putc(CHAR(char_border_single_bottomRight_s));
+  draw_border_rect(y_top, y_top + 3, color);
+  render_box_row(y_top + 1, line1);
+  render_box_row(y_top + 2, line2);
 
   gfx_draw_changed();
 }
@@ -255,27 +231,17 @@ void menu_show_message(const char *message, const char *message2, Color color) {
   // Single-line modal box spanning the full width, vertically centered in
   // the list area. The next menu_render_main() will fully overwrite it.
   const uint8_t y_top = 14;
-  const uint8_t y_mid = 15;
-  const uint8_t y_bot = 16;
 
   gfx_set_foreground(color);
+  draw_border_rect(y_top, y_top + 2, color);
 
-  // Top border.
-  gfx_set_cursor(1, y_top);
-  gfx_putc(CHAR(char_border_single_topLeft_s));
-  for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
-    gfx_set_cursor(x, y_top);
-    gfx_putc(CHAR(char_border_single_horizontal_s));
-  }
-  gfx_set_cursor(TEXT_WIDTH - 2, y_top);
-  gfx_putc(CHAR(char_border_single_topRight_s));
-
-  gfx_set_cursor(1, y_mid);
+  // Text row: combine message and optional message2 into one row.
+  gfx_set_cursor(1, y_top + 1);
   gfx_putc(CHAR(char_border_single_vertical_s));
 
   uint8_t col = 2;
   const uint8_t end = TEXT_WIDTH - 2;
-  gfx_set_cursor(col, y_mid);
+  gfx_set_cursor(col, y_top + 1);
   auto write_char = [&](char c) {
     if (col < end) {
       col++;
@@ -293,18 +259,8 @@ void menu_show_message(const char *message, const char *message2, Color color) {
   while (col < end)
     write_char(' ');
 
-  gfx_set_cursor(TEXT_WIDTH - 2, y_mid);
+  gfx_set_cursor(TEXT_WIDTH - 2, y_top + 1);
   gfx_putc(CHAR(char_border_single_vertical_s));
-
-  // Bottom border.
-  gfx_set_cursor(1, y_bot);
-  gfx_putc(CHAR(char_border_single_bottomLeft_s));
-  for (uint8_t x = 2; x < TEXT_WIDTH - 2; ++x) {
-    gfx_set_cursor(x, y_bot);
-    gfx_putc(CHAR(char_border_single_horizontal_s));
-  }
-  gfx_set_cursor(TEXT_WIDTH - 2, y_bot);
-  gfx_putc(CHAR(char_border_single_bottomRight_s));
 
   gfx_draw_changed();
 }

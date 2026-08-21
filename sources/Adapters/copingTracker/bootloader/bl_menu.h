@@ -3,11 +3,11 @@
  *
  * Copyright (c) 2026 nILS Podewski
  *
- * This file is part of the copingTracker Boot Manager
+ * This file is part of the PatchBay Boot Manager
  */
 
-#ifndef PICOTRACKER_BOOTLOADER_MENU_H
-#define PICOTRACKER_BOOTLOADER_MENU_H
+#ifndef PATCHBAY_BL_MENU_H
+#define PATCHBAY_BL_MENU_H
 
 #include "Foundation/Types/Colors.h"
 #include <cstdint>
@@ -22,7 +22,6 @@ struct Uf2FileEntry {
 void menu_show_message(const char *message, const char *message2 = nullptr, Color = WHITE);
 void menu_show_message_box(const char *line1, const char *line2, Color = WHITE);
 void menu_show_sd_warning(void);
-int menu_show_firmware_selection(void);
 
 // Paint the title, static labels and the bottom key legend once. The screen
 // is cleared as part of this call. Call this exactly once at startup, after

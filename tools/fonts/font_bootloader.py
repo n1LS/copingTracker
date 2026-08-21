@@ -10,9 +10,7 @@ LAST_CHAR = 255
 
 EMPTY_CHAR = 63 # "?" character
 
-img = Image.open("font_light.png").convert("RGBA")
-
-print("Image size:", img.width, img.height)
+img = Image.open("font_bootloader.png").convert("RGBA")
 
 pixels = img.load()
 
@@ -59,8 +57,18 @@ for charCode in range(FIRST_CHAR, LAST_CHAR):
         char_map[charCode - FIRST_CHAR] = glyphIndex
         glyphIndex += 1
 
-print("uint8_t font[][8] =")
-print("{")
+print('''/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Copyright (c) 2026 nILS Podewski
+ *
+ * This file is part of the PatchBay Boot Manager
+ */
+
+#include <stdint.h>
+''')
+
+print("uint8_t font[][8] = {")
 
 for glyph in font:
     print("    {", end="")
@@ -83,9 +91,9 @@ for i, value in enumerate(char_map):
     if i % 16 == 0:
         print("    ", end="")
 
-    print(f"{value:3}, ", end="")
+    print(f"0x{value:02X}, ", end="")
 
     if (i + 1) % 16 == 0:
         print()
 
-print("};")
+print("\n};\n")

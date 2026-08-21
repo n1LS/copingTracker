@@ -1,5 +1,15 @@
-#ifndef PICOTRACKER_BOOTLOADER_GFX_H
-#define PICOTRACKER_BOOTLOADER_GFX_H
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
+ *
+ * This file was part of the picoTracker firmware
+ * This file is part of the PatchBay firmware
+ */
+
+#ifndef PATCHBAY_BL_GFX_H
+#define PATCHBAY_BL_GFX_H
 
 #include "Adapters/copingTracker/display/ili9341.h"
 #include "Foundation/Constants/SpecialCharacters.h"
