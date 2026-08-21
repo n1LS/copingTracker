@@ -2,26 +2,21 @@
 set -euo pipefail
 
 : "${PICO_TOOLCHAIN_FILE:?Set PICO_TOOLCHAIN_FILE to your CMake toolchain file}"
+: "${GM_SF2_FILE:?Set GM_SF2_FILE to your GeneralMidi sf2 file}"
 
 quick=false
 pretools=false
 bootloader=false
 minimal_gm=false
 
-for arg in "$@"
-do
-    if [ "$arg" = "quick" ]; then
-        quick=true
-    fi
-    if [ "$arg" = "pre" ]; then
-        pretools=true
-    fi
-    if [ "$arg" = "bootloader" ]; then
-        bootloader=true
-    fi
-    if [ "$arg" = "minimal_gm" ]; then
-        minimal_gm=true
-    fi
+for arg in "$@"; do
+    case "$arg" in
+        quick) quick=true ;;
+        pre) pretools=true ;;
+        bootloader) bootloader=true ;;
+        minimal_gm) minimal_gm=true ;;
+        *) echo "Unknown option: $arg" >&2; exit 2 ;;
+    esac
 done
 
 if [ "$quick" = false ]; then
@@ -39,7 +34,7 @@ if [ "$quick" = false ]; then
     if [ "$minimal_gm" = true ]; then
         GM_FLAG="--minimal-gm"
     fi
-    python3 -m ctsb_converter $GM_FLAG 2GMGSMT.SF2 ../../sources/Application/Instruments
+    python3 -m ctsb_converter $GM_FLAG "$GM_SF2_FILE" ../../sources/Application/Instruments
     cd ../..
     echo "4) Formatting source code…"
     ./format.sh 
@@ -55,14 +50,14 @@ if [ "$quick" = false ]; then
     else
         echo "Building in device mode..."
     fi
-    cmake -S sources -B build -DPICO_SDK_PATH=$PWD/sources/Externals/pico-sdk -DCMAKE_TOOLCHAIN_FILE="$PICO_TOOLCHAIN_FILE" || exit 1
+    cmake -S sources -B build -DPICO_SDK_PATH=$PWD/sources/Externals/pico-sdk -DCMAKE_TOOLCHAIN_FILE="$PICO_TOOLCHAIN_FILE"
 fi
 
 if [ "$bootloader" = true ]; then
-    cmake --build build --target PatchBay -j8 || exit 1
+    cmake --build build --target PatchBay -j8
     picotool load ./build/Adapters/copingTracker/bootloader/PatchBay.uf2 && picotool reboot
 else
-    cmake --build build -j8 || exit 1
+    cmake --build build -j8
     cp build/Adapters/copingTracker/main/copingTracker.uf2 build/Adapters/copingTracker/main/copingTracker.patched.uf2
     python3 tools/uf2tools/patch_boot2_uf2.py build/Adapters/copingTracker/main/copingTracker.patched.uf2
     picotool load ./build/Adapters/copingTracker/main/copingTracker.patched.uf2 && picotool reboot
