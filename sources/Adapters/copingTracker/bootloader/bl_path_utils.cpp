@@ -6,7 +6,7 @@
  * This file is part of the PatchBay Boot Manager
  */
 
-#include "path_utils.h"
+#include "bl_path_utils.h"
 #include <cstring>
 
 namespace {

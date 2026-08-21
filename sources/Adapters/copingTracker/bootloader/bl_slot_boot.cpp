@@ -6,8 +6,8 @@
  * This file is part of the PatchBay Boot Manager
  */
 
-#include "slot_boot.h"
-#include "Adapters/copingTracker/bootloader/bootloader_log.h"
+#include "bl_slot_boot.h"
+#include "bl_log.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/structs/nvic.h"
 #include "hardware/structs/scb.h"
@@ -36,6 +36,7 @@ void _Noreturn launch_application_from(void *app_location) {
 }
 
 bool boot_firmware_slot(uint32_t slot_base_address) {
-  launch_application_from((void *)(XIP_BASE + 0x100));
+  // The vector table is at slot_base_address + 0x100 (right after boot2).
+  launch_application_from(reinterpret_cast<void *>(slot_base_address + 0x100));
   return true;
 }

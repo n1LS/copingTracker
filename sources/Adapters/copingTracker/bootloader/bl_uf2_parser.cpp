@@ -6,29 +6,24 @@
  * This file is part of the PatchBay Boot Manager
  */
 
-#include "uf2_parser.h"
-
-#include "Adapters/copingTracker/bootloader/bootloader_log.h"
+#include "bl_uf2_parser.h"
+#include "bl_config.h"
+#include "bl_log.h"
+#include "bl_flash_writer.h"
 #include "Adapters/copingTracker/sdcard/sdcard.h"
 #include "Externals/SdFat/src/SdFat.h"
-#include "flash_writer.h"
 #include "hardware/flash.h"
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 
-constexpr uint32_t BOOT2_ADDRESS = 0x10000000u;
-constexpr uint32_t BOOT2_SIZE = 256u;
-
-constexpr uint32_t UF2_MAGIC_START0 = 0x0A324655u;
-constexpr uint32_t UF2_MAGIC_START1 = 0x9E5D5157u;
-constexpr uint32_t UF2_MAGIC_END = 0x0AB16F30u;
-constexpr uint32_t UF2_BLOCK_SIZE = 512u;
-constexpr uint32_t APP_SLOT_SIZE = 0x00FEFF00;
-constexpr uint32_t kFillChunkSize = 256u;
+// UF2 format magic numbers (local to this module).
+constexpr uint32_t kUf2MagicStart0 = 0x0A324655u;
+constexpr uint32_t kUf2MagicStart1 = 0x9E5D5157u;
+constexpr uint32_t kUf2MagicEnd = 0x0AB16F30u;
 static FsFile g_file;
 static FsFile g_derived;
-static uint8_t g_uf2_block[UF2_BLOCK_SIZE];
+static uint8_t g_uf2_block[kUf2BlockSize];
 static uint8_t g_flash_page[FLASH_PAGE_SIZE];
 static uint8_t g_fill_chunk[kFillChunkSize];
 
@@ -41,7 +36,7 @@ bool is_valid_uf2_block(const uint8_t *block) {
   const uint32_t magic0 = read_le32(block + 0);
   const uint32_t magic1 = read_le32(block + 4);
   const uint32_t magic_end = read_le32(block + 508);
-  return magic0 == UF2_MAGIC_START0 && magic1 == UF2_MAGIC_START1 && magic_end == UF2_MAGIC_END;
+  return magic0 == kUf2MagicStart0 && magic1 == kUf2MagicStart1 && magic_end == kUf2MagicEnd;
 }
 
 bool is_sd_ready(SdFs *sd) {
@@ -54,7 +49,7 @@ bool is_sd_ready(SdFs *sd) {
 
 bool validate_uf2_targets_for_app_slot(uint32_t min_addr, uint32_t max_addr, uint32_t target_slot) {
   const uint32_t slot_start = target_slot;
-  const uint32_t slot_end = target_slot + APP_SLOT_SIZE;
+  const uint32_t slot_end = target_slot + kAppSlotSize;
 
   if (max_addr > slot_end) {
     bootlog("UF2: image address range [0x%08x .. 0x%08x) is outside app slot "
@@ -81,20 +76,20 @@ int flash_derived_bin_to_slot(SdFs *sd, const char *bin_path) {
   }
 
   const uint32_t bin_size = static_cast<uint32_t>(bin_file.fileSize());
-  if (bin_size == 0 || bin_size > APP_SLOT_SIZE) {
+  if (bin_size == 0 || bin_size > kAppSlotSize) {
     bootlog("BIN: invalid size %u for %s\n", bin_size, bin_path);
     bin_file.close();
     return -1;
   }
 
-  if (erase_firmware_range(XIP_BASE, bin_size) != 0) {
-    bootlog("BIN: erase failed for slot 0x%08x size %u\n", XIP_BASE, bin_size);
+  if (erase_firmware_range(kXipBase, bin_size) != 0) {
+    bootlog("BIN: erase failed for slot 0x%08x size %u\n", kXipBase, bin_size);
     bin_file.close();
     return -1;
   }
 
   uint32_t offset = 0;
-  bootlog("BIN: flashing %u bytes from %s starting at 0x%08x\n", bin_size, bin_path, XIP_BASE);
+  bootlog("BIN: flashing %u bytes from %s starting at 0x%08x\n", bin_size, bin_path, kXipBase);
   while (offset < bin_size) {
     std::memset(g_flash_page, 0xFF, sizeof(g_flash_page));
 
@@ -107,7 +102,7 @@ int flash_derived_bin_to_slot(SdFs *sd, const char *bin_path) {
       return -1;
     }
 
-    const uint32_t absolute = XIP_BASE + offset;
+    const uint32_t absolute = kXipBase + offset;
     bootlog("BIN: flashing chunk at offset=%u absolute=0x%08x to_read=%u\n", offset, absolute, to_read);
     if (write_firmware_chunk(absolute, g_flash_page, to_read) != 0) {
       bootlog("BIN: write failed at 0x%08x\n", absolute);
@@ -125,7 +120,7 @@ int flash_derived_bin_to_slot(SdFs *sd, const char *bin_path) {
   }
 
   bin_file.close();
-  bootlog("BIN: flashed %u bytes from %s to app slot 0x%08x\n", bin_size, bin_path, XIP_BASE);
+  bootlog("BIN: flashed %u bytes from %s to app slot 0x%08x\n", bin_size, bin_path, kXipBase);
   return 0;
 }
 
@@ -148,7 +143,7 @@ int convert_uf2_to_bin(SdFs *sd, const char *filename, uint32_t target_slot, con
   uint32_t max_addr = 0u;
   uint32_t block_count = 0;
 
-  while (g_file.read(g_uf2_block, UF2_BLOCK_SIZE) == static_cast<int>(UF2_BLOCK_SIZE)) {
+  while (g_file.read(g_uf2_block, kUf2BlockSize) == static_cast<int>(kUf2BlockSize)) {
     if (!is_valid_uf2_block(g_uf2_block)) {
       continue;
     }
@@ -179,15 +174,15 @@ int convert_uf2_to_bin(SdFs *sd, const char *filename, uint32_t target_slot, con
   const uint32_t image_size = max_addr - min_addr;
 
   // The derived file starts at 0x10000000 because it contains boot2.
-  const uint32_t derived_size = max_addr - BOOT2_ADDRESS;
+  const uint32_t derived_size = max_addr - kBoot2Address;
 
-  if (image_size > APP_SLOT_SIZE + BOOT2_SIZE) {
+  if (image_size > kAppSlotSize + kBoot2Size) {
     bootlog("UF2: image too large (%u bytes)\n", image_size);
     g_file.close();
     return -1;
   }
 
-  if (derived_size == 0 || derived_size > APP_SLOT_SIZE + BOOT2_SIZE) {
+  if (derived_size == 0 || derived_size > kAppSlotSize + kBoot2Size) {
     bootlog("UF2: invalid derived size (%u bytes)\n", derived_size);
     g_file.close();
     return -1;
@@ -212,9 +207,9 @@ int convert_uf2_to_bin(SdFs *sd, const char *filename, uint32_t target_slot, con
    * This is important because erasing the first flash sector will
    * also erase boot2.
    */
-  const uint8_t *current_boot2 = reinterpret_cast<const uint8_t *>(BOOT2_ADDRESS);
-  bootlog("UF2: copying current boot2 from 0x%08x\n", BOOT2_ADDRESS);
-  if (g_derived.write(current_boot2, BOOT2_SIZE) != BOOT2_SIZE) {
+  const uint8_t *current_boot2 = reinterpret_cast<const uint8_t *>(kBoot2Address);
+  bootlog("UF2: copying current boot2 from 0x%08x\n", kBoot2Address);
+  if (g_derived.write(current_boot2, kBoot2Size) != kBoot2Size) {
     bootlog("UF2: failed writing current boot2 to derived artifact\n");
     g_derived.close();
     g_file.close();
@@ -222,9 +217,9 @@ int convert_uf2_to_bin(SdFs *sd, const char *filename, uint32_t target_slot, con
   }
 
   g_file.rewind();
-  uint32_t current_file_pos = BOOT2_SIZE;
+  uint32_t current_file_pos = kBoot2Size;
 
-  while (g_file.read(g_uf2_block, UF2_BLOCK_SIZE) == static_cast<int>(UF2_BLOCK_SIZE)) {
+  while (g_file.read(g_uf2_block, kUf2BlockSize) == static_cast<int>(kUf2BlockSize)) {
     if (!is_valid_uf2_block(g_uf2_block)) {
       continue;
     }
@@ -237,7 +232,7 @@ int convert_uf2_to_bin(SdFs *sd, const char *filename, uint32_t target_slot, con
     }
 
     // Skip blocks that target boot2 range (first 256 bytes).
-    const uint32_t boot2_end = BOOT2_ADDRESS + BOOT2_SIZE;
+    const uint32_t boot2_end = kBoot2Address + kBoot2Size;
     if (target_addr < boot2_end) {
       const uint32_t overlap = boot2_end - target_addr;
       if (overlap >= payload_size) {
@@ -246,7 +241,7 @@ int convert_uf2_to_bin(SdFs *sd, const char *filename, uint32_t target_slot, con
       // Partial overlap: write only the part after boot2.
       const uint32_t write_offset = overlap;
       const uint32_t write_size = payload_size - overlap;
-      const uint32_t file_offset = BOOT2_SIZE;
+      const uint32_t file_offset = kBoot2Size;
 
       if (current_file_pos != file_offset) {
         g_derived.seekSet(file_offset);
@@ -262,7 +257,7 @@ int convert_uf2_to_bin(SdFs *sd, const char *filename, uint32_t target_slot, con
       current_file_pos += write_size;
     } else {
       // Block is entirely in app range.
-      uint32_t file_offset = target_addr - BOOT2_ADDRESS;
+      uint32_t file_offset = target_addr - kBoot2Address;
 
       if (current_file_pos != file_offset) {
         g_derived.seekSet(file_offset);

@@ -8,7 +8,7 @@
  * This file is part of the PatchBay firmware
  */
 
-#include "bootloader_gfx.h"
+#include "bl_gfx.h"
 #include "bootloader_font.generated.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"

@@ -6,8 +6,8 @@
  * This file is part of the PatchBay Boot Manager
  */
 
-#ifndef PICOTRACKER_BOOTLOADER_FLASH_WRITER_H
-#define PICOTRACKER_BOOTLOADER_FLASH_WRITER_H
+#ifndef PATCHBAY_BL_FLASH_WRITER_H
+#define PATCHBAY_BL_FLASH_WRITER_H
 
 #include <cstdint>
 

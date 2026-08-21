@@ -6,8 +6,8 @@
  * This file is part of the PatchBay Boot Manager
  */
 
-#ifndef BOOTLOADER_LOG_H
-#define BOOTLOADER_LOG_H
+#ifndef PATCHBAY_BL_LOG_H
+#define PATCHBAY_BL_LOG_H
 
 void bootlog(const char *fmt, ...);
 

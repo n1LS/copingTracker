@@ -8,8 +8,8 @@
  * This file is part of the PatchBay firmware
  */
 
-#ifndef PICOTRACKER_BOOTLOADER_GFX_H
-#define PICOTRACKER_BOOTLOADER_GFX_H
+#ifndef PATCHBAY_BL_GFX_H
+#define PATCHBAY_BL_GFX_H
 
 #include "Adapters/copingTracker/display/ili9341.h"
 #include "Foundation/Constants/SpecialCharacters.h"

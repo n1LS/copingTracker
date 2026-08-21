@@ -27,7 +27,6 @@
 #include "uf2_parser.h"
 #include <cstring>
 
-#define APP_SLOT_ADDR 0x10000000u
 #define FIRMWARE_DIR "/firmwares"
 #define FIRMWARE_INFO_FILE "/firmwares/firmware_info.txt"
 
@@ -238,7 +237,7 @@ static bool import_uf2_to_firmwares(const Uf2FileEntry *inbox, int inbox_count) 
     }
 
     menu_show_message("Converting", inbox[i].path, WHITE);
-    const int rc = convert_uf2_to_bin(&g_sd, inbox[i].path, APP_SLOT_ADDR, bin_path);
+    const int rc = convert_uf2_to_bin(&g_sd, inbox[i].path, XIP_BASE, bin_path);
     if (rc != 0) {
       // on failure, remove the failed .bin (if any) and rename the .uf2 to
       // .uf2.fail to prevent repeated failed import attempts.
@@ -387,7 +386,7 @@ int main(int argc, char *argv[]) {
     if (auto_boot_armed && static_cast<int32_t>(now_ms - auto_boot_deadline) >= 0) {
       menu_show_message("Auto-booting app slot...");
 
-      if (!boot_firmware_slot(APP_SLOT_ADDR)) {
+      if (!boot_firmware_slot(XIP_BASE)) {
         menu_show_message("App-slot boot failed.", "Check flashed firmware image.", LIGHT_RED);
       }
     }
@@ -432,8 +431,8 @@ int main(int argc, char *argv[]) {
         if (installed_bin[0] && bl_str_equals_ci(bin_path, installed_bin)) {
           menu_show_message("Booting selected firmware...");
           bootlog("BOOTDBG[%s]: enter->boot(installed) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag,
-                  APP_SLOT_ADDR);
-          if (!boot_firmware_slot(APP_SLOT_ADDR)) {
+                  XIP_BASE);
+          if (!boot_firmware_slot(XIP_BASE)) {
             menu_show_message("Boot failed. Check flashed firmware image.", nullptr, LIGHT_RED);
             bootlog("BOOTDBG: enter->boot(installed) returned failure");
           }
@@ -467,8 +466,8 @@ int main(int argc, char *argv[]) {
 
     if (pressed == BM_PLAY) {
       menu_show_message("Booting app slot...");
-      bootlog("BOOTDBG[%s]: handoff(manual) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, APP_SLOT_ADDR);
-      if (!boot_firmware_slot(APP_SLOT_ADDR)) {
+      bootlog("BOOTDBG[%s]: handoff(manual) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, XIP_BASE);
+      if (!boot_firmware_slot(XIP_BASE)) {
         menu_show_message("App-slot boot failed.", "Check flashed firmware image.", LIGHT_YELLOW);
         bootlog("BOOTDBG: handoff(manual) returned failure");
       }

@@ -6,19 +6,11 @@
  * This file is part of the copingTracker firmware
  */
 
+#include "bl_config.h"
 #include "hardware/flash.h"
 #include "hardware/sync.h"
 #include <algorithm>
 #include <cstdint>
-
-// Application slot: starts right after the boot2 region.
-// boot2 occupies 0x10000000 .. 0x100000FF.
-#define APP_SLOT_ADDR 0x10000000u
-#define APP_SLOT_SIZE 0x00FEFF00u
-
-// The bootloader itself lives in the top 64 KB of flash
-// (0x10FF0000 .. 0x10FFFFFF).  Never write to it.
-#define BOOTLOADER_BASE 0x10FF0000u
 
 static bool is_in_slot_range(uint32_t absolute_address, uint32_t length) {
   if (length == 0) {
@@ -30,15 +22,15 @@ static bool is_in_slot_range(uint32_t absolute_address, uint32_t length) {
     return false;
   }
 
-  const uint32_t slot_start = APP_SLOT_ADDR;
-  const uint32_t slot_end = APP_SLOT_ADDR + APP_SLOT_SIZE;
+  const uint32_t slot_start = kXipBase;
+  const uint32_t slot_end = kXipBase + kAppSlotSize;
 
   if (absolute_address < slot_start || write_end > slot_end) {
     return false;
   }
 
   // Also guard against accidentally reaching the bootloader's own flash region.
-  if (absolute_address >= BOOTLOADER_BASE) {
+  if (absolute_address >= kBootloaderBase) {
     return false;
   }
 
@@ -46,11 +38,11 @@ static bool is_in_slot_range(uint32_t absolute_address, uint32_t length) {
 }
 
 int erase_firmware_range(uint32_t slot_address, uint32_t image_size) {
-  if (image_size == 0 || image_size > APP_SLOT_SIZE) {
+  if (image_size == 0 || image_size > kAppSlotSize) {
     return -1;
   }
 
-  if (slot_address < APP_SLOT_ADDR || slot_address >= (APP_SLOT_ADDR + APP_SLOT_SIZE)) {
+  if (slot_address < kXipBase || slot_address >= (kXipBase + kAppSlotSize)) {
     return -1;
   }
 
@@ -62,7 +54,7 @@ int erase_firmware_range(uint32_t slot_address, uint32_t image_size) {
   const uint32_t erase_end = (slot_address + image_size + (FLASH_SECTOR_SIZE - 1u)) & ~(FLASH_SECTOR_SIZE - 1u);
   const uint32_t erase_size = erase_end - erase_start;
 
-  const uint32_t flash_offset = erase_start - XIP_BASE;
+  const uint32_t flash_offset = erase_start - kXipBase;
   uint32_t irq_state = save_and_disable_interrupts();
   flash_range_erase(flash_offset, erase_size);
   restore_interrupts(irq_state);
@@ -87,7 +79,7 @@ int write_firmware_chunk(uint32_t absolute_address, const uint8_t *data, uint32_
     return -1;
   }
 
-  const uint32_t flash_offset = absolute_address - XIP_BASE;
+  const uint32_t flash_offset = absolute_address - kXipBase;
   uint32_t irq_state = save_and_disable_interrupts();
   flash_range_program(flash_offset, data, length);
   restore_interrupts(irq_state);

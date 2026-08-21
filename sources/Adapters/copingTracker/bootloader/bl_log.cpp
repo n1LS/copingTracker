@@ -6,7 +6,7 @@
  * This file is part of the PatchBay Boot Manager
  */
 
-#include "bootloader_log.h"
+#include "bl_log.h"
 
 #include "Adapters/copingTracker/sdcard/sdcard.h"
 #include "Externals/SdFat/src/SdFat.h"

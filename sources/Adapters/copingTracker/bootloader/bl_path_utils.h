@@ -6,8 +6,8 @@
  * This file is part of the PatchBay Boot Manager
  */
 
-#ifndef PICOTRACKER_BOOTLOADER_PATH_UTILS_H
-#define PICOTRACKER_BOOTLOADER_PATH_UTILS_H
+#ifndef PATCHBAY_BL_PATH_UTILS_H
+#define PATCHBAY_BL_PATH_UTILS_H
 
 #include <cstddef>
 

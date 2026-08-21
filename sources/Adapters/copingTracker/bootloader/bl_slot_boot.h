@@ -6,8 +6,8 @@
  * This file is part of the PatchBay Boot Manager
  */
 
-#ifndef PICOTRACKER_BOOTLOADER_SLOT_BOOT_H
-#define PICOTRACKER_BOOTLOADER_SLOT_BOOT_H
+#ifndef PATCHBAY_BL_SLOT_BOOT_H
+#define PATCHBAY_BL_SLOT_BOOT_H
 
 #include <cstdint>
 
