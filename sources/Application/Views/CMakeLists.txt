@@ -1,4 +1,5 @@
 add_library(application_views
+  BootView.cpp
   CommandView.cpp
   FieldView.cpp
   GraphField.cpp

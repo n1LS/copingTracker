@@ -25,7 +25,7 @@ ToastView::ToastView(GUIWindow &w, ViewData *viewData) : View(w, viewData) {
 
 ToastView::~ToastView() {
 }
-ToastView *ToastView::getInstance() {
+ToastView *ToastView::GetInstance() {
   return instance_;
 }
 

@@ -20,7 +20,6 @@
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
-#include "Application/Views/ToastView.h"
 #include "Application/Views/Views.h"
 #include "BaseClasses/View.h"
 #include "Foundation/Variables/WatchedVariable.h"
@@ -88,13 +87,14 @@ struct AppWindowViews {
   SampleEditorView sampleEditorView;
   SampleSlicesView sampleSlicesView;
   NullView nullView;
+  BootView bootView;
 
   AppWindowViews(GUIWindow &w, ViewData &viewData)
       : songView(w, &viewData), chainView(w, &viewData), phraseView(w, &viewData), deviceView(w, &viewData),
         helpView(w, &viewData), themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData),
         importView(w, &viewData), instrumentImportView(w, &viewData), instrumentView(w, &viewData),
         tableView(w, &viewData), grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
-        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), nullView(w, &viewData) {
+        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), nullView(w, &viewData), bootView(w, &viewData) {
   }
 };
 
@@ -151,8 +151,8 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   static AppWindowViews views(*this, viewData_);
   views_ = &views;
 
-  _currentView = &views_->nullView;
-  views_->nullView.SetDirty(true);
+  _currentView = &views_->bootView;
+  views_->bootView.SetDirty(true);
 
   views_->songView.AddObserver(*this);
   views_->chainView.AddObserver(*this);
@@ -171,6 +171,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   views_->mixerView.AddObserver(*this);
   views_->sampleEditorView.AddObserver(*this);
   views_->sampleSlicesView.AddObserver(*this);
+  views_->bootView.AddObserver(*this);
 
   memset(_charScreen, ' ', SCREEN_CHARS);
   memset(_preScreen, ' ', SCREEN_CHARS);
@@ -185,7 +186,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   // causes audio init to fail, so instead set this flag which will then cause
   // LoadProject() to be called from within the next time that AnimationUpdate()
   // is called
-  loadProject_ = true;
+  // loadProject_ = true;
 }
 
 // Static callback wrapper for SamplePool to notify InstrumentBank
@@ -301,7 +302,7 @@ void AppWindow::InvalidateTextCache() {
 //
 void AppWindow::Flush() {
   // draw the ToastView, it handles its own visibility
-  ToastView::getInstance()->Draw(*this);
+  ToastView::GetInstance()->Draw(*this);
 
   Lock();
 
@@ -359,7 +360,6 @@ void AppWindow::Flush() {
 }
 
 AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
-
   _closeProject = false;
 
   PersistencyService *persist = PersistencyService::GetInstance();
@@ -617,7 +617,7 @@ void AppWindow::AnimationUpdate() {
 
   // Check for ToastView animation updates (needs to run frequently for smooth
   // animation)
-  ToastView::getInstance()->UpdateTimer();
+  ToastView::GetInstance()->UpdateTimer();
 
   if (lowBatteryState_ && !lowBatteryMessageShown_) {
     if (!_currentView->HasModalView()) {
@@ -631,7 +631,7 @@ void AppWindow::AnimationUpdate() {
     if (modal) {
       modal->EndModal(0);
       _currentView->DismissModal();
-      Trace::Debug("CLose Low Batt dialog");
+      Trace::Debug("Close Low Batt dialog");
     }
     lowBatteryMessageShown_ = false;
     SetDirty();

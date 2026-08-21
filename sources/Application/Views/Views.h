@@ -9,6 +9,7 @@
 #ifndef VIEWS_H
 #define VIEWS_H
 
+#include "Application/Views/BootView.h"
 #include "Application/Views/ChainView.h"
 #include "Application/Views/CommandView.h"
 #include "Application/Views/DeviceView.h"
@@ -30,5 +31,6 @@
 #include "Application/Views/TableView.h"
 #include "Application/Views/ThemeImportView.h"
 #include "Application/Views/ThemeView.h"
+#include "Application/Views/ToastView.h"
 
 #endif

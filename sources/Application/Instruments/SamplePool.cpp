@@ -364,7 +364,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   ev.type_ = SPET_INSERT;
   NotifyObservers(&ev);
 
-  ToastView *t = ToastView::getInstance();
+  ToastView *t = ToastView::GetInstance();
   t->Show(status ? "Loaded successfully." : "Loading failed.", status ? &ttSuccess : &ttError, 1500);
 
   return status ? (count_ - 1) : -1;

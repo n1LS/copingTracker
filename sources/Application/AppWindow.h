@@ -13,16 +13,6 @@
 #define _APP_WINDOW_H_
 
 #include "Application/Views/BaseClasses/View.h"
-#include "Foundation/Types/Colors.h"
-typedef union color_t {
-  struct {
-    Color fg : 4;
-    Color bg : 4;
-  };
-  unsigned char byte;
-} color_t;
-
-#include "Application/Views/BaseClasses/View.h"
 #include "Application/Views/ViewData.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Types/Colors.h"
@@ -56,6 +46,8 @@ public:
   static AppWindow *Create(GUICreateWindowParams &, const char *projectName);
 
   enum LoadProjectResult { LOAD_FAILED = -1, LOAD_OK = 0 };
+
+  static AppWindow *GetInstance();
 
   LoadProjectResult LoadProject(const char *name);
   void CloseProject();
