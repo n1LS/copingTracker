@@ -245,12 +245,13 @@ struct Token {
     ActionMassStorage = 50,
     VarOutputVolume = 74,
     ActionModulation = 213,
+    ActionDelete = 182,
 
     VarKeyDelay = 139,
     VarKeyRepeat = 176,
 
     // 93-98 free     6
-    // 182-183 free   2
+    // 183 free       1
     // 191-199 free   9
     // 227-254 free  29
     // ----------------
