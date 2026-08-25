@@ -26,3 +26,7 @@ bool GMBank::sampleForNote(uint16_t instrument, uint8_t note, uint8_t velocity, 
 
   return true;
 }
+
+const char *GMBank::nameForPreset(int index) {
+  return presets[index].name;
+}

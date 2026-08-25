@@ -610,6 +610,7 @@ void InstrumentView::fillSIDParameters() {
 #include "InstrumentView_Chiptune.ipp"
 #include "InstrumentView_Drum.ipp"
 #include "InstrumentView_Stack.ipp"
+#include "InstrumentView_Sample.ipp"
 
 void InstrumentView::fillMidiParameters() {
 
@@ -961,6 +962,8 @@ void InstrumentView::DrawView() {
       DrawViewDrum();
     } else if (type == IT_STACK) {
       DrawViewStack();
+    } else if (type == IT_SAMPLE) {
+      DrawViewSample();
     }
   }
 }

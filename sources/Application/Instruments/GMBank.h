@@ -47,4 +47,5 @@ class GMBank {
 
 public:
   static bool sampleForNote(uint16_t instrument, uint8_t note, uint8_t velocity, const SampleEntry **entry);
+  static const char *nameForPreset(int index);
 };

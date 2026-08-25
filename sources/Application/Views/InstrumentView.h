@@ -42,6 +42,7 @@ public:
   virtual void DrawView();
   void DrawViewDrum();
   void DrawViewStack();
+  void DrawViewSample();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   virtual void OnFocus();
   void onInstrumentTypeChange(bool updateUI = false);
