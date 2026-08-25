@@ -252,11 +252,12 @@ struct Token {
     ActionMassStorage = 50,
     VarOutputVolume = 74,
     ActionModulation = 213,
+    ActionDelete = 182,
 
     VarKeyDelay = 139,
     VarKeyRepeat = 176,
 
-    StackInstrumentSpread = 182,
+    StackInstrumentSpread = 229,
     StackInstrumentWave = 183,
     StackInstrumentTranspose = 192,
     StackInstrumentTable = 193,
@@ -270,6 +271,12 @@ struct Token {
     StackInstrumentGlide = 228,
 
     // 230-254 free  27
+    // 93-98 free     6
+    // 183 free       1
+    // 191-199 free   9
+    // 230-254 free  26
+    // ----------------
+    //               48
 
     Default = 255, // "    "
   };

@@ -24,6 +24,7 @@ ScreenView::~ScreenView() {
 /// every clock tick
 void ScreenView::AnimationUpdate() {
   drawBattery();
+  drawPlaybackIndicator();
 }
 
 void ScreenView::Navigate(ViewType target) {

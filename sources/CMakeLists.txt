@@ -25,9 +25,9 @@ set(PICO_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Externals/pico-sdk)
 # Pull in SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(copingTracker C CXX ASM)
+set(PICO_FLASH_SIZE_BYTES "16 * 1024 * 1024")
 
-option(COPINGTRACKER_SLOT_LINKED_APP "Build app for persistent-bootloader app slot" ON)
+project(copingTracker C CXX ASM)
 
 if(PICO_SDK_VERSION_STRING VERSION_LESS "2.0.0")
   message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
@@ -68,15 +68,6 @@ add_subdirectory(sdk_bundle)
 
 add_subdirectory(Adapters/copingTracker)
 add_subdirectory(Externals/SdFat)
-
-if(COPINGTRACKER_SLOT_LINKED_APP)
-  message(STATUS "Building copingTracker in single app-slot linked mode")
- 
-  target_link_options(copingTracker PRIVATE
-    -L${CMAKE_CURRENT_SOURCE_DIR}/Externals/pico-sdk/src/rp2_common/pico_crt0/rp2040)
-  pico_set_linker_script(copingTracker
-    ${CMAKE_CURRENT_SOURCE_DIR}/Adapters/copingTracker/bootloader/memmap_app_slot.ld)
-endif()
 
 set_property(TARGET copingTracker APPEND_STRING PROPERTY LINK_FLAGS "-Wl,--print-memory-usage")
 

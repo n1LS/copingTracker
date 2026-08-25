@@ -812,7 +812,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   pos = GetAnchor();
   pos.x_ += 21;
 
-  PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[phrase];
 
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));

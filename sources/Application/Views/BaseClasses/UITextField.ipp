@@ -21,7 +21,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
   // Draw the label
   ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
   ((AppWindow &)w).SetColor(Theme::Input::label);
-  w.DrawString(label_.c_str(), position);
+  w.DrawString(position.x_, position.y_, label_.c_str());
   position.x_ += label_.length();
   
   auto srcString = src_->GetString();
@@ -44,7 +44,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
     if (len == 0) {
       // For empty fields, draw a cursor at the beginning position
       ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
-      w.DrawString(" ", position);
+      w.DrawString(position.x_, position.y_, " ");
     } else {
       ((AppWindow &)w).SetColor(Theme::Input::fg(true));
 
@@ -55,7 +55,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
         buffer[0] = value[i];
         bool active = currentChar_ == i;
         ((AppWindow &)w).SetBackgroundColor(active ? Theme::Input::cursor : Theme::Input::bg(true));
-        w.DrawString(buffer, position);
+        w.DrawString(position.x_, position.y_, buffer);
         position.x_ += 1;
       }
     }
@@ -63,7 +63,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
     if (len != 0) {
       ((AppWindow &)w).SetColor(Theme::Input::fg(false));
       ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(false));
-      w.DrawString(value, position);
+      w.DrawString(position.x_, position.y_, value);
     }
   }
 }

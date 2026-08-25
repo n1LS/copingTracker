@@ -10,12 +10,10 @@
  */
 
 #include "Service.h"
-#include "ServiceRegistry.h"
 #include "System/Console/Trace.h"
 
 Service::Service(int token) {
   token_ = token;
-  ServiceRegistry::GetInstance()->Register(this);
 }
 
 Service::~Service() {};

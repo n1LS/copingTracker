@@ -14,7 +14,7 @@
 
 class SubService {
 public:
-  SubService(int token, bool registerWithService = true);
+  SubService(int token);
   virtual ~SubService();
   int GetToken() {
     return token_;
@@ -22,6 +22,5 @@ public:
 
 private:
   int token_;
-  bool registerWithService_;
 };
 #endif

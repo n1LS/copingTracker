@@ -13,13 +13,13 @@
 #define Drum_Name_2 "Snare 1 "
 #define Drum_Name_3 "Clap    "
 #define Drum_Name_4 "Snare 2 "
-#define Drum_Name_5 "Tom Low "
+#define Drum_Name_5 "Low tom "
 #define Drum_Name_6 "Hihat cl"
-#define Drum_Name_7 "Low tom "
+#define Drum_Name_7 "Mid tom "
 #define Drum_Name_8 "Hihat pd"
-#define Drum_Name_9 "Mid tom "
+#define Drum_Name_9 "High tom"
 #define Drum_Name_A "Hihat op"
-#define Drum_Name_B "High tom"
+#define Drum_Name_B "Crash   "
 
 static const char drumNames[12][9] = {Drum_Name_0, Drum_Name_1, Drum_Name_2, Drum_Name_3, Drum_Name_4, Drum_Name_5,
                                       Drum_Name_6, Drum_Name_7, Drum_Name_8, Drum_Name_A, Drum_Name_B};

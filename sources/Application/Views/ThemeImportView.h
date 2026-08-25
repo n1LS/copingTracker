@@ -17,8 +17,6 @@
 #include "ViewData.h"
 
 /**
- * ThemeImportView - Migrated to use FileListView base class
- *
  * This view allows users to browse and import theme files (.thm)
  * from the themes directory.
  */
