@@ -10,12 +10,10 @@
  */
 
 #include "Service.h"
-#include "ServiceRegistry.h"
 #include "System/Console/Trace.h"
 
 Service::Service(int fourCC) {
   fourCC_ = fourCC;
-  ServiceRegistry::GetInstance()->Register(this);
 }
 
 Service::~Service() {};

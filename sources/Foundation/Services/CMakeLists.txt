@@ -1,6 +1,5 @@
 add_library(foundation_services
   Service.cpp
-  ServiceRegistry.cpp
   SubService.cpp
 )
 
