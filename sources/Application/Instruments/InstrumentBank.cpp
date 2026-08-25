@@ -23,6 +23,7 @@
 #include "MidiInstrument.h"
 #include "OpalInstrument.h"
 #include "SIDInstrument.h"
+#include "StackInstrument.h"
 #include "System/io/Status.h"
 
 #define XML_DEBUG_LOGGING 0
@@ -161,6 +162,9 @@ InstrumentAssignResult InstrumentBank::AssignInstrumentToSlot(InstrumentType typ
     case IT_DRUM:
       current = instrumentPool_.create<DrumInstrument>();
       break;
+    case IT_STACK:
+      current = instrumentPool_.create<StackInstrument>();
+      break;
     case IT_NONE:
       instruments_[id] = &none_;
       return InstrumentAssignResult::Success;
@@ -202,6 +206,9 @@ void InstrumentBank::purgeInstrument(I_Instrument *instrument) {
       break;
     case IT_DRUM:
       instrumentPool_.destroy(static_cast<DrumInstrument *>(instrument));
+      break;
+    case IT_STACK:
+      instrumentPool_.destroy(static_cast<StackInstrument *>(instrument));
       break;
     case IT_NONE:
       // NA: None is a "singleton" so no need to release from pool

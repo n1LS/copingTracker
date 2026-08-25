@@ -7,6 +7,8 @@
  */
 
 #include "bl_flash_logic.h"
+#include "Adapters/copingTracker/platform/platform.h"
+#include "Foundation/Types/Colors.h"
 #include "bl_config.h"
 #include "bl_log.h"
 #include "bl_menu.h"
@@ -14,8 +16,6 @@
 #include "bl_sd_ops.h"
 #include "bl_slot_boot.h"
 #include "bl_uf2_parser.h"
-#include "Adapters/copingTracker/platform/platform.h"
-#include "Foundation/Types/Colors.h"
 #include "pico/time.h"
 #include <cstring>
 
@@ -42,14 +42,12 @@ bool bl_handle_flash_and_boot(SdFs *sd, const char *bin_path) {
   const int rc = flash_derived_bin_to_slot(sd, bin_path);
   if (rc != 0) {
     menu_show_message("Flash failed. See bootloader.log", nullptr, LIGHT_RED);
-    bootlog("BOOTDBG: flash_derived_bin_to_slot returned %d for %s", rc,
-            bin_path);
+    bootlog("BOOTDBG: flash_derived_bin_to_slot returned %d for %s", rc, bin_path);
     return false;
   }
 
   if (!bl_write_firmware_info(source_uf2, bin_path)) {
-    menu_show_message("Warning: could not persist firmware_info metadata.",
-                      nullptr, LIGHT_YELLOW);
+    menu_show_message("Warning: could not persist firmware_info metadata.", nullptr, LIGHT_YELLOW);
   }
 
   menu_show_message("Flash successful. Rebooting...");
@@ -63,21 +61,17 @@ bool bl_handle_boot_installed(SdFs *sd, const char *installed_bin_path) {
 
   if (installed_bin_path && installed_bin_path[0]) {
     menu_show_message("Booting selected firmware...");
-    bootlog("BOOTDBG[%s]: enter->boot(installed) -> boot_firmware_slot(0x%08x)",
-            kBootloaderBuildTag, kXipBase);
+    bootlog("BOOTDBG[%s]: enter->boot(installed) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, kXipBase);
     if (!boot_firmware_slot(kXipBase)) {
-      menu_show_message("Boot failed. Check flashed firmware image.", nullptr,
-                        LIGHT_RED);
+      menu_show_message("Boot failed. Check flashed firmware image.", nullptr, LIGHT_RED);
       bootlog("BOOTDBG: enter->boot(installed) returned failure");
       return false;
     }
   } else {
     menu_show_message("Booting app slot...");
-    bootlog("BOOTDBG[%s]: handoff(manual) -> boot_firmware_slot(0x%08x)",
-            kBootloaderBuildTag, kXipBase);
+    bootlog("BOOTDBG[%s]: handoff(manual) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, kXipBase);
     if (!boot_firmware_slot(kXipBase)) {
-      menu_show_message("App-slot boot failed.", "Check flashed firmware image.",
-                        LIGHT_YELLOW);
+      menu_show_message("App-slot boot failed.", "Check flashed firmware image.", LIGHT_YELLOW);
       bootlog("BOOTDBG: handoff(manual) returned failure");
       return false;
     }

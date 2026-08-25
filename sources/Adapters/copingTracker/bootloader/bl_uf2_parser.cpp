@@ -7,11 +7,11 @@
  */
 
 #include "bl_uf2_parser.h"
-#include "bl_config.h"
-#include "bl_log.h"
-#include "bl_flash_writer.h"
 #include "Adapters/copingTracker/sdcard/sdcard.h"
 #include "Externals/SdFat/src/SdFat.h"
+#include "bl_config.h"
+#include "bl_flash_writer.h"
+#include "bl_log.h"
 #include "hardware/flash.h"
 #include <cstdint>
 #include <cstdio>

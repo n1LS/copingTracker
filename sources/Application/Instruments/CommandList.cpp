@@ -13,7 +13,7 @@
 
 // Keep command entries grouped by displayed mnemonic first letter;
 // GetNextAlpha/GetPrevAlpha depend on this ordering.
-const int CommandList::CommandCount = 29;
+const int CommandList::CommandCount = 31;
 
 const Token CommandList::AllCommands[CommandCount] = {
     Token::InstrumentCommandNone,
@@ -31,7 +31,9 @@ const Token CommandList::AllCommands[CommandCount] = {
     Token::InstrumentCommandLegato,
     Token::InstrumentCommandLoopOffset,
     Token::InstrumentCommandMidiCC,
-    Token::InstrumentCommandMidiChord,
+    Token::InstrumentCommandChordBidirectional,
+    Token::InstrumentCommandChordDown,
+    Token::InstrumentCommandChordUp,
     Token::InstrumentCommandMidiPC,
     Token::InstrumentCommandPan,
     Token::InstrumentCommandPitchFineTune,

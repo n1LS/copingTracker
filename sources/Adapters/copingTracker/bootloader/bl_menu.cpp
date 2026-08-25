@@ -39,8 +39,7 @@ static void render_text_padded(uint8_t x, uint8_t y, const char *s, uint8_t widt
 // ── Shared border-drawing helpers ───────────────────────────────────────────
 
 // Draw a horizontal line from col_left to col_right (inclusive) at row y.
-static void draw_h_line(uint8_t y, uint8_t col_left, uint8_t col_right,
-                         char ch) {
+static void draw_h_line(uint8_t y, uint8_t col_left, uint8_t col_right, char ch) {
   for (uint8_t x = col_left; x <= col_right; ++x) {
     gfx_set_cursor(x, y);
     gfx_putc(ch);

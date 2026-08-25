@@ -14,9 +14,9 @@
 #include "ViewUtils.h"
 #include <string.h>
 
-UIActionField::UIActionField(const char *name, unsigned int fourcc, GUIPoint &position) : UIField(position) {
+UIActionField::UIActionField(const char *name, unsigned int token, GUIPoint &position) : UIField(position) {
   name_ = name;
-  fourcc_ = fourcc;
+  token_ = token;
 }
 
 UIActionField::~UIActionField() {};
@@ -25,7 +25,7 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
   int x = x_;
   int y = y_ + offset;
 
-  // enforce max field length 
+  // enforce max field length
   char buffer[MAX_FIELD_WIDTH + 1];
   snprintf(buffer, sizeof(buffer), "(%.*s)", MAX_FIELD_WIDTH, name_);
   strncpy(buffer, name_, MAX_FIELD_WIDTH);
@@ -53,7 +53,7 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
 
 void UIActionField::OnClick() {
   SetChanged();
-  NotifyObservers((I_ObservableData *)fourcc_);
+  NotifyObservers((I_ObservableData *)token_);
 }
 
 const char *UIActionField::GetString() {

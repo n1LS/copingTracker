@@ -21,7 +21,7 @@
 template <uint8_t MaxLength> class UITextField : public UIField, public Observable {
 public:
   UITextField(Variable &v, const GUIPoint &position, const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label,
-              uint8_t fourcc, etl::string<MaxLength> &defaultValue_);
+              uint8_t token, etl::string<MaxLength> &defaultValue_);
 
   virtual ~UITextField();
   void Draw(GUIWindow &w, int offset = 0);
@@ -39,7 +39,7 @@ private:
   uint8_t lastUsedChar_ = 'A';
   Variable *src_; // Pointer instead of reference
   const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> label_;
-  uint8_t fourcc_;
+  uint8_t token_;
   etl::string<MaxLength> defaultValue_;
 };
 

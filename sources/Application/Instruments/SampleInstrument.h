@@ -18,11 +18,20 @@
 #include "Foundation/Observable.h"
 #include "Foundation/Types/Types.h"
 #include "Foundation/Variables/WatchedVariable.h"
+#include "GMBank.h"
+#include "GMBankSource.h"
 #include "I_Instrument.h"
 #include "SRPUpdaters.h"
 #include "SampleRenderingParams.h"
 #include "SampleVariable.h"
 #include "SoundSource.h"
+
+// Bits/values packed into SampleEntry::flags. The low nibble stores the raw
+// SampleInstrumentLoopMode value so that loop/one-shot state can round-trip
+// losslessly through a SampleEntry; higher bits are reserved for future use.
+enum SampleEntryFlags : uint16_t {
+  SEF_LOOP_MODE_MASK = 0x000F,
+};
 
 enum SampleInstrumentLoopMode {
   SILM_ONESHOT = 0,
@@ -35,6 +44,7 @@ enum SampleInstrumentLoopMode {
 };
 
 #define NO_SAMPLE (-1)
+#define NO_GM_INSTRUMENT (-1)
 
 class SampleInstrument : public I_Instrument, I_Observer {
 
@@ -55,7 +65,7 @@ public:
   virtual InstrumentType GetType() {
     return IT_SAMPLE;
   };
-  virtual void ProcessCommand(int channel, Token cc, uint16_t value);
+  virtual void ProcessCommand(int channel, Token token, uint16_t value);
   virtual int GetTable();
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
@@ -107,8 +117,16 @@ protected:
   void doTickUpdate(int channel);
   void doKRateUpdate(int channel);
 
+  // Common playback-relevant state initialization, shared by the WAV import
+  // path and any future sample-bank (e.g. cTSB) loading path. Sets the
+  // instrument's root note/fine tune/loop point/loop-mode variables and
+  // resolves the sample pointer from sampleStorageBase + entry.pcmOffset.
+  // Deliberately does not touch source_/the playback engine: rendering
+  // continues to go through the existing SoundSource (source_) interface.
+  void initFromSampleEntry(const SampleEntry *entry, const void *sampleStorageBase);
+
 private:
-  etl::list<Variable *, 21> variables_;
+  etl::list<Variable *, 24> variables_;
 
   SoundSource *source_;
   __attribute__((section(".DTCMRAM"))) static struct renderParams renderParams_[SONG_CHANNEL_COUNT];
@@ -118,6 +136,8 @@ private:
 
   static signed char lastMidiNote_[SONG_CHANNEL_COUNT];
   static fixed lastSample_[SONG_CHANNEL_COUNT][2];
+  adsr_envelope_t envelope_[SONG_CHANNEL_COUNT];
+
   SampleVariable sample_;
   Variable volume_;
   Variable interpolation_;
@@ -137,8 +157,28 @@ private:
   WatchedVariable loopEnd_;
   Variable table_;
   Variable tableAuto_;
+  Variable attack_;
+  Variable decay_;
+  Variable sustain_;
+  Variable release_;
+  // GM bank instrument index (0..kGMInstrumentCount-1), NO_GM_INSTRUMENT
+  // (-1) when this instrument isn't playing from the GM bank. Only
+  // meaningful while sample_ == NO_SAMPLE; see updateInstrumentData().
+  Variable gmInstrument_;
+  // Adapts the flash-resident GM bank PCM data to the SoundSource interface
+  // (see GMBankSource.h). Used as source_ instead of a SamplePool-backed
+  // source when gmInstrument_ selects a GM patch.
+  GMBankSource gmBankSource_;
   // TODO (democloid): evaluate if this should be in DTCMRAM
   etl::array<uint32_t, MaxSlices> slicePoints_;
+
+  // Resolved PCM pointer/length from the most recent SampleEntry
+  // initialization (sampleStorageBase + entry.pcmOffset). Not yet consumed by
+  // the rendering engine (which still reads via source_); kept here so a
+  // future cTSB-backed SoundSource can be wired up without further changes to
+  // this initialization path.
+  const int16_t *sampleData_;
+  uint32_t sampleLength_;
 
   static bool useDirtyDownsampling_;
   bool isSliceIndexActive(size_t index) const;

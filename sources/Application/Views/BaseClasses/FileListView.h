@@ -103,6 +103,7 @@ public:
   // ListView::Delegate implementation
   void OnItemSelected(int index, int selectedTab = 0) override;
   void OnItemNavigated(int index) override;
+  void OnItemEdit(int index, int selectedTab = 0) override;
 
   // Note: Reset() is not in ScreenView, kept for compatibility
   virtual void Reset();

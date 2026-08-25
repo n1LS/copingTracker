@@ -79,10 +79,10 @@ enum drum_instrument_defaults_e {
   defaultCharacter = 0x00
 };
 
-typedef union drumFlags {
+typedef union drum_flags {
   struct {
     uint8_t retrigger : 1;
     uint8_t unused : 7;
   };
   uint8_t byte;
-} drumFlags;
+} drum_flags;

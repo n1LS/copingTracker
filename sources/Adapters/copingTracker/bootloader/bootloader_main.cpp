@@ -430,8 +430,7 @@ int main(int argc, char *argv[]) {
         // If the selected firmware is already in the app slot, boot directly.
         if (installed_bin[0] && bl_str_equals_ci(bin_path, installed_bin)) {
           menu_show_message("Booting selected firmware...");
-          bootlog("BOOTDBG[%s]: enter->boot(installed) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag,
-                  XIP_BASE);
+          bootlog("BOOTDBG[%s]: enter->boot(installed) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, XIP_BASE);
           if (!boot_firmware_slot(XIP_BASE)) {
             menu_show_message("Boot failed. Check flashed firmware image.", nullptr, LIGHT_RED);
             bootlog("BOOTDBG: enter->boot(installed) returned failure");

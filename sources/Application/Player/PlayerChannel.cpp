@@ -27,21 +27,24 @@ PlayerChannel::~PlayerChannel() {
 
 void PlayerChannel::StartInstrument(I_Instrument *instr, unsigned char note, uint8_t volume, bool trigger) {
   if (instr_) {
-    StopInstrument();
+    // remove the old instrument from the channel before starting a new one
+    StopInstrument(true);
   }
 
   if (instr->Start(index_, note, volume, trigger)) {
     // note could be refused because it's out of the keymap
     instr_ = instr;
-  } else {
-    instr_ = 0;
-  };
+  }
 }
 
-void PlayerChannel::StopInstrument() {
+void PlayerChannel::StopInstrument(bool force) {
   if (instr_) {
     instr_->Stop(index_);
-    instr_ = 0;
+
+    // instrument cannot always be nil'ed here as things like adsr exist and need to be rendered until they are finished
+    if (force) {
+      instr_ = 0;
+    }
   }
 }
 

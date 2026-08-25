@@ -27,5 +27,9 @@ AGENTS.md
 .github/copilot-instructions.md
 TODO.md
 
+tools/sf2converter/*.SF2
+tools/sf2converter/*.sf2
+tools/sf2converter/ctsb_converter/__pycache__
+
 ## generated source code
 *.generated.*

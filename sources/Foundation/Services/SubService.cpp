@@ -11,6 +11,7 @@
 
 #include "SubService.h"
 
-SubService::SubService(int fourCC) : fourCC_(fourCC) {}
-
-SubService::~SubService() {}
+SubService::SubService(int token) : token_(token) {
+}
+SubService::~SubService() {
+}

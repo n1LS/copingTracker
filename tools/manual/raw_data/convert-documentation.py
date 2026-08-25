@@ -131,7 +131,7 @@ def write_array(out, name, filename):
 def main():
     if len(sys.argv) != 3:
         print(
-            f"Usage: {sys.argv[0]} <documentation.rc> <Documentation.h>"
+            f"Usage: {sys.argv[0]} <documentation.rc> <Documentation.generated.h>"
         )
         sys.exit(1)
 

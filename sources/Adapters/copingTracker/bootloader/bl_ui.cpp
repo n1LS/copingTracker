@@ -7,27 +7,26 @@
  */
 
 #include "bl_ui.h"
+#include "Adapters/copingTracker/platform/platform.h"
+#include "Adapters/copingTracker/system/input.h"
+#include "Application/Views/BaseClasses/View.h"
+#include "Foundation/Types/Colors.h"
 #include "bl_config.h"
 #include "bl_flash_logic.h"
 #include "bl_log.h"
 #include "bl_menu.h"
 #include "bl_path_utils.h"
 #include "bl_sd_ops.h"
-#include "Application/Views/BaseClasses/View.h"
-#include "Foundation/Types/Colors.h"
-#include "Adapters/copingTracker/platform/platform.h"
-#include "Adapters/copingTracker/system/input.h"
-#include "hardware/watchdog.h"
 #include "hardware/structs/watchdog.h"
+#include "hardware/watchdog.h"
 #include "pico/time.h"
 #include <cstring>
 
 // ── App trace reporting ─────────────────────────────────────────────────────
 
 static void report_app_boot_trace() {
-  bootlog("BOOTDBG: wd_caused=%d scratch2=0x%08x scratch3=0x%08x",
-          watchdog_caused_reboot() ? 1 : 0, watchdog_hw->scratch[2],
-          watchdog_hw->scratch[3]);
+  bootlog("BOOTDBG: wd_caused=%d scratch2=0x%08x scratch3=0x%08x", watchdog_caused_reboot() ? 1 : 0,
+          watchdog_hw->scratch[2], watchdog_hw->scratch[3]);
 
   if (watchdog_hw->scratch[2] != kAppBootTraceMagic) {
     return;
@@ -38,10 +37,9 @@ static void report_app_boot_trace() {
 
 // ── Startup initialisation (shared between normal and auto-boot paths) ──────
 
-static void startup_init(int &selected_file, Uf2FileEntry *uf2_files,
-                         int &uf2_count, bool &sd_ready,
-                         bool &auto_boot_armed, uint32_t &auto_boot_deadline,
-                         char *installed_firmware, char *installed_bin) {
+static void startup_init(int &selected_file, Uf2FileEntry *uf2_files, int &uf2_count, bool &sd_ready,
+                         bool &auto_boot_armed, uint32_t &auto_boot_deadline, char *installed_firmware,
+                         char *installed_bin) {
   if (bl_mount_sd()) {
     sd_ready = true;
     if (bl_read_firmware_info(installed_firmware, 64, installed_bin, 80)) {
@@ -92,8 +90,8 @@ void bl_run_ui_loop() {
   int displayed_auto_boot_seconds = -1;
 
   report_app_boot_trace();
-  startup_init(selected_file, uf2_files, uf2_count, sd_ready, auto_boot_armed,
-               auto_boot_deadline, installed_firmware, installed_bin);
+  startup_init(selected_file, uf2_files, uf2_count, sd_ready, auto_boot_armed, auto_boot_deadline, installed_firmware,
+               installed_bin);
 
   while (true) {
     const uint32_t now_ms = millis();
@@ -104,8 +102,7 @@ void bl_run_ui_loop() {
     }
 
     uint16_t pressed = 0;
-    if (pending_keys != stable_keys &&
-        (now_ms - pending_since_ms) >= kDebounceMs) {
+    if (pending_keys != stable_keys && (now_ms - pending_since_ms) >= kDebounceMs) {
       const uint16_t old_keys = stable_keys;
       stable_keys = pending_keys;
       pressed = stable_keys & ~old_keys;
@@ -126,8 +123,7 @@ void bl_run_ui_loop() {
 
     if (pressed & (BM_UP | BM_DOWN)) {
       if (uf2_count > 0) {
-        selected_file =
-            (selected_file + (keys & BM_UP ? -1 : 1) + uf2_count) % uf2_count;
+        selected_file = (selected_file + (keys & BM_UP ? -1 : 1) + uf2_count) % uf2_count;
         display_dirty = true;
       }
     }
@@ -212,8 +208,7 @@ void bl_run_ui_loop() {
     // ── Render ───────────────────────────────────────────────────────────
 
     if (display_dirty) {
-      menu_render_main(uf2_files, uf2_count, selected_file, installed_bin,
-                       sd_ready, auto_boot_timeout);
+      menu_render_main(uf2_files, uf2_count, selected_file, installed_bin, sd_ready, auto_boot_timeout);
       display_dirty = false;
       displayed_auto_boot_seconds = auto_boot_seconds;
     }

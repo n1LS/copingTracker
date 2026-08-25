@@ -21,7 +21,7 @@ constexpr uint32_t kBoot2Size = 256u;
 constexpr uint32_t kBoot2Address = kXipBase;
 
 // Application slot: starts right after boot2 (kXipBase + kBoot2Size).
-constexpr uint32_t kAppSlotBase = kXipBase + kBoot2Size;  // 0x10000100
+constexpr uint32_t kAppSlotBase = kXipBase + kBoot2Size; // 0x10000100
 constexpr uint32_t kAppSlotSize = 0x00FEFF00u;
 
 // Bootloader region (top 64 KB of the 16 MB flash — never written by firmware
@@ -43,7 +43,7 @@ constexpr uint32_t kBootlogBufferSize = 256;
 
 // ── Misc ────────────────────────────────────────────────────────────────────
 
-constexpr uint32_t kAppBootTraceMagic = 0x41505452u;  // 'APTR'
+constexpr uint32_t kAppBootTraceMagic = 0x41505452u; // 'APTR'
 constexpr const char *kBootloaderBuildTag = "BLD-2026-06-05-library-v4";
 
 // UF2 block constants.
