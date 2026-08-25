@@ -7,9 +7,10 @@
  */
 
 
- #include "DrumEnums.h"
+#include "DrumEnums.h"
+#include "Application/Utils/char.h" 
 
- static const char *drumFormatStrings[12] = {
+static const char *drumFormatStrings[12] = {
   Drum_Name_0 ":%4.4X",
   Drum_Name_1 ":%4.4X",
   Drum_Name_2 ":%4.4X",
@@ -118,7 +119,7 @@ void InstrumentView::fillDrumParameters() {
   // character
   position.y_++;
   v = instrument->FindVariable(Token::DrumInstrumentParamsCharacter);
-  intVarField_.emplace_back(position, *v, "Flavor  :%02X", 0, 255, 1, 16);
+  intVarField_.emplace_back(position, *v, "Wobble  :%02X", 0, 255, 1, 16);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
   position.y_++;
   
@@ -144,10 +145,24 @@ void InstrumentView::DrawViewDrum() {
   for (int n = 0; n < 12; n++) {
     Variable *v = instr->FindVariable(Token::enum_type(Token::DrumInstrumentParamsVoice0 + displayOrder[n]));
     uint32_t wave = v->GetInt() % drumNumWaveforms;
-    DrawString(p.x_ + 14, p.y_ + 5 + n, chiptune_waveforms[wave]);
+    
+    UIHexVarField &field = hexVarField_[n];
+    Variable &var = field.GetVariable();
+    int column = field.GetColumn();
+    bool selected = field.HasFocus();
+    drum_parameters_t params = std::bit_cast<drum_parameters_t>(var.GetInt());
+
+    SetColor(selected ? (column == 3 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
+    DrawChar(p.x_ + 14, p.y_ + 5 + n, CHAR(char_bargraph_lookup[(params.pitch * 10 + 7) / 15]));
+    SetColor(selected ? (column == 2 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
+    DrawChar(p.x_ + 15, p.y_ + 5 + n, CHAR(char_bargraph_lookup[(params.note * 10 + 7) / 15]));
+    SetColor(selected ? (column == 1 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
+    DrawChar(p.x_ + 16, p.y_ + 5 + n, CHAR(char_bargraph_lookup[(params.decay * 10 + 7) / 15]));
+    SetColor(selected ? (column == 0 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
+    DrawString(p.x_ + 18, p.y_ + 5 + n, chiptune_waveforms[params.wave % drumNumWaveforms]);
   }
 
-  // character display
+  // character/wobble display
   char buffer[14];
   horizontal_bargraph_5(buffer, instr->FindVariable(Token::DrumInstrumentParamsCharacter)->GetInt());
   SetBackgroundColor(Theme::View::inactive);
@@ -161,4 +176,10 @@ void InstrumentView::DrawViewDrum() {
   DrawString(p.x_ + 2, p.y_ + 2, " Note" horz_3 char_border_single_topRight_s char_border_single_topLeft_s horz_3 "Decay");
   DrawString(p.x_ + 2, p.y_ + 3, "Sweep" horz_2 char_border_single_topRight_s vert2 char_border_single_topLeft_s horz_2 "Waveform");
   DrawString(p.x_ + 9, p.y_ + 4, vert4);
+
+   // note labels
+  for (int j = 0; j < 12; j++) {
+    SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
+    DrawString(p.x_ - 3, p.y_ + 5 + j, noteNames[displayOrder[j]]);
+  }
 }

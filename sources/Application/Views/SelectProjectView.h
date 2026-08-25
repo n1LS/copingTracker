@@ -16,8 +16,6 @@
 #include "ViewData.h"
 
 /**
- * SelectProjectView - Migrated to use FileListView base class
- *
  * This view allows users to browse, load, and delete projects.
  * Features two action tabs: Load and Delete.
  */
@@ -31,7 +29,8 @@ public:
 
   // Tab action handler
   virtual void OnTabAction(int tabIndex, const char *filename) override;
-
+  virtual void ConfirmedStop(Token source) override;
+  
   // Public methods
   void getSelectedProjectName(char *name);
   void getHighlightedProjectName(char *name);
@@ -46,10 +45,9 @@ private:
   char selection_[MAX_PROJECT_NAME_LENGTH + 1] = {};
 
   // Internal helpers
-  void AttemptDeletingSelectedProject();
-  void AttemptLoadingProject();
+  void DeleteSelectedProject();
+  void LoadSelectedProject();
   bool SelectionIsCurrentProject();
-  bool WarnPlayerRunning();
 };
 
 #endif // _SELECTPROJECT_VIEW_H_

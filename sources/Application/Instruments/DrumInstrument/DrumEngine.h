@@ -239,7 +239,7 @@ typedef struct drum_voice_t {
     int fIndex = 64 + 3 * parameters.note; // 64..109
     base_frequency = frequencyLUT[fIndex];
     frequency = base_frequency;
-    wave = (drum_wave_type_e)parameters.wave;
+    wave = (drum_wave_type_e)(parameters.wave % drumNumWaveforms);
 
     // reset noise seed to get deterministic noise
     lfsr = 42;
