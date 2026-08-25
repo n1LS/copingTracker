@@ -609,8 +609,8 @@ void InstrumentView::fillSIDParameters() {
 
 #include "InstrumentView_Chiptune.ipp"
 #include "InstrumentView_Drum.ipp"
-#include "InstrumentView_Stack.ipp"
 #include "InstrumentView_Sample.ipp"
+#include "InstrumentView_Stack.ipp"
 
 void InstrumentView::fillMidiParameters() {
 
