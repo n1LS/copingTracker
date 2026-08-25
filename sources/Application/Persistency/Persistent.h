@@ -19,6 +19,7 @@
 class Persistent : SubService {
 public:
   Persistent(const char *nodeName, bool registerWithService = true);
+  ~Persistent();
   void Save(tinyxml2::XMLPrinter *printer);
   bool Restore(PersistencyDocument *doc);
 
@@ -28,6 +29,7 @@ protected:
 
 private:
   const char *nodeName_;
+  bool registerWithService_;
 };
 
 #endif
