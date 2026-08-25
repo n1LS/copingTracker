@@ -25,7 +25,7 @@ with open("font.h", "w") as out:
     out.write("\n#endif // FONT_H\n")
 
 # clean up intermediate files
-os.rename("font.h", "../../sources/Adapters/copingTracker/display/font.h")
+os.rename("font.h", "../../sources/Adapters/copingTracker/display/font.generated.h")
 os.remove("font_block.h")
 os.remove("font_light.h")
 os.remove("font_bold.h")
