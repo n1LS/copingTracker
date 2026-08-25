@@ -14,13 +14,13 @@
 
 class SubService {
 public:
-  SubService(int fourCC);
+  SubService(int token);
   virtual ~SubService();
   int GetToken() {
-    return fourCC_;
+    return token_;
   };
 
 private:
-  int fourCC_;
+  int token_;
 };
 #endif

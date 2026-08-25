@@ -107,8 +107,7 @@ void PlayerMixer::StartChannel(int channel) {
 }
 
 void PlayerMixer::StopChannel(int channel) {
-
-  StopInstrument(channel);
+  StopInstrument(channel, true);
   isChannelPlaying_[channel] = false;
 }
 
@@ -156,8 +155,8 @@ void PlayerMixer::StartInstrument(int channel, I_Instrument *instrument, unsigne
   volume_[channel] = volume;
 }
 
-void PlayerMixer::StopInstrument(int channel) {
-  channel_[channel]->StopInstrument();
+void PlayerMixer::StopInstrument(int channel, bool force) {
+  channel_[channel]->StopInstrument(force);
   notes_[channel] = NO_NOTE;
   volume_[channel] = NO_VOLUME;
 }

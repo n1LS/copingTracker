@@ -230,8 +230,8 @@ bool SIDInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void SIDInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
-  switch (cc) {
+void SIDInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  switch (token) {
     case Token::InstrumentCommandGateOff:
       int osc = GetOsc();
       sid_->Register[4 + osc * 7] &= ~1; // Set gate bit off

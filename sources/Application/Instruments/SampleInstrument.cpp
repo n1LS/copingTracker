@@ -23,6 +23,8 @@
 #include "Application/Utils/fixed.h"
 #include "CommandList.h"
 #include "Foundation/Constants/SineTable.h"
+#include "GMBank.h"
+#include "GMBank_data.generated.h"
 #include "SampleInstrument.h"
 #include "SampleInstrumentDatas.h"
 #include "SamplePool.h"
@@ -53,7 +55,10 @@ SampleInstrument::SampleInstrument()
       filterMode_(Token::SampleInstrumentFilterMode, filterMode, 3, 0), start_(Token::SampleInstrumentStart, 0),
       loopMode_(Token::SampleInstrumentLoopMode, loopTypes, SILM_LAST, 0),
       loopStart_(Token::SampleInstrumentLoopStart, 0), loopEnd_(Token::SampleInstrumentEnd, 0),
-      table_(Token::SampleInstrumentTable, -1), tableAuto_(Token::SampleInstrumentTableAutomation, false) {
+      table_(Token::SampleInstrumentTable, VAR_OFF), tableAuto_(Token::SampleInstrumentTableAutomation, false),
+      attack_(Token::SampleInstrumentAttack, 0), decay_(Token::SampleInstrumentDecay, 0),
+      sustain_(Token::SampleInstrumentSustain, 0xFF), release_(Token::SampleInstrumentRelease, 0),
+      gmInstrument_(Token::SampleInstrumentGMInstrument, NO_GM_INSTRUMENT) {
 
   // Initialize MIDI notes
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
@@ -64,6 +69,8 @@ SampleInstrument::SampleInstrument()
   source_ = 0;
   dirty_ = false;
   running_ = false;
+  sampleData_ = nullptr;
+  sampleLength_ = 0;
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
@@ -92,6 +99,11 @@ SampleInstrument::SampleInstrument()
   loopEnd_.AddObserver(*this);
   variables_.insert(variables_.end(), &table_);
   variables_.insert(variables_.end(), &tableAuto_);
+  variables_.insert(variables_.end(), &gmInstrument_);
+  variables_.insert(variables_.end(), &attack_);
+  variables_.insert(variables_.end(), &decay_);
+  variables_.insert(variables_.end(), &sustain_);
+  variables_.insert(variables_.end(), &release_);
 
   tableState_.Reset();
   slicePoints_.fill(0);
@@ -354,7 +366,9 @@ void SampleInstrument::OnStart() {
 bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // Look if we're dirty & need to update this instrument's data
 
-  if (dirty_) {
+  Variable *v = FindVariable(Token::SampleInstrumentGMInstrument);
+
+  if (dirty_ || (v->GetInt() != NO_GM_INSTRUMENT)) {
     updateInstrumentData(false);
   }
 
@@ -380,7 +394,7 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
   rp->sampleBuffer_ = source_->GetSampleBuffer(rp->midiNote_);
   if (rp->sampleBuffer_ == 0) {
     return false;
-  };
+  }
   rp->channelCount_ = source_->GetChannelCount(rp->midiNote_);
   int sampleSize = source_->GetSize(rp->midiNote_);
   uint32_t sampleSizeU = sampleSize > 0 ? static_cast<uint32_t>(sampleSize) : 0;
@@ -518,7 +532,11 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
 
   // Compute octave & note difference from root
 
-  float fineTune = float(fineTune_.GetInt() - 0x7F);
+  int fineTuneValue = fineTune_.GetInt() - 0x7F;
+  if (source_->IsMulti()) {
+    fineTuneValue += source_->GetFineTune(rp->midiNote_);
+  }
+  float fineTune = float(fineTuneValue);
   fineTune /= float(0x80);
   int offset = note - rootNote;
   if (sliceActive) {
@@ -531,6 +549,34 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
   fixed freqFactor = fl2fp(float(pow(2.0, (offset + fineTune) / 12.0)));
   rp->baseSpeed_ = fp_mul(rp->baseSpeed_, freqFactor);
   rp->speed_ = rp->baseSpeed_;
+
+  // set envelope
+
+  uint8_t attackVal, decayVal, sustainVal, releaseVal;
+
+  // If using GMBank source, retrieve ADSR from the sample entry; otherwise use variables
+  if (source_ == &gmBankSource_) {
+    attackVal = gmBankSource_.GetAttack(rp->midiNote_);
+    decayVal = gmBankSource_.GetDecay(rp->midiNote_);
+    sustainVal = gmBankSource_.GetSustain(rp->midiNote_);
+    releaseVal = gmBankSource_.GetRelease(rp->midiNote_);
+  } else {
+    Variable *a = FindVariable(Token::SampleInstrumentAttack);
+    Variable *d = FindVariable(Token::SampleInstrumentDecay);
+    Variable *s = FindVariable(Token::SampleInstrumentSustain);
+    Variable *r = FindVariable(Token::SampleInstrumentRelease);
+
+    attackVal = static_cast<uint8_t>(a->GetInt());
+    decayVal = static_cast<uint8_t>(d->GetInt());
+    sustainVal = static_cast<uint8_t>(s->GetInt());
+    releaseVal = static_cast<uint8_t>(r->GetInt());
+  }
+
+  rp->envelope_.set_attack(attackVal);
+  rp->envelope_.set_decay(decayVal);
+  rp->envelope_.set_sustain(sustainVal);
+  rp->envelope_.set_release(releaseVal);
+  rp->envelope_.trigger();
 
   // Init k rate counter
 
@@ -586,7 +632,7 @@ void SampleInstrument::SetStepVolume(int channel, uint8_t volume) {
 
 void SampleInstrument::Stop(int channel) {
   renderParams *rp = renderParams_ + channel;
-  rp->finished_ = true; // Mark this channel as finished
+  rp->envelope_.release_note();
 }
 
 void SampleInstrument::doTickUpdate(int channel) {
@@ -625,8 +671,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
       return false;
 
     // clear the fixed point buffer
-
-    memset(buffer, 0, size * 2 * sizeof(fixed));
+    // memset(buffer, 0, size * 2 * sizeof(fixed));
 
     bool hasUpdaters = !(rp->activeUpdaters_.empty());
 
@@ -722,6 +767,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
     fixed volscale = fl2fp(0.003921568627450980392156862745098f);
     fixed volfactor = fp_mul(rp->volume_, volscale);
+    fixed env = rp->envelope_.value >> 1;
+    volfactor = fp_mul(volfactor, env);
     int pan = fp2i(rp->pan_);
     fixed fixedpanl = panlaw[pan];
     fixed fixedpanr = panlaw[254 - pan];
@@ -885,6 +932,12 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
         if (rpKrateCount-- == 0) {
           rpKrateCount = KRATE_SAMPLE_COUNT;
 
+          // update the envelope as well
+          // TODO POD
+          if (!rp->envelope_.tick()) {
+            //            rp->finished_ = true; // Mark this channel as finished
+          }
+
           if (hasUpdaters) {
             doKRateUpdate(channel);
             struct RUParams rup;
@@ -916,7 +969,17 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
             } else {
               fpSpeed = rp->speed_;
             }
+          } else {
+            // No active updaters: still need to recompute volfactor from the
+            // base volume before applying the envelope, otherwise the
+            // envelope value would get re-multiplied onto an already
+            // enveloped volfactor every k-rate tick, causing volume to
+            // decay/flutter exponentially instead of following the envelope.
+            volfactor = fp_mul(rp->volume_, volscale);
           }
+
+          fixed env = rp->envelope_.value >> 1;
+          volfactor = fp_mul(volfactor, env);
         }
 
         // get input sample to interpolate from
@@ -1048,14 +1111,16 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
         count--;
       }
     }
-    // Update 'reverse' mode if changed
 
+    // Update 'reverse' mode if changed
     rp->reverse_ = rpReverse;
 
     // Update final sample position
     rp->position_ = (((char *)input) - wavbuf) / (2 * channelCount) + fp2fl(fpPos);
 
     somethingToMix = true;
+
+    rp->krateCount_ = rpKrateCount;
   }
 
   return somethingToMix;
@@ -1103,7 +1168,6 @@ bool SampleInstrument::IsInitialized() {
 }
 
 void SampleInstrument::updateInstrumentData(bool search) {
-
   SamplePool *pool = SamplePool::GetInstance();
 
   // Get the source index
@@ -1121,20 +1185,81 @@ void SampleInstrument::updateInstrumentData(bool search) {
     vSample->SetInt(NO_SAMPLE);
   }
 
+  const void *sampleStorageBase = nullptr;
+
   if (index != NO_SAMPLE) {
     source_ = pool->GetSource(index);
     if (source_ && (!source_->IsMulti())) {
       instrSize = source_->GetSize(-1);
+      sampleStorageBase = source_->GetSampleBuffer(-1);
+    }
+  } else {
+    int gmInstrument = gmInstrument_.GetInt();
+    if (gmInstrument >= 0 && gmInstrument < kGMInstrumentCount) {
+      // GM bank instruments live in a separate flash blob (pcmData[] in
+      // GMBank_data.generated.h) from SamplePool-managed samples, so they
+      // can't be exposed through a pool-backed source. GMBankSource adapts
+      // that data to the SoundSource interface and reports IsMulti() ==
+      // true, so Start() resolves loop points/root note/size per note
+      // exactly like it already does for other multi-sample sources -
+      // nothing further needs to happen here.
+      gmBankSource_.SetInstrument(static_cast<uint16_t>(gmInstrument));
+      source_ = &gmBankSource_;
+      dirty_ = false;
+      return;
     }
   }
 
+  // Build a SampleEntry equivalent to the currently assigned WAV source and
+  // feed it through the common initialization path. Root note/fine tune/loop
+  // mode are carried over unchanged (this codepath never altered them), so
+  // this is a lossless round trip preserving current behavior; loop
+  // start/end and the sample length are reset to span the whole sample, also
+  // matching current behavior.
+  SampleEntry entry;
+  entry.pcmOffset = 0;
+  entry.length = static_cast<uint32_t>(instrSize);
+  entry.loopStart = 0;
+  entry.loopEnd = static_cast<uint32_t>(instrSize);
+  entry.rootNote = static_cast<uint8_t>(rootNote_.GetInt());
+  entry.fineTune = static_cast<int8_t>(fineTune_.GetInt() - 0x7F);
+  entry.flags = static_cast<uint16_t>(loopMode_.GetInt()) & SEF_LOOP_MODE_MASK;
+  entry.attack = static_cast<uint8_t>(FindVariable(Token::SampleInstrumentAttack)->GetInt());
+  entry.decay = static_cast<uint8_t>(FindVariable(Token::SampleInstrumentDecay)->GetInt());
+  entry.sustain = static_cast<uint8_t>(FindVariable(Token::SampleInstrumentSustain)->GetInt());
+  entry.release = static_cast<uint8_t>(FindVariable(Token::SampleInstrumentRelease)->GetInt());
+
+  initFromSampleEntry(&entry, sampleStorageBase);
+}
+
+void SampleInstrument::initFromSampleEntry(const SampleEntry *entry, const void *sampleStorageBase) {
+
+  // Resolve the sample pointer from the shared storage base + pcmOffset.
+  // Playback still reads PCM data through source_ (SoundSource interface);
+  // this pointer/length pair is kept for a future cTSB-backed source.
+  sampleData_ =
+      sampleStorageBase
+          ? reinterpret_cast<const int16_t *>(static_cast<const uint8_t *>(sampleStorageBase) + entry->pcmOffset)
+          : nullptr;
+  sampleLength_ = entry->length;
+
   Variable *v = FindVariable(Token::SampleInstrumentEnd);
-  v->SetInt(instrSize);
+  v->SetInt(static_cast<int>(entry->length));
   v = FindVariable(Token::SampleInstrumentLoopStart);
-  v->SetInt(0);
+  v->SetInt(static_cast<int>(entry->loopStart));
   v = FindVariable(Token::SampleInstrumentStart);
   v->SetInt(0);
-  clampSlicePoints(static_cast<uint32_t>(instrSize));
+
+  rootNote_.SetInt(entry->rootNote);
+  fineTune_.SetInt(static_cast<int>(entry->fineTune) + 0x7F);
+
+  int loopMode = entry->flags & SEF_LOOP_MODE_MASK;
+  if (loopMode >= SILM_LAST) {
+    loopMode = SILM_ONESHOT;
+  }
+  loopMode_.SetInt(loopMode);
+
+  clampSlicePoints(entry->length);
   dirty_ = false;
 }
 
@@ -1157,18 +1282,18 @@ void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
 
     default:
       //         Trace::Dump("Got notification from
-      //         %c%c%c%c",fourcc[0],fourcc[1],fourcc[2],fourcc[3]) ;
+      //         %c%c%c%c",token[0],token[1],token[2],token[3]) ;
       break;
   };
 }
 
-void SampleInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
+void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 
   renderParams *rp = renderParams_ + channel;
   if (!source_)
     return;
 
-  switch (cc) {
+  switch (token) {
     case Token::InstrumentCommandLoopOffset:
 
       if (value > 0x8000) {
@@ -1584,7 +1709,10 @@ void SampleInstrument::Purge() {
 }
 bool SampleInstrument::IsEmpty() {
   Variable *v = FindVariable(Token::SampleInstrumentSample);
-  return (v->GetInt() == -1);
+  if (v->GetInt() != NO_SAMPLE) {
+    return false;
+  }
+  return gmInstrument_.GetInt() == NO_GM_INSTRUMENT;
 }
 
 int SampleInstrument::GetTable() {

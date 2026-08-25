@@ -228,12 +228,12 @@ bool MidiInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void MidiInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
+void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 
   Variable *v = FindVariable(Token::MidiInstrumentChannel);
   int mchannel = v->GetInt();
 
-  switch (cc) {
+  switch (token) {
 
     case Token::InstrumentCommandRetrigger:
       {
@@ -307,7 +307,8 @@ void MidiInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
       };
       break;
 
-    case Token::InstrumentCommandMidiChord:
+    // TODO POD: Support InstrumentCommandChordUp and InstrumentCommandChordBidirectional
+    case Token::InstrumentCommandChordUp:
       {
         // split into 4 note offsets
         for (int i = 0; i < MAX_MIDI_CHORD_NOTES; i++) {

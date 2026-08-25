@@ -62,6 +62,8 @@ public:
     }
     virtual void OnItemNavigated(int index) {
     }
+    virtual void OnItemEdit(int index, int selectedTab = 0) {
+    }
   };
 
   ListView(GUIWindow &w, ViewData *viewData, DataSource *dataSource, Delegate *delegate, size_t pageSize,
@@ -106,6 +108,7 @@ protected:
   void HandleUp(bool page);
   void HandleDown(bool page);
   void HandleEnter();
+  void HandleEdit();
 
   void EnsureVisible();
   void DrawListItems();

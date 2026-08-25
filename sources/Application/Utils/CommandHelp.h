@@ -549,12 +549,12 @@ CommandHelp getCommandHelp(Token command) {
           "                          ")
       );
 
-    case Token::InstrumentCommandMidiChord:
+    case Token::InstrumentCommandChordUp:
       return CommandHelp(
         makeTintString(
-          "f7   f 7    abcd7         ",
+          "ff7   f7  abcd7           ",
           "0                         ",
-          "Midi CHord: abcd          "),
+          "CHord Up: abcd            "),
         makeTintString(
           "7                         ",
           "0                         ",
@@ -567,6 +567,46 @@ CommandHelp getCommandHelp(Token command) {
           "f                         ",
           "0                         ",
           "                          ")
+      );
+
+    case Token::InstrumentCommandChordDown:
+      return CommandHelp(
+        makeTintString(
+          "ff7   f7    abcd7         ",
+          "0                         ",
+          "CHord Down: abcd          "),
+        makeTintString(
+          "7                         ",
+          "0                         ",
+          "Play a chord with the rel-"),
+        makeTintString(
+          "7              a7 b7 c7 d7",
+          "0                         ",
+          "ative pitches -a,-b,-c,-d "),
+        makeTintString(
+          "f                         ",
+          "0                         ",
+          "                          ")
+      );
+
+    case Token::InstrumentCommandChordBidirectional:
+      return CommandHelp(
+        makeTintString(
+          "ff7   f7             abcd ",
+          "0                         ",
+          "CHord Bidirectional: abcd "),
+        makeTintString(
+          "7                         ",
+          "0                         ",
+          "Play a chord with the rel-"),
+        makeTintString(
+          "7              a7 b7 c7 d7",
+          "0                         ",
+          "ative pitches a,b,c,d with"),
+        makeTintString(
+          "f                         ",
+          "0                         ",
+          "0-7=up, F-8=down          ")
       );
 
     case Token::InstrumentCommandVibrato:

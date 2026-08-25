@@ -153,22 +153,21 @@ void InstrumentView::DrawViewDrum() {
     drum_parameters_t params = std::bit_cast<drum_parameters_t>(var.GetInt());
 
     SetColor(selected ? (column == 3 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 14, p.y_ + 5 + n, CHAR(char_bargraph_lookup[(params.pitch * 10 + 7) / 15]));
+    DrawChar(p.x_ + 14, p.y_ + 5 + n, char_v_bar_lookup[(params.pitch * 10 + 7) / 15]);
     SetColor(selected ? (column == 2 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 15, p.y_ + 5 + n, CHAR(char_bargraph_lookup[(params.note * 10 + 7) / 15]));
+    DrawChar(p.x_ + 15, p.y_ + 5 + n, char_v_bar_lookup[(params.note * 10 + 7) / 15]);
     SetColor(selected ? (column == 1 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 16, p.y_ + 5 + n, CHAR(char_bargraph_lookup[(params.decay * 10 + 7) / 15]));
+    DrawChar(p.x_ + 16, p.y_ + 5 + n, char_v_bar_lookup[(params.decay * 10 + 7) / 15]);
     SetColor(selected ? (column == 0 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
     DrawString(p.x_ + 18, p.y_ + 5 + n, chiptune_waveforms[params.wave % drumNumWaveforms]);
   }
 
   // character/wobble display
   char buffer[14];
-  horizontal_bargraph_5(buffer, instr->FindVariable(Token::DrumInstrumentParamsCharacter)->GetInt());
-  SetBackgroundColor(Theme::View::inactive);
+  int value = instr->FindVariable(Token::DrumInstrumentParamsCharacter)->GetInt();
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph(value));
   SetColor(Theme::View::fg);
   DrawString(p.x_ + 14, p.y_ + 18, buffer);
-  SetBackgroundColor(Theme::View::bg);
 
   // legend labels up top
   SetColor(Theme::View::inactive);

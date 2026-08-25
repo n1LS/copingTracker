@@ -40,7 +40,7 @@ public:
   void OnPlayerStop();
 
   void StartInstrument(int channel, I_Instrument *instrument, unsigned char note, uint8_t volume, bool newInstrument);
-  void StopInstrument(int channel);
+  void StopInstrument(int channel, bool force = false);
 
   int GetChannelNote(int Channel);
   int GetChannelVolume(int Channel);

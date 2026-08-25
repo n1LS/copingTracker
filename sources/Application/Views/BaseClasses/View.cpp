@@ -321,12 +321,12 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 
       // draw left channel if changed
       if (leftChanged) {
-        DrawString(pos.x_, pos.y_ - i, char_bargraph_s(leftBars - 10 * i));
+        DrawChar(pos.x_, pos.y_ - i, char_v_bar(leftBars - 10 * i));
       }
 
       // draw right channel if changed
       if (rightChanged) {
-        DrawString(pos.x_ + 1, pos.y_ - i, char_bargraph_s(rightBars - 10 * i));
+        DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(rightBars - 10 * i));
       }
     }
   }

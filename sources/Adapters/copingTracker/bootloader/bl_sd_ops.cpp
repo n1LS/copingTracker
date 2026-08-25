@@ -7,13 +7,13 @@
  */
 
 #include "bl_sd_ops.h"
+#include "Adapters/copingTracker/sdcard/sdcard.h"
+#include "Foundation/Types/Colors.h"
 #include "bl_config.h"
 #include "bl_log.h"
+#include "bl_menu.h"
 #include "bl_path_utils.h"
 #include "bl_uf2_parser.h"
-#include "bl_menu.h"
-#include "Foundation/Types/Colors.h"
-#include "Adapters/copingTracker/sdcard/sdcard.h"
 #include <cstring>
 
 // ── Global SD instance ──────────────────────────────────────────────────────
@@ -48,8 +48,7 @@ static bool has_uf2_extension(const char *name) {
 }
 
 // Convert "/foo.uf2" -> "/firmwares/foo.bin"
-static void uf2_to_firmware_bin_path(const char *uf2_path, char *out,
-                                     size_t out_size) {
+static void uf2_to_firmware_bin_path(const char *uf2_path, char *out, size_t out_size) {
   const char *base = bl_path_basename(uf2_path);
   bl_copy_str(out, out_size, kFirmwareDir);
   bl_append_str(out, out_size, "/");
@@ -88,8 +87,7 @@ int bl_scan_uf2_inbox(Uf2FileEntry *entries, int capacity) {
     filename[0] = 0;
     entry.getName(filename, sizeof(filename));
 
-    if (!entry.isDirectory() && filename[0] != '.' &&
-        has_uf2_extension(filename)) {
+    if (!entry.isDirectory() && filename[0] != '.' && has_uf2_extension(filename)) {
       bl_copy_str(entries[count].path, sizeof(entries[count].path), "/");
       bl_append_str(entries[count].path, sizeof(entries[count].path), filename);
       ++count;
@@ -120,8 +118,7 @@ int bl_scan_firmware_bins(Uf2FileEntry *entries, int capacity) {
     entry.getName(filename, sizeof(filename));
     const bool is_bin = bl_path_has_extension_ci(filename, ".bin");
     if (!entry.isDirectory() && is_bin) {
-      bl_copy_str(entries[count].path, sizeof(entries[count].path),
-                  kFirmwareDir);
+      bl_copy_str(entries[count].path, sizeof(entries[count].path), kFirmwareDir);
       bl_append_str(entries[count].path, sizeof(entries[count].path), "/");
       bl_append_str(entries[count].path, sizeof(entries[count].path), filename);
       ++count;
@@ -164,8 +161,7 @@ bool bl_write_firmware_info(const char *last_uf2, const char *derived_path) {
   return true;
 }
 
-bool bl_read_firmware_info(char *last_uf2_out, size_t uf2_capacity,
-                           char *derived_out, size_t derived_capacity) {
+bool bl_read_firmware_info(char *last_uf2_out, size_t uf2_capacity, char *derived_out, size_t derived_capacity) {
   if (last_uf2_out == nullptr || uf2_capacity == 0) {
     return false;
   }
@@ -194,8 +190,7 @@ bool bl_read_firmware_info(char *last_uf2_out, size_t uf2_capacity,
       last_uf2_out[uf2_capacity - 1] = 0;
       strip_nl(last_uf2_out, uf2_capacity);
       found_uf2 = true;
-    } else if (derived_out && derived_capacity > 0 &&
-               std::strncmp(line, "derived=", 8) == 0) {
+    } else if (derived_out && derived_capacity > 0 && std::strncmp(line, "derived=", 8) == 0) {
       std::strncpy(derived_out, line + 8, derived_capacity - 1);
       derived_out[derived_capacity - 1] = 0;
       strip_nl(derived_out, derived_capacity);

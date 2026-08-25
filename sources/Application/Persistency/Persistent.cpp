@@ -10,12 +10,11 @@
  */
 
 #include "Persistent.h"
-#include "PersistencyService.h"
 #include "Foundation/Types/Types.h"
+#include "PersistencyService.h"
 
 Persistent::Persistent(const char *nodeName, bool registerWithService)
-    : SubService(Token::ServicePersistency), nodeName_(nodeName),
-      registerWithService_(registerWithService) {
+    : SubService(Token::ServicePersistency), nodeName_(nodeName), registerWithService_(registerWithService) {
   if (registerWithService_) {
     PersistencyService::GetInstance()->Register(this);
   }

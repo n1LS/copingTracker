@@ -37,7 +37,7 @@ public:
   // size refers to the number of samples
   // should always fill interleaved stereo / 16bit
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick);
-  virtual void ProcessCommand(int channel, Token cc, uint16_t value);
+  virtual void ProcessCommand(int channel, Token token, uint16_t value);
 
   virtual bool IsInitialized();
 

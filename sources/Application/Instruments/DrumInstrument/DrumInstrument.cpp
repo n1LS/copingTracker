@@ -74,8 +74,8 @@ bool DrumInstrument::Render(int channel, fixed *buffer, int size, bool updateTic
   return true;
 }
 
-void DrumInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
-  switch (cc) {
+void DrumInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  switch (token) {
     case Token::InstrumentCommandSetInstrumentParameter:
       voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
       break;
@@ -106,7 +106,7 @@ void DrumInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
       break;
 
     case Token::InstrumentCommandVolume:
-      voices_[channel].volume = value >> 8;
+      voices_[channel].volume = value & 0xff;
       break;
 
     case Token::InstrumentCommandPitchFineTune:
@@ -117,7 +117,8 @@ void DrumInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
   }
 }
 
-bool DrumInstrument::SupportsCommand(Token cc) {
+// TODO POD: implement and adjust accordingly
+bool DrumInstrument::SupportsCommand(Token token) {
   return false;
 }
 

@@ -5,9 +5,9 @@
 template <uint8_t MaxLength>
 UITextField<MaxLength>::UITextField(
     Variable &v, const GUIPoint &position,
-    const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label, uint8_t fourcc,
+    const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label, uint8_t token,
     etl::string<MaxLength> &defaultValue_)
-    : UIField(position), src_(&v), label_(label), fourcc_(fourcc),
+    : UIField(position), src_(&v), label_(label), token_(token),
       defaultValue_(defaultValue_) {}
 
 template <uint8_t MaxLength> UITextField<MaxLength>::~UITextField(){};
@@ -71,7 +71,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
 template <uint8_t MaxLength> void UITextField<MaxLength>::OnClick() {
   SetChanged();
   NotifyObservers(
-      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(fourcc_)));
+      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(token_)));
 }
 
 template <uint8_t MaxLength> void UITextField<MaxLength>::OnEditClick() {
@@ -83,7 +83,7 @@ template <uint8_t MaxLength> void UITextField<MaxLength>::OnEditClick() {
   src_->SetString(buffer.c_str(), true);
   SetChanged();
   NotifyObservers(
-      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(fourcc_)));
+      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(token_)));
 }
 
 template <uint8_t MaxLength>
@@ -93,7 +93,7 @@ void UITextField<MaxLength>::ProcessArrow(uint16_t mask) {
     src_->SetString(buffer.c_str(), true);
     SetChanged();
     NotifyObservers(
-        reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(fourcc_)));
+        reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(token_)));
   };
 
   // If the variable's value is empty, we need to initialize it when the user

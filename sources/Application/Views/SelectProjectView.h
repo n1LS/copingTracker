@@ -30,7 +30,7 @@ public:
   // Tab action handler
   virtual void OnTabAction(int tabIndex, const char *filename) override;
   virtual void ConfirmedStop(Token source) override;
-  
+
   // Public methods
   void getSelectedProjectName(char *name);
   void getHighlightedProjectName(char *name);
