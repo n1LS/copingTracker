@@ -56,7 +56,7 @@ Each `.copingDoc` file is registered in `Documentation.rc` with a title:
 filename.copingDoc;Display Title
 ```
 
-The `convert-documentation.py` script reads this resource file, processes all listed `.copingDoc` files, and generates `Documentation.h` containing:
+The `convert-documentation.py` script reads this resource file, processes all listed `.copingDoc` files, and generates `Documentation.generated.h` containing:
 
 - An enum `DocumentationId` with one entry per document
 - A `uint8_t` array per document with the packed (fg<<4 | bg, char) byte pairs
@@ -68,5 +68,5 @@ The format is designed to be human-readable and easy to generate programmaticall
 
 1. Create a `.copingDoc` file with 3-line blocks (fg, bg, text) of equal line lengths
 2. Add an entry to `Documentation.rc`
-3. Run `convert-documentation.py Documentation.rc ../../sources/Foundation/Constants/Documentation.h`
+3. Run `convert-documentation.py Documentation.rc ../../sources/Foundation/Constants/Documentation.generated.h`
 4. Rebuild the firmware

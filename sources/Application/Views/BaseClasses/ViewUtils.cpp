@@ -28,7 +28,7 @@ void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focuse
     valueOffset = index + 1;
 
     ((AppWindow &)w).SetColor(Theme::Input::label);
-    w.DrawString(buffer, position);
+    w.DrawString(position.x_, position.y_, buffer);
 
     position.x_ += index + 1;
     buffer += index + 1;
@@ -38,7 +38,7 @@ void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focuse
     ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(true));
     ((AppWindow &)w).SetColor(Theme::Input::fg(true));
 
-    w.DrawString(buffer, position);
+    w.DrawString(position.x_, position.y_, buffer);
 
     int valueSubSelectionOffset = subSelectionOffset - valueOffset;
     if (subSelectionOffset >= valueOffset && valueSubSelectionOffset < (int)strlen(buffer) && subSelectionLength > 0) {
@@ -52,12 +52,12 @@ void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focuse
       position.x_ += valueSubSelectionOffset;
       ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
       ((AppWindow &)w).SetColor(Theme::Input::fg(true));
-      w.DrawString(buffer + valueSubSelectionOffset, position);
+      w.DrawString(position.x_, position.y_, buffer + valueSubSelectionOffset);
       buffer[valueSubSelectionOffset + subSelectionLength] = replaced;
     }
   } else {
     ((AppWindow &)w).SetColor(Theme::Input::fg(false));
-    w.DrawString(buffer, position);
+    w.DrawString(position.x_, position.y_, buffer);
   }
 }
 

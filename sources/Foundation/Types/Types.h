@@ -48,7 +48,9 @@ struct Token {
     InstrumentCommandVolume = 69,                  // VOL
     InstrumentCommandVibrato = 73,                 // VIB
     InstrumentCommandNone = 45,                    // ---
-    InstrumentCommandMidiChord = 143,              // MCH
+    InstrumentCommandChordUp = 143,                // CHU
+    InstrumentCommandChordDown = 98,               // CHD
+    InstrumentCommandChordBidirectional = 229,     // CHB
 
     SampleInstrumentCrushVolume = 3,
     SampleInstrumentVolume = 19,
@@ -69,6 +71,11 @@ struct Token {
     SampleInstrumentEnd = 6,
     SampleInstrumentTable = 117,
     SampleInstrumentTableAutomation = 60,
+    SampleInstrumentGMInstrument = 191, // GM bank instrument index (0..kGMInstrumentCount-1), -1 = off
+    SampleInstrumentAttack = 93,
+    SampleInstrumentDecay = 94,
+    SampleInstrumentSustain = 95,
+    SampleInstrumentRelease = 96,
 
     MidiInstrumentChannel = 1,
     MidiInstrumentNoteLength = 32,
@@ -245,14 +252,29 @@ struct Token {
     ActionMassStorage = 50,
     VarOutputVolume = 74,
     ActionModulation = 213,
+    ActionDelete = 182,
 
     VarKeyDelay = 139,
     VarKeyRepeat = 176,
 
+    StackInstrumentSpread = 229,
+    StackInstrumentWave = 183,
+    StackInstrumentTranspose = 192,
+    StackInstrumentTable = 193,
+    StackInstrumentTableAutomation = 194,
+    StackInstrumentAttack = 195,
+    StackInstrumentDecay = 196,
+    StackInstrumentSustain = 197,
+    StackInstrumentRelease = 198,
+    StackInstrumentVolume = 199,
+    StackInstrumentBrightness = 227,
+    StackInstrumentGlide = 228,
+
+    // 230-254 free  27
     // 93-98 free     6
-    // 182-183 free   2
+    // 183 free       1
     // 191-199 free   9
-    // 227-254 free  29
+    // 230-254 free  26
     // ----------------
     //               48
 
@@ -277,35 +299,37 @@ struct Token {
   // Not all enums need reflection. Only cases where we need reflection is the
   // Token codes that need to be converted to text in order to display on
   // screen
-  ETL_ENUM_TYPE_16(InstrumentCommandArpeggiator, "ARP")
-  ETL_ENUM_TYPE_16(InstrumentCommandCrush, "CSH")
-  ETL_ENUM_TYPE_16(InstrumentCommandKill, "KIL")
-  ETL_ENUM_TYPE_16(InstrumentCommandLoopOffset, "LOF")
-  ETL_ENUM_TYPE_16(InstrumentCommandVelocity, "VEL")
-  ETL_ENUM_TYPE_16(InstrumentCommandVolume, "VOL")
-  ETL_ENUM_TYPE_16(InstrumentCommandPitchSlide, "PSL")
-  ETL_ENUM_TYPE_16(InstrumentCommandHop, "HOP")
-  ETL_ENUM_TYPE_16(InstrumentCommandLegato, "LEG")
-  ETL_ENUM_TYPE_16(InstrumentCommandRetrigger, "RTG")
-  ETL_ENUM_TYPE_16(InstrumentCommandTempo, "TPO")
+  ETL_ENUM_TYPE_16(InstrumentCommandArpeggiator, "Arp")
+  ETL_ENUM_TYPE_16(InstrumentCommandCrush, "Csh")
+  ETL_ENUM_TYPE_16(InstrumentCommandKill, "Kil")
+  ETL_ENUM_TYPE_16(InstrumentCommandLoopOffset, "LOf")
+  ETL_ENUM_TYPE_16(InstrumentCommandVelocity, "Vel")
+  ETL_ENUM_TYPE_16(InstrumentCommandVolume, "Vol")
+  ETL_ENUM_TYPE_16(InstrumentCommandPitchSlide, "PSl")
+  ETL_ENUM_TYPE_16(InstrumentCommandHop, "Hop")
+  ETL_ENUM_TYPE_16(InstrumentCommandLegato, "Leg")
+  ETL_ENUM_TYPE_16(InstrumentCommandRetrigger, "Rtg")
+  ETL_ENUM_TYPE_16(InstrumentCommandTempo, "Tpo")
   ETL_ENUM_TYPE_16(InstrumentCommandMidiCC, "MCC")
   ETL_ENUM_TYPE_16(InstrumentCommandMidiPC, "MPC")
-  ETL_ENUM_TYPE_16(InstrumentCommandPlayOfset, "POF")
-  ETL_ENUM_TYPE_16(InstrumentCommandLowPassFilter, "FLT")
-  ETL_ENUM_TYPE_16(InstrumentCommandTable, "TBL")
-  ETL_ENUM_TYPE_16(InstrumentCommandFilterCut, "FCT")
-  ETL_ENUM_TYPE_16(InstrumentCommandFilterResonance, "FRS")
-  ETL_ENUM_TYPE_16(InstrumentCommandPan, "PAN")
-  ETL_ENUM_TYPE_16(InstrumentCommandGateOff, "GOF")
-  ETL_ENUM_TYPE_16(InstrumentCommandGroove, "GRV")
+  ETL_ENUM_TYPE_16(InstrumentCommandPlayOfset, "POf")
+  ETL_ENUM_TYPE_16(InstrumentCommandLowPassFilter, "Flt")
+  ETL_ENUM_TYPE_16(InstrumentCommandTable, "Tbl")
+  ETL_ENUM_TYPE_16(InstrumentCommandFilterCut, "FCt")
+  ETL_ENUM_TYPE_16(InstrumentCommandFilterResonance, "FRs")
+  ETL_ENUM_TYPE_16(InstrumentCommandPan, "Pan")
+  ETL_ENUM_TYPE_16(InstrumentCommandGateOff, "GOf")
+  ETL_ENUM_TYPE_16(InstrumentCommandGroove, "Grv")
   ETL_ENUM_TYPE_16(InstrumentCommandSetInstrumentParameter, "SIP")
-  ETL_ENUM_TYPE_16(InstrumentCommandStop, "STP")
+  ETL_ENUM_TYPE_16(InstrumentCommandStop, "Stp")
   ETL_ENUM_TYPE_16(InstrumentCommandNone, "---")
-  ETL_ENUM_TYPE_16(InstrumentCommandPitchFineTune, "PFT")
-  ETL_ENUM_TYPE_16(InstrumentCommandDelay, "DLY")
-  ETL_ENUM_TYPE_16(InstrumentCommandInstrumentRetrigger, "IRT")
-  ETL_ENUM_TYPE_16(InstrumentCommandMidiChord, "MCH")
-  ETL_ENUM_TYPE_16(InstrumentCommandVibrato, "VIB")
+  ETL_ENUM_TYPE_16(InstrumentCommandPitchFineTune, "PFt")
+  ETL_ENUM_TYPE_16(InstrumentCommandDelay, "Dly")
+  ETL_ENUM_TYPE_16(InstrumentCommandInstrumentRetrigger, "IRt")
+  ETL_ENUM_TYPE_16(InstrumentCommandChordUp, "ChU")
+  ETL_ENUM_TYPE_16(InstrumentCommandChordDown, "ChD")
+  ETL_ENUM_TYPE_16(InstrumentCommandChordBidirectional, "ChB")
+  ETL_ENUM_TYPE_16(InstrumentCommandVibrato, "Vib")
 
   ETL_ENUM_TYPE_16(VarKeyDelay, "key-delay")
   ETL_ENUM_TYPE_16(VarKeyRepeat, "key-repeat")
@@ -336,8 +360,16 @@ struct Token {
   ETL_ENUM_TYPE_16(SampleInstrumentEnd, "End")
   ETL_ENUM_TYPE_16(SampleInstrumentTable, "Table")
   ETL_ENUM_TYPE_16(SampleInstrumentTableAutomation, "TableAutomation")
+  ETL_ENUM_TYPE_16(SampleInstrumentGMInstrument, "GMInstrument")
+  ETL_ENUM_TYPE_16(SampleInstrumentAttack, "Attack")
+  ETL_ENUM_TYPE_16(SampleInstrumentDecay, "Decay")
+  ETL_ENUM_TYPE_16(SampleInstrumentSustain, "Sustain")
+  ETL_ENUM_TYPE_16(SampleInstrumentRelease, "Release")
+
   ETL_ENUM_TYPE_16(MidiInstrumentChannel, "Channel")
+
   ETL_ENUM_TYPE_16(InstrumentName, "Name")
+
   ETL_ENUM_TYPE_16(MidiInstrumentName, "MidiName")
   ETL_ENUM_TYPE_16(MidiInstrumentNoteLength, "NoteLength")
   ETL_ENUM_TYPE_16(MidiInstrumentVolume, "Volume")

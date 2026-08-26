@@ -36,6 +36,8 @@ void ListView::ProcessButtonMask(uint16_t mask, bool pressed) {
     HandleDown(mask & BM_ALT);
   } else if (mask & BM_ENTER) {
     HandleEnter();
+  } else if (mask & BM_EDIT) {
+    HandleEdit();
   }
 }
 
@@ -143,6 +145,12 @@ void ListView::HandleDown(bool page) {
 void ListView::HandleEnter() {
   if (delegate_) {
     delegate_->OnItemSelected(currentIndex_, selectedTab_);
+  }
+}
+
+void ListView::HandleEdit() {
+  if (delegate_) {
+    delegate_->OnItemEdit(currentIndex_, selectedTab_);
   }
 }
 

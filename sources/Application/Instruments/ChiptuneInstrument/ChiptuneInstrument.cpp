@@ -70,8 +70,8 @@ bool ChiptuneInstrument::Render(int channel, fixed *buffer, int size, bool updat
   return true;
 }
 
-void ChiptuneInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
-  switch (cc) {
+void ChiptuneInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  switch (token) {
     case Token::InstrumentCommandSetInstrumentParameter:
       voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
       break;
@@ -120,7 +120,8 @@ void ChiptuneInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
   }
 }
 
-bool ChiptuneInstrument::SupportsCommand(Token cc) {
+// TODO POD: implement and adjust accordingly
+bool ChiptuneInstrument::SupportsCommand(Token token) {
   return false;
 }
 

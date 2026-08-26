@@ -23,6 +23,7 @@
 #include "OpalInstrument.h"
 #include "SIDInstrument.h"
 #include "SampleInstrument.h"
+#include "StackInstrument/StackInstrument.h"
 
 #define NO_MORE_INSTRUMENT 0x100
 
@@ -61,7 +62,7 @@ public:
 private:
   etl::array<I_Instrument *, MAX_INSTRUMENT_COUNT> instruments_;
   etl::variant_pool<MAX_INSTRUMENT_COUNT, SampleInstrument, SIDInstrument, OpalInstrument, MidiInstrument,
-                    ChiptuneInstrument, DrumInstrument>
+                    ChiptuneInstrument, DrumInstrument, StackInstrument>
       instrumentPool_;
   NoneInstrument none_ = NoneInstrument();
   uint16_t sidOscCount = 0;

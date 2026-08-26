@@ -74,8 +74,8 @@ struct Theme {
   };
 
   struct Data {
-    FIXED(negative, RED)
-    FIXED(positive, GREEN)
+    FIXED(negative, LIGHT_RED)
+    FIXED(positive, LIGHT_GREEN)
   };
 
   struct Waveform {
@@ -290,6 +290,7 @@ protected:
   void drawCommandLegend(uint8_t x, uint8_t y, Token command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
+  void drawPlaybackIndicator();
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
   void drawPlayTime(Player *player, GUIPoint pos);
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);

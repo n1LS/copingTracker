@@ -9,7 +9,7 @@
  */
 
 #include "chargfx.h"
-#include "font.h"
+#include "font.generated.h"
 #include "gpio.h"
 #include "hardware/dma.h"
 #include "hardware/spi.h"

@@ -85,10 +85,7 @@ typedef struct drum_voice_t {
   uint8_t level;
   uint32_t timeToLive;
 
-  struct flags {
-    uint8_t retrigger : 1;
-    uint8_t padding : 7;
-  } flags;
+  drum_flags flags;
 
   // character settings
   uint8_t glitch_trigger_delay;
@@ -239,7 +236,7 @@ typedef struct drum_voice_t {
     int fIndex = 64 + 3 * parameters.note; // 64..109
     base_frequency = frequencyLUT[fIndex];
     frequency = base_frequency;
-    wave = (drum_wave_type_e)parameters.wave;
+    wave = (drum_wave_type_e)(parameters.wave % drumNumWaveforms);
 
     // reset noise seed to get deterministic noise
     lfsr = 42;

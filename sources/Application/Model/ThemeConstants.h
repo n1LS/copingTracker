@@ -12,7 +12,7 @@
 #ifndef _THEME_CONSTANTS_H_
 #define _THEME_CONSTANTS_H_
 
-#include "Adapters/copingTracker/display/font.h"
+#include "Adapters/copingTracker/display/font.generated.h"
 
 // Define default color values to be used across the application
 namespace ThemeConstants {

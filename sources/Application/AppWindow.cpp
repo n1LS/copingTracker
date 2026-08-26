@@ -242,23 +242,22 @@ void appwindow_set_sdcard_present(bool present) {
   }
 }
 
-void AppWindow::DrawString(const char *string, const GUIPoint &pos) {
+void AppWindow::DrawString(int x, int y, const char *string) {
   if (!string) {
     return;
   }
 
-  int x = pos.x_;
   for (const char *current = string; *current; ++current, ++x) {
-    DrawChar(*current, GUIPoint(x, pos.y_));
+    DrawChar(x, y, *current);
   }
 }
 
-void AppWindow::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
-  if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT || pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
+void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
+  if (y < 0 || y >= SCREEN_HEIGHT || x < 0 || x >= SCREEN_WIDTH) {
     return;
   }
 
-  int index = pos.x_ + SCREEN_WIDTH * pos.y_;
+  int index = x + SCREEN_WIDTH * y;
   _charScreen[index] = c;
 
   if (transparent) {
@@ -333,13 +332,10 @@ void AppWindow::Flush() {
 
   Lock();
 
-  GUIPoint pos;
-
   // Start with an invalid color to force color setting on first character
   Color currentFG = (Color)-1;
   Color currentBG = (Color)-1;
-  pos.x_ = 0;
-  pos.y_ = 0;
+  GUIPoint pos(0, 0);
 
   int count = 0;
 
@@ -367,7 +363,7 @@ void AppWindow::Flush() {
           GUIWindow::SetBackgroundColor(bg);
         }
 
-        GUIWindow::DrawChar(*current, pos);
+        GUIWindow::DrawChar(pos.x_, pos.y_, *current);
         count++;
       }
 
@@ -380,6 +376,7 @@ void AppWindow::Flush() {
     pos.y_++;
     pos.x_ = 0;
   }
+
   GUIWindow::Flush();
   Unlock();
   memcpy(_preScreen, _charScreen, SCREEN_CHARS);
@@ -860,13 +857,15 @@ void AppWindow::Print(char *line) {
     position -= strlen(token);
     position /= 2;
 
-    GUIPoint pos(position, current_y);
-    DrawString(token, pos);
+    DrawString(position, current_y, token);
 
     // Get the next line
     token = strtok(NULL, "\n");
     current_y++;
   }
+
+  // Preserve the build string at the bottom of the screen
+  DrawString((int)(SCREEN_WIDTH - strlen(VERSION_STRING)) / 2, 22, VERSION_STRING);
 }
 
 void AppWindow::SwapColors() {

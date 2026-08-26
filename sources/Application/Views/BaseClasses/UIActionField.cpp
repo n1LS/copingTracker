@@ -14,15 +14,16 @@
 #include "ViewUtils.h"
 #include <string.h>
 
-UIActionField::UIActionField(const char *name, unsigned int fourcc, GUIPoint &position) : UIField(position) {
+UIActionField::UIActionField(const char *name, unsigned int token, GUIPoint &position) : UIField(position) {
   name_ = name;
-  fourcc_ = fourcc;
+  token_ = token;
 }
 
 UIActionField::~UIActionField() {};
 
 void UIActionField::Draw(GUIWindow &w, int offset) {
-  GUIPoint position(x_, y_ + offset);
+  int x = x_;
+  int y = y_ + offset;
 
   // enforce max field length
   char buffer[MAX_FIELD_WIDTH + 1];
@@ -32,28 +33,27 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
 
   ((AppWindow &)w).SetBackgroundColor(Theme::Button::bg(focus_));
   ((AppWindow &)w).SetColor(Theme::Button::fg(focus_));
-  w.DrawString(buffer, position);
+  w.DrawString(x, y, buffer);
 
   // add button ends
   // draw highlight button ends
+  char front = focus_ ? CHAR(char_button_border_left_s) : ' ';
+  char end = focus_ ? CHAR(char_button_border_right_s) : ' ';
+
   if (focus_) {
     ((AppWindow &)w).SetColor(Theme::View::bg);
     ((AppWindow &)w).SwapColors();
-    position.x_ -= 1;
-    w.DrawChar(CHAR(char_button_border_left_s), position);
-    position.x_ += strlen(buffer) + 1;
-    w.DrawChar(CHAR(char_button_border_right_s), position);
-  } else {
-    position.x_ -= 1;
-    w.DrawChar(' ', position);
-    position.x_ += strlen(buffer) + 1;
-    w.DrawChar(' ', position);
   }
+
+  x -= 1;
+  w.DrawChar(x, y, front);
+  x += strlen(buffer) + 1;
+  w.DrawChar(x, y, end);
 }
 
 void UIActionField::OnClick() {
   SetChanged();
-  NotifyObservers((I_ObservableData *)fourcc_);
+  NotifyObservers((I_ObservableData *)token_);
 }
 
 const char *UIActionField::GetString() {

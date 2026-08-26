@@ -12,6 +12,7 @@
 #ifndef _SAMPLE_RENDER_PARAMS_H_
 #define _SAMPLE_RENDER_PARAMS_H_
 
+#include "Application/Instruments/EnvelopeGenerators.h"
 #include "Externals/etl/include/etl/vector.h"
 #include "Foundation/Types/Types.h"
 #include "SRPUpdaters.h"
@@ -73,6 +74,8 @@ struct renderParams {
   LogSpeedRamp pfin_;
   Arp arp_;
   Vibrato vibrato_;
+
+  adsr_envelope_t envelope_;
 
   bool couldClick_;
 

@@ -6,13 +6,13 @@
  * This file is part of the PatchBay Boot Manager
  */
 
+#include "Adapters/copingTracker/platform/platform.h"
 #include "bl_config.h"
 #include "bl_gfx.h"
 #include "bl_log.h"
 #include "bl_menu.h"
 #include "bl_ui.h"
 #include "bsp/board.h"
-#include "Adapters/copingTracker/platform/platform.h"
 
 int main(int argc, char *argv[]) {
   (void)argc;

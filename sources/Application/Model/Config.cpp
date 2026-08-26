@@ -62,7 +62,7 @@ struct ConfigParam {
     int intValue;
     const char *strValue;
   } defaultValue;
-  Token::enum_type fourcc;
+  Token::enum_type token;
   const char **options;
   int optionCount;
   bool isString;
@@ -225,7 +225,7 @@ Config::Config()
         // Find the variable by name in configParams
         for (const auto &param : configParams) {
           if (!strcmp(doc.ElemName(), param.name)) {
-            if (Variable *var = FindVariable(param.fourcc)) {
+            if (Variable *var = FindVariable(param.token)) {
               var->SetInt(atoi(doc.attrval_));
               Trace::Log("CONFIG", "Set %s = %s", param.name, doc.attrval_);
             }
@@ -342,44 +342,44 @@ void Config::ReadColorVariable(PersistencyDocument *doc) {
 
       if (parsedSuccessfully) {
         // Find the variable by name and set its value
-        Token fourcc = Token::Default; // Use Default as invalid marker
+        Token token = Token::Default; // Use Default as invalid marker
 
         if (strcmp(colorName, Token(Token::VarColor_0).c_str()) == 0) {
-          fourcc = Token::VarColor_0;
+          token = Token::VarColor_0;
         } else if (strcmp(colorName, Token(Token::VarColor_1).c_str()) == 0) {
-          fourcc = Token::VarColor_1;
+          token = Token::VarColor_1;
         } else if (strcmp(colorName, Token(Token::VarColor_2).c_str()) == 0) {
-          fourcc = Token::VarColor_2;
+          token = Token::VarColor_2;
         } else if (strcmp(colorName, Token(Token::VarColor_3).c_str()) == 0) {
-          fourcc = Token::VarColor_3;
+          token = Token::VarColor_3;
         } else if (strcmp(colorName, Token(Token::VarColor_4).c_str()) == 0) {
-          fourcc = Token::VarColor_4;
+          token = Token::VarColor_4;
         } else if (strcmp(colorName, Token(Token::VarColor_5).c_str()) == 0) {
-          fourcc = Token::VarColor_5;
+          token = Token::VarColor_5;
         } else if (strcmp(colorName, Token(Token::VarColor_6).c_str()) == 0) {
-          fourcc = Token::VarColor_6;
+          token = Token::VarColor_6;
         } else if (strcmp(colorName, Token(Token::VarColor_7).c_str()) == 0) {
-          fourcc = Token::VarColor_7;
+          token = Token::VarColor_7;
         } else if (strcmp(colorName, Token(Token::VarColor_8).c_str()) == 0) {
-          fourcc = Token::VarColor_8;
+          token = Token::VarColor_8;
         } else if (strcmp(colorName, Token(Token::VarColor_9).c_str()) == 0) {
-          fourcc = Token::VarColor_9;
+          token = Token::VarColor_9;
         } else if (strcmp(colorName, Token(Token::VarColor_A).c_str()) == 0) {
-          fourcc = Token::VarColor_A;
+          token = Token::VarColor_A;
         } else if (strcmp(colorName, Token(Token::VarColor_B).c_str()) == 0) {
-          fourcc = Token::VarColor_B;
+          token = Token::VarColor_B;
         } else if (strcmp(colorName, Token(Token::VarColor_C).c_str()) == 0) {
-          fourcc = Token::VarColor_C;
+          token = Token::VarColor_C;
         } else if (strcmp(colorName, Token(Token::VarColor_D).c_str()) == 0) {
-          fourcc = Token::VarColor_D;
+          token = Token::VarColor_D;
         } else if (strcmp(colorName, Token(Token::VarColor_E).c_str()) == 0) {
-          fourcc = Token::VarColor_E;
+          token = Token::VarColor_E;
         } else if (strcmp(colorName, Token(Token::VarColor_F).c_str()) == 0) {
-          fourcc = Token::VarColor_F;
+          token = Token::VarColor_F;
         }
 
-        if (fourcc != Token::Default) { // If we found a valid color
-          Variable *var = FindVariable(fourcc);
+        if (token != Token::Default) { // If we found a valid color
+          Variable *var = FindVariable(token);
           if (var) {
             var->SetInt(value);
             Trace::Log("CONFIG", "Read Color: %s = %d", colorName, value);

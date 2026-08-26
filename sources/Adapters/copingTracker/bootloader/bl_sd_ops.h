@@ -42,8 +42,7 @@ bool bl_ensure_firmware_dir();
 bool bl_write_firmware_info(const char *last_uf2, const char *derived_path);
 
 // Read persisted firmware info. Returns true if last_uf2 was found.
-bool bl_read_firmware_info(char *last_uf2_out, size_t uf2_capacity,
-                           char *derived_out, size_t derived_capacity);
+bool bl_read_firmware_info(char *last_uf2_out, size_t uf2_capacity, char *derived_out, size_t derived_capacity);
 
 // ── UF2 import ──────────────────────────────────────────────────────────────
 

@@ -110,19 +110,18 @@ void picoTrackerGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount
   }
 }
 
-void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
-  chargfx_set_cursor(pos.x_, pos.y_);
+void picoTrackerGUIWindowImp::DrawChar(int x, int y, const char c, bool transparent) {
+  chargfx_set_cursor(x, y);
   chargfx_putc(c, transparent);
 }
 
-void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos) {
+void picoTrackerGUIWindowImp::DrawString(int x, int y, const char *string) {
   if (!string) {
     return;
   }
 
-  GUIPoint drawPos = pos;
-  for (const char *current = string; *current; ++current, ++drawPos.x_) {
-    DrawChar(*current, drawPos);
+  for (const char *current = string; *current; ++current, ++x) {
+    DrawChar(x, y, *current);
   }
 }
 

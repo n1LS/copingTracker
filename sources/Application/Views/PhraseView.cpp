@@ -145,29 +145,29 @@ void PhraseView::updateVolumeValue(ViewUpdateDirection direction, int yOffset) {
 
 void PhraseView::updateCommandValue(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  Token cc = (col == colCmd1) ? Token::enum_type(step.cmd1) : Token::enum_type(step.cmd2);
+  Token token = (col == colCmd1) ? Token::enum_type(step.cmd1) : Token::enum_type(step.cmd2);
 
   switch (direction) {
     case VUD_LEFT:
-      cc = CommandList::GetPrev(cc);
+      token = CommandList::GetPrev(token);
       break;
     case VUD_RIGHT:
-      cc = CommandList::GetNext(cc);
+      token = CommandList::GetNext(token);
       break;
     case VUD_UP:
-      cc = CommandList::GetNextAlpha(cc);
+      token = CommandList::GetNextAlpha(token);
       break;
     case VUD_DOWN:
-      cc = CommandList::GetPrevAlpha(cc);
+      token = CommandList::GetPrevAlpha(token);
       break;
   }
 
   if (col == colCmd1) {
-    step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
+    step.cmd1 = static_cast<uint8_t>(static_cast<char>(token));
   } else {
-    step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
+    step.cmd2 = static_cast<uint8_t>(static_cast<char>(token));
   }
-  lastCmd_ = cc;
+  lastCmd_ = token;
 }
 
 void PhraseView::updateCommandParam(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
@@ -1244,7 +1244,7 @@ void PhraseView::DrawView() {
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    uint8_t p = stepsBase[j].param1;
+    uint16_t p = stepsBase[j].param1;
     setTextProps(colCmdVal1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
     wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
@@ -1274,7 +1274,7 @@ void PhraseView::DrawView() {
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    uint8_t p = stepsBase[j].param2;
+    uint16_t p = stepsBase[j].param2;
     setTextProps(colCmdVal2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
     wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);

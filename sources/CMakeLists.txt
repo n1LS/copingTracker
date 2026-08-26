@@ -25,6 +25,8 @@ set(PICO_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Externals/pico-sdk)
 # Pull in SDK (must be before project)
 include(pico_sdk_import.cmake)
 
+set(PICO_FLASH_SIZE_BYTES "16 * 1024 * 1024")
+
 project(copingTracker C CXX ASM)
 
 if(PICO_SDK_VERSION_STRING VERSION_LESS "2.0.0")

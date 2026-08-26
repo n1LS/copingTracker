@@ -178,8 +178,8 @@ bool OpalInstrument::IsInitialized() {
   return true; // Always initialised
 }
 
-void OpalInstrument::ProcessCommand(int channel, Token cc, uint16_t value) {
-  switch (cc) {
+void OpalInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  switch (token) {
     case Token::InstrumentCommandGateOff:
       uint8_t stop = BitClr(breg, 5);
       opl_.Port(OCTAVE_BASE_REG, stop);

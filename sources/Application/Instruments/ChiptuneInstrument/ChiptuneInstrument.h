@@ -21,47 +21,56 @@ public:
   ChiptuneInstrument();
   virtual ~ChiptuneInstrument() {};
 
+  bool SupportsCommand(Token token);
+
   virtual bool Init() {
     return true;
   }
+
   virtual bool IsInitialized() {
     return true;
-  };
+  }
+
   virtual bool IsEmpty() {
     return false;
-  };
-
-  virtual bool SupportsCommand(Token cc);
+  }
 
   virtual InstrumentType GetType() {
     return IT_CHIPTUNE;
-  };
+  }
 
   // Start & stop the instument
   virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true);
   virtual void Stop(int channel);
 
-  virtual void OnStart() {};
-  virtual void Purge() {};
+  virtual void OnStart() {
+  }
+  virtual void Purge() {
+  }
 
   virtual void SetStepVolume(int channel, uint8_t volume);
 
   // size refers to the number of samples
   // should always fill interleaved stereo / 16bit
   virtual bool Render(int channel, fixed *buffer, int size, bool updateTick);
-  virtual void ProcessCommand(int channel, Token cc, uint16_t value);
+  virtual void ProcessCommand(int channel, Token token, uint16_t value);
+
+  virtual void GetTableState(TableSaveState &state) {
+  }
+  virtual void SetTableState(TableSaveState &state) {
+  }
 
   virtual int GetTable() {
     return vTable_.GetInt();
-  };
+  }
+
   virtual bool GetTableAutomation() {
     return 0;
-  };
-  virtual void GetTableState(TableSaveState &state) {};
-  virtual void SetTableState(TableSaveState &state) {};
+  }
+
   etl::ilist<Variable *> *Variables() {
     return &variables_;
-  };
+  }
 
   void setChannel(uint8_t channel);
 

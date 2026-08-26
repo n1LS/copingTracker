@@ -25,7 +25,7 @@ void UIStaticField::Draw(GUIWindow &w, int offset) {
 
   ((AppWindow &)w).SetColor(color_);
   ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
-  w.DrawString(string_, position);
+  w.DrawString(position.x_, position.y_, string_);
 }
 
 void UIStaticField::ProcessArrow(uint16_t mask) {

@@ -18,8 +18,6 @@
 #include "ViewData.h"
 
 /**
- * InstrumentImportView - Migrated to use FileListView base class
- *
  * This view allows users to browse and import instrument files.
  * Shows instrument type prefixes for each file.
  */
