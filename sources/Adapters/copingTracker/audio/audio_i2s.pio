@@ -108,8 +108,8 @@ static inline void audio_i2s_program_init(PIO pio, uint32_t sm, uint32_t offset,
 
     pio_sm_init(pio, sm, offset, &sm_config);
 
-    uint32_t pin_mask = (1u << data_pin) | (3u << clock_pin_base);
-    pio_sm_set_pindirs_with_mask(pio, sm, pin_mask, pin_mask);
+    uint32_t pinmask_ = (1u << data_pin) | (3u << clock_pin_base);
+    pio_sm_set_pindirs_with_mask(pio, sm, pinmask_, pinmask_);
     pio_sm_set_pins(pio, sm, 0); // clear pins
 
     pio_sm_exec(pio, sm, pio_encode_jmp(offset + audio_i2s_offset_entry_point));

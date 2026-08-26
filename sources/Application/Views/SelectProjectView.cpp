@@ -158,7 +158,7 @@ void SelectProjectView::LoadProject() {
   // all subdirs directly inside /project are expected to be projects
   GetFileName(GetCurrentIndex(), selection_, MAX_PROJECT_NAME_LENGTH + 1);
   if (strlen(selection_) == 0) {
-    Trace::Log("SELECTPROJECTVIEW", "skipping too long project name on Index:%zu", GetCurrentIndex());
+    Trace::Log("SELECTPROJECTVIEW", "skipping too long project name on Index: %zu", GetCurrentIndex());
     return;
   }
 

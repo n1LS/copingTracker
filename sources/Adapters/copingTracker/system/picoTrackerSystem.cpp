@@ -23,6 +23,7 @@
 #include "Application/Player/SyncMaster.h"
 #include "hardware/gpio.h"
 #include "input.h"
+#include "pico/multicore.h"
 #include "pico/rand.h"
 #include "tusb.h"
 #include <assert.h>
@@ -75,6 +76,12 @@ static bool pollForValidSDCard() {
 }
 
 void picoTrackerSystem::Boot(int argc, char **argv) {
+
+  // Register core0 as a lockout victim. This allows core1 (during project
+  // loading) to pause core0 while writing to flash. Core0 runs entirely from
+  // flash (XIP), so it must be pausable to avoid hang/corruption when the
+  // other core programs/erases flash.
+  multicore_lockout_victim_init();
 
   // Install System
   alignas(picoTrackerSystem) static char systemMemBuf[sizeof(picoTrackerSystem)];

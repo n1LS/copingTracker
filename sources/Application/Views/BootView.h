@@ -21,6 +21,9 @@ public:
   virtual void DrawView();
   virtual void OnFocus();
   virtual void AnimationUpdate();
+  bool IsAnimationDone() const { return animationDone_; }
+
+  void SetLoadTrigger();
 
 private:
   uint32_t Random();
@@ -46,6 +49,7 @@ private:
   uint32_t wrongCount_;
   uint32_t fixCount_ = 1;
   bool animationDone_ = false;
+  bool waitingForLoad_ = false;
 };
 
 #endif

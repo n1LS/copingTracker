@@ -7,6 +7,9 @@
 */
 
 #include "BootView.h"
+#include "Adapters/copingTracker/system/picoTrackerProjectLoader.h"
+#include "Application/Model/Project.h"
+#include "System/io/Status.h"
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
@@ -29,6 +32,11 @@ void BootView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
+  // Don't respond to button input while a project load is in progress
+  if (picoTrackerProjectLoader::IsLoadInProgress()) {
+    return;
+  }
+
   if (mask & BM_ENTER) {
     Navigate(VT_SONG);
   } else {
@@ -42,6 +50,11 @@ void BootView::DrawView() {
   for (int n = 0; n < animationSize_; n++) {
     DrawIndex(n);
   }
+
+  // Preserve the build string at the bottom of the screen
+  SetColor(Theme::View::inactive);
+  SetBackgroundColor(Theme::View::bg);
+  DrawString((SCREEN_WIDTH - strlen(VERSION_STRING)) / 2, 22, VERSION_STRING);
 }
 
 void BootView::OnFocus() {
@@ -49,31 +62,43 @@ void BootView::OnFocus() {
 }
 
 void BootView::AnimationUpdate() {
-  if (wrongCount_ == 0) {
-    animationDone_ = true;
-    return;
-  }
-  
-  fixCount_ = wrongCount_ / 10;
-  if (fixCount_ == 0) fixCount_ = 1;
-  
-  int fix = fixCount_;
-  
-  while (fix--) {
-    uint8_t rand = Random();
-    RevealRandom();
-    RevealColor();
+  if (waitingForLoad_) {
+    waitingForLoad_ = false;
+    AppWindow::GetInstance()->DelayedProjectLoad();
   }
 
-  wrongCount_ -= fixCount_;
+  // Run the reveal animation and show loading progress on top
+  if (wrongCount_ == 0) {
+    animationDone_ = true;
+  } else {
+    fixCount_ = wrongCount_ / 10;
+    if (fixCount_ == 0) fixCount_ = 1;
+
+    int fix = fixCount_;
+
+    while (fix--) {
+      uint8_t rand = Random();
+      RevealRandom();
+      RevealColor();
+    }
+
+    wrongCount_ -= fixCount_;
+  }
+
+  // Show loading progress if a load is in progress, overlaid on the animation
+  if (picoTrackerProjectLoader::IsLoadInProgress()) {
+    uint32_t idx, total;
+    char msg[64];
+    picoTrackerProjectLoader::GetProgress(&idx, &total, msg, sizeof(msg));
+    // Display progress at the bottom of the screen, overwriting Status
+    Status::Set("Loading %s", msg);
+  }
 }
 
 void BootView::RevealColor() {
-
   int pos = Random() % animationSize_;
   while (animationColors_[pos].byte == defaultColor_.byte) {
-    pos++;
-    if (pos >= animationSize_) {
+    if (++pos >= animationSize_) {
       pos = 0;
     };
   }
@@ -106,38 +131,6 @@ void BootView::RevealRandom() {
   DrawIndex(pos);  
 }
 
-void BootView::RevealRing() {
-  const int width = 32;
-  const int height = animationSize_ / width;
-
-  // roll dice for direction, right or left, top or bottom
-  bool left = Random() & 13;
-  bool top = Random() & 25;
-
-  const int xStart = left ? 0 : width - 1;
-  const int xEnd = left ? width : -1;
-  const int xStep = left ? 1 : -1;
-
-  const int yStart = top ? 0 : height - 1;
-  const int yEnd = top ? height : -1;
-  const int yStep = top ? 1 : -1;
-
-  int selected = -1;
-
-  for (int x = xStart; x != xEnd && selected < 0; x += xStep) {
-    for (int y = yStart; y != yEnd; y += yStep) {
-      const int index = y * width + x;
-
-      if (animationContent_[index] != animationTarget_[index]) {
-        selected = index;
-        animationContent_[index] = animationTarget_[index];
-        return;
-      }
-    }
-  }
-
-}
-
 void BootView::RandomizeColors() {
   for (int n = 0; n < animationSize_; n++) {
     do {
@@ -160,4 +153,8 @@ uint32_t BootView::Random() {
 void BootView::CoordinatesForIndex(int index, uint8_t *x, uint8_t *y) {
   *x = index & 0x1f;
   *y = 10 + (index >> 5);
+}
+
+void BootView::SetLoadTrigger() {
+  waitingForLoad_ = true;
 }
