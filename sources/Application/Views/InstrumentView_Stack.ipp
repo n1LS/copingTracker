@@ -88,7 +88,7 @@ void InstrumentView::fillStackParameters() {
 
   // Table
   v = instrument->FindVariable(Token::StackInstrumentTable);
-  intVarOffField_.emplace_back(position, *v, "Table         :%02X", 0x00, TABLE_COUNT - 1, 1, 16);
+  intVarOffField_.emplace_back(position, *v, "Table         :%2.2X", 0x00, TABLE_COUNT - 1, 1, 16);
   fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));  
   position.y_++;
 

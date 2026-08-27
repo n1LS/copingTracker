@@ -15,7 +15,7 @@ const char *loopTypes[SILM_LAST] = {"oneshot", "loop", "pingpong", "oscillator",
                                     //	"oscillator fine",
                                     "looper sync"};
 
-const char *interpolationTypes[] = {"linear", "none"};
+const char *interpolationTypes[] = {"lin", "non"};
 
 const char *filterMode[] = {"original", "bassy", "scream"};
 

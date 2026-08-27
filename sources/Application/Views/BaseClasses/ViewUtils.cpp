@@ -14,53 +14,6 @@ int FindFormatValueOffset(const char *format) {
   return -1;
 }
 
-void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused, int subSelectionOffset,
-                      int subSelectionLength) {
-  ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
-  ((AppWindow &)w).SetColor(Theme::View::fg);
-
-  char *colon = strchr(buffer, ':');
-  int valueOffset = 0;
-
-  if (colon) {
-    int index = colon - buffer;
-    buffer[index] = 0;
-    valueOffset = index + 1;
-
-    ((AppWindow &)w).SetColor(Theme::Input::label);
-    w.DrawString(position.x_, position.y_, buffer);
-
-    position.x_ += index + 1;
-    buffer += index + 1;
-  }
-
-  if (focused) {
-    ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(true));
-    ((AppWindow &)w).SetColor(Theme::Input::fg(true));
-
-    w.DrawString(position.x_, position.y_, buffer);
-
-    int valueSubSelectionOffset = subSelectionOffset - valueOffset;
-    if (subSelectionOffset >= valueOffset && valueSubSelectionOffset < (int)strlen(buffer) && subSelectionLength > 0) {
-      int valueLength = strlen(buffer);
-      if (valueSubSelectionOffset + subSelectionLength > valueLength) {
-        subSelectionLength = valueLength - valueSubSelectionOffset;
-      }
-
-      char replaced = buffer[valueSubSelectionOffset + subSelectionLength];
-      buffer[valueSubSelectionOffset + subSelectionLength] = 0;
-      position.x_ += valueSubSelectionOffset;
-      ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
-      ((AppWindow &)w).SetColor(Theme::Input::fg(true));
-      w.DrawString(position.x_, position.y_, buffer + valueSubSelectionOffset);
-      buffer[valueSubSelectionOffset + subSelectionLength] = replaced;
-    }
-  } else {
-    ((AppWindow &)w).SetColor(Theme::Input::fg(false));
-    w.DrawString(position.x_, position.y_, buffer);
-  }
-}
-
 bool goProjectSamplesDir(ViewData *viewData_) {
   auto fs = FileSystem::GetInstance();
   fs->chdir(PROJECTS_DIR);

@@ -35,7 +35,7 @@ void UIBitmaskVarField::Draw(GUIWindow &w, int offset) {
   if (valueOffset >= 0) {
     subSelectionOffset = valueOffset + (len_ - position_);
   }
-  DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
+  DrawLabeledField(w, position, buffer, subSelectionOffset);
 }
 
 void UIBitmaskVarField::ProcessArrow(uint16_t mask) {

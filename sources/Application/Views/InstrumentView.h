@@ -43,6 +43,8 @@ public:
   void DrawViewDrum();
   void DrawViewStack();
   void DrawViewSample();
+  void AnimationUpdateSample();
+  virtual void AnimationUpdate() override;
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   virtual void OnFocus();
   void onInstrumentTypeChange(bool updateUI = false);
@@ -89,6 +91,7 @@ private:
   WatchedVariable instrumentType_;
   int lastSampleIndex_;
   bool suppressSampleChangeWarning_;
+  unsigned int scrollStartTime_ = 0;
   etl::string<SliceCountLabelSize> sliceCountLabel_;
 
   // Variables for export confirmation dialog
@@ -98,6 +101,9 @@ private:
   I_Instrument *exportInstrument_ = nullptr;
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> exportName_;
   InstrumentType pendingInstrumentType_ = IT_NONE;
+
+  UIField *gmInputField_;
+  UIField *sampleInputField_;
 
   etl::vector<UIIntVarField, 1> typeIntVarField_;
   etl::vector<UIActionField, 3> persistentActionField_;

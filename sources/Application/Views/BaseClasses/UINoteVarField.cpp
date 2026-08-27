@@ -12,7 +12,6 @@
 #include "UINoteVarField.h"
 #include "Application/AppWindow.h"
 #include "Application/Utils/char.h"
-#include "ViewUtils.h"
 #include <System/Console/nanoprintf.h>
 
 UINoteVarField::UINoteVarField(const GUIPoint &position, Variable &v, const char *format, int min, int max, int xOffset,
@@ -32,5 +31,5 @@ void UINoteVarField::Draw(GUIWindow &w, int offset) {
   note[3] = 0;
   npf_snprintf(buffer, sizeof(buffer), format_, note);
 
-  DrawLabeledField(w, position, buffer, focus_);
+  DrawLabeledField(w, position, buffer);
 }

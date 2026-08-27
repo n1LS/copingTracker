@@ -265,6 +265,9 @@ void InstrumentView::refreshInstrumentFields() {
   nameVariables_.clear();
   lastSampleIndex_ = -1;
 
+  sampleInputField_ = nullptr;
+  gmInputField_ = nullptr;
+
   // first put back the type field as its shown on *all* instrument types
   fieldList_.insert(fieldList_.end(), &(*typeIntVarField_.rbegin()));
   lastFocusID_ = Token::VarInstrumentType;
@@ -366,71 +369,73 @@ void InstrumentView::fillSampleParameters() {
 
   Variable *v = instrument->FindVariable(Token::SampleInstrumentSample);
   SamplePool *sp = SamplePool::GetInstance();
-  intVarField_.emplace_back(position, *v, "Sample        :%.12s", 0, sp->GetNameListSize() - 1, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "Sample   :%.12s", 0, sp->GetNameListSize() - 1, 1, 0x10);
+  sampleInputField_ = &intVarField_.back();
+  sampleInputField_->SetActive(v->GetInt() != NO_SAMPLE);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentGMInstrument);
-  intVarField_.emplace_back(position, *v, "GM Instrument :%d", 0, kGMInstrumentCount - 1, 1, 0x10);
+  intVarOffField_.emplace_back(position, *v, "GM Instr.:%3d", 0, kGMInstrumentCount - 1, 1, 0x10);
+  gmInputField_ = &intVarOffField_.back();
+  gmInputField_->SetActive(v->GetInt() != NO_GM_INSTRUMENT);
+  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
+
+  // row Drive / Crush
+  position.y_ += 2;
+  v = instrument->FindVariable(Token::SampleInstrumentCrushVolume);
+  intVarField_.emplace_back(position, *v, "Drive     :%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  position.y_ += 1;
-  updateSliceCountLabel(sliceCountLabel_, instrument);
-  staticField_.emplace_back(position, sliceCountLabel_.c_str());
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  GUIPoint actionPos = position;
-  actionPos.x_ = baseX + 15;
-  sampleActionField_.emplace_back("Adjust", Token::ActionShowSampleSlices, actionPos);
-  fieldList_.insert(fieldList_.end(), &sampleActionField_.back());
-  sampleActionField_.back().AddObserver(*this);
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentVolume);
-  intVarField_.emplace_back(position, *v, "Volume        :%d [%2.2X]", 0, 255, 1, 10);
+  position.x_ += 14;
+  v = instrument->FindVariable(Token::SampleInstrumentCrush);
+  intVarField_.emplace_back(position, *v, "Crush     :%d", 1, 0x10, 1, 4);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  position.x_ -= 14;
 
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentPan);
-  intVarField_.emplace_back(position, *v, "Pan           :%2.2X", 0, 0xFE, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentRootNote);
-  noteVarField_.emplace_back(position, *v, "Root note     :%s", 0, 0x7F, 1, 0x0C);
-  fieldList_.insert(fieldList_.end(), &(*noteVarField_.rbegin()));
-
+  // row Detune / Root Note
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentFineTune);
-  intVarField_.emplace_back(position, *v, "Detune        :%2.2X", 0, 255, 1, 0x10);
+  intVarField_.emplace_back(position, *v, "Detune    :%2.2X", 0, 255, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentCrushVolume);
-  intVarField_.emplace_back(position, *v, "Drive         :%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  position.x_ += 14;
+  v = instrument->FindVariable(Token::SampleInstrumentRootNote);
+  noteVarField_.emplace_back(position, *v, "Root note:%s", 0, 0x7F, 1, 0x0C);
+  fieldList_.insert(fieldList_.end(), &(*noteVarField_.rbegin()));
+  position.x_ -= 14;
 
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentCrush);
-  intVarField_.emplace_back(position, *v, "Crush         :%d", 1, 0x10, 1, 4);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
+  // row Downsample / Interpolate
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentDownsample);
-  intVarField_.emplace_back(position, *v, "Downsample    :%d", 0, 8, 1, 4);
+  intVarField_.emplace_back(position, *v, "Downsample :%d", 0, 8, 1, 4);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  position.y_ += 1;
+  position.x_ += 14;
   v = instrument->FindVariable(Token::SampleInstrumentInterpolation);
-  intVarField_.emplace_back(position, *v, "Interpolate   :%s", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Interpol.:%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  position.x_ -= 14;
 
+  // row Pan / Volume
   position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentAttack);
-  intVarField_.emplace_back(position, *v, "A/D/S/R       :%2.2X", 0, 0xFF, 1, 0x10);
+  v = instrument->FindVariable(Token::SampleInstrumentPan);
+  intVarField_.emplace_back(position, *v, "Pan       :%2.2X", 0, 0xFE, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  position.x_ += 17;
+  position.x_ += 14;
+  v = instrument->FindVariable(Token::SampleInstrumentVolume);
+  intVarField_.emplace_back(position, *v, "Volume    :%d [%2.2X]", 0, 255, 1, 10);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  position.x_ -= 14;
+
+  // row ADSR
+  position.y_ += 2;
+  v = instrument->FindVariable(Token::SampleInstrumentAttack);
+  intVarField_.emplace_back(position, *v, "A/D/S/R   :%2.2X", 0, 0xFF, 1, 0x10);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+
+  position.x_ += 13;
   v = instrument->FindVariable(Token::SampleInstrumentDecay);
   intVarField_.emplace_back(position, *v, ":%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
@@ -445,18 +450,9 @@ void InstrumentView::fillSampleParameters() {
   intVarField_.emplace_back(position, *v, ":%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  position.y_ += 1;
+  // row filter
+  position.y_ += 2;
   position.x_ = baseX;
-  v = instrument->FindVariable(Token::SampleInstrumentTable);
-  intVarOffField_.emplace_back(position, *v, "Table         :%2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentTableAutomation);
-  intVarField_.emplace_back(position, *v, last_sub_item "Automation:%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
   staticField_.emplace_back(position, "Filter     Cut    Res");
   fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
 
@@ -473,33 +469,61 @@ void InstrumentView::fillSampleParameters() {
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentFilterType);
-  intVarField_.emplace_back(position, *v, sub_item "Type       :%2.2X", 0, 0xFF, 1, 0x10);
+  intVarField_.emplace_back(position, *v, sub_item "Type  :%2.2X", 0, 0xFF, 1, 0x10);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentFilterMode);
-  intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, 2, 1, 1);
+  intVarField_.emplace_back(position, *v, last_sub_item "Mode  :%s", 0, 2, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
-  position.y_ += 1;
+  // row loop mode
+  position.y_ += 2;
   v = instrument->FindVariable(Token::SampleInstrumentLoopMode);
-  intVarField_.emplace_back(position, *v, "Loop mode     :%s", 0, SILM_LAST - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Loop mode :%s", 0, SILM_LAST - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentStart);
-  hexVarField_.emplace_back(position, *v, 7, sub_item "Start     :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  hexVarField_.emplace_back(position, *v, 7, sub_item "Start :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SampleInstrumentLoopStart);
-  hexVarField_.emplace_back(position, *v, 7, sub_item "Loop:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  hexVarField_.emplace_back(position, *v, 7, last_sub_item "Loop  :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
 
-  position.x_ += 17;
+  position.x_ += 18;
   v = instrument->FindVariable(Token::SampleInstrumentEnd);
-  hexVarField_.emplace_back(position, *v, 7, ">:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
+  hexVarField_.emplace_back(position, *v, 7, ":%7.7X", 0, instrument->GetSampleSize() - 1, 16);
   fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
+  position.x_ = baseX;
+
+  // row Table / Automate
+  position.x_ = baseX;
+  position.y_ = SCREEN_HEIGHT - 1;
+  v = instrument->FindVariable(Token::SampleInstrumentTable);
+  intVarOffField_.emplace_back(position, *v, "Table     :%2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
+  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
+
+  position.x_ += 14;
+  v = instrument->FindVariable(Token::SampleInstrumentTableAutomation);
+  intVarField_.emplace_back(position, *v, "Automate :%s", 0, 1, 1, 1);
+  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+
+/*
+  position.y_ += 1;
+  updateSliceCountLabel(sliceCountLabel_, instrument);
+  staticField_.emplace_back(position, sliceCountLabel_.c_str());
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
+
+  GUIPoint actionPos = position;
+  actionPos.x_ = baseX + 15;
+  sampleActionField_.emplace_back("Adjust", Token::ActionShowSampleSlices, actionPos);
+  fieldList_.insert(fieldList_.end(), &sampleActionField_.back());
+  sampleActionField_.back().AddObserver(*this);
+ 
+*/  
 }
 
 void InstrumentView::fillSIDParameters() {
@@ -1060,26 +1084,35 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
         Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
         if (sampleVar) {
           sampleVar->SetInt(-1);
+          sampleInputField_->SetActive(false);
         }
 
+        Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
+        gmInputField_->SetActive(gmVar->GetInt() != NO_GM_INSTRUMENT);
         // TODO nILS: warn about losing slices when changing GM instrument if sample was assigned and slices exist
         // like below
-
+        
+        scrollStartTime_ = System::GetInstance()->Millis();
         isDirty_ = true;
         break;
       }
     case Token::SampleInstrumentSample:
       {
-        // changing the sample clears the GM Isntrument
+        // changing the sample clears the GM Instrument
         Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
         if (gmVar) {
           gmVar->SetInt(NO_GM_INSTRUMENT);
+          // find the intput field and set it inactive
+          gmInputField_->SetActive(false);
         }
 
         I_Instrument *instr = getInstrument();
         if (!instr || instr->GetType() != IT_SAMPLE) {
           break;
         }
+
+        Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
+        sampleInputField_->SetActive(sampleVar->GetInt() != NO_GM_INSTRUMENT);
 
         SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
         int newIndex = sampleInstr->GetSampleIndex();
@@ -1369,4 +1402,18 @@ void InstrumentView::SetFocus(UIField *field) {
 
   // call parent implementation
   FieldView::SetFocus(field);
+}
+
+void InstrumentView::AnimationUpdate() {
+  // First call the parent class implementation to draw the battery gauge
+  ScreenView::AnimationUpdate();
+
+  I_Instrument *instr = getInstrument();
+  if (instr) {
+    InstrumentType type = instr->GetType();
+
+    if (type == IT_SAMPLE) {
+      AnimationUpdateSample();
+    }
+  }
 }

@@ -20,6 +20,7 @@
 #define char_symbol_muted_s "\x8A"
 #define char_symbol_indicatorEmpty_s "\x8B"
 #define char_symbol_indicatorFull_s "\x8C"
+#define char_symbol_indicator_s(x) ((x) ? char_symbol_indicatorFull_s : char_symbol_indicatorEmpty_s)
 
 #define char_playback_pause_s "\x8C"
 #define char_playback_play_s "\x90"

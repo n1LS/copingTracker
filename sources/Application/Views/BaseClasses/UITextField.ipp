@@ -20,7 +20,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
 
   // Draw the label
   ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
-  ((AppWindow &)w).SetColor(Theme::Input::label);
+  ((AppWindow &)w).SetColor(Theme::Input::label(active_));
   w.DrawString(position.x_, position.y_, label_.c_str());
   position.x_ += label_.length();
   

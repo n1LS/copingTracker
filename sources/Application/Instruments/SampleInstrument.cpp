@@ -449,13 +449,6 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
     loopmode = SILM_ONESHOT;
   }
   rp->loopModeValue_ = static_cast<int>(loopmode);
-
-  /*	 if (loopmode==SILM_OSCFINE) {
-                  if (rp->rendLoopEnd_>source_->GetSize()-1) { // check for
-     older instrument that were not correctly handled
-                          rp->rendLoopEnd_=source_->GetSize()-1 ;
-                  }
-           }*/
   rp->reverse_ = false;
 
   float driverRate = float(Audio::GetInstance()->GetSampleRate());
@@ -477,15 +470,9 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
       break;
 
     case SILM_OSC:
-      //		case SILM_OSCFINE:
       {
 
         float freq = 261.6255653006f; // C3
-        /*
-        if (loopmode==SILM_OSCFINE) {
-          freq=float(pow(2.0,-0.75))*440; // C3
-        }
-        */
         int length = rp->rendLoopEnd_ - rp->rendLoopStart_;
         if (length == 0)
           length = 1;
@@ -797,7 +784,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
     int16_t *loopPosition = (int16_t *)(wavbuf + rp->rendLoopStart_ * 2 * channelCount);
     int16_t *lastSample = (int16_t *)(wavbuf + (rp->rendLoopEnd_ - 1) * 2 * channelCount);
 
-    if (/*(loopMode==SILM_OSCFINE)||*/ (rp->reverse_)) {
+    if (rp->reverse_) {
       lastSample = (int16_t *)(wavbuf + rp->rendLoopEnd_ * 2 * channelCount);
     }
 
@@ -828,7 +815,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
       // look where we are, if we need to
 
       if (!rpReverse) {
-        if (input >= lastSample /*-((loopMode==SILM_OSCFINE)?1:0)*/) {
+        if (input >= lastSample) {
           switch (loopMode) {
             case SILM_ONESHOT:
               *rpFinished = true;
@@ -857,18 +844,6 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
                 }
               }
               break;
-              /*						case
-                 SILM_OSCFINE:
-                                                              {
-                                                                      int
-                 offset=(input-lastSample)/channelCount ;
-                                                                      rpReverse=(loopPosition>lastSample)
-                 ; if (rpReverse) { fpSpeed=-rp->speed_ ;
-                                                                              input=loopPosition-offset
-                 ; } else { fpSpeed=rp->speed_ ; input=loopPosition+offset ;
-                                                                      }
-                                                                      break ;
-                                                              }*/
             case SILM_LAST:
               NAssert(0);
               break;
@@ -904,18 +879,6 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
                 }
               }
               break;
-              /*						case
-                 SILM_OSCFINE:
-                                                              {
-                                                                      int
-                 offset=(lastSample-input)/channelCount ;
-                                                                      rpReverse=(loopPosition>lastSample)
-                 ; if (rpReverse) { fpSpeed=-rp->speed_ ;
-                                                                              input=loopPosition-offset
-                 ; } else { fpSpeed=rp->speed_ ; input=loopPosition+offset ;
-                                                                      }
-                                                                      break ;
-                                                              }*/
             case SILM_LAST:
               NAssert(0);
               break;
@@ -933,9 +896,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
           rpKrateCount = KRATE_SAMPLE_COUNT;
 
           // update the envelope as well
-          // TODO POD
           if (!rp->envelope_.tick()) {
-            //            rp->finished_ = true; // Mark this channel as finished
+            rp->finished_ = true; // Mark this channel as finished
           }
 
           if (hasUpdaters) {

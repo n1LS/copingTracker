@@ -13,7 +13,6 @@
 #include "Application/AppWindow.h"
 #include "System/Console/Trace.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
-#include "ViewUtils.h"
 #include <System/Console/nanoprintf.h>
 
 #define abs(x) (x < 0 ? -x : x)
@@ -38,7 +37,7 @@ void UIIntField::Draw(GUIWindow &w) {
   int value = *src_;
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
-  DrawLabeledField(w, position, buffer, focus_);
+  DrawLabeledField(w, position, buffer);
 }
 
 void UIIntField::ProcessArrow(uint16_t mask) {

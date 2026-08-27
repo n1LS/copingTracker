@@ -29,6 +29,7 @@ public:
   virtual void ProcessClear() {}; // EDIT+ENTER pressed
   void SetFocus();
   void ClearFocus();
+  void SetActive(bool active);
   bool HasFocus();
 
   void SetPosition(const GUIPoint &);
@@ -42,9 +43,13 @@ public:
 
   virtual bool IsStatic();
 
+  void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset = -1,
+                        int subSelectionLength = 1);
+
 protected:
   uint8_t x_;
   uint8_t y_;
   bool focus_;
+  bool active_ = true;
 };
 #endif

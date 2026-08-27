@@ -11,7 +11,6 @@
 
 #include "UIIntVarOffField.h"
 #include "Application/AppWindow.h"
-#include "ViewUtils.h"
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 
@@ -101,5 +100,5 @@ void UIIntVarOffField::Draw(GUIWindow &w, int offset) {
       strcpy(buffer, "++wtf++");
   }
 
-  DrawLabeledField(w, position, buffer, focus_);
+  DrawLabeledField(w, position, buffer);
 }

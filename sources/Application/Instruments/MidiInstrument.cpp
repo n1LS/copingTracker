@@ -307,7 +307,7 @@ void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
       };
       break;
 
-    // TODO POD: Support InstrumentCommandChordUp and InstrumentCommandChordBidirectional
+    // TODO nILS: Support InstrumentCommandChordUp and InstrumentCommandChordBidirectional
     case Token::InstrumentCommandChordUp:
       {
         // split into 4 note offsets

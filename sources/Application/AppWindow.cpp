@@ -844,6 +844,10 @@ void AppWindow::Print(char *line) {
   char *token = strtok(line, "\n");
   int lineCount = 0;
 
+  char outLine[33];
+  memset(outLine, ' ', sizeof(outLine) - 1);
+  outLine[32] = 0;
+
   while (token != NULL) {
     // Stop if we are about to overwrite the build string line
     if (current_y >= 22) {
@@ -860,6 +864,7 @@ void AppWindow::Print(char *line) {
     position -= strlen(token);
     position /= 2;
 
+    DrawString(0, current_y, outLine);
     DrawString(position, current_y, token);
 
     // Get the next line

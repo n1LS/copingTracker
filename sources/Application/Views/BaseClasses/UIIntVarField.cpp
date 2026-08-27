@@ -15,7 +15,6 @@
 #include "System/Console/Trace.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
 #include "UIIntVarField.h"
-#include "ViewUtils.h"
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 
@@ -67,7 +66,7 @@ void UIIntVarField::Draw(GUIWindow &w, int offset) {
       strcpy(buffer, "++wtf++");
   }
 
-  DrawLabeledField(w, position, buffer, focus_);
+  DrawLabeledField(w, position, buffer);
 }
 
 void UIIntVarField::ProcessArrow(uint16_t mask) {

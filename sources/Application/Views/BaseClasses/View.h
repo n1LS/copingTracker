@@ -88,7 +88,7 @@ struct Theme {
   struct Input {
     FIXED(cursor, WHITE)
     FIXED(placeholder, LIGHT_GRAY)
-    FIXED(label, WHITE)
+    SWITCHABLE(label, WHITE, LIGHT_GRAY)
     SWITCHABLE(bg, LIGHT_GREEN, BLACK)
     SWITCHABLE(fg, BLACK, GREEN)
   };

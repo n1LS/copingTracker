@@ -6,8 +6,6 @@ struct GUIPoint;
 class ViewData;
 
 int FindFormatValueOffset(const char *format);
-void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused = false, int subSelectionOffset = -1,
-                      int subSelectionLength = 1);
 
 bool goProjectSamplesDir(ViewData *viewData_);
 

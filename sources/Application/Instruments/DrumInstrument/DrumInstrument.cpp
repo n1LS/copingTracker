@@ -117,7 +117,7 @@ void DrumInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
   }
 }
 
-// TODO POD: implement and adjust accordingly
+// TODO nILS: implement and adjust accordingly
 bool DrumInstrument::SupportsCommand(Token token) {
   return false;
 }

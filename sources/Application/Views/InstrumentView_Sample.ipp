@@ -22,11 +22,39 @@ void InstrumentView::DrawViewSample() {
   SetColor(Theme::View::fg);
   SetBackgroundColor(Theme::View::bg);
 
-  Variable *v = instrument->FindVariable(Token::SampleInstrumentGMInstrument);
-  int ins = v->GetInt();
-  int offset = (ins > 99) ? 19 : (ins > 10) ? 18 : 17;
+  Variable *gm = instrument->FindVariable(Token::SampleInstrumentGMInstrument);
+  int ins = gm->GetInt();
+  int offset = 14;
 
-  DrawString(position.x_ + offset, position.y_, (ins >= 0) ? GMBank::nameForPreset(ins) : " ---");
-  DrawString(position.x_ - 1, position.y_ - 1, char_border_single_topLeft_s);
-  DrawString(position.x_ - 1, position.y_, char_border_single_bottomLeft_s);
+  char buffer[16];
+  const char *name = (ins >= 0) ? GMBank::nameForPreset(ins) : "";
+
+  const size_t displayLength = 13;
+  const size_t gapLength = 2;
+  const size_t nameLength = strlen(name);
+
+  if (nameLength <= displayLength) {
+    // Static, space-padded text.
+    snprintf(buffer, sizeof(buffer), "%s", name);
+  } else {
+    // Advance one character every 256 ms ~= 4 characters/second.
+    const size_t cycleLength = nameLength + gapLength;
+    const size_t start = ((System::GetInstance()->Millis() - scrollStartTime_) >> 8) % cycleLength;
+    
+    for (size_t i = 0; i < displayLength; ++i) {
+      const size_t source = (start + i) % cycleLength;
+      buffer[i] = source < nameLength ? name[source] : ' ';
+    }
+    buffer[displayLength] = '\0';
+  }
+  
+  DrawString(position.x_ + offset, position.y_, buffer);
+
+  // draw the indicator between loop start and end
+  SetColor(Theme::View::fg);
+  DrawChar(position.x_ + 18, position.y_ + 15, '>');
+}
+
+void InstrumentView::AnimationUpdateSample() {
+  DrawViewSample();  
 }
