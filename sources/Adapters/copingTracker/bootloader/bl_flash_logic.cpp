@@ -58,7 +58,7 @@ bool bl_handle_flash_and_boot(SdFs *sd, const char *bin_path) {
 
 void bl_boot_installed(bool silent) {
   if (silent) {
-    menu_show_message("Shhhhh! Booting.");
+    menu_show_message("Auto-booting selected firmware...");
   } else {
     menu_show_message("Booting selected firmware...");
   }
