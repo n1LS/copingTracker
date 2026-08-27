@@ -24,7 +24,7 @@ if [ "$quick" = false ]; then
     echo "1) Generating the font data"
     cd tools/fonts
     python3 import.py
-    python3 font_bootloader.py > ../../sources/Adapters/copingTracker/bootloader/bootloader_font.generated.h
+    python3 font_bootloader.py > ../../sources/Adapters/copingTracker/bootloader/bl_font.generated.h
     cd ../..
     echo "2) Converting the documentation"
     python3 ./tools/manual/raw_data/convert-documentation.py ./tools/manual/raw_data/Documentation.rc sources/Foundation/Constants/Documentation.generated.h

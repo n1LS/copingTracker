@@ -56,25 +56,13 @@ bool bl_handle_flash_and_boot(SdFs *sd, const char *bin_path) {
   return true; // unreachable, but keeps the compiler happy
 }
 
-bool bl_handle_boot_installed(SdFs *sd, const char *installed_bin_path) {
-  (void)sd;
-
-  if (installed_bin_path && installed_bin_path[0]) {
-    menu_show_message("Booting selected firmware...");
-    bootlog("BOOTDBG[%s]: enter->boot(installed) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, kXipBase);
-    if (!boot_firmware_slot(kXipBase)) {
-      menu_show_message("Boot failed. Check flashed firmware image.", nullptr, LIGHT_RED);
-      bootlog("BOOTDBG: enter->boot(installed) returned failure");
-      return false;
-    }
+void bl_boot_installed(bool silent) {
+  if (silent) {
+    menu_show_message("Shhhhh! Booting.");
   } else {
-    menu_show_message("Booting app slot...");
-    bootlog("BOOTDBG[%s]: handoff(manual) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, kXipBase);
-    if (!boot_firmware_slot(kXipBase)) {
-      menu_show_message("App-slot boot failed.", "Check flashed firmware image.", LIGHT_YELLOW);
-      bootlog("BOOTDBG: handoff(manual) returned failure");
-      return false;
-    }
+    menu_show_message("Booting selected firmware...");
   }
-  return true;
+
+  bootlog("BOOTDBG[%s]: enter->boot(installed) -> boot_firmware_slot(0x%08x)", kBootloaderBuildTag, kXipBase);
+  boot_firmware_slot(kXipBase);
 }

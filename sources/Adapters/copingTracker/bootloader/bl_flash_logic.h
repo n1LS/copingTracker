@@ -17,6 +17,6 @@ bool bl_handle_flash_and_boot(SdFs *sd, const char *bin_path);
 
 // Boot the installed firmware without flashing.
 // Returns false if the slot is not bootable.
-bool bl_handle_boot_installed(SdFs *sd, const char *installed_bin_path);
+void bl_boot_installed(bool silent);
 
 #endif // PATCHBAY_BL_FLASH_LOGIC_H
