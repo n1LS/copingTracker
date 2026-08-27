@@ -165,6 +165,10 @@ void picoTrackerGUIWindowImp::Flush() {
   }
 
   chargfx_draw_changed();
+
+  // 2nd render pass for the focus rect
+  const GUIRect &rect = _window->GetFocusRect();
+  chargfx_draw_focus_rect(rect.Left(), rect.Top(), rect.Width());
 }
 
 void picoTrackerGUIWindowImp::Invalidate() {
@@ -178,6 +182,10 @@ void picoTrackerGUIWindowImp::PushEvent(GUIEvent &event) {
 GUIRect picoTrackerGUIWindowImp::GetRect() {
   Trace::Debug("GUI GetRect");
   return GUIRect(0, 0, 320, 240);
+}
+
+const GUIRect &picoTrackerGUIWindowImp::GetFocusRect() const {
+  return _window->GetFocusRect();
 }
 
 void picoTrackerGUIWindowImp::ProcessEvent(picoTrackerEvent &event) {

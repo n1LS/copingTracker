@@ -809,3 +809,7 @@ bool View::ConfirmStopPlayback(Token source) {
 
   return false;
 }
+
+GUIRect View::GetFocusRect() {
+  return focusRect_;
+}

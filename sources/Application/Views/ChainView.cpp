@@ -18,6 +18,9 @@
 #include "ViewData.h"
 #include <nanoprintf.h>
 
+const int columnPositions_[2] = {0, 3};
+const int columnWidths_[2] = {2, 2};
+
 ChainView::ChainView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
   updatingPhrase_ = false;
   lastPhrase_ = 0;
@@ -84,6 +87,11 @@ void ChainView::pasteLastPhrase() {
 void ChainView::updateCursor(int dx, int dy) {
   viewData_->UpdateChainCursor(dx, dy);
   isDirty_ = true;
+
+  int col = viewData_->chainCol_;
+  int x = 5 + columnPositions_[col];
+  int y = 3 + viewData_->chainRow_;
+  focusRect_ = GUIRect(x, y, x + columnWidths_[col], y);
 }
 
 void ChainView::updateCursorValue(int offset, int dx, int dy) {

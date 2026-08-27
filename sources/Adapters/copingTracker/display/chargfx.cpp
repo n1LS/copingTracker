@@ -243,7 +243,119 @@ inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
     }
 
     dma_channel_set_read_addr(DISPLAY_DMA_CH, buffer, false);
+    dma_channel_set_trans_count(DISPLAY_DMA_CH, CHAR_WIDTH * screen_height * sizeof(uint16_t), true);
 
+    haveDmaInFlight = true;
+
+    uint16_t *tmp = buffer;
+    buffer = buffer_dma;
+    buffer_dma = tmp;
+  }
+
+  if (haveDmaInFlight) {
+    while (dma_channel_is_busy(DISPLAY_DMA_CH)) {
+    }
+    while (spi_is_busy(DISPLAY_SPI)) {
+    }
+  }
+
+  ili9341_stop_writing();
+}
+
+static uint16_t rgb565_brightness(uint16_t color, uint8_t brightness) {
+  static const int8_t sine_brightness[32] = {0, 1,  2,  3,  4,  5,  5,  6,  6,  5,  5,  4,  4,  3,  2,  1,
+                                             0, -1, -2, -3, -4, -5, -5, -6, -6, -5, -5, -4, -4, -3, -2, -1};
+
+  // Convert byte-swapped RGB565 to normal packed RGB565.
+  color = SWAP_BYTES(color);
+
+  const int32_t level = sine_brightness[brightness & 0x1f];
+
+  int32_t red = (color >> 11) & 0x1F;  // 0..31
+  int32_t green = (color >> 5) & 0x3F; // 0..63
+  int32_t blue = color & 0x1F;         // 0..31
+
+  // Additive brightness adjustment.
+  red += level;
+  green += level * 2;
+  blue += level;
+
+  // Clamp components.
+  if (red < 0) {
+    red = 0;
+  } else if (red > 31) {
+    red = 31;
+  }
+  if (green < 0) {
+    green = 0;
+  } else if (green > 63) {
+    green = 63;
+  }
+  if (blue < 0) {
+    blue = 0;
+  } else if (blue > 31) {
+    blue = 31;
+  }
+  // Repack normal RGB565.
+  const uint16_t adjusted = (uint16_t)((red << 11) | (green << 5) | blue);
+
+  // Return in the palette's byte-swapped format.
+  return SWAP_BYTES(adjusted);
+}
+
+inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width) {
+  uint16_t screen_x = x * CHAR_WIDTH;
+  uint16_t screen_y = (TEXT_HEIGHT - 1 - y) * CHAR_HEIGHT;
+  uint16_t screen_width = width * CHAR_WIDTH;
+  uint16_t screen_height = CHAR_HEIGHT;
+
+  static uint8_t pulse = 0;
+  pulse++;
+
+  uint16_t currentPalette[16];
+
+  for (size_t i = 0; i < 16; ++i) {
+    currentPalette[i] = rgb565_brightness(palette[i], pulse);
+  }
+
+  ili9341_transmit32(ILI9341_CASET, screen_y, screen_y + screen_height - 1);
+  ili9341_transmit32(ILI9341_PASET, screen_x, screen_x + screen_width - 1);
+
+  ili9341_set_command(ILI9341_RAMWR);
+  ili9341_start_writing();
+
+  const font_t *font = fonts[ui_font_index];
+
+  bool haveDmaInFlight = false;
+
+  for (int page = x; page < x + width; page++) {
+    uint16_t *buffer_idx = buffer;
+
+    int col = y;
+    int idx = col * TEXT_WIDTH + page;
+
+    uint8_t character = screen[idx];
+    uint16_t fg = currentPalette[(colors[idx] >> 4) & 0x0F];
+    uint16_t bg = currentPalette[colors[idx] & 0x0F];
+    const uint16_t *glyph = (*font)[character];
+
+    for (int glyphY = 0; glyphY < CHAR_HEIGHT; glyphY++) {
+      uint16_t pix = glyph[glyphY];
+
+      for (int glyphX = CHAR_WIDTH - 1; glyphX >= 0; glyphX--) {
+        uint16_t mask = 1u << glyphX;
+        *buffer_idx++ = (pix & mask) ? bg : fg;
+      }
+    }
+
+    if (haveDmaInFlight) {
+      while (dma_channel_is_busy(DISPLAY_DMA_CH)) {
+      }
+      while (spi_is_busy(DISPLAY_SPI)) {
+      }
+    }
+
+    dma_channel_set_read_addr(DISPLAY_DMA_CH, buffer, false);
     dma_channel_set_trans_count(DISPLAY_DMA_CH, CHAR_WIDTH * screen_height * sizeof(uint16_t), true);
 
     haveDmaInFlight = true;
@@ -310,4 +422,8 @@ void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool *
   *outScreen = screen;
   *outColors = colors;
   *outChanged = changed;
+}
+
+void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width) {
+  chargfx_draw_highlight_region(x, y, width);
 }

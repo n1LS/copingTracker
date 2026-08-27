@@ -30,6 +30,7 @@
 
 static const int16_t offsets_[2][4] = {-1, 1, 12, -12, -1, 1, 16, -16};
 static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
+static const uint8_t columnWidths_[7] = {3, 2, 1, 3, 4, 3, 4};
 
 // static callback handlers
 
@@ -314,6 +315,10 @@ void PhraseView::updateCursor(int dx, int dy) {
   }
 
   viewData_->phraseCurPos_ = row_;
+
+  int x = 5 + columnPositions_[col_];
+  focusRect_ = GUIRect(x, row_ + 3, x + columnWidths_[col_]);
+
   isDirty_ = true;
 }
 
