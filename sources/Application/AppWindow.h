@@ -70,7 +70,7 @@ public:
 
   // ProjectLoaderProtocol implementation
   virtual void onLoadPhaseAComplete() override;
-  virtual void onPhaseCComplete(bool success, const char *projectName) override;
+  virtual void onLoadPhaseCComplete(bool success, const char *projectName) override;
   virtual void onLoadProgress(uint32_t index, uint32_t total, const char *message) override;
 
   char projectName_[MAX_PROJECT_NAME_LENGTH + 1];

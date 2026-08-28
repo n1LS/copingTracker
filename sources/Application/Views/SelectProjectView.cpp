@@ -67,6 +67,7 @@ static void LoadProjectCallback(View &v, ModalView &dialog) {
       return;
     }
     current->Write(name, 1, strlen(name));
+    current->Sync();
 
     Trace::Log("SELECTPROJECTVIEW", "Saved '%s' to .current, rebooting", name);
     System *sys = System::GetInstance();

@@ -59,7 +59,7 @@ void ProjectLoader::FinalizeLoad() {
   }
   sampleLoadComplete_ = false;
   RunPhaseC(projectName_);
-  listener_.onPhaseCComplete(phaseCDone_, projectName_);
+  listener_.onLoadPhaseCComplete(phaseCDone_, projectName_);
 }
 
 bool ProjectLoader::IsLoadInProgress() const {

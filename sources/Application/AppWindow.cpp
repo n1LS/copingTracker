@@ -401,7 +401,7 @@ void AppWindow::onLoadProgress(uint32_t index, uint32_t total, const char *messa
   (void)message;
 }
 
-void AppWindow::onPhaseCComplete(bool success, const char *projectName) {
+void AppWindow::onLoadPhaseCComplete(bool success, const char *projectName) {
   // Phase C: view-level completion work after sample loading
   if (!success) {
     Trace::Error("Failed to load project '%s'. Waiting for key press to load untitled", projectName);

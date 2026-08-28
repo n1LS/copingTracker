@@ -30,7 +30,7 @@ public:
   // Called after Phase C (load project data, init instruments/dispatcher)
   // completes. The caller should handle view setup. Returns false if the
   // load failed.
-  virtual void onPhaseCComplete(bool success, const char *projectName) = 0;
+  virtual void onLoadPhaseCComplete(bool success, const char *projectName) = 0;
 
   // Progress updates during the async sample-loading phase.
   virtual void onLoadProgress(uint32_t index, uint32_t total, const char *message) = 0;
@@ -57,7 +57,7 @@ public:
   void Update();
 
   // Runs Phase C (data load, instrument init, dispatcher init, save state)
-  // and notifies the listener via onPhaseCComplete(). Only call this when
+  // and notifies the listener via onLoadPhaseCComplete(). Only call this when
   // IsSampleLoadDone() is true.
   void FinalizeLoad();
 
