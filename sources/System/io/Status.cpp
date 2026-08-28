@@ -27,4 +27,9 @@ void Status::Set(const char *fmt, ...) {
   npf_vsnprintf(buffer, sizeof(buffer), fmt, args);
   status->Print(buffer);
   va_end(args);
+
+  extern AppWindow *instance;
+  if (instance) {
+    instance->Flush();
+  }
 }

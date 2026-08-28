@@ -42,11 +42,12 @@ public: // I_GUIGraphics implementation
   virtual void SetColor(Color color);
   virtual void SetBackgroundColor(Color color);
   virtual void ClearTextRect(GUIRect &rect);
-  virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false);
-  virtual void DrawString(const char *string, const GUIPoint &pos);
+  virtual void DrawChar(int x, int y, const char c, bool transparent = false);
+  virtual void DrawString(int x, int y, const char *string);
   virtual void DrawRect(const GUIRect &rect);
   virtual void SetCurrentRectColor(Color color);
   virtual GUIRect GetRect();
+  const GUIRect &GetFocusRect() const;
   virtual void Invalidate();
   virtual void Flush();
   virtual void Lock();
@@ -70,6 +71,8 @@ public:
 
   virtual bool DispatchEvent(GUIEvent &Event);
 
+  void SetFocusRect(const GUIRect &rect);
+
   // Returns the offset of the control with respect to the
   // I_GUIGraphics it uses to render itself.
 
@@ -83,6 +86,7 @@ protected:
   // Returns the graphics used to render the window
 
   virtual I_GUIGraphics *GetGraphics();
+  GUIRect focusRect_;
 
 private:
   I_GUIWindowImp *_imp; // the implementation system-dependant window

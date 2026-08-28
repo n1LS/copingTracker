@@ -25,6 +25,9 @@ public:
 
   virtual bool IsStatic();
 
+  int GetFocusOffset();
+  int GetFocusWidth();
+
 protected:
 protected:
   Color color_;

@@ -17,7 +17,7 @@
 
 class UIActionField : public UIField, public Observable {
 public:
-  UIActionField(const char *name, unsigned int fourcc, GUIPoint &position);
+  UIActionField(const char *name, unsigned int tocken, GUIPoint &position);
 
   virtual ~UIActionField();
   virtual void Draw(GUIWindow &w, int offset = 0);
@@ -25,8 +25,11 @@ public:
   virtual void OnClick();
   const char *GetString();
 
+  int GetFocusOffset();
+  int GetFocusWidth();
+
 protected:
   const char *name_;
-  unsigned int fourcc_;
+  unsigned int token_;
 };
 #endif

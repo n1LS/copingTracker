@@ -10,19 +10,17 @@
  */
 
 #include "Service.h"
-#include "ServiceRegistry.h"
 #include "System/Console/Trace.h"
 
-Service::Service(int fourCC) {
-  fourCC_ = fourCC;
-  ServiceRegistry::GetInstance()->Register(this);
+Service::Service(int token) {
+  token_ = token;
 }
 
 Service::~Service() {};
 
 void Service::Register(SubService *sub) {
   if (subs_.full()) {
-    Trace::Error("Service %d: subservice list full", fourCC_);
+    Trace::Error("Service %d: subservice list full", token_);
     return;
   }
   subs_.push_back(sub);

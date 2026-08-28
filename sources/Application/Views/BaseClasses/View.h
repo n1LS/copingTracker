@@ -74,8 +74,8 @@ struct Theme {
   };
 
   struct Data {
-    FIXED(negative, RED)
-    FIXED(positive, GREEN)
+    FIXED(negative, LIGHT_RED)
+    FIXED(positive, LIGHT_GREEN)
   };
 
   struct Waveform {
@@ -120,8 +120,8 @@ struct Theme {
     };
 
     struct Selection {
-      FIXED(bg, LIGHT_GREEN)
-      FIXED(fg, BLACK)
+      SWITCHABLE(bg, LIGHT_GREEN, Theme::View::bg)
+      SWITCHABLE(fg, BLACK, Theme::View::fg)
     };
 
     struct Title {
@@ -269,6 +269,8 @@ public:
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
 
+  virtual GUIRect GetFocusRect();
+
 protected:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed) = 0;
 
@@ -290,6 +292,7 @@ protected:
   void drawCommandLegend(uint8_t x, uint8_t y, Token command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
+  void drawPlaybackIndicator();
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
   void drawPlayTime(Player *player, GUIPoint pos);
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
@@ -323,7 +326,7 @@ public: // temp hack for modal window constructors
 
   int vuMeterCount_;
   ViewMode viewMode_;
-  bool isDirty_; // .Do we need to redraw screeen
+  bool isDirty_; // Do we need to redraw screeen
   ViewType viewType_;
   bool hasFocus_;
 
@@ -332,6 +335,9 @@ public: // temp hack for modal window constructors
   int32_t prevRightVU_[SONG_CHANNEL_COUNT + 1];
 
   Token stopPlaybackSource_;
+
+protected:
+  GUIRect focusRect_;
 
 private:
   uint16_t mask_;

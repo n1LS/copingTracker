@@ -1,17 +1,27 @@
+### bootloader ################################################################
+
 add_executable(PatchBay
-  bootloader_main.cpp
-  bootloader_gfx.cpp
-  bootloader_log.cpp
-  flash_writer.cpp
-  bootloader_menu.cpp
-  path_utils.cpp
-  slot_boot.cpp
+  bl_main.cpp
+  bl_gfx.cpp
+  bl_log.cpp
+  bl_flash_writer.cpp
+  bl_menu.cpp
+  bl_path_utils.cpp
+  bl_slot_boot.cpp
+  bl_ui.cpp
+  bl_sd_ops.cpp
+  bl_flash_logic.cpp
   trace_wrap.cpp
-  uf2_parser.cpp
+  bl_uf2_parser.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/copingTracker/display/ili9341.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/copingTracker/platform/platform.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/copingTracker/mutex/picoTrackerMutex.cpp
   ${PROJECT_SOURCE_DIR}/Adapters/copingTracker/system/input.cpp
+)
+
+
+pico_set_linker_script(PatchBay
+  ${CMAKE_CURRENT_SOURCE_DIR}/bootloader_memmap.ld
 )
 
 target_link_libraries(PatchBay PUBLIC
@@ -24,7 +34,18 @@ target_link_libraries(PatchBay PUBLIC
     
     # External and SDK libraries
     pico_sdk_bundle
+    pico_stdlib
 )
+
+pico_define_boot_stage2(boot2_custom
+  "${CMAKE_CURRENT_SOURCE_DIR}/boot2_custom.S"
+)
+
+target_compile_definitions(boot2_custom PRIVATE
+  BOOTLOADER_START=0x10FF0000
+)
+
+pico_set_boot_stage2(PatchBay boot2_custom)
 
 target_include_directories(PatchBay PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR})

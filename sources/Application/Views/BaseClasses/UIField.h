@@ -31,6 +31,11 @@ public:
   void ClearFocus();
   bool HasFocus();
 
+  virtual int GetFocusWidth() {
+    return focusWidth_;
+  }
+  virtual int GetFocusOffset() = 0;
+
   void SetPosition(const GUIPoint &);
   GUIPoint GetPosition();
 
@@ -46,5 +51,6 @@ protected:
   uint8_t x_;
   uint8_t y_;
   bool focus_;
+  int focusWidth_;
 };
 #endif

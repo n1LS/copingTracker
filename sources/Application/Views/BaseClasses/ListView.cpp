@@ -36,6 +36,8 @@ void ListView::ProcessButtonMask(uint16_t mask, bool pressed) {
     HandleDown(mask & BM_ALT);
   } else if (mask & BM_ENTER) {
     HandleEnter();
+  } else if (mask & BM_EDIT) {
+    HandleEdit();
   }
 }
 
@@ -64,8 +66,8 @@ void ListView::DrawListItems() {
   for (size_t i = topIndex_; i < topIndex_ + pageSize_ && i < itemCount; i++) {
     bool isSelected = (i == currentIndex_);
 
-    Color bg = isSelected ? Theme::View::Selection::bg : Theme::View::bg;
-    Color fg = isSelected ? Theme::View::Selection::fg : Theme::View::fg;
+    Color bg = Theme::View::Selection::bg(isSelected);
+    Color fg = Theme::View::Selection::fg(isSelected);
 
     dataSource_->PrepareItemDrawing(i, isSelected, &fg, &bg, buffer, sizeof(buffer));
     SetColor(fg);
@@ -76,6 +78,8 @@ void ListView::DrawListItems() {
       SwapColors();
       DrawString(0, y, char_button_border_left_s);
       DrawString(SCREEN_WIDTH - 2, y, char_button_border_right_s);
+
+      focusRect_ = GUIRect(0, y, SCREEN_WIDTH - 1, y);
     }
 
     y++;
@@ -143,6 +147,12 @@ void ListView::HandleDown(bool page) {
 void ListView::HandleEnter() {
   if (delegate_) {
     delegate_->OnItemSelected(currentIndex_, selectedTab_);
+  }
+}
+
+void ListView::HandleEdit() {
+  if (delegate_) {
+    delegate_->OnItemEdit(currentIndex_, selectedTab_);
   }
 }
 

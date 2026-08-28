@@ -321,12 +321,12 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 
       // draw left channel if changed
       if (leftChanged) {
-        DrawString(pos.x_, pos.y_ - i, char_bargraph_s(leftBars - 10 * i));
+        DrawChar(pos.x_, pos.y_ - i, char_v_bar(leftBars - 10 * i));
       }
 
       // draw right channel if changed
       if (rightChanged) {
-        DrawString(pos.x_ + 1, pos.y_ - i, char_bargraph_s(rightBars - 10 * i));
+        DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(rightBars - 10 * i));
       }
     }
   }
@@ -430,32 +430,35 @@ void View::ClearTextRect(int x, int y, int w, int h) {
 }
 
 void View::DrawString(int x, int y, const char *text) {
-  GUIPoint pos(x, y);
-  w_.DrawString(text, pos);
+  w_.DrawString(x, y, text);
 }
 
 void View::DrawTintString(int x, int y, const TintChar *data) {
-  GUIPoint pos(x, y);
-
   TintChar *cell = (TintChar *)data;
 
   while (cell->character != 0) {
     w_.SetColor(cell->fgBg.fg);
     w_.SetBackgroundColor(cell->fgBg.bg);
-    w_.DrawChar(cell->character, pos, false);
-    pos.x_++;
+    w_.DrawChar(x, y, cell->character, false);
+    x++;
     cell++;
   }
 }
 
 void View::DrawChar(int x, int y, const char character, bool transparent) {
-  GUIPoint pos(x, y);
-  w_.DrawChar(character, pos, transparent);
+  w_.DrawChar(x, y, character, transparent);
 }
 
 void View::DrawRect(const GUIRect &r, Color color) {
   w_.SetCurrentRectColor(color);
   w_.DrawRect(r);
+}
+
+void View::drawPlaybackIndicator() {
+  SetBackgroundColor(Theme::View::Title::bg);
+  SetColor(Theme::View::Title::fg);
+  int startX = SCREEN_WIDTH - 5;
+  DrawChar(startX, 0, Player::GetInstance()->IsRunning() ? CHAR(char_indicator_position_s) : ' ');
 }
 
 void View::drawBattery() {
@@ -805,4 +808,8 @@ bool View::ConfirmStopPlayback(Token source) {
   DoModal(mb, ModalViewCallback::create<View, &View::OnConfirmStopDialog>(*this));
 
   return false;
+}
+
+GUIRect View::GetFocusRect() {
+  return focusRect_;
 }

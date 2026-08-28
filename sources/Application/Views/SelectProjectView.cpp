@@ -102,13 +102,8 @@ void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg
   }
 
   // Set colors based on selection
-  if (isSelected) {
-    SetBackgroundColor(Theme::View::Selection::bg);
-    SetColor(Theme::View::Selection::fg);
-  } else {
-    SetBackgroundColor(Theme::View::bg);
-    SetColor(Theme::View::fg);
-  }
+  SetBackgroundColor(Theme::View::Selection::bg(isSelected));
+  SetColor(Theme::View::Selection::fg(isSelected));
 
   // Check if this is the current project
   auto var = viewData_->project_->FindVariable(Token::VarProjectName);
@@ -129,10 +124,10 @@ void SelectProjectView::OnTabAction(int tabIndex, const char *filename) {
 
   switch (tabIndex) {
     case 0: // Load tab
-      AttemptLoadingProject();
+      ConfirmStopPlayback(Token::ActionImport);
       break;
     case 1: // Delete tab
-      AttemptDeletingSelectedProject();
+      ConfirmStopPlayback(Token::ActionDelete);
       break;
   }
 }
@@ -180,15 +175,6 @@ void SelectProjectView::ClearAutoSave() {
   }
 }
 
-bool SelectProjectView::WarnPlayerRunning() {
-  if (Player::GetInstance()->IsRunning()) {
-    MessageBox *mb = MessageBox::Create(*this, "Error", "Not while running!", MBBF_OK);
-    DoModal(mb);
-    return true;
-  }
-  return false;
-}
-
 bool SelectProjectView::SelectionIsCurrentProject() {
   char selected[MAX_PROJECT_NAME_LENGTH + 1];
   getHighlightedProjectName(selected);
@@ -200,12 +186,28 @@ bool SelectProjectView::SelectionIsCurrentProject() {
   return strcmp(current, selected) == 0;
 }
 
-void SelectProjectView::AttemptDeletingSelectedProject() {
+void SelectProjectView::LoadSelectedProject() {
   if (GetCurrentIndex() >= ListView::GetItemCount()) {
     return;
   }
 
-  if (WarnPlayerRunning()) {
+  MessageBox *mb = MessageBox::Create(*this, "Load", "Load song and lose changes?", MBBF_YES | MBBF_NO);
+  DoModal(mb, ModalViewCallback::create<&LoadProjectCallback>());
+}
+
+void SelectProjectView::ConfirmedStop(Token source) {
+  switch (source) {
+    case Token::ActionImport:
+      LoadSelectedProject();
+      break;
+    case Token::ActionDelete:
+      DeleteSelectedProject();
+      break;
+  }
+}
+
+void SelectProjectView::DeleteSelectedProject() {
+  if (GetCurrentIndex() >= GetItemCount()) {
     return;
   }
 
@@ -220,13 +222,4 @@ void SelectProjectView::AttemptDeletingSelectedProject() {
 
   ModalView *mb = DeleteProjectConfirmModal::Create(*this, selected);
   DoModal(mb, ModalViewCallback::create<&DeleteProjectCallback>());
-}
-
-void SelectProjectView::AttemptLoadingProject() {
-  if (GetCurrentIndex() >= ListView::GetItemCount() || WarnPlayerRunning()) {
-    return;
-  }
-
-  MessageBox *mb = MessageBox::Create(*this, "Load", "Load song and lose changes?", MBBF_YES | MBBF_NO);
-  DoModal(mb, ModalViewCallback::create<&LoadProjectCallback>());
 }

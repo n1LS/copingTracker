@@ -181,6 +181,12 @@ void FileListView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
+  // Handle EDIT key alone (open editor for selected item)
+  if (mask == BM_EDIT) {
+    HandleEdit();
+    return;
+  }
+
   // Handle navigation
   if (mask & BM_UP) {
     HandleUp(mask & BM_EDIT); // SHIFT+UP for page up
@@ -500,8 +506,8 @@ void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Col
 
   // Set colors based on selection and type
   if (isSelected) {
-    *fg = Theme::View::Selection::fg;
-    *bg = Theme::View::Selection::bg;
+    *fg = Theme::View::Selection::fg(true);
+    *bg = Theme::View::Selection::bg(true);
   } else {
     *fg = isDirectory ? Theme::FileList::directory : Theme::FileList::file;
     *bg = Theme::View::bg;
@@ -556,6 +562,12 @@ void FileListView::OnItemSelected(int index, int selectedTab) {
 
 void FileListView::OnItemNavigated(int index) {
   (void)index; // Default: just notify, no action needed
+}
+
+void FileListView::OnItemEdit(int index, int selectedTab) {
+  // Default: no-op; subclasses can override to open an editor for the selected item
+  (void)index;
+  (void)selectedTab;
 }
 
 void FileListView::OnFileSelected(const char *filename) {

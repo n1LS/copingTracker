@@ -20,11 +20,19 @@ void UISwatchField::Draw(GUIWindow &w, int offset) {
   GUIPoint position = GetPosition() + GUIPoint(1, offset);
 
   ((AppWindow &)w).SetBackgroundColor(color_);
-  w.DrawString("   ", position);
+  w.DrawString(position.x_, position.y_, "   ");
 }
 
 void UISwatchField::ProcessArrow(uint16_t mask) {};
 
 bool UISwatchField::IsStatic() {
   return true;
+}
+
+int UISwatchField::GetFocusOffset() {
+  return 0;
+}
+
+int UISwatchField::GetFocusWidth() {
+  return 0;
 }

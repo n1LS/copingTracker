@@ -13,6 +13,8 @@
 // precalculated semitone ratios for pitch slides (Q16.16 format)
 constexpr auto semitoneRatioQ16 = gen_semi_lut(std::make_index_sequence<256>{});
 // precalculated frequency table midi notes -12 to 127+12
+#define fLUT_MinNote -12
+#define fLUT_MaxNote 138
 constexpr auto frequencyLUT = gen_frq_lut(std::make_index_sequence<128 + 24>{});
 // precalculated attack coefficients for envelope (0-64)
 constexpr auto attackCoeffLUT = gen_attack_lut(std::make_index_sequence<65>{});

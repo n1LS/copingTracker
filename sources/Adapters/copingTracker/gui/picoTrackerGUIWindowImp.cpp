@@ -110,19 +110,18 @@ void picoTrackerGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount
   }
 }
 
-void picoTrackerGUIWindowImp::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
-  chargfx_set_cursor(pos.x_, pos.y_);
+void picoTrackerGUIWindowImp::DrawChar(int x, int y, const char c, bool transparent) {
+  chargfx_set_cursor(x, y);
   chargfx_putc(c, transparent);
 }
 
-void picoTrackerGUIWindowImp::DrawString(const char *string, const GUIPoint &pos) {
+void picoTrackerGUIWindowImp::DrawString(int x, int y, const char *string) {
   if (!string) {
     return;
   }
 
-  GUIPoint drawPos = pos;
-  for (const char *current = string; *current; ++current, ++drawPos.x_) {
-    DrawChar(*current, drawPos);
+  for (const char *current = string; *current; ++current, ++x) {
+    DrawChar(x, y, *current);
   }
 }
 
@@ -166,6 +165,10 @@ void picoTrackerGUIWindowImp::Flush() {
   }
 
   chargfx_draw_changed();
+
+  // 2nd render pass for the focus rect
+  const GUIRect &rect = _window->GetFocusRect();
+  chargfx_draw_focus_rect(rect.Left(), rect.Top(), rect.Width());
 }
 
 void picoTrackerGUIWindowImp::Invalidate() {
@@ -179,6 +182,10 @@ void picoTrackerGUIWindowImp::PushEvent(GUIEvent &event) {
 GUIRect picoTrackerGUIWindowImp::GetRect() {
   Trace::Debug("GUI GetRect");
   return GUIRect(0, 0, 320, 240);
+}
+
+const GUIRect &picoTrackerGUIWindowImp::GetFocusRect() const {
+  return _window->GetFocusRect();
 }
 
 void picoTrackerGUIWindowImp::ProcessEvent(picoTrackerEvent &event) {

@@ -67,7 +67,7 @@ void UIIntVarField::Draw(GUIWindow &w, int offset) {
       strcpy(buffer, "++wtf++");
   }
 
-  DrawLabeledField(w, position, buffer, focus_);
+  focusWidth_ = DrawLabeledField(w, position, buffer, focus_);
 }
 
 void UIIntVarField::ProcessArrow(uint16_t mask) {
@@ -123,4 +123,14 @@ void UIIntVarField::SetRange(int min, int max, int xOffset, int yOffset) {
   max_ = max;
   xOffset_ = xOffset;
   yOffset_ = yOffset;
+}
+
+int UIIntVarField::GetFocusOffset() {
+  char *colon = strchr(format_, ':');
+
+  if (colon != NULL) {
+    return colon - format_;
+  }
+
+  return 0;
 }

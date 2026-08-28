@@ -5,9 +5,9 @@
 template <uint8_t MaxLength>
 UITextField<MaxLength>::UITextField(
     Variable &v, const GUIPoint &position,
-    const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label, uint8_t fourcc,
+    const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label, uint8_t token,
     etl::string<MaxLength> &defaultValue_)
-    : UIField(position), src_(&v), label_(label), fourcc_(fourcc),
+    : UIField(position), src_(&v), label_(label), token_(token),
       defaultValue_(defaultValue_) {}
 
 template <uint8_t MaxLength> UITextField<MaxLength>::~UITextField(){};
@@ -21,7 +21,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
   // Draw the label
   ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
   ((AppWindow &)w).SetColor(Theme::Input::label);
-  w.DrawString(label_.c_str(), position);
+  w.DrawString(position.x_, position.y_, label_.c_str());
   position.x_ += label_.length();
   
   auto srcString = src_->GetString();
@@ -44,7 +44,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
     if (len == 0) {
       // For empty fields, draw a cursor at the beginning position
       ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
-      w.DrawString(" ", position);
+      w.DrawString(position.x_, position.y_, " ");
     } else {
       ((AppWindow &)w).SetColor(Theme::Input::fg(true));
 
@@ -55,7 +55,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
         buffer[0] = value[i];
         bool active = currentChar_ == i;
         ((AppWindow &)w).SetBackgroundColor(active ? Theme::Input::cursor : Theme::Input::bg(true));
-        w.DrawString(buffer, position);
+        w.DrawString(position.x_, position.y_, buffer);
         position.x_ += 1;
       }
     }
@@ -63,7 +63,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
     if (len != 0) {
       ((AppWindow &)w).SetColor(Theme::Input::fg(false));
       ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(false));
-      w.DrawString(value, position);
+      w.DrawString(position.x_, position.y_, value);
     }
   }
 }
@@ -71,7 +71,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
 template <uint8_t MaxLength> void UITextField<MaxLength>::OnClick() {
   SetChanged();
   NotifyObservers(
-      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(fourcc_)));
+      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(token_)));
 }
 
 template <uint8_t MaxLength> void UITextField<MaxLength>::OnEditClick() {
@@ -83,7 +83,7 @@ template <uint8_t MaxLength> void UITextField<MaxLength>::OnEditClick() {
   src_->SetString(buffer.c_str(), true);
   SetChanged();
   NotifyObservers(
-      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(fourcc_)));
+      reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(token_)));
 }
 
 template <uint8_t MaxLength>
@@ -93,7 +93,7 @@ void UITextField<MaxLength>::ProcessArrow(uint16_t mask) {
     src_->SetString(buffer.c_str(), true);
     SetChanged();
     NotifyObservers(
-        reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(fourcc_)));
+        reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(token_)));
   };
 
   // If the variable's value is empty, we need to initialize it when the user
@@ -158,4 +158,14 @@ void UITextField<MaxLength>::SetVariable(Variable &v) {
   // Set the variable this UITextField is bound to
   src_ = &v;
   currentChar_ = 0; // Reset cursor position
+}
+
+template <uint8_t MaxLength>
+int UITextField<MaxLength>::GetFocusOffset() {
+  return strlen(label_.c_str());
+}
+
+template <uint8_t MaxLength>
+int UITextField<MaxLength>::GetFocusWidth() {
+  return GetString().size();
 }

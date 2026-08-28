@@ -63,8 +63,8 @@ public:
   using GUIWindow::Clear;
   virtual void Clear();
   virtual void ClearTextRect(GUIRect &rect);
-  virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false);
-  virtual void DrawString(const char *string, const GUIPoint &pos);
+  virtual void DrawChar(int x, int y, const char c, bool transparent = false);
+  virtual void DrawString(int x, int y, const char *string);
   virtual void SwapColors();
   virtual void SetColor(Color color);
   virtual void SetBackgroundColor(Color color);

@@ -18,6 +18,9 @@
 #include "ViewData.h"
 #include <nanoprintf.h>
 
+const int columnPositions_[2] = {0, 3};
+const int columnWidths_[2] = {2, 2};
+
 ChainView::ChainView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
   updatingPhrase_ = false;
   lastPhrase_ = 0;
@@ -84,6 +87,15 @@ void ChainView::pasteLastPhrase() {
 void ChainView::updateCursor(int dx, int dy) {
   viewData_->UpdateChainCursor(dx, dy);
   isDirty_ = true;
+
+  updateFocusRect();
+}
+
+void ChainView::updateFocusRect() {
+  int col = viewData_->chainCol_;
+  int x = 5 + columnPositions_[col];
+  int y = 3 + viewData_->chainRow_;
+  focusRect_ = GUIRect(x, y, x + columnWidths_[col], y);
 }
 
 void ChainView::updateCursorValue(int offset, int dx, int dy) {
@@ -578,6 +590,8 @@ void ChainView::OnFocus() {
          viewData_->song_->chain_.steps_[viewData_->currentChain_][viewData_->chainRow_].phrase == 0xFF) {
     viewData_->chainRow_--;
   }
+
+  updateFocusRect();
 }
 
 void ChainView::setTextProps(int col, int row) {
@@ -810,7 +824,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   pos = GetAnchor();
   pos.x_ += 21;
 
-  PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[phrase];
 
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));

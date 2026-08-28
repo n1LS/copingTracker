@@ -14,51 +14,80 @@ int FindFormatValueOffset(const char *format) {
   return -1;
 }
 
-void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused, int subSelectionOffset,
-                      int subSelectionLength) {
+int DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused, int subSelectionOffset,
+                     int subSelectionLength) {
   ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
   ((AppWindow &)w).SetColor(Theme::View::fg);
 
+  GUIPoint basePosition = position;
+
   char *colon = strchr(buffer, ':');
   int valueOffset = 0;
+  char *value = buffer;
 
   if (colon) {
-    int index = colon - buffer;
-    buffer[index] = 0;
-    valueOffset = index + 1;
+    int labelLength = colon - buffer;
+
+    // Temporarily terminate the label.
+    *colon = '\0';
 
     ((AppWindow &)w).SetColor(Theme::Input::label);
-    w.DrawString(buffer, position);
+    w.DrawString(position.x_, position.y_, buffer);
 
-    position.x_ += index + 1;
-    buffer += index + 1;
+    // Restore the caller's buffer.
+    *colon = ':';
+
+    valueOffset = labelLength + 1;
+    position.x_ += valueOffset;
+    value = colon + 1;
   }
+
+  const int valueLength = static_cast<int>(strlen(value));
 
   if (focused) {
     ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(true));
     ((AppWindow &)w).SetColor(Theme::Input::fg(true));
 
-    w.DrawString(buffer, position);
+    w.DrawString(position.x_, position.y_, value);
 
     int valueSubSelectionOffset = subSelectionOffset - valueOffset;
-    if (subSelectionOffset >= valueOffset && valueSubSelectionOffset < (int)strlen(buffer) && subSelectionLength > 0) {
-      int valueLength = strlen(buffer);
+
+    if (subSelectionOffset >= valueOffset && valueSubSelectionOffset < valueLength && subSelectionLength > 0) {
       if (valueSubSelectionOffset + subSelectionLength > valueLength) {
         subSelectionLength = valueLength - valueSubSelectionOffset;
       }
 
-      char replaced = buffer[valueSubSelectionOffset + subSelectionLength];
-      buffer[valueSubSelectionOffset + subSelectionLength] = 0;
+      char replaced = value[valueSubSelectionOffset + subSelectionLength];
+
+      value[valueSubSelectionOffset + subSelectionLength] = '\0';
+
       position.x_ += valueSubSelectionOffset;
+
       ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
       ((AppWindow &)w).SetColor(Theme::Input::fg(true));
-      w.DrawString(buffer + valueSubSelectionOffset, position);
-      buffer[valueSubSelectionOffset + subSelectionLength] = replaced;
+
+      w.DrawString(position.x_, position.y_, value + valueSubSelectionOffset);
+
+      value[valueSubSelectionOffset + subSelectionLength] = replaced;
     }
   } else {
     ((AppWindow &)w).SetColor(Theme::Input::fg(false));
-    w.DrawString(buffer, position);
+    w.DrawString(position.x_, position.y_, value);
   }
+
+  // draw highlight button ends
+  char front = focused ? CHAR(char_button_border_left_s) : ' ';
+  char end = focused ? CHAR(char_button_border_right_s) : ' ';
+
+  if (focused) {
+    ((AppWindow &)w).SetColor(Theme::Input::bg(true));
+    ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
+  }
+
+  w.DrawChar(basePosition.x_ + valueOffset - 1, basePosition.y_, front);
+  w.DrawChar(basePosition.x_ + strlen(buffer), basePosition.y_, end);
+
+  return valueLength + 2;
 }
 
 bool goProjectSamplesDir(ViewData *viewData_) {

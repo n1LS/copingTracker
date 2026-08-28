@@ -36,6 +36,13 @@ public:
   void SetBorderColors(Color normal, Color focused);
   void SetSampleSize(uint32_t sampleSize);
 
+  int GetFocusWidth() {
+    return 0;
+  }
+  int GetFocusOffset() {
+    return 0;
+  }
+
   uint32_t SampleSize() const;
   uint8_t ZoomLevel() const;
   uint8_t MaxZoomLevel() const;

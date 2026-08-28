@@ -30,6 +30,7 @@
 
 static const int16_t offsets_[2][4] = {-1, 1, 12, -12, -1, 1, 16, -16};
 static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
+static const uint8_t columnWidths_[7] = {3, 2, 1, 3, 4, 3, 4};
 
 // static callback handlers
 
@@ -145,29 +146,29 @@ void PhraseView::updateVolumeValue(ViewUpdateDirection direction, int yOffset) {
 
 void PhraseView::updateCommandValue(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
   PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  Token cc = (col == colCmd1) ? Token::enum_type(step.cmd1) : Token::enum_type(step.cmd2);
+  Token token = (col == colCmd1) ? Token::enum_type(step.cmd1) : Token::enum_type(step.cmd2);
 
   switch (direction) {
     case VUD_LEFT:
-      cc = CommandList::GetPrev(cc);
+      token = CommandList::GetPrev(token);
       break;
     case VUD_RIGHT:
-      cc = CommandList::GetNext(cc);
+      token = CommandList::GetNext(token);
       break;
     case VUD_UP:
-      cc = CommandList::GetNextAlpha(cc);
+      token = CommandList::GetNextAlpha(token);
       break;
     case VUD_DOWN:
-      cc = CommandList::GetPrevAlpha(cc);
+      token = CommandList::GetPrevAlpha(token);
       break;
   }
 
   if (col == colCmd1) {
-    step.cmd1 = static_cast<uint8_t>(static_cast<char>(cc));
+    step.cmd1 = static_cast<uint8_t>(static_cast<char>(token));
   } else {
-    step.cmd2 = static_cast<uint8_t>(static_cast<char>(cc));
+    step.cmd2 = static_cast<uint8_t>(static_cast<char>(token));
   }
-  lastCmd_ = cc;
+  lastCmd_ = token;
 }
 
 void PhraseView::updateCommandParam(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
@@ -198,14 +199,14 @@ PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
   lastInstr_ = 0;
   lastCmd_ = Token::InstrumentCommandNone;
   lastParam_ = 0;
-  lastVolume_ = 0xFF;
+  lastVolume_ = NO_VOLUME;
 
   clipboard_.active_ = false;
   clipboard_.width_ = 0;
   clipboard_.height_ = 0;
 
   for (int i = 0; i < 16; i++) {
-    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0, 0xFF};
+    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0, NO_VOLUME};
   };
 }
 
@@ -220,7 +221,7 @@ void PhraseView::Reset() {
   lastInstr_ = 0;
   lastCmd_ = Token::InstrumentCommandNone;
   lastParam_ = 0;
-  lastVolume_ = 0xFF;
+  lastVolume_ = NO_VOLUME;
   viewData_->phraseCurPos_ = 0;
 
   clipboard_.active_ = false;
@@ -230,7 +231,7 @@ void PhraseView::Reset() {
   clipboard_.row_ = 0;
 
   for (int i = 0; i < 16; i++) {
-    clipboard_.steps_[i] = {0xFF, 0, 0, 0, 0, 0, 0xFF};
+    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0, NO_VOLUME};
   }
 
   saveCol_ = colNote;
@@ -314,6 +315,10 @@ void PhraseView::updateCursor(int dx, int dy) {
   }
 
   viewData_->phraseCurPos_ = row_;
+
+  int x = 5 + columnPositions_[col_];
+  focusRect_ = GUIRect(x, row_ + 3, x + columnWidths_[col_]);
+
   isDirty_ = true;
 }
 
@@ -644,10 +649,10 @@ void PhraseView::cutSelection() {
       int r = j + clipboard_.row_;
       switch (i + clipboard_.col_) {
         case colNote:
-          base[r].note = 0xFF;
+          base[r].note = NO_NOTE;
           break;
         case colInstrument:
-          base[r].instrument = 0xFF;
+          base[r].instrument = NO_INSTRUMENT;
           break;
         case colCmd1:
           base[r].cmd1 = kNone;
@@ -662,7 +667,7 @@ void PhraseView::cutSelection() {
           base[r].param2 = 0x0000;
           break;
         case colVolume:
-          base[r].volume = 0xFF;
+          base[r].volume = NO_VOLUME;
           break;
       }
     }
@@ -1244,7 +1249,7 @@ void PhraseView::DrawView() {
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    uint8_t p = stepsBase[j].param1;
+    uint16_t p = stepsBase[j].param1;
     setTextProps(colCmdVal1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
     wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
@@ -1274,7 +1279,7 @@ void PhraseView::DrawView() {
   buffer[5] = 0;
 
   for (int j = 0; j < 16; j++) {
-    uint8_t p = stepsBase[j].param2;
+    uint16_t p = stepsBase[j].param2;
     setTextProps(colCmdVal2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
     wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);

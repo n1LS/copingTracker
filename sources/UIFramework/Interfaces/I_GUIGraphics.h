@@ -15,8 +15,6 @@
 #include "Foundation/Types/Colors.h"
 #include "UIFramework/BasicDatas/GUIRect.h"
 
-// #include "Engine/ENGBitmap.h"
-
 // Interface definition for a graphical port.
 
 class I_GUIGraphics {
@@ -26,10 +24,11 @@ public:
   virtual void SetColor(Color color) = 0;
   virtual void SetBackgroundColor(Color color) = 0;
   virtual void ClearTextRect(GUIRect &) = 0;
-  virtual void DrawString(const char *string, const GUIPoint &pos) = 0;
-  virtual void DrawChar(const char c, const GUIPoint &pos, bool transparent = false) = 0;
+  virtual void DrawString(int x, int y, const char *string) = 0;
+  virtual void DrawChar(int x, int y, const char c, bool transparent = false) = 0;
 
   virtual GUIRect GetRect() = 0;
+  virtual const GUIRect &GetFocusRect() const = 0;
   virtual void Invalidate() = 0;
   virtual void Lock() = 0;
   virtual void Unlock() = 0;

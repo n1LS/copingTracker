@@ -176,7 +176,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
     return;
   }
 
-  uintptr_t fourcc = (uintptr_t)data;
+  uintptr_t token = (uintptr_t)data;
 
   UIField *focus = GetFocus();
   focus->ClearFocus();
@@ -184,7 +184,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   focus->SetFocus();
 
   // Handle brightness changes directly
-  if (fourcc == Token::VarBacklightLevel) {
+  if (token == Token::VarBacklightLevel) {
     Config *config = Config::GetInstance();
     Variable *v = config->FindVariable(Token::VarBacklightLevel);
     if (v) {
@@ -197,7 +197,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
   Player *player = Player::GetInstance();
   Config *config = Config::GetInstance();
 
-  switch (fourcc) {
+  switch (token) {
     case Token::VarKeyRepeat:
     case Token::VarKeyDelay:
       {

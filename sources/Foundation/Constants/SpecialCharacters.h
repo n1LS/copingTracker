@@ -35,17 +35,17 @@
 #define char_indicator_save_s "\xEE"
 #define char_indicator_ellipsis_s "\xEF"
 
-#define char_bargraph_bar0_s " "
-#define char_bargraph_bar1_s "\xA1"
-#define char_bargraph_bar2_s "\xA2"
-#define char_bargraph_bar3_s "\xA3"
-#define char_bargraph_bar4_s "\xA4"
-#define char_bargraph_bar5_s "\xA5"
-#define char_bargraph_bar6_s "\xA6"
-#define char_bargraph_bar7_s "\xA7"
-#define char_bargraph_bar8_s "\xA8"
-#define char_bargraph_bar9_s "\xA8"
-#define char_bargraph_bar10_s "\xDB"
+#define char_v_bar_0_s " "
+#define char_v_bar_1_s "\xA0"
+#define char_v_bar_2_s "\xA1"
+#define char_v_bar_3_s "\xA2"
+#define char_v_bar_4_s "\xA3"
+#define char_v_bar_5_s "\xA4"
+#define char_v_bar_6_s "\xA5"
+#define char_v_bar_7_s "\xA6"
+#define char_v_bar_8_s "\xA7"
+#define char_v_bar_9_s "\xA8"
+#define char_v_bar_10_s char_block_full_s
 
 #define char_key_right_s "\x97"
 #define char_key_up_s "\x98"
@@ -168,6 +168,32 @@
 #define char_file_instrument_s "\xD6"
 #define char_symbols_usb_s "\xD7"
 
+// horizontal ruler indicator
+#define char_h_ruler_0_s "\x0a"
+#define char_h_ruler_1_s "\x0b"
+#define char_h_ruler_2_s "\x0c"
+#define char_h_ruler_3_s "\x0d"
+#define char_h_ruler_4_s "\x0e"
+#define char_h_ruler_5_s "\x0f"
+#define char_h_ruler_6_s "\x1a"
+#define char_h_ruler_7_s "\x1b"
+#define char_h_ruler_8_s "\x1c"
+#define char_h_ruler_9_s "\x1d"
+
+// horizontal bar indicator
+#define char_h_bar_0_s "\x1e"
+#define char_h_bar_1_s "\x10"
+#define char_h_bar_2_s "\x11"
+#define char_h_bar_3_s "\x12"
+#define char_h_bar_4_s "\x13"
+#define char_h_bar_5_s "\x14"
+#define char_h_bar_6_s "\x15"
+#define char_h_bar_7_s "\x16"
+#define char_h_bar_8_s "\x17"
+#define char_h_bar_9_s "\x18"
+#define char_h_bar_10_s "\x19"
+#define char_h_bar_previous_s "\x1f"
+
 #define string_battery_charging                                                                                        \
   char_battery_left_s char_battery_charging1_s char_battery_charging2_s char_battery_right_s
 #define string_battery_100_percent char_battery_left_s char_battery_full_s char_battery_full_s char_battery_right_s
@@ -177,31 +203,84 @@
 #define string_battery_0_percent char_battery_left_s char_battery_empty_s char_battery_empty_s char_battery_right_s
 
 // Array of bargraph characters for fast lookup
-static const char *const char_bargraph_lookup[] = {char_bargraph_bar0_s, char_bargraph_bar1_s, char_bargraph_bar2_s,
-                                                   char_bargraph_bar3_s, char_bargraph_bar4_s, char_bargraph_bar5_s,
-                                                   char_bargraph_bar6_s, char_bargraph_bar7_s, char_bargraph_bar8_s,
-                                                   char_bargraph_bar9_s, char_bargraph_bar10_s};
+static const char char_v_bar_lookup[] = {CHAR(char_v_bar_0_s), CHAR(char_v_bar_1_s), CHAR(char_v_bar_2_s),
+                                         CHAR(char_v_bar_3_s), CHAR(char_v_bar_4_s), CHAR(char_v_bar_5_s),
+                                         CHAR(char_v_bar_6_s), CHAR(char_v_bar_7_s), CHAR(char_v_bar_8_s),
+                                         CHAR(char_v_bar_9_s), CHAR(char_v_bar_10_s)};
 
-#define char_bargraph_s(x) (char_bargraph_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
+static const char char_h_bar_lookup[] = {CHAR(char_h_bar_0_s), CHAR(char_h_bar_1_s),  CHAR(char_h_bar_2_s),
+                                         CHAR(char_h_bar_3_s), CHAR(char_h_bar_4_s),  CHAR(char_h_bar_5_s),
+                                         CHAR(char_h_bar_6_s), CHAR(char_h_bar_7_s),  CHAR(char_h_bar_8_s),
+                                         CHAR(char_h_bar_9_s), CHAR(char_h_bar_10_s), CHAR(char_h_bar_previous_s)};
 
-#define char_bargraph_s(x) (char_bargraph_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
+static const char char_ruler_lookup[] = {CHAR(char_h_ruler_0_s),
+                                         CHAR(char_h_ruler_1_s),
+                                         CHAR(char_h_ruler_2_s),
+                                         CHAR(char_h_ruler_3_s),
+                                         CHAR(char_h_ruler_4_s),
+                                         CHAR(char_h_ruler_5_s),
+                                         CHAR(char_h_ruler_6_s),
+                                         CHAR(char_h_ruler_7_s),
+                                         CHAR(char_h_ruler_8_s),
+                                         CHAR(char_h_ruler_9_s),
+                                         CHAR(char_border_single_horizontal_s)};
 
-static inline void horizontal_bargraph_5(char *buffer, uint8_t value) {
-  int32_t v = value / 5;
+#define char_v_bar(x) (char_v_bar_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
 
-  for (int n = 0; n < 5; n++) {
-    if (v >= 10) {
-      buffer[n] = CHAR(char_block_full_s);
+static inline uint8_t map_255_to_bargraph(uint8_t value) {
+  if (value <= 1) {
+    return value + 1;
+  } else if (value >= 254) {
+    return value - 195;
+  }
+  return 2 + ((value - 1) * 55 + 126) / 250;
+}
+
+static inline uint8_t map_12_to_bargraph(uint8_t value) {
+  const uint8_t position[13] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59};
+  return position[(value > 12) ? 12 : value];
+}
+
+static inline uint8_t map_48_to_bargraph(uint8_t value) {
+  // approximate * 1.22916... with * 1.234375
+  return (value * 79) >> 6;
+}
+
+static inline void horizontal_bar_graph_6(char *buffer, uint8_t value) {
+  int v = value;
+  bool lastWas9 = false;
+
+  for (int n = 0; n < 6; n++) {
+    if (lastWas9) {
+      buffer[n] = char_h_bar_lookup[11];
+      lastWas9 = false;
+    } else if (v >= 10) {
+      buffer[n] = char_h_bar_lookup[10];
+      lastWas9 = (v == 10);
     } else if (v > 0) {
-      buffer[n] = 15 + v;
+      buffer[n] = char_h_bar_lookup[v];
     } else {
-      buffer[n] = ' ';
+      buffer[n] = char_h_bar_lookup[0];
     }
 
     v -= 10;
   }
 
-  buffer[5] = 0;
+  buffer[6] = 0;
+}
+
+static inline void horizontal_ruler_6(char *buffer, uint8_t value) {
+  for (int n = 0; n < 6; n++) {
+    if (value >= 10 || value < 0) {
+      buffer[n] = char_ruler_lookup[10];
+    } else if (value >= 0) {
+      buffer[n] = char_ruler_lookup[value];
+    }
+
+    value -= 10;
+  }
+
+  buffer[6] = 0;
 }
 
 // progress bar parts

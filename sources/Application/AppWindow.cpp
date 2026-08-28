@@ -210,24 +210,23 @@ void appwindow_set_sdcard_present(bool present) {
   }
 }
 
-void AppWindow::DrawString(const char *string, const GUIPoint &pos) {
+void AppWindow::DrawString(int x, int y, const char *string) {
   if (!string) {
     return;
   }
 
-  int x = pos.x_;
   for (const char *current = string; *current; ++current, ++x) {
-    DrawChar(*current, GUIPoint(x, pos.y_));
+    DrawChar(x, y, *current);
   }
 }
 
-void AppWindow::DrawChar(const char c, const GUIPoint &pos, bool transparent) {
-  if (pos.y_ < 0 || pos.y_ >= SCREEN_HEIGHT || pos.x_ < 0 || pos.x_ >= SCREEN_WIDTH) {
+void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
+  if (y < 0 || y >= SCREEN_HEIGHT || x < 0 || x >= SCREEN_WIDTH) {
     return;
   }
 
-  int index = pos.x_ + SCREEN_WIDTH * pos.y_;
-  _screenChar[index] = c;
+  int index = x + SCREEN_WIDTH * y;
+  _charScreen[index] = c;
 
   if (transparent) {
     _screenColor[index].fg = color_.fg;
@@ -307,8 +306,15 @@ void AppWindow::Flush() {
 
   Lock();
 
-  GUIPoint pos;
-  unsigned char *current = _screenChar;
+  // Start with an invalid color to force color setting on first character
+  Color currentFG = (Color)-1;
+  Color currentBG = (Color)-1;
+  GUIPoint pos(0, 0);
+
+  int count = 0;
+
+  unsigned char *current = _charScreen;
+  unsigned char *previous = _preScreen;
   color_t *currentColor = _screenColor;
 
   if (transitionType_ != vtNone) {
@@ -319,12 +325,31 @@ void AppWindow::Flush() {
       pos = {0, y};
       for (int x = 0; x < SCREEN_WIDTH; x++, current++, currentColor++, pos.x_++) {
         // Extract invert flag from properties
-        GUI(currentColor, current, pos);
+        Color fg = (Color)currentColor->fg;
+        Color bg = (Color)currentColor->bg;
+
+        // Extract color index from properties and check if it's different from
+        // current color
+        if (fg != currentFG) {
+          currentFG = fg;
+          GUIWindow::SetColor(fg);
+        }
+
+        if (bg != currentBG) {
+          currentBG = bg;
+          GUIWindow::SetBackgroundColor(bg);
+        }
+
+        GUIWindow::DrawChar(pos.x_, pos.y_, *current);
+        count++;
       }
     }
   }
 
+  GUIWindow::SetFocusRect(_currentView->GetFocusRect());
+
   GUIWindow::Flush();
+
   Unlock();
 
   // skip flipping during transitions
@@ -850,8 +875,7 @@ void AppWindow::Print(char *line) {
     position -= strlen(token);
     position /= 2;
 
-    GUIPoint pos(position, current_y);
-    DrawString(token, pos);
+    DrawString(position, current_y, token);
 
     // Get the next line
     token = strtok(NULL, "\n");
@@ -860,8 +884,7 @@ void AppWindow::Print(char *line) {
   }
 
   // Preserve the build string at the bottom of the screen
-  GUIPoint pos((SCREEN_WIDTH - strlen(VERSION_STRING)) / 2, 22);
-  DrawString(VERSION_STRING, pos);
+  DrawString((int)(SCREEN_WIDTH - strlen(VERSION_STRING)) / 2, 22, VERSION_STRING);
 }
 
 void AppWindow::SwapColors() {

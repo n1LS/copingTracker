@@ -22,7 +22,7 @@ public:
   virtual ~PlayerChannel();
   virtual bool Render(fixed *buffer, int samplecount);
   void StartInstrument(I_Instrument *instr, unsigned char note, uint8_t volume, bool newInstrument);
-  void StopInstrument();
+  void StopInstrument(bool force = false);
   I_Instrument *GetInstrument();
   void SetMute(bool muted);
   bool IsMuted();

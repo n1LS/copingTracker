@@ -10,7 +10,7 @@
  */
 
 #include "HelpView.h"
-#include "Foundation/Constants/Documentation.h"
+#include "Foundation/Constants/Documentation.generated.h"
 #include <Application/AppWindow.h>
 #include <nanoprintf.h>
 
