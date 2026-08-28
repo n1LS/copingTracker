@@ -376,7 +376,7 @@ void AppWindow::Flush() {
     pos.x_ = 0;
   }
 
-  GUIWindow::SetFocusRect(_currentView->GetFocusRect());
+  GUIWindow::SetFocusRect(currentView_->GetFocusRect());
 
   GUIWindow::Flush();
 
