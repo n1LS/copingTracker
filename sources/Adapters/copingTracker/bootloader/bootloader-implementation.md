@@ -8,7 +8,7 @@ The bootloader is permanently stored at flash start and handles:
 
 1. Importing UF2 files from SD card root into a firmware library directory.
 2. Flashing a selected firmware image into a fixed app slot.
-3. Booting the app slot manually or via countdown auto-boot.
+3. Booting the app slot manually.
 4. Persisting metadata about the last flashed firmware.
 
 The active design is single-slot app boot (no multi-slot policy).
@@ -20,7 +20,7 @@ The active design is single-slot app boot (no multi-slot policy).
 bl_main.cpp          → Entry point (board_init, platform_init, gfx_init, menu_render_static)
                          │
                          ▼
-bl_ui.cpp            → Main loop: button debounce/dispatch, SD hotplug poll, auto-boot countdown
+bl_ui.cpp            → Main loop: button debounce/dispatch, SD hotplug poll
                          │
               ┌────────┼────────────┬──────────────────┐
               ▼        ▼            ▼                  ▼
@@ -72,7 +72,7 @@ Primary output artifacts:
 Entry point:
 
 - sources/Adapters/copingTracker/bootloader/bl_main.cpp (minimal startup, delegates to bl_run_ui_loop())
-- sources/Adapters/copingTracker/bootloader/bl_ui.cpp (UI loop with button dispatch and auto-boot countdown)
+- sources/Adapters/copingTracker/bootloader/bl_ui.cpp (UI loop with button dispatch)
 
 Startup sequence:
 
@@ -92,7 +92,6 @@ Runtime interaction:
 - START: flash selected firmware and persist metadata
 - ENTER: boot app slot
 - EDIT: enter device update bootloader mode
-- Auto-boot: 3-second countdown if metadata exists; any key aborts
 
 ## USB Behavior
 
@@ -196,7 +195,7 @@ This confirms the bootloader is currently under the 64 KB cap.
 
 - sources/Adapters/copingTracker/bootloader/bl_main.cpp — Startup entry point
 - sources/Adapters/copingTracker/bootloader/bl_config.h — Shared constants (flash layout, paths, timing)
-- sources/Adapters/copingTracker/bootloader/bl_ui.cpp — Main UI loop with button dispatch and auto-boot
+- sources/Adapters/copingTracker/bootloader/bl_ui.cpp — Main UI loop with button dispatch
 - sources/Adapters/copingTracker/bootloader/bl_flash_logic.cpp — Flash-and-boot / boot-installed orchestration
 - sources/Adapters/copingTracker/bootloader/bl_sd_ops.cpp — SD mount, scan, metadata read/write
 - sources/Adapters/copingTracker/bootloader/bl_menu.cpp — Menu rendering (static + dynamic list)

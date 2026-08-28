@@ -9,7 +9,7 @@
  */
 
 #include "bl_gfx.h"
-#include "bootloader_font.generated.h"
+#include "bl_font.generated.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
 #include <stdio.h>

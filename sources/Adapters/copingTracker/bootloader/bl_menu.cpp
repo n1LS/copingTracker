@@ -132,7 +132,7 @@ void menu_render_static(void) {
 }
 
 void menu_render_main(const Uf2FileEntry *uf2_files, int uf2_count, int selected_index, const char *installed_bin,
-                      bool sd_ready, int auto_boot_timeout) {
+                      bool sd_ready) {
   // Installed firmware name (row 3). Strip leading '/' and trailing
   // .bin extension for display.
   char fw_buf[TEXT_WIDTH];
@@ -194,17 +194,6 @@ void menu_render_main(const Uf2FileEntry *uf2_files, int uf2_count, int selected
 
       render_text_padded(3, y, row_buf, static_cast<uint8_t>(kBoxInnerWidth));
     }
-  }
-
-  // Auto-boot status row. Keep this on the display; menu_show_message()
-  // currently writes to the serial console only.
-  gfx_set_background(BLACK);
-  gfx_set_foreground(YELLOW);
-
-  if (auto_boot_timeout > 0) {
-    char text[35] = "Auto-Boot in Xs. Any key to abort.";
-    text[13] = '0' + (auto_boot_timeout / 1000);
-    menu_show_message(text);
   }
 
   gfx_draw_changed();
