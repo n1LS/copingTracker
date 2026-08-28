@@ -15,10 +15,11 @@
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Model/Mixer.h"
 #include "Application/Persistency/PersistencyService.h"
-#include "Application/Player/TablePlayback.h"
 #include "Application/Player/Player.h"
+#include "Application/Player/TablePlayback.h"
 #include "System/Console/Trace.h"
 #include "System/Console/nanoprintf.h"
+#include "System/FileSystem/FileSystem.h"
 #include <cstring>
 
 ProjectLoader::ProjectLoader(ProjectLoaderProtocol &listener, Project &project)
@@ -84,9 +85,17 @@ void ProjectLoader::RunPhaseA(const char *projectName, bool createNew) {
 
   PersistencyService *persist = PersistencyService::GetInstance();
 
+  // Reset FileSystem to a known state before touching any resources
+  // This ensures SelectProjectView's directory state doesn't interfere
+  FileSystem::GetInstance()->chdir("/");
+
   Player *player = Player::GetInstance();
   if (player->IsRunning()) {
     player->Stop();
+    // Give the audio thread time to acknowledge the stop and park before
+    // we attempt to reset core1. This is especially important when loading
+    // from SelectProjectView where the audio thread is fully active.
+    System::GetInstance()->Sleep(50);
   }
 
   TablePlayback::Reset();

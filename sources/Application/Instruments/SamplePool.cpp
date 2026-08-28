@@ -64,8 +64,11 @@ void SamplePool::Load(const char *projectName) {
   auto fs = FileSystem::GetInstance();
   if (!fs->chdir(PROJECTS_DIR) || !fs->chdir(projectName) || !fs->chdir(PROJECT_SAMPLES_DIR)) {
     Trace::Error("Failed to chdir into %s/%s/%s", PROJECTS_DIR, projectName, PROJECT_SAMPLES_DIR);
+    updateStatus(0, 0, "Failed to load samples");
+    return;
   }
   // First, find all wav files
+  updateStatus(0, 0, "Scanning samples");
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes;
   fs->list(&fileIndexes, ".wav");
   char name[PFILENAME_SIZE];

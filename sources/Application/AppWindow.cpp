@@ -13,7 +13,6 @@
 
 #include "Adapters/copingTracker/system/picoTrackerProjectLoader.h"
 
-#include "Application/Utility/ProjectLoader.h"
 #include "Application/Commands/ApplicationCommandDispatcher.h"
 #include "Application/Commands/EventDispatcher.h"
 #include "Application/Instruments/InstrumentBank.h"
@@ -23,6 +22,7 @@
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Player/TablePlayback.h"
+#include "Application/Utility/ProjectLoader.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/Views.h"
 #include "BaseClasses/View.h"
@@ -90,7 +90,6 @@ struct AppWindowViews {
   MixerView mixerView;
   SampleEditorView sampleEditorView;
   SampleSlicesView sampleSlicesView;
-  NullView nullView;
   BootView bootView;
 
   void Reset() {
@@ -138,7 +137,7 @@ struct AppWindowViews {
         helpView(w, &viewData), themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData),
         importView(w, &viewData), instrumentImportView(w, &viewData), instrumentView(w, &viewData),
         tableView(w, &viewData), grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
-        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), nullView(w, &viewData), bootView(w, &viewData) {
+        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), bootView(w, &viewData) {
   }
 };
 
@@ -406,7 +405,10 @@ void AppWindow::onPhaseCComplete(bool success, const char *projectName) {
     npf_snprintf(projectName_, sizeof(projectName_), "%s", projectName);
     awaitingProjectLoadAck_ = true;
     View &errorView = views_->songView;
-    MessageBox *mb = MessageBox::Create(errorView, "Project", "Invalid Project:", projectName, MBBF_OK);
+
+    char buffer[32];
+    npf_snprintf(buffer, sizeof(buffer), "\"%28s\"", projectName);
+    MessageBox *mb = MessageBox::Create(errorView, "Project load failed", "Invalid Project:", buffer, MBBF_OK);
     errorView.DoModal(mb);
     return;
   }
@@ -560,12 +562,18 @@ void AppWindow::onUpdate(bool redraw) {
 }
 
 void AppWindow::DelayedProjectLoad() {
-  bootLoadTriggered_ = true;
-  if (!projectLoader_.IsLoadInProgress()) {
-    projectLoader_.LoadProject(projectName_, createProjectOnLoad_);
-    createProjectOnLoad_ = false;
+  // This method is re-entered on every AnimationUpdate once a load's samples
+  // have finished loading, solely so we can call FinalizeLoad() (Phase C) at
+  // that point. It is important therefore that we only *start* a load when
+  // none is in flight AND no completed load is already awaiting finalization;
+  // otherwise we would (re)start a fresh load and orphan the pending one.
+  if (!projectLoader_.IsLoadInProgress() && !projectLoader_.IsSampleLoadDone()) {
+    if (projectLoader_.LoadProject(projectName_, createProjectOnLoad_)) {
+      createProjectOnLoad_ = false;
+      bootLoadTriggered_ = true;
+      Trace::Log("APPWINDOW", "Auto-triggering boot load of project: %s", projectName_);
+    }
   }
-  Trace::Log("APPWINDOW", "Auto-triggering boot load of project: %s", projectName_);
 
   // When sample loading is done, finalize the load (Phase C) and transition
   // to the main view. If we are still on BootView, wait for its animation to
@@ -599,8 +607,10 @@ void AppWindow::AnimationUpdate() {
     return;
   }
 
-  // Auto-trigger load on boot if BootView is showing and load hasn't started yet
-  if (!bootLoadTriggered_ && currentView_ == &views_->bootView) {
+  // Auto-trigger load on boot if BootView is showing and load hasn't started
+  // yet, or re-enter to finalize a load once its samples have finished loading
+  // (Phase C runs only after this, so the project data actually gets loaded).
+  if ((!bootLoadTriggered_ && currentView_ == &views_->bootView) || projectLoader_.IsSampleLoadDone()) {
     DelayedProjectLoad();
   }
 
@@ -802,12 +812,17 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
     case VET_LOAD_PROJECT:
       {
         if (!projectLoader_.IsLoadInProgress()) {
-          if (currentView_ != &views_->bootView) {
-            views_->bootView.Navigate(VT_BOOT);
-          }
           const char *name = static_cast<const char *>(ve->GetData());
           npf_snprintf(projectName_, sizeof(projectName_), "%s", name);
-          views_->bootView.SetLoadTrigger();
+          if (currentView_ != &views_->bootView) {
+            currentView_ = &views_->bootView;
+            currentView_->OnFocus();
+            bootLoadTriggered_ = false;
+            SetDirty();
+            Clear();
+          } else {
+            bootLoadTriggered_ = false;
+          }
         }
         break;
       }
@@ -830,21 +845,25 @@ void AppWindow::Print(char *line) {
   SetColor(Theme::View::fg);
 
   int lineCount = 1;
-  
+
   char *s = line;
   while (*s) {
     lineCount += (*s == '\n');
     s++;
   }
-  
+
   // Start near the bottom of the screen
   int current_y = 21 - lineCount;
   if (current_y < 14) {
     current_y = 14;
   }
-  
+
   // Use strtok to split the string by newline characters
   char *token = strtok(line, "\n");
+
+  char emptyLine[SCREEN_WIDTH + 1];
+  memset(emptyLine, ' ', sizeof(emptyLine) - 1);
+  emptyLine[SCREEN_WIDTH] = 0;
 
   while (token != NULL) {
     // Stop if we are about to overwrite the build string line
@@ -857,15 +876,13 @@ void AppWindow::Print(char *line) {
     position -= strlen(token);
     position /= 2;
 
+    DrawString(0, current_y, emptyLine);
     DrawString(position, current_y, token);
 
     // Get the next line
     token = strtok(NULL, "\n");
     current_y++;
   }
-
-  // Preserve the build string at the bottom of the screen
-  DrawString((int)(SCREEN_WIDTH - strlen(VERSION_STRING)) / 2, 22, VERSION_STRING);
 }
 
 void AppWindow::SwapColors() {

@@ -164,11 +164,13 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
     uint32_t sectorsToErase =
         ((additionalData / FLASH_SECTOR_SIZE) + ((additionalData % FLASH_SECTOR_SIZE) != 0)) * FLASH_SECTOR_SIZE;
 
-    if (needLockout) multicore_lockout_start_blocking();
+    if (needLockout)
+      multicore_lockout_start_blocking();
     uint32_t irqs = save_and_disable_interrupts();
     flash_range_erase(flashEraseOffset_, sectorsToErase);
     restore_interrupts(irqs);
-    if (needLockout) multicore_lockout_end_blocking();
+    if (needLockout)
+      multicore_lockout_end_blocking();
 
     flashEraseOffset_ += sectorsToErase;
   }
@@ -186,11 +188,13 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
 
     // --- Program: Only this brief operation requires the other core to be paused.
     // SD read happens fully outside this window.
-    if (needLockout) multicore_lockout_start_blocking();
+    if (needLockout)
+      multicore_lockout_start_blocking();
     uint32_t irqs = save_and_disable_interrupts();
     flash_range_program(flashWriteOffset_, (uint8_t *)readBuffer, writeSize);
     restore_interrupts(irqs);
-    if (needLockout) multicore_lockout_end_blocking();
+    if (needLockout)
+      multicore_lockout_end_blocking();
 
     flashWriteOffset_ += writeSize;
     // Next SD read happens outside any lockout/interrupt-disabled window.

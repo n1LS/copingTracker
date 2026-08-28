@@ -11,28 +11,29 @@
 #include "Adapters/copingTracker/mutex/picoTrackerMutex.h"
 #include "Application/Instruments/SamplePool.h"
 #include "System/Console/Trace.h"
+#include "System/FileSystem/FileSystem.h"
 #include "pico/multicore.h"
 #include <cstring>
 
 namespace {
-  struct LoadState {
-    char projectName[MAX_PROJECT_NAME_LENGTH + 1] = {0};
-    volatile bool inProgress = false;
-    volatile bool complete = false;
-    uint32_t progressIndex = 0;
-    uint32_t progressTotal = 0;
-    char progressMessage[64] = {0};
-  };
+struct LoadState {
+  char projectName[MAX_PROJECT_NAME_LENGTH + 1] = {0};
+  volatile bool inProgress = false;
+  volatile bool complete = false;
+  uint32_t progressIndex = 0;
+  uint32_t progressTotal = 0;
+  char progressMessage[64] = {0};
+};
 
-  LoadState g_state;
-  picoTrackerMutex g_loaderMutex;
-}
+LoadState g_state;
+picoTrackerMutex g_loaderMutex;
+} // namespace
 
 bool picoTrackerProjectLoader::StartLoad(const char *projectName) {
   g_loaderMutex.Lock();
   if (g_state.inProgress) {
     g_loaderMutex.Unlock();
-    return false;  // re-entrancy guard
+    return false; // re-entrancy guard
   }
   strncpy(g_state.projectName, projectName, MAX_PROJECT_NAME_LENGTH);
   g_state.projectName[MAX_PROJECT_NAME_LENGTH] = '\0';
@@ -64,8 +65,10 @@ bool picoTrackerProjectLoader::IsLoadComplete() {
 
 void picoTrackerProjectLoader::GetProgress(uint32_t *index, uint32_t *total, char *messageBuf, size_t bufSize) {
   g_loaderMutex.Lock();
-  if (index) *index = g_state.progressIndex;
-  if (total) *total = g_state.progressTotal;
+  if (index)
+    *index = g_state.progressIndex;
+  if (total)
+    *total = g_state.progressTotal;
   if (messageBuf && bufSize > 0) {
     strncpy(messageBuf, g_state.progressMessage, bufSize - 1);
     messageBuf[bufSize - 1] = '\0';
@@ -94,6 +97,12 @@ void picoTrackerProjectLoader::AcknowledgeLoadComplete() {
 void picoTrackerProjectLoader::LoadThreadEntry() {
   // Runs on core1. The actual sample loading happens here.
   Trace::Log("PROJECTLOADER", "Core1: Loading samples for project: %s", g_state.projectName);
+
+  // Reset FileSystem to a known state before loading samples
+  // This ensures any state left by SelectProjectView or other views doesn't
+  // interfere with the load operations
+  FileSystem::GetInstance()->chdir("/");
+
   SamplePool::GetInstance()->Load(g_state.projectName);
 
   // Signal completion to core0.

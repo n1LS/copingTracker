@@ -112,7 +112,7 @@ private:
   View *currentView_;
 
   bool shouldQuit_;
-  uint16_t mask_; 
+  uint16_t mask_;
 
   bool lowBatteryState_;
   bool lowBatteryMessageShown_;

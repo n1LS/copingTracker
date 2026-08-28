@@ -25,6 +25,7 @@
 #include "input.h"
 #include "pico/multicore.h"
 #include "pico/rand.h"
+#include "pico/stdlib.h"
 #include "tusb.h"
 #include <assert.h>
 #include <fcntl.h>
@@ -188,11 +189,6 @@ void picoTrackerSystem::SetDisplayBrightness(unsigned char value) {
   platform_brightness(value);
 }
 
-void picoTrackerSystem::Sleep(int millisec) {
-  //	if (millisec>0)
-  //		assert(0) ;
-}
-
 unsigned int picoTrackerSystem::GetMemoryUsage() {
   return 0;
 }
@@ -238,4 +234,8 @@ uint32_t picoTrackerSystem::Millis() {
 
 SysMutex *picoTrackerSystem::GetMutex() {
   return platform_mutex();
+}
+
+void picoTrackerSystem::Sleep(uint32_t millis) {
+  sleep_ms(millis);
 }

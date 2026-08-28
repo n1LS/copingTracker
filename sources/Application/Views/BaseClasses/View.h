@@ -324,7 +324,7 @@ public: // temp hack for modal window constructors
 
   int vuMeterCount_;
   ViewMode viewMode_;
-  bool isDirty_; // .Do we need to redraw screeen
+  bool isDirty_; // Do we need to redraw screeen
   ViewType viewType_;
   bool hasFocus_;
 

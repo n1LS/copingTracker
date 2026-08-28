@@ -10,8 +10,8 @@
 #define _PROJECT_LOADER_H
 
 #include "Application/Model/Project.h"
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 // Result codes for project loading phases
 enum class LoadProjectResult { LOAD_FAILED = -1, LOAD_OK = 0 };
@@ -65,7 +65,9 @@ public:
   bool IsLoadInProgress() const;
   bool IsSampleLoadDone() const;
 
-  const char *GetProjectName() const { return projectName_; }
+  const char *GetProjectName() const {
+    return projectName_;
+  }
 
   // Wipe the project name buffer (used when falling back to untitled)
   void SetProjectName(const char *name);

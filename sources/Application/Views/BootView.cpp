@@ -1,10 +1,10 @@
 /*
-* SPDX-License-Identifier: BSD-3-Clause
-*
-* Copyright (c) 2026 nILS Podewski
-*
-* This file is part of the copingTracker firmware
-*/
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Copyright (c) 2026 nILS Podewski
+ *
+ * This file is part of the copingTracker firmware
+ */
 
 #include "BootView.h"
 #include "Adapters/copingTracker/system/picoTrackerProjectLoader.h"
@@ -22,7 +22,7 @@ void BootView::Reset() {
 
   RandomizeAnimation();
   RandomizeColors();
-  
+
   animationDone_ = false;
   wrongCount_ = animationSize_;
 }
@@ -37,11 +37,7 @@ void BootView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
-  if (mask & BM_ENTER) {
-    Navigate(VT_SONG);
-  } else {
-    Reset();
-  }
+  Navigate(VT_SONG);
 }
 
 void BootView::DrawView() {
@@ -72,7 +68,8 @@ void BootView::AnimationUpdate() {
     animationDone_ = true;
   } else {
     fixCount_ = wrongCount_ / 10;
-    if (fixCount_ == 0) fixCount_ = 1;
+    if (fixCount_ == 0)
+      fixCount_ = 1;
 
     int fix = fixCount_;
 
@@ -91,7 +88,13 @@ void BootView::AnimationUpdate() {
     char msg[64];
     picoTrackerProjectLoader::GetProgress(&idx, &total, msg, sizeof(msg));
     // Display progress at the bottom of the screen, overwriting Status
-    Status::Set("Loading %s", msg);
+    Status::Set(msg);
+  } else {
+    // no load in progress, animation done?
+    if (animationDone_) {
+      // jump to song view
+      Navigate(VT_SONG);
+    }
   }
 }
 
@@ -102,23 +105,23 @@ void BootView::RevealColor() {
       pos = 0;
     };
   }
-  
+
   animationColors_[pos] = defaultColor_;
   DrawIndex(pos);
 }
 
 void BootView::DrawIndex(int index) {
   uint8_t x, y;
-  
+
   CoordinatesForIndex(index, &x, &y);
   SetColor(animationColors_[index].fg);
   SetBackgroundColor(animationColors_[index].bg);
-  DrawChar(x, y, animationContent_[index]);  
+  DrawChar(x, y, animationContent_[index]);
 }
 
 void BootView::RevealRandom() {
-  const color_t defaultColor = { fg: WHITE, bg: BLACK };
-  
+  const color_t defaultColor = {fg : WHITE, bg : BLACK};
+
   int pos = Random() % animationSize_;
   while (animationContent_[pos] == animationTarget_[pos]) {
     pos++;
@@ -126,9 +129,9 @@ void BootView::RevealRandom() {
       pos = 0;
     };
   }
-  
+
   animationContent_[pos] = animationTarget_[pos];
-  DrawIndex(pos);  
+  DrawIndex(pos);
 }
 
 void BootView::RandomizeColors() {
@@ -146,7 +149,7 @@ void BootView::RandomizeAnimation() {
 }
 
 uint32_t BootView::Random() {
-  lcg_ = lcg_ * 1664525	+ 1013904223;
+  lcg_ = lcg_ * 1664525 + 1013904223;
   return lcg_;
 }
 

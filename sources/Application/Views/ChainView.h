@@ -55,11 +55,11 @@ protected:
   void drawPhrasePreview(uint8_t phrase);
 
 private:
-  bool updatingPhrase_;      // .Tells if we're in the middle
-                             //  of updating a phrase to avoid
-                             //  allocation of unused phrases
-  int updateRow_;            // .Tells which row is being updated
-  unsigned char lastPhrase_; // .Clipboard for phrase
+  bool updatingPhrase_;      // Tells if we're in the middle
+                             // of updating a phrase to avoid
+                             // allocation of unused phrases
+  int updateRow_;            // Tells which row is being updated
+  unsigned char lastPhrase_; // Clipboard for phrase
   int lastPlayingPos_;
   int lastQueuedPos_;
 
