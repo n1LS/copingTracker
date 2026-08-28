@@ -32,18 +32,13 @@ public:
   virtual void ConfirmedStop(Token source) override;
 
   // Public methods
-  void getSelectedProjectName(char *name);
   void getHighlightedProjectName(char *name);
-  void LoadProject();
-  void ClearAutoSave();
 
 protected:
   virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
                                   size_t bufferSize) override;
 
 private:
-  char selection_[MAX_PROJECT_NAME_LENGTH + 1] = {};
-
   // Internal helpers
   void DeleteSelectedProject();
   void LoadSelectedProject();

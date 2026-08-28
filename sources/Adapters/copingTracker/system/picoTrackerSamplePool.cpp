@@ -9,15 +9,23 @@
  */
 
 #include "picoTrackerSamplePool.h"
+#include "Adapters/copingTracker/system/picoTrackerProjectLoader.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "hardware/flash.h"
 #include "hardware/sync.h"
 #include "pico/multicore.h"
+#include "pico/platform.h"
 #include <cstring>
 
 #define MB 1024 * 1024
 
 #define VERBOSE_FLASH_DEBUG 0
+
+// Direction-agnostic lockout check: returns true if the *other* core
+// relative to the caller is registered as a lockout victim.
+static inline bool other_core_is_lockout_victim() {
+  return multicore_lockout_victim_is_initialized(1 - get_core_num());
+}
 
 // Maximum sample storage per project (8MB limit for now)
 #define SAMPLE_STORAGE_START_MB 8
@@ -86,24 +94,30 @@ void picoTrackerSamplePool::Reset() {
   flashWriteOffset_ = FLASH_TARGET_OFFSET;
 }
 
+void picoTrackerSamplePool::updateStatus(uint32_t current, uint32_t total, const char *message) {
+  // If running on core1 (during a project load), route progress into the
+  // shared loader state so core0 can display it safely without race on
+  // AppWindow's screen buffer. Otherwise, fall back to the base class
+  // behavior (write directly to Status for runtime single-sample imports
+  // on core0).
+  if (get_core_num() == 1) {
+    picoTrackerProjectLoader::UpdateProgress(current, total, message);
+  } else {
+    SamplePool::updateStatus(current, total, message);
+  }
+}
+
 bool picoTrackerSamplePool::loadSample(const char *name) {
   Trace::Log("SAMPLEPOOL", "Loading sample into flash: %s", name);
-  // Pause core1 in order to be able to write to flash and ensure core1 is
-  // not reading from it, it also disables IRQs on it
-  // https://www.raspberrypi.com/documentation/pico-sdk/high_level.html#multicore_lockout
-  if (multicore_lockout_victim_is_initialized(1)) {
-    multicore_lockout_start_blocking();
-  }
 
   if (count_ == MAX_SAMPLES)
     return false;
 
+  // Open and stat the WAV file — this is SD I/O and must happen fully
+  // outside any lockout/interrupt-disabled window.
   auto res = wav_[count_].Open(name);
   if (!res) {
     Trace::Error("Failed to load sample:%s", name);
-    if (multicore_lockout_victim_is_initialized(1)) {
-      multicore_lockout_end_blocking();
-    }
     return false;
   }
   strncpy(nameStore_[count_], name, MAX_INSTRUMENT_FILENAME_LENGTH);
@@ -117,17 +131,10 @@ bool picoTrackerSamplePool::loadSample(const char *name) {
     count_--;
     nameStore_[count_][0] = '\0';
     wav_[count_].Close();
-    if (multicore_lockout_victim_is_initialized(1)) {
-      multicore_lockout_end_blocking();
-    }
     return false;
   }
 
   wav_[count_ - 1].Close();
-
-  if (multicore_lockout_victim_is_initialized(1)) {
-    multicore_lockout_end_blocking();
-  }
   return true;
 }
 
@@ -138,8 +145,6 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
   // Size actually occupied in flash
   uint32_t FlashPageBufferSize =
       ((FlashBaseBufferSize / FLASH_PAGE_SIZE) + ((FlashBaseBufferSize % FLASH_PAGE_SIZE) != 0)) * FLASH_PAGE_SIZE;
-  // Trace::Debug("Size in flash: %i (%i 256 byte pages)", FlashPageBufferSize,
-  //              FlashPageBufferSize / FLASH_PAGE_SIZE);
 
   if (flashWriteOffset_ + FlashPageBufferSize > flashLimit_) {
     return false;
@@ -148,49 +153,54 @@ bool picoTrackerSamplePool::LoadInFlash(WavFile *wave) {
   // Set wave base
   wave->SetSampleBuffer((int16_t *)(XIP_BASE + flashWriteOffset_));
 
-  // Any operation on the flash need to ensure that nothing else reads or writes
-  // on it We disable IRQs and ensure that we don't have multiprocessing on
-  // at this time
-  uint32_t irqs = save_and_disable_interrupts();
+  // Determine if we need to pause the other core during flash operations.
+  // The other core must be a registered lockout victim.
+  bool needLockout = other_core_is_lockout_victim();
 
-  // If data doesn't fit in previously erased page, we'll have to erase
-  // additional ones
+  // --- Erase: The other core must be paused (XIP is inaccessible during
+  // flash erase on this chip). No SD I/O involved here.
   if (FlashPageBufferSize > (flashEraseOffset_ - flashWriteOffset_)) {
     uint32_t additionalData = FlashPageBufferSize - flashEraseOffset_ + flashWriteOffset_;
     uint32_t sectorsToErase =
         ((additionalData / FLASH_SECTOR_SIZE) + ((additionalData % FLASH_SECTOR_SIZE) != 0)) * FLASH_SECTOR_SIZE;
-    // Trace::Debug("About to erase %i sectors in flash region 0x%X - 0x%X",
-    //              sectorsToErase, flashEraseOffset_,
-    //              flashEraseOffset_ + sectorsToErase);
-    // Erase required number of sectors
+
+    if (needLockout)
+      multicore_lockout_start_blocking();
+    uint32_t irqs = save_and_disable_interrupts();
     flash_range_erase(flashEraseOffset_, sectorsToErase);
-    // Move erase pointer to new position
+    restore_interrupts(irqs);
+    if (needLockout)
+      multicore_lockout_end_blocking();
+
     flashEraseOffset_ += sectorsToErase;
-    // Trace::Debug("new erase offset: %p", flashEraseOffset_);
   }
 
-  uint32_t offset = 0;
+  // Read samples from SD and program into flash, one page at a time.
   uint32_t br = 0;
   uint8_t readBuffer[BUFFER_SIZE];
 
   wave->Rewind();
   wave->Read(&readBuffer, BUFFER_SIZE, &br);
   while (br > 0) {
-    // We need to write double the bytes if we needed to expand to 16 bit
-    // Write size will be either 256 (which is the flash page size) or 512
     uint32_t writeSize = br;
     // Adjust to page size
     writeSize = ((writeSize / FLASH_PAGE_SIZE) + ((writeSize % FLASH_PAGE_SIZE) != 0)) * FLASH_PAGE_SIZE;
 
-    // There will be trash at the end, but sampleBufferSize_ gives me the
-    // bounds
+    // --- Program: Only this brief operation requires the other core to be paused.
+    // SD read happens fully outside this window.
+    if (needLockout)
+      multicore_lockout_start_blocking();
+    uint32_t irqs = save_and_disable_interrupts();
     flash_range_program(flashWriteOffset_, (uint8_t *)readBuffer, writeSize);
+    restore_interrupts(irqs);
+    if (needLockout)
+      multicore_lockout_end_blocking();
+
     flashWriteOffset_ += writeSize;
+    // Next SD read happens outside any lockout/interrupt-disabled window.
     wave->Read(&readBuffer, BUFFER_SIZE, &br);
   }
 
-  // Lastly we restore the IRQs
-  restore_interrupts(irqs);
   return true;
 }
 

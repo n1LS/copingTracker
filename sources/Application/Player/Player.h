@@ -152,8 +152,7 @@ private:
   bool isRunning_;
   bool stopAtEnd_;
 
-  unsigned long startClock_; // .Used to time display live queued chains
-                             //  for blinking effect
+  unsigned long startClock_; // Used to time display live queued chains for blinking effect
   unsigned long now_;
   int lastPercentage_;
   unsigned int lastBeatCount_;

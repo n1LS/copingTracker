@@ -16,7 +16,7 @@
 #include "System/System/System.h"
 #include <cstring>
 
-#define DELETE_HOLD_MASK (BM_ALT | BM_PLAY | BM_EDIT)
+#define DELETE_HOLDmask_ (BM_ALT | BM_PLAY | BM_EDIT)
 #define DELETE_HOLD_DURATION_MS 2000
 
 bool DeleteProjectConfirmModal::inUse_ = false;
@@ -49,7 +49,7 @@ void DeleteProjectConfirmModal::Destroy() {
 }
 
 void DeleteProjectConfirmModal::UpdateProgress_() {
-  const bool comboHeld = (currentMask_ & DELETE_HOLD_MASK) == DELETE_HOLD_MASK;
+  const bool comboHeld = (currentMask_ & DELETE_HOLDmask_) == DELETE_HOLDmask_;
   const unsigned long now = System::GetInstance()->GetClock();
 
   if (!comboHeld) {

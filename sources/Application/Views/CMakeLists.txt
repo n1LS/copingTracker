@@ -1,4 +1,5 @@
 add_library(application_views
+  BootView.cpp
   CommandView.cpp
   FieldView.cpp
   GraphField.cpp
@@ -10,7 +11,6 @@ add_library(application_views
   InstrumentView.cpp
   ThemeImportView.cpp
   DeviceView.cpp
-  NullView.cpp
   PhraseView.cpp
   ProjectView.cpp
   SelectProjectView.cpp

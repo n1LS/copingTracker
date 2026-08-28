@@ -64,8 +64,11 @@ void SamplePool::Load(const char *projectName) {
   auto fs = FileSystem::GetInstance();
   if (!fs->chdir(PROJECTS_DIR) || !fs->chdir(projectName) || !fs->chdir(PROJECT_SAMPLES_DIR)) {
     Trace::Error("Failed to chdir into %s/%s/%s", PROJECTS_DIR, projectName, PROJECT_SAMPLES_DIR);
+    updateStatus(0, 0, "Failed to load samples");
+    return;
   }
   // First, find all wav files
+  updateStatus(0, 0, "Scanning samples");
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes;
   fs->list(&fileIndexes, ".wav");
   char name[PFILENAME_SIZE];
@@ -92,6 +95,7 @@ void SamplePool::Load(const char *projectName) {
       int progress = (int)((i * 100) / totalSamples);
       int prog10 = progress / 10;
 
+      /*
       char progressBar[13];
       for (int j = 1; j < 11; j++) {
         progressBar[j] = j >= prog10 ? CHAR(char_battery_empty_s) : CHAR(char_block_full_s);
@@ -99,8 +103,7 @@ void SamplePool::Load(const char *projectName) {
       progressBar[0] = CHAR(char_button_border_left_s);
       progressBar[11] = CHAR(char_button_border_right_s);
       progressBar[12] = 0;
-
-      Status::Set("Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", name, (const char *)progressBar, progress);
+      */
 
       updateStatus(importIndex, importCount, "Loading");
       loadSample(name);
@@ -364,7 +367,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   ev.type_ = SPET_INSERT;
   NotifyObservers(&ev);
 
-  ToastView *t = ToastView::getInstance();
+  ToastView *t = ToastView::GetInstance();
   t->Show(status ? "Loaded successfully." : "Loading failed.", status ? &ttSuccess : &ttError, 1500);
 
   return status ? (count_ - 1) : -1;

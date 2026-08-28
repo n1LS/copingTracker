@@ -13,6 +13,14 @@
 
 typedef uint8_t Color;
 
+typedef union color_t {
+  struct {
+    Color fg : 4;
+    Color bg : 4;
+  };
+  unsigned char byte;
+} color_t;
+
 typedef enum {
   BLACK,
   RED,

@@ -287,3 +287,24 @@ int picoTrackerAudioDriver::GetPlayedBufferPercentage() {
 double picoTrackerAudioDriver::GetStreamTime() {
   return (millis() - startTime_) / 1000.0;
 }
+
+void picoTrackerAudioDriver::SuspendAudioThreadForLoad() {
+  // Hard-reset core1 to reclaim it for the project-loading task.
+  // multicore_reset_core1() clears lockout_victim_initialized[1] as a
+  // side effect (pico-sdk multicore.c:121), so no manual cleanup needed.
+  // AudioThread is guaranteed parked on sem_acquire_blocking(&core1_audio)
+  // at this point (Player::Stop() ensures isPlaying_ == false, so the DMA
+  // IRQ never releases the semaphore), so nothing is lost.
+  multicore_reset_core1();
+}
+
+void picoTrackerAudioDriver::ResumeAudioThread() {
+  // Re-launch AudioThread on core1 after project loading completes.
+  // Mirrors the core1-launch tail of InitDriver() (lines 163-166).
+  multicore_reset_core1();
+  multicore_launch_core1(AudioThread);
+  // Re-init the semaphore to a known-good permit count, matching InitDriver().
+  // AudioThread re-registers itself as a lockout victim via
+  // multicore_lockout_victim_init() at the top of its loop.
+  sem_init(&core1_audio, 0, SOUND_BUFFER_COUNT - 1);
+}

@@ -26,6 +26,8 @@ public:
     return (flashLimit_ - flashWriteOffset_);
   }
 
+  virtual void updateStatus(uint32_t current, uint32_t total, const char *message) override;
+
 protected:
   virtual bool loadSample(const char *name);
   virtual bool unloadSample(uint32_t index);
