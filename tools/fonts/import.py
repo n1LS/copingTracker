@@ -21,7 +21,8 @@ with open("font.h", "w") as out:
 
     out.write("#define FONT_COUNT 3\n")
     out.write("static const font_t *fonts[FONT_COUNT] = { &FONT_LIGHT_BITMAP, &FONT_BOLD_BITMAP, &FONT_BLOCK_BITMAP };\n")
-
+    out.write("static const uint16_t (*font_masks[FONT_COUNT])[10] = { FONT_LIGHT_MASK, FONT_BOLD_MASK, FONT_BLOCK_MASK };\n")
+    out.write("static const int8_t *font_mask_indices[FONT_COUNT] = { FONT_LIGHT_MASK_INDEX, FONT_BOLD_MASK_INDEX, FONT_BLOCK_MASK_INDEX };\n")
     out.write("\n#endif // FONT_H\n")
 
 # clean up intermediate files

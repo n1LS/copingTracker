@@ -120,8 +120,8 @@ struct Theme {
     };
 
     struct Selection {
-      FIXED(bg, LIGHT_GREEN)
-      FIXED(fg, BLACK)
+      SWITCHABLE(bg, LIGHT_GREEN, Theme::View::bg)
+      SWITCHABLE(fg, BLACK, Theme::View::fg)
     };
 
     struct Title {
@@ -269,6 +269,8 @@ public:
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
 
+  virtual GUIRect GetFocusRect();
+
 protected:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed) = 0;
 
@@ -324,7 +326,7 @@ public: // temp hack for modal window constructors
 
   int vuMeterCount_;
   ViewMode viewMode_;
-  bool isDirty_; // .Do we need to redraw screeen
+  bool isDirty_; // Do we need to redraw screeen
   ViewType viewType_;
   bool hasFocus_;
 
@@ -333,6 +335,9 @@ public: // temp hack for modal window constructors
   int32_t prevRightVU_[SONG_CHANNEL_COUNT + 1];
 
   Token stopPlaybackSource_;
+
+protected:
+  GUIRect focusRect_;
 
 private:
   uint16_t mask_;

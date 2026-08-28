@@ -25,6 +25,9 @@ public:
   virtual void OnClick();
   const char *GetString();
 
+  int GetFocusOffset();
+  int GetFocusWidth();
+
 protected:
   const char *name_;
   unsigned int token_;

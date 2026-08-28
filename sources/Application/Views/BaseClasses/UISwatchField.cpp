@@ -28,3 +28,11 @@ void UISwatchField::ProcessArrow(uint16_t mask) {};
 bool UISwatchField::IsStatic() {
   return true;
 }
+
+int UISwatchField::GetFocusOffset() {
+  return 0;
+}
+
+int UISwatchField::GetFocusWidth() {
+  return 0;
+}

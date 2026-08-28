@@ -105,7 +105,7 @@ void bl_run_ui_loop() {
     }
   }
 
-while (true) {
+  while (true) {
     const uint32_t now_ms = millis();
     const uint16_t raw_keys = scanKeys();
     if (raw_keys != pending_keys) {

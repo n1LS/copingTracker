@@ -59,3 +59,11 @@ void UIActionField::OnClick() {
 const char *UIActionField::GetString() {
   return name_;
 }
+
+int UIActionField::GetFocusOffset() {
+  return -1;
+}
+
+int UIActionField::GetFocusWidth() {
+  return strlen(name_) + 2;
+}

@@ -184,7 +184,7 @@ void SongView::clonePosition() {
 
   for (int i = 0; i < 16; i++) {
     *dst++ = *src++;
-  };
+  }
   setChain((unsigned char)next);
   isDirty_ = true;
 }
@@ -846,6 +846,11 @@ void SongView::DrawView() {
 
       if (highlighted) {
         SwapColors();
+
+        if (!clipboard_.active_) {
+          // set the focus rect
+          focusRect_ = GUIRect(pos.x_, pos.y_, pos.x_ + 2, pos.y_);
+        }
       }
 
       if (d == 0xFF) {

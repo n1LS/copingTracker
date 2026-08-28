@@ -349,7 +349,10 @@ void AppWindow::Flush() {
     pos.x_ = 0;
   }
 
+  GUIWindow::SetFocusRect(_currentView->GetFocusRect());
+
   GUIWindow::Flush();
+
   Unlock();
   memcpy(_preScreen, _charScreen, SCREEN_CHARS);
   memcpy(_preScreenColor, _screenColor, SCREEN_CHARS);
