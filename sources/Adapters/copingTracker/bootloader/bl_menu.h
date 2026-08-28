@@ -31,6 +31,6 @@ void menu_render_static(void);
 // Paint only the regions that change at runtime: the installed firmware name
 // and the UF2 list. Does not clear and does not redraw any static content.
 void menu_render_main(const Uf2FileEntry *uf2_files, int uf2_count, int selected_index, const char *installed_bin,
-                      bool sd_ready, int auto_boot_timeout);
+                      bool sd_ready);
 
 #endif

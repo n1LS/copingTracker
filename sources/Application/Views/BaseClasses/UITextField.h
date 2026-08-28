@@ -30,6 +30,9 @@ public:
   void OnEditClick();
   etl::string<MaxLength> GetString();
 
+  int GetFocusOffset();
+  int GetFocusWidth();
+
   // Set the variable this UITextField is bound to
   void SetVariable(Variable &v);
 

@@ -57,6 +57,7 @@ public: // I_GUIWindowImp implementation
   virtual void SendFont(uint8_t uifontIndex);
   virtual void SendPalette();
   virtual void SetPalette(const GUIColor *palette, int colorCount) override;
+  virtual const GUIRect &GetFocusRect() const override;
 
   static void ProcessEvent(picoTrackerEvent &event);
   static void ProcessButtonChange(uint16_t changeMask, uint16_t buttonMask);

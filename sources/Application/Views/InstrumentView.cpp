@@ -44,8 +44,7 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
   project_ = data->project_;
 
   GUIPoint position = GUIPoint(5, 1);
-  typeIntVarField_.emplace_back(position, *&instrumentType_, "Type:%s", 0,
-                                static_cast<int>(kMaxSelectableInstrumentType), 1, 1);
+  typeIntVarField_.emplace_back(position, *&instrumentType_, "Type:%s", 0, (int)kMaxSelectableInstrumentType, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*typeIntVarField_.rbegin()));
   (*typeIntVarField_.rbegin()).AddObserver(*this);
   lastFocusID_ = Token::VarInstrumentType;

@@ -30,6 +30,7 @@
 
 static const int16_t offsets_[2][4] = {-1, 1, 12, -12, -1, 1, 16, -16};
 static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
+static const uint8_t columnWidths_[7] = {3, 2, 1, 3, 4, 3, 4};
 
 // static callback handlers
 
@@ -198,14 +199,14 @@ PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
   lastInstr_ = 0;
   lastCmd_ = Token::InstrumentCommandNone;
   lastParam_ = 0;
-  lastVolume_ = 0xFF;
+  lastVolume_ = NO_VOLUME;
 
   clipboard_.active_ = false;
   clipboard_.width_ = 0;
   clipboard_.height_ = 0;
 
   for (int i = 0; i < 16; i++) {
-    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0, 0xFF};
+    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0, NO_VOLUME};
   };
 }
 
@@ -220,7 +221,7 @@ void PhraseView::Reset() {
   lastInstr_ = 0;
   lastCmd_ = Token::InstrumentCommandNone;
   lastParam_ = 0;
-  lastVolume_ = 0xFF;
+  lastVolume_ = NO_VOLUME;
   viewData_->phraseCurPos_ = 0;
 
   clipboard_.active_ = false;
@@ -230,7 +231,7 @@ void PhraseView::Reset() {
   clipboard_.row_ = 0;
 
   for (int i = 0; i < 16; i++) {
-    clipboard_.steps_[i] = {0xFF, 0, 0, 0, 0, 0, 0xFF};
+    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0, NO_VOLUME};
   }
 
   saveCol_ = colNote;
@@ -314,6 +315,10 @@ void PhraseView::updateCursor(int dx, int dy) {
   }
 
   viewData_->phraseCurPos_ = row_;
+
+  int x = 5 + columnPositions_[col_];
+  focusRect_ = GUIRect(x, row_ + 3, x + columnWidths_[col_]);
+
   isDirty_ = true;
 }
 
@@ -644,10 +649,10 @@ void PhraseView::cutSelection() {
       int r = j + clipboard_.row_;
       switch (i + clipboard_.col_) {
         case colNote:
-          base[r].note = 0xFF;
+          base[r].note = NO_NOTE;
           break;
         case colInstrument:
-          base[r].instrument = 0xFF;
+          base[r].instrument = NO_INSTRUMENT;
           break;
         case colCmd1:
           base[r].cmd1 = kNone;
@@ -662,7 +667,7 @@ void PhraseView::cutSelection() {
           base[r].param2 = 0x0000;
           break;
         case colVolume:
-          base[r].volume = 0xFF;
+          base[r].volume = NO_VOLUME;
           break;
       }
     }

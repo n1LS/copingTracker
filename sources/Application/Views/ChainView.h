@@ -27,6 +27,7 @@ public:
   virtual void AnimationUpdate();
 
 protected:
+  void updateFocusRect();
   void updateCursor(int dx, int dy);
   void updateCursorValue(int offset, int dx = 0, int dy = 0);
   void updateSelectionValue(int offset);

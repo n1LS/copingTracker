@@ -25,7 +25,9 @@ public:
   virtual void SetFocus(UIField *field);
   UIField *GetFocus();
   void ClearFocus();
+  void UpdateFocusRect();
   int GetFocusIndex();
+  GUIRect GetFocusRect() override;
   void SetSize(int size);
 
   etl::list<UIField *, 64> fieldList_; // adjust to maximum fields on one screen

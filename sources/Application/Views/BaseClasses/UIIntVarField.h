@@ -26,6 +26,8 @@ public:
   virtual void ProcessArrow(uint16_t mask);
   virtual void OnClick() {};
 
+  int GetFocusOffset();
+
   void ProcessClear();
   Token GetVariableID();
   Variable &GetVariable();

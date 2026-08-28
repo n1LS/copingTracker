@@ -23,6 +23,8 @@ public:
   virtual void ProcessArrow(uint16_t mask);
   virtual void OnClick() {};
 
+  int GetFocusOffset();
+
 protected:
 protected:
   int *src_;
