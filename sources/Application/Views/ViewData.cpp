@@ -39,8 +39,8 @@ void ViewData::Load(Project *project) {
     songPlayPos_[i] = 0;
     chainPlayPos_[i] = 0;
     phrasePlayPos_[i] = 0;
-    currentPlayChain_[i] = 0xFF;
-    currentPlayPhrase_[i] = 0xFF;
+    currentPlayChain_[i] = EMPTY_SONG_VALUE;
+    currentPlayPhrase_[i] = EMPTY_CHAIN_VALUE;
   }
 
   sampleEditorFilename.clear();

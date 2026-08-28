@@ -105,7 +105,6 @@ void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg
   SetBackgroundColor(Theme::View::Selection::bg(isSelected));
   SetColor(Theme::View::Selection::fg(isSelected));
 
-
   // Check if this is the current project
   auto var = viewData_->project_->FindVariable(Token::VarProjectName);
   etl::string<MAX_PROJECT_NAME_LENGTH> projectName = var->GetString();

@@ -194,7 +194,7 @@ ThemeView::ColorComponentTarget *ThemeView::selectedColorComponentTarget() {
   if (targetIndex >= colorComponentTargets_.size()) {
     return nullptr;
   }
-  
+
   return &colorComponentTargets_[targetIndex];
 }
 
@@ -249,7 +249,8 @@ void ThemeView::moveColorComponentFocus(int8_t colorDelta, int8_t componentDelta
     selectedColor_ = (selectedColor_ + COLOR_COUNT + colorDelta) % COLOR_COUNT;
   }
   if (componentDelta != 0) {
-    selectedColorComponent_ = (selectedColorComponent_ + COLOR_COMPONENT_COUNT + componentDelta) % COLOR_COMPONENT_COUNT;
+    selectedColorComponent_ =
+        (selectedColorComponent_ + COLOR_COMPONENT_COUNT + componentDelta) % COLOR_COMPONENT_COUNT;
   }
   updateColorComponentField();
   SetDirty(true);

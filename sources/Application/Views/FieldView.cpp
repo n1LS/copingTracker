@@ -237,6 +237,6 @@ int FieldView::GetFocusIndex() {
 
 GUIRect FieldView::GetFocusRect() {
   UpdateFocusRect();
-  
+
   return focusRect_;
 }
