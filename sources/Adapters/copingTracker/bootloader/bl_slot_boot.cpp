@@ -35,8 +35,7 @@ void _Noreturn launch_application_from(void *app_location) {
   }
 }
 
-bool boot_firmware_slot(uint32_t slot_base_address) {
+void boot_firmware_slot(uint32_t slot_base_address) {
   // The vector table is at slot_base_address + 0x100 (right after boot2).
   launch_application_from(reinterpret_cast<void *>(slot_base_address + 0x100));
-  return true;
 }

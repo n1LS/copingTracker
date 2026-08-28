@@ -11,6 +11,6 @@
 
 #include <cstdint>
 
-bool boot_firmware_slot(uint32_t slot_base_address);
+void boot_firmware_slot(uint32_t slot_base_address);
 
 #endif
