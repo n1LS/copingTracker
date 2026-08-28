@@ -105,12 +105,8 @@ void InstrumentImportView::PrepareItemDrawing(int index, bool isSelected, Color 
   }
 
   // Set colors based on selection
-  if (isSelected) {
-    *bg = Theme::View::Selection::bg;
-    *fg = Theme::View::Selection::fg;
-  } else {
-    *bg = Theme::View::bg;
-  }
+  *bg = Theme::View::Selection::bg(isSelected);
+  *fg = Theme::View::Selection::fg(isSelected);
 
   bool isDirectory = IsDirectory(index);
 

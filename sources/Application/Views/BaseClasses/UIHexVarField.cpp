@@ -38,7 +38,8 @@ void UIHexVarField::Draw(GUIWindow &w, int offset) {
   if (valueOffset >= 0) {
     subSelectionOffset = valueOffset + (precision_ - position_);
   }
-  DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
+
+  focusWidth_ = DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
 }
 
 void UIHexVarField::ProcessArrow(uint16_t mask) {

@@ -17,8 +17,14 @@ FieldView::FieldView(GUIWindow &w, ViewData *data) : ScreenView(w, data) {
   focus_ = 0;
 }
 
-void FieldView::SetFocus(UIField *field) {
+void FieldView::UpdateFocusRect() {
+  GUIPoint pos = focus_->GetPosition();
+  int w = focus_->GetFocusWidth();
+  int dx = focus_->GetFocusOffset();
+  focusRect_ = GUIRect(pos.x_ + dx, pos.y_, pos.x_ + dx + w, pos.y_);
+}
 
+void FieldView::SetFocus(UIField *field) {
   if (focus_) {
     focus_->ClearFocus();
   }
@@ -28,6 +34,8 @@ void FieldView::SetFocus(UIField *field) {
 
   if (focus_ == 0)
     return;
+
+  UpdateFocusRect();
 
   focus_->SetFocus();
   isDirty_ = true;
@@ -215,7 +223,6 @@ UIField *FieldView::findAdjacentField(bool vertical, int8_t direction) {
 }
 
 int FieldView::GetFocusIndex() {
-
   int focusIndex = 0;
   auto it = fieldList_.begin();
   for (size_t i = 0; i < fieldList_.size(); i++) {
@@ -226,4 +233,10 @@ int FieldView::GetFocusIndex() {
     it++;
   };
   return focusIndex;
+}
+
+GUIRect FieldView::GetFocusRect() {
+  UpdateFocusRect();
+  
+  return focusRect_;
 }

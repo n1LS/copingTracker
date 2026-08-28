@@ -226,11 +226,11 @@ inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
       const uint16_t *glyph = (*font)[character];
 
       for (int glyphY = 0; glyphY < CHAR_HEIGHT; glyphY++) {
-        uint16_t pix = glyph[glyphY];
+        uint16_t pixels = glyph[glyphY];
 
         for (int glyphX = CHAR_WIDTH - 1; glyphX >= 0; glyphX--) {
           uint16_t mask = 1u << glyphX;
-          *buffer_idx++ = (pix & mask) ? bg : fg;
+          *buffer_idx++ = (pixels & mask) ? fg : bg;
         }
       }
     }
@@ -325,8 +325,11 @@ inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width) {
   ili9341_start_writing();
 
   const font_t *font = fonts[ui_font_index];
+  const int8_t *font_mask_index = font_mask_indices[ui_font_index];
 
   bool haveDmaInFlight = false;
+
+  const uint16_t empty_mask[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   for (int page = x; page < x + width; page++) {
     uint16_t *buffer_idx = buffer;
@@ -335,16 +338,34 @@ inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width) {
     int idx = col * TEXT_WIDTH + page;
 
     uint8_t character = screen[idx];
-    uint16_t fg = currentPalette[(colors[idx] >> 4) & 0x0F];
-    uint16_t bg = currentPalette[colors[idx] & 0x0F];
+
+    int fg_idx = (colors[idx] >> 4) & 0x0F;
+    int bg_idx = colors[idx] & 0x0F;
+
+    uint16_t fg_highlight = currentPalette[fg_idx];
+    uint16_t bg_highlight = currentPalette[bg_idx];
+    uint16_t fg = palette[fg_idx];
+    uint16_t bg = palette[bg_idx];
+
+    // get the glyph
     const uint16_t *glyph = (*font)[character];
 
+    // get character mask
+    int mask_index = font_mask_index[character];
+    const uint16_t *mask = (mask_index == -1) ? empty_mask : font_masks[ui_font_index][mask_index];
+
     for (int glyphY = 0; glyphY < CHAR_HEIGHT; glyphY++) {
-      uint16_t pix = glyph[glyphY];
+      uint16_t pixels = glyph[glyphY];
+      uint16_t mask_bits = mask[glyphY];
 
       for (int glyphX = CHAR_WIDTH - 1; glyphX >= 0; glyphX--) {
-        uint16_t mask = 1u << glyphX;
-        *buffer_idx++ = (pix & mask) ? bg : fg;
+        uint16_t bit_mask = 1u << glyphX;
+
+        if (mask_bits & bit_mask) {
+          *buffer_idx++ = (pixels & bit_mask) ? fg : bg;
+        } else {
+          *buffer_idx++ = (pixels & bit_mask) ? fg_highlight : bg_highlight;
+        }
       }
     }
 
@@ -425,5 +446,6 @@ void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool *
 }
 
 void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width) {
+  width = (x + width > TEXT_WIDTH) ? TEXT_WIDTH - x : width;
   chargfx_draw_highlight_region(x, y, width);
 }

@@ -156,6 +156,12 @@ void ThemeView::DrawView() {
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::inactive);
   DrawString(21, 7, "R  G  B");
+
+  if (isColorComponentFocus()) {
+    UIIntVarField &field = intVarField_.back();
+    GUIPoint pos = field.GetPosition();
+    focusRect_ = GUIRect(pos.x_, pos.y_, pos.x_ + 2, pos.y_);
+  }
 }
 
 void ThemeView::addSwatchField(Color color, GUIPoint position) {
@@ -165,7 +171,6 @@ void ThemeView::addSwatchField(Color color, GUIPoint position) {
 }
 
 void ThemeView::addColorField(const char *label, Variable *colorVar, Color color, GUIPoint position) {
-
   staticField_.emplace_back(position, label);
   UIStaticField &labelField = *staticField_.rbegin();
   fieldList_.insert(fieldList_.end(), &labelField);
@@ -189,6 +194,7 @@ ThemeView::ColorComponentTarget *ThemeView::selectedColorComponentTarget() {
   if (targetIndex >= colorComponentTargets_.size()) {
     return nullptr;
   }
+  
   return &colorComponentTargets_[targetIndex];
 }
 
@@ -240,11 +246,10 @@ void ThemeView::drawColorComponentValues() {
 
 void ThemeView::moveColorComponentFocus(int8_t colorDelta, int8_t componentDelta) {
   if (colorDelta != 0) {
-    selectedColor_ = static_cast<uint8_t>((selectedColor_ + COLOR_COUNT + colorDelta) % COLOR_COUNT);
+    selectedColor_ = (selectedColor_ + COLOR_COUNT + colorDelta) % COLOR_COUNT;
   }
   if (componentDelta != 0) {
-    selectedColorComponent_ = static_cast<uint8_t>((selectedColorComponent_ + COLOR_COMPONENT_COUNT + componentDelta) %
-                                                   COLOR_COMPONENT_COUNT);
+    selectedColorComponent_ = (selectedColorComponent_ + COLOR_COMPONENT_COUNT + componentDelta) % COLOR_COMPONENT_COUNT;
   }
   updateColorComponentField();
   SetDirty(true);
@@ -533,6 +538,7 @@ void ThemeView::importTheme() {
   // Switch to the theme import view
   Navigate(VT_THEME_IMPORT);
 }
+
 void ThemeView::AnimationUpdate() {
   if (forceRedraw_) {
     Clear();

@@ -88,6 +88,10 @@ void ChainView::updateCursor(int dx, int dy) {
   viewData_->UpdateChainCursor(dx, dy);
   isDirty_ = true;
 
+  updateFocusRect();
+}
+
+void ChainView::updateFocusRect() {
   int col = viewData_->chainCol_;
   int x = 5 + columnPositions_[col];
   int y = 3 + viewData_->chainRow_;
@@ -588,6 +592,8 @@ void ChainView::OnFocus() {
          viewData_->song_->chain_.steps_[viewData_->currentChain_][viewData_->chainRow_].phrase == 0xFF) {
     viewData_->chainRow_--;
   }
+
+  updateFocusRect();
 }
 
 void ChainView::setTextProps(int col, int row) {

@@ -120,8 +120,8 @@ struct Theme {
     };
 
     struct Selection {
-      FIXED(bg, LIGHT_GREEN)
-      FIXED(fg, BLACK)
+      SWITCHABLE(bg, LIGHT_GREEN, Theme::View::bg)
+      SWITCHABLE(fg, BLACK, Theme::View::fg)
     };
 
     struct Title {
@@ -269,7 +269,7 @@ public:
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
 
-  GUIRect GetFocusRect();
+  virtual GUIRect GetFocusRect();
 
 protected:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed) = 0;
