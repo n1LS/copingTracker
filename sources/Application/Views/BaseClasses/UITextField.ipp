@@ -159,3 +159,13 @@ void UITextField<MaxLength>::SetVariable(Variable &v) {
   src_ = &v;
   currentChar_ = 0; // Reset cursor position
 }
+
+template <uint8_t MaxLength>
+int UITextField<MaxLength>::GetFocusOffset() {
+  return strlen(label_.c_str());
+}
+
+template <uint8_t MaxLength>
+int UITextField<MaxLength>::GetFocusWidth() {
+  return GetString().size();
+}

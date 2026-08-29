@@ -40,6 +40,7 @@ public:                                 // Override in implementation
   virtual uint32_t GetRandomNumber() = 0;
   virtual uint32_t Micros() = 0;
   virtual uint32_t Millis() = 0;
+  virtual void Sleep(uint32_t millis) = 0;
   virtual SysMutex *GetMutex() = 0;
 };
 

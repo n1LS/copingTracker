@@ -143,12 +143,8 @@ void SampleImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg,
   GetFileName(index, temp, PFILENAME_SIZE);
 
   // Set colors based on selection
-  if (isSelected) {
-    *bg = Theme::View::Selection::bg;
-    *fg = Theme::View::Selection::fg;
-  } else {
-    *bg = Theme::View::bg;
-  }
+  *bg = Theme::View::Selection::bg(isSelected);
+  *fg = Theme::View::Selection::fg(isSelected);
 
   bool isDirectory = IsDirectory(index);
 
@@ -414,7 +410,7 @@ void SampleImportView::import() {
     // Store the imported sample index for auto-assignment
     viewData_->lastImportedSampleIndex = result;
     // Navigate back to the source view after successful import
-    Navigate(sourceViewType_);
+    Navigate(sourceViewType_, vtCollapse);
   } else {
     Trace::Error("SAMPLEIMPORT", "Failed to import sample, error code: %d", result);
   }
@@ -440,7 +436,7 @@ void SampleImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENG
 
   // Navigate to the sample editor view using ScreenView's Navigate method
   // The SampleEditorView will handle loading the sample from the current directory
-  Navigate(VT_SAMPLE_EDITOR);
+  Navigate(VT_SAMPLE_EDITOR, vtRevealFromCenter);
 }
 
 void SampleImportView::onConfirmRemoveProjectSample(View &view, ModalView &dialog) {

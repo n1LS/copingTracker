@@ -74,5 +74,5 @@ void ThemeImportView::onImportThemeModalDismiss(View &, ModalView &dialog) {
     return;
   }
 
-  Navigate(VT_THEME);
+  Navigate(VT_THEME, vtRevealFromCenter);
 }

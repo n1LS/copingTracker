@@ -15,8 +15,9 @@
 #include "Application/Utils/DrawUtils.h"
 #include "Application/Views/ModalDialogs/DeleteProjectConfirmModal.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
-#include "BaseClasses/ViewEvent.h"
 #include "Foundation/Constants/SpecialCharacters.h"
+#include "System/FileSystem/FileSystem.h"
+#include "System/System/System.h"
 #include <nanoprintf.h>
 #include <new>
 
@@ -43,9 +44,34 @@ static const FileListConfig kSelectProjectConfig{
 
 static void LoadProjectCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
-    // User accepted losing changes; clear autosave for the current project.
-    ((SelectProjectView &)v).ClearAutoSave();
-    ((SelectProjectView &)v).LoadProject();
+    // User accepted losing changes. Write the selected project name to the
+    // boot-state file (/.current) and reboot so the project loads through the
+    // exact same code path as on boot (Application::initProject ->
+    // PersistencyService::LoadCurrentProjectName). This guarantees project
+    // loading behaves identically to a fresh boot.
+    SelectProjectView &view = (SelectProjectView &)v;
+
+    char name[MAX_PROJECT_NAME_LENGTH + 1];
+    view.getHighlightedProjectName(name);
+    if (strlen(name) == 0) {
+      Trace::Log("SELECTPROJECTVIEW", "Cannot load: no valid project name");
+      return;
+    }
+
+    // Mirror PersistencyService::SaveProjectState byte-for-byte: write only the
+    // bare project name (no newline, no terminator) to SD_BASE_DIR "/.current".
+    auto fs = FileSystem::GetInstance();
+    auto current = fs->Open(SD_BASE_DIR "/.current", "w");
+    if (!current) {
+      Trace::Log("SELECTPROJECTVIEW", "Could not open %s", SD_BASE_DIR "/.current");
+      return;
+    }
+    current->Write(name, 1, strlen(name));
+    current->Sync();
+
+    Trace::Log("SELECTPROJECTVIEW", "Saved '%s' to .current, rebooting", name);
+    System *sys = System::GetInstance();
+    sys->SystemReboot(); // watchdog reset; does not return
   }
 }
 
@@ -102,13 +128,8 @@ void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg
   }
 
   // Set colors based on selection
-  if (isSelected) {
-    SetBackgroundColor(Theme::View::Selection::bg);
-    SetColor(Theme::View::Selection::fg);
-  } else {
-    SetBackgroundColor(Theme::View::bg);
-    SetColor(Theme::View::fg);
-  }
+  SetBackgroundColor(Theme::View::Selection::bg(isSelected));
+  SetColor(Theme::View::Selection::fg(isSelected));
 
   // Check if this is the current project
   auto var = viewData_->project_->FindVariable(Token::VarProjectName);
@@ -118,7 +139,7 @@ void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg
   bool isCurrent = strcmp(temp, currentProject) == 0;
   Trace::Debug("checking %s vs %s -> %b", temp, currentProject, isCurrent);
 
-  char symbol = isCurrent ? CHAR(char_playback_play_s) : ' ';
+  uint8_t symbol = isCurrent ? CHAR(char_playback_play_s) : ' ';
 
   int len = FILE_LIST_LINE_LENGTH - 2;
   npf_snprintf(buffer, SCREEN_WIDTH, "%c %-*.*s", symbol, len, len, temp);
@@ -137,10 +158,6 @@ void SelectProjectView::OnTabAction(int tabIndex, const char *filename) {
   }
 }
 
-void SelectProjectView::getSelectedProjectName(char *name) {
-  strcpy(name, selection_);
-}
-
 void SelectProjectView::getHighlightedProjectName(char *name) {
   name[0] = '\0';
   if (GetCurrentIndex() >= ListView::GetItemCount()) {
@@ -148,36 +165,6 @@ void SelectProjectView::getHighlightedProjectName(char *name) {
   }
 
   GetFileName(GetCurrentIndex(), name, MAX_PROJECT_NAME_LENGTH + 1);
-}
-
-void SelectProjectView::LoadProject() {
-  if (GetCurrentIndex() >= ListView::GetItemCount()) {
-    return;
-  }
-
-  // all subdirs directly inside /project are expected to be projects
-  GetFileName(GetCurrentIndex(), selection_, MAX_PROJECT_NAME_LENGTH + 1);
-  if (strlen(selection_) == 0) {
-    Trace::Log("SELECTPROJECTVIEW", "skipping too long project name on Index:%zu", GetCurrentIndex());
-    return;
-  }
-
-  Trace::Log("SELECTPROJECTVIEW", "Select Project:%s", selection_);
-
-  ViewEvent ve(VET_LOAD_PROJECT, selection_);
-  SetChanged();
-  NotifyObservers(&ve);
-}
-
-void SelectProjectView::ClearAutoSave() {
-  auto var = viewData_->project_->FindVariable(Token::VarProjectName);
-  etl::string<MAX_PROJECT_NAME_LENGTH> projectName = var->GetString();
-  PersistencyService *ps = PersistencyService::GetInstance();
-  if (!projectName.empty()) {
-    if (!ps->ClearAutosave(projectName.c_str())) {
-      Trace::Log("SELECTPROJECTVIEW", "Autosave clear failed or missing for project: %s", projectName.c_str());
-    }
-  }
 }
 
 bool SelectProjectView::SelectionIsCurrentProject() {

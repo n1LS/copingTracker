@@ -334,7 +334,7 @@ void FileListView::HandleTabRight() {
 }
 
 void FileListView::HandleBackNavigation() {
-  Navigate(config_.backNavigationTarget);
+  Navigate(config_.backNavigationTarget, vtCollapse);
 }
 
 void FileListView::OnTabAction(int tabIndex, const char *filename) {
@@ -506,8 +506,8 @@ void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Col
 
   // Set colors based on selection and type
   if (isSelected) {
-    *fg = Theme::View::Selection::fg;
-    *bg = Theme::View::Selection::bg;
+    *fg = Theme::View::Selection::fg(true);
+    *bg = Theme::View::Selection::bg(true);
   } else {
     *fg = isDirectory ? Theme::FileList::directory : Theme::FileList::file;
     *bg = Theme::View::bg;

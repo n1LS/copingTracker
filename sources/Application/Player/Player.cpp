@@ -771,12 +771,12 @@ void Player::updateChainPos(int pos, int channel, int hop) {
   if (chain != 0xFF) {
     viewData_->chainPlayPos_[channel] = pos;
     viewData_->currentPlayPhrase_[channel] = viewData_->song_->chain_.steps_[chain][pos].phrase;
-    if (viewData_->currentPlayPhrase_[channel] == 0xFF) { // This could happen if starting in song mode on a row
-                                                          // where a chain contains no phrase
+    if (viewData_->currentPlayPhrase_[channel] == EMPTY_CHAIN_VALUE) {
+      // This could happen if starting in song mode on a row where a chain contains no phrase
       mixer_.StopChannel(channel);
     }
   } else {
-    viewData_->currentPlayPhrase_[channel] = 0xFF;
+    viewData_->currentPlayPhrase_[channel] = EMPTY_CHAIN_VALUE;
     mixer_.StopChannel(channel);
   };
   updatePhrasePos((hop >= 0) ? hop : 0, channel);
@@ -1259,7 +1259,7 @@ int Player::GetPlayedBufferPercentage() {
   return lastPercentage_;
 }
 
-PlayerEvent::PlayerEvent(PlayerEventType type, unsigned int tickCount) : ViewEvent(VET_PLAYER_POSITION_UPDATE) {
+PlayerEvent::PlayerEvent(PlayerEventType type, unsigned int tickCount) : ViewEvent(vetPlayerPositionUpdate) {
   type_ = type;
   tickCount_ = tickCount;
 }

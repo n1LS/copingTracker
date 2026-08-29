@@ -156,9 +156,9 @@ void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
   // NAV back to Song view
   if (mask & BM_NAV) {
     if (mask & BM_UP) {
-      Navigate(VT_SONG);
+      Navigate(VT_SONG, vtRevealFromTop);
     } else if (mask & BM_RIGHT) {
-      Navigate(VT_TABLE);
+      Navigate(VT_TABLE, vtRevealFromRight);
     }
   }
 
@@ -207,7 +207,7 @@ void MixerView::processNormalButtonMask(unsigned int mask) {
     }
   } else if (mask & BM_NAV) {
     if (mask & BM_UP) {
-      Navigate(VT_SONG);
+      Navigate(VT_SONG, vtRevealFromTop);
     }
     if (mask & BM_ALT) {
       unMuteAll();

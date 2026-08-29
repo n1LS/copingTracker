@@ -29,11 +29,11 @@
 
 #define TOAST_SAVE_SUCCESS()                                                                                           \
   {                                                                                                                    \
-    ToastView::getInstance()->Show("Project saved successfully.", &ttSuccess, ToastDuration::regular);                 \
+    ToastView::GetInstance()->Show("Project saved successfully.", &ttSuccess, ToastDuration::regular);                 \
   }
 #define TOAST_SAVE_FAILURE()                                                                                           \
   {                                                                                                                    \
-    ToastView::getInstance()->Show("Failed to save project.", &ttError, ToastDuration::regular);                       \
+    ToastView::GetInstance()->Show("Failed to save project.", &ttError, ToastDuration::regular);                       \
   }
 
 static void CreateNewProjectCallback(View &v, ModalView &dialog) {
@@ -41,7 +41,7 @@ static void CreateNewProjectCallback(View &v, ModalView &dialog) {
     // first clear out any existing "unnamed" project
     PersistencyService::GetInstance()->PurgeUnnamedProject();
 
-    ViewEvent ve(VET_NEW_PROJECT);
+    ViewEvent ve(vetNewProject);
     ((ProjectView &)v).SetChanged();
     ((ProjectView &)v).NotifyObservers(&ve);
   }
@@ -256,11 +256,11 @@ void ProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
 
     if (mask & BM_DOWN) {
-      Navigate(VT_SONG);
+      Navigate(VT_SONG, vtRevealFromBottom);
     } else if (mask & BM_RIGHT) {
-      Navigate(VT_GROOVE);
+      Navigate(VT_GROOVE, vtRevealFromRight);
     } else if (mask & BM_UP) {
-      Navigate(VT_DEVICE);
+      Navigate(VT_DEVICE, vtRevealFromTop);
     }
   } else if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
@@ -363,7 +363,7 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
     case Token::ActionBrowse:
       {
         if (CanExit()) {
-          Navigate(VT_SELECTPROJECT);
+          Navigate(VT_SELECTPROJECT, vtRevealFromCenter);
         }
         break;
       }
@@ -467,7 +467,7 @@ void ProjectView::goToSampleImport() {
     viewData_->isShowingSampleEditorProjectPool = true;
 
     // Go to import sample
-    Navigate(VT_IMPORT);
+    Navigate(VT_IMPORT, vtRevealFromCenter);
   }
 }
 

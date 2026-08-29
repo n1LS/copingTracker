@@ -13,9 +13,12 @@ _copingTracker_ is essentially _picoTracker_ having an existential crisis - jumb
 * up to 32 instruments consisting of 
     * Sample instruments
     * MIDI instruments
+    * Stack instrument (multi-saw -> chord wavetable synthesizer)
+    * internal 135 instrument GM Bank
+    * Chiptune Drum
+    * Chiptune Lead
     * SID instruments
     * OPAL instruments
-    * Chiptune instruments
 * 8 or 16bit samples up to 44.1kHz, mono or stereo
 * 16bit/44.1kHz/Stereo audio output
 

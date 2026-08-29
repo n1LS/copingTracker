@@ -35,26 +35,20 @@ static void report_app_boot_trace() {
   bootlog("BOOTDBG: app-trace stage=0x%08x", stage);
 }
 
-// ── Startup initialisation (shared between normal and auto-boot paths) ──────
+// ── Startup initialisation ────────────────────────────────────────────────────
 
 static void startup_init(int &selected_file, Uf2FileEntry *uf2_files, int &uf2_count, bool &sd_ready,
-                         bool &auto_boot_armed, uint32_t &auto_boot_deadline, char *installed_firmware,
-                         char *installed_bin) {
+                         char *installed_firmware, char *installed_bin) {
   if (bl_mount_sd()) {
     sd_ready = true;
-    if (bl_read_firmware_info(installed_firmware, 64, installed_bin, 80)) {
-      auto_boot_armed = true;
-      auto_boot_deadline = millis() + 3000;
-    }
+    bl_read_firmware_info(installed_firmware, 64, installed_bin, 80);
   } else {
     menu_show_sd_warning();
   }
 
   if (sd_ready) {
     const int inbox_count = bl_scan_uf2_inbox(uf2_files, kMaxUf2Files);
-    if (bl_import_uf2_to_firmwares(uf2_files, inbox_count)) {
-      auto_boot_armed = false;
-    }
+    bl_import_uf2_to_firmwares(uf2_files, inbox_count);
 
     uf2_count = bl_scan_firmware_bins(uf2_files, kMaxUf2Files);
 
@@ -81,17 +75,41 @@ void bl_run_ui_loop() {
   uint32_t pending_since_ms = 0;
   constexpr uint32_t kDebounceMs = 25;
   bool sd_ready = false;
-  bool auto_boot_armed = false;
   uint32_t sd_last_check_ms = 0;
-  uint32_t auto_boot_deadline = 0;
   char installed_firmware[64] = {0};
   char installed_bin[80] = {0};
   bool display_dirty = true;
-  int displayed_auto_boot_seconds = -1;
 
   report_app_boot_trace();
-  startup_init(selected_file, uf2_files, uf2_count, sd_ready, auto_boot_armed, auto_boot_deadline, installed_firmware,
-               installed_bin);
+  startup_init(selected_file, uf2_files, uf2_count, sd_ready, installed_firmware, installed_bin);
+
+  // Initial key-press check: wait up to 50ms for keys to debounce. If no keys
+  // are held after debounce settles and firmware is installed, auto-boot.
+  {
+    const uint32_t check_start = millis();
+    while ((millis() - check_start) < 50) {
+      const uint16_t raw_keys = scanKeys();
+      if (raw_keys != pending_keys) {
+        pending_keys = raw_keys;
+        pending_since_ms = millis();
+      }
+
+      if (pending_keys != stable_keys && (millis() - pending_since_ms) >= kDebounceMs) {
+        stable_keys = pending_keys;
+        break;
+      }
+    }
+
+    if ((stable_keys == 0) && (installed_bin[0])) {
+      bl_boot_installed(true);
+    }
+  }
+
+  // Quick boot has been cancelled (a key was pressed during the 50ms window),
+  // so commit to the interactive UI: paint the static title bar, labels and
+  // key legend once. Nothing is drawn above because the auto-boot path must
+  // boot with a clean/blank screen.
+  menu_render_static();
 
   while (true) {
     const uint32_t now_ms = millis();
@@ -134,7 +152,7 @@ void bl_run_ui_loop() {
       platform_bootloader();
     }
 
-    // ALT+ENTER: flash the selected bin without auto-boot
+    // ALT+ENTER: flash the selected bin without booting it.
     if ((pressed & BM_ENTER) && (keys & BM_ALT)) {
       if (uf2_count <= 0) {
         menu_show_message("No firmware in /firmwares. Add a UF2 to SD root, "
@@ -157,7 +175,7 @@ void bl_run_ui_loop() {
 
         if (installed_bin[0] && bl_str_equals_ci(bin_path, installed_bin)) {
           // Already installed — boot directly.
-          bl_handle_boot_installed(&g_sd, bin_path);
+          bl_boot_installed(false);
         } else {
           bl_handle_flash_and_boot(&g_sd, bin_path);
         }
@@ -167,7 +185,7 @@ void bl_run_ui_loop() {
 
     // PLAY (no ALT): boot the app slot directly.
     if ((pressed & BM_PLAY) && !(keys & BM_ALT)) {
-      bl_handle_boot_installed(&g_sd, nullptr);
+      bl_boot_installed(false);
     }
 
     // EDIT: reboot to firmware update (USB mass storage) mode.
@@ -176,41 +194,11 @@ void bl_run_ui_loop() {
       platform_bootloader();
     }
 
-    // ── Auto-boot countdown ──────────────────────────────────────────────
-
-    int auto_boot_timeout = -1;
-    int auto_boot_seconds = -1;
-
-    if (auto_boot_armed) {
-      auto_boot_timeout = static_cast<int32_t>(auto_boot_deadline - now_ms);
-      if (auto_boot_timeout < 0) {
-        auto_boot_timeout = 0;
-      }
-      auto_boot_seconds = auto_boot_timeout / 1000 + 1;
-
-      // Any key press aborts auto-boot.
-      if (pressed) {
-        auto_boot_armed = false;
-        display_dirty = true;
-      }
-    }
-
-    if (auto_boot_timeout == 0 && auto_boot_armed) {
-      // Timeout reached — boot installed firmware.
-      auto_boot_armed = false;
-      bl_handle_boot_installed(&g_sd, nullptr);
-    }
-
-    if (auto_boot_seconds != displayed_auto_boot_seconds) {
-      display_dirty = true;
-    }
-
     // ── Render ───────────────────────────────────────────────────────────
 
     if (display_dirty) {
-      menu_render_main(uf2_files, uf2_count, selected_file, installed_bin, sd_ready, auto_boot_timeout);
+      menu_render_main(uf2_files, uf2_count, selected_file, installed_bin, sd_ready);
       display_dirty = false;
-      displayed_auto_boot_seconds = auto_boot_seconds;
     }
 
     tight_loop_contents();

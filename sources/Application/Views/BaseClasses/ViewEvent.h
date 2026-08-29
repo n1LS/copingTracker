@@ -13,15 +13,32 @@
 #define _VIEW_EVENT_H_
 
 #include "Foundation/Observable.h"
+#include "Foundation/Types/ViewType.h"
+
+typedef enum ViewTransition {
+  vtRevealFromLeft,
+  vtRevealFromRight,
+  vtRevealFromTop,
+  vtRevealFromBottom,
+  vtRevealFromCenter,
+  vtDissolve,
+  vtCollapse,
+  vtNone,
+} ViewTransition;
 
 enum ViewEventType {
-  VET_SWITCH_VIEW,
-  VET_PLAYER_POSITION_UPDATE,
-  VET_LIST_SELECT,
-  VET_LOAD_PROJECT,
-  VET_NEW_PROJECT,
-  VET_QUIT_PROJECT,
-  VET_UPDATE
+  vetSwitchView,
+  vetPlayerPositionUpdate,
+  vetListSelect,
+  vetLoadProject,
+  vetNewProject,
+  vetQuitProject,
+  vetUpdate
+};
+
+struct ViewEventData {
+  ViewType type;
+  ViewTransition transition;
 };
 
 class ViewEvent : public I_ObservableData {

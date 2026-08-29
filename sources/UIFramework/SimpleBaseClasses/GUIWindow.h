@@ -47,6 +47,7 @@ public: // I_GUIGraphics implementation
   virtual void DrawRect(const GUIRect &rect);
   virtual void SetCurrentRectColor(Color color);
   virtual GUIRect GetRect();
+  const GUIRect &GetFocusRect() const;
   virtual void Invalidate();
   virtual void Flush();
   virtual void Lock();
@@ -55,8 +56,6 @@ public: // I_GUIGraphics implementation
   virtual void ClockTick();
   virtual void onUpdate(bool redraw) = 0;
   virtual void AnimationUpdate() = 0;
-  //	virtual void Save() ;
-  //	virtual void Restore() ;
   void PushEvent(GUIEvent &event);
   void Clear();
   I_GUIWindowImp *GetImpWindow() {
@@ -72,6 +71,8 @@ public:
 
   virtual bool DispatchEvent(GUIEvent &Event);
 
+  void SetFocusRect(const GUIRect &rect);
+
   // Returns the offset of the control with respect to the
   // I_GUIGraphics it uses to render itself.
 
@@ -85,6 +86,7 @@ protected:
   // Returns the graphics used to render the window
 
   virtual I_GUIGraphics *GetGraphics();
+  GUIRect focusRect_;
 
 private:
   I_GUIWindowImp *_imp; // the implementation system-dependant window

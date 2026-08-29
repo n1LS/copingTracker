@@ -128,7 +128,7 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
     if (mask & BM_LEFT) {
       // Go back to sample browser NAV+LEFT
       stopPreview();
-      Navigate(VT_INSTRUMENT);
+      Navigate(VT_INSTRUMENT, vtCollapse);
       return;
     }
     // For other NAV combinations, let parent handle it
@@ -356,7 +356,6 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
     case Token::ActionAutoSlice:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
         MessageBox *mb = MessageBox::Create(*this, "Slices", "Replace current slices?", MBBF_YES | MBBF_NO);
-        ((AppWindow &)w_).InvalidateTextCache();
         DoModal(mb, ModalViewCallback::create<&SampleSlicesView::AutoSliceConfirmCallback>());
       } else {
         autoSliceEvenly();
@@ -370,7 +369,6 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
     case Token::ActionSlicingRevert:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
         MessageBox *mb = MessageBox::Create(*this, "Slices", "Restore slices?", MBBF_YES | MBBF_NO);
-        ((AppWindow &)w_).InvalidateTextCache();
         DoModal(mb, ModalViewCallback::create<&SampleSlicesView::ResetSlicesConfirmCallback>());
       } else {
         autoSliceEvenly();

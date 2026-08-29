@@ -108,3 +108,11 @@ bool GUIWindow::DispatchEvent(GUIEvent &event) {
 void GUIWindow::PushEvent(GUIEvent &event) {
   _imp->PushEvent(event);
 }
+
+void GUIWindow::SetFocusRect(const GUIRect &rect) {
+  focusRect_ = rect;
+}
+
+const GUIRect &GUIWindow::GetFocusRect() const {
+  return focusRect_;
+}

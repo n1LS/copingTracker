@@ -184,7 +184,7 @@ void SongView::clonePosition() {
 
   for (int i = 0; i < 16; i++) {
     *dst++ = *src++;
-  };
+  }
   setChain((unsigned char)next);
   isDirty_ = true;
 }
@@ -637,8 +637,8 @@ void SongView::processNormalButtonMask(unsigned int mask) {
     if (mask & BM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentSongPointer();
       if (*data != 0xFF) {
-        ViewType vt = VT_CHAIN;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
+        ViewEventData ved = {VT_CHAIN, vtRevealFromRight};
+        ViewEvent ve(vetSwitchView, &ved);
         viewData_->currentChain_ = *data;
         SetChanged();
         NotifyObservers(&ve);
@@ -646,15 +646,15 @@ void SongView::processNormalButtonMask(unsigned int mask) {
     }
 
     if (mask & BM_UP) {
-      ViewType vt = VT_PROJECT;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
+      ViewEventData ved = {VT_PROJECT, vtRevealFromTop};
+      ViewEvent ve(vetSwitchView, &ved);
       SetChanged();
       NotifyObservers(&ve);
     }
 
     if (mask & BM_DOWN) {
-      ViewType vt = VT_MIXER;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
+      ViewEventData ved = {VT_MIXER, vtRevealFromBottom};
+      ViewEvent ve(vetSwitchView, &ved);
       SetChanged();
       NotifyObservers(&ve);
     }
@@ -737,8 +737,8 @@ void SongView::processSelectionButtonMask(unsigned int mask) {
     if (mask & BM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentSongPointer();
       if (*data != 0xFF) {
-        ViewType vt = VT_CHAIN;
-        ViewEvent ve(VET_SWITCH_VIEW, &vt);
+        ViewEventData ved = {VT_CHAIN, vtRevealFromRight};
+        ViewEvent ve(vetSwitchView, &ved);
         viewData_->currentChain_ = *data;
         SetChanged();
         NotifyObservers(&ve);
@@ -746,15 +746,15 @@ void SongView::processSelectionButtonMask(unsigned int mask) {
     }
 
     if (mask & BM_UP) {
-      ViewType vt = VT_PROJECT;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
+      ViewEventData ved = {VT_PROJECT, vtRevealFromTop};
+      ViewEvent ve(vetSwitchView, &ved);
       SetChanged();
       NotifyObservers(&ve);
     }
 
     if (mask & BM_DOWN) {
-      ViewType vt = VT_MIXER;
-      ViewEvent ve(VET_SWITCH_VIEW, &vt);
+      ViewEventData ved = {VT_MIXER, vtRevealFromBottom};
+      ViewEvent ve(vetSwitchView, &ved);
       SetChanged();
       NotifyObservers(&ve);
     }
@@ -846,6 +846,11 @@ void SongView::DrawView() {
 
       if (highlighted) {
         SwapColors();
+
+        if (!clipboard_.active_) {
+          // set the focus rect
+          focusRect_ = GUIRect(pos.x_, pos.y_, pos.x_ + 2, pos.y_);
+        }
       }
 
       if (d == 0xFF) {

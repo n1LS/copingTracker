@@ -31,5 +31,5 @@ void UINoteVarField::Draw(GUIWindow &w, int offset) {
   note[3] = 0;
   npf_snprintf(buffer, sizeof(buffer), format_, note);
 
-  DrawLabeledField(w, position, buffer);
+  focusWidth_ = DrawLabeledField(w, position, buffer, focus_);
 }

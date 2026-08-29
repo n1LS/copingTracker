@@ -25,7 +25,7 @@ public:
   virtual void OnFocus() {};
   virtual void AnimationUpdate() override;
 
-  void Navigate(ViewType target);
+  void Navigate(ViewType target, ViewTransition transition);
 
 protected:
   virtual const char *emptyStateMessage() const;

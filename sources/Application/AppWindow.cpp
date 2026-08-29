@@ -10,6 +10,9 @@
  */
 
 #include "AppWindow.h"
+
+#include "Adapters/copingTracker/system/picoTrackerProjectLoader.h"
+
 #include "Application/Commands/ApplicationCommandDispatcher.h"
 #include "Application/Commands/EventDispatcher.h"
 #include "Application/Instruments/InstrumentBank.h"
@@ -19,8 +22,8 @@
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Player/TablePlayback.h"
+#include "Application/Utility/ProjectLoader.h"
 #include "Application/Utils/char.h"
-#include "Application/Views/ToastView.h"
 #include "Application/Views/Views.h"
 #include "BaseClasses/View.h"
 #include "Foundation/Variables/WatchedVariable.h"
@@ -42,10 +45,8 @@ const uint16_t AUTOSAVE_INTERVAL_IN_SECONDS = 1 * 60;
 
 AppWindow *instance = 0;
 
-unsigned char AppWindow::_charScreen[SCREEN_CHARS];
+unsigned char AppWindow::_screenChar[SCREEN_CHARS];
 color_t AppWindow::_screenColor[SCREEN_CHARS];
-unsigned char AppWindow::_preScreen[SCREEN_CHARS];
-color_t AppWindow::_preScreenColor[SCREEN_CHARS];
 
 GUIColor AppWindow::colorPalette_[NUM_COLORS] = {
     GUIColor(0x00, 0x00, 0x00), // 0: black
@@ -87,16 +88,60 @@ struct AppWindowViews {
   MixerView mixerView;
   SampleEditorView sampleEditorView;
   SampleSlicesView sampleSlicesView;
-  NullView nullView;
+  BootView bootView;
+
+  void Reset() {
+    bootView.Reset();
+    songView.Reset();
+    chainView.Reset();
+    phraseView.Reset();
+    grooveView.Reset();
+    tableView.Reset();
+    projectView.Reset();
+    instrumentView.Reset();
+    mixerView.Reset();
+    importView.Reset();
+    instrumentImportView.Reset();
+    themeView.Reset();
+    themeImportView.Reset();
+    selectProjectView.Reset();
+    sampleEditorView.Reset();
+    sampleSlicesView.Reset();
+  };
+
+  void AddObservers(I_Observer &window) {
+    songView.AddObserver(window);
+    chainView.AddObserver(window);
+    phraseView.AddObserver(window);
+    deviceView.AddObserver(window);
+    helpView.AddObserver(window);
+    themeView.AddObserver(window);
+    themeImportView.AddObserver(window);
+    projectView.AddObserver(window);
+    importView.AddObserver(window);
+    instrumentImportView.AddObserver(window);
+    instrumentView.AddObserver(window);
+    tableView.AddObserver(window);
+    grooveView.AddObserver(window);
+    selectProjectView.AddObserver(window);
+    mixerView.AddObserver(window);
+    sampleEditorView.AddObserver(window);
+    sampleSlicesView.AddObserver(window);
+    bootView.AddObserver(window);
+  };
 
   AppWindowViews(GUIWindow &w, ViewData &viewData)
       : songView(w, &viewData), chainView(w, &viewData), phraseView(w, &viewData), deviceView(w, &viewData),
         helpView(w, &viewData), themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData),
         importView(w, &viewData), instrumentImportView(w, &viewData), instrumentView(w, &viewData),
         tableView(w, &viewData), grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
-        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), nullView(w, &viewData) {
+        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), bootView(w, &viewData) {
   }
 };
+
+AppWindow *AppWindow::GetInstance() {
+  return instance;
+}
 
 void AppWindow::defineColor(Token colorCode, GUIColor &color, int paletteIndex) {
   Config *config = Config::GetInstance();
@@ -117,19 +162,15 @@ void AppWindow::defineColor(Token colorCode, GUIColor &color, int paletteIndex) 
 }
 
 AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
-    : GUIWindow(imp), project_(projectName), viewData_(&project_), views_(nullptr), _currentView(nullptr) {
+    : GUIWindow(imp), project_(projectName), viewData_(&project_), views_(nullptr), currentView_(nullptr),
+      projectLoader_(*this, project_) {
 
   instance = this;
 
   // Init all members
 
-  _statusLine[0] = 0;
-
-  _currentView = nullptr;
-  _closeProject = false;
-  _lastA = 0;
-  _lastB = 0;
-  _mask = 0;
+  currentView_ = nullptr;
+  mask_ = 0;
   lowBatteryMessageShown_ = false;
   sdCardMissing_ = false;
   sdCardMessageShown_ = false;
@@ -151,31 +192,13 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   static AppWindowViews views(*this, viewData_);
   views_ = &views;
 
-  _currentView = &views_->nullView;
-  views_->nullView.SetDirty(true);
+  currentView_ = &views_->bootView;
+  views_->bootView.SetDirty(true);
 
-  views_->songView.AddObserver(*this);
-  views_->chainView.AddObserver(*this);
-  views_->phraseView.AddObserver(*this);
-  views_->deviceView.AddObserver(*this);
-  views_->helpView.AddObserver(*this);
-  views_->themeView.AddObserver(*this);
-  views_->themeImportView.AddObserver(*this);
-  views_->projectView.AddObserver(*this);
-  views_->importView.AddObserver(*this);
-  views_->instrumentImportView.AddObserver(*this);
-  views_->instrumentView.AddObserver(*this);
-  views_->tableView.AddObserver(*this);
-  views_->grooveView.AddObserver(*this);
-  views_->selectProjectView.AddObserver(*this);
-  views_->mixerView.AddObserver(*this);
-  views_->sampleEditorView.AddObserver(*this);
-  views_->sampleSlicesView.AddObserver(*this);
+  views_->AddObservers(*this);
 
-  memset(_charScreen, ' ', SCREEN_CHARS);
-  memset(_preScreen, ' ', SCREEN_CHARS);
+  memset(_screenChar, ' ', SCREEN_CHARS);
   memset(_screenColor, 0, SCREEN_CHARS);
-  memset(_preScreenColor, 0, SCREEN_CHARS);
 
   ToastView::Init(*this, &viewData_);
 
@@ -185,7 +208,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   // causes audio init to fail, so instead set this flag which will then cause
   // LoadProject() to be called from within the next time that AnimationUpdate()
   // is called
-  loadProject_ = true;
+  // loadProject_ = true;
 }
 
 // Static callback wrapper for SamplePool to notify InstrumentBank
@@ -230,7 +253,7 @@ void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
   }
 
   int index = x + SCREEN_WIDTH * y;
-  _charScreen[index] = c;
+  _screenChar[index] = c;
 
   if (transparent) {
     _screenColor[index].fg = color_.fg;
@@ -242,11 +265,8 @@ void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
 void AppWindow::Clear() {
   color_t base = (color_t){.fg = Theme::View::fg, .bg = Theme::View::bg};
 
-  memset(_charScreen, ' ', SCREEN_CHARS);
+  memset(_screenChar, ' ', SCREEN_CHARS);
   memset(_screenColor, base.byte, SCREEN_CHARS);
-
-  memset(_preScreen, '\0', SCREEN_CHARS);
-  memset(_preScreenColor, 0xff, SCREEN_CHARS);
 }
 
 void AppWindow::ClearTextRect(GUIRect &r) {
@@ -276,7 +296,7 @@ void AppWindow::ClearTextRect(GUIRect &r) {
     return;
   }
 
-  unsigned char *st = _charScreen + x + (SCREEN_WIDTH * y);
+  unsigned char *st = _screenChar + x + (SCREEN_WIDTH * y);
   color_t *pr = _screenColor + x + (SCREEN_WIDTH * y);
   for (int i = 0; i < h; i++) {
     for (int j = 0; j < w; j++) {
@@ -288,11 +308,25 @@ void AppWindow::ClearTextRect(GUIRect &r) {
   }
 }
 
-void AppWindow::InvalidateTextCache() {
-  // Force the next text flush to resend all cells without changing the current
-  // text buffer contents.
-  memset(_preScreen, 0xFF, SCREEN_CHARS);
-  memset(_preScreenColor, 0xFF, SCREEN_CHARS);
+#define GUI(f, c, p)                                                                                                   \
+  {                                                                                                                    \
+    GUIWindow::SetColor(f->fg);                                                                                        \
+    GUIWindow::SetBackgroundColor(f->bg);                                                                              \
+    GUIWindow::DrawChar(p.x_, p.y_, *c);                                                                               \
+  }
+
+void AppWindow::FlushTransition() {
+  for (int y = 0; y < SCREEN_HEIGHT; y++) {
+    for (int x = 0; x < SCREEN_WIDTH; x++) {
+      unsigned char *current = _screenChar + y * SCREEN_WIDTH + x;
+      color_t *currentColor = _screenColor + y * SCREEN_WIDTH + x;
+      GUIPoint pos = {x, y};
+      bool draw = ((x & 1) == 0 && (y & 1) == 0) || (transitionFrame_ >= 1 && (x & 1) == 1 && (y & 1) == 1);
+      if (draw) {
+        GUI(currentColor, current, pos);
+      }
+    }
+  }
 }
 
 //
@@ -300,7 +334,7 @@ void AppWindow::InvalidateTextCache() {
 //
 void AppWindow::Flush() {
   // draw the ToastView, it handles its own visibility
-  ToastView::getInstance()->Draw(*this);
+  ToastView::GetInstance()->Draw(*this);
 
   Lock();
 
@@ -311,14 +345,17 @@ void AppWindow::Flush() {
 
   int count = 0;
 
-  unsigned char *current = _charScreen;
+  unsigned char *current = _screenChar;
   unsigned char *previous = _preScreen;
   color_t *currentColor = _screenColor;
-  color_t *previousColor = _preScreenColor;
 
-  for (int y = 0; y < SCREEN_HEIGHT; y++) {
-    for (int x = 0; x < SCREEN_WIDTH; x++) {
-      if ((*current != *previous) || (currentColor->byte != previousColor->byte)) {
+  if (transitionType_ != vtNone) {
+    FlushTransition();
+  } else {
+    // regular drawing
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+      pos = {0, y};
+      for (int x = 0; x < SCREEN_WIDTH; x++, current++, currentColor++, pos.x_++) {
         // Extract invert flag from properties
         Color fg = (Color)currentColor->fg;
         Color bg = (Color)currentColor->bg;
@@ -338,109 +375,84 @@ void AppWindow::Flush() {
         GUIWindow::DrawChar(pos.x_, pos.y_, *current);
         count++;
       }
-
-      current++;
-      previous++;
-      currentColor++;
-      previousColor++;
-      pos.x_++;
     }
-    pos.y_++;
-    pos.x_ = 0;
   }
+
+  GUIWindow::SetFocusRect(currentView_->GetFocusRect());
 
   GUIWindow::Flush();
+
   Unlock();
-  memcpy(_preScreen, _charScreen, SCREEN_CHARS);
-  memcpy(_preScreenColor, _screenColor, SCREEN_CHARS);
+
+  // skip flipping during transitions
+  if (transitionType_ != vtNone) {
+    if (transitionFrame_ < 1) {
+      transitionFrame_++;
+    } else {
+      transitionType_ = vtNone;
+    }
+    return;
+  }
 }
 
-AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
+// ============================================================================
+// ProjectLoaderProtocol implementation
+// ============================================================================
 
-  _closeProject = false;
+void AppWindow::onLoadPhaseAComplete() {
+  // Phase A completed — the project is loaded into memory and samples are
+  // being loaded asynchronously. BootView is already showing.
+}
+
+void AppWindow::onLoadProgress(uint32_t index, uint32_t total, const char *message) {
+  // Progress is polled from BootView via GetProjectLoadProgress()
+  (void)index;
+  (void)total;
+  (void)message;
+}
+
+void AppWindow::onLoadPhaseCComplete(bool success, const char *projectName) {
+  // Phase C: view-level completion work after sample loading
+  if (!success) {
+    Trace::Error("Failed to load project '%s'. Waiting for key press to load untitled", projectName);
+    npf_snprintf(projectName_, sizeof(projectName_), "%s", projectName);
+    awaitingProjectLoadAck_ = true;
+    View &errorView = views_->songView;
+
+    char buffer[32];
+    npf_snprintf(buffer, sizeof(buffer), "\"%28s\"", projectName);
+    MessageBox *mb = MessageBox::Create(errorView, "Project load failed", "Invalid Project:", buffer, MBBF_OK);
+    errorView.DoModal(mb);
+    return;
+  }
 
   PersistencyService *persist = PersistencyService::GetInstance();
-
   Player *player = Player::GetInstance();
-  if (player->IsRunning()) {
-    player->Stop();
-  }
-
-  TablePlayback::Reset();
-  TableHolder::GetInstance()->Reset();
-  Mixer::GetInstance()->Clear();
-
-  SamplePool *pool = SamplePool::GetInstance();
-  pool->Reset();
-
-  project_.Load(projectName);
   Project *project = &project_;
-
-  if (createProjectOnLoad_) {
-    PersistencyResult created = persist->CreateProject();
-    if (created != PERSIST_SAVED) {
-      Trace::Error("Failed to create new project '%s'", projectName);
-      return LoadProjectResult::LOAD_FAILED;
-    }
-    createProjectOnLoad_ = false;
-  }
-
-  // load the projects samples
-  pool->Load(projectName);
 
   // Register callback to update instruments when samples are removed
   SamplePool::SetSampleRemovedCallback(&OnSampleRemovedFromPool);
 
-  bool succeeded = (persist->Load(projectName) == PERSIST_LOADED);
-  if (!succeeded) {
-    Trace::Error("Failed to load project '%s'", projectName);
-    pool->Reset();
-    TableHolder::GetInstance()->Reset();
-    return LoadProjectResult::LOAD_FAILED;
-  };
-
-  // Project
-
   WatchedVariable::Disable();
 
-  // Register as an observer of the project name variable to get notified of
-  // changes
+  // Register as an observer of the project name variable
   Variable *projectNameVar = project->FindVariable(Token::VarProjectName);
   if (projectNameVar) {
     WatchedVariable *watchedVar = (WatchedVariable *)projectNameVar;
     if (watchedVar) {
       watchedVar->RemoveObserver(*this);
       watchedVar->AddObserver(*this);
-      // Store the initial project name
       project->GetProjectName(projectName_);
     }
   }
 
-  project->GetInstrumentBank()->Init();
-
   WatchedVariable::Enable();
-
-  ApplicationCommandDispatcher::GetInstance()->Init(project);
 
   // Update view data
   viewData_.Load(project);
 
   if (views_) {
-    views_->songView.Reset();
-    views_->chainView.Reset();
-    views_->phraseView.Reset();
-    views_->grooveView.Reset();
-    views_->tableView.Reset();
-    views_->projectView.Reset();
-    views_->instrumentView.Reset();
-    views_->mixerView.Reset();
-    views_->importView.Reset();
-    views_->instrumentImportView.Reset();
-    views_->themeView.Reset();
-    views_->themeImportView.Reset();
-    views_->selectProjectView.Reset();
-    views_->sampleEditorView.Reset();
-    views_->sampleSlicesView.Reset();
+    views_->Reset();
   }
 
   bool playerOK = true;
@@ -452,49 +464,29 @@ AppWindow::LoadProjectResult AppWindow::LoadProject(const char *projectName) {
     player->BindProject(project, &viewData_);
   }
 
-  // Create the controller
   UIController *controller = UIController::GetInstance();
   controller->Init(project, &viewData_);
 
-  _currentView = &views_->songView;
-  _currentView->OnFocus();
+  currentView_ = &views_->songView;
+  currentView_->OnFocus();
 
   if (!playerOK) {
     MessageBox *mb = MessageBox::Create(views_->songView, "Audio", "Failed to initialize audio", MBBF_OK);
     views_->songView.DoModal(mb);
   }
 
-  if (_currentView) {
-    _currentView->SetDirty(true);
+  if (currentView_) {
+    currentView_->SetDirty(true);
     SetDirty();
   }
-
-  if (persist->SaveProjectState(projectName) != PERSIST_SAVED) {
-    Trace::Error("Failed to save project state for '%s'", projectName);
-  }
-  return LoadProjectResult::LOAD_OK;
 }
 
-void AppWindow::CloseProject() {
-
-  _closeProject = false;
-  Player *player = Player::GetInstance();
-  player->Stop();
-  player->RemoveObserver(*this);
-
-  SamplePool *pool = SamplePool::GetInstance();
-  pool->Reset();
-
-  TableHolder::GetInstance()->Reset();
-  TablePlayback::Reset();
-
-  ApplicationCommandDispatcher::GetInstance()->Close();
-
-  UIController *controller = UIController::GetInstance();
-  controller->Reset();
-
-  _currentView = &views_->nullView;
-  views_->nullView.SetDirty(true);
+LoadProjectResult AppWindow::LoadProject(const char *projectName) {
+  if (projectLoader_.LoadProject(projectName, createProjectOnLoad_)) {
+    createProjectOnLoad_ = false;
+    return LoadProjectResult::LOAD_OK;
+  }
+  return LoadProjectResult::LOAD_FAILED;
 }
 
 AppWindow *AppWindow::Create(GUICreateWindowParams &params, const char *projectName) {
@@ -505,9 +497,17 @@ AppWindow *AppWindow::Create(GUICreateWindowParams &params, const char *projectN
 }
 
 void AppWindow::SetDirty() {
-  if (_currentView) {
-    _currentView->SetDirty(true);
+  if (currentView_) {
+    currentView_->SetDirty(true);
   }
+}
+
+bool AppWindow::IsProjectLoadInProgress() const {
+  return projectLoader_.IsLoadInProgress();
+}
+
+void AppWindow::GetProjectLoadProgress(uint32_t *index, uint32_t *total, char *msgBuf, size_t bufSize) const {
+  picoTrackerProjectLoader::GetProgress(index, total, msgBuf, bufSize);
 }
 
 void AppWindow::UpdateColorsFromConfig() {
@@ -537,7 +537,7 @@ bool AppWindow::onEvent(GUIEvent &event) {
   // We need to tell the app to quit once we're out of the
   // mixer lock, otherwise the windows driver will never return
 
-  _shouldQuit = false;
+  shouldQuit_ = false;
 
   uint16_t v = 1 << event.GetValue();
 
@@ -545,24 +545,19 @@ bool AppWindow::onEvent(GUIEvent &event) {
 
   switch (event.GetType()) {
     case ET_PADBUTTONDOWN:
-      _mask |= v;
-      if (_currentView)
-        _currentView->ProcessButton(_mask, true);
+      mask_ |= v;
+      if (currentView_)
+        currentView_->ProcessButton(mask_, true);
       break;
 
     case ET_PADBUTTONUP:
-      _mask &= ~v;
-      if (_currentView)
-        _currentView->ProcessButton(_mask, false);
+      mask_ &= ~v;
+      if (currentView_)
+        currentView_->ProcessButton(mask_, false);
       break;
 
     default:
       break;
-  }
-
-  if (_closeProject) {
-    CloseProject();
-    SetDirty();
   }
 
   // View dirty flag will be checked in AnimationUpdate to determine if redraw
@@ -579,101 +574,124 @@ void AppWindow::onUpdate(bool redraw) {
   // No Flush here - AnimationUpdate will handle it
 }
 
+void AppWindow::DelayedProjectLoad() {
+  // This method is re-entered on every AnimationUpdate once a load's samples
+  // have finished loading, solely so we can call FinalizeLoad() (Phase C) at
+  // that point. It is important therefore that we only *start* a load when
+  // none is in flight AND no completed load is already awaiting finalization;
+  // otherwise we would (re)start a fresh load and orphan the pending one.
+  if (!projectLoader_.IsLoadInProgress() && !projectLoader_.IsSampleLoadDone()) {
+    if (projectLoader_.LoadProject(projectName_, createProjectOnLoad_)) {
+      createProjectOnLoad_ = false;
+      bootLoadTriggered_ = true;
+      Trace::Log("APPWINDOW", "Auto-triggering boot load of project: %s", projectName_);
+    }
+  }
+
+  // When sample loading is done, finalize the load (Phase C) and transition
+  // to the main view. If we are still on BootView, wait for its animation to
+  // complete first so the user sees the full boot animation.
+  if (projectLoader_.IsSampleLoadDone()) {
+    bool canFinalize = true;
+    if (currentView_ == &views_->bootView) {
+      canFinalize = views_->bootView.IsAnimationDone();
+    }
+    if (canFinalize) {
+      projectLoader_.FinalizeLoad();
+    }
+  }
+}
+
 void AppWindow::AnimationUpdate() {
   // Increment the animation frame counter
   animationFrameCounter_++;
   char failedProjectName_[MAX_PROJECT_NAME_LENGTH + 1] = {0};
-  View *viewBeforeLoad = nullptr; // Track view before load attempt
 
   if (awaitingProjectLoadAck_) {
-    if (_mask != 0) {
+    if (mask_ != 0) {
       FileSystem::GetInstance()->DeleteFile("/.current");
+      createProjectOnLoad_ = false;
+      projectLoader_.SetProjectName(UNNAMED_PROJECT_NAME);
       npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
-      loadProject_ = true;
+      projectLoader_.LoadProject(UNNAMED_PROJECT_NAME, true);
       awaitingProjectLoadAck_ = false;
       Trace::Error("Falling back to untitled after failed load of '%s'", failedProjectName_);
     }
     return;
   }
 
-  if (loadProject_) {
-    // Save current view before load attempt for error dialog
-    LoadProjectResult loadResult = LoadProject(projectName_);
-    loadProject_ = false;
-    if (loadResult == LoadProjectResult::LOAD_FAILED) {
-      npf_snprintf(failedProjectName_, sizeof(failedProjectName_), "%s", projectName_);
-      Trace::Error("Failed to load project '%s'. Waiting for key press to load untitled", failedProjectName_);
-      awaitingProjectLoadAck_ = true;
-      // Use saved view for error dialog, fallback to songView if null
-      View &errorView = views_->songView;
-      MessageBox *mb = MessageBox::Create(errorView, "Project", "Invalid Project:", failedProjectName_, MBBF_OK);
-      errorView.DoModal(mb);
-      return;
-    }
+  // Auto-trigger load on boot if BootView is showing and load hasn't started
+  // yet, or re-enter to finalize a load once its samples have finished loading
+  // (Phase C runs only after this, so the project data actually gets loaded).
+  if ((!bootLoadTriggered_ && currentView_ == &views_->bootView) || projectLoader_.IsSampleLoadDone()) {
+    DelayedProjectLoad();
   }
+
+  // Drive the async load progress
+  projectLoader_.Update();
 
   // Check for ToastView animation updates (needs to run frequently for smooth
   // animation)
-  ToastView::getInstance()->UpdateTimer();
+  ToastView::GetInstance()->UpdateTimer();
 
   if (lowBatteryState_ && !lowBatteryMessageShown_) {
-    if (!_currentView->HasModalView()) {
-      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "Battery", "Low battery!", "Connect charger", 0);
-      _currentView->DoModal(mb);
+    if (!currentView_->HasModalView()) {
+      FullScreenBox *mb = FullScreenBox::Create(*currentView_, "Battery", "Low battery!", "Connect charger", 0);
+      currentView_->DoModal(mb);
       lowBatteryMessageShown_ = true;
       SetDirty();
     }
   } else if (!lowBatteryState_ && lowBatteryMessageShown_) {
-    ModalView *modal = _currentView->GetModalView();
+    ModalView *modal = currentView_->GetModalView();
     if (modal) {
       modal->EndModal(0);
-      _currentView->DismissModal();
-      Trace::Debug("CLose Low Batt dialog");
+      currentView_->DismissModal();
+      Trace::Debug("Close Low Batt dialog");
     }
     lowBatteryMessageShown_ = false;
     SetDirty();
   }
 
   if (sdCardMissing_ && !sdCardMessageShown_) {
-    if (_currentView && !_currentView->HasModalView()) {
-      FullScreenBox *mb = FullScreenBox::Create(*_currentView, "SD Card", "SD Card Missing", "Insert SD Card", 0);
-      _currentView->DoModal(mb);
+    if (currentView_ && !currentView_->HasModalView()) {
+      FullScreenBox *mb = FullScreenBox::Create(*currentView_, "SD Card", "SD Card Missing", "Insert SD Card", 0);
+      currentView_->DoModal(mb);
       sdCardMessageShown_ = true;
       SetDirty();
     }
   } else if (!sdCardMissing_ && sdCardMessageShown_) {
-    ModalView *modal = _currentView ? _currentView->GetModalView() : nullptr;
+    ModalView *modal = currentView_ ? currentView_->GetModalView() : nullptr;
     if (modal) {
       modal->EndModal(0);
-      _currentView->DismissModal();
+      currentView_->DismissModal();
     }
     sdCardMessageShown_ = false;
     // reinserted SD card means we need to either leave the view or reload the current directory in all views
-    if (_currentView) {
+    if (currentView_) {
       // todo: change this to just back out as little as possible, but for now just jump to the song view
-      _currentView = &views_->songView;
-      _currentView->OnFocus();
+      currentView_ = &views_->songView;
+      currentView_->OnFocus();
     }
     SetDirty();
   }
 
   // If we need a full redraw due to state changes from key events
-  if (_currentView && _currentView->isDirty()) {
-    _currentView->Redraw(); // Draw main content
+  if (currentView_ && currentView_->isDirty()) {
+    currentView_->Redraw(); // Draw main content
   }
 
   // Handle view updates
-  if (_currentView) {
+  if (currentView_) {
     // Always update the main view even if modal is active because things like
     // batt gauge still need redrawing and visibility even with a modal onscreen
-    _currentView->AnimationUpdate();
+    currentView_->AnimationUpdate();
     // Now check if there's an active modal view and
-    ModalView *modalView = _currentView->GetModalView();
+    ModalView *modalView = currentView_->GetModalView();
     if (modalView) {
       // Update the modal view
       modalView->AnimationUpdate();
       // Modal can complete from animation updates (e.g. timed hold confirms).
-      _currentView->DismissModal();
+      currentView_->DismissModal();
     }
   }
 
@@ -695,6 +713,11 @@ void AppWindow::AnimationUpdate() {
 
 void AppWindow::LayoutChildren() {};
 
+void AppWindow::SetTransition(ViewTransition type) {
+  transitionType_ = type;
+  transitionFrame_ = 0;
+}
+
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
   if (d && (uintptr_t)d == (uintptr_t)Token::VarProjectName) {
     // Update the stored project name from the project
@@ -712,137 +735,152 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
 
   switch (ve->GetType()) {
 
-    case VET_SWITCH_VIEW:
+    case vetSwitchView:
       {
-        ViewType *vt = (ViewType *)ve->GetData();
-        if (_currentView) {
-          _currentView->LoseFocus();
+        ViewEventData *ved = (ViewEventData *)ve->GetData();
+
+        if (currentView_) {
+          currentView_->LoseFocus();
         }
 
-        switch (*vt) {
+        switch (ved->type) {
           case VT_SONG:
-            _currentView = &views_->songView;
+            currentView_ = &views_->songView;
             break;
           case VT_CHAIN:
-            _currentView = &views_->chainView;
+            currentView_ = &views_->chainView;
             break;
           case VT_PHRASE:
-            _currentView = &views_->phraseView;
+            currentView_ = &views_->phraseView;
             break;
           case VT_DEVICE:
-            _currentView = &views_->deviceView;
+            currentView_ = &views_->deviceView;
             break;
           case VT_HELP:
-            _currentView = &views_->helpView;
+            currentView_ = &views_->helpView;
             break;
           case VT_PROJECT:
-            _currentView = &views_->projectView;
+            currentView_ = &views_->projectView;
             break;
           case VT_INSTRUMENT:
-            _currentView = &views_->instrumentView;
+            currentView_ = &views_->instrumentView;
             break;
           case VT_TABLE:
-            _currentView = &views_->tableView;
+            currentView_ = &views_->tableView;
             break;
           case VT_TABLE2:
-            _currentView = &views_->tableView;
+            currentView_ = &views_->tableView;
             break;
           case VT_GROOVE:
-            _currentView = &views_->grooveView;
+            currentView_ = &views_->grooveView;
             break;
           case VT_IMPORT:
-            _currentView = &views_->importView;
+            currentView_ = &views_->importView;
             break;
           case VT_INSTRUMENT_IMPORT:
-            _currentView = &views_->instrumentImportView;
+            currentView_ = &views_->instrumentImportView;
             break;
           case VT_SELECTPROJECT:
-            _currentView = &views_->selectProjectView;
+            currentView_ = &views_->selectProjectView;
             break;
           case VT_MIXER:
-            _currentView = &views_->mixerView;
+            currentView_ = &views_->mixerView;
             break;
           case VT_THEME:
-            _currentView = &views_->themeView;
+            currentView_ = &views_->themeView;
             break;
           case VT_THEME_IMPORT:
-            _currentView = &views_->themeImportView;
+            currentView_ = &views_->themeImportView;
             break;
           case VT_SELECTTHEME:
-            _currentView = &views_->themeView;
+            currentView_ = &views_->themeView;
             break;
           case VT_SAMPLE_EDITOR:
-            _currentView = &views_->sampleEditorView;
+            currentView_ = &views_->sampleEditorView;
             break;
           case VT_SAMPLE_SLICES:
-            _currentView = &views_->sampleSlicesView;
+            currentView_ = &views_->sampleSlicesView;
             break;
           default:
             break;
         }
-        _currentView->SetFocus(*vt);
+        currentView_->SetFocus(ved->type);
         SetDirty();
         Clear();
+        SetTransition(ved->transition);
         break;
       }
 
-    case VET_PLAYER_POSITION_UPDATE:
+    case vetPlayerPositionUpdate:
       {
         PlayerEvent *pt = (PlayerEvent *)ve;
-        if (_currentView) {
+        if (currentView_) {
           // Check if the current view has a modal view
-          const bool hasModal = _currentView->HasModalView();
+          const bool hasModal = currentView_->HasModalView();
           if (hasModal) {
-            _currentView->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+            currentView_->GetModalView()->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
           } else {
-            _currentView->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
+            currentView_->OnPlayerUpdate(pt->GetType(), pt->GetTickCount());
           }
         }
         break;
       }
 
-    case VET_LOAD_PROJECT:
+    case vetLoadProject:
       {
-        const char *name = static_cast<const char *>(ve->GetData());
-        if (name && name[0] != '\0') {
+        if (!projectLoader_.IsLoadInProgress()) {
+          const char *name = static_cast<const char *>(ve->GetData());
           npf_snprintf(projectName_, sizeof(projectName_), "%s", name);
-          createProjectOnLoad_ = false;
-          loadProject_ = true;
+          if (currentView_ != &views_->bootView) {
+            currentView_ = &views_->bootView;
+            currentView_->OnFocus();
+            bootLoadTriggered_ = false;
+            SetDirty();
+            Clear();
+          } else {
+            bootLoadTriggered_ = false;
+          }
         }
         break;
       }
-    case VET_NEW_PROJECT:
+    case vetNewProject:
       {
-        npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
-        createProjectOnLoad_ = true;
-        loadProject_ = true;
+        if (!projectLoader_.IsLoadInProgress()) {
+          npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
+          createProjectOnLoad_ = true;
+          projectLoader_.LoadProject(UNNAMED_PROJECT_NAME, true);
+        }
         break;
       }
-    case VET_QUIT_PROJECT:
-      {
-        // defer event to after we got out of the view
-        _closeProject = true;
-        break;
-      }
-    default: // VET_LIST_SELECT, VET_UPDATE
+    default: // vetListSelect, vetUpdate
       break;
   }
 }
 
 void AppWindow::Print(char *line) {
-  Clear();
-
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);
 
-  int current_y = 11; // Start near the middle of the screen
+  int lineCount = 1;
 
-  // Handle single line case for Print function
-  bool isSingleLine = (line != nullptr && strchr(line, '\n') == nullptr);
+  char *s = line;
+  while (*s) {
+    lineCount += (*s == '\n');
+    s++;
+  }
+
+  // Start near the bottom of the screen
+  int current_y = 21 - lineCount;
+  if (current_y < 14) {
+    current_y = 14;
+  }
 
   // Use strtok to split the string by newline characters
   char *token = strtok(line, "\n");
-  int lineCount = 0;
+
+  char emptyLine[SCREEN_WIDTH + 1];
+  memset(emptyLine, ' ', sizeof(emptyLine) - 1);
+  emptyLine[SCREEN_WIDTH] = 0;
 
   char outLine[33];
   memset(outLine, ' ', sizeof(outLine) - 1);
@@ -850,13 +888,8 @@ void AppWindow::Print(char *line) {
 
   while (token != NULL) {
     // Stop if we are about to overwrite the build string line
-    if (current_y >= 22) {
+    if (current_y > 22) {
       break;
-    }
-
-    // For single line, center it at position 12 instead of starting at 11
-    if (isSingleLine && lineCount == 0) {
-      current_y = 12;
     }
 
     // Horizontally center the current line of text
@@ -864,17 +897,13 @@ void AppWindow::Print(char *line) {
     position -= strlen(token);
     position /= 2;
 
-    DrawString(0, current_y, outLine);
+    DrawString(0, current_y, emptyLine);
     DrawString(position, current_y, token);
 
     // Get the next line
     token = strtok(NULL, "\n");
     current_y++;
-    lineCount++;
   }
-
-  // Preserve the build string at the bottom of the screen
-  DrawString((int)(SCREEN_WIDTH - strlen(VERSION_STRING)) / 2, 22, VERSION_STRING);
 }
 
 void AppWindow::SwapColors() {
@@ -893,18 +922,14 @@ void AppWindow::SetBackgroundColor(Color color) {
 
 bool AppWindow::AutoSave() {
   Player *player = Player::GetInstance();
-  if (views_ == nullptr || _currentView == nullptr) {
+  if (!views_ || !currentView_) {
     return false;
   }
-  // only auto save when sequencer is not running and the user is in an autosave-safe view.
-  // todo: maybe work with a negative list?
-  bool autosaveSafeView = _currentView == &views_->songView || _currentView == &views_->chainView ||
-                          _currentView == &views_->phraseView || _currentView == &views_->tableView ||
-                          _currentView == &views_->grooveView || _currentView == &views_->instrumentView ||
-                          _currentView == &views_->deviceView || _currentView == &views_->themeView ||
-                          _currentView == &views_->mixerView || _currentView == &views_->helpView;
 
-  if (!player->IsRunning() && autosaveSafeView) {
+  // only auto save when sequencer is not running and the user is in an autosave-safe view.
+  bool dontAutoSave = currentView_ == &views_->bootView;
+
+  if (!player->IsRunning() && !dontAutoSave) {
     Trace::Log("APPWINDOW", "AutoSaving Project Data");
     // get persistence service and call autosave
     PersistencyService *ps = PersistencyService::GetInstance();

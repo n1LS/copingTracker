@@ -550,12 +550,12 @@ void TableView::processNormalButtonMask(uint16_t mask) {
   } else if (mask & BM_NAV) {
     // NAV Modifier
     if (mask & BM_UP) {
-      Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT));
+      Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT), vtRevealFromTop);
     } else if (mask & BM_LEFT) {
-      Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE);
+      Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE, vtRevealFromLeft);
     } else if (mask & BM_RIGHT) {
       if (viewType_ == VT_TABLE) {
-        Navigate(VT_TABLE2);
+        Navigate(VT_TABLE2, vtRevealFromRight);
       }
     }
     if (mask & BM_PLAY) {
@@ -602,7 +602,7 @@ void TableView::processSelectionButtonMask(uint16_t mask) {
 
       if (mask & BM_NAV) {
         if (mask & BM_UP) {
-          Navigate(VT_PHRASE);
+          Navigate(VT_PHRASE, vtRevealFromTop);
         }
         if (mask & BM_PLAY) {
           player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
