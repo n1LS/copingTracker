@@ -45,10 +45,8 @@ const uint16_t AUTOSAVE_INTERVAL_IN_SECONDS = 1 * 60;
 
 AppWindow *instance = 0;
 
-unsigned char AppWindow::_charScreen[SCREEN_CHARS];
+unsigned char AppWindow::_screenChar[SCREEN_CHARS];
 color_t AppWindow::_screenColor[SCREEN_CHARS];
-unsigned char AppWindow::_preScreen[SCREEN_CHARS];
-color_t AppWindow::_preScreenColor[SCREEN_CHARS];
 
 GUIColor AppWindow::colorPalette_[NUM_COLORS] = {
     GUIColor(0x00, 0x00, 0x00), // 0: black
@@ -199,10 +197,8 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   views_->AddObservers(*this);
 
-  memset(_charScreen, ' ', SCREEN_CHARS);
-  memset(_preScreen, ' ', SCREEN_CHARS);
+  memset(_screenChar, ' ', SCREEN_CHARS);
   memset(_screenColor, 0, SCREEN_CHARS);
-  memset(_preScreenColor, 0, SCREEN_CHARS);
 
   ToastView::Init(*this, &viewData_);
 
@@ -257,7 +253,7 @@ void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
   }
 
   int index = x + SCREEN_WIDTH * y;
-  _charScreen[index] = c;
+  _screenChar[index] = c;
 
   if (transparent) {
     _screenColor[index].fg = color_.fg;
@@ -269,11 +265,8 @@ void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
 void AppWindow::Clear() {
   color_t base = (color_t){.fg = Theme::View::fg, .bg = Theme::View::bg};
 
-  memset(_charScreen, ' ', SCREEN_CHARS);
+  memset(_screenChar, ' ', SCREEN_CHARS);
   memset(_screenColor, base.byte, SCREEN_CHARS);
-
-  memset(_preScreen, '\0', SCREEN_CHARS);
-  memset(_preScreenColor, 0xff, SCREEN_CHARS);
 }
 
 void AppWindow::ClearTextRect(GUIRect &r) {
@@ -303,7 +296,7 @@ void AppWindow::ClearTextRect(GUIRect &r) {
     return;
   }
 
-  unsigned char *st = _charScreen + x + (SCREEN_WIDTH * y);
+  unsigned char *st = _screenChar + x + (SCREEN_WIDTH * y);
   color_t *pr = _screenColor + x + (SCREEN_WIDTH * y);
   for (int i = 0; i < h; i++) {
     for (int j = 0; j < w; j++) {
@@ -315,11 +308,25 @@ void AppWindow::ClearTextRect(GUIRect &r) {
   }
 }
 
-void AppWindow::InvalidateTextCache() {
-  // Force the next text flush to resend all cells without changing the current
-  // text buffer contents.
-  memset(_preScreen, 0xFF, SCREEN_CHARS);
-  memset(_preScreenColor, 0xFF, SCREEN_CHARS);
+#define GUI(f, c, p)                                                                                                   \
+  {                                                                                                                    \
+    GUIWindow::SetColor(f->fg);                                                                                        \
+    GUIWindow::SetBackgroundColor(f->bg);                                                                              \
+    GUIWindow::DrawChar(p.x_, p.y_, *c);                                                                               \
+  }
+
+void AppWindow::FlushTransition() {
+  for (int y = 0; y < SCREEN_HEIGHT; y++) {
+    for (int x = 0; x < SCREEN_WIDTH; x++) {
+      unsigned char *current = _screenChar + y * SCREEN_WIDTH + x;
+      color_t *currentColor = _screenColor + y * SCREEN_WIDTH + x;
+      GUIPoint pos = {x, y};
+      bool draw = ((x & 1) == 0 && (y & 1) == 0) || (transitionFrame_ >= 1 && (x & 1) == 1 && (y & 1) == 1);
+      if (draw) {
+        GUI(currentColor, current, pos);
+      }
+    }
+  }
 }
 
 //
@@ -338,14 +345,17 @@ void AppWindow::Flush() {
 
   int count = 0;
 
-  unsigned char *current = _charScreen;
+  unsigned char *current = _screenChar;
   unsigned char *previous = _preScreen;
   color_t *currentColor = _screenColor;
-  color_t *previousColor = _preScreenColor;
 
-  for (int y = 0; y < SCREEN_HEIGHT; y++) {
-    for (int x = 0; x < SCREEN_WIDTH; x++) {
-      if ((*current != *previous) || (currentColor->byte != previousColor->byte)) {
+  if (transitionType_ != vtNone) {
+    FlushTransition();
+  } else {
+    // regular drawing
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+      pos = {0, y};
+      for (int x = 0; x < SCREEN_WIDTH; x++, current++, currentColor++, pos.x_++) {
         // Extract invert flag from properties
         Color fg = (Color)currentColor->fg;
         Color bg = (Color)currentColor->bg;
@@ -365,15 +375,7 @@ void AppWindow::Flush() {
         GUIWindow::DrawChar(pos.x_, pos.y_, *current);
         count++;
       }
-
-      current++;
-      previous++;
-      currentColor++;
-      previousColor++;
-      pos.x_++;
     }
-    pos.y_++;
-    pos.x_ = 0;
   }
 
   GUIWindow::SetFocusRect(currentView_->GetFocusRect());
@@ -381,8 +383,16 @@ void AppWindow::Flush() {
   GUIWindow::Flush();
 
   Unlock();
-  memcpy(_preScreen, _charScreen, SCREEN_CHARS);
-  memcpy(_preScreenColor, _screenColor, SCREEN_CHARS);
+
+  // skip flipping during transitions
+  if (transitionType_ != vtNone) {
+    if (transitionFrame_ < 1) {
+      transitionFrame_++;
+    } else {
+      transitionType_ = vtNone;
+    }
+    return;
+  }
 }
 
 // ============================================================================
@@ -703,6 +713,11 @@ void AppWindow::AnimationUpdate() {
 
 void AppWindow::LayoutChildren() {};
 
+void AppWindow::SetTransition(ViewTransition type) {
+  transitionType_ = type;
+  transitionFrame_ = 0;
+}
+
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
   if (d && (uintptr_t)d == (uintptr_t)Token::VarProjectName) {
     // Update the stored project name from the project
@@ -720,17 +735,15 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
 
   switch (ve->GetType()) {
 
-    case VET_SWITCH_VIEW:
+    case vetSwitchView:
       {
-        ViewType *vt = (ViewType *)ve->GetData();
+        ViewEventData *ved = (ViewEventData *)ve->GetData();
+
         if (currentView_) {
           currentView_->LoseFocus();
         }
 
-        switch (*vt) {
-          case VT_BOOT:
-            currentView_ = &views_->bootView;
-            break;
+        switch (ved->type) {
           case VT_SONG:
             currentView_ = &views_->songView;
             break;
@@ -791,13 +804,14 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
           default:
             break;
         }
-        currentView_->SetFocus(*vt);
+        currentView_->SetFocus(ved->type);
         SetDirty();
         Clear();
+        SetTransition(ved->transition);
         break;
       }
 
-    case VET_PLAYER_POSITION_UPDATE:
+    case vetPlayerPositionUpdate:
       {
         PlayerEvent *pt = (PlayerEvent *)ve;
         if (currentView_) {
@@ -812,7 +826,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         break;
       }
 
-    case VET_LOAD_PROJECT:
+    case vetLoadProject:
       {
         if (!projectLoader_.IsLoadInProgress()) {
           const char *name = static_cast<const char *>(ve->GetData());
@@ -829,7 +843,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         }
         break;
       }
-    case VET_NEW_PROJECT:
+    case vetNewProject:
       {
         if (!projectLoader_.IsLoadInProgress()) {
           npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
@@ -838,7 +852,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
         }
         break;
       }
-    default: // VET_LIST_SELECT, VET_UPDATE
+    default: // vetListSelect, vetUpdate
       break;
   }
 }

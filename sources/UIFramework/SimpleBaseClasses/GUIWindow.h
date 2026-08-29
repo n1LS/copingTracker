@@ -56,8 +56,6 @@ public: // I_GUIGraphics implementation
   virtual void ClockTick();
   virtual void onUpdate(bool redraw) = 0;
   virtual void AnimationUpdate() = 0;
-  //	virtual void Save() ;
-  //	virtual void Restore() ;
   void PushEvent(GUIEvent &event);
   void Clear();
   I_GUIWindowImp *GetImpWindow() {

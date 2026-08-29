@@ -974,7 +974,7 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
   } else if (mask & BM_NAV) {
     // NAV Modifier
     if (mask & BM_LEFT) {
-      Navigate(VT_CHAIN);
+      Navigate(VT_CHAIN, vtRevealFromLeft);
     } else if (mask & BM_RIGHT) {
       unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
       if (*c != 0xFF) {
@@ -983,7 +983,7 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
         viewData_->currentInstrumentID_ = lastInstr_;
       }
       if (viewData_->currentInstrumentID_ != 0xFF) {
-        Navigate(VT_INSTRUMENT);
+        Navigate(VT_INSTRUMENT, vtRevealFromRight);
       }
     } else if (mask & BM_DOWN) {
       // Go to table view
@@ -998,12 +998,12 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
         }
       }
 
-      Navigate(VT_TABLE);
+      Navigate(VT_TABLE, vtRevealFromBottom);
     } else if (mask & BM_UP) {
       // Go to groove view
       stopAudition();
 
-      Navigate(VT_GROOVE);
+      Navigate(VT_GROOVE, vtRevealFromTop);
     }
 
     if (mask & BM_PLAY) {
@@ -1066,7 +1066,7 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
 
     if (mask & BM_NAV) {
       if (mask & BM_LEFT) {
-        Navigate(VT_CHAIN);
+        Navigate(VT_CHAIN, vtRevealFromLeft);
       }
       if (mask & BM_RIGHT) {
         unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
@@ -1075,7 +1075,7 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
         } else {
           viewData_->currentInstrumentID_ = lastInstr_;
         }
-        Navigate(VT_INSTRUMENT);
+        Navigate(VT_INSTRUMENT, vtRevealFromRight);
       }
       if (mask & BM_PLAY) {
         player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);

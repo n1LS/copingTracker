@@ -334,7 +334,7 @@ void FileListView::HandleTabRight() {
 }
 
 void FileListView::HandleBackNavigation() {
-  Navigate(config_.backNavigationTarget);
+  Navigate(config_.backNavigationTarget, vtCollapse);
 }
 
 void FileListView::OnTabAction(int tabIndex, const char *filename) {

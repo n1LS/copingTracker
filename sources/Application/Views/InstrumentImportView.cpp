@@ -290,5 +290,5 @@ void InstrumentImportView::onImportSuccess(View &, ModalView &dialog) {
     instrument->NotifyObservers();
   }
 
-  Navigate(VT_INSTRUMENT);
+  Navigate(VT_INSTRUMENT, vtCollapse);
 }

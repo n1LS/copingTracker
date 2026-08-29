@@ -1259,7 +1259,7 @@ int Player::GetPlayedBufferPercentage() {
   return lastPercentage_;
 }
 
-PlayerEvent::PlayerEvent(PlayerEventType type, unsigned int tickCount) : ViewEvent(VET_PLAYER_POSITION_UPDATE) {
+PlayerEvent::PlayerEvent(PlayerEventType type, unsigned int tickCount) : ViewEvent(vetPlayerPositionUpdate) {
   type_ = type;
   tickCount_ = tickCount;
 }

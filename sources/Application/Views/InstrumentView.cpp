@@ -897,7 +897,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       getInstrument()->RemoveObserver(*this);
       ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
 
-      Navigate(VT_PHRASE);
+      Navigate(VT_PHRASE, vtRevealFromLeft);
     }
 
     if (mask & BM_DOWN) {
@@ -910,7 +910,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       if (table != VAR_OFF) {
         viewData_->currentTable_ = table;
       }
-      Navigate(VT_TABLE2);
+      Navigate(VT_TABLE2, vtRevealFromBottom);
     }
 
     if (mask & BM_PLAY) {
@@ -1051,7 +1051,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       break;
     case Token::ActionImport:
       // Switch to the InstrumentImportView
-      Navigate(VT_INSTRUMENT_IMPORT);
+      Navigate(VT_INSTRUMENT_IMPORT, vtRevealFromCenter);
       break;
     case Token::SampleInstrumentGMInstrument:
       {
@@ -1119,7 +1119,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
           DoModal(mb);
           break;
         }
-        Navigate(VT_SAMPLE_SLICES);
+        Navigate(VT_SAMPLE_SLICES, vtRevealFromCenter);
         break;
       }
     case Token::MidiInstrumentProgram:
@@ -1319,7 +1319,7 @@ void InstrumentView::goToImport() {
 
     // Go to import sample
     viewData_->shouldAssignImportedSample = true;
-    Navigate(VT_IMPORT);
+    Navigate(VT_IMPORT, vtRevealFromCenter);
   }
 }
 

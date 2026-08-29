@@ -121,9 +121,9 @@ void GrooveView::ProcessButtonMask(uint16_t mask, bool pressed) {
   } else if (mask & BM_NAV) {
     // NAV Modifier
     if (mask & BM_DOWN) {
-      Navigate(VT_PHRASE);
+      Navigate(VT_PHRASE, vtRevealFromBottom);
     } else if (mask & BM_LEFT) {
-      Navigate(VT_PROJECT);
+      Navigate(VT_PROJECT, vtRevealFromLeft);
     } else if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }

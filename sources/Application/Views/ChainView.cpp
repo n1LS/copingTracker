@@ -465,12 +465,12 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
   } else if (mask & BM_NAV) {
     // NAV Modifier
     if (mask & BM_LEFT) {
-      Navigate(VT_SONG);
+      Navigate(VT_SONG, vtRevealFromLeft);
     } else if (mask & BM_RIGHT) {
       unsigned char *data = viewData_->GetCurrentChainPointer();
       if (*data != 0xFF) {
         viewData_->currentPhrase_ = *data;
-        Navigate(VT_PHRASE);
+        Navigate(VT_PHRASE, vtRevealFromRight);
       }
     }
 
@@ -543,16 +543,14 @@ void ChainView::processSelectionButtonMask(uint16_t mask) {
       if (mask & BM_NAV) {
 
         if (mask & BM_LEFT) {
-          Navigate(VT_SONG);
-          ;
-          ;
+          Navigate(VT_SONG, vtRevealFromLeft);
         }
 
         if (mask & BM_RIGHT) {
           unsigned char *data = viewData_->GetCurrentChainPointer();
           if (*data != 0xFF) {
             viewData_->currentPhrase_ = *data;
-            Navigate(VT_PHRASE);
+            Navigate(VT_PHRASE, vtRevealFromRight);
           }
         }
 
