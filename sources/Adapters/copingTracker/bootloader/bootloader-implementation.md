@@ -17,7 +17,7 @@ The active design is single-slot app boot (no multi-slot policy).
 ## Module Structure
 
 ```
-bl_main.cpp          → Entry point (board_init, platform_init, gfx_init, menu_render_static)
+bl_main.cpp          → Entry point (board_init, platform_init, gfx_init)
                          │
                          ▼
 bl_ui.cpp            → Main loop: button debounce/dispatch, SD hotplug poll
@@ -79,12 +79,16 @@ Startup sequence:
 1. board_init()
 2. platform_init()
 3. gfx_init()
-4. menu_render_static()
-5. SD mount
-6. Read persisted firmware metadata from /firmwares/firmware_info.txt
-7. Scan UF2 files in SD root (hidden files ignored)
-8. Import new UF2 files to /firmwares/*.bin
-9. Scan /firmwares for selectable .bin entries
+4. SD mount
+5. Read persisted firmware metadata from /firmwares/firmware_info.txt
+6. Scan UF2 files in SD root (hidden files ignored)
+7. Import new UF2 files to /firmwares/*.bin
+8. Scan /firmwares for selectable .bin entries
+9. Quick-boot check: wait up to 50ms for keys to debounce. If no keys are held
+   and firmware is installed, auto-boot it (clean/blank screen, nothing drawn).
+10. menu_render_static() — only once the quick boot is cancelled (a key was
+    pressed); the interactive menu UI is then painted.
+
 
 Runtime interaction:
 
