@@ -226,7 +226,7 @@ void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
   }
 
   int index = x + SCREEN_WIDTH * y;
-  _charScreen[index] = c;
+  _screenChar[index] = c;
 
   if (transparent) {
     _screenColor[index].fg = color_.fg;
@@ -281,7 +281,7 @@ void AppWindow::ClearTextRect(GUIRect &r) {
   }
 }
 
-#define GUI(f, c, p) { GUIWindow::SetColor(f->fg); GUIWindow::SetBackgroundColor(f->bg); GUIWindow::DrawChar(*c, p); }
+#define GUI(f, c, p) { GUIWindow::SetColor(f->fg); GUIWindow::SetBackgroundColor(f->bg); GUIWindow::DrawChar(p.x_, p.y_, *c); }
 
 void AppWindow::FlushTransition() {
   for (int y = 0; y < SCREEN_HEIGHT; y++) {
@@ -313,7 +313,7 @@ void AppWindow::Flush() {
 
   int count = 0;
 
-  unsigned char *current = _charScreen;
+  unsigned char *current = _screenChar;
   unsigned char *previous = _preScreen;
   color_t *currentColor = _screenColor;
 
