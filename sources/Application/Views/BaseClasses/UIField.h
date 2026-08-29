@@ -48,7 +48,7 @@ public:
 
   virtual bool IsStatic();
 
-  void DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset = -1,
+  int DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset = -1,
                         int subSelectionLength = 1);
 
 protected:

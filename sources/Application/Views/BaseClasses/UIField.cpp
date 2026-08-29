@@ -52,10 +52,12 @@ void UIField::SetActive(bool active) {
   active_ = active;
 }
 
-void UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset,
+int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset,
                                int subSelectionLength) {
   ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
   ((AppWindow &)w).SetColor(Theme::View::fg);
+
+  GUIPoint basePosition = position;
 
   char *colon = strchr(buffer, ':');
   int valueOffset = 0;
@@ -71,6 +73,8 @@ void UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, in
     position.x_ += index + 1;
     buffer += index + 1;
   }
+
+  const int valueLength = static_cast<int>(strlen(buffer));
 
   if (focus_) {
     ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(true));
@@ -97,4 +101,18 @@ void UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, in
     ((AppWindow &)w).SetColor(Theme::Input::fg(false));
     w.DrawString(position.x_, position.y_, buffer);
   }
+
+  // draw highlight button ends
+  char front = focus_ ? CHAR(char_button_border_left_s) : ' ';
+  char end = focus_ ? CHAR(char_button_border_right_s) : ' ';
+
+  if (focus_) {
+    ((AppWindow &)w).SetColor(Theme::Input::bg(true));
+    ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
+  }
+
+  w.DrawChar(basePosition.x_ + valueOffset - 1, basePosition.y_, front);
+  w.DrawChar(basePosition.x_ + valueOffset + strlen(buffer), basePosition.y_, end);
+
+  return valueLength + 2;
 }
