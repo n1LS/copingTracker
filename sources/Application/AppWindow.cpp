@@ -308,7 +308,12 @@ void AppWindow::ClearTextRect(GUIRect &r) {
   }
 }
 
-#define GUI(f, c, p) { GUIWindow::SetColor(f->fg); GUIWindow::SetBackgroundColor(f->bg); GUIWindow::DrawChar(p.x_, p.y_, *c); }
+#define GUI(f, c, p)                                                                                                   \
+  {                                                                                                                    \
+    GUIWindow::SetColor(f->fg);                                                                                        \
+    GUIWindow::SetBackgroundColor(f->bg);                                                                              \
+    GUIWindow::DrawChar(p.x_, p.y_, *c);                                                                               \
+  }
 
 void AppWindow::FlushTransition() {
   for (int y = 0; y < SCREEN_HEIGHT; y++) {
@@ -734,8 +739,8 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
       {
         ViewEventData *ved = (ViewEventData *)ve->GetData();
 
-        if (_currentView) {
-          _currentView->LoseFocus();
+        if (currentView_) {
+          currentView_->LoseFocus();
         }
 
         switch (ved->type) {
@@ -799,7 +804,7 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
           default:
             break;
         }
-        _currentView->SetFocus(ved->type);
+        currentView_->SetFocus(ved->type);
         SetDirty();
         Clear();
         SetTransition(ved->transition);

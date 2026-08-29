@@ -26,6 +26,7 @@ public:
   virtual void AnimationUpdate() override;
 
   void Navigate(ViewType target, ViewTransition transition);
+
 protected:
   virtual const char *emptyStateMessage() const;
   void drawEmptyState();

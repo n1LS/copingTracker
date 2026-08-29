@@ -37,7 +37,7 @@ void BootView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
-  Navigate(VT_SONG);
+  Navigate(VT_SONG, vtCollapse);
 }
 
 void BootView::DrawView() {
@@ -93,7 +93,7 @@ void BootView::AnimationUpdate() {
     // no load in progress, animation done?
     if (animationDone_) {
       // jump to song view
-      Navigate(VT_SONG);
+      Navigate(VT_SONG, vtRevealFromCenter);
     }
   }
 }

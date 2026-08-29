@@ -139,7 +139,7 @@ void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg
   bool isCurrent = strcmp(temp, currentProject) == 0;
   Trace::Debug("checking %s vs %s -> %b", temp, currentProject, isCurrent);
 
-  char symbol = isCurrent ? CHAR(char_playback_play_s) : ' ';
+  uint8_t symbol = isCurrent ? CHAR(char_playback_play_s) : ' ';
 
   int len = FILE_LIST_LINE_LENGTH - 2;
   npf_snprintf(buffer, SCREEN_WIDTH, "%c %-*.*s", symbol, len, len, temp);
