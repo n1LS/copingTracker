@@ -48,6 +48,11 @@ public:
   static void IRQHandler();
   static void BufferNeeded();
 
+  // Core1 hand-off for project loading. Safe to call only when playback is
+  // stopped (player->Stop() already guarantees this before load begins).
+  static void SuspendAudioThreadForLoad();
+  static void ResumeAudioThread();
+
 private:
   static picoTrackerAudioDriver *instance_;
 

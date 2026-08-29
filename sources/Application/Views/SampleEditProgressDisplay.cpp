@@ -9,7 +9,6 @@
  */
 
 #include "SampleEditProgressDisplay.h"
-
 #include "System/io/Status.h"
 
 SampleEditProgressDisplay::SampleEditProgressDisplay(const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &filename)

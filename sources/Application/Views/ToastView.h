@@ -27,7 +27,7 @@ public:
   virtual ~ToastView();
 
   static void Init(GUIWindow &w, ViewData *viewData);
-  static ToastView *getInstance();
+  static ToastView *GetInstance();
 
   void Show(const char *text, const ToastType *type, uint32_t msTime);
   void Draw(GUIWindow &w);

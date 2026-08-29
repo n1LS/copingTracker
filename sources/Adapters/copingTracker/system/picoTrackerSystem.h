@@ -29,7 +29,6 @@ public: // System implementation
   virtual unsigned long GetClock();
   virtual void GetBatteryState(BatteryState &state);
   virtual void SetDisplayBrightness(unsigned char value);
-  virtual void Sleep(int millisec);
   virtual unsigned int GetMemoryUsage();
   virtual void PowerDown() {};
   virtual void SystemBootloader();
@@ -39,6 +38,7 @@ public: // System implementation
   virtual uint32_t GetRandomNumber();
   virtual uint32_t Micros();
   virtual uint32_t Millis();
+  virtual void Sleep(uint32_t millis) override;
   virtual SysMutex *GetMutex() override;
 
 private:

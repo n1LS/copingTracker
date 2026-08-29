@@ -12,16 +12,7 @@
 #ifndef _APP_WINDOW_H_
 #define _APP_WINDOW_H_
 
-#include "Application/Views/BaseClasses/View.h"
-#include "Foundation/Types/Colors.h"
-typedef union color_t {
-  struct {
-    Color fg : 4;
-    Color bg : 4;
-  };
-  unsigned char byte;
-} color_t;
-
+#include "Application/Utility/ProjectLoader.h"
 #include "Application/Views/BaseClasses/View.h"
 #include "Application/Views/ViewData.h"
 #include "Foundation/Observable.h"
@@ -47,7 +38,7 @@ typedef union color_t {
 class View;
 struct AppWindowViews;
 
-class AppWindow : public GUIWindow, I_Observer, Status {
+class AppWindow : public GUIWindow, I_Observer, Status, public ProjectLoaderProtocol {
 protected:
   AppWindow(I_GUIWindowImp &imp, const char *projectName);
   virtual ~AppWindow();
@@ -55,10 +46,13 @@ protected:
 public:
   static AppWindow *Create(GUICreateWindowParams &, const char *projectName);
 
-  enum LoadProjectResult { LOAD_FAILED = -1, LOAD_OK = 0 };
+  static AppWindow *GetInstance();
 
   LoadProjectResult LoadProject(const char *name);
-  void CloseProject();
+
+  // Public accessors for load progress (for BootView / loading UI)
+  bool IsProjectLoadInProgress() const;
+  void GetProjectLoadProgress(uint32_t *index, uint32_t *total, char *msgBuf, size_t bufSize) const;
 
   using GUIWindow::Clear;
   virtual void Clear();
@@ -73,6 +67,11 @@ public:
   void UpdateColorsFromConfig();
   void SetSdCardPresent(bool present);
 
+  // ProjectLoaderProtocol implementation
+  virtual void onLoadPhaseAComplete() override;
+  virtual void onLoadPhaseCComplete(bool success, const char *projectName) override;
+  virtual void onLoadProgress(uint32_t index, uint32_t total, const char *message) override;
+
   char projectName_[MAX_PROJECT_NAME_LENGTH + 1];
 
   // Accessor for callback to update instruments
@@ -85,7 +84,8 @@ public:
 public:
   void Flush();
   void FlushTransition();
-  
+  void DelayedProjectLoad();
+
 protected: // GUIWindow implementation
   virtual bool onEvent(GUIEvent &event);
   virtual void onUpdate(bool redraw);
@@ -114,14 +114,10 @@ private:
   Project project_;
   ViewData viewData_;
   AppWindowViews *views_;
-  View *_currentView;
+  View *currentView_;
 
-  bool _closeProject;
-  bool _shouldQuit;
-  uint16_t _mask;
-  unsigned long _lastA;
-  unsigned long _lastB;
-  char _statusLine[80];
+  bool shouldQuit_;
+  uint16_t mask_;
 
   bool lowBatteryState_;
   bool lowBatteryMessageShown_;
@@ -144,9 +140,12 @@ private:
   void SetTransition(ViewTransition type);
 
   bool loadProject_ = false;
+  ProjectLoader projectLoader_;
+
   bool awaitingProjectLoadAck_ = false;
   bool createProjectOnLoad_ = false;
   bool playerInitialized_ = false;
+  bool bootLoadTriggered_ = false;
 
   uint32_t lastAutoSave = 0;
 

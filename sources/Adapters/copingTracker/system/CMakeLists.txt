@@ -4,6 +4,7 @@ add_library(platform_system
   input.cpp
   critical_error_message.cpp
   picoTrackerSamplePool.cpp
+  picoTrackerProjectLoader.cpp
 )
 
 target_link_libraries(platform_system INTERFACE system_system PUBLIC

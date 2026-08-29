@@ -56,33 +56,33 @@ public:
 
   // Editor settings
 
-  int songX_;      // .Current song screen position in the editor
+  int songX_;      // Current song screen position in the editor
   int songY_;      //
-  int songOffset_; // .Current song offset (top screen row) in editor
+  int songOffset_; // Current song offset (top screen row) in editor
 
-  int chainRow_; // .Current row in chain editor
-  int chainCol_; // .Current column in chain editor
+  int chainRow_; // Current row in chain editor
+  int chainCol_; // Current column in chain editor
 
-  int currentChain_;  // .Current edited chain
-  int currentPhrase_; // .Current edited phrase
+  int currentChain_;  // Current edited chain
+  int currentPhrase_; // Current edited phrase
 
-  int currentInstrumentID_; // .Current edited instrument
+  int currentInstrumentID_; // Current edited instrument
 
-  int currentTable_; // .Current edited table
+  int currentTable_; // Current edited table
 
-  int currentGroove_; // .Current edited groove
+  int currentGroove_; // Current edited groove
 
   // Player Settings
 
   PlayMode playMode_;
-  int songPlayPos_[SONG_CHANNEL_COUNT];                 // .Play position of each channel
-  unsigned char currentPlayChain_[SONG_CHANNEL_COUNT];  // .Current played chain
+  int songPlayPos_[SONG_CHANNEL_COUNT];                 // Play position of each channel
+  unsigned char currentPlayChain_[SONG_CHANNEL_COUNT];  // Current played chain
                                                         // for each channel
-  int chainPlayPos_[SONG_CHANNEL_COUNT];                // .Play position in chain for each
+  int chainPlayPos_[SONG_CHANNEL_COUNT];                // Play position in chain for each
                                                         // channel
-  unsigned char currentPlayPhrase_[SONG_CHANNEL_COUNT]; // .Current played phrase for each
+  unsigned char currentPlayPhrase_[SONG_CHANNEL_COUNT]; // Current played phrase for each
                                                         // channel
-  int phrasePlayPos_[SONG_CHANNEL_COUNT];               // .Play position in phrase for each
+  int phrasePlayPos_[SONG_CHANNEL_COUNT];               // Play position in phrase for each
                                                         // channel
   int phraseCurPos_;                                    // current UI cursor row position
 

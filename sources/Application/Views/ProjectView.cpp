@@ -29,11 +29,11 @@
 
 #define TOAST_SAVE_SUCCESS()                                                                                           \
   {                                                                                                                    \
-    ToastView::getInstance()->Show("Project saved successfully.", &ttSuccess, ToastDuration::regular);                 \
+    ToastView::GetInstance()->Show("Project saved successfully.", &ttSuccess, ToastDuration::regular);                 \
   }
 #define TOAST_SAVE_FAILURE()                                                                                           \
   {                                                                                                                    \
-    ToastView::getInstance()->Show("Failed to save project.", &ttError, ToastDuration::regular);                       \
+    ToastView::GetInstance()->Show("Failed to save project.", &ttError, ToastDuration::regular);                       \
   }
 
 static void CreateNewProjectCallback(View &v, ModalView &dialog) {
