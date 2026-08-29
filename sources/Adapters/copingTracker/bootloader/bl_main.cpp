@@ -10,7 +10,6 @@
 #include "bl_config.h"
 #include "bl_gfx.h"
 #include "bl_log.h"
-#include "bl_menu.h"
 #include "bl_ui.h"
 #include "bsp/board.h"
 
@@ -24,9 +23,6 @@ int main(int argc, char *argv[]) {
 
   // Bring up the ILI9341 display controller.
   gfx_init();
-
-  // Paint the static title bar, labels and key legend once.
-  menu_render_static();
 
   bootlog("BOOTDBG: startup complete");
 

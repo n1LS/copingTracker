@@ -105,6 +105,12 @@ void bl_run_ui_loop() {
     }
   }
 
+  // Quick boot has been cancelled (a key was pressed during the 50ms window),
+  // so commit to the interactive UI: paint the static title bar, labels and
+  // key legend once. Nothing is drawn above because the auto-boot path must
+  // boot with a clean/blank screen.
+  menu_render_static();
+
   while (true) {
     const uint32_t now_ms = millis();
     const uint16_t raw_keys = scanKeys();
