@@ -88,9 +88,24 @@ struct Theme {
   struct Input {
     FIXED(cursor, WHITE)
     FIXED(placeholder, LIGHT_GRAY)
-    SWITCHABLE(label, WHITE, LIGHT_GRAY)
     SWITCHABLE(bg, LIGHT_GREEN, BLACK)
     SWITCHABLE(fg, BLACK, GREEN)
+  };
+
+  struct InstrumentInput {
+    FIXED(cursor, WHITE)
+    FIXED(placeholder, LIGHT_GRAY)
+    SWITCHABLE(bg, WHITE, DARK_GRAY)
+    SWITCHABLE(fg, BLACK, WHITE)
+  };
+
+  struct SemanticColors {
+    FIXED(pitch, MAGENTA)
+    FIXED(filter, LIGHT_RED)
+    FIXED(volume, LIGHT_YELLOW)
+    SWITCHABLE(sample, LIGHT_CYAN, CYAN)
+    FIXED(effect, LIGHT_RED)
+    FIXED(table, LIGHT_GRAY)
   };
 
   struct Button {
@@ -104,6 +119,7 @@ struct Theme {
 
     FIXED(inactive, LIGHT_GRAY)
     FIXED(scrollbar, LIGHT_GRAY)
+    FIXED(separator, DARK_GRAY)
 
     SWITCHABLE(index, LIGHT_CYAN, CYAN)
     SWITCHABLE(help, WHITE, LIGHT_GRAY)

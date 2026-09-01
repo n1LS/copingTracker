@@ -15,7 +15,7 @@ void InstrumentView::addIndexToLine(uint8_t index, uint8_t line) {
 
   staticField_.emplace_back(GUIPoint(31, line), hexIndexLabels[index & 0x0F]);
   staticField_.back().color_ = Theme::View::info;
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 }
 
 void InstrumentView::fillChiptuneParameters() {
@@ -29,90 +29,90 @@ void InstrumentView::fillChiptuneParameters() {
   position.y_ += 2;
   Variable *v = instrument->FindVariable(Token::ChiptuneInstrumentWaveform);
   intVarField_.emplace_back(position, *v, expand(wave));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(0, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentTranspose);
   intVarField_.emplace_back(position, *v, expand(transpose));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(1, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentLevel);
   intVarField_.emplace_back(position, *v, expand(level));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(2, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentBurst);
   intVarOffField_.emplace_back(position, *v, expand(burst));
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarOffField_.back());
   addIndexToLine(3, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentArpSpeed);
   intVarField_.emplace_back(position, *v, expand(arp));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(4, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentLength);
   intVarOffField_.emplace_back(position, *v, expand(length));
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarOffField_.back());
   addIndexToLine(5, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentTable);
   intVarOffField_.emplace_back(position, *v, expand(table));
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarOffField_.back());
 
   position.y_ += 2;
   staticField_.emplace_back(position, "Envelope");
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentAttack);
   intVarField_.emplace_back(position, *v, expand(attack));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(6, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentDecay);
   intVarField_.emplace_back(position, *v, expand(decay));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(7, position.y_);
 
   position.y_ += 2;
   staticField_.emplace_back(position, "Vibrato");
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentVibratoDelay);
   intVarField_.emplace_back(position, *v, expand(vibrato_delay));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(8, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentVibrato);
   intVarField_.emplace_back(position, *v, expand(vibrato_amount));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(9, position.y_);
 
   position.y_ += 2;
   staticField_.emplace_back(position, "Sweep");
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentSweepTime);
   intVarField_.emplace_back(position, *v, expand(sweep_time));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(10, position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::ChiptuneInstrumentSweepAmount);
   intVarField_.emplace_back(position, *v, expand(sweep_amount));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(11, position.y_);
 
   position = GetAnchor();

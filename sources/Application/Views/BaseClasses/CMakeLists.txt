@@ -14,6 +14,7 @@ add_library(application_views_baseclasses
   UISortedVarList.cpp
   UIStaticField.cpp
   UITempoField.cpp
+  UITabField.cpp
   UISwatchField.cpp
   UIBitmaskVarField.cpp
   View.cpp

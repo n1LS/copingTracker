@@ -19,83 +19,83 @@ void InstrumentView::fillStackParameters() {
   // Wave
   Variable *v = instrument->FindVariable(Token::StackInstrumentWave);
   intVarField_.emplace_back(position, *v, "Waveform      :%s", 0, stackNumWaveforms - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(0, position.y_);
   position.y_++;
 
   // Transpose
   v = instrument->FindVariable(Token::StackInstrumentTranspose);
   intVarField_.emplace_back(position, *v, "Transpose    :%+03d", -24, 24, 1, 12);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(1, position.y_);
   position.y_++;
 
   // Volume
   v = instrument->FindVariable(Token::StackInstrumentVolume);
   intVarField_.emplace_back(position, *v, "Volume        :%02X", 0x00, 0xff, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(2, position.y_);
   position.y_ += 2;
 
   // Attack
   v = instrument->FindVariable(Token::StackInstrumentAttack);
   intVarField_.emplace_back(position, *v, "Attack        :%02X", 0x00, 0xff, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(3, position.y_);
   position.y_++;
 
   // Decay
   v = instrument->FindVariable(Token::StackInstrumentDecay);
   intVarField_.emplace_back(position, *v, "Decay         :%02X", 0x00, 0xff, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(4, position.y_);
   position.y_++;
 
   // Sustain
   v = instrument->FindVariable(Token::StackInstrumentSustain);
   intVarField_.emplace_back(position, *v, "Sustain       :%02X", 0x00, 0xff, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(5, position.y_);
   position.y_++;
 
   // Release
   v = instrument->FindVariable(Token::StackInstrumentRelease);
   intVarField_.emplace_back(position, *v, "Release       :%02X", 0x00, 0xff, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(6, position.y_);
   position.y_ += 2;
 
   // Spread
   v = instrument->FindVariable(Token::StackInstrumentSpread);
   intVarField_.emplace_back(position, *v, "Spread        :%02X", 0x0000, 0xff, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(7, position.y_);
   position.y_++;
 
   // Brightness
   v = instrument->FindVariable(Token::StackInstrumentBrightness);
   intVarField_.emplace_back(position, *v, "Brightness    : %01X", 0, stackBrightnessMax, 1, stackBrightnessMax / 2);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(8, position.y_);
   position.y_++;
 
   // Glide
   v = instrument->FindVariable(Token::StackInstrumentGlide);
   intVarField_.emplace_back(position, *v, "Glide         :%02X", 0x00, 0xff, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(9, position.y_);
   position.y_ += 2;
 
   // Table
   v = instrument->FindVariable(Token::StackInstrumentTable);
   intVarOffField_.emplace_back(position, *v, "Table         :%2.2X", 0x00, TABLE_COUNT - 1, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarOffField_.back());  
   position.y_++;
 
   // Automate
   v = instrument->FindVariable(Token::StackInstrumentTableAutomation);
   intVarField_.emplace_back(position, *v, last_sub_item "Automation:%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   position.y_++;
 }
 

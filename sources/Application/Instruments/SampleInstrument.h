@@ -33,14 +33,7 @@ enum SampleEntryFlags : uint16_t {
   SEF_LOOP_MODE_MASK = 0x000F,
 };
 
-enum SampleInstrumentLoopMode {
-  SILM_ONESHOT = 0,
-  SILM_LOOP,
-  SILM_LOOP_PINGPONG,
-  SILM_OSC,
-  SILM_LOOPSYNC,
-  SILM_LAST
-};
+enum SampleInstrumentLoopMode { SILM_ONESHOT = 0, SILM_LOOP, SILM_LOOP_PINGPONG, SILM_OSC, SILM_LOOPSYNC, SILM_LAST };
 
 #define NO_SAMPLE (-1)
 #define NO_GM_INSTRUMENT (-1)

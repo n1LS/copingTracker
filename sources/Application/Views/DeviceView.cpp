@@ -49,79 +49,79 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   v = config->FindVariable(Token::VarMidiDevice);
   intVarField_.emplace_back(position, *v, "MIDI device  :%s", 0, 3, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarMidiSync);
   // just hardcode max of 1, as only settings are "off" & "send"
   intVarField_.emplace_back(position, *v, "MIDI sync    :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarLineOut);
   intVarField_.emplace_back(position, *v, "Line Out Mode:%s", 0, 2, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarMirrorUI);
   intVarField_.emplace_back(position, *v, "mirrorUI     :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarKeyDelay);
   intVarField_.emplace_back(position, *v, "Key delay/rep:%3d", 250, 750, 1, 100);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   v = config->FindVariable(Token::VarKeyRepeat);
   intVarField_.emplace_back(position + GUIPoint(18, 0), *v, "/:%d", 10, 200, 1, 10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 2;
   v = config->FindVariable(Token::VarPreviewVolume);
   intVarField_.emplace_back(position, *v, "Preview volume    :%2d", 0, 99, 1, 10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarBacklightLevel);
   // MIN brightness is 0xF (15)
   intVarField_.emplace_back(position, *v, "Display brightness:%2.2X", 0xF, 0xFF, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarImportResampler);
   intVarField_.emplace_back(position, *v, "Import resampler  :%s", 0, v->GetListSize() - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarConfigCommandPicker);
   intVarField_.emplace_back(position, *v, "Command input mode:%s", 0, v->GetListSize() - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   position.y_ += 2;
   actionField_.emplace_back("Theme settings", Token::ActionShowTheme, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   position.y_ += 2;
   actionField_.emplace_back("Firmware update", Token::ActionBootSelect, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
 #ifndef ADV
   position.y_ += 1;
   actionField_.emplace_back(char_symbols_usb_s " USB Storage", Token::ActionMassStorage, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 #endif
 }
 
@@ -267,7 +267,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
 void DeviceView::addSwatchField(Color color, GUIPoint position) {
   position.x_ -= 5;
   swatchField_.emplace_back(position, color);
-  fieldList_.insert(fieldList_.end(), &(*swatchField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &swatchField_.back());
 }
 
 void DeviceView::OnFocusLost() {

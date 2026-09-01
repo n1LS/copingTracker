@@ -53,7 +53,7 @@ void UIField::SetActive(bool active) {
 }
 
 int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset,
-                               int subSelectionLength) {
+                              int subSelectionLength) {
   ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
   ((AppWindow &)w).SetColor(Theme::View::fg);
 
@@ -67,7 +67,7 @@ int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int
     buffer[index] = 0;
     valueOffset = index + 1;
 
-    ((AppWindow &)w).SetColor(Theme::Input::label(active_));
+    ((AppWindow &)w).SetColor(labelColor_);
     w.DrawString(position.x_, position.y_, buffer);
 
     position.x_ += index + 1;

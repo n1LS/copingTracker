@@ -20,6 +20,7 @@
 #include "BaseClasses/UIIntVarOffField.h"
 #include "BaseClasses/UINoteVarField.h"
 #include "BaseClasses/UIStaticField.h"
+#include "BaseClasses/UITabField.h"
 #include "BaseClasses/UITextField.h"
 #include "Externals/etl/include/etl/string.h"
 #include "Externals/etl/include/etl/vector.h"
@@ -40,6 +41,7 @@ public:
 
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
+  void DrawDivider(int y, bool full = false);
   void DrawViewDrum();
   void DrawViewStack();
   void DrawViewSample();
@@ -105,7 +107,7 @@ private:
   UIField *gmInputField_;
   UIField *sampleInputField_;
 
-  etl::vector<UIIntVarField, 1> typeIntVarField_;
+  etl::vector<UITabField, 1> typeVarField_;
   etl::vector<UIActionField, 3> persistentActionField_;
   etl::vector<UIIntVarField, 40> intVarField_;
   etl::vector<UINoteVarField, 1> noteVarField_;

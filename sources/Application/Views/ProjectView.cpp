@@ -140,18 +140,18 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   Variable *v = project_->FindVariable(Token::VarTempo);
   tempoField_.emplace_back(Token::ActionBPMChanged, position, *v, "Tempo     :" char_symbol_bpm_s " %d", MIN_TEMPO,
                            MAX_TEMPO, 1, 10);
-  fieldList_.insert(fieldList_.end(), &(*tempoField_.rbegin()));
-  (*tempoField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &tempoField_.back());
+  tempoField_.back().AddObserver(*this);
 
   v = project_->FindVariable(Token::VarMasterVolume);
   position.y_ += 1;
   intVarField_.emplace_back(position, *v, "Master vol:%d%%", 0, 100, 1, 5);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   v = project_->FindVariable(Token::VarTranspose);
   position.y_ += 1;
   intVarField_.emplace_back(position, *v, "Transpose :%3.2d", -48, 48, 0x1, 0xC);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   v = project_->FindVariable(Token::VarScale);
   // if scale name is not found, set the default chromatic scale
@@ -160,28 +160,28 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   }
   position.y_ += 1;
   intVarField_.emplace_back(position, *v, "Scale     :%s", 0, numScales - 1, 1, 10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   // Add Scale Root field
   position.y_ += 1;
   v = project_->FindVariable(Token::VarScaleRoot);
   intVarField_.emplace_back(position, *v, "Scale root:%s", 0, 11, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 2;
   actionField_.emplace_back("Sample Pool", Token::ActionImport, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   position.y_ += 1;
   actionField_.emplace_back("Remove Unused Samples", Token::ActionPurge, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   position.y_ += 1;
   actionField_.emplace_back("Remove Unused Instruments", Token::ActionPurgeInstrument, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   position.y_ += 2;
 
@@ -192,30 +192,30 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Project   :");
   auto defaultName = etl::make_string_with_capacity<MAX_PROJECT_NAME_LENGTH>(UNNAMED_PROJECT_NAME);
   textField_.emplace_back(*v, position, label, Token::ActionProjectRename, defaultName);
-  nameField_ = &(*textField_.rbegin());
+  nameField_ = &textField_.back();
 
   nameField_->AddObserver(*this);
   fieldList_.insert(fieldList_.end(), nameField_);
 
   position.y_ += 2;
   actionField_.emplace_back("Browse", Token::ActionBrowse, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   position.x_ += 8;
   actionField_.emplace_back("Save", Token::ActionSave, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   position.x_ += 6;
   actionField_.emplace_back("New", Token::ActionNewProject, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   position.x_ += 5;
   actionField_.emplace_back("Random", Token::ActionRandomName, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
   position.x_ = xalign;
 
   // Add rendering action fields
@@ -223,18 +223,18 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   // Add a static field as a label for the render actions
   staticField_.emplace_back(position, "Render:");
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   // Position the Mixdown action field to the right of the label
   position.x_ += 8;
   actionField_.emplace_back("Mixdown", Token::ActionRenderMixdown, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   position.x_ += 9;
   actionField_.emplace_back("Stems", Token::ActionRenderStems, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
   position.x_ = xalign;
 }
 

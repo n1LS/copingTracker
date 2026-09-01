@@ -17,6 +17,16 @@
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
 #include "View.h"
 
+struct FieldConfiguration {
+  Color backgroundColor = Theme::Input::bg(false);
+  Color color = Theme::Input::fg(false);
+  Color activeBackgroundColor = Theme::Input::bg(true);
+  Color activeColor = Theme::Input::fg(true);
+};
+
+static const FieldConfiguration instrumentFieldConfiguration = { Theme::InstrumentInput::bg(false), Theme::InstrumentInput::fg(false), Theme::InstrumentInput::bg(true), Theme::InstrumentInput::fg(true) };
+static const FieldConfiguration defaultFieldConfiguration;
+
 class UIField {
 public:
   UIField(const GUIPoint &position);
@@ -31,6 +41,14 @@ public:
   void ClearFocus();
   void SetActive(bool active);
   bool HasFocus();
+
+  void SetLabelColor(Color color) {
+    labelColor_ = color;
+  }
+
+  void SetFieldConfiguration(const FieldConfiguration config) {
+    fieldConfig_ = config;
+  }
 
   virtual int GetFocusWidth() {
     return focusWidth_;
@@ -49,7 +67,7 @@ public:
   virtual bool IsStatic();
 
   int DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset = -1,
-                        int subSelectionLength = 1);
+                       int subSelectionLength = 1);
 
 protected:
   uint8_t x_;
@@ -57,5 +75,7 @@ protected:
   bool focus_;
   bool active_ = true;
   int focusWidth_;
+  Color labelColor_ = Theme::View::fg;
+  FieldConfiguration fieldConfig_ = defaultFieldConfiguration;
 };
 #endif

@@ -50,9 +50,13 @@ void InstrumentView::DrawViewSample() {
   
   DrawString(position.x_ + offset, position.y_, buffer);
 
-  // draw the indicator between loop start and end
-  SetColor(Theme::View::fg);
-  DrawChar(position.x_ + 18, position.y_ + 15, '>');
+  // Spacers
+  DrawDivider(6);
+  DrawDivider(8);
+  DrawDivider(12);
+  DrawDivider(16);
+  DrawDivider(20);
+  DrawDivider(22);
 }
 
 void InstrumentView::AnimationUpdateSample() {

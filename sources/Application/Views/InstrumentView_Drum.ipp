@@ -47,80 +47,80 @@ void InstrumentView::fillDrumParameters() {
   // bass drum
   Variable *v = instrument->FindVariable(Token::DrumInstrumentParamsVoice0);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[0], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // snare 1
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice2);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[2], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // snare 2
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice4);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[4], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // rim
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice1);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[1], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // clap
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice3);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[3], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // hh closed
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice5);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[5], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // hihat pedal
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice7);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[7], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // hihat open
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice9);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[9], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // low tom
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice6);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[6], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // mid tom
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice8);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[8], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // high tom
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice10);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[10], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // crash
   v = instrument->FindVariable(Token::DrumInstrumentParamsVoice11);
   hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[11], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
   position.y_++;
 
   // character
   position.y_++;
   v = instrument->FindVariable(Token::DrumInstrumentParamsCharacter);
   intVarField_.emplace_back(position, *v, "Wobble  :%02X", 0, 255, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   position.y_++;
   
   for (auto &f : hexVarField_) {
@@ -170,15 +170,30 @@ void InstrumentView::DrawViewDrum() {
   DrawString(p.x_ + 14, p.y_ + 18, buffer);
 
   // legend labels up top
-  SetColor(Theme::View::inactive);
+  SetColor(Theme::SemanticColors::pitch);
+  DrawString(p.x_ + 3, p.y_ + 2, "Note" horz_3 char_border_single_topRight_s);
+  DrawChar(p.x_ + 10, p.y_ + 3, CHAR(char_border_single_vertical_s));
+  DrawChar(p.x_ + 10, p.y_ + 4, CHAR(char_border_single_vertical_s));
 
-  DrawString(p.x_ + 2, p.y_ + 2, " Note" horz_3 char_border_single_topRight_s char_border_single_topLeft_s horz_3 "Decay");
-  DrawString(p.x_ + 2, p.y_ + 3, "Sweep" horz_2 char_border_single_topRight_s vert2 char_border_single_topLeft_s horz_2 "Waveform");
-  DrawString(p.x_ + 9, p.y_ + 4, vert4);
+  SetColor(Theme::SemanticColors::volume);
+  DrawString(p.x_ + 11, p.y_ + 2, char_border_single_topLeft_s horz_3 "Decay");
+  DrawChar(p.x_ + 11, p.y_ + 3, CHAR(char_border_single_vertical_s));
+  DrawChar(p.x_ + 11, p.y_ + 4, CHAR(char_border_single_vertical_s));
+  
+  SetColor(Theme::SemanticColors::effect);
+  DrawString(p.x_ + 2, p.y_ + 3, "Sweep" horz_2 char_border_single_topRight_s);
+  DrawChar(p.x_ + 9, p.y_ + 4, CHAR(char_border_single_vertical_s));
 
-   // note labels
+  SetColor(Theme::SemanticColors::sample(true));
+  DrawString(p.x_ + 12, p.y_ + 3, char_border_single_topLeft_s horz_2 "Waveform");
+  DrawChar(p.x_ + 12, p.y_ + 4, CHAR(char_border_single_vertical_s));
+
+  // note labels
   for (int j = 0; j < 12; j++) {
     SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
     DrawString(p.x_ - 3, p.y_ + 5 + j, noteNames[displayOrder[j]]);
   }
+
+  // divider line to table / volume
+  DrawDivider(22);
 }

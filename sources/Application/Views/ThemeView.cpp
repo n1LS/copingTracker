@@ -43,13 +43,13 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   actionPos.y_ -= 1;
 
   actionField_.emplace_back("Import", Token::ActionImport, actionPos);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   actionPos.x_ += 8;
   actionField_.emplace_back("Export", Token::ActionExport, actionPos);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
   actionPos.y_ += 2;
 
   // Font selection
@@ -57,8 +57,8 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   Variable *fontVar = config->FindVariable(Token::VarUIFont);
   intVarField_.emplace_back(position, *fontVar, "Font :%s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
                             ThemeConstants::THEME_FONT_COUNT - 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
   position.y_ += 1;
 
   // Get the current theme name from Config
@@ -78,7 +78,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   // Add the text field
   textFields_.emplace_back(themeNameVar_, position, label, Token::ActionThemeName, defaultValue);
-  themeNameField_ = &(*textFields_.rbegin());
+  themeNameField_ = &textFields_.back();
   themeNameField_->AddObserver(*this);
   fieldList_.insert(fieldList_.end(), themeNameField_);
 
@@ -124,7 +124,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   updateColorComponentField();
   intVarField_.emplace_back(colorComponentTargets_[0].position, colorComponentVar_, "%2.2X", 0, 248, 8, 16, 0);
-  colorComponentField_ = &(*intVarField_.rbegin());
+  colorComponentField_ = &intVarField_.back();
   fieldList_.insert(fieldList_.end(), colorComponentField_);
   colorComponentField_->AddObserver(*this);
   colorComponentField_->SetPosition({0, SCREEN_HEIGHT});
@@ -167,7 +167,7 @@ void ThemeView::DrawView() {
 void ThemeView::addSwatchField(Color color, GUIPoint position) {
   position.x_ -= 5;
   swatchField_.emplace_back(position, color);
-  fieldList_.insert(fieldList_.end(), &(*swatchField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &swatchField_.back());
 }
 
 void ThemeView::addColorField(const char *label, Variable *colorVar, Color color, GUIPoint position) {
