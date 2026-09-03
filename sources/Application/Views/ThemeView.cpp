@@ -403,9 +403,10 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
 }
 
 void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed)
+  if (!pressed) {
+    FieldView::ProcessButtonMask(mask, pressed);
     return;
-
+  }
   bool wasColorComponentFocus = isColorComponentFocus();
 
   if (wasColorComponentFocus && !(mask & (BM_ENTER | BM_EDIT | BM_ALT | BM_NAV | BM_PLAY))) {

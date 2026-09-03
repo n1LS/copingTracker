@@ -76,6 +76,10 @@
 
 #define char_button_border_left_s "\x8E"
 #define char_button_border_right_s "\x8F"
+#define char_button_pressed_border_left_s "\xFE"
+#define char_button_pressed_border_right_s "\xFF"
+#define char_button_left(active) (active ? CHAR(char_button_pressed_border_left_s) : CHAR(char_button_border_left_s))
+#define char_button_right(active) (active ? CHAR(char_button_pressed_border_right_s) : CHAR(char_button_border_right_s))
 
 #define char_tab_border_left_s "\xAE"
 #define char_tab_border_right_s "\xAF"

@@ -67,7 +67,7 @@ void UIIntVarField::Draw(GUIWindow &w, int offset) {
       strcpy(buffer, "++wtf++");
   }
 
-  focusWidth_ = DrawLabeledField(w, position, buffer, focus_);
+  focusWidth_ = DrawLabeledField(w, position, buffer);
 }
 
 void UIIntVarField::ProcessArrow(uint16_t mask) {

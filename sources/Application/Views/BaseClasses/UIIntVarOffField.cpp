@@ -101,5 +101,5 @@ void UIIntVarOffField::Draw(GUIWindow &w, int offset) {
       strcpy(buffer, "++wtf++");
   }
 
-  focusWidth_ = DrawLabeledField(w, position, buffer, focus_);
+  focusWidth_ = DrawLabeledField(w, position, buffer);
 }

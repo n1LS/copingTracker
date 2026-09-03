@@ -31,17 +31,17 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
   strncpy(buffer, name_, MAX_FIELD_WIDTH);
   buffer[MAX_FIELD_WIDTH] = '\0';
 
-  ((AppWindow &)w).SetBackgroundColor(Theme::Button::bg(focus_));
-  ((AppWindow &)w).SetColor(Theme::Button::fg(focus_));
+  w.SetBackgroundColor(Theme::Button::bg(focus_));
+  w.SetColor(Theme::Button::fg(focus_));
   w.DrawString(x, y, buffer);
 
   // add button ends
   // draw highlight button ends
-  char front = focus_ ? CHAR(char_button_border_left_s) : ' ';
-  char end = focus_ ? CHAR(char_button_border_right_s) : ' ';
+  char front = focus_ ? char_button_left(pressed_) : ' ';
+  char end = focus_ ? char_button_right(pressed_) : ' ';
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(Theme::View::bg);
+    w.SetColor(Theme::View::bg);
     ((AppWindow &)w).SwapColors();
   }
 

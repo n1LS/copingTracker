@@ -19,8 +19,8 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
   position.y_ += offset;
 
   // Draw the label
-  ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
-  ((AppWindow &)w).SetColor(Theme::Input::label);
+  w.SetBackgroundColor(Theme::View::bg);
+  w.SetColor(Theme::Input::label);
   w.DrawString(position.x_, position.y_, label_.c_str());
   position.x_ += label_.length();
   
@@ -33,20 +33,20 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
     value = defaultValue_.c_str();
     len = defaultValue_.length();
     // Use a different color for default values to indicate they're not set
-    ((AppWindow &)w).SetColor(Theme::Input::placeholder);
+    w.SetColor(Theme::Input::placeholder);
   } else {
     value = srcString.c_str();
     len = srcString.length();
-    ((AppWindow &)w).SetColor(Theme::Input::fg(focus_));
+    w.SetColor(Theme::Input::fg(focus_));
   }
 
   if (focus_) {
     if (len == 0) {
       // For empty fields, draw a cursor at the beginning position
-      ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
+      w.SetBackgroundColor(Theme::Input::cursor);
       w.DrawString(position.x_, position.y_, " ");
     } else {
-      ((AppWindow &)w).SetColor(Theme::Input::fg(true));
+      w.SetColor(Theme::Input::fg(true));
 
       char buffer[2];
       buffer[1] = 0;
@@ -54,14 +54,14 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
       for (size_t i = 0; i < len; i++) {
         buffer[0] = value[i];
         bool active = currentChar_ == i;
-        ((AppWindow &)w).SetBackgroundColor(active ? Theme::Input::cursor : Theme::Input::bg(true));
+        w.SetBackgroundColor(active ? Theme::Input::cursor : Theme::Input::bg(true));
         w.DrawString(position.x_, position.y_, buffer);
         position.x_ += 1;
       }
     }
   } else if (len != 0) {
-    ((AppWindow &)w).SetColor(Theme::Input::fg(false));
-    ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(false));
+    w.SetColor(Theme::Input::fg(false));
+    w.SetBackgroundColor(Theme::Input::bg(false));
     w.DrawString(position.x_, position.y_, value);
   }
 }

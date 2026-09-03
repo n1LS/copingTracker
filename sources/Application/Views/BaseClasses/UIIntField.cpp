@@ -38,7 +38,7 @@ void UIIntField::Draw(GUIWindow &w) {
   int value = *src_;
   npf_snprintf(buffer, sizeof(buffer), format_, value);
 
-  focusWidth_ = DrawLabeledField(w, position, buffer, focus_);
+  focusWidth_ = DrawLabeledField(w, position, buffer);
 }
 
 void UIIntField::ProcessArrow(uint16_t mask) {
