@@ -1234,7 +1234,9 @@ int npf_vsnprintf(char *buffer, size_t bufsz, char const *format, va_list vlist)
       buffer[0] = '\0';
     }
 #else
-    buffer[bufsz - 1] = '\0';
+    if (bufsz > 0) {
+      buffer[bufsz - 1] = '\0';
+    }
 #endif
   }
 

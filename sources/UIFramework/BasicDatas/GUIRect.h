@@ -19,7 +19,7 @@
 
 class GUIRect {
 public:
-  GUIRect(long x0 = 0, long y0 = 0, long x1 = 0, long y1 = 0);
+  GUIRect(int x0 = 0, int y0 = 0, int x1 = 0, int y1 = 0);
   GUIRect(GUIPoint &, GUIPoint &);
 
   // Returns true if the specified point is contained in the rectangle.

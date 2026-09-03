@@ -54,7 +54,7 @@ void FullScreenBox::Destroy() {
 
 void FullScreenBox::DrawView() {
   // message size
-  int line1_width = line1_.size();
+  int line1_width = (int)line1_.size();
   // set window size full screen
   SetWindow(SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -68,7 +68,7 @@ void FullScreenBox::DrawView() {
   DrawString(x1, y1, line1_.c_str());
 
   if (line2_.size() > 0) {
-    int line2_width = line2_.size();
+    int line2_width = (int)line2_.size();
     int x2 = ((SCREEN_WIDTH - line2_width) / 2) - 2;
     int y2 = y1 + 2;
     DrawString(x2, y2, line2_.c_str());

@@ -29,7 +29,9 @@ Trace::Trace() {
 
 void Trace::trace_uart_putc(int c, void *context) {
   System *sys = System::GetInstance();
-  sys->SystemPutChar(c);
+  if (sys) {
+    sys->SystemPutChar(c);
+  }
 }
 
 //------------------------------------------------------------------------------

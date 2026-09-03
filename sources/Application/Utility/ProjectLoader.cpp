@@ -8,8 +8,12 @@
 
 #include "ProjectLoader.h"
 
+#ifdef __PICO__
 #include "Adapters/copingTracker/audio/picoTrackerAudioDriver.h"
 #include "Adapters/copingTracker/system/picoTrackerProjectLoader.h"
+#else
+#include "Adapters/Host/system/HostProjectLoader.h"
+#endif
 #include "Application/Commands/ApplicationCommandDispatcher.h"
 #include "Application/Instruments/InstrumentBank.h"
 #include "Application/Instruments/SamplePool.h"
@@ -46,7 +50,9 @@ void ProjectLoader::Update() {
 
   if (picoTrackerProjectLoader::IsLoadComplete()) {
     picoTrackerProjectLoader::AcknowledgeLoadComplete();
+#ifdef __PICO__
     picoTrackerAudioDriver::ResumeAudioThread();
+#endif
     loadInFlight_ = false;
     sampleLoadComplete_ = true;
   }

@@ -47,7 +47,7 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
   typeIntVarField_.emplace_back(position, *&instrumentType_, "Type:%s", 0, (int)kMaxSelectableInstrumentType, 1, 1);
   fieldList_.insert(fieldList_.end(), &(*typeIntVarField_.rbegin()));
   (*typeIntVarField_.rbegin()).AddObserver(*this);
-  lastFocusID_ = Token::VarInstrumentType;
+          lastFocus_ = &typeIntVarField_.back();
 
   // Create the name field with the actual instrument variable
   I_Instrument *instr = getInstrument();
@@ -63,21 +63,18 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
   position.y_ = 2;
 
   persistentActionField_.emplace_back("Import", Token::ActionImport, position);
-  fieldList_.insert(fieldList_.end(), &(*persistentActionField_.rbegin()));
-  (*persistentActionField_.rbegin()).AddObserver(*this);
-  lastFocusID_ = Token::ActionImport;
+  fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
+  persistentActionField_.back().AddObserver(*this);
 
   position.x_ += 8;
   persistentActionField_.emplace_back("Export", Token::ActionExport, position);
-  fieldList_.insert(fieldList_.end(), &(*persistentActionField_.rbegin()));
-  (*persistentActionField_.rbegin()).AddObserver(*this);
-  lastFocusID_ = Token::ActionExport;
+  fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
+          persistentActionField_.back().AddObserver(*this);
 
   position.x_ += 8;
   persistentActionField_.emplace_back("Modulation", Token::ActionModulation, position);
-  fieldList_.insert(fieldList_.end(), &(*persistentActionField_.rbegin()));
-  (*persistentActionField_.rbegin()).AddObserver(*this);
-  lastFocusID_ = Token::ActionModulation;
+  fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
+  persistentActionField_.back().AddObserver(*this);
 
   sliceCountLabel_.clear();
 }
@@ -90,7 +87,7 @@ void InstrumentView::Reset() {
   suppressSampleChangeWarning_ = false;
   exportInstrument_ = nullptr;
   exportName_.clear();
-  lastFocusID_ = Token::VarInstrumentType;
+  lastFocus_ = &typeIntVarField_.back();
   instrumentType_.SetInt(0, false);
   sliceCountLabel_.clear();
 }
@@ -265,8 +262,8 @@ void InstrumentView::refreshInstrumentFields() {
   lastSampleIndex_ = -1;
 
   // first put back the type field as its shown on *all* instrument types
-  fieldList_.insert(fieldList_.end(), &(*typeIntVarField_.rbegin()));
-  lastFocusID_ = Token::VarInstrumentType;
+  fieldList_.insert(fieldList_.end(), &typeIntVarField_.back());
+  lastFocus_ = &typeIntVarField_.back();
 
   // Re-add the action fields for export and import only if not IT_NONE
   if (instrumentType_.GetInt() != IT_NONE) {
@@ -323,7 +320,7 @@ void InstrumentView::refreshInstrumentFields() {
   };
 
   for (auto field : fieldList_) {
-    if (((UIIntVarField *)field)->GetVariableID() == lastFocusID_) {
+    if (field == lastFocus_) {
       SetFocus(field);
       break;
     }
@@ -923,10 +920,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
 
-  UIIntVarField *field = (UIIntVarField *)GetFocus();
-  if (field) {
-    lastFocusID_ = field->GetVariableID();
-  }
+  lastFocus_ = GetFocus();
 }
 
 void InstrumentView::DrawView() {
@@ -1228,7 +1222,7 @@ void InstrumentView::handleInstrumentExport() {
 
     if (result == PERSIST_EXISTS) {
       // File already exists, ask user if they want to override it
-      etl::string<strlen("Overwrite existing file: ")> confirmMsg = "Overwrite existing file?";
+      etl::string<64> confirmMsg = "Overwrite existing file?";
       MessageBox *mb = MessageBox::Create(*this, "Export", confirmMsg.c_str(), name.c_str(), MBBF_YES | MBBF_NO);
 
       exportInstrument_ = instrument;
@@ -1236,7 +1230,7 @@ void InstrumentView::handleInstrumentExport() {
       DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmExportOverwrite>(*this));
     } else {
       // Create a message with the instrument name
-      etl::string<MAX_INSTRUMENT_NAME_LENGTH + strlen("Exported: ")> successMsg = "Exported: ";
+      etl::string<64> successMsg = "Exported: ";
       successMsg += name;
 
       const char *message = result == PERSIST_SAVED ? successMsg.c_str() : "Failed to export instrument";

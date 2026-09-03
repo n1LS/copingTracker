@@ -214,15 +214,15 @@ void picoTrackerGUIWindowImp::ProcessEvent(picoTrackerEvent &event) {
 void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t buttonMask) {
   int e = 1;
   System *system = System::GetInstance();
-  unsigned long now = system->GetClock();
+
   for (int i = 0; i < 10; i++) {
     if (changeMask & e) {
       GUIEventType type = (buttonMask & e) ? ET_PADBUTTONDOWN : ET_PADBUTTONUP;
 
-      GUIEvent event(eventMapping[i], type, now, 0, 0, 0);
+      GUIEvent event(eventMapping[i], type);
       instance_->_window->DispatchEvent(event);
     }
-    e = e << 1;
+    e <<= 1;
   }
 }
 

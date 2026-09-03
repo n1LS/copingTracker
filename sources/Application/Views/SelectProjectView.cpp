@@ -110,7 +110,6 @@ const char *SelectProjectView::GetEmptyStateMessage() const {
 
 void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
                                            size_t bufferSize) {
-  (void)bufferSize; // Unused - use fixed size
   // Get filename
   char temp[MAX_PROJECT_NAME_LENGTH + 1];
   memset(temp, '\0', sizeof(temp));
@@ -137,12 +136,11 @@ void SelectProjectView::PrepareItemDrawing(int index, bool isSelected, Color *fg
   const char *currentProject = projectName.c_str();
 
   bool isCurrent = strcmp(temp, currentProject) == 0;
-  Trace::Debug("checking %s vs %s -> %b", temp, currentProject, isCurrent);
 
   uint8_t symbol = isCurrent ? CHAR(char_playback_play_s) : ' ';
 
   int len = FILE_LIST_LINE_LENGTH - 2;
-  npf_snprintf(buffer, SCREEN_WIDTH, "%c %-*.*s", symbol, len, len, temp);
+  npf_snprintf(buffer, bufferSize, "%c %-*.*s", symbol, len, len, temp);
 }
 
 void SelectProjectView::OnTabAction(int tabIndex, const char *filename) {

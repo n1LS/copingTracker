@@ -18,27 +18,25 @@
 #include <stdlib.h>
 #include <string.h>
 
-Variable::Variable(Token id, float value) : id_(id) {
+Variable::Variable(Token id, float value) : id_(id), listSize_(0), list_(nullptr) {
   value_.float_ = value;
   defaultValue_.float_ = value;
   type_ = FLOAT;
 }
 
-Variable::Variable(Token id, int value) : id_(id) {
+Variable::Variable(Token id, int value) : id_(id), listSize_(0), list_(nullptr) {
   value_.int_ = value;
   defaultValue_.int_ = value;
   type_ = INT;
 }
 
-Variable::Variable(Token id, bool value) : id_(id) {
+Variable::Variable(Token id, bool value) : id_(id), listSize_(0), list_(nullptr) {
   value_.bool_ = value;
   defaultValue_.bool_ = value;
   type_ = BOOL;
 }
 
-Variable::Variable(Token id, const char *const *list, int size, int index) : id_(id) {
-  list_ = list;
-  listSize_ = size;
+Variable::Variable(Token id, const char *const *list, int size, int index) : id_(id), listSize_(size), list_(list) {
   value_.index_ = index;
   defaultValue_.index_ = index;
   type_ = CHAR_LIST;

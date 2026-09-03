@@ -36,9 +36,9 @@ RenderProgressModal::RenderProgressModal(View &view, const char *title, const ch
                                          ProgressDisplayMode progressDisplayMode)
     : ModalView(view), title_(title), message_(message), totalSamples_(0.0f),
       progressDisplayMode_(progressDisplayMode) {
-  dialogWidth_ = title_.size();
+  dialogWidth_ = (uint32_t)title_.size();
   if (message_.size() > dialogWidth_) {
-    dialogWidth_ = message_.size();
+    dialogWidth_ = (uint32_t)message_.size();
   }
   if (dialogWidth_ < 16u) {
     dialogWidth_ = 16u;
@@ -61,13 +61,13 @@ void RenderProgressModal::DrawView() {
 
   // Draw title
   int32_t y = 0;
-  int32_t x = (width - title_.size()) / 2;
+  int32_t x = (int32_t)(width - title_.size()) / 2;
   SetColor(Theme::View::warning);
   DrawString(x, y, title_.c_str());
 
   // Draw message
   y++;
-  x = (width - message_.size()) / 2;
+  x = (int32_t)(width - message_.size()) / 2;
   DrawString(x, y, message_.c_str());
 
   // Draw render progress
