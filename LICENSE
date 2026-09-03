@@ -38,57 +38,42 @@ Third-Party Software and Licenses
 This project includes third-party software components. Each component is
 subject to its own license. Below is a summary of included external code:
 
-1. FatFs
-   Path: sources/Externals/FatFs
-   SPDX-License-Identifier: BSD 1-Clause License (or equivalent)
-   License file: sources/Externals/FatFs/LICENSE.txt
-
-2. FreeRTOS
-   Path: sources/Externals/FreeRTOS-Kernel
-   SPDX-License-Identifier: MIT
-   License file: sources/Externals/FreeRTOS-Kernel/LICENSE.md
-
-3. SdFat
+1. SdFat
    Path: sources/Externals/SdFat
    SPDX-License-Identifier: MIT
    License file: sources/Externals/SdFat/LICENSE.md
 
-4. SdFat
+2. TinyXML2
    Path: sources/Externals/TinyXML2
    SPDX-License-Identifier: Zlib
    License file: sources/Externals/TinyXML2/LICENSE.txt
 
-5. braids
-   Path: sources/Externals/braids
-   SPDX-License-Identifier: MIT
-   License file: sources/Externals/braids/LICENSE
-
-6. cRSID
+3. cRSID
    Path: sources/Externals/cRSID
-   SPDX-License-Identifier: WTFPL (or equivalent)
+   SPDX-License-Identifier: WTFPL
    License file: sources/Externals/cRSID/README.txt
 
-7. etl
+4. etl
    Path: sources/Externals/etl
    SPDX-License-Identifier: MIT
    License file: sources/Externals/etl/LICENSE
 
-8. lvgl
-   Path: sources/Externals/lvgl
-   SPDX-License-Identifier: MIT
-   License file: sources/Externals/lvgl/LICENCE.txt
-
-9. opal
+5. opal
    Path: sources/Externals/opal
-   SPDX-License-Identifier: Unlicense (or equivalent)
+   SPDX-License-Identifier: Unlicense
    License file: sources/Externals/opal/LICENSE.md
 
-10. pico-sdk
+6. pico-sdk
    Path: sources/Externals/pico-sdk
    SPDX-License-Identifier: BSD-3-Clause
    License file: sources/Externals/pico-sdk/LICENSE.TXT
 
-11. opal
+7. tinyusb
+   Path: sources/Externals/tinyusb
+   SPDX-License-Identifier: MIT
+   License file: sources/Externals/tinyusb/LICENSE
+
+8. yxml
    Path: sources/Externals/yxml
    SPDX-License-Identifier: MIT
    License file: sources/Externals/yxml/COPYING
