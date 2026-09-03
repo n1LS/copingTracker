@@ -177,7 +177,7 @@ void SampleImportView::GetStatusInfo(char *buffer, size_t bufferSize) {
     unsigned fileIndex = GetFileList()[GetCurrentIndex()];
     // only get file size if it's a file not a dir
     if (fs->getFileType(fileIndex) == PFT_FILE) {
-      filesize = fs->getFileSize(fileIndex);
+      filesize = (uint32_t)fs->getFileSize(fileIndex);
     }
   }
 

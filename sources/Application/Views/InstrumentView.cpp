@@ -48,7 +48,7 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
   typeVarField_.emplace_back("Type", position, *&instrumentType_, tabs, 6);
   fieldList_.insert(fieldList_.end(), &typeVarField_.back());
   typeVarField_.back().AddObserver(*this);
-  lastFocusID_ = Token::VarInstrumentType;
+  lastFocus_ = typeVarField_.back();
 
   // Create the name field with the actual instrument variable
   I_Instrument *instr = getInstrument();
@@ -66,19 +66,16 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
   persistentActionField_.emplace_back(char_symbol_load_s, Token::ActionImport, position);
   fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
   persistentActionField_.back().AddObserver(*this);
-  lastFocusID_ = Token::ActionImport;
 
   position.x_ = 26;
   persistentActionField_.emplace_back(char_symbol_save_s, Token::ActionExport, position);
   fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
   persistentActionField_.back().AddObserver(*this);
-  lastFocusID_ = Token::ActionExport;
 
   position.x_ += 29;
   persistentActionField_.emplace_back("Mod", Token::ActionModulation, position);
   fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
   persistentActionField_.back().AddObserver(*this);
-  lastFocusID_ = Token::ActionModulation;
 
   sliceCountLabel_.clear();
 }
@@ -91,7 +88,7 @@ void InstrumentView::Reset() {
   suppressSampleChangeWarning_ = false;
   exportInstrument_ = nullptr;
   exportName_.clear();
-  lastFocusID_ = Token::VarInstrumentType;
+  lastFocus_ = &typeIntVarField_.back();
   instrumentType_.SetInt(0, false);
   sliceCountLabel_.clear();
 }
@@ -270,7 +267,7 @@ void InstrumentView::refreshInstrumentFields() {
 
   // first put back the type field as its shown on *all* instrument types
   fieldList_.insert(fieldList_.end(), &typeVarField_.back());
-  lastFocusID_ = Token::VarInstrumentType;
+  lastFocus_ = &typeVarField_.back();
 
   // Re-add the action fields for export and import only if not IT_NONE
   if (instrumentType_.GetInt() != IT_NONE) {
@@ -327,7 +324,7 @@ void InstrumentView::refreshInstrumentFields() {
   };
 
   for (auto field : fieldList_) {
-    if (((UIIntVarField *)field)->GetVariableID() == lastFocusID_) {
+    if (field == lastFocus_) {
       SetFocus(field);
       break;
     }
@@ -970,10 +967,7 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
 
-  UIIntVarField *field = (UIIntVarField *)GetFocus();
-  if (field) {
-    lastFocusID_ = field->GetVariable().GetID();
-  }
+  lastFocus_ = GetFocus();
 }
 
 void InstrumentView::DrawView() {
@@ -1279,7 +1273,7 @@ void InstrumentView::handleInstrumentExport() {
 
     if (result == PERSIST_EXISTS) {
       // File already exists, ask user if they want to override it
-      etl::string<strlen("Overwrite existing file: ")> confirmMsg = "Overwrite existing file?";
+      etl::string<64> confirmMsg = "Overwrite existing file?";
       MessageBox *mb = MessageBox::Create(*this, "Export", confirmMsg.c_str(), name.c_str(), MBBF_YES | MBBF_NO);
 
       exportInstrument_ = instrument;
@@ -1287,7 +1281,7 @@ void InstrumentView::handleInstrumentExport() {
       DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmExportOverwrite>(*this));
     } else {
       // Create a message with the instrument name
-      etl::string<MAX_INSTRUMENT_NAME_LENGTH + strlen("Exported: ")> successMsg = "Exported: ";
+      etl::string<64> successMsg = "Exported: ";
       successMsg += name;
 
       const char *message = result == PERSIST_SAVED ? successMsg.c_str() : "Failed to export instrument";

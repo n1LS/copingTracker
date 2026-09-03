@@ -7,7 +7,11 @@
  */
 
 #include "BootView.h"
+#ifdef __PICO__
 #include "Adapters/copingTracker/system/picoTrackerProjectLoader.h"
+#else
+#include "Adapters/Host/system/HostProjectLoader.h"
+#endif
 #include "Application/Model/Project.h"
 #include "System/io/Status.h"
 
@@ -120,7 +124,7 @@ void BootView::DrawIndex(int index) {
 }
 
 void BootView::RevealRandom() {
-  const color_t defaultColor = {fg : WHITE, bg : BLACK};
+  const color_t defaultColor = {.fg = WHITE, .bg = BLACK};
 
   int pos = Random() % animationSize_;
   while (animationContent_[pos] == animationTarget_[pos]) {

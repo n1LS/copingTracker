@@ -57,7 +57,6 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
   // Navigate to the first child of the INSTRUMENT element (which should be a
   // PARAM element)
   bool subelem = doc->FirstChild();
-  int paramCount = 0;
 
   while (subelem) {
     // Process the PARAM element attributes
@@ -80,7 +79,6 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
         // Set the instrument name directly
         SetName(value);
         Trace::Log("I_INSTRUMENT", "Set instrument name: %s", value);
-        paramCount++;
       } else {
         // For other parameters, find the variable and set its value
         bool found = false;
@@ -92,7 +90,6 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
             // Trace::Log("I_INSTRUMENT", "Set parameter: %s = %s", name,
             // value);
             found = true;
-            paramCount++;
             break;
           }
         }

@@ -10,9 +10,15 @@
  */
 
 #include "randomnames.h"
+#include "System/FileSystem/FileHandle.h"
+#include "System/FileSystem/FileSystem.h"
+#include "System/System/System.h"
+#ifdef __PICO__
 #include "Adapters/copingTracker/filesystem/picoTrackerFileSystem.h"
-#include "Application/Persistency/PersistenceConstants.h"
 #include "Externals/SdFat/src/SdCard/SdCard.h"
+#endif
+#include "Application/Persistency/PersistenceConstants.h"
+#include <cstdio>
 #include <stdlib.h>
 
 static bool getRandomWordFromFile(const FileHandle &file, uint32_t randomBits, int maxLen, char *buffer) {

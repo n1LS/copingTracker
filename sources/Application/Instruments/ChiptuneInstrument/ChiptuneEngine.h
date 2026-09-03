@@ -258,7 +258,7 @@ typedef struct voice_t {
     }
 
     // apply to frequency: frequency *= legato.factor (Q16.16)
-    frequency = ((int64_t)frequency * legato.factor) >> 16;
+    frequency = (uint32_t)((int64_t)frequency * legato.factor) >> 16;
   }
 
   inline void tick_1000Hz() {
@@ -567,8 +567,8 @@ typedef struct voice_t {
       // target factor = 1.0 (when we reach the new frequency)
       int64_t initialFactor = ((int64_t)lastFrequency << 16) / frequency;
       legato.targetFactor = 0x0001'0000; // 1.0 in Q16.16
-      legato.coefficient = (legato.targetFactor - initialFactor) / ticks;
-      legato.factor = initialFactor; // start at the ratio
+      legato.coefficient = (int32_t)((legato.targetFactor - initialFactor) / ticks);
+      legato.factor = (uint32_t)initialFactor; // start at the ratio
     } else {
       // get total ratio from table (Q16.16)
       legato.targetFactor = semitoneRatioQ16[semitones + 128];

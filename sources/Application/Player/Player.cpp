@@ -91,6 +91,8 @@ bool Player::IsChannelMuted(int channel) {
 }
 
 void Player::Start(PlayMode mode, bool forceSongMode, MixerServiceMode msmMode, bool stopAtEnd) {
+  if (!viewData_)
+    return;
 
   mixer_.Lock();
 

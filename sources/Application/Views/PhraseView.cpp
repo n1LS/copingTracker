@@ -28,7 +28,7 @@
 #include <nanoprintf.h>
 #include <stdlib.h>
 
-static const int16_t offsets_[2][4] = {-1, 1, 12, -12, -1, 1, 16, -16};
+static const int16_t offsets_[2][4] = {{-1, 1, 12, -12}, {-1, 1, 16, -16}};
 static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
 static const uint8_t columnWidths_[7] = {3, 2, 1, 3, 4, 3, 4};
 

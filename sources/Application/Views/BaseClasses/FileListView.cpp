@@ -222,7 +222,7 @@ void FileListView::DrawView() {
 
   // Draw action tabs if configured
   if (!config_.actionTabs.empty()) {
-    DrawActionTabs(SCREEN_HEIGHT - 1, GetSelectedTab());
+    DrawActionTabs(SCREEN_HEIGHT - 1, (int)GetSelectedTab());
   } else if (config_.useButtonSystem) {
     // Draw buttons if button system is enabled
     DrawButtons(selectedButton_);
@@ -328,7 +328,7 @@ void FileListView::HandleTabLeft() {
 }
 
 void FileListView::HandleTabRight() {
-  if (GetSelectedTab() < static_cast<int>(config_.actionTabs.size()) - 1) {
+  if (GetSelectedTab() < config_.actionTabs.size() - 1) {
     SetSelectedTab(GetSelectedTab() + 1);
   }
 }
@@ -474,7 +474,7 @@ void FileListView::GetFileName(size_t index, char *buffer, size_t bufferSize) co
     buffer[0] = '\0';
     return;
   }
-  fs_->getFileName(fileIndexList_[index], buffer, bufferSize);
+  fs_->getFileName(fileIndexList_[index], buffer, (int)bufferSize);
 }
 
 FileType FileListView::GetFileType(size_t index) const {
@@ -493,7 +493,7 @@ uint32_t FileListView::GetFileSize(size_t index) const {
 
 // ListView::DataSource implementation
 size_t FileListView::GetItemCount() const {
-  return fileIndexList_.size();
+  return (int)fileIndexList_.size();
 }
 
 void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,

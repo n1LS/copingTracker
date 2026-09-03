@@ -563,7 +563,7 @@ bool Config::ImportTheme(const char *themeName) {
   auto fs = FileSystem::GetInstance();
 
   // Check if the filename already has the .thm extension
-  etl::string<MAX_THEME_NAME_LENGTH + strlen(THEME_FILE_EXTENSION)> filename = themeName;
+  etl::string<MAX_THEME_FILENAME_LENGTH> filename = themeName;
 
   const char *extension = strrchr(themeName, '.');
   if (!extension || strcmp(extension, THEME_FILE_EXTENSION) != 0) {

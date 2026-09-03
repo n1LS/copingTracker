@@ -78,7 +78,6 @@ private:
   int tempoNudge_;
   unsigned long lastTap_[MAX_TAP];
   unsigned int tempoTapCount_;
-  char *name[MAX_PROJECT_NAME_LENGTH];
 
   // variables
   WatchedVariable tempo_;

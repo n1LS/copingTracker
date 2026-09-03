@@ -34,3 +34,6 @@ tools/sf2converter/ctsb_converter/__pycache__
 ## generated source code
 *.generated.*
 tools/sf2converter/ctsb_converter
+build-debug
+build-host
+build-xcode

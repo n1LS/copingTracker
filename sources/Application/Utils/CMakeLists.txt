@@ -3,13 +3,16 @@ add_library(application_utils
   char.cpp
   fixed.cpp
   randomnames.cpp
-  stringutils.cpp 
+  stringutils.cpp
 )
 
 target_link_libraries(application_utils PUBLIC
   etl
-  sdfat
 )
+
+if(NOT HOST_BUILD)
+  target_link_libraries(application_utils PUBLIC sdfat)
+endif()
 
 target_include_directories(application_utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

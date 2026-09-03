@@ -14,11 +14,9 @@
 
 // Typed constructor
 
-GUIEvent::GUIEvent(GUIPoint &point, GUIEventType type, long when, bool ctrl, bool shift, bool btn)
-    : _position(point), _type(type), _value(0), _when(when), _ctrl(ctrl), _shift(shift), _btn(btn) {};
+GUIEvent::GUIEvent(GUIPoint &point, GUIEventType type) : _position(point), _type(type) {};
 
-GUIEvent::GUIEvent(long value, GUIEventType type, long when, bool ctrl, bool shift, bool btn)
-    : _position(), _type(type), _value(value), _when(when), _ctrl(ctrl), _shift(shift), _btn(btn) {};
+GUIEvent::GUIEvent(int value, GUIEventType type) : _position(), _type(type), _value(value) {};
 
 // Position accessor
 

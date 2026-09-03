@@ -86,6 +86,13 @@ public:
   void FlushTransition();
   void DelayedProjectLoad();
 
+  View *GetCurrentView() {
+    return currentView_;
+  }
+  void SetBootLoadTriggered(bool triggered) {
+    bootLoadTriggered_ = triggered;
+  }
+
 protected: // GUIWindow implementation
   virtual bool onEvent(GUIEvent &event);
   virtual void onUpdate(bool redraw);

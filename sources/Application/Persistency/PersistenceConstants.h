@@ -16,7 +16,10 @@
 // Sample filenames include the ".wav" extension.
 #define MAX_INSTRUMENT_FILENAME_LENGTH 24
 #define MAX_THEME_NAME_LENGTH 16
-#define MAX_THEME_EXPORT_PATH_LENGTH (MAX_THEME_NAME_LENGTH + strlen(THEMES_DIR) + 1 + strlen(THEME_FILE_EXTENSION))
+// MAX_THEME_NAME_LENGTH (16) + "/copingTracker/themes" (20) + "." (1) + "thm" (3) = 40 bytes
+#define MAX_THEME_EXPORT_PATH_LENGTH 64
+// Theme name + extension: "themename" (16) + ".thm" (4) = 20 bytes
+#define MAX_THEME_FILENAME_LENGTH 32
 // accounts for .ins extension so they are 4 chars shorter.
 #define MAX_INSTRUMENT_NAME_LENGTH (MAX_INSTRUMENT_FILENAME_LENGTH - 4)
 

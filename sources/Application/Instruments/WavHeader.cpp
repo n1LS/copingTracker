@@ -138,7 +138,7 @@ etl::expected<WavHeaderInfo, WAVEFILE_ERROR> WavHeaderWriter::ReadHeader(I_File 
     }
     info.fmtChunkSize = chunkSize;
 
-    uint32_t chunkDataOffset = file->Tell();
+    uint32_t chunkDataOffset = (uint32_t)file->Tell();
     uint32_t paddedChunkSize = info.fmtChunkSize + (info.fmtChunkSize & 1);
     uint32_t nextOffset = chunkDataOffset + paddedChunkSize;
     if (nextOffset > riffEnd) {
@@ -275,7 +275,7 @@ etl::expected<WavHeaderInfo, WAVEFILE_ERROR> WavHeaderWriter::ReadHeader(I_File 
       return etl::unexpected(INVALID_HEADER);
     }
 
-    uint32_t dataStart = file->Tell();
+    uint32_t dataStart = (uint32_t)file->Tell();
     uint32_t paddedChunkSize = chunkSize + (chunkSize & 1);
     uint32_t chunkEnd = dataStart + paddedChunkSize;
     if (chunkEnd > riffEnd) {
@@ -324,7 +324,7 @@ bool WavHeaderWriter::UpdateFileSize(I_File *file, uint32_t sampleCount, uint16_
   }
 
   // Get the current position, which is the total file size
-  uint32_t totalFileSize = file->Tell();
+  uint32_t totalFileSize = (uint32_t)file->Tell();
   if (totalFileSize < 44) {
     Trace::Error("WAVHEADER: file too small to patch header (%u bytes)", totalFileSize);
     return false;

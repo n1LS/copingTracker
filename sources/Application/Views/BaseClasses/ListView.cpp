@@ -69,7 +69,7 @@ void ListView::DrawListItems() {
     Color bg = Theme::View::Selection::bg(isSelected);
     Color fg = Theme::View::Selection::fg(isSelected);
 
-    dataSource_->PrepareItemDrawing(i, isSelected, &fg, &bg, buffer, sizeof(buffer));
+    dataSource_->PrepareItemDrawing((int)i, isSelected, &fg, &bg, buffer, sizeof(buffer));
     SetColor(fg);
     SetBackgroundColor(bg);
     dataSource_->DrawItem(x, y, i, isSelected, fg, bg, buffer);
@@ -101,7 +101,7 @@ void ListView::DrawEmptyState() {
 }
 
 void ListView::HandleUp(bool page) {
-  size_t itemCount = dataSource_->GetItemCount();
+  int itemCount = dataSource_->GetItemCount();
 
   if (itemCount == 0) {
     return;

@@ -72,8 +72,8 @@ public:
 
   // Constructor with data
 
-  GUIEvent(GUIPoint &point, GUIEventType type, long when = 0, bool ctrl = false, bool shift = false, bool btn = false);
-  GUIEvent(long value, GUIEventType type, long when = 0, bool ctrl = false, bool shift = false, bool btn = false);
+  GUIEvent(GUIPoint &point, GUIEventType type);
+  GUIEvent(int value, GUIEventType type);
 
   // Position accessor
 
@@ -83,7 +83,7 @@ public:
   // Type accessor
 
   GUIEventType GetType();
-  long GetValue() {
+  int GetValue() {
     return _value;
   };
 
@@ -91,10 +91,6 @@ private:
   GUIPoint _position; // The event's position
   GUIEventType _type; // The event's type
   int _value;         // for key events...
-  long _when;         // event timestamp
-  bool _ctrl;
-  bool _shift;
-  bool _btn;
 };
 
 #endif
