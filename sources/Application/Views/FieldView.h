@@ -36,6 +36,7 @@ public:
 
 private:
   UIField *focus_;
+  uint16_t lastMask_;
   UIField *findAdjacentField(bool vertical, int8_t direction);
 };
 

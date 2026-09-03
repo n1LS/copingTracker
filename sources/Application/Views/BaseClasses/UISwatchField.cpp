@@ -19,7 +19,7 @@ UISwatchField::UISwatchField(const GUIPoint &position, const Color color) : UIFi
 void UISwatchField::Draw(GUIWindow &w, int offset) {
   GUIPoint position = GetPosition() + GUIPoint(1, offset);
 
-  ((AppWindow &)w).SetBackgroundColor(color_);
+  w.SetBackgroundColor(color_);
   w.DrawString(position.x_, position.y_, "   ");
 }
 

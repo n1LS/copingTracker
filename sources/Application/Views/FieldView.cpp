@@ -10,11 +10,13 @@
  */
 
 #include "FieldView.h"
+#include "ModalView.h"
 #include "System/Console/Trace.h"
 #include "UIIntVarField.h"
 
 FieldView::FieldView(GUIWindow &w, ViewData *data) : ScreenView(w, data) {
   focus_ = 0;
+  lastMask_ = 0;
 }
 
 void FieldView::UpdateFocusRect() {
@@ -75,88 +77,71 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
     focus_->SetFocus();
   }
 
+  if (!pressed) { // Button release: fire click/edit-click actions on release
+    uint16_t released = lastMask_ & ~mask;
+    if (released == BM_ENTER) {
+      focus_->SetPressed(false);
+      focus_->OnClick();
+      isDirty_ = true;
+    } else if (released == BM_EDIT) {
+      focus_->OnEditClick();
+      isDirty_ = true;
+    }
+    lastMask_ = mask;
+    return;
+  }
+
   if (mask & BM_ENTER) { // ENTER or ENTER+ARROW is sent to the field
-    if (mask & BM_DOWN) {
+    if (mask == BM_ENTER) {
+      focus_->SetPressed(true);
+      isDirty_ = true;
+    } else if (mask & BM_DOWN) {
       focus_->ProcessArrow(BM_DOWN);
       isDirty_ = true;
-    }
-    if (mask & BM_UP) {
+    } else if (mask & BM_UP) {
       focus_->ProcessArrow(BM_UP);
       isDirty_ = true;
-    }
-
-    if (mask & BM_LEFT) {
+    } else if (mask & BM_LEFT) {
       focus_->ProcessArrow(BM_LEFT);
       isDirty_ = true;
-    }
-
-    if (mask & BM_RIGHT) {
+    } else if (mask & BM_RIGHT) {
       focus_->ProcessArrow(BM_RIGHT);
       isDirty_ = true;
-    }
-
-    if (mask & BM_EDIT) {
+    } else if (mask & BM_EDIT) {
       focus_->ProcessClear();
       isDirty_ = true;
     }
-
-    if (mask == BM_ENTER) {
-      focus_->OnClick();
-    };
-
-  } else {
-    if (mask & BM_EDIT) { // EDIT or EDIT+ARROW is sent to the field
-
-      if (mask == BM_EDIT) {
-        focus_->OnEditClick();
-        isDirty_ = true;
-      };
-
-      if (mask & BM_DOWN) {
-        focus_->ProcessEditArrow(BM_DOWN);
-        isDirty_ = true;
-      }
-      if (mask & BM_UP) {
-        focus_->ProcessEditArrow(BM_UP);
-        isDirty_ = true;
-      }
-
-      if (mask & BM_LEFT) {
-        focus_->ProcessEditArrow(BM_LEFT);
-        isDirty_ = true;
-      }
-
-      if (mask & BM_RIGHT) {
-        focus_->ProcessEditArrow(BM_RIGHT);
-        isDirty_ = true;
-      }
-
-    } else { // Nor ENTER or EDIT is pressed
-
-      if (!(mask & (BM_ENTER | BM_EDIT | BM_ALT | BM_NAV | BM_PLAY))) {
-
-        if (mask & BM_DOWN) {
-          UIField *next = findAdjacentField(true, +1);
-          SetFocus(next);
-        }
-
-        if (mask & BM_UP) {
-          UIField *prev = findAdjacentField(true, -1);
-          SetFocus(prev);
-        }
-
-        if (mask & BM_RIGHT) {
-          UIField *next = findAdjacentField(false, +1);
-          SetFocus(next);
-        }
-
-        if (mask & BM_LEFT) {
-          UIField *prev = findAdjacentField(false, -1);
-          SetFocus(prev);
-        }
-      }
+  } else if (mask & BM_EDIT) { // EDIT or EDIT+ARROW is sent to the field
+    if (mask & BM_DOWN) {
+      focus_->ProcessEditArrow(BM_DOWN);
+      isDirty_ = true;
+    } else if (mask & BM_UP) {
+      focus_->ProcessEditArrow(BM_UP);
+      isDirty_ = true;
+    } else if (mask & BM_LEFT) {
+      focus_->ProcessEditArrow(BM_LEFT);
+      isDirty_ = true;
+    } else if (mask & BM_RIGHT) {
+      focus_->ProcessEditArrow(BM_RIGHT);
+      isDirty_ = true;
+    }
+  } else if (!(mask & (BM_ENTER | BM_EDIT | BM_ALT | BM_NAV | BM_PLAY))) {
+    if (mask & BM_DOWN) {
+      UIField *next = findAdjacentField(true, +1);
+      SetFocus(next);
+    } else if (mask & BM_UP) {
+      UIField *prev = findAdjacentField(true, -1);
+      SetFocus(prev);
+    } else if (mask & BM_RIGHT) {
+      UIField *next = findAdjacentField(false, +1);
+      SetFocus(next);
+    } else if (mask & BM_LEFT) {
+      UIField *prev = findAdjacentField(false, -1);
+      SetFocus(prev);
     }
   }
+
+  lastMask_ = mask;
 }
 
 // Finds the next focusable field adjacent to the current focus.
@@ -236,6 +221,11 @@ int FieldView::GetFocusIndex() {
 }
 
 GUIRect FieldView::GetFocusRect() {
+  ModalView *v = GetModalView();
+  if (v) {
+    return v->GetFocusRect();
+  }
+
   UpdateFocusRect();
 
   return focusRect_;

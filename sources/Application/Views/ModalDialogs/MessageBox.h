@@ -38,6 +38,8 @@ public:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void AnimationUpdate() {};
 
+  GUIRect GetFocusRect() override;
+
 protected:
   MessageBox(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
   MessageBox(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK);
@@ -45,6 +47,9 @@ protected:
   etl::string<SCREEN_WIDTH - 2> line1_ = "";
   etl::string<SCREEN_WIDTH - 2> line2_ = "";
   int button_[4];
+  int buttonPosition_[4];
+  int buttonLength_[4];
+  int buttonY_;
   int buttonCount_;
   int selected_;
 

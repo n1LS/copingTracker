@@ -23,8 +23,8 @@ void UIStaticField::Draw(GUIWindow &w, int offset) {
   GUIPoint position = GetPosition();
   position.y_ += offset;
 
-  ((AppWindow &)w).SetColor(color_);
-  ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
+  w.SetColor(color_);
+  w.SetBackgroundColor(Theme::View::bg);
   w.DrawString(position.x_, position.y_, string_);
 }
 

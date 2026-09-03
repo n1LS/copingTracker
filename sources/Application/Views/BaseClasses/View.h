@@ -334,6 +334,10 @@ public: // temp hack for modal window constructors
   int32_t prevLeftVU_[SONG_CHANNEL_COUNT + 1];
   int32_t prevRightVU_[SONG_CHANNEL_COUNT + 1];
 
+  ModalView *GetModalView() {
+    return modalView_;
+  }
+
   Token stopPlaybackSource_;
 
 protected:

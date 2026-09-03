@@ -47,10 +47,18 @@ public:
 
   virtual bool IsStatic();
 
+  void SetPressed(bool pressed) {
+    pressed_ = pressed;
+  }
+
+  int DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset = -1,
+                       int subSelectionLength = 1);
+
 protected:
   uint8_t x_;
   uint8_t y_;
   bool focus_;
   int focusWidth_;
+  bool pressed_ = false;
 };
 #endif

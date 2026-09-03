@@ -772,6 +772,7 @@ void InstrumentView::warpToNext(int offset) {
 
 void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed) {
+    FieldView::ProcessButtonMask(mask, pressed);
     return;
   }
 
