@@ -126,7 +126,7 @@ void UIIntVarField::SetRange(int min, int max, int xOffset, int yOffset) {
 }
 
 int UIIntVarField::GetFocusOffset() {
-  char *colon = strchr(format_, ':');
+  char *colon = const_cast<char *>(strchr(format_, ':'));
 
   if (colon != NULL) {
     return colon - format_;

@@ -59,8 +59,14 @@ private:
   bool hasSound_ = false;
   stereosample lastPeakVolume_ = 0;
 
-  __attribute__((section(".DTCMRAM"))) __attribute__((aligned(32))) static fixed primarySoundBuffer_[MIX_BUFFER_SIZE];
-  __attribute__((section(".DTCMRAM"))) __attribute__((aligned(32))) static int16_t mixBuffer_[MIX_BUFFER_SIZE];
+#ifdef __PICO__
+  __attribute__((section(".DTCMRAM")))
+#endif
+  __attribute__((aligned(32))) static fixed primarySoundBuffer_[MIX_BUFFER_SIZE];
+#ifdef __PICO__
+  __attribute__((section(".DTCMRAM")))
+#endif
+  __attribute__((aligned(32))) static int16_t mixBuffer_[MIX_BUFFER_SIZE];
   int sampleCount_;
 };
 #endif

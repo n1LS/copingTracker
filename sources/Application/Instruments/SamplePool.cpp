@@ -72,7 +72,7 @@ void SamplePool::Load(const char *projectName) {
   etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes;
   fs->list(&fileIndexes, ".wav");
   char name[PFILENAME_SIZE];
-  uint32_t totalSamples = fileIndexes.size();
+  uint32_t totalSamples = (uint32_t)fileIndexes.size();
 
   // store for ui updates
   importCount = totalSamples;

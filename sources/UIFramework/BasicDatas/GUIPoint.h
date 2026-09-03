@@ -16,7 +16,7 @@
 
 class GUIPoint {
 public:
-  GUIPoint(long x = 0, long y = 0) {
+  GUIPoint(int x = 0, int y = 0) {
     x_ = x;
     y_ = y;
   };
@@ -41,6 +41,6 @@ public:
     return GUIPoint(x_ - p.x_, y_ - p.y_);
   };
 
-  long x_, y_;
+  int x_, y_;
 };
 #endif

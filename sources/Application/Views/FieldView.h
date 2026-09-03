@@ -35,8 +35,8 @@ public:
   // name + buttons)
 
 private:
-  UIField *focus_;
   uint16_t lastMask_;
+  UIField *focus_ = nullptr;
   UIField *findAdjacentField(bool vertical, int8_t direction);
 };
 

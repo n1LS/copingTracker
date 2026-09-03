@@ -11,7 +11,11 @@
 
 #include "AppWindow.h"
 
+#ifdef __PICO__
 #include "Adapters/copingTracker/system/picoTrackerProjectLoader.h"
+#else
+#include "Adapters/Host/system/HostProjectLoader.h"
+#endif
 
 #include "Application/Commands/ApplicationCommandDispatcher.h"
 #include "Application/Commands/EventDispatcher.h"
@@ -47,6 +51,8 @@ AppWindow *instance = 0;
 
 unsigned char AppWindow::_screenChar[SCREEN_CHARS];
 color_t AppWindow::_screenColor[SCREEN_CHARS];
+unsigned char AppWindow::_preScreen[SCREEN_CHARS];
+color_t AppWindow::_preScreenColor[SCREEN_CHARS];
 
 GUIColor AppWindow::colorPalette_[NUM_COLORS] = {
     GUIColor(0x00, 0x00, 0x00), // 0: black
@@ -800,6 +806,9 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
             break;
           case VT_SAMPLE_SLICES:
             currentView_ = &views_->sampleSlicesView;
+            break;
+          case VT_BOOT:
+            currentView_ = &views_->bootView;
             break;
           default:
             break;

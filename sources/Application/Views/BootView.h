@@ -39,7 +39,7 @@ private:
   void RevealRandom();
   void RevealRing();
 
-  constexpr static const color_t defaultColor_ = {fg : WHITE, bg : BLACK};
+  constexpr static const color_t defaultColor_ = {{.fg = WHITE, .bg = BLACK}};
   static const int animationSize_ = SCREEN_WIDTH * 3;
   color_t animationColors_[animationSize_];
   char animationContent_[animationSize_];

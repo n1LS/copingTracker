@@ -87,9 +87,8 @@ void EventDispatcher::Execute(Token id, float value) {
 
     // Dispatch event to window
 
-    unsigned long now = System::GetInstance()->GetClock();
     GUIEventType type = (value > 0.5) ? ET_PADBUTTONDOWN : ET_PADBUTTONUP;
-    GUIEvent event(mapping, type, now, 0, 0, 0);
+    GUIEvent event(mapping, type);
     window_->DispatchEvent(event);
 
     if (eventMask_ & repeatMask_) {
@@ -107,13 +106,12 @@ void EventDispatcher::SetWindow(GUIWindow *window) {
 
 unsigned int EventDispatcher::OnTimerTick() {
   unsigned sendMask = (eventMask_ & repeatMask_);
-  unsigned long now = System::GetInstance()->GetClock();
 
   if (sendMask) {
     int current = 0;
     while (sendMask) {
       if (sendMask & 1) {
-        GUIEvent event(current, ET_PADBUTTONDOWN, now, 0, 0, 0);
+        GUIEvent event(current, ET_PADBUTTONDOWN);
         window_->DispatchEvent(event);
       }
       sendMask >>= 1;

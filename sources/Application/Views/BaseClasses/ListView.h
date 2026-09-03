@@ -78,29 +78,32 @@ protected:
   DataSource *GetDataSource() const {
     return dataSource_;
   }
+
   Delegate *GetDelegate() const {
     return delegate_;
   }
 
+  void SetCurrentIndex(size_t index);
   size_t GetCurrentIndex() const {
     return currentIndex_;
   }
-  void SetCurrentIndex(size_t index);
 
   size_t GetTopIndex() const {
     return topIndex_;
   }
+
   size_t GetPageSize() const {
     return pageSize_;
   }
+
   size_t GetItemCount() const {
     return dataSource_->GetItemCount();
   }
 
-  int GetSelectedTab() const {
+  size_t GetSelectedTab() const {
     return selectedTab_;
   }
-  void SetSelectedTab(int index) {
+  void SetSelectedTab(size_t index) {
     selectedTab_ = index;
     isDirty_ = true;
   }
@@ -121,7 +124,7 @@ protected:
   size_t pageSize_;
   size_t topIndex_ = 0;
   size_t currentIndex_ = 0;
-  int selectedTab_ = 0;
+  size_t selectedTab_ = 0;
 };
 
 #endif // _LIST_VIEW_H_

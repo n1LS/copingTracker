@@ -129,7 +129,10 @@ private:
   etl::list<Variable *, 24> variables_;
 
   SoundSource *source_;
-  __attribute__((section(".DTCMRAM"))) static struct renderParams renderParams_[SONG_CHANNEL_COUNT];
+#ifdef __PICO__
+  __attribute__((section(".DTCMRAM")))
+#endif
+  static struct renderParams renderParams_[SONG_CHANNEL_COUNT];
   bool running_;
   bool dirty_;
   TableSaveState tableState_;
