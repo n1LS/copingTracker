@@ -70,10 +70,10 @@ void UIIntField::ProcessArrow(uint16_t mask) {
 }
 
 int UIIntField::GetFocusOffset() {
-  char *colon = strchr(format_, ':');
+  char *colon = const_cast<char *>(strchr(format_, ':'));
 
   if (colon != NULL) {
-    return colon - format_;
+    return (int)(colon - format_);
   }
 
   return 0;

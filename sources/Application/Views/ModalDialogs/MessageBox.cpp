@@ -84,8 +84,8 @@ void MessageBox::DrawView() {
   SetBackgroundColor(Theme::Dialog::bg);
 
   // message size
-  int size1 = line1_.size();
-  int size2 = line2_.size();
+  int size1 = (int)line1_.size();
+  int size2 = (int)line2_.size();
   int messageWidth = std::max(size1, size2);
 
   // Calculate total button text width for centering
@@ -124,7 +124,7 @@ void MessageBox::DrawView() {
   for (int i = 0; i < buttonCount_; i++) {
     bool sel = i == selected_;
     const char *text = buttonText[button_[i]];
-    int textLen = strlen(text);
+    int textLen = (int)strlen(text);
 
     // Draw left border
     SetColor(Theme::Dialog::Button::bg(sel));

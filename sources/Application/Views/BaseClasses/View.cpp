@@ -574,7 +574,7 @@ void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool 
 }
 
 int View::DrawButton(int x, int y, const char *title, bool selected) {
-  int len = strlen(title);
+  int len = (int)strlen(title);
 
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::Button::bg(selected));
@@ -592,7 +592,7 @@ int View::DrawButton(int x, int y, const char *title, bool selected) {
 }
 
 int View::DrawTab(int x, int y, const char *title, bool selected) {
-  int len = strlen(title);
+  int len = (int)strlen(title);
 
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::Tab::bg(selected));

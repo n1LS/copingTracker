@@ -11,8 +11,12 @@ const uint16_t Opal::RateTables[4][8] = {
 // These look up tables are accessed in tight loops for each sample, so they
 // need to be in RAM not flash for fast access
 //--------------------------------------------------------------------------------------------------
+#ifdef __PICO__
 static const uint16_t __attribute__((section(".time_critical."
                                              "opalLUTdata")))
+#else
+static const uint16_t
+#endif
 ExpTable[0x100] = {
     1018, 1013, 1007, 1002, 996, 991, 986, 980, 975, 969, 964, 959, 953, 948,
     942,  937,  932,  927,  921, 916, 911, 906, 900, 895, 890, 885, 880, 874,
@@ -36,8 +40,12 @@ ExpTable[0x100] = {
 };
 
 //--------------------------------------------------------------------------------------------------
+#ifdef __PICO__
 static const uint16_t __attribute__((section(".time_critical."
                                              "opalLUTdata")))
+#else
+static const uint16_t
+#endif
 LogSinTable[0x100] = {
     2137, 1731, 1543, 1419, 1326, 1252, 1190, 1137, 1091, 1050, 1013, 979, 949,
     920,  894,  869,  846,  825,  804,  785,  767,  749,  732,  717,  701, 687,

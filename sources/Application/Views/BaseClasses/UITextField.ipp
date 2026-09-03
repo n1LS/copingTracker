@@ -26,7 +26,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
   
   auto srcString = src_->GetString();
   const char *value;
-  int len;
+  size_t len;
   
   // If the variable's value is empty, use the default value for display
   if (srcString.empty()) {
@@ -51,7 +51,7 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
       char buffer[2];
       buffer[1] = 0;
 
-      for (int i = 0; i < len; i++) {
+      for (size_t i = 0; i < len; i++) {
         buffer[0] = value[i];
         bool active = currentChar_ == i;
         ((AppWindow &)w).SetBackgroundColor(active ? Theme::Input::cursor : Theme::Input::bg(true));
@@ -59,12 +59,10 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
         position.x_ += 1;
       }
     }
-  } else {
-    if (len != 0) {
-      ((AppWindow &)w).SetColor(Theme::Input::fg(false));
-      ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(false));
-      w.DrawString(position.x_, position.y_, value);
-    }
+  } else if (len != 0) {
+    ((AppWindow &)w).SetColor(Theme::Input::fg(false));
+    ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(false));
+    w.DrawString(position.x_, position.y_, value);
   }
 }
 

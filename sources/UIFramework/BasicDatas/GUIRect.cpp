@@ -13,7 +13,7 @@
 
 // Constructor: specifies top,lef,bottom and right coordinates
 
-GUIRect::GUIRect(long x0, long y0, long x1, long y1) : _topLeft(x0, y0), _bottomRight(x1, y1) {
+GUIRect::GUIRect(int x0, int y0, int x1, int y1) : _topLeft(x0, y0), _bottomRight(x1, y1) {
 }
 
 GUIRect::GUIRect(GUIPoint &topLeft, GUIPoint &bottomRight) : _topLeft(topLeft), _bottomRight(bottomRight) {
@@ -35,8 +35,8 @@ GUIPoint GUIRect::GetPosition() {
 // the same size
 
 void GUIRect::SetPosition(GUIPoint &point) {
-  long w = _bottomRight.x_ - _topLeft.x_;
-  long h = _bottomRight.y_ - _topLeft.y_;
+  int w = _bottomRight.x_ - _topLeft.x_;
+  int h = _bottomRight.y_ - _topLeft.y_;
   _topLeft = point;
   _bottomRight = point;
   _bottomRight.Add(GUIPoint(w, h));

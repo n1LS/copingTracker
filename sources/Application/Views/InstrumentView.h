@@ -85,7 +85,7 @@ private:
 
   static constexpr size_t SliceCountLabelSize = 20;
   Project *project_;
-  Token lastFocusID_;
+  UIField *lastFocus_ = nullptr;
   WatchedVariable instrumentType_;
   int lastSampleIndex_;
   bool suppressSampleChangeWarning_;

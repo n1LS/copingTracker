@@ -114,7 +114,7 @@ typedef struct drum_voice_t {
 
     // pitch
     pitch.tick();
-    frequency = ((uint64_t)base_frequency * pitch.value) >> 16;
+    frequency = (uint32_t)((uint64_t)base_frequency * pitch.value) >> 16;
   }
 
   inline void tick_1000Hz() {

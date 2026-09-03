@@ -2,7 +2,7 @@
 #define VIEWUTILS_H
 
 class GUIWindow;
-struct GUIPoint;
+class GUIPoint;
 class ViewData;
 
 int FindFormatValueOffset(const char *format);

@@ -26,7 +26,7 @@ int DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, bool focused
   char *value = buffer;
 
   if (colon) {
-    int labelLength = colon - buffer;
+    int labelLength = (int)(colon - buffer);
 
     // Temporarily terminate the label.
     *colon = '\0';

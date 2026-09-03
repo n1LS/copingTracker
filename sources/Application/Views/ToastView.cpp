@@ -32,7 +32,10 @@ ToastView *ToastView::GetInstance() {
 
 void ToastView::Init(GUIWindow &w, ViewData *viewData) {
   if (!instance_) {
-    __attribute__((section(".DATA_RAM"))) static char toastStorage[sizeof(ToastView)];
+#ifdef __PICO__
+    __attribute__((section(".DATA_RAM")))
+#endif
+    static char toastStorage[sizeof(ToastView)];
     instance_ = new (toastStorage) ToastView(w, viewData);
   }
 }
