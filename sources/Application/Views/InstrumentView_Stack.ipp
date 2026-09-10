@@ -11,92 +11,105 @@ void InstrumentView::fillStackParameters() {
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instr = bank->GetInstrument(i);
   StackInstrument *instrument = (StackInstrument *)instr;
-  GUIPoint position = GetAnchor();
 
-  // extra y spacing to allow for gap between export/import and parameters
-  position.y_ += 2;
+  GUIPoint position = GUIPoint(1, 6);
 
   // Wave
   Variable *v = instrument->FindVariable(Token::StackInstrumentWave);
-  intVarField_.emplace_back(position, *v, "Waveform      :%s", 0, stackNumWaveforms - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(0, position.y_);
-  position.y_++;
-
-  // Transpose
-  v = instrument->FindVariable(Token::StackInstrumentTranspose);
-  intVarField_.emplace_back(position, *v, "Transpose    :%+03d", -24, 24, 1, 12);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(1, position.y_);
-  position.y_++;
-
-  // Volume
-  v = instrument->FindVariable(Token::StackInstrumentVolume);
-  intVarField_.emplace_back(position, *v, "Volume        :%02X", 0x00, 0xff, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(2, position.y_);
-  position.y_ += 2;
-
-  // Attack
-  v = instrument->FindVariable(Token::StackInstrumentAttack);
-  intVarField_.emplace_back(position, *v, "Attack        :%02X", 0x00, 0xff, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(3, position.y_);
-  position.y_++;
-
-  // Decay
-  v = instrument->FindVariable(Token::StackInstrumentDecay);
-  intVarField_.emplace_back(position, *v, "Decay         :%02X", 0x00, 0xff, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
+  intVarField_.emplace_back(position, *v, "Waveform:%-19.19s", 0, stackNumWaveforms - 1, 1, 1);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::sample(true));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(4, position.y_);
+  
+  // Transpose
   position.y_++;
+  addTitleLabel("Pitch", position.y_);
 
-  // Sustain
-  v = instrument->FindVariable(Token::StackInstrumentSustain);
-  intVarField_.emplace_back(position, *v, "Sustain       :%02X", 0x00, 0xff, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(5, position.y_);
   position.y_++;
-
-  // Release
-  v = instrument->FindVariable(Token::StackInstrumentRelease);
-  intVarField_.emplace_back(position, *v, "Release       :%02X", 0x00, 0xff, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(6, position.y_);
-  position.y_ += 2;
-
-  // Spread
-  v = instrument->FindVariable(Token::StackInstrumentSpread);
-  intVarField_.emplace_back(position, *v, "Spread        :%02X", 0x0000, 0xff, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(7, position.y_);
-  position.y_++;
-
-  // Brightness
-  v = instrument->FindVariable(Token::StackInstrumentBrightness);
-  intVarField_.emplace_back(position, *v, "Brightness    : %01X", 0, stackBrightnessMax, 1, stackBrightnessMax / 2);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(8, position.y_);
-  position.y_++;
+  v = instrument->FindVariable(Token::StackInstrumentTranspose);
+  intVarField_.emplace_back(position, *v, "Transpse:%+03d", -24, 24, 1, 12);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::pitch);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
+  addIndexToLine(5, position.y_, true);
 
   // Glide
+  position.y_++;
   v = instrument->FindVariable(Token::StackInstrumentGlide);
-  intVarField_.emplace_back(position, *v, "Glide         :%02X", 0x00, 0xff, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
-  addIndexToLine(9, position.y_);
-  position.y_ += 2;
+  intVarField_.emplace_back(position, *v, "Glide   : %02X", 0x00, 0xff, 1, 16);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::pitch);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
+  addIndexToLine(6, position.y_, true);
 
-  // Table
-  v = instrument->FindVariable(Token::StackInstrumentTable);
-  intVarOffField_.emplace_back(position, *v, "Table         :%02X", 0x00, TABLE_COUNT - 1, 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));  
+  // Spread
   position.y_++;
+  addTitleLabel("Effects", position.y_);
 
-  // Automate
-  v = instrument->FindVariable(Token::StackInstrumentTableAutomation);
-  intVarField_.emplace_back(position, *v, last_sub_item "Automation:%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));  
   position.y_++;
+  v = instrument->FindVariable(Token::StackInstrumentSpread);
+  intVarField_.emplace_back(position, *v, "Spread  : %02X", 0x0000, 0xff, 1, 16);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
+  addIndexToLine(7, position.y_, true);
+
+  // Brightness/Timber
+  position.y_++;
+  v = instrument->FindVariable(Token::StackInstrumentBrightness);
+  intVarField_.emplace_back(position, *v, "Timbre  : %02X", 0, stackBrightnessMax, 1, stackBrightnessMax / 2);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
+  addIndexToLine(8, position.y_, true);
+
+  // Attack
+  position.y_++;
+  addTitleLabel("Effects", position.y_);
+
+  position.y_++;
+  v = instrument->FindVariable(Token::StackInstrumentAttack);
+  intVarField_.emplace_back(position, *v, "Attack  : %02X", 0x00, 0xff, 1, 0x10);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
+  addIndexToLine(9, position.y_, true);
+
+  // Decay
+  position.y_++;
+  v = instrument->FindVariable(Token::StackInstrumentDecay);
+  intVarField_.emplace_back(position, *v, "Decay   : %02X", 0x00, 0xff, 1, 0x10);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
+  addIndexToLine(10, position.y_, true);
+
+  // Sustain
+  position.y_++;
+  v = instrument->FindVariable(Token::StackInstrumentSustain);
+  intVarField_.emplace_back(position, *v, "Sustain : %02X", 0x00, 0xff, 1, 0x10);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
+  addIndexToLine(11, position.y_, true);
+  
+  // Release
+  position.y_++;
+  v = instrument->FindVariable(Token::StackInstrumentRelease);
+  intVarField_.emplace_back(position, *v, "Release : %02X", 0x00, 0xff, 1, 0x10);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
+  addIndexToLine(12, position.y_, true);
+
+  // default Items
+
+  addTitleLabel("Automation", SCREEN_HEIGHT - 2);
+  AddTableRow();
+
+  addTitleLabel("Volume", SCREEN_HEIGHT - 4);
+  AddVolumeRow();
 }
 
 void InstrumentView::DrawViewStack() {
@@ -107,13 +120,13 @@ void InstrumentView::DrawViewStack() {
 
   GUIPoint p = GetAnchor();
 
+  /* TODO nILS: re add those
   // indicators
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);
   char buffer[16];
-
   // transpose
-  Variable *var = instrument->FindVariable(Token::StackInstrumentTranspose);
+  Variable *va r = instrument->FindVariable(Token::StackInstrumentTranspose);
   int transpose = var->GetInt();
   horizontal_ruler_6(buffer, map_48_to_bargraph(transpose + 24));
   if (transpose != 0) {
@@ -123,7 +136,7 @@ void InstrumentView::DrawViewStack() {
   SetColor(Theme::View::fg);
 
   // volume
-  var = instrument->FindVariable(Token::StackInstrumentVolume);
+  var = instrument->FindVariable(Token::InstrumentParameterVolume);
   horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 4, buffer);
  
@@ -161,4 +174,5 @@ void InstrumentView::DrawViewStack() {
   var = instrument->FindVariable(Token::StackInstrumentGlide);
   horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 13, buffer);
+*/
 }

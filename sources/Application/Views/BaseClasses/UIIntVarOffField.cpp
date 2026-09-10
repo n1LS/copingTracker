@@ -11,7 +11,6 @@
 
 #include "UIIntVarOffField.h"
 #include "Application/AppWindow.h"
-#include "ViewUtils.h"
 #include <System/Console/nanoprintf.h>
 #include <string.h>
 

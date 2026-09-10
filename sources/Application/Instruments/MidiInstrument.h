@@ -110,9 +110,6 @@ private:
 
   Variable channel_;
   Variable noteLen_;
-  Variable volume_;
-  Variable table_;
-  Variable tableAuto_;
   Variable program_;
   static MidiService *svc_;
   static TimerService *timerSvc_;

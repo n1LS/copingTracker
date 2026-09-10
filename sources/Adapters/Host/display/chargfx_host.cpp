@@ -22,8 +22,7 @@ static uint8_t colors[CHARGFX_TEXT_HEIGHT * CHARGFX_TEXT_WIDTH] = {0};
 static bool changed[CHARGFX_TEXT_HEIGHT * CHARGFX_TEXT_WIDTH] = {0};
 static uint32_t pixel_buffer[CHARGFX_SCREEN_HEIGHT * CHARGFX_SCREEN_WIDTH] = {0};
 
-static uint16_t palette[16] = {0x0000, 0x0080, 0x0004, 0x0084, 0x1000, 0x1080, 0x1004, 0x1084,
-                               0x38C6, 0x00F8, 0xE007, 0xE0FF, 0x1F00, 0x1FF8, 0xFF07, 0xFFFF};
+static uint16_t palette[16];
 
 static uint32_t RGB565toRGB888(uint16_t rgb565) {
   uint8_t r = (rgb565 >> 11) << 3;
@@ -33,16 +32,12 @@ static uint32_t RGB565toRGB888(uint16_t rgb565) {
 }
 
 void chargfx_init() {
-  memset(screen, 0, sizeof(screen));
-  memset(colors, 0, sizeof(colors));
-  memset(changed, true, sizeof(changed));
-  memset(pixel_buffer, 0, sizeof(pixel_buffer));
+  chargfx_clear();
 }
 
 void chargfx_clear() {
-  int size = CHARGFX_TEXT_WIDTH * CHARGFX_TEXT_HEIGHT;
-  memset(screen, 0, size);
-  memset(colors, screen_bg_color, size);
+  memset(screen, 0, sizeof(screen));
+  memset(colors, 0, sizeof(colors));
   memset(changed, true, sizeof(changed));
   chargfx_set_cursor(0, 0);
 }
@@ -94,7 +89,7 @@ void chargfx_putc(char c, bool transparent) {
     color = (screen_fg_color << 4) | screen_bg_color;
   }
 
-  if (screen[idx] != c || colors[idx] != color) {
+  if (screen[idx] != (uint8_t)c || colors[idx] != color) {
     screen[idx] = c;
     colors[idx] = color;
     changed[idx] = true;
@@ -238,6 +233,7 @@ void chargfx_draw_changed() {
   for (int y = 0; y < CHARGFX_TEXT_HEIGHT; ++y) {
     for (int x = 0; x < CHARGFX_TEXT_WIDTH; ++x) {
       int idx = y * CHARGFX_TEXT_WIDTH + x;
+
       if (!changed[idx])
         continue;
       uint8_t ch = screen[idx];
@@ -253,6 +249,16 @@ void chargfx_draw_changed() {
 }
 
 void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width) {
+  if (x >= CHARGFX_TEXT_WIDTH) {
+    return;
+  }
+  if (y >= CHARGFX_TEXT_HEIGHT) {
+    return;
+  }
+  if (x + width >= CHARGFX_TEXT_WIDTH) {
+    width -= x + width - CHARGFX_TEXT_WIDTH;
+  }
+
   for (int i = 0; i < width; ++i) {
     int idx = y * CHARGFX_TEXT_WIDTH + (x + i);
     changed[idx] = true;

@@ -17,23 +17,20 @@ ChiptuneInstrument::ChiptuneInstrument()
     : I_Instrument(&variables_), vArpSpeed_(Token::ChiptuneInstrumentArpSpeed, defaultArpSpeed),
       vAttack_(Token::ChiptuneInstrumentAttack, defaultAttack), vBurst_(Token::ChiptuneInstrumentBurst, defaultBurst),
       vDecay_(Token::ChiptuneInstrumentDecay, defaultDecay), vLength_(Token::ChiptuneInstrumentLength, defaultLength),
-      vLevel_(Token::ChiptuneInstrumentLevel, defaultLevel),
       vSweepAmount_(Token::ChiptuneInstrumentSweepAmount, defaultSweepAmount),
       vSweepTime_(Token::ChiptuneInstrumentSweepTime, defaultSweepTime),
-      vTable_(Token::ChiptuneInstrumentTable, defaultTable),
       vTranspose_(Token::ChiptuneInstrumentTranspose, defaultTranspose),
       vVibratoDelay_(Token::ChiptuneInstrumentVibratoDelay, defaultVibratoDelay),
       vVibratoDepth_(Token::ChiptuneInstrumentVibrato, defaultVibratoDepth),
       vWaveform_(Token::ChiptuneInstrumentWaveform, chiptune_waveforms, numWaveforms, defaultWaveform) {
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
+  InsertBaseVariables();
   variables_.insert(variables_.end(), &vWaveform_);
   variables_.insert(variables_.end(), &vTranspose_);
-  variables_.insert(variables_.end(), &vLevel_);
   variables_.insert(variables_.end(), &vBurst_);
   variables_.insert(variables_.end(), &vArpSpeed_);
   variables_.insert(variables_.end(), &vLength_);
-  variables_.insert(variables_.end(), &vTable_);
   variables_.insert(variables_.end(), &vAttack_);
   variables_.insert(variables_.end(), &vDecay_);
   variables_.insert(variables_.end(), &vVibratoDelay_);
@@ -120,7 +117,7 @@ void ChiptuneInstrument::ProcessCommand(int channel, Token token, uint16_t value
   }
 }
 
-// TODO POD: implement and adjust accordingly
+// TODO nILS: implement and adjust accordingly
 bool ChiptuneInstrument::SupportsCommand(Token token) {
   return false;
 }
@@ -136,7 +133,7 @@ InstrumentParameters ChiptuneInstrument::getInstrumentParameters() {
   params.wave = (chiptune_wave_type_e)vWaveform_.GetInt();
   params.attack = vAttack_.GetInt();
   params.decay = vDecay_.GetInt();
-  params.level = vLevel_.GetInt();
+  params.level = volume_.GetInt();
   // off == -1, map to uint8_t range
   params.length = vLength_.GetInt() < 0 ? 0 : vLength_.GetInt();
   params.burst = vBurst_.GetInt() < 0 ? 0 : vBurst_.GetInt();

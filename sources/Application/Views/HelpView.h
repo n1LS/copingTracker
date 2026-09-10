@@ -31,6 +31,6 @@ private:
   const uint8_t *data_;
   int numLines_;
   unsigned int dataSize_;
-  bool navDown_;
+  bool mapShown_;
 };
 #endif

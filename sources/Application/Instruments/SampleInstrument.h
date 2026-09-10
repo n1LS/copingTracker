@@ -33,15 +33,7 @@ enum SampleEntryFlags : uint16_t {
   SEF_LOOP_MODE_MASK = 0x000F,
 };
 
-enum SampleInstrumentLoopMode {
-  SILM_ONESHOT = 0,
-  SILM_LOOP,
-  SILM_LOOP_PINGPONG,
-  SILM_OSC,
-  //	SILM_OSCFINE,
-  SILM_LOOPSYNC,
-  SILM_LAST
-};
+enum SampleInstrumentLoopMode { SILM_ONESHOT = 0, SILM_LOOP, SILM_LOOP_PINGPONG, SILM_OSC, SILM_LOOPSYNC, SILM_LAST };
 
 #define NO_SAMPLE (-1)
 #define NO_GM_INSTRUMENT (-1)
@@ -142,14 +134,12 @@ private:
   adsr_envelope_t envelope_[SONG_CHANNEL_COUNT];
 
   SampleVariable sample_;
-  Variable volume_;
   Variable interpolation_;
   Variable crush_;
   Variable drive_;
   Variable downsample_;
   Variable rootNote_;
   Variable fineTune_;
-  Variable pan_;
   Variable cutoff_;
   Variable reso_;
   Variable filterMix_;
@@ -158,8 +148,6 @@ private:
   Variable loopMode_;
   WatchedVariable loopStart_;
   WatchedVariable loopEnd_;
-  Variable table_;
-  Variable tableAuto_;
   Variable attack_;
   Variable decay_;
   Variable sustain_;

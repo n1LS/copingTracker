@@ -46,6 +46,4 @@ private:
   etl::string<MaxLength> defaultValue_;
 };
 
-#include "UITextField.ipp"
-
 #endif

@@ -13,73 +13,35 @@
 
 // Constructor: specifies top,lef,bottom and right coordinates
 
-GUIRect::GUIRect(int x0, int y0, int x1, int y1) : _topLeft(x0, y0), _bottomRight(x1, y1) {
+GUIRect::GUIRect(int x, int y, int w, int h) : x_(x), y_(y), w_(w), h_(h) {
 }
-
-GUIRect::GUIRect(GUIPoint &topLeft, GUIPoint &bottomRight) : _topLeft(topLeft), _bottomRight(bottomRight) {
+GUIRect::GUIRect(GUIPoint &topLeft, GUIPoint &bottomRight)
+    : x_(topLeft.x_), y_(topLeft.y_), w_(bottomRight.x_ - topLeft.x_), h_(bottomRight.y_ - topLeft.y_) {
 }
 
 // Returns true if the point is contained inside the specified rectangle
 
 bool GUIRect::Contains(const GUIPoint &p) {
-  return p.x_ >= _topLeft.x_ && p.x_ <= _bottomRight.x_ && p.y_ >= _topLeft.y_ && p.y_ <= _bottomRight.y_;
+  return p.x_ >= x_ && p.y_ >= y_ && p.y_ < y_ + h_ && p.x_ < x_ + w_;
 }
 
 // Returns the topLeft corner of the rectangle
 
 GUIPoint GUIRect::GetPosition() {
-  return _topLeft;
+  return GUIPoint(x_, y_);
 }
 
 // Moves the rectangle to the specified topLeft point. The rectangle keeps
 // the same size
 
 void GUIRect::SetPosition(GUIPoint &point) {
-  int w = _bottomRight.x_ - _topLeft.x_;
-  int h = _bottomRight.y_ - _topLeft.y_;
-  _topLeft = point;
-  _bottomRight = point;
-  _bottomRight.Add(GUIPoint(w, h));
+  x_ = point.x_;
+  y_ = point.y_;
 }
 
 // Translate the rectangle
 
 void GUIRect::Translate(GUIPoint &p) {
-  _topLeft.Add(p);
-  _bottomRight.Add(p);
-}
-
-GUIRect GUIRect::Intersect(GUIRect &other) {
-  this->Normalize();
-  other.Normalize();
-
-  GUIPoint topLeft = _topLeft;
-  if (other.Left() > topLeft.x_) {
-    topLeft.x_ = other.Left();
-  }
-  if (other.Top() > topLeft.y_) {
-    topLeft.y_ = other.Top();
-  }
-
-  GUIPoint bottomRight = _bottomRight;
-  if (other.Right() < bottomRight.x_) {
-    bottomRight.x_ = other.Right();
-  }
-  if (other.Bottom() < bottomRight.y_) {
-    bottomRight.y_ = other.Bottom();
-  }
-  return GUIRect(topLeft, bottomRight);
-}
-
-void GUIRect::Normalize() {
-  if (_topLeft.x_ > _bottomRight.x_) {
-    int x = _topLeft.x_;
-    _topLeft.x_ = _bottomRight.x_;
-    _bottomRight.x_ = x;
-  }
-  if (_topLeft.y_ > _bottomRight.y_) {
-    int y = _topLeft.y_;
-    _topLeft.y_ = _bottomRight.y_;
-    _bottomRight.y_ = y;
-  }
+  x_ += p.x_;
+  y_ += p.y_;
 }

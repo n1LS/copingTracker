@@ -288,7 +288,7 @@ void MixerView::initChannelVolumeFields() {
       channelVolumeFields_.emplace_back(fieldPos, *v, "%2.2d", 0, 99, 1, 5);
 
       // Add the field to the fieldList_ for proper field navigation
-      fieldList_.insert(fieldList_.end(), &(*channelVolumeFields_.rbegin()));
+      fieldList_.insert(fieldList_.end(), &channelVolumeFields_.back());
     }
   }
 

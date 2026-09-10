@@ -86,11 +86,33 @@ struct Theme {
   };
 
   struct Input {
-    FIXED(cursor, WHITE)
+    FIXED(cursor, LIGHT_RED)
     FIXED(placeholder, LIGHT_GRAY)
-    FIXED(label, WHITE)
     SWITCHABLE(bg, LIGHT_GREEN, BLACK)
     SWITCHABLE(fg, BLACK, GREEN)
+  };
+
+  struct InstrumentInput {
+    FIXED(cursor, LIGHT_YELLOW)
+    FIXED(placeholder, LIGHT_GRAY)
+    SWITCHABLE(bg, WHITE, DARK_GRAY)
+    SWITCHABLE(fg, LIGHT_RED, WHITE)
+  };
+
+  struct PanelInput {
+    FIXED(cursor, LIGHT_YELLOW)
+    FIXED(placeholder, DARK_GRAY)
+    SWITCHABLE(bg, WHITE, LIGHT_GRAY)
+    SWITCHABLE(fg, LIGHT_RED, DARK_GRAY)
+  };
+
+  struct SemanticColors {
+    FIXED(pitch, MAGENTA)
+    FIXED(filter, LIGHT_RED)
+    FIXED(volume, LIGHT_YELLOW)
+    SWITCHABLE(sample, LIGHT_CYAN, CYAN)
+    FIXED(effect, LIGHT_RED)
+    FIXED(table, LIGHT_GRAY)
   };
 
   struct Button {
@@ -98,12 +120,18 @@ struct Theme {
     SWITCHABLE(fg, WHITE, LIGHT_BLUE)
   };
 
+  struct PanelButton {
+    SWITCHABLE(bg, LIGHT_BLUE, LIGHT_GRAY)
+    SWITCHABLE(fg, WHITE, LIGHT_BLUE)
+  };
+
   struct View {
     FIXED(bg, BLACK)
     FIXED(fg, WHITE)
 
-    FIXED(inactive, LIGHT_GRAY)
+    FIXED(inactive, DARK_GRAY)
     FIXED(scrollbar, LIGHT_GRAY)
+    FIXED(separator, DARK_GRAY)
 
     SWITCHABLE(index, LIGHT_CYAN, CYAN)
     SWITCHABLE(help, WHITE, LIGHT_GRAY)
@@ -135,8 +163,8 @@ struct Theme {
     };
 
     struct Tab {
-      SWITCHABLE(fg, BLACK, BLACK)
-      SWITCHABLE(bg, LIGHT_YELLOW, LIGHT_GRAY)
+      SWITCHABLE(fg, BLACK, LIGHT_GRAY)
+      SWITCHABLE(bg, LIGHT_YELLOW, BLACK)
     };
   };
 
@@ -260,7 +288,7 @@ public:
   virtual void DrawString(int x, int y, const char *text);
   virtual void DrawTintString(int x, int y, const TintChar *data);
   virtual void DrawChar(int x, int y, const char character, bool transparent = false);
-  virtual void DrawRect(const GUIRect &r, Color color);
+  virtual void DrawRect(const GUIRect r, Color color);
 
   virtual void ConfirmedStop(Token sender);
   void OnConfirmStopDialog(View &v, ModalView &dialog);
@@ -269,7 +297,7 @@ public:
   void DoModal(ModalView *view, ModalViewCallback cb = ModalViewCallback());
   void DismissModal();
 
-  virtual GUIRect GetFocusRect();
+  virtual const GUIRect GetFocusRect();
 
 protected:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed) = 0;

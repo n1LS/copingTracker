@@ -21,7 +21,7 @@
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
 
-enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_MIDI, IT_SID, IT_OPAL, IT_CHIPTUNE, IT_DRUM, IT_STACK, IT_LAST };
+enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_CHIPTUNE, IT_DRUM, IT_STACK, IT_MIDI, IT_SID, IT_OPAL, IT_LAST };
 
 // non-linear volume (4-bit) mapping to volume scaler
 static const uint8_t volumeLUT[16] = {0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 160, 193, 228, 245, 255};
@@ -50,7 +50,10 @@ protected:
 public:
   I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = XML_ELEM_INSTRUMENT,
                bool registerWithPersistence = false)
-      : VariableContainer(list), Persistent(nodeName, registerWithPersistence) {};
+      : VariableContainer(list), Persistent(nodeName, registerWithPersistence),
+        volume_(Token::InstrumentParameterVolume, 0xff), pan_(Token::InstrumentParameterPan, 0x80),
+        table_(Token::InstrumentParameterTable, VAR_OFF),
+        tableAutomation_(Token::InstrumentParameterTableAutomation, false) {};
   virtual ~I_Instrument();
 
   // Initialisation routine
@@ -128,5 +131,23 @@ public:
   // Persistent implementation
   virtual void SaveContent(tinyxml2::XMLPrinter *printer) override;
   virtual void RestoreContent(PersistencyDocument *doc) override;
+
+protected:
+  // Adds the variables owned by this base class to the instrument's variable
+  // list. Must be called from the derived class constructor *body*: the list
+  // lives in the derived class, so it isn't constructed yet while this base
+  // class is being constructed.
+  void InsertBaseVariables() {
+    auto list = Variables();
+    list->insert(list->end(), &volume_);
+    list->insert(list->end(), &pan_);
+    list->insert(list->end(), &table_);
+    list->insert(list->end(), &tableAutomation_);
+  }
+
+  Variable volume_;
+  Variable pan_;
+  Variable table_;
+  Variable tableAutomation_;
 };
 #endif

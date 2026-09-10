@@ -231,8 +231,6 @@ GUIRect SongView::getSelectionRect() {
 
   GUIRect selRect(clipboard_.x_, clipboard_.y_ + clipboard_.offset_, viewData_->songX_,
                   viewData_->songY_ + viewData_->songOffset_);
-
-  selRect.Normalize();
   return selRect;
 }
 
@@ -790,9 +788,9 @@ void SongView::DrawView() {
   // Prepare selection related information
   GUIRect selRect;
   if (clipboard_.active_) {
-    selRect = GUIRect(clipboard_.x_, clipboard_.y_ + clipboard_.offset_, viewData_->songX_,
-                      viewData_->songY_ + viewData_->songOffset_);
-    selRect.Normalize();
+    int x = clipboard_.x_;
+    int y = clipboard_.y_ + clipboard_.offset_;
+    selRect = GUIRect(x, y, viewData_->songX_ - x, viewData_->songY_ + viewData_->songOffset_ - y);
   }
 
   // Draw title
@@ -849,7 +847,7 @@ void SongView::DrawView() {
 
         if (!clipboard_.active_) {
           // set the focus rect
-          focusRect_ = GUIRect(pos.x_, pos.y_, pos.x_ + 2, pos.y_);
+          focusRect_ = GUIRect(pos.x_, pos.y_, 2, 1);
         }
       }
 

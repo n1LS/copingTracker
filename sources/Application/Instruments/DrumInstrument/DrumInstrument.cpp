@@ -30,6 +30,7 @@ DrumInstrument::DrumInstrument()
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
+  InsertBaseVariables();
   variables_.insert(variables_.end(), &vVoice0_);
   variables_.insert(variables_.end(), &vVoice1_);
   variables_.insert(variables_.end(), &vVoice2_);
@@ -117,7 +118,7 @@ void DrumInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
   }
 }
 
-// TODO POD: implement and adjust accordingly
+// TODO nILS: implement and adjust accordingly
 bool DrumInstrument::SupportsCommand(Token token) {
   return false;
 }

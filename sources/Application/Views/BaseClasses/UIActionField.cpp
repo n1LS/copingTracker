@@ -17,6 +17,8 @@
 UIActionField::UIActionField(const char *name, unsigned int token, GUIPoint &position) : UIField(position) {
   name_ = name;
   token_ = token;
+
+  fieldConfig_ = actionFieldConfiguration;
 }
 
 UIActionField::~UIActionField() {};
@@ -31,24 +33,15 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
   strncpy(buffer, name_, MAX_FIELD_WIDTH);
   buffer[MAX_FIELD_WIDTH] = '\0';
 
-  w.SetBackgroundColor(Theme::Button::bg(focus_));
-  w.SetColor(Theme::Button::fg(focus_));
+  w.SetBackgroundColor(focus_ ? fieldConfig_.activeBackgroundColor : fieldConfig_.backgroundColor);
+  w.SetColor(focus_ ? fieldConfig_.activeColor : fieldConfig_.color);
   w.DrawString(x, y, buffer);
 
-  // add button ends
-  // draw highlight button ends
-  char front = focus_ ? char_button_left(pressed_) : ' ';
-  char end = focus_ ? char_button_right(pressed_) : ' ';
+  w.SetBackgroundColor(backgroundColor_);
+  w.SetColor(focus_ ? fieldConfig_.activeBackgroundColor : fieldConfig_.backgroundColor);
 
-  if (focus_) {
-    w.SetColor(Theme::View::bg);
-    ((AppWindow &)w).SwapColors();
-  }
-
-  x -= 1;
-  w.DrawChar(x, y, front);
-  x += strlen(buffer) + 1;
-  w.DrawChar(x, y, end);
+  w.DrawChar(x - 1, y, CHAR(char_button_border_left_s));
+  w.DrawChar(x + (int)strlen(buffer), y, CHAR(char_button_border_right_s));
 }
 
 void UIActionField::OnClick() {
@@ -65,5 +58,5 @@ int UIActionField::GetFocusOffset() {
 }
 
 int UIActionField::GetFocusWidth() {
-  return strlen(name_) + 2;
+  return (int)strlen(name_) + 2;
 }

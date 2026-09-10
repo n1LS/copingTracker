@@ -67,7 +67,7 @@ private:
   uint8_t breg;
   uint32_t stepVolume_;
 
-  etl::list<Variable *, 16> variables_;
+  etl::list<Variable *, 19> variables_;
 
   Variable algorithm_;
   Variable feedback_;

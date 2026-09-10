@@ -40,17 +40,17 @@ public:
   virtual void Clear() override;
   virtual void SetColor(Color color) override;
   virtual void SetBackgroundColor(Color color) override;
-  virtual void ClearTextRect(GUIRect &rect) override;
+  virtual void ClearTextRect(GUIRect rect) override;
   virtual void DrawString(int x, int y, const char *string) override;
   virtual void DrawChar(int x, int y, const char c, bool transparent = false) override;
   virtual GUIRect GetRect() override;
-  virtual const GUIRect &GetFocusRect() const override;
+  virtual const GUIRect GetFocusRect() const override;
   virtual void Invalidate() override;
   virtual void Lock() override;
   virtual void Unlock() override;
   virtual void Flush() override;
   virtual void PushEvent(GUIEvent &event) override;
-  virtual void DrawRect(const GUIRect &r) override;
+  virtual void DrawRect(const GUIRect r) override;
   virtual void SendFont(uint8_t uifontIndex) override;
   virtual void SendPalette() override;
   virtual void SetPalette(const GUIColor *palette, int colorCount) override;
@@ -100,12 +100,15 @@ void HostGUIWindowImp::SetBackgroundColor(Color color) {
   chargfx_set_background(color);
 }
 
-void HostGUIWindowImp::ClearTextRect(GUIRect &rect) {
+void HostGUIWindowImp::ClearTextRect(GUIRect rect) {
+  chargfx_set_background(BLACK);
+
   int x_end = rect.Right();
   int y_end = rect.Bottom();
   for (int y = rect.Top(); y < y_end && y < 24; ++y) {
     for (int x = rect.Left(); x < x_end && x < 32; ++x) {
-      // Clear screen at this position
+      chargfx_set_cursor(x, y);
+      chargfx_putc(' ', false);
     }
   }
 }
@@ -131,7 +134,7 @@ GUIRect HostGUIWindowImp::GetRect() {
   return GUIRect(0, 0, 320, 240);
 }
 
-const GUIRect &HostGUIWindowImp::GetFocusRect() const {
+const GUIRect HostGUIWindowImp::GetFocusRect() const {
   return focus_rect_;
 }
 
@@ -157,7 +160,7 @@ void HostGUIWindowImp::Flush() {
   // 2nd render pass for the focus rect (pulse effect), matching the PICO
   // implementation in picoTrackerGUIWindowImp::Flush().
   if (_window) {
-    const GUIRect &rect = _window->GetFocusRect();
+    const GUIRect rect = _window->GetFocusRect();
     chargfx_draw_focus_rect(rect.Left(), rect.Top(), rect.Width());
   }
 
@@ -172,7 +175,7 @@ void HostGUIWindowImp::Flush() {
 void HostGUIWindowImp::PushEvent(GUIEvent &event) {
 }
 
-void HostGUIWindowImp::DrawRect(const GUIRect &r) {
+void HostGUIWindowImp::DrawRect(const GUIRect r) {
   chargfx_fill_rect(r.Left(), r.Top(), r.Right() - r.Left(), r.Bottom() - r.Top());
 }
 
@@ -190,6 +193,9 @@ void HostGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount) {
     uint16_t rgb565 = ((palette[i].r_ >> 3) << 11) | ((palette[i].g_ >> 2) << 5) | (palette[i].b_ >> 3);
     chargfx_set_palette_color(i, rgb565);
   }
+
+  // palette cxhanges are not reflected until the next draw call, so force a draw here
+  chargfx_draw_screen();
 }
 
 void HostGUIWindowImp::mirrorUIConnectionChanged(bool connected) {

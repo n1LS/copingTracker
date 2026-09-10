@@ -60,6 +60,6 @@ public:
   };
 
 private:
-  etl::list<Variable *, 2> variables_;
+  etl::list<Variable *, 4> variables_;
 };
 #endif

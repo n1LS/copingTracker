@@ -43,13 +43,13 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   actionPos.y_ -= 1;
 
   actionField_.emplace_back("Import", Token::ActionImport, actionPos);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   actionPos.x_ += 8;
   actionField_.emplace_back("Export", Token::ActionExport, actionPos);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
   actionPos.y_ += 2;
 
   // Font selection
@@ -57,8 +57,8 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   Variable *fontVar = config->FindVariable(Token::VarUIFont);
   intVarField_.emplace_back(position, *fontVar, "Font :%s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
                             ThemeConstants::THEME_FONT_COUNT - 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
   position.y_ += 1;
 
   // Get the current theme name from Config
@@ -78,7 +78,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   // Add the text field
   textFields_.emplace_back(themeNameVar_, position, label, Token::ActionThemeName, defaultValue);
-  themeNameField_ = &(*textFields_.rbegin());
+  themeNameField_ = &textFields_.back();
   themeNameField_->AddObserver(*this);
   fieldList_.insert(fieldList_.end(), themeNameField_);
 
@@ -124,7 +124,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   updateColorComponentField();
   intVarField_.emplace_back(colorComponentTargets_[0].position, colorComponentVar_, "%2.2X", 0, 248, 8, 16, 0);
-  colorComponentField_ = &(*intVarField_.rbegin());
+  colorComponentField_ = &intVarField_.back();
   fieldList_.insert(fieldList_.end(), colorComponentField_);
   colorComponentField_->AddObserver(*this);
   colorComponentField_->SetPosition({0, SCREEN_HEIGHT});
@@ -156,18 +156,12 @@ void ThemeView::DrawView() {
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::inactive);
   DrawString(21, 7, "R  G  B");
-
-  if (isColorComponentFocus()) {
-    UIIntVarField &field = intVarField_.back();
-    GUIPoint pos = field.GetPosition();
-    focusRect_ = GUIRect(pos.x_, pos.y_, pos.x_ + 2, pos.y_);
-  }
 }
 
 void ThemeView::addSwatchField(Color color, GUIPoint position) {
   position.x_ -= 5;
   swatchField_.emplace_back(position, color);
-  fieldList_.insert(fieldList_.end(), &(*swatchField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &swatchField_.back());
 }
 
 void ThemeView::addColorField(const char *label, Variable *colorVar, Color color, GUIPoint position) {
@@ -295,6 +289,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   if (!hasFocus_) {
     return;
   }
+
   UIField *focus = GetFocus();
   focus->ClearFocus();
   focus->Draw(w_);
@@ -365,7 +360,6 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
     case Token::VarUIFont:
       {
         // need to force redraw of entire screen to update for font change
-        Clear();
         DrawView();
         configDirty_ = true;
         break;
@@ -543,10 +537,18 @@ void ThemeView::importTheme() {
 
 void ThemeView::AnimationUpdate() {
   if (forceRedraw_) {
-    Clear();
     DrawView();
     forceRedraw_ = false;
   }
 
   ScreenView::AnimationUpdate();
+}
+
+const GUIRect ThemeView::GetFocusRect() {
+  if (isColorComponentFocus()) {
+    GUIPoint pos = colorComponentField_->GetPosition();
+    return GUIRect(pos.x_, pos.y_, 2, 1);
+  }
+
+  return FieldView::GetFocusRect();
 }

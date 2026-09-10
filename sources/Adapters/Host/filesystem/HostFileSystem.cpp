@@ -8,6 +8,13 @@
 
 #include "HostFileSystem.h"
 #include <cstring>
+#include <cstdlib>
+#include <filesystem>
+
+#ifndef _WIN32
+#include <unistd.h>
+#include <pwd.h>
+#endif
 
 namespace fs = std::filesystem;
 
@@ -85,8 +92,28 @@ bool HostFile::Close() {
   return true;
 }
 
+std::filesystem::path GetHomeDirectory() {
+#ifdef _WIN32
+  const char *home = std::getenv("USERPROFILE");
+  if (home != nullptr)
+    return home;
+
+  return {};
+#else
+  const char *home = std::getenv("HOME");
+  if (home != nullptr)
+    return home;
+
+  struct passwd *pw = getpwuid(getuid());
+  if (pw != nullptr && pw->pw_dir != nullptr)
+    return pw->pw_dir;
+
+  return {};
+#endif
+}
+
 HostFileSystem::HostFileSystem() {
-  baseDir_ = fs::current_path() / "data";
+  baseDir_ = GetHomeDirectory();
   currentDir_ = baseDir_;
   if (!fs::exists(baseDir_)) {
     fs::create_directories(baseDir_);

@@ -14,6 +14,7 @@
 #include "Externals/etl/include/etl/string.h"
 
 NoneInstrument::NoneInstrument() : I_Instrument(&variables_) {
+  InsertBaseVariables();
 }
 
 NoneInstrument::~NoneInstrument() {

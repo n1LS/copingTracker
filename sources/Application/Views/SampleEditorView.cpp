@@ -312,49 +312,49 @@ void SampleEditorView::addAllFields() {
 
   position.y_ += 1;
   hexVarField_.emplace_back(position, startVar_, 7, "Start     :%7.7X", 0, tempSampleSize_ - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
-  (*hexVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
+  hexVarField_.back().AddObserver(*this);
 
   // Add end position control
   position.y_ += 1;
   hexVarField_.emplace_back(position, endVar_, 7, "End       :%7.7X", 0, tempSampleSize_ - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
-  (*hexVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
+  hexVarField_.back().AddObserver(*this);
 
   // Operation selector
   position.y_ += 1;
   position.x_ = baseX;
   uint8_t maxOperationIndex = operationVar_.GetListSize() > 0 ? operationVar_.GetListSize() - 1 : 0;
   intVarField_.emplace_back(position, operationVar_, "Op        :%s", 0, maxOperationIndex, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  (*intVarField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
 
   // Apply button
   position.x_ = baseX + 20;
   actionField_.emplace_back("Apply", Token::ActionOK, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   // Save button row
   position.y_ += 2; // want extra empty row between these buttons & prev Apply
   position.x_ = baseX;
   actionField_.emplace_back("Save", Token::ActionSave, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
   position.x_ += 5;
 
   // load & save button
   if (!viewData_->isShowingSampleEditorProjectPool) {
     actionField_.emplace_back("Save & Load", Token::ActionLoadAndSave, position);
-    fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-    (*actionField_.rbegin()).AddObserver(*this);
+    fieldList_.insert(fieldList_.end(), &actionField_.back());
+    actionField_.back().AddObserver(*this);
     position.x_ += 12;
   }
 
   // discard button
   actionField_.emplace_back("Discard", Token::ActionCancel, position);
-  fieldList_.insert(fieldList_.end(), &(*actionField_.rbegin()));
-  (*actionField_.rbegin()).AddObserver(*this);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
 
   fieldList_.insert(fieldList_.end(), &graphField_);
 }
@@ -540,8 +540,8 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
       UIField *focus = GetFocus();
       for (auto &field : hexVarField_) {
         if (&field == focus && field.GetVariableID() == Token::VarSampleEditEnd) {
-          Variable &var = field.GetVariable();
-          var.SetInt(tempSampleSize_ - 1);
+          Variable *var = field.GetVariable();
+          var->SetInt(tempSampleSize_ - 1);
           isDirty_ = true;
           break;
         }
@@ -891,19 +891,16 @@ void SampleEditorView::onConfirmOverwriteSave(View &, ModalView &dialog) {
     return;
   }
 
-  // TODO nILS: clearTextRect?
   hadModal_ = true;
   isDirty_ = true;
 }
 
 void SampleEditorView::onOperationFailedAck(View &, ModalView &) {
-  // TODO nILS: clearTextRect?
   hadModal_ = true;
   isDirty_ = true;
 }
 
 void SampleEditorView::onSimpleModalDismiss(View &view, ModalView &) {
-  // TODO nILS: clearTextRect?
   hadModal_ = true;
   isDirty_ = true;
 }
@@ -1421,7 +1418,6 @@ void SampleEditorView::loadSample(const etl::string<MAX_INSTRUMENT_FILENAME_LENG
 
 void SampleEditorView::clearWaveformRegion() {
   // Clear the entire waveform area
-  GUIRect rect = GUIRect(GraphXOffset, GraphYOffset, GraphXOffset + GraphField::BitmapWidth,
-                         GraphYOffset + GraphField::BitmapHeight);
+  GUIRect rect = GUIRect(GraphXOffset, GraphYOffset, GraphField::BitmapWidth, GraphField::BitmapHeight);
   DrawRect(rect, Theme::View::bg);
 }

@@ -17,6 +17,32 @@
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
 #include "View.h"
 
+struct FieldConfiguration {
+  Color backgroundColor = Theme::Input::bg(false);
+  Color color = Theme::Input::fg(false);
+  Color activeBackgroundColor = Theme::Input::bg(true);
+  Color activeColor = Theme::Input::fg(true);
+  Color cursor = Theme::Input::cursor;
+};
+
+static const FieldConfiguration instrumentFieldConfiguration = {
+    Theme::InstrumentInput::bg(false), Theme::InstrumentInput::fg(false), Theme::InstrumentInput::bg(true),
+    Theme::InstrumentInput::fg(true), Theme::InstrumentInput::cursor};
+
+static const FieldConfiguration actionFieldConfiguration = {Theme::Button::bg(false), Theme::Button::fg(false),
+                                                            Theme::Button::bg(true), Theme::Button::fg(true),
+                                                            Theme::InstrumentInput::cursor};
+
+static const FieldConfiguration instrumentActionFieldConfiguration = {
+    Theme::PanelButton::bg(false), Theme::PanelButton::fg(false), Theme::PanelButton::bg(true),
+    Theme::PanelButton::fg(true), Theme::InstrumentInput::cursor};
+
+static const FieldConfiguration panelFieldConfiguration = {Theme::PanelInput::bg(false), Theme::PanelInput::fg(false),
+                                                           Theme::PanelInput::bg(true), Theme::PanelInput::fg(true),
+                                                           Theme::PanelInput::cursor};
+
+static const FieldConfiguration defaultFieldConfiguration;
+
 class UIField {
 public:
   UIField(const GUIPoint &position);
@@ -29,7 +55,24 @@ public:
   virtual void ProcessClear() {}; // EDIT+ENTER pressed
   void SetFocus();
   void ClearFocus();
+  void SetActive(bool active);
   bool HasFocus();
+
+  virtual Variable *GetVariable() {
+    return nullptr;
+  }
+
+  void SetBackgroundColor(Color color) {
+    backgroundColor_ = color;
+  }
+
+  void SetLabelColor(Color color) {
+    labelColor_ = color;
+  }
+
+  void SetFieldConfiguration(const FieldConfiguration config) {
+    fieldConfig_ = config;
+  }
 
   virtual int GetFocusWidth() {
     return focusWidth_;
@@ -47,18 +90,22 @@ public:
 
   virtual bool IsStatic();
 
+  int DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset = 0,
+                       int subSelectionLength = 0);
+
   void SetPressed(bool pressed) {
     pressed_ = pressed;
   }
 
-  int DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset = -1,
-                       int subSelectionLength = 1);
-
 protected:
   uint8_t x_;
   uint8_t y_;
-  bool focus_;
   int focusWidth_;
+  bool focus_;
+  bool active_ = true;
   bool pressed_ = false;
+  Color backgroundColor_ = Theme::View::bg;
+  Color labelColor_ = Theme::View::fg;
+  FieldConfiguration fieldConfig_ = defaultFieldConfiguration;
 };
 #endif

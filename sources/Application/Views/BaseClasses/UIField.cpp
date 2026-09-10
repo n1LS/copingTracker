@@ -11,6 +11,9 @@
 
 #include "UIField.h"
 
+#include "Application/AppWindow.h"
+#include <string.h>
+
 UIField::UIField(const GUIPoint &position) {
   x_ = position.x_;
   y_ = position.y_;
@@ -45,78 +48,73 @@ bool UIField::IsStatic() {
   return false;
 }
 
-int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset,
-                              int subSelectionLength) {
-  w.SetBackgroundColor(Theme::View::bg);
-  w.SetColor(Theme::View::fg);
+void UIField::SetActive(bool active) {
+  active_ = active;
+}
+
+int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset, int subSelectionLength) {
+  w.SetBackgroundColor(backgroundColor_);
 
   GUIPoint basePosition = position;
 
   char *colon = strchr(buffer, ':');
-  int valueOffset = 0;
-  char *value = buffer;
+
+  // Draw the Label first
+
+  int colonIndex = (int)(colon - buffer);
+  int valueOffset = colonIndex + 1;
 
   if (colon) {
-    int labelLength = colon - buffer;
+    buffer[colonIndex] = 0;
 
-    // Temporarily terminate the label.
-    *colon = '\0';
-
-    w.SetColor(Theme::Input::label);
+    w.SetColor(labelColor_);
     w.DrawString(position.x_, position.y_, buffer);
 
-    // Restore the caller's buffer.
-    *colon = ':';
-
-    valueOffset = labelLength + 1;
-    position.x_ += valueOffset;
-    value = colon + 1;
+    position.x_ += colonIndex + 1;
+    buffer += colonIndex + 1;
   }
 
-  const int valueLength = static_cast<int>(strlen(value));
+  const int valueLength = static_cast<int>(strlen(buffer));
 
   if (focus_) {
-    w.SetBackgroundColor(Theme::Input::bg(true));
-    w.SetColor(Theme::Input::fg(true));
+    // focused value drawing, needs a cursor
+    w.SetBackgroundColor(fieldConfig_.activeBackgroundColor);
+    w.SetColor(fieldConfig_.activeColor);
 
-    w.DrawString(position.x_, position.y_, value);
+    // draw value
+    w.DrawString(position.x_, position.y_, buffer);
 
-    int valueSubSelectionOffset = subSelectionOffset - valueOffset;
+    // overdraw the subselection
+    for (int c = 0; c < subSelectionLength; c++) {
+      w.SetBackgroundColor(fieldConfig_.activeColor);
+      w.SetColor(fieldConfig_.activeBackgroundColor);
 
-    if (subSelectionOffset >= valueOffset && valueSubSelectionOffset < valueLength && subSelectionLength > 0) {
-      if (valueSubSelectionOffset + subSelectionLength > valueLength) {
-        subSelectionLength = valueLength - valueSubSelectionOffset;
-      }
-
-      char replaced = value[valueSubSelectionOffset + subSelectionLength];
-
-      value[valueSubSelectionOffset + subSelectionLength] = '\0';
-
-      position.x_ += valueSubSelectionOffset;
-
-      w.SetBackgroundColor(Theme::Input::cursor);
-      w.SetColor(Theme::Input::fg(true));
-
-      w.DrawString(position.x_, position.y_, value + valueSubSelectionOffset);
-
-      value[valueSubSelectionOffset + subSelectionLength] = replaced;
+      char character = buffer[c + subSelectionOffset];
+      w.DrawChar(position.x_ + subSelectionOffset + c, position.y_, character);
     }
   } else {
-    w.SetColor(Theme::Input::fg(false));
-    w.DrawString(position.x_, position.y_, value);
+    // unfocused value drawing
+
+    w.SetColor(fieldConfig_.color);
+    w.SetBackgroundColor(fieldConfig_.backgroundColor);
+    w.DrawString(position.x_, position.y_, buffer);
   }
 
-  // draw highlight button ends
-  char front = focus_ ? char_button_left(pressed_) : ' ';
-  char end = focus_ ? char_button_right(pressed_) : ' ';
+  // draw field ends (rounded buttons when focused, square blocks when unfocused)
+
+  char front = focus_ ? char_button_left(pressed_) : CHAR(char_block_left_s);
+  char end = focus_ ? char_button_right(pressed_) : CHAR(char_block_right_s);
+
+  w.SetBackgroundColor(backgroundColor_);
 
   if (focus_) {
-    w.SetColor(Theme::Input::bg(true));
-    w.SetBackgroundColor(Theme::View::bg);
+    w.SetColor(fieldConfig_.activeBackgroundColor);
+  } else {
+    w.SetColor(fieldConfig_.backgroundColor);
   }
 
   w.DrawChar(basePosition.x_ + valueOffset - 1, basePosition.y_, front);
-  w.DrawChar(basePosition.x_ + strlen(buffer), basePosition.y_, end);
+  w.DrawChar(basePosition.x_ + valueOffset + strlen(buffer), basePosition.y_, end);
 
   return valueLength + 2;
 }

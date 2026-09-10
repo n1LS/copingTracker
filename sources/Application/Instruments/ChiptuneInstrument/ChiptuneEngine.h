@@ -604,7 +604,7 @@ typedef struct voice_t {
         break;
       case 1:                                 // transpose
         parameters.transpose = (int8_t)value; // reinterpret as signed
-        // TODO POD: there's more to this in the case of ARP or the likes
+        // TODO nILS: there's more to this in the case of ARP or the likes
         break;
       case 2: // level
         volume.level = value;

@@ -131,8 +131,6 @@ private:
   Variable vring_;
   Variable vadsr_;
   Variable vfon_;
-  Variable table_;
-  Variable tableAuto_;
   Variable osc_; // 0, 1 or 2
 
   // all these settings are shared by all oscillators on a single SID Chip

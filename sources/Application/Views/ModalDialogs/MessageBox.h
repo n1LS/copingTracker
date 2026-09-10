@@ -38,8 +38,6 @@ public:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void AnimationUpdate() {};
 
-  GUIRect GetFocusRect() override;
-
 protected:
   MessageBox(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
   MessageBox(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK);

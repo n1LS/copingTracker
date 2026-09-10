@@ -20,6 +20,9 @@
 #define char_symbol_muted_s "\x8A"
 #define char_symbol_indicatorEmpty_s "\x8B"
 #define char_symbol_indicatorFull_s "\x8C"
+#define char_symbol_indicator_s(x) ((x) ? char_symbol_indicatorFull_s : char_symbol_indicatorEmpty_s)
+#define char_symbol_load_s "\xED"
+#define char_symbol_save_s "\xEE"
 
 #define char_playback_pause_s "\x8C"
 #define char_playback_play_s "\x90"
@@ -31,8 +34,6 @@
 #define char_indicator_rightNoLeft_s "\x94"
 #define char_indicator_leftNoRight_s "\x95"
 #define char_indicator_leftRight_s "\x96"
-#define char_indicator_load_s "\xED"
-#define char_indicator_save_s "\xEE"
 #define char_indicator_ellipsis_s "\xEF"
 
 #define char_v_bar_0_s " "
@@ -124,6 +125,10 @@
 #define char_waveform_saw_s char_waveform_saw1_s char_waveform_saw2_s
 #define char_waveform_pulse_s char_waveform_pulse1_s char_waveform_pulse2_s
 #define char_waveform_noise_s char_waveform_noise1_s char_waveform_noise2_s
+
+#define char_mod_1_s "\xFC"
+#define char_mod_2_s "\xFD"
+#define char_mod_s char_mod_1_s char_mod_2_s
 
 #define char_border_single_topLeft_s "\xDA"
 #define char_border_single_topRight_s "\xBF"

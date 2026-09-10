@@ -61,7 +61,7 @@ public:
   }
 
   virtual int GetTable() {
-    return vTable_.GetInt();
+    return table_.GetInt();
   }
 
   virtual bool GetTableAutomation() {
@@ -77,17 +77,15 @@ public:
 private:
   static voice_t voices_[SONG_CHANNEL_COUNT];
 
-  etl::list<Variable *, 13> variables_;
+  etl::list<Variable *, 15> variables_;
 
   Variable vArpSpeed_;
   Variable vAttack_;
   Variable vBurst_;
   Variable vDecay_;
   Variable vLength_;
-  Variable vLevel_;
   Variable vSweepAmount_;
   Variable vSweepTime_;
-  Variable vTable_;
   Variable vTranspose_;
   Variable vVibratoDelay_;
   Variable vVibratoDepth_;

@@ -45,17 +45,15 @@ signed char SampleInstrument::lastMidiNote_[SONG_CHANNEL_COUNT];
 #define KRATE_SAMPLE_COUNT 100
 
 SampleInstrument::SampleInstrument()
-    : I_Instrument(&variables_), sample_(Token::SampleInstrumentSample), volume_(Token::SampleInstrumentVolume, 0x80),
+    : I_Instrument(&variables_), sample_(Token::SampleInstrumentSample),
       interpolation_(Token::SampleInstrumentInterpolation, interpolationTypes, 2, 0),
       crush_(Token::SampleInstrumentCrush, 16), drive_(Token::SampleInstrumentCrushVolume, 0xFF),
       downsample_(Token::SampleInstrumentDownsample, 0), rootNote_(Token::SampleInstrumentRootNote, 60),
-      fineTune_(Token::SampleInstrumentFineTune, 0x7F), pan_(Token::SampleInstrumentPan, 0x7F),
-      cutoff_(Token::SampleInstrumentFilterCutOff, 0xFF), reso_(Token::SampleInstrumentFilterResonance, 0x00),
-      filterMix_(Token::SampleInstrumentFilterType, 0x00),
+      fineTune_(Token::SampleInstrumentFineTune, 0x7F), cutoff_(Token::SampleInstrumentFilterCutOff, 0xFF),
+      reso_(Token::SampleInstrumentFilterResonance, 0x00), filterMix_(Token::SampleInstrumentFilterType, 0x00),
       filterMode_(Token::SampleInstrumentFilterMode, filterMode, 3, 0), start_(Token::SampleInstrumentStart, 0),
       loopMode_(Token::SampleInstrumentLoopMode, loopTypes, SILM_LAST, 0),
       loopStart_(Token::SampleInstrumentLoopStart, 0), loopEnd_(Token::SampleInstrumentEnd, 0),
-      table_(Token::SampleInstrumentTable, VAR_OFF), tableAuto_(Token::SampleInstrumentTableAutomation, false),
       attack_(Token::SampleInstrumentAttack, 0), decay_(Token::SampleInstrumentDecay, 0),
       sustain_(Token::SampleInstrumentSustain, 0xFF), release_(Token::SampleInstrumentRelease, 0),
       gmInstrument_(Token::SampleInstrumentGMInstrument, NO_GM_INSTRUMENT) {
@@ -74,36 +72,34 @@ SampleInstrument::SampleInstrument()
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
+  InsertBaseVariables();
   variables_.insert(variables_.end(), &sample_);
   sample_.AddObserver(*this);
 
-  variables_.insert(variables_.end(), &volume_);
   variables_.insert(variables_.end(), &interpolation_);
   variables_.insert(variables_.end(), &crush_);
   variables_.insert(variables_.end(), &drive_);
   variables_.insert(variables_.end(), &downsample_);
   variables_.insert(variables_.end(), &rootNote_);
   variables_.insert(variables_.end(), &fineTune_);
-  variables_.insert(variables_.end(), &pan_);
   variables_.insert(variables_.end(), &cutoff_);
   variables_.insert(variables_.end(), &reso_);
   variables_.insert(variables_.end(), &filterMix_);
   variables_.insert(variables_.end(), &filterMode_);
   variables_.insert(variables_.end(), &start_);
-  start_.AddObserver(*this);
   variables_.insert(variables_.end(), &loopMode_);
-  loopMode_.SetInt(0);
   variables_.insert(variables_.end(), &loopStart_);
-  loopStart_.AddObserver(*this);
   variables_.insert(variables_.end(), &loopEnd_);
-  loopEnd_.AddObserver(*this);
-  variables_.insert(variables_.end(), &table_);
-  variables_.insert(variables_.end(), &tableAuto_);
   variables_.insert(variables_.end(), &gmInstrument_);
   variables_.insert(variables_.end(), &attack_);
   variables_.insert(variables_.end(), &decay_);
   variables_.insert(variables_.end(), &sustain_);
   variables_.insert(variables_.end(), &release_);
+
+  loopMode_.SetInt(0);
+  loopEnd_.AddObserver(*this);
+  start_.AddObserver(*this);
+  loopStart_.AddObserver(*this);
 
   tableState_.Reset();
   slicePoints_.fill(0);
@@ -449,13 +445,6 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
     loopmode = SILM_ONESHOT;
   }
   rp->loopModeValue_ = static_cast<int>(loopmode);
-
-  /*	 if (loopmode==SILM_OSCFINE) {
-                  if (rp->rendLoopEnd_>source_->GetSize()-1) { // check for
-     older instrument that were not correctly handled
-                          rp->rendLoopEnd_=source_->GetSize()-1 ;
-                  }
-           }*/
   rp->reverse_ = false;
 
   float driverRate = float(Audio::GetInstance()->GetSampleRate());
@@ -477,15 +466,9 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
       break;
 
     case SILM_OSC:
-      //		case SILM_OSCFINE:
       {
 
         float freq = 261.6255653006f; // C3
-        /*
-        if (loopmode==SILM_OSCFINE) {
-          freq=float(pow(2.0,-0.75))*440; // C3
-        }
-        */
         int length = rp->rendLoopEnd_ - rp->rendLoopStart_;
         if (length == 0)
           length = 1;
@@ -797,7 +780,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
     int16_t *loopPosition = (int16_t *)(wavbuf + rp->rendLoopStart_ * 2 * channelCount);
     int16_t *lastSample = (int16_t *)(wavbuf + (rp->rendLoopEnd_ - 1) * 2 * channelCount);
 
-    if (/*(loopMode==SILM_OSCFINE)||*/ (rp->reverse_)) {
+    if (rp->reverse_) {
       lastSample = (int16_t *)(wavbuf + rp->rendLoopEnd_ * 2 * channelCount);
     }
 
@@ -828,7 +811,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
       // look where we are, if we need to
 
       if (!rpReverse) {
-        if (input >= lastSample /*-((loopMode==SILM_OSCFINE)?1:0)*/) {
+        if (input >= lastSample) {
           switch (loopMode) {
             case SILM_ONESHOT:
               *rpFinished = true;
@@ -857,18 +840,6 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
                 }
               }
               break;
-              /*						case
-                 SILM_OSCFINE:
-                                                              {
-                                                                      int
-                 offset=(input-lastSample)/channelCount ;
-                                                                      rpReverse=(loopPosition>lastSample)
-                 ; if (rpReverse) { fpSpeed=-rp->speed_ ;
-                                                                              input=loopPosition-offset
-                 ; } else { fpSpeed=rp->speed_ ; input=loopPosition+offset ;
-                                                                      }
-                                                                      break ;
-                                                              }*/
             case SILM_LAST:
               NAssert(0);
               break;
@@ -904,18 +875,6 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
                 }
               }
               break;
-              /*						case
-                 SILM_OSCFINE:
-                                                              {
-                                                                      int
-                 offset=(lastSample-input)/channelCount ;
-                                                                      rpReverse=(loopPosition>lastSample)
-                 ; if (rpReverse) { fpSpeed=-rp->speed_ ;
-                                                                              input=loopPosition-offset
-                 ; } else { fpSpeed=rp->speed_ ; input=loopPosition+offset ;
-                                                                      }
-                                                                      break ;
-                                                              }*/
             case SILM_LAST:
               NAssert(0);
               break;
@@ -933,9 +892,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
           rpKrateCount = KRATE_SAMPLE_COUNT;
 
           // update the envelope as well
-          // TODO POD
           if (!rp->envelope_.tick()) {
-            //            rp->finished_ = true; // Mark this channel as finished
+            rp->finished_ = true; // Mark this channel as finished
           }
 
           if (hasUpdaters) {
@@ -1138,12 +1096,12 @@ int SampleInstrument::GetSampleIndex() {
 }
 
 void SampleInstrument::SetVolume(int volume) {
-  Variable *v = FindVariable(Token::SampleInstrumentVolume);
+  Variable *v = FindVariable(Token::InstrumentParameterVolume);
   v->SetInt(volume);
 }
 
 int SampleInstrument::GetVolume() {
-  Variable *v = FindVariable(Token::SampleInstrumentVolume);
+  Variable *v = FindVariable(Token::InstrumentParameterVolume);
   return v->GetInt();
 }
 
@@ -1724,7 +1682,7 @@ int SampleInstrument::GetTable() {
 }
 
 bool SampleInstrument::GetTableAutomation() {
-  return tableAuto_.GetBool();
+  return tableAutomation_.GetBool();
 }
 
 void SampleInstrument::GetTableState(TableSaveState &state) {

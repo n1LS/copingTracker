@@ -1,5 +1,6 @@
 import subprocess
 import os
+import shutil
 
 subprocess.run(["python3", "convert_font.py", "--start", "0", "--end", "255", "--name", "block", "font_block.png"])
 subprocess.run(["python3", "convert_font.py", "--start", "0", "--end", "255", "--name", "light", "font_light.png"])
@@ -26,6 +27,7 @@ with open("font.h", "w") as out:
     out.write("\n#endif // FONT_H\n")
 
 # clean up intermediate files
+shutil.copyfile("font.h", "../../sources/Adapters/Host/display/font.generated.h")
 os.rename("font.h", "../../sources/Adapters/copingTracker/display/font.generated.h")
 os.remove("font_block.h")
 os.remove("font_light.h")

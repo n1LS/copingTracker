@@ -12,6 +12,7 @@
 #ifndef _INSTRUMENT_VIEW_H_
 #define _INSTRUMENT_VIEW_H_
 
+#include "Application/AppWindow.h"
 #include "Application/Instruments/InstrumentNameVariable.h"
 #include "BaseClasses/UIActionField.h"
 #include "BaseClasses/UIBitmaskVarField.h"
@@ -20,6 +21,7 @@
 #include "BaseClasses/UIIntVarOffField.h"
 #include "BaseClasses/UINoteVarField.h"
 #include "BaseClasses/UIStaticField.h"
+#include "BaseClasses/UITabField.h"
 #include "BaseClasses/UITextField.h"
 #include "Externals/etl/include/etl/string.h"
 #include "Externals/etl/include/etl/vector.h"
@@ -41,8 +43,13 @@ public:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
   void DrawViewDrum();
-  void DrawViewStack();
+  void DrawViewChiptune();
+  void DrawViewMIDI();
   void DrawViewSample();
+  void DrawViewSample_GMInstrument();
+  void DrawViewStack();
+  void AnimationUpdateSample();
+  virtual void AnimationUpdate() override;
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   virtual void OnFocus();
   void onInstrumentTypeChange(bool updateUI = false);
@@ -52,8 +59,8 @@ public:
   virtual void SetFocus(UIField *field) override;
 
 protected:
-  void addIndexToLine(uint8_t index, uint8_t line);
-
+  void addIndexToLine(uint8_t index, uint8_t line, bool left = false);
+  void addTitleLabel(const char *title, uint8_t line, bool left = true);
   void warpToNext(int offset);
   void onInstrumentChange();
   void fillSampleParameters();
@@ -67,29 +74,37 @@ protected:
   I_Instrument *getInstrument();
   void Update(Observable &o, I_ObservableData *d);
   void refreshInstrumentFields();
-  void addNameTextField(I_Instrument *instr, GUIPoint &position);
+  void addNameTextField(I_Instrument *instr, const GUIPoint &position);
   void handleInstrumentExport();
 
+  const GUIRect GetFocusRect() override;
   virtual void ConfirmedStop(Token source);
 
 private:
+  void updateSliceCount(SampleInstrument *instrument);
+
   void onConfirmInstrumentTypeChange(View &view, ModalView &dialog);
   void onConfirmResetInstrument(View &view, ModalView &dialog);
   void onConfirmSampleChange(View &view, ModalView &dialog);
   void onConfirmExportOverwrite(View &view, ModalView &dialog);
+
+  void AddVolumeRow(int y = SCREEN_HEIGHT - 3);
+  void AddTableRow(int y = SCREEN_HEIGHT - 1);
 
   void goToModulationPage();
   void goToInstrumentPage();
   void goToImport();
   void changeInstrumentType();
 
-  static constexpr size_t SliceCountLabelSize = 20;
+  size_t sliceCount_ = 0;
   Project *project_;
   UIField *lastFocus_ = nullptr;
   WatchedVariable instrumentType_;
   int lastSampleIndex_;
   bool suppressSampleChangeWarning_;
-  etl::string<SliceCountLabelSize> sliceCountLabel_;
+  unsigned int scrollStartTime_ = 0;
+
+  bool mapVisible_ = false;
 
   // Variables for export confirmation dialog
   I_Instrument *pendingPurgeInstrument_ = nullptr;
@@ -99,11 +114,14 @@ private:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> exportName_;
   InstrumentType pendingInstrumentType_ = IT_NONE;
 
-  etl::vector<UIIntVarField, 1> typeIntVarField_;
+  UIField *gmInputField_;
+  UIField *sampleInputField_;
+
+  etl::vector<UITabField, 1> typeVarField_;
   etl::vector<UIActionField, 3> persistentActionField_;
   etl::vector<UIIntVarField, 40> intVarField_;
   etl::vector<UINoteVarField, 1> noteVarField_;
-  etl::vector<UIStaticField, 16> staticField_;
+  etl::vector<UIStaticField, 32> staticField_;
   etl::vector<UIHexVarField, 12> hexVarField_;
   etl::vector<UIIntVarOffField, 3> intVarOffField_;
   etl::vector<UIActionField, 1> sampleActionField_;

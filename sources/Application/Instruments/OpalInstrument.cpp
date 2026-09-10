@@ -46,6 +46,7 @@ OpalInstrument::OpalInstrument()
       op2KeyScaleLevel_(Token::OPALInstrumentOp2KeyScaleLevel, kslValues, 4, 0) {
 
   // name_ is now an etl::string in the base class, not a Variable
+  InsertBaseVariables();
   variables_.insert(variables_.end(), &algorithm_);
   variables_.insert(variables_.end(), &feedback_);
   variables_.insert(variables_.end(), &deepTremeloVibrato_);

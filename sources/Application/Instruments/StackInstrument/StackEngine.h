@@ -123,7 +123,7 @@ typedef struct stack_voice_t {
     // processing at ~100Hz
 
     // volume
-    envelope.tick(); // TODO POD: handle output value to know when to kill the note on NOTE_OFF -> release ringing out
+    envelope.tick(); // TODO nILS: handle output value to know when to kill the note on NOTE_OFF -> release ringing out
 
     // recompute combined gain when envelope, pan or volume changes
     level = (parameters.volume * volume * envelope.value) >> 24;
@@ -183,8 +183,8 @@ typedef struct stack_voice_t {
     // generate sample based on waveform
     if (wave != stackWaveNone) {
       for (int o = 0; o < stackNumOscillators; o++) {
-         // render wavetable
-         sample += (StackWavetables::stack_wavetables[wave][0][phase[o] >> 21]);
+        // render wavetable
+        sample += (StackWavetables::stack_wavetables[wave][0][phase[o] >> 21]);
       }
     }
 

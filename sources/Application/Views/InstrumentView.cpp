@@ -43,40 +43,48 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
       lastSampleIndex_(-1), suppressSampleChangeWarning_(false) {
   project_ = data->project_;
 
-  GUIPoint position = GUIPoint(5, 1);
-  typeIntVarField_.emplace_back(position, *&instrumentType_, "Type:%s", 0, (int)kMaxSelectableInstrumentType, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*typeIntVarField_.rbegin()));
-  (*typeIntVarField_.rbegin()).AddObserver(*this);
-          lastFocus_ = &typeIntVarField_.back();
+  static const char *tabs[] = {"-", "Smpl", "Chip", "Drum", "Stck", "MIDI"}; // TODO nILS: grab from from InstrumentType
+
+  GUIPoint position = GUIPoint(0, 2);
+  typeVarField_.emplace_back("Type", position, *&instrumentType_, tabs, 6);
+  fieldList_.insert(fieldList_.end(), &typeVarField_.back());
+  typeVarField_.back().AddObserver(*this);
+  typeVarField_.back().SetBackgroundColor(Theme::View::inactive);
+  lastFocus_ = &typeVarField_.back();
+  position.x_ += 5;
 
   // Create the name field with the actual instrument variable
   I_Instrument *instr = getInstrument();
   if (instr) {
     // NONE dont have a name field
     if (instr->GetType() != IT_NONE) {
+      position.x_ = 5;
       position.y_ = 3;
       addNameTextField(instr, position);
     }
   }
 
-  // add ui action fields for exporting and importing instrument settings
-  position.y_ = 2;
-
-  persistentActionField_.emplace_back("Import", Token::ActionImport, position);
+  // add ui action fields for exporting and importing instrument settings and modulation
+  position = GUIPoint(23, 4);
+  persistentActionField_.emplace_back(char_symbol_load_s, Token::ActionImport, position);
+  persistentActionField_.back().SetBackgroundColor(Theme::View::inactive);
+  persistentActionField_.back().SetFieldConfiguration(instrumentActionFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
   persistentActionField_.back().AddObserver(*this);
 
-  position.x_ += 8;
-  persistentActionField_.emplace_back("Export", Token::ActionExport, position);
-  fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
-          persistentActionField_.back().AddObserver(*this);
-
-  position.x_ += 8;
-  persistentActionField_.emplace_back("Modulation", Token::ActionModulation, position);
+  position = GUIPoint(26, 4);
+  persistentActionField_.emplace_back(char_symbol_save_s, Token::ActionExport, position);
+  persistentActionField_.back().SetBackgroundColor(Theme::View::inactive);
+  persistentActionField_.back().SetFieldConfiguration(instrumentActionFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
   persistentActionField_.back().AddObserver(*this);
 
-  sliceCountLabel_.clear();
+  position = GUIPoint(29, 4);
+  persistentActionField_.emplace_back(char_mod_s, Token::ActionModulation, position);
+  persistentActionField_.back().SetBackgroundColor(Theme::View::inactive);
+  persistentActionField_.back().SetFieldConfiguration(instrumentActionFieldConfiguration);
+  fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
+  persistentActionField_.back().AddObserver(*this);
 }
 
 InstrumentView::~InstrumentView() {
@@ -87,43 +95,34 @@ void InstrumentView::Reset() {
   suppressSampleChangeWarning_ = false;
   exportInstrument_ = nullptr;
   exportName_.clear();
-  lastFocus_ = &typeIntVarField_.back();
+  lastFocus_ = &typeVarField_.back();
   instrumentType_.SetInt(0, false);
-  sliceCountLabel_.clear();
 }
 
-static void updateSliceCountLabel(etl::string<20> &label, SampleInstrument *instrument) {
-  int32_t count = 0;
+void InstrumentView::updateSliceCount(SampleInstrument *instrument) {
+  sliceCount_ = 0;
   if (instrument) {
     for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
       if (instrument->IsSliceDefined(i)) {
-        count++;
+        sliceCount_++;
       }
     }
   }
-  if (count <= 1) {
-    label = "Slices: off";
-  } else {
-    label = "Slices: ";
-    etl::format_spec format;
-    format.width(2).fill(' ');
-    etl::to_string(count, label, format, true);
-  }
 }
 
-void InstrumentView::addNameTextField(I_Instrument *instr, GUIPoint &position) {
+void InstrumentView::addNameTextField(I_Instrument *instr, const GUIPoint &position) {
   nameVariables_.emplace_back(instr);
   Variable &nameVar = *nameVariables_.rbegin();
-
-  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Name: ");
 
   // Use an empty default name - we don't want to populate with sample filename
   // The display name will still be shown on the phrase screen via
   // GetDisplayName()
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> defaultName;
 
-  nameTextField_.emplace_back(nameVar, position, label, Token::InstrumentName, defaultName);
-  fieldList_.insert(fieldList_.end(), &(*nameTextField_.rbegin()));
+  nameTextField_.emplace_back(nameVar, position, "Name", Token::InstrumentName, defaultName);
+  nameTextField_.back().SetFieldConfiguration(panelFieldConfiguration);
+  nameTextField_.back().SetBackgroundColor(Theme::View::inactive);
+  fieldList_.insert(fieldList_.end(), &nameTextField_.back());
 }
 
 I_Instrument *InstrumentView::getInstrument() {
@@ -207,7 +206,7 @@ void InstrumentView::onInstrumentTypeChange(bool updateUI) {
   // Refresh the UI fields for the new instrument type
   refreshInstrumentFields();
 
-  // Mark the view as dirty to ensure it gets redrawn
+  // Mark the view as dirty to ensure it gets themen
   isDirty_ = true;
 }
 
@@ -261,9 +260,12 @@ void InstrumentView::refreshInstrumentFields() {
   nameVariables_.clear();
   lastSampleIndex_ = -1;
 
+  sampleInputField_ = nullptr;
+  gmInputField_ = nullptr;
+
   // first put back the type field as its shown on *all* instrument types
-  fieldList_.insert(fieldList_.end(), &typeIntVarField_.back());
-  lastFocus_ = &typeIntVarField_.back();
+  fieldList_.insert(fieldList_.end(), &typeVarField_.back());
+  lastFocus_ = &typeVarField_.back();
 
   // Re-add the action fields for export and import only if not IT_NONE
   if (instrumentType_.GetInt() != IT_NONE) {
@@ -276,15 +278,14 @@ void InstrumentView::refreshInstrumentFields() {
     // bit of a hack !!since we just assume that import is the first action
     // field
     fieldList_.insert(fieldList_.end(), &(*persistentActionField_.begin()));
-    (*persistentActionField_.rbegin()).AddObserver(*this);
+    persistentActionField_.back().AddObserver(*this);
   }
 
   // Create a new nameTextField_ if the instrument type supports it
   if (instrumentType_.GetInt() != IT_NONE) {
     I_Instrument *instr = getInstrument();
     if (instr) {
-      GUIPoint position = GetAnchor();
-      addNameTextField(instr, position);
+      addNameTextField(instr, GUIPoint(0, 4));
     }
   }
 
@@ -347,157 +348,6 @@ void InstrumentView::refreshInstrumentFields() {
 void InstrumentView::fillNoneParameters() {
 }
 
-void InstrumentView::fillSampleParameters() {
-  int i = viewData_->currentInstrumentID_;
-  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  I_Instrument *instr = bank->GetInstrument(i);
-  SampleInstrument *instrument = (SampleInstrument *)instr;
-  lastSampleIndex_ = instrument->GetSampleIndex();
-
-  GUIPoint position = GetAnchor();
-  const int baseX = position.x_;
-
-  // offset y to account for instrument type and export/import fields
-  position.y_ += 1;
-
-  Variable *v = instrument->FindVariable(Token::SampleInstrumentSample);
-  SamplePool *sp = SamplePool::GetInstance();
-  intVarField_.emplace_back(position, *v, "Sample        :%.12s", 0, sp->GetNameListSize() - 1, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentGMInstrument);
-  intVarField_.emplace_back(position, *v, "GM Instrument :%d", 0, kGMInstrumentCount - 1, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  updateSliceCountLabel(sliceCountLabel_, instrument);
-  staticField_.emplace_back(position, sliceCountLabel_.c_str());
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  GUIPoint actionPos = position;
-  actionPos.x_ = baseX + 15;
-  sampleActionField_.emplace_back("Adjust", Token::ActionShowSampleSlices, actionPos);
-  fieldList_.insert(fieldList_.end(), &sampleActionField_.back());
-  sampleActionField_.back().AddObserver(*this);
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentVolume);
-  intVarField_.emplace_back(position, *v, "Volume        :%d [%2.2X]", 0, 255, 1, 10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentPan);
-  intVarField_.emplace_back(position, *v, "Pan           :%2.2X", 0, 0xFE, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentRootNote);
-  noteVarField_.emplace_back(position, *v, "Root note     :%s", 0, 0x7F, 1, 0x0C);
-  fieldList_.insert(fieldList_.end(), &(*noteVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentFineTune);
-  intVarField_.emplace_back(position, *v, "Detune        :%2.2X", 0, 255, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentCrushVolume);
-  intVarField_.emplace_back(position, *v, "Drive         :%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentCrush);
-  intVarField_.emplace_back(position, *v, "Crush         :%d", 1, 0x10, 1, 4);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentDownsample);
-  intVarField_.emplace_back(position, *v, "Downsample    :%d", 0, 8, 1, 4);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentInterpolation);
-  intVarField_.emplace_back(position, *v, "Interpolate   :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentAttack);
-  intVarField_.emplace_back(position, *v, "A/D/S/R       :%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.x_ += 17;
-  v = instrument->FindVariable(Token::SampleInstrumentDecay);
-  intVarField_.emplace_back(position, *v, ":%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.x_ += 3;
-  v = instrument->FindVariable(Token::SampleInstrumentSustain);
-  intVarField_.emplace_back(position, *v, ":%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.x_ += 3;
-  v = instrument->FindVariable(Token::SampleInstrumentRelease);
-  intVarField_.emplace_back(position, *v, ":%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  position.x_ = baseX;
-  v = instrument->FindVariable(Token::SampleInstrumentTable);
-  intVarOffField_.emplace_back(position, *v, "Table         :%2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentTableAutomation);
-  intVarField_.emplace_back(position, *v, last_sub_item "Automation:%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  staticField_.emplace_back(position, "Filter     Cut    Res");
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
-
-  position.x_ += 15;
-  v = instrument->FindVariable(Token::SampleInstrumentFilterCutOff);
-  intVarField_.emplace_back(position, *v, "%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.x_ += 7;
-  v = instrument->FindVariable(Token::SampleInstrumentFilterResonance);
-  intVarField_.emplace_back(position, *v, "%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-  position.x_ -= 22;
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentFilterType);
-  intVarField_.emplace_back(position, *v, sub_item "Type       :%2.2X", 0, 0xFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentFilterMode);
-  intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, 2, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentLoopMode);
-  intVarField_.emplace_back(position, *v, "Loop mode     :%s", 0, SILM_LAST - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentStart);
-  hexVarField_.emplace_back(position, *v, 7, sub_item "Start     :%7.7X", 0, instrument->GetSampleSize() - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SampleInstrumentLoopStart);
-  hexVarField_.emplace_back(position, *v, 7, sub_item "Loop:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
-
-  position.x_ += 17;
-  v = instrument->FindVariable(Token::SampleInstrumentEnd);
-  hexVarField_.emplace_back(position, *v, 7, ">:%7.7X", 0, instrument->GetSampleSize() - 1, 16);
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
-}
-
 void InstrumentView::fillSIDParameters() {
   int i = viewData_->currentInstrumentID_;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
@@ -508,51 +358,51 @@ void InstrumentView::fillSIDParameters() {
   position.y_ += 1;
 
   staticField_.emplace_back(position, instrument->GetChipName());
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position.y_ += 2;
   staticField_.emplace_back(position, "Oscillator Settings" char_line_5_s);
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position.y_ += 2;
   Variable *v = instrument->FindVariable(Token::SIDInstrumentOSCNumber);
   intVarField_.emplace_back(position, *v, "Oscillator    :%1.1X", 0, 0x2, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SIDInstrumentPulseWidth);
   intVarField_.emplace_back(position, *v, sub_item "Pulsewidth:%2.2X", 0, 0xFFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SIDInstrumentWaveform);
 
   intVarField_.emplace_back(position, *v, sub_item "Waveform  :%s", 0, DWF_LAST - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SIDInstrumentVSync);
   intVarField_.emplace_back(position, *v, sub_item "Osc Sync  :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::SIDInstrumentRingModulator);
   intVarField_.emplace_back(position, *v, last_sub_item "Ring Mod  :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 2;
   v = instrument->FindVariable(Token::SIDInstrumentADSR);
   hexVarField_.emplace_back(UIHexVarField(position, *v, 4, "Env. A/D/S/R  :%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
 
   position.y_ += 2;
   staticField_.emplace_back(position, "Chip Settings" char_line_11_s);
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position.y_ += 2;
   v = instrument->FindVariable(Token::SIDInstrumentFilterOn);
   intVarField_.emplace_back(position, *v, "Filter        :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   switch (instrument->GetChip()) {
@@ -564,7 +414,7 @@ void InstrumentView::fillSIDParameters() {
       break;
   }
   intVarField_.emplace_back(position, *v, sub_item "Cutoff    :%1.1X", 0, 0x7FF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   switch (instrument->GetChip()) {
@@ -576,7 +426,7 @@ void InstrumentView::fillSIDParameters() {
       break;
   }
   intVarField_.emplace_back(position, *v, sub_item "Resonance :%1.1X", 0, 0xF, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   switch (instrument->GetChip()) {
@@ -588,7 +438,7 @@ void InstrumentView::fillSIDParameters() {
       break;
   }
   intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, DFM_LAST - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 2;
   switch (instrument->GetChip()) {
@@ -600,54 +450,14 @@ void InstrumentView::fillSIDParameters() {
       break;
   }
   intVarField_.emplace_back(position, *v, "Volume        :%1.1X", 0, 0xF, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 }
 
 #include "InstrumentView_Chiptune.ipp"
 #include "InstrumentView_Drum.ipp"
+#include "InstrumentView_MIDI.ipp"
 #include "InstrumentView_Sample.ipp"
 #include "InstrumentView_Stack.ipp"
-
-void InstrumentView::fillMidiParameters() {
-
-  int i = viewData_->currentInstrumentID_;
-  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  I_Instrument *instr = bank->GetInstrument(i);
-  MidiInstrument *instrument = (MidiInstrument *)instr;
-  GUIPoint position = GetAnchor();
-
-  // offset y to account for instrument type, name and export/import fields
-  position.y_ += 2;
-
-  Variable *v = instrument->FindVariable(Token::MidiInstrumentChannel);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Channel       :%2.2d", 0, 0x0F, 1, 0x04, 1));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::MidiInstrumentVolume);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Volume        :%2.2X", 0, 0xFF, 1, 0x10));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::MidiInstrumentNoteLength);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Length        :%2.2X", 0, 0xFF, 1, 0x10));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::MidiInstrumentProgram);
-  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Program       :%2.2X", 0, 0x7F, 1, 0x10));
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
-
-  position.y_ += 2;
-  v = instrument->FindVariable(Token::MidiInstrumentTable);
-  intVarOffField_.emplace_back(UIIntVarOffField(position, *v, "Table         :%2.2X", 0, TABLE_COUNT - 1, 1, 0x10));
-  fieldList_.insert(fieldList_.end(), &(*intVarOffField_.rbegin()));
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::MidiInstrumentTableAutomation);
-  intVarField_.emplace_back(UIIntVarField(position, *v, last_sub_item "Automation:%s", 0, 1, 1, 1));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
-}
 
 void InstrumentView::fillOpalParameters() {
   int i = viewData_->currentInstrumentID_;
@@ -659,97 +469,97 @@ void InstrumentView::fillOpalParameters() {
   // extra y spacing to allow for gap between export/import and parameters
   position.y_ += 2;
   staticField_.emplace_back(position, "General Settings" char_line_8_s);
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position.y_ += 2;
   Variable *v = instrument->FindVariable(Token::OPALInstrumentAlgorithm);
   intVarField_.emplace_back(position, *v, "Algorithm     :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentDeepTremeloVibrato);
   bitmaskVarField_.emplace_back(UIBitmaskVarField(position, *v, "Deep Trem/Vib :%02b", 2));
-  fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &bitmaskVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentFeedback);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Feedback      :%1.1X", 0, 0x07, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 2;
   staticField_.emplace_back(position, "Operator Settings" char_line_7_s);
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   // operator settings
   position.y_ += 2;
   staticField_.emplace_back(position, "               Op 1" char_border_single_vertical_s "Op 2");
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   position.y_ += 1;
   staticField_.emplace_back(position, "               " char_line_4_s char_border_single_cross_s char_line_4_s);
-  fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
 
   // vertical table separator
   GUIPoint p = position + GUIPoint(19, 1);
   for (int n = 0; n < 6; n++) {
     staticField_.emplace_back(p, char_border_single_vertical_s);
-    fieldList_.insert(fieldList_.end(), &(*staticField_.rbegin()));
+    fieldList_.insert(fieldList_.end(), &staticField_.back());
     p.y_ += 1;
   }
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentOp1Level);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Level         :%2.2X", 0, 63, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   v = instrument->FindVariable(Token::OPALInstrumentOp2Level);
   intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%2.2X", 0, 63, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentOp1Multiplier);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Multiplier    :%1.1X", 0, 15, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   v = instrument->FindVariable(Token::OPALInstrumentOp2Multiplier);
   intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%1.1X", 0, 15, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentOp1ADSR);
   hexVarField_.emplace_back(UIHexVarField(position, *v, 4, "A/D/S/R       :%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
 
   v = instrument->FindVariable(Token::OPALInstrumentOp2ADSR);
   hexVarField_.emplace_back(UIHexVarField(position + GUIPoint(20, 0), *v, 4, "%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &(*hexVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentOp1WaveShape);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Shape         :%s", 0, 7, 1, 1));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   v = instrument->FindVariable(Token::OPALInstrumentOp2WaveShape);
   intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 7, 1, 1));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentOp1TremVibSusKSR);
   bitmaskVarField_.emplace_back(UIBitmaskVarField(position, *v, "TR/VB/SU/KSR  :%04b", 4));
-  fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &bitmaskVarField_.back());
 
   v = instrument->FindVariable(Token::OPALInstrumentOp2TremVibSusKSR);
   bitmaskVarField_.emplace_back(UIBitmaskVarField(position + GUIPoint(20, 0), *v, "%04b", 4));
-  fieldList_.insert(fieldList_.end(), &(*bitmaskVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &bitmaskVarField_.back());
 
   position.y_ += 1;
   v = instrument->FindVariable(Token::OPALInstrumentOp1KeyScaleLevel);
   intVarField_.emplace_back(UIIntVarField(position, *v, "Keyscale      :%s", 0, 3, 1, 1));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   v = instrument->FindVariable(Token::OPALInstrumentOp2KeyScaleLevel);
   intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 3, 1, 1));
-  fieldList_.insert(fieldList_.end(), &(*intVarField_.rbegin()));
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   Trace::Error("OPAL fill done, total fields: %d", fieldList_.size());
 }
@@ -768,12 +578,15 @@ void InstrumentView::warpToNext(int offset) {
 }
 
 void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
+  if (AppWindow::GetInstance()->buttonDown(BM_NAV) != mapVisible_) {
+    SetDirty(true);
+  }
+
   if (!pressed) {
     FieldView::ProcessButtonMask(mask, pressed);
     return;
   }
 
-  isDirty_ = false;
   if (mask == (BM_EDIT | BM_ENTER)) {
     int i = viewData_->currentInstrumentID_;
     InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
@@ -788,11 +601,12 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       return;
     }
     if (getInstrument()->GetType() == IT_SAMPLE) {
-      UIIntVarField *field = (UIIntVarField *)GetFocus();
+      UIIntVarField *field =
+          (UIIntVarField *)GetFocus(); // TODO nILS: this is bad, it's not necessarily an UIIntVarField
       if (field->GetVariableID() == Token::SampleInstrumentEnd) {
-        Variable &var = field->GetVariable();
+        Variable *var = field->GetVariable();
         SampleInstrument *instrument = (SampleInstrument *)instr;
-        var.SetInt(instrument->GetSampleSize() - 1);
+        var->SetInt(instrument->GetSampleSize() - 1);
         isDirty_ = true;
         return;
       };
@@ -807,41 +621,44 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (mask == BM_ENTER) {
     // Get the current field to check if we're on the sample field
-    UIIntVarField *currentField = (UIIntVarField *)GetFocus();
+    UIIntVarField *currentField =
+        (UIIntVarField *)GetFocus(); // TODO nILS: this is bad, it's not necessarily an UIIntVarField
+    Variable *var = currentField->GetVariable();
 
-    // Only allow sample import when the sample field is selected
-    if (getInstrument()->GetType() == IT_SAMPLE && currentField &&
-        currentField->GetVariableID() == Token::SampleInstrumentSample) {
+    if (var) {
+      // Only allow sample import when the sample field is selected
+      if (getInstrument()->GetType() == IT_SAMPLE && currentField &&
+          currentField->GetVariableID() == Token::SampleInstrumentSample) {
 
-      if (viewMode_ == VM_NEW) {
-        viewMode_ = VM_NORMAL; // clear the "enter double tap" state
-        ConfirmStopPlayback(Token::ActionImport);
-      } else {
-        // mark as "new" mode so a 2nd following ENTER will trigger the sample
-        // import above
-        viewMode_ = VM_NEW;
-      }
-    } else if (viewMode_ == VM_NEW) {
-      // If we're not on the sample field but in VM_NEW mode, reset it
-      viewMode_ = VM_NORMAL;
-    }
-
-    UIIntVarField *field = (UIIntVarField *)GetFocus();
-    Variable &v = field->GetVariable();
-    switch (v.GetID()) {
-      case Token::SampleInstrumentTable:
-        {
-          int next = TableHolder::GetInstance()->GetNext();
-          if (next != NO_MORE_TABLE) {
-            v.SetInt(next);
-            isDirty_ = true;
-          }
-          break;
+        if (viewMode_ == VM_NEW) {
+          viewMode_ = VM_NORMAL; // clear the "enter double tap" state
+          ConfirmStopPlayback(Token::ActionImport);
+        } else {
+          // mark as "new" mode so a 2nd following ENTER will trigger the sample
+          // import above
+          viewMode_ = VM_NEW;
         }
-      default:
-        break;
+      } else if (viewMode_ == VM_NEW) {
+        // If we're not on the sample field but in VM_NEW mode, reset it
+        viewMode_ = VM_NORMAL;
+      }
+
+      switch (var->GetID()) {
+        case Token::InstrumentParameterTable:
+          {
+            int next = TableHolder::GetInstance()->GetNext();
+            if (next != NO_MORE_TABLE) {
+              var->SetInt(next);
+              isDirty_ = true;
+            }
+            break;
+          }
+        default:
+          break;
+      }
+      mask &= ~BM_ENTER;
     }
-    mask &= ~BM_ENTER;
+
   } else {
     // Clear the VM_NEW state if any key other than ENTER is pressed
     if (viewMode_ == VM_NEW) {
@@ -851,29 +668,24 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (viewMode_ == VM_CLONE) {
     if ((mask & BM_ENTER) && (mask & BM_ALT)) {
-      UIIntVarField *field = (UIIntVarField *)GetFocus();
+      UIIntVarField *field =
+          (UIIntVarField *)GetFocus(); // TODO nILS: this is bad, it's not necessarily an UIIntVarField
       mask &= ~BM_ENTER;
-      Variable &v = field->GetVariable();
-      int current = v.GetInt();
+      Variable *v = field->GetVariable();
+      int current = v->GetInt();
       if (current == -1)
         return;
 
-      if ((field->GetVariableID() == Token::SampleInstrumentTable) ||
-          (field->GetVariableID() == Token::MidiInstrumentTable)) {
+      if (field->GetVariableID() == Token::InstrumentParameterTable) {
         int next = TableHolder::GetInstance()->Clone(current);
         if (next != NO_MORE_TABLE) {
-          v.SetInt(next);
+          v->SetInt(next);
           isDirty_ = true;
         }
       };
     }
     mask &= (0xFFFF - (BM_ENTER | BM_ALT));
   };
-
-  if (viewMode_ == VM_SELECTION) {
-  } else {
-    // viewMode_ = VM_NORMAL;
-  }
 
   // EDIT Modifier
   if (mask & BM_EDIT) {
@@ -928,37 +740,56 @@ void InstrumentView::DrawView() {
   Clear();
 
   // Draw title
-
   DrawTitle("Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_,
             project_->GetInstrumentBank()->UsedInstrumentCount(), MAX_INSTRUMENT_COUNT);
+
+  // border line up top
+  SetBackgroundColor(Theme::View::inactive);
+  for (int n = 0; n < SCREEN_WIDTH; n++) {
+    SetColor(Theme::View::Title::bg);
+    DrawChar(n, 1, CHAR(char_block_top_s));
+
+    DrawChar(n, 3, ' ');
+
+    SetColor(Theme::View::bg);
+    DrawChar(n, 5, CHAR(char_block_bottom_s));
+  }
 
   // Draw fields
   FieldView::Redraw();
 
-  // draw the map
-  drawMap();
-
-  // Draw instrument type with special handling for SID and OPAL
+  // Draw instrument specific UI
   I_Instrument *instr = getInstrument();
   if (instr) {
     InstrumentType type = instr->GetType();
-    if (type == IT_SID || type == IT_OPAL || type == IT_CHIPTUNE) {
-      SetColor(Theme::VU::warn);
-      SetBackgroundColor(Theme::View::bg);
-      DrawString(18, 1, char_button_border_left_s);
-      SwapColors();
-      DrawString(19, 1, "EXPERIMENTAL");
-      SwapColors();
-      DrawString(31, 1, char_button_border_right_s);
-    }
 
     if (type == IT_DRUM) {
       DrawViewDrum();
+    } else if (type == IT_CHIPTUNE) {
+      DrawViewChiptune();
     } else if (type == IT_STACK) {
       DrawViewStack();
     } else if (type == IT_SAMPLE) {
       DrawViewSample();
+    } else if (type == IT_MIDI) {
+      DrawViewMIDI();
+    } else if (type == IT_NONE) {
+      // fill to clear out the missing name, save and mod buttons
+      SetBackgroundColor(Theme::View::inactive);
+      DrawString(0, 4, "                      ");
+      DrawString(25, 4, "       ");
     }
+  }
+
+  // draw the map
+  mapVisible_ = AppWindow::GetInstance()->buttonDown(BM_NAV);
+  if (mapVisible_) {
+    drawMap();
+  }
+
+  ModalView *mv = GetModalView();
+  if (mv) {
+    mv->Redraw();
   }
 }
 
@@ -1054,26 +885,35 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
         Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
         if (sampleVar) {
           sampleVar->SetInt(-1);
+          sampleInputField_->SetActive(false);
         }
 
+        Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
+        gmInputField_->SetActive(gmVar->GetInt() != NO_GM_INSTRUMENT);
         // TODO nILS: warn about losing slices when changing GM instrument if sample was assigned and slices exist
         // like below
 
+        scrollStartTime_ = System::GetInstance()->Millis();
         isDirty_ = true;
         break;
       }
     case Token::SampleInstrumentSample:
       {
-        // changing the sample clears the GM Isntrument
+        // changing the sample clears the GM Instrument
         Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
         if (gmVar) {
           gmVar->SetInt(NO_GM_INSTRUMENT);
+          // find the intput field and set it inactive
+          gmInputField_->SetActive(false);
         }
 
         I_Instrument *instr = getInstrument();
         if (!instr || instr->GetType() != IT_SAMPLE) {
           break;
         }
+
+        Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
+        sampleInputField_->SetActive(sampleVar->GetInt() != NO_GM_INSTRUMENT);
 
         SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
         int newIndex = sampleInstr->GetSampleIndex();
@@ -1091,7 +931,7 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
         if (!sampleInstr->HasSlicesForWarning()) {
           sampleInstr->ClearSlices();
           lastSampleIndex_ = newIndex;
-          updateSliceCountLabel(sliceCountLabel_, sampleInstr);
+          updateSliceCount(sampleInstr);
           isDirty_ = true;
           break;
         }
@@ -1274,7 +1114,7 @@ void InstrumentView::onConfirmSampleChange(View &, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
     sampleInstr->ClearSlices();
     lastSampleIndex_ = newIndex;
-    updateSliceCountLabel(sliceCountLabel_, sampleInstr);
+    updateSliceCount(sampleInstr);
     isDirty_ = true;
     return;
   }
@@ -1345,8 +1185,6 @@ void InstrumentView::ConfirmedStop(Token source) {
 
 // override to synchronize the position selection for DrumInstruments
 void InstrumentView::SetFocus(UIField *field) {
-  Trace::Log("Instrument", "setFocus to %d", field);
-
   // Drum instrument, currently on a field and moving to a field?
   UIField *focus = GetFocus();
   I_Instrument *instr = getInstrument();
@@ -1354,13 +1192,82 @@ void InstrumentView::SetFocus(UIField *field) {
   if (focus && field && instr && instr->GetType() == IT_DRUM) {
     // is current field a hex field?
     int sourceColumn = focus->GetColumn();
-    Trace::Log("Instrument", "inner at %d", sourceColumn);
     if (sourceColumn != -1) {
-      Trace::Log("Instrument", "BAM!");
       field->SetColumn(sourceColumn);
     }
   }
 
   // call parent implementation
   FieldView::SetFocus(field);
+}
+
+void InstrumentView::AnimationUpdate() {
+  // First call the parent class implementation to draw the battery gauge
+  ScreenView::AnimationUpdate();
+
+  I_Instrument *instr = getInstrument();
+  if (instr) {
+    InstrumentType type = instr->GetType();
+
+    if (type == IT_SAMPLE) {
+      AnimationUpdateSample();
+    }
+  }
+}
+
+void InstrumentView::AddVolumeRow(int y) {
+  int i = viewData_->currentInstrumentID_;
+  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  I_Instrument *instr = bank->GetInstrument(i);
+  GUIPoint position = GUIPoint(1, y);
+
+  Variable *v = instr->FindVariable(Token::InstrumentParameterVolume);
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Volume  : %2.2X", 0, 0xFF, 1, 0x10));
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+
+  v = instr->FindVariable(Token::InstrumentParameterPan);
+  position.x_ = 17;
+  intVarField_.emplace_back(UIIntVarField(position, *v, "Pan     : %2.2X", 0, 0xFF, 1, 0x10));
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+
+  addIndexToLine(0, y, true);
+  addIndexToLine(1, y, false);
+}
+
+void InstrumentView::AddTableRow(int y) {
+  int i = viewData_->currentInstrumentID_;
+  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  I_Instrument *instr = bank->GetInstrument(i);
+  GUIPoint position = GUIPoint(1, y);
+
+  Variable *v = instr->FindVariable(Token::InstrumentParameterTable);
+  intVarOffField_.emplace_back(position, *v, "Table   : %2.2X", 0x00, TABLE_COUNT - 1, 1, 0x10);
+  intVarOffField_.back().SetLabelColor(Theme::SemanticColors::table);
+  intVarOffField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  fieldList_.insert(fieldList_.end(), &intVarOffField_.back());
+
+  position.x_ = 17;
+  v = instr->FindVariable(Token::InstrumentParameterTableAutomation);
+  intVarField_.emplace_back(position, *v, "Automate: %1s ", 0, 1, 1, 1);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::table);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+
+  addIndexToLine(2, y, true);
+  addIndexToLine(3, y, false);
+}
+
+const GUIRect InstrumentView::GetFocusRect() {
+  ModalView *mv = GetModalView();
+
+  if (mv) {
+    const GUIRect rect = mv->GetFocusRect();
+    return rect;
+  }
+
+  return FieldView::GetFocusRect();
 }

@@ -51,6 +51,8 @@ public:
   // For storing export theme name during modal callbacks
   etl::string<MAX_THEME_NAME_LENGTH> exportThemeName_;
 
+  const GUIRect GetFocusRect() override;
+
 protected:
 private:
   void onConfirmThemeOverwrite(View &view, ModalView &dialog);

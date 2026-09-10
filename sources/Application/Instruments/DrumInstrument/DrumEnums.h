@@ -76,7 +76,9 @@ enum drum_instrument_defaults_e {
   defaultInstrument9 = 0x1852,
   defaultInstrument10 = 0x0B6F,
   defaultInstrument11 = 0x1F84,
-  defaultCharacter = 0x00
+  defaultCharacter = 0x00,
+  defaultVolume = 0xFF,
+  defaultPan = 0x80,
 };
 
 typedef union drum_flags {

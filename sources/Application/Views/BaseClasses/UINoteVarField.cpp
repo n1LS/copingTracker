@@ -12,7 +12,6 @@
 #include "UINoteVarField.h"
 #include "Application/AppWindow.h"
 #include "Application/Utils/char.h"
-#include "ViewUtils.h"
 #include <System/Console/nanoprintf.h>
 
 UINoteVarField::UINoteVarField(const GUIPoint &position, Variable &v, const char *format, int min, int max, int xOffset,

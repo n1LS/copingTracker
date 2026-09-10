@@ -18,27 +18,23 @@ stack_voice_t StackInstrument::voices_[SONG_CHANNEL_COUNT];
 StackInstrument::StackInstrument()
     : I_Instrument(&variables_), spread_(Token::StackInstrumentSpread, stackDefaultSpread),
       wave_(Token::StackInstrumentWave, stackWaveNames, stackNumWaveforms, stackDefaultWave),
-      transpose_(Token::StackInstrumentTranspose, stackDefaultTranspose), table_(Token::StackInstrumentTable, VAR_OFF),
-      tableAuto_(Token::StackInstrumentTableAutomation, false),
+      transpose_(Token::StackInstrumentTranspose, stackDefaultTranspose),
       attack_(Token::StackInstrumentAttack, stackDefaultAttack), decay_(Token::StackInstrumentDecay, stackDefaultDecay),
       sustain_(Token::StackInstrumentSustain, stackDefaultSustain),
       release_(Token::StackInstrumentRelease, stackDefaultRelease),
-      volume_(Token::StackInstrumentVolume, stackDefaultVolume),
       brightness_(Token::StackInstrumentBrightness, stackDefaultBrightness),
       glide_(Token::StackInstrumentGlide, stackDefaultGlide) {
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
+  InsertBaseVariables();
   variables_.insert(variables_.end(), &spread_);
   variables_.insert(variables_.end(), &wave_);
   variables_.insert(variables_.end(), &transpose_);
-  variables_.insert(variables_.end(), &table_);
-  variables_.insert(variables_.end(), &tableAuto_);
   variables_.insert(variables_.end(), &attack_);
   variables_.insert(variables_.end(), &decay_);
   variables_.insert(variables_.end(), &sustain_);
   variables_.insert(variables_.end(), &release_);
-  variables_.insert(variables_.end(), &volume_);
   variables_.insert(variables_.end(), &brightness_);
   variables_.insert(variables_.end(), &glide_);
 }
@@ -130,7 +126,7 @@ void StackInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
   }
 }
 
-// TODO POD: implement and adjust accordingly
+// TODO nILS: implement and adjust accordingly
 bool StackInstrument::SupportsCommand(Token token) {
   return false;
 }

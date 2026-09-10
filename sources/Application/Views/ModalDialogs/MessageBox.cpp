@@ -142,8 +142,9 @@ void MessageBox::DrawView() {
     SetBackgroundColor(Theme::Dialog::bg);
     DrawChar(buttonStartX + 1 + textLen, y, CHAR(char_button_border_right_s));
 
-    buttonPosition_[i] = buttonStartX;
-    buttonLength_[i] = textLen + 2; // +2 for border chars
+    if (sel) {
+      focusRect_ = GUIRect(buttonStartX + left_, y + top_, textLen + 2, 1);
+    }
 
     buttonStartX += textLen + 3; // text + left border + right border + 1 space between buttons
   }
@@ -170,9 +171,4 @@ void MessageBox::ProcessButtonMask(uint16_t mask, bool pressed) {
     EndModal(button_[selected_]);
   }
   isDirty_ = true;
-}
-
-GUIRect MessageBox::GetFocusRect() {
-  int x = left_ + buttonPosition_[selected_];
-  return GUIRect(x, top_ + buttonY_, x + buttonLength_[selected_], top_ + buttonY_ + 1);
 }

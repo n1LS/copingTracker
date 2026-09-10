@@ -125,7 +125,7 @@ void picoTrackerGUIWindowImp::DrawString(int x, int y, const char *string) {
   }
 }
 
-void picoTrackerGUIWindowImp::DrawRect(const GUIRect &r) {
+void picoTrackerGUIWindowImp::DrawRect(const GUIRect r) {
   // This is the local drawing command for the device's own screen.
   chargfx_fill_rect(r.Left(), r.Top(), r.Width(), r.Height());
 
@@ -138,7 +138,7 @@ void picoTrackerGUIWindowImp::Clear() {
   chargfx_clear();
 };
 
-void picoTrackerGUIWindowImp::ClearTextRect(GUIRect &r) {
+void picoTrackerGUIWindowImp::ClearTextRect(GUIRect r) {
   Trace::Debug("GUI ClearTextRect call");
 };
 
@@ -167,7 +167,7 @@ void picoTrackerGUIWindowImp::Flush() {
   chargfx_draw_changed();
 
   // 2nd render pass for the focus rect
-  const GUIRect &rect = _window->GetFocusRect();
+  const GUIRect rect = _window->GetFocusRect();
   chargfx_draw_focus_rect(rect.Left(), rect.Top(), rect.Width());
 }
 
@@ -184,7 +184,7 @@ GUIRect picoTrackerGUIWindowImp::GetRect() {
   return GUIRect(0, 0, 320, 240);
 }
 
-const GUIRect &picoTrackerGUIWindowImp::GetFocusRect() const {
+const GUIRect picoTrackerGUIWindowImp::GetFocusRect() const {
   return _window->GetFocusRect();
 }
 

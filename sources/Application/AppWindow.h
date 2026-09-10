@@ -56,7 +56,7 @@ public:
 
   using GUIWindow::Clear;
   virtual void Clear();
-  virtual void ClearTextRect(GUIRect &rect);
+  virtual void ClearTextRect(GUIRect rect);
   virtual void DrawChar(int x, int y, const char c, bool transparent = false);
   virtual void DrawString(int x, int y, const char *string);
   virtual void SwapColors();
@@ -80,6 +80,10 @@ public:
   }
 
   static GUIColor colorPalette_[16];
+
+  bool buttonDown(ButtonMask button) {
+    return mask_ & button;
+  }
 
 public:
   void Flush();

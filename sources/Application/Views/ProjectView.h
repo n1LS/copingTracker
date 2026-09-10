@@ -56,6 +56,8 @@ public:
 
   void Update(Observable &, I_ObservableData *);
 
+  const GUIRect GetFocusRect() override;
+
   void OnPurgeInstruments();
   void OnPurge();
   void OnQuit();

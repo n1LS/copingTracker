@@ -23,7 +23,7 @@ void FieldView::UpdateFocusRect() {
   GUIPoint pos = focus_->GetPosition();
   int w = focus_->GetFocusWidth();
   int dx = focus_->GetFocusOffset();
-  focusRect_ = GUIRect(pos.x_ + dx, pos.y_, pos.x_ + dx + w, pos.y_);
+  focusRect_ = GUIRect(pos.x_ + dx, pos.y_, w, 1);
 }
 
 void FieldView::SetFocus(UIField *field) {
@@ -220,8 +220,9 @@ int FieldView::GetFocusIndex() {
   return focusIndex;
 }
 
-GUIRect FieldView::GetFocusRect() {
+const GUIRect FieldView::GetFocusRect() {
   ModalView *v = GetModalView();
+
   if (v) {
     return v->GetFocusRect();
   }

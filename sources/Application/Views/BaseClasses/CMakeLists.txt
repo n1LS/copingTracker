@@ -1,21 +1,23 @@
 add_library(application_views_baseclasses
+../ScreenView.cpp
   ListView.cpp
   FileListView.cpp
   I_Action.cpp
   ModalView.cpp
-  ../ScreenView.cpp
   UIActionField.cpp
-  UIHexVarField.cpp
+  UIBitmaskVarField.cpp
   UIField.cpp
+  UIHexVarField.cpp
   UIIntField.cpp
   UIIntVarField.cpp
   UIIntVarOffField.cpp
   UINoteVarField.cpp
   UISortedVarList.cpp
   UIStaticField.cpp
-  UITempoField.cpp
   UISwatchField.cpp
-  UIBitmaskVarField.cpp
+  UITempoField.cpp
+  UITabField.cpp
+  UITextField.cpp
   View.cpp
   ViewEvent.cpp
   ViewUtils.cpp
