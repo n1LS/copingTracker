@@ -11,20 +11,20 @@
 
 #include "UIIntVarField.h"
 
-class UITabField : public UIIntVarField{
+class UITabField : public UIIntVarField {
 public:
   UITabField(const char *label, const GUIPoint &position, Variable &variable, const char *tabs[], int count);
   void Draw(GUIWindow &w, int offset = 0);
   int GetFocusOffset();
+
 private:
-  int min_;
-  int max_;
+  int count_;
+  int focusPosition_;
   Token action_;
   Variable &src_;
 
   const char *label_;
   etl::vector<const char *, 10> tabs_;
 };
-
 
 #endif

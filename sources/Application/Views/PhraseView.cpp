@@ -317,7 +317,7 @@ void PhraseView::updateCursor(int dx, int dy) {
   viewData_->phraseCurPos_ = row_;
 
   int x = 5 + columnPositions_[col_];
-  focusRect_ = GUIRect(x, row_ + 3, x + columnWidths_[col_]);
+  focusRect_ = GUIRect(x, row_ + 3, columnWidths_[col_], 1);
 
   isDirty_ = true;
 }
@@ -527,7 +527,6 @@ void PhraseView::warpToNeighbour(int offset) {
 
 GUIRect PhraseView::getSelectionRect() {
   GUIRect r(clipboard_.col_, clipboard_.row_, col_, row_);
-  r.Normalize();
   return r;
 }
 

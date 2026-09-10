@@ -141,6 +141,10 @@ void MessageBox::DrawView() {
     SetBackgroundColor(Theme::Dialog::bg);
     DrawChar(buttonStartX + 1 + textLen, y, CHAR(char_button_border_right_s));
 
+    if (sel) {
+      focusRect_ = GUIRect(buttonStartX + left_, y + top_, textLen + 2, 1);
+    }
+
     buttonStartX += textLen + 3; // text + left border + right border + 1 space between buttons
   }
 }
@@ -149,6 +153,10 @@ void MessageBox::OnPlayerUpdate(PlayerEventType, unsigned int currentTick) {
 }
 
 void MessageBox::OnFocus() {
+}
+
+const GUIRect MessageBox::GetFocusRect() {
+  return focusRect_;
 }
 
 void MessageBox::ProcessButtonMask(uint16_t mask, bool pressed) {

@@ -44,25 +44,8 @@ static uint8_t ui_font_index = 0;
 // hit in doing so vs a bool array
 static bool changed[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 
-// Default palette, can be redefined
-static uint16_t palette[16] = {
-    0x0000, // 0: black       (#000000)
-    0x0080, // 1: dark red    (#800000)
-    0x0004, // 2: dark green  (#008000)
-    0x0084, // 3: dark yellow (#808000)
-    0x1000, // 4: dark blue   (#000080)
-    0x1080, // 5: dark magenta(#800080)
-    0x1004, // 6: dark cyan   (#008080)
-    0x1084, // 7: gray        (#808080)
-    0x38C6, // 8: light gray  (#C6C6C6)
-    0x00F8, // 9: red         (#FF0000)
-    0xE007, // 10: green      (#00FF00)
-    0xE0FF, // 11: yellow     (#FFFF00)
-    0x1F00, // 12: blue       (#0000FF)
-    0x1FF8, // 13: magenta    (#FF00FF)
-    0xFF07, // 14: cyan       (#00FFFF)
-    0xFFFF  // 15: white      (#FFFFFF)
-};
+// this is the ready to use rgb565 palette with swapped bytes
+static uint16_t palette[16];
 
 uint16_t *chargfx_get_palette() {
   return palette;

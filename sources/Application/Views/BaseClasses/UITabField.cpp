@@ -6,11 +6,12 @@
  * This file is part of the copingTracker firmware
  */
 
- #include "UITabField.h"
- #include "Application/AppWindow.h"
+#include "UITabField.h"
+#include "Application/AppWindow.h"
 
- UITabField::UITabField(const char *label, const GUIPoint &position, Variable &variable, const char *tabs[], int count) : UIIntVarField(position, variable, "", 0, count - 1, 1, count - 1) , src_(variable) {
-  max_ = count - 1;
+UITabField::UITabField(const char *label, const GUIPoint &position, Variable &variable, const char *tabs[], int count)
+    : UIIntVarField(position, variable, "", 0, count - 1, 1, count - 1), src_(variable) {
+  count_ = count;
   label_ = label;
 
   src_ = variable;
@@ -27,51 +28,50 @@ void UITabField::Draw(GUIWindow &window, int offset) {
   int index = src_.GetInt();
 
   w.SetColor(Theme::View::fg);
+  w.SetBackgroundColor(backgroundColor_);
   w.DrawString(position.x_, position.y_, label_);
 
-  int x = position.x_ + strlen(label_) + 1;
+  int x = position.x_ + (int)strlen(label_);
 
   const char *space = " ";
   const char *noSpace = "";
-
   const char **nextSpace = &space;
 
-  for (int t = 0; t < max_; t++) {
-    int len = strlen(tabs_[t]); 
+  for (int t = 0; t < count_; t++) {
+    int len = (int)strlen(tabs_[t]);
 
     if (index == t) {
-      w.SetBackgroundColor(Theme::View::bg);
-      w.SetColor(Theme::View::Button::bg(true));
+      w.SetBackgroundColor(backgroundColor_);
+      w.SetColor(Theme::View::Tab::bg(true));
       w.DrawChar(x, position.y_, CHAR(char_button_border_left_s));
-      w.DrawChar(x + 1 + len, position.y_, CHAR(char_button_border_left_s));
-      
-      w.SetBackgroundColor(Theme::View::Button::bg(true));
-      w.SetColor(Theme::View::Button::fg(true));
-      w.DrawString(x, position.y_, tabs_[t]);
+      w.DrawChar(x + 1 + len, position.y_, CHAR(char_button_border_right_s));
+
+      w.SetBackgroundColor(Theme::View::Tab::bg(true));
+      w.SetColor(Theme::View::Tab::fg(true));
+      w.DrawString(x + 1, position.y_, tabs_[t]);
 
       nextSpace = &noSpace;
-      focusWidth_ = 2 + len;
+      focusWidth_ = len + 2;
+      focusPosition_ = x;
     } else {
-      w.SetBackgroundColor(Theme::View::bg);
-      w.SetColor(Theme::View::inactive);
+      w.SetBackgroundColor(backgroundColor_);
+      w.SetColor(Theme::View::Tab::fg(false));
       w.DrawString(x, position.y_, *nextSpace);
       w.DrawString(x + 1, position.y_, tabs_[t]);
-      nextSpace =  &space;
+      nextSpace = &space;
     }
 
     x += 1 + len;
   }
 
   // last space
-  w.DrawString(x + 1, position.y_, " ");
-
-  // TODO nILS: if we ever need scrolling, this is where to put the indicator + handle the scroll position
+  w.SetColor(RED);
+  w.DrawString(x, position.y_, *nextSpace);
 }
 
 int UITabField::GetFocusOffset() {
-  return 0;
+  return focusPosition_;
 }
 
 void Update(Observable &o, I_ObservableData *d) {
-
 }

@@ -25,9 +25,9 @@ MidiInstrument::NoteOffInfo MidiInstrument::NoteOffInfo::current = {0, 0};
 
 MidiInstrument::MidiInstrument()
     : I_Instrument(&variables_), channel_(Token::MidiInstrumentChannel, 0),
-      noteLen_(Token::MidiInstrumentNoteLength, 0), volume_(Token::MidiInstrumentVolume, 255),
-      table_(Token::MidiInstrumentTable, VAR_OFF), tableAuto_(Token::MidiInstrumentTableAutomation, false),
-      program_(Token::MidiInstrumentProgram, VAR_OFF) {
+      noteLen_(Token::MidiInstrumentNoteLength, 0), program_(Token::MidiInstrumentProgram, VAR_OFF) {
+
+  InsertBaseVariables();
 
   if (svc_ == 0) {
     svc_ = MidiService::GetInstance();
@@ -40,9 +40,6 @@ MidiInstrument::MidiInstrument()
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &channel_);
   variables_.insert(variables_.end(), &noteLen_);
-  variables_.insert(variables_.end(), &volume_);
-  variables_.insert(variables_.end(), &table_);
-  variables_.insert(variables_.end(), &tableAuto_);
   variables_.insert(variables_.end(), &program_);
 }
 
@@ -364,12 +361,12 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> MidiInstrument::GetDefaultName() {
 }
 
 int MidiInstrument::GetTable() {
-  Variable *v = FindVariable(Token::MidiInstrumentTable);
+  Variable *v = FindVariable(Token::InstrumentParameterTable);
   return v->GetInt();
 }
 
 bool MidiInstrument::GetTableAutomation() {
-  Variable *v = FindVariable(Token::MidiInstrumentTableAutomation);
+  Variable *v = FindVariable(Token::InstrumentParameterTableAutomation);
   return v->GetBool();
 }
 

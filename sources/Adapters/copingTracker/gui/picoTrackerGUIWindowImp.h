@@ -42,7 +42,7 @@ public:
 public: // I_GUIWindowImp implementation
   virtual void SetColor(Color color) override;
   virtual void SetBackgroundColor(Color color) override;
-  virtual void DrawRect(const GUIRect &rect) override;
+  virtual void DrawRect(const GUIRect rect) override;
   virtual void DrawChar(int x, int y, const char c, bool transparent = false) override;
   virtual void DrawString(int x, int y, const char *string) override;
   virtual GUIRect GetRect();
@@ -51,13 +51,13 @@ public: // I_GUIWindowImp implementation
   virtual void Lock();
   virtual void Unlock();
   virtual void Clear();
-  virtual void ClearTextRect(GUIRect &rect);
+  virtual void ClearTextRect(GUIRect rect);
   virtual void PushEvent(GUIEvent &event);
 
   virtual void SendFont(uint8_t uifontIndex);
   virtual void SendPalette();
   virtual void SetPalette(const GUIColor *palette, int colorCount) override;
-  virtual const GUIRect &GetFocusRect() const override;
+  virtual const GUIRect GetFocusRect() const override;
 
   static void ProcessEvent(picoTrackerEvent &event);
   static void ProcessButtonChange(uint16_t changeMask, uint16_t buttonMask);

@@ -14,29 +14,34 @@
 
 // A Simple class to represent a Point/Position
 
-class GUIPoint {
-public:
+struct GUIPoint {
   GUIPoint(int x = 0, int y = 0) {
     x_ = x;
     y_ = y;
   };
+
   void Add(GUIPoint p) {
     x_ = x_ + p.x_;
     y_ = y_ + p.y_;
   };
+
   void Sub(GUIPoint p) {
     x_ = x_ - p.x_;
     y_ = y_ - p.y_;
   };
+
   bool operator==(const GUIPoint &p) const {
     return x_ == p.x_ && y_ == p.y_;
   };
+
   bool operator!=(const GUIPoint &p) const {
     return x_ != p.x_ || y_ != p.y_;
   };
+
   GUIPoint operator+(const GUIPoint &p) const {
     return GUIPoint(x_ + p.x_, y_ + p.y_);
   };
+
   GUIPoint operator-(const GUIPoint &p) const {
     return GUIPoint(x_ - p.x_, y_ - p.y_);
   };

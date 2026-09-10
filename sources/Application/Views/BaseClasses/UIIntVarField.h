@@ -28,7 +28,7 @@ public:
 
   void ProcessClear();
   Token GetVariableID();
-  Variable &GetVariable();
+  Variable *GetVariable() override;
   void SetRange(int min, int max, int xOffset, int yOffset);
   int GetFocusOffset();
 

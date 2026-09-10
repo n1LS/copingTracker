@@ -113,8 +113,8 @@ Token UIIntVarField::GetVariableID() {
   return src_.GetID();
 }
 
-Variable &UIIntVarField::GetVariable() {
-  return src_;
+Variable *UIIntVarField::GetVariable() {
+  return &src_;
 }
 
 void UIIntVarField::SetRange(int min, int max, int xOffset, int yOffset) {
@@ -128,7 +128,7 @@ int UIIntVarField::GetFocusOffset() {
   char *colon = const_cast<char *>(strchr(format_, ':'));
 
   if (colon != NULL) {
-    return colon - format_;
+    return (int)(colon - format_);
   }
 
   return 0;

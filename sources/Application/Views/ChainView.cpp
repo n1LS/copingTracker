@@ -95,7 +95,7 @@ void ChainView::updateFocusRect() {
   int col = viewData_->chainCol_;
   int x = 5 + columnPositions_[col];
   int y = 3 + viewData_->chainRow_;
-  focusRect_ = GUIRect(x, y, x + columnWidths_[col], y);
+  focusRect_ = GUIRect(x, y, columnWidths_[col], 1);
 }
 
 void ChainView::updateCursorValue(int offset, int dx, int dy) {
@@ -189,7 +189,6 @@ void ChainView::clonePosition() {
 
 GUIRect ChainView::getSelectionRect() {
   GUIRect r(clipboard_.col_, clipboard_.row_, viewData_->chainCol_, viewData_->chainRow_);
-  r.Normalize();
   return r;
 }
 

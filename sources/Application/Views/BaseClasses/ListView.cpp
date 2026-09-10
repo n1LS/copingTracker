@@ -79,7 +79,7 @@ void ListView::DrawListItems() {
       DrawString(0, y, char_button_border_left_s);
       DrawString(SCREEN_WIDTH - 2, y, char_button_border_right_s);
 
-      focusRect_ = GUIRect(0, y, SCREEN_WIDTH - 1, y);
+      focusRect_ = GUIRect(0, y, SCREEN_WIDTH, 1);
     }
 
     y++;

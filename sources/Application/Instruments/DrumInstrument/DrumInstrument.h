@@ -70,7 +70,7 @@ public:
 private:
   static drum_voice_t voices_[SONG_CHANNEL_COUNT];
 
-  etl::list<Variable *, 13> variables_;
+  etl::list<Variable *, 17> variables_;
 
   Variable vVoice0_;
   Variable vVoice1_;

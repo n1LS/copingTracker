@@ -22,8 +22,7 @@ static uint8_t colors[CHARGFX_TEXT_HEIGHT * CHARGFX_TEXT_WIDTH] = {0};
 static bool changed[CHARGFX_TEXT_HEIGHT * CHARGFX_TEXT_WIDTH] = {0};
 static uint32_t pixel_buffer[CHARGFX_SCREEN_HEIGHT * CHARGFX_SCREEN_WIDTH] = {0};
 
-static uint16_t palette[16] = {0x0000, 0x0080, 0x0004, 0x0084, 0x1000, 0x1080, 0x1004, 0x1084,
-                               0x38C6, 0x00F8, 0xE007, 0xE0FF, 0x1F00, 0x1FF8, 0xFF07, 0xFFFF};
+static uint16_t palette[16];
 
 static uint32_t RGB565toRGB888(uint16_t rgb565) {
   uint8_t r = (rgb565 >> 11) << 3;

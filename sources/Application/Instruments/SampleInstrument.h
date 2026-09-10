@@ -134,14 +134,12 @@ private:
   adsr_envelope_t envelope_[SONG_CHANNEL_COUNT];
 
   SampleVariable sample_;
-  Variable volume_;
   Variable interpolation_;
   Variable crush_;
   Variable drive_;
   Variable downsample_;
   Variable rootNote_;
   Variable fineTune_;
-  Variable pan_;
   Variable cutoff_;
   Variable reso_;
   Variable filterMix_;
@@ -150,8 +148,6 @@ private:
   Variable loopMode_;
   WatchedVariable loopStart_;
   WatchedVariable loopEnd_;
-  Variable table_;
-  Variable tableAuto_;
   Variable attack_;
   Variable decay_;
   Variable sustain_;

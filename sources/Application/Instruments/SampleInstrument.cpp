@@ -45,17 +45,15 @@ signed char SampleInstrument::lastMidiNote_[SONG_CHANNEL_COUNT];
 #define KRATE_SAMPLE_COUNT 100
 
 SampleInstrument::SampleInstrument()
-    : I_Instrument(&variables_), sample_(Token::SampleInstrumentSample), volume_(Token::SampleInstrumentVolume, 0x80),
+    : I_Instrument(&variables_), sample_(Token::SampleInstrumentSample),
       interpolation_(Token::SampleInstrumentInterpolation, interpolationTypes, 2, 0),
       crush_(Token::SampleInstrumentCrush, 16), drive_(Token::SampleInstrumentCrushVolume, 0xFF),
       downsample_(Token::SampleInstrumentDownsample, 0), rootNote_(Token::SampleInstrumentRootNote, 60),
-      fineTune_(Token::SampleInstrumentFineTune, 0x7F), pan_(Token::SampleInstrumentPan, 0x7F),
-      cutoff_(Token::SampleInstrumentFilterCutOff, 0xFF), reso_(Token::SampleInstrumentFilterResonance, 0x00),
-      filterMix_(Token::SampleInstrumentFilterType, 0x00),
+      fineTune_(Token::SampleInstrumentFineTune, 0x7F), cutoff_(Token::SampleInstrumentFilterCutOff, 0xFF),
+      reso_(Token::SampleInstrumentFilterResonance, 0x00), filterMix_(Token::SampleInstrumentFilterType, 0x00),
       filterMode_(Token::SampleInstrumentFilterMode, filterMode, 3, 0), start_(Token::SampleInstrumentStart, 0),
       loopMode_(Token::SampleInstrumentLoopMode, loopTypes, SILM_LAST, 0),
       loopStart_(Token::SampleInstrumentLoopStart, 0), loopEnd_(Token::SampleInstrumentEnd, 0),
-      table_(Token::SampleInstrumentTable, VAR_OFF), tableAuto_(Token::SampleInstrumentTableAutomation, false),
       attack_(Token::SampleInstrumentAttack, 0), decay_(Token::SampleInstrumentDecay, 0),
       sustain_(Token::SampleInstrumentSustain, 0xFF), release_(Token::SampleInstrumentRelease, 0),
       gmInstrument_(Token::SampleInstrumentGMInstrument, NO_GM_INSTRUMENT) {
@@ -74,36 +72,34 @@ SampleInstrument::SampleInstrument()
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
+  InsertBaseVariables();
   variables_.insert(variables_.end(), &sample_);
   sample_.AddObserver(*this);
 
-  variables_.insert(variables_.end(), &volume_);
   variables_.insert(variables_.end(), &interpolation_);
   variables_.insert(variables_.end(), &crush_);
   variables_.insert(variables_.end(), &drive_);
   variables_.insert(variables_.end(), &downsample_);
   variables_.insert(variables_.end(), &rootNote_);
   variables_.insert(variables_.end(), &fineTune_);
-  variables_.insert(variables_.end(), &pan_);
   variables_.insert(variables_.end(), &cutoff_);
   variables_.insert(variables_.end(), &reso_);
   variables_.insert(variables_.end(), &filterMix_);
   variables_.insert(variables_.end(), &filterMode_);
   variables_.insert(variables_.end(), &start_);
-  start_.AddObserver(*this);
   variables_.insert(variables_.end(), &loopMode_);
-  loopMode_.SetInt(0);
   variables_.insert(variables_.end(), &loopStart_);
-  loopStart_.AddObserver(*this);
   variables_.insert(variables_.end(), &loopEnd_);
-  loopEnd_.AddObserver(*this);
-  variables_.insert(variables_.end(), &table_);
-  variables_.insert(variables_.end(), &tableAuto_);
   variables_.insert(variables_.end(), &gmInstrument_);
   variables_.insert(variables_.end(), &attack_);
   variables_.insert(variables_.end(), &decay_);
   variables_.insert(variables_.end(), &sustain_);
   variables_.insert(variables_.end(), &release_);
+
+  loopMode_.SetInt(0);
+  loopEnd_.AddObserver(*this);
+  start_.AddObserver(*this);
+  loopStart_.AddObserver(*this);
 
   tableState_.Reset();
   slicePoints_.fill(0);
@@ -1100,12 +1096,12 @@ int SampleInstrument::GetSampleIndex() {
 }
 
 void SampleInstrument::SetVolume(int volume) {
-  Variable *v = FindVariable(Token::SampleInstrumentVolume);
+  Variable *v = FindVariable(Token::InstrumentParameterVolume);
   v->SetInt(volume);
 }
 
 int SampleInstrument::GetVolume() {
-  Variable *v = FindVariable(Token::SampleInstrumentVolume);
+  Variable *v = FindVariable(Token::InstrumentParameterVolume);
   return v->GetInt();
 }
 
@@ -1686,7 +1682,7 @@ int SampleInstrument::GetTable() {
 }
 
 bool SampleInstrument::GetTableAutomation() {
-  return tableAuto_.GetBool();
+  return tableAutomation_.GetBool();
 }
 
 void SampleInstrument::GetTableState(TableSaveState &state) {

@@ -72,7 +72,7 @@ public:
   }
 
   virtual bool GetTableAutomation() {
-    return tableAuto_.GetBool();
+    return tableAutomation_.GetBool();
   }
 
 private:
@@ -80,18 +80,15 @@ private:
 
   stack_parameters_t getInstrumentParameters();
 
-  etl::list<Variable *, 12> variables_;
+  etl::list<Variable *, 13> variables_;
 
   Variable spread_;
   Variable wave_;
   Variable transpose_;
-  Variable table_;
-  Variable tableAuto_;
   Variable attack_;
   Variable decay_;
   Variable sustain_;
   Variable release_;
-  Variable volume_;
   Variable brightness_;
   Variable glide_;
 };

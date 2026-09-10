@@ -540,8 +540,8 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
       UIField *focus = GetFocus();
       for (auto &field : hexVarField_) {
         if (&field == focus && field.GetVariableID() == Token::VarSampleEditEnd) {
-          Variable &var = field.GetVariable();
-          var.SetInt(tempSampleSize_ - 1);
+          Variable *var = field.GetVariable();
+          var->SetInt(tempSampleSize_ - 1);
           isDirty_ = true;
           break;
         }
@@ -891,19 +891,16 @@ void SampleEditorView::onConfirmOverwriteSave(View &, ModalView &dialog) {
     return;
   }
 
-  // TODO nILS: clearTextRect?
   hadModal_ = true;
   isDirty_ = true;
 }
 
 void SampleEditorView::onOperationFailedAck(View &, ModalView &) {
-  // TODO nILS: clearTextRect?
   hadModal_ = true;
   isDirty_ = true;
 }
 
 void SampleEditorView::onSimpleModalDismiss(View &view, ModalView &) {
-  // TODO nILS: clearTextRect?
   hadModal_ = true;
   isDirty_ = true;
 }
@@ -1421,7 +1418,6 @@ void SampleEditorView::loadSample(const etl::string<MAX_INSTRUMENT_FILENAME_LENG
 
 void SampleEditorView::clearWaveformRegion() {
   // Clear the entire waveform area
-  GUIRect rect = GUIRect(GraphXOffset, GraphYOffset, GraphXOffset + GraphField::BitmapWidth,
-                         GraphYOffset + GraphField::BitmapHeight);
+  GUIRect rect = GUIRect(GraphXOffset, GraphYOffset, GraphField::BitmapWidth, GraphField::BitmapHeight);
   DrawRect(rect, Theme::View::bg);
 }

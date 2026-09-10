@@ -93,73 +93,49 @@ void View::Unlock() {
 }
 
 void View::drawMap() {
-  GUIPoint anchor = GetAnchor();
-  GUIPoint pos(View::margin_, anchor.y_ + View::songRowCount_ + 1);
+  GUIPoint pos(0, SCREEN_HEIGHT - 5);
+
+  const char songViewChar = Player::GetInstance()->GetSequencerMode() == SM_LIVE ? 'L' : 'S';
 
   // draw entire map
   SetColor(Theme::View::Map::fg(false));
   SetBackgroundColor(Theme::View::Map::bg(false));
 
-  Player *player = Player::GetInstance();
-  const char *songViewChar = player->GetSequencerMode() == SM_LIVE ? "L" : "S";
-
-  char buffer[5];
-  // row1
-  DrawString(pos.x_, pos.y_, "DH  ");
-  // row2
-  DrawString(pos.x_, pos.y_ + 1, "W" char_dotted_horizontal_s "G ");
-  // row3
-  DrawString(pos.x_, pos.y_ + 2, songViewChar);
-  DrawString(pos.x_ + 1, pos.y_ + 2, "CPI");
-  // row4
-  DrawString(pos.x_, pos.y_ + 3, "M" char_dotted_horizontal_s "TT");
+  DrawString(pos.x_, pos.y_ + 0, "   ");
+  DrawString(pos.x_, pos.y_ + 1, "DH  ");
+  DrawString(pos.x_, pos.y_ + 2, "W G  ");
+  DrawChar(pos.x_, pos.y_ + 3, songViewChar);
+  DrawString(pos.x_ + 1, pos.y_ + 3, "CPI ");
+  DrawString(pos.x_, pos.y_ + 4, "M TT ");
 
   // dotted fast forward symbols
   SetColor(Theme::View::inactive);
-  DrawString(pos.x_ + 1, pos.y_ + 1, char_dotted_horizontal_s);
-  DrawString(pos.x_ + 1, pos.y_ + 3, char_dotted_horizontal_s);
+  DrawChar(pos.x_ + 1, pos.y_ + 2, CHAR(char_dotted_horizontal_s));
+  DrawChar(pos.x_ + 1, pos.y_ + 4, CHAR(char_dotted_horizontal_s));
 
   // draw current screen on map
   SetColor(Theme::View::Map::fg(true));
   SetBackgroundColor(Theme::View::Map::bg(true));
 
-  pos.y_ = anchor.y_ + View::songRowCount_ + 1;
-  switch (viewType_) {
-    case VT_CHAIN:
-      DrawString(pos.x_ + 1, pos.y_ + 2, "C");
+  struct MapEntry {
+    ViewType viewType;
+    uint8_t x;
+    uint8_t y;
+    char character;
+  };
+
+  const int viewCount = 11;
+
+  MapEntry mapEntries[viewCount] = {{VT_CHAIN, 1, 3, 'C'}, {VT_PHRASE, 2, 3, 'P'},       {VT_DEVICE, 0, 1, 'D'},
+                                    {VT_HELP, 1, 1, 'H'},  {VT_PROJECT, 0, 2, 'W'},      {VT_INSTRUMENT, 3, 3, 'I'},
+                                    {VT_TABLE, 2, 4, 'T'}, {VT_TABLE2, 3, 4, 'T'},       {VT_GROOVE, 2, 2, 'G'},
+                                    {VT_MIXER, 0, 4, 'M'}, {VT_SONG, 0, 3, songViewChar}};
+
+  for (int n = 0; n < viewCount; n++) {
+    if (viewType_ == mapEntries[n].viewType) {
+      DrawChar(pos.x_ + mapEntries[n].x, pos.y_ + mapEntries[n].y, mapEntries[n].character);
       break;
-    case VT_PHRASE:
-      DrawString(pos.x_ + 2, pos.y_ + 2, "P");
-      break;
-    case VT_DEVICE:
-      DrawString(pos.x_, pos.y_, "D");
-      break;
-    case VT_HELP:
-      DrawString(pos.x_ + 1, pos.y_, "H");
-      break;
-    case VT_PROJECT:
-      DrawString(pos.x_, pos.y_ + 1, "W");
-      break;
-    case VT_INSTRUMENT:
-      DrawString(pos.x_ + 3, pos.y_ + 2, "I");
-      break;
-    case VT_TABLE: // under phrase
-      DrawString(pos.x_ + 2, pos.y_ + 3, "T");
-      break;
-    case VT_TABLE2: // under instrument
-      DrawString(pos.x_ + 3, pos.y_ + 3, "T");
-      break;
-    case VT_GROOVE:
-      DrawString(pos.x_ + 2, pos.y_ + 1, "G");
-      break;
-    case VT_MIXER:
-      DrawString(pos.x_, pos.y_ + 3, "M");
-      break;
-    case VT_SONG:
-      DrawString(pos.x_, pos.y_ + 2, songViewChar);
-      break;
-    default:
-      break;
+    }
   }
 }
 
@@ -379,14 +355,12 @@ void View::DismissModal() {
 }
 
 void View::Redraw() {
+  DrawView();
+
   if (modalView_) {
-    if (isDirty_) {
-      DrawView();
-    }
     modalView_->Redraw();
-  } else {
-    DrawView();
   }
+
   isDirty_ = false;
 }
 
@@ -449,7 +423,7 @@ void View::DrawChar(int x, int y, const char character, bool transparent) {
   w_.DrawChar(x, y, character, transparent);
 }
 
-void View::DrawRect(const GUIRect &r, Color color) {
+void View::DrawRect(const GUIRect r, Color color) {
   w_.SetCurrentRectColor(color);
   w_.DrawRect(r);
 }
@@ -810,6 +784,6 @@ bool View::ConfirmStopPlayback(Token source) {
   return false;
 }
 
-GUIRect View::GetFocusRect() {
+const GUIRect View::GetFocusRect() {
   return focusRect_;
 }

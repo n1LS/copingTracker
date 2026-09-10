@@ -25,7 +25,6 @@ UIHexVarField::UIHexVarField(const GUIPoint &position, Variable &v, int precisio
 }
 
 void UIHexVarField::Draw(GUIWindow &w, int offset) {
-
   GUIPoint position = GetPosition();
   position.y_ += offset;
 
@@ -36,10 +35,10 @@ void UIHexVarField::Draw(GUIWindow &w, int offset) {
   int subSelectionOffset = -1;
   int valueOffset = FindFormatValueOffset(format_);
   if (valueOffset >= 0) {
-    subSelectionOffset = valueOffset + (precision_ - position_);
+    subSelectionOffset = precision_ - position_;
   }
 
-  focusWidth_ = DrawLabeledField(w, position, buffer, focus_, subSelectionOffset);
+  focusWidth_ = DrawLabeledField(w, position, buffer, subSelectionOffset, 1);
 }
 
 void UIHexVarField::ProcessArrow(uint16_t mask) {

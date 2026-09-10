@@ -156,12 +156,6 @@ void ThemeView::DrawView() {
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::inactive);
   DrawString(21, 7, "R  G  B");
-
-  if (isColorComponentFocus()) {
-    UIIntVarField &field = intVarField_.back();
-    GUIPoint pos = field.GetPosition();
-    focusRect_ = GUIRect(pos.x_, pos.y_, pos.x_ + 2, pos.y_);
-  }
 }
 
 void ThemeView::addSwatchField(Color color, GUIPoint position) {
@@ -295,6 +289,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   if (!hasFocus_) {
     return;
   }
+
   UIField *focus = GetFocus();
   focus->ClearFocus();
   focus->Draw(w_);
@@ -365,7 +360,6 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
     case Token::VarUIFont:
       {
         // need to force redraw of entire screen to update for font change
-        Clear();
         DrawView();
         configDirty_ = true;
         break;
@@ -542,10 +536,18 @@ void ThemeView::importTheme() {
 
 void ThemeView::AnimationUpdate() {
   if (forceRedraw_) {
-    Clear();
     DrawView();
     forceRedraw_ = false;
   }
 
   ScreenView::AnimationUpdate();
+}
+
+const GUIRect ThemeView::GetFocusRect() {
+  if (isColorComponentFocus()) {
+    GUIPoint pos = colorComponentField_->GetPosition();
+    return GUIRect(pos.x_, pos.y_, 2, 1);
+  }
+
+  return FieldView::GetFocusRect();
 }

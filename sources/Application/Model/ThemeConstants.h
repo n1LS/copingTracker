@@ -17,22 +17,22 @@
 // Define default color values to be used across the application
 namespace ThemeConstants {
 // Color constants
-const uint32_t DEFAULT_COLOR0 = 0x000000;
-const uint32_t DEFAULT_COLOR1 = 0x800000;
-const uint32_t DEFAULT_COLOR2 = 0x008000;
-const uint32_t DEFAULT_COLOR3 = 0x808000;
-const uint32_t DEFAULT_COLOR4 = 0x000080;
-const uint32_t DEFAULT_COLOR5 = 0x800080;
-const uint32_t DEFAULT_COLOR6 = 0x008080;
-const uint32_t DEFAULT_COLOR7 = 0x808080;
-const uint32_t DEFAULT_COLOR8 = 0xc6c6c6;
-const uint32_t DEFAULT_COLOR9 = 0xFF0000;
-const uint32_t DEFAULT_COLOR10 = 0x00FF00;
-const uint32_t DEFAULT_COLOR11 = 0xFFFF00;
-const uint32_t DEFAULT_COLOR12 = 0x0000FF;
-const uint32_t DEFAULT_COLOR13 = 0xFF00FF;
-const uint32_t DEFAULT_COLOR14 = 0x00FFFF;
-const uint32_t DEFAULT_COLOR15 = 0xFFFFFF;
+const uint32_t DEFAULT_COLOR0 =  0x000000;
+const uint32_t DEFAULT_COLOR1 =  0xBB3B2A;
+const uint32_t DEFAULT_COLOR2 =  0x25BC24;
+const uint32_t DEFAULT_COLOR3 =  0xC88200;
+const uint32_t DEFAULT_COLOR4 =  0x003259;
+const uint32_t DEFAULT_COLOR5 =  0xBF4182;
+const uint32_t DEFAULT_COLOR6 =  0x2DB1BE;
+const uint32_t DEFAULT_COLOR7 =  0x808080;
+const uint32_t DEFAULT_COLOR8 =  0x303030;
+const uint32_t DEFAULT_COLOR9 =  0xFC391F;
+const uint32_t DEFAULT_COLOR10 = 0x31E71F;
+const uint32_t DEFAULT_COLOR11 = 0xFFC023;
+const uint32_t DEFAULT_COLOR12 = 0x40649E;
+const uint32_t DEFAULT_COLOR13 = 0xFF64B4;
+const uint32_t DEFAULT_COLOR14 = 0x14F0F0;
+const uint32_t DEFAULT_COLOR15 = 0xDEDEDE;
 
 // Font constants
 const int DEFAULT_UIFONT = 0x0;

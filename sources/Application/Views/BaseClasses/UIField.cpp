@@ -54,61 +54,65 @@ void UIField::SetActive(bool active) {
 
 int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset,
                               int subSelectionLength) {
-  ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
-  ((AppWindow &)w).SetColor(Theme::View::fg);
+  w.SetBackgroundColor(backgroundColor_);
+  w.SetColor(Theme::View::fg);
 
   GUIPoint basePosition = position;
 
   char *colon = strchr(buffer, ':');
-  int valueOffset = 0;
+
+  // Draw the Label first
+
+  int colonIndex = (int)(colon - buffer);
+  int valueOffset = colonIndex + 1;
 
   if (colon) {
-    int index = colon - buffer;
-    buffer[index] = 0;
-    valueOffset = index + 1;
+    buffer[colonIndex] = 0;
 
-    ((AppWindow &)w).SetColor(labelColor_);
+    w.SetColor(labelColor_);
     w.DrawString(position.x_, position.y_, buffer);
 
-    position.x_ += index + 1;
-    buffer += index + 1;
+    position.x_ += colonIndex + 1;
+    buffer += colonIndex + 1;
   }
 
   const int valueLength = static_cast<int>(strlen(buffer));
 
   if (focus_) {
-    ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(true));
-    ((AppWindow &)w).SetColor(Theme::Input::fg(true));
+    // focused value drawing, needs a cursor
+    w.SetBackgroundColor(fieldConfig_.activeBackgroundColor);
+    w.SetColor(fieldConfig_.activeColor);
 
+    // draw value
     w.DrawString(position.x_, position.y_, buffer);
 
-    int valueSubSelectionOffset = subSelectionOffset - valueOffset;
-    if (subSelectionOffset >= valueOffset && valueSubSelectionOffset < (int)strlen(buffer) && subSelectionLength > 0) {
-      int valueLength = strlen(buffer);
-      if (valueSubSelectionOffset + subSelectionLength > valueLength) {
-        subSelectionLength = valueLength - valueSubSelectionOffset;
-      }
+    // overdraw the subselection
+    for (int c = 0; c < subSelectionLength; c++) {
+      w.SetBackgroundColor(fieldConfig_.activeColor);
+      w.SetColor(fieldConfig_.activeBackgroundColor);
 
-      char replaced = buffer[valueSubSelectionOffset + subSelectionLength];
-      buffer[valueSubSelectionOffset + subSelectionLength] = 0;
-      position.x_ += valueSubSelectionOffset;
-      ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
-      ((AppWindow &)w).SetColor(Theme::Input::fg(true));
-      w.DrawString(position.x_, position.y_, buffer + valueSubSelectionOffset);
-      buffer[valueSubSelectionOffset + subSelectionLength] = replaced;
+      char character = buffer[c + subSelectionOffset];
+      w.DrawChar(position.x_ + subSelectionOffset + c, position.y_, character);
     }
   } else {
-    ((AppWindow &)w).SetColor(Theme::Input::fg(false));
+    // unfocused value drawing
+
+    w.SetColor(fieldConfig_.color);
+    w.SetBackgroundColor(fieldConfig_.backgroundColor);
     w.DrawString(position.x_, position.y_, buffer);
   }
 
-  // draw highlight button ends
-  char front = focus_ ? CHAR(char_button_border_left_s) : ' ';
-  char end = focus_ ? CHAR(char_button_border_right_s) : ' ';
+  // draw field ends (rounded buttons when focused, square blocks when unfocused)
+
+  char front = focus_ ? CHAR(char_button_border_left_s) : CHAR(char_block_left_s);
+  char end = focus_ ? CHAR(char_button_border_right_s) : CHAR(char_block_right_s);
+
+  w.SetBackgroundColor(backgroundColor_);
 
   if (focus_) {
-    ((AppWindow &)w).SetColor(Theme::Input::bg(true));
-    ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
+    w.SetColor(fieldConfig_.activeBackgroundColor);
+  } else {
+    w.SetColor(fieldConfig_.backgroundColor);
   }
 
   w.DrawChar(basePosition.x_ + valueOffset - 1, basePosition.y_, front);

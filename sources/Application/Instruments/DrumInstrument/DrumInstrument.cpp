@@ -30,6 +30,7 @@ DrumInstrument::DrumInstrument()
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
+  InsertBaseVariables();
   variables_.insert(variables_.end(), &vVoice0_);
   variables_.insert(variables_.end(), &vVoice1_);
   variables_.insert(variables_.end(), &vVoice2_);

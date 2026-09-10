@@ -30,103 +30,42 @@ void InstrumentView::fillDrumParameters() {
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instr = bank->GetInstrument(i);
   DrumInstrument *instrument = (DrumInstrument *)instr;
-  GUIPoint position = GetAnchor();
-
-  // extra y spacing to allow for gap between export/import and parameters
-  position.y_ += 5;
-
-  #define horz_2 char_border_single_horizontal_s char_border_single_horizontal_s 
-  #define horz_3 horz_2 char_border_single_horizontal_s
-  #define horz_4 horz_2 horz_2
-  #define horz_5 horz_4 char_border_single_horizontal_s
-  #define horz_6 horz_4 horz_2
-  #define vert char_border_single_vertical_s
-  #define vert2 vert vert
-  #define vert4 vert2 vert2
   
-  // bass drum
-  Variable *v = instrument->FindVariable(Token::DrumInstrumentParamsVoice0);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[0], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
+  GUIPoint position = GUIPoint(4, 6);
 
-  // snare 1
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice2);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[2], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
+  const uint8_t drumOrder[12] = {0, 2, 4, 1, 3, 5, 7, 9, 6, 8, 10, 11};
 
-  // snare 2
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice4);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[4], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
+  for (int n = 0; n < 12; n++) {
+    Variable *v = instrument->FindVariable(Token(Token::DrumInstrumentParamsVoice0 + n));
+    hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[drumOrder[n]], 0x0000, 0xffff, 16);
+    hexVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+    fieldList_.insert(fieldList_.end(), &hexVarField_.back());
+    position.y_++;
+  }
 
-  // rim
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice1);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[1], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // clap
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice3);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[3], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // hh closed
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice5);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[5], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // hihat pedal
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice7);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[7], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // hihat open
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice9);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[9], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // low tom
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice6);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[6], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // mid tom
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice8);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[8], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // high tom
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice10);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[10], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // crash
-  v = instrument->FindVariable(Token::DrumInstrumentParamsVoice11);
-  hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[11], 0x0000, 0xffff, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
-  position.y_++;
-
-  // character
-  position.y_++;
-  v = instrument->FindVariable(Token::DrumInstrumentParamsCharacter);
-  intVarField_.emplace_back(position, *v, "Wobble  :%02X", 0, 255, 1, 16);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());  
-  position.y_++;
-  
   for (auto &f : hexVarField_) {
     f.SetWrapDigits(false);
     f.SetWrap(false);
   }
+
+  // character
+  addTitleLabel("Effects", position.y_);  
+
+  position.y_++;
+  position.x_ = 1;
+  Variable *v = instrument->FindVariable(Token::DrumInstrumentParamsCharacter);
+  intVarField_.emplace_back(position, *v, "Wobble  : %02X", 0, 255, 1, 16);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  addIndexToLine(4, position.y_, true);
+
+  // volume row
+  addTitleLabel("Volume", SCREEN_HEIGHT - 4);
+  AddVolumeRow(SCREEN_HEIGHT - 3);
+
+  addTitleLabel("Automation", SCREEN_HEIGHT - 2);
+  AddTableRow(SCREEN_HEIGHT - 1);
 }
 
 void InstrumentView::DrawViewDrum() {
@@ -141,59 +80,55 @@ void InstrumentView::DrawViewDrum() {
 
   // waveform display
   const int displayOrder[12] = { 0, 2, 4, 1, 3, 5, 7, 9, 6, 8, 10, 11 };
+  Color colors[4] = {Theme::SemanticColors::pitch, Theme::SemanticColors::effect, Theme::SemanticColors::volume, Theme::SemanticColors::sample(true)}; 
 
   for (int n = 0; n < 12; n++) {
     Variable *v = instr->FindVariable(Token::enum_type(Token::DrumInstrumentParamsVoice0 + displayOrder[n]));
     uint32_t wave = v->GetInt() % drumNumWaveforms;
     
     UIHexVarField &field = hexVarField_[n];
-    Variable &var = field.GetVariable();
+    Variable *var = field.GetVariable();
     int column = field.GetColumn();
     bool selected = field.HasFocus();
-    drum_parameters_t params = std::bit_cast<drum_parameters_t>(var.GetInt());
+    drum_parameters_t params = std::bit_cast<drum_parameters_t>(var->GetInt());
 
-    SetColor(selected ? (column == 3 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 14, p.y_ + 5 + n, char_v_bar_lookup[(params.pitch * 10 + 7) / 15]);
-    SetColor(selected ? (column == 2 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 15, p.y_ + 5 + n, char_v_bar_lookup[(params.note * 10 + 7) / 15]);
-    SetColor(selected ? (column == 1 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 16, p.y_ + 5 + n, char_v_bar_lookup[(params.decay * 10 + 7) / 15]);
-    SetColor(selected ? (column == 0 ? Theme::Input::bg(true) : Theme::View::fg) : Theme::View::inactive);
-    DrawString(p.x_ + 18, p.y_ + 5 + n, chiptune_waveforms[params.wave % drumNumWaveforms]);
+    SetColor(selected ? (column == 3 ? colors[0] : Theme::View::fg) : Theme::View::inactive);
+    DrawChar(p.x_ + 14, p.y_ + 3 + n, char_v_bar_lookup[(params.pitch * 10 + 7) / 15]);
+    SetColor(selected ? (column == 2 ? colors[1] : Theme::View::fg) : Theme::View::inactive);
+    DrawChar(p.x_ + 15, p.y_ + 3 + n, char_v_bar_lookup[(params.note * 10 + 7) / 15]);
+    SetColor(selected ? (column == 1 ? colors[2] : Theme::View::fg) : Theme::View::inactive);
+    DrawChar(p.x_ + 16, p.y_ + 3 + n, char_v_bar_lookup[(params.decay * 10 + 7) / 15]);
+    SetColor(selected ? (column == 0 ? colors[3] : Theme::View::fg) : Theme::View::inactive);
+    DrawString(p.x_ + 18, p.y_ + 3 + n, chiptune_waveforms[params.wave % drumNumWaveforms]);
   }
 
-  // character/wobble display
-  char buffer[14];
-  int value = instr->FindVariable(Token::DrumInstrumentParamsCharacter)->GetInt();
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph(value));
-  SetColor(Theme::View::fg);
-  DrawString(p.x_ + 14, p.y_ + 18, buffer);
-
-  // legend labels up top
-  SetColor(Theme::SemanticColors::pitch);
-  DrawString(p.x_ + 3, p.y_ + 2, "Note" horz_3 char_border_single_topRight_s);
-  DrawChar(p.x_ + 10, p.y_ + 3, CHAR(char_border_single_vertical_s));
-  DrawChar(p.x_ + 10, p.y_ + 4, CHAR(char_border_single_vertical_s));
-
-  SetColor(Theme::SemanticColors::volume);
-  DrawString(p.x_ + 11, p.y_ + 2, char_border_single_topLeft_s horz_3 "Decay");
-  DrawChar(p.x_ + 11, p.y_ + 3, CHAR(char_border_single_vertical_s));
-  DrawChar(p.x_ + 11, p.y_ + 4, CHAR(char_border_single_vertical_s));
-  
-  SetColor(Theme::SemanticColors::effect);
-  DrawString(p.x_ + 2, p.y_ + 3, "Sweep" horz_2 char_border_single_topRight_s);
-  DrawChar(p.x_ + 9, p.y_ + 4, CHAR(char_border_single_vertical_s));
-
-  SetColor(Theme::SemanticColors::sample(true));
-  DrawString(p.x_ + 12, p.y_ + 3, char_border_single_topLeft_s horz_2 "Waveform");
-  DrawChar(p.x_ + 12, p.y_ + 4, CHAR(char_border_single_vertical_s));
+  // legend labels below
+  for (int n = 0; n < 12; n++) {
+    UIHexVarField &field = hexVarField_[n];
+    
+    if (field.HasFocus()) {
+      int column = 3 - field.GetColumn();
+      
+#define horz char_border_single_horizontal_s
+#define horz2 horz horz
+#define horz4 horz2 horz2
+      
+      const char *labels[4] = {
+        char_border_single_bottomLeft_s horz4 "Sweep", 
+        char_border_single_bottomLeft_s horz2 horz "Note", 
+        char_border_single_bottomLeft_s horz2 "Decay", 
+        char_border_single_bottomLeft_s horz "Waveform"
+      };
+    
+      SetColor(colors[column]);
+      DrawString(13 + column, 18, labels[column]);
+      break;
+    }
+  }
 
   // note labels
   for (int j = 0; j < 12; j++) {
     SetColor(Theme::View::index(j % ALT_ROW_NUMBER == 0));
-    DrawString(p.x_ - 3, p.y_ + 5 + j, noteNames[displayOrder[j]]);
+    DrawString(1, 6 + j, noteNames[displayOrder[j]]);
   }
-
-  // divider line to table / volume
-  DrawDivider(22);
 }

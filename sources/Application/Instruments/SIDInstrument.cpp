@@ -49,18 +49,16 @@ SIDInstrument::SIDInstrument(SIDInstrumentInstance chip)
     : I_Instrument(&variables_), chip_(chip), vpw_(Token::SIDInstrumentPulseWidth, 0x800),
       vwf_(Token::SIDInstrumentWaveform, sidWaveformText, DWF_LAST, 0x1), vsync_(Token::SIDInstrumentVSync, false),
       vring_(Token::SIDInstrumentRingModulator, false), vadsr_(Token::SIDInstrumentADSR, 0x2282),
-      vfon_(Token::SIDInstrumentFilterOn, false), table_(Token::SIDInstrumentTable, -1),
-      tableAuto_(Token::SIDInstrumentTableAutomation, false), osc_(Token::SIDInstrumentOSCNumber, 0) {
+      vfon_(Token::SIDInstrumentFilterOn, false), osc_(Token::SIDInstrumentOSCNumber, 0) {
 
   // name_ is now an etl::string in the base class, not a Variable
+  InsertBaseVariables();
   variables_.insert(variables_.end(), &vpw_);
   variables_.insert(variables_.end(), &vwf_);
   variables_.insert(variables_.end(), &vsync_);
   variables_.insert(variables_.end(), &vring_);
   variables_.insert(variables_.end(), &vadsr_);
   variables_.insert(variables_.end(), &vfon_);
-  variables_.insert(variables_.end(), &table_);
-  variables_.insert(variables_.end(), &tableAuto_);
   variables_.insert(variables_.end(), &osc_);
   variables_.insert(variables_.end(), &fltcut1_);
   variables_.insert(variables_.end(), &fltres1_);
@@ -250,12 +248,12 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SIDInstrument::GetName() {
 }
 
 int SIDInstrument::GetTable() {
-  Variable *v = FindVariable(Token::SIDInstrumentTable);
+  Variable *v = FindVariable(Token::InstrumentParameterTable);
   return v->GetInt();
 }
 
 bool SIDInstrument::GetTableAutomation() {
-  Variable *v = FindVariable(Token::SIDInstrumentTableAutomation);
+  Variable *v = FindVariable(Token::InstrumentParameterTableAutomation);
   return v->GetBool();
 }
 

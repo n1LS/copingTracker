@@ -52,15 +52,18 @@ struct Token {
     InstrumentCommandChordDown = 98,               // CHD
     InstrumentCommandChordBidirectional = 229,     // CHB
 
+    InstrumentParameterVolume = 19,
+    InstrumentParameterPan = 43,
+    InstrumentParameterTable = 117,
+    InstrumentParameterTableAutomation = 60,
+
     SampleInstrumentCrushVolume = 3,
-    SampleInstrumentVolume = 19,
     SampleInstrumentCrush = 114,
     SampleInstrumentSample = 54,
     SampleInstrumentInterpolation = 28,
     SampleInstrumentDownsample = 5,
     SampleInstrumentRootNote = 51,
     SampleInstrumentFineTune = 24,
-    SampleInstrumentPan = 43,
     SampleInstrumentFilterCutOff = 115,
     SampleInstrumentFilterResonance = 116,
     SampleInstrumentFilterType = 23,
@@ -69,8 +72,6 @@ struct Token {
     SampleInstrumentLoopMode = 34,
     SampleInstrumentLoopStart = 37,
     SampleInstrumentEnd = 6,
-    SampleInstrumentTable = 117,
-    SampleInstrumentTableAutomation = 60,
     SampleInstrumentGMInstrument = 191, // GM bank instrument index (0..kGMInstrumentCount-1), -1 = off
     SampleInstrumentAttack = 93,
     SampleInstrumentDecay = 94,
@@ -79,8 +80,6 @@ struct Token {
 
     MidiInstrumentChannel = 1,
     MidiInstrumentNoteLength = 32,
-    MidiInstrumentVolume = 118,
-    MidiInstrumentTable = 119,
     MidiInstrumentTableAutomation = 120,
     MidiInstrumentName = 144,
     MidiInstrumentProgram = 160,
@@ -104,8 +103,6 @@ struct Token {
     SIDInstrumentADSR = 77,
     SIDInstrumentFilterOn = 78,
     SIDInstrumentVoice3Off = 91,
-    SIDInstrumentTable = 121,
-    SIDInstrumentTableAutomation = 122,
     SIDInstrumentOSCNumber = 142,
 
     OPALInstrumentChannel = 123,
@@ -224,13 +221,11 @@ struct Token {
     ChiptuneInstrumentWaveform = 200,
     ChiptuneInstrumentAttack = 201,
     ChiptuneInstrumentDecay = 202,
-    ChiptuneInstrumentLevel = 203,
     ChiptuneInstrumentLength = 204,
     ChiptuneInstrumentBurst = 205,
     ChiptuneInstrumentVibrato = 206,
     ChiptuneInstrumentVibratoDelay = 207,
     ChiptuneInstrumentTranspose = 208,
-    ChiptuneInstrumentTable = 209,
     ChiptuneInstrumentSweepTime = 210,
     ChiptuneInstrumentSweepAmount = 211,
     ChiptuneInstrumentArpSpeed = 212,
@@ -260,13 +255,10 @@ struct Token {
     StackInstrumentSpread = 229,
     StackInstrumentWave = 183,
     StackInstrumentTranspose = 192,
-    StackInstrumentTable = 193,
-    StackInstrumentTableAutomation = 194,
     StackInstrumentAttack = 195,
     StackInstrumentDecay = 196,
     StackInstrumentSustain = 197,
     StackInstrumentRelease = 198,
-    StackInstrumentVolume = 199,
     StackInstrumentBrightness = 227,
     StackInstrumentGlide = 228,
 
@@ -331,6 +323,11 @@ struct Token {
   ETL_ENUM_TYPE_16(InstrumentCommandChordBidirectional, "ChB")
   ETL_ENUM_TYPE_16(InstrumentCommandVibrato, "Vib")
 
+  ETL_ENUM_TYPE_16(InstrumentParameterVolume, "Volume")
+  ETL_ENUM_TYPE_16(InstrumentParameterPan, "Pan")
+  ETL_ENUM_TYPE_16(InstrumentParameterTable, "Table")
+  ETL_ENUM_TYPE_16(InstrumentParameterTableAutomation, "Automate")
+
   ETL_ENUM_TYPE_16(VarKeyDelay, "key-delay")
   ETL_ENUM_TYPE_16(VarKeyRepeat, "key-repeat")
   ETL_ENUM_TYPE_16(VarLineOut, "line-out")
@@ -342,14 +339,12 @@ struct Token {
   ETL_ENUM_TYPE_16(VarThemeName, "theme-name")
   ETL_ENUM_TYPE_16(VarScaleRoot, "scale-root")
   ETL_ENUM_TYPE_16(SampleInstrumentSample, "Sample")
-  ETL_ENUM_TYPE_16(SampleInstrumentVolume, "Volume")
   ETL_ENUM_TYPE_16(SampleInstrumentInterpolation, "Interpolation")
   ETL_ENUM_TYPE_16(SampleInstrumentCrush, "Crush")
   ETL_ENUM_TYPE_16(SampleInstrumentCrushVolume, "CrushDrive")
   ETL_ENUM_TYPE_16(SampleInstrumentDownsample, "Downsample")
   ETL_ENUM_TYPE_16(SampleInstrumentRootNote, "RootNote")
   ETL_ENUM_TYPE_16(SampleInstrumentFineTune, "Finetune")
-  ETL_ENUM_TYPE_16(SampleInstrumentPan, "Pan")
   ETL_ENUM_TYPE_16(SampleInstrumentFilterCutOff, "FilterCutoff")
   ETL_ENUM_TYPE_16(SampleInstrumentFilterResonance, "FilterResonance")
   ETL_ENUM_TYPE_16(SampleInstrumentFilterType, "FilterType")
@@ -358,8 +353,6 @@ struct Token {
   ETL_ENUM_TYPE_16(SampleInstrumentLoopMode, "LoopMode")
   ETL_ENUM_TYPE_16(SampleInstrumentLoopStart, "LoopStart")
   ETL_ENUM_TYPE_16(SampleInstrumentEnd, "End")
-  ETL_ENUM_TYPE_16(SampleInstrumentTable, "Table")
-  ETL_ENUM_TYPE_16(SampleInstrumentTableAutomation, "TableAutomation")
   ETL_ENUM_TYPE_16(SampleInstrumentGMInstrument, "GMInstrument")
   ETL_ENUM_TYPE_16(SampleInstrumentAttack, "Attack")
   ETL_ENUM_TYPE_16(SampleInstrumentDecay, "Decay")
@@ -372,9 +365,6 @@ struct Token {
 
   ETL_ENUM_TYPE_16(MidiInstrumentName, "MidiName")
   ETL_ENUM_TYPE_16(MidiInstrumentNoteLength, "NoteLength")
-  ETL_ENUM_TYPE_16(MidiInstrumentVolume, "Volume")
-  ETL_ENUM_TYPE_16(MidiInstrumentTable, "Table")
-  ETL_ENUM_TYPE_16(MidiInstrumentTableAutomation, "TableAutomation")
   ETL_ENUM_TYPE_16(MidiInstrumentProgram, "Program")
   ETL_ENUM_TYPE_16(SIDInstrumentWaveform, "OscWaveform")
   ETL_ENUM_TYPE_16(SIDInstrument1FilterCut, "FilterCutoff1")
@@ -390,8 +380,6 @@ struct Token {
   ETL_ENUM_TYPE_16(SIDInstrumentRingModulator, "OscRingMod")
   ETL_ENUM_TYPE_16(SIDInstrumentADSR, "OscADSR")
   ETL_ENUM_TYPE_16(SIDInstrumentFilterOn, "VoiceFilterOn")
-  ETL_ENUM_TYPE_16(SIDInstrumentTable, "Table")
-  ETL_ENUM_TYPE_16(SIDInstrumentTableAutomation, "table automation")
   ETL_ENUM_TYPE_16(SIDInstrumentOSCNumber, "OscNum")
 
   // channel variable not currently used by OPAL instruments but maybe in future
@@ -461,13 +449,11 @@ struct Token {
   ETL_ENUM_TYPE_16(ChiptuneInstrumentWaveform, "Waveform")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentAttack, "Attack")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentDecay, "Decay")
-  ETL_ENUM_TYPE_16(ChiptuneInstrumentLevel, "Level")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentLength, "Length")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentBurst, "Burst")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentVibrato, "Vibrato")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentVibratoDelay, "VibratoDelay")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentTranspose, "Transpose")
-  ETL_ENUM_TYPE_16(ChiptuneInstrumentTable, "Table")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentSweepTime, "SweepTime")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentSweepAmount, "SweepAmount")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentArpSpeed, "ArpSpeed")

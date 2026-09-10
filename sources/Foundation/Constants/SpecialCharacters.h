@@ -122,6 +122,10 @@
 #define char_waveform_pulse_s char_waveform_pulse1_s char_waveform_pulse2_s
 #define char_waveform_noise_s char_waveform_noise1_s char_waveform_noise2_s
 
+#define char_mod_1_s "\xFC"
+#define char_mod_2_s "\xFD"
+#define char_mod_s char_mod_1_s char_mod_2_s
+
 #define char_border_single_topLeft_s "\xDA"
 #define char_border_single_topRight_s "\xBF"
 #define char_border_single_bottomLeft_s "\xC0"

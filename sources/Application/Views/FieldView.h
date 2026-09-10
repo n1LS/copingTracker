@@ -27,7 +27,7 @@ public:
   void ClearFocus();
   void UpdateFocusRect();
   int GetFocusIndex();
-  GUIRect GetFocusRect() override;
+  const GUIRect GetFocusRect() override;
   void SetSize(int size);
 
   etl::list<UIField *, 64> fieldList_; // adjust to maximum fields on one screen

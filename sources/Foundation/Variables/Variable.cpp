@@ -10,6 +10,7 @@
  */
 
 #include "Variable.h"
+#include "Foundation/Constants/SpecialCharacters.h"
 #include "System/Console/Trace.h"
 #include "System/Console/n_assert.h"
 #include <System/Console/nanoprintf.h>
@@ -221,7 +222,7 @@ etl::string<MAX_VARIABLE_STRING_LENGTH> Variable::GetString() {
       npf_snprintf(buf, sizeof(buf), "%d", value_.int_);
       break;
     case BOOL:
-      npf_snprintf(buf, sizeof(buf), "%s", value_.bool_ ? "yes" : "no");
+      npf_snprintf(buf, sizeof(buf), "%s", value_.bool_ ? char_symbol_indicatorFull_s : " ");
       break;
     case STRING:
       if (stringValue_) {

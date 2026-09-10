@@ -10,6 +10,7 @@
  */
 
 #include "TableView.h"
+#include "Application/AppWindow.h"
 #include "Application/Instruments/CommandList.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
@@ -147,7 +148,6 @@ void TableView::cutPosition() {
 
 GUIRect TableView::getSelectionRect() {
   GUIRect r(clipboard_.col_, clipboard_.row_, col_, row_);
-  r.Normalize();
   return r;
 }
 

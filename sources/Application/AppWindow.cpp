@@ -203,6 +203,7 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   views_->AddObservers(*this);
 
+  memset(_preScreen, 0, SCREEN_CHARS);
   memset(_screenChar, ' ', SCREEN_CHARS);
   memset(_screenColor, 0, SCREEN_CHARS);
 
@@ -271,11 +272,12 @@ void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
 void AppWindow::Clear() {
   color_t base = (color_t){.fg = Theme::View::fg, .bg = Theme::View::bg};
 
-  memset(_screenChar, ' ', SCREEN_CHARS);
+  memset(_preScreen, ' ', SCREEN_CHARS);
+  memset(_screenChar, 0, SCREEN_CHARS);
   memset(_screenColor, base.byte, SCREEN_CHARS);
 }
 
-void AppWindow::ClearTextRect(GUIRect &r) {
+void AppWindow::ClearTextRect(GUIRect r) {
   int x = r.Left();
   int y = r.Top();
   int w = r.Width();
@@ -423,12 +425,11 @@ void AppWindow::onLoadPhaseCComplete(bool success, const char *projectName) {
     Trace::Error("Failed to load project '%s'. Waiting for key press to load untitled", projectName);
     npf_snprintf(projectName_, sizeof(projectName_), "%s", projectName);
     awaitingProjectLoadAck_ = true;
-    View &errorView = views_->songView;
 
     char buffer[32];
-    npf_snprintf(buffer, sizeof(buffer), "\"%28s\"", projectName);
-    MessageBox *mb = MessageBox::Create(errorView, "Project load failed", "Invalid Project:", buffer, MBBF_OK);
-    errorView.DoModal(mb);
+    npf_snprintf(buffer, sizeof(buffer), "\"%s\"", projectName);
+    MessageBox *mb = MessageBox::Create(views_->bootView, "Project load failed", "Invalid Project:", buffer, MBBF_OK);
+    views_->bootView.DoModal(mb);
     return;
   }
 

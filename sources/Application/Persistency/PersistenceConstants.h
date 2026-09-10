@@ -21,7 +21,7 @@
 // Theme name + extension: "themename" (16) + ".thm" (4) = 20 bytes
 #define MAX_THEME_FILENAME_LENGTH 32
 // accounts for .ins extension so they are 4 chars shorter.
-#define MAX_INSTRUMENT_NAME_LENGTH (MAX_INSTRUMENT_FILENAME_LENGTH - 4)
+#define MAX_INSTRUMENT_NAME_LENGTH 16
 
 #define INSTRUMENT_FILE_EXTENSION ".ins"
 #define THEME_FILE_EXTENSION ".thm"

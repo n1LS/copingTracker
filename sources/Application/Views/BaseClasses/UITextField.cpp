@@ -1,69 +1,49 @@
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Copyright (c) 2018 Discodirt
+ * Copyright (c) 2024 xiphonics, inc.
+ * Copyright (c) 2026 nILS Podewski
+ *
+ * This file was part of the picoTracker firmware
+ * This file is part of the copingTracker firmware
+ */
+
+
+#include "UITextField.h"
 #include "Application/AppWindow.h"
 #include "View.h"
 #include "Application/Utils/stringutils.h"
+#include <System/Console/nanoprintf.h>
 
 template <uint8_t MaxLength>
-UITextField<MaxLength>::UITextField(
-    Variable &v, const GUIPoint &position,
-    const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label, uint8_t token,
-    etl::string<MaxLength> &defaultValue_)
-    : UIField(position), src_(&v), label_(label), token_(token),
+UITextField<MaxLength>::UITextField(Variable &v, const GUIPoint &position,
+                                    const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> &label, uint8_t token,
+                                    etl::string<MaxLength> &defaultValue_) : UIField(position), src_(&v), label_(label), token_(token),
       defaultValue_(defaultValue_) {}
 
 template <uint8_t MaxLength> UITextField<MaxLength>::~UITextField(){};
 
 template <uint8_t MaxLength>
 void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
-
   GUIPoint position = GetPosition();
   position.y_ += offset;
 
-  // Draw the label
-  ((AppWindow &)w).SetBackgroundColor(Theme::View::bg);
-  ((AppWindow &)w).SetColor(labelColor_);
-  w.DrawString(position.x_, position.y_, label_.c_str());
-  position.x_ += label_.length();
-  
   auto srcString = src_->GetString();
   const char *value;
-  size_t len;
-  
+
   // If the variable's value is empty, use the default value for display
-  if (srcString.empty()) {
-    value = defaultValue_.c_str();
-    len = defaultValue_.length();
-    // Use a different color for default values to indicate they're not set
-    ((AppWindow &)w).SetColor(Theme::Input::placeholder);
-  } else {
-    value = srcString.c_str();
-    len = srcString.length();
-    ((AppWindow &)w).SetColor(Theme::Input::fg(focus_));
-  }
+   if (!srcString.empty()) {
+     value = srcString.c_str();
+   } else {
+     value = defaultValue_.c_str();
+   }
 
-  if (focus_) {
-    if (len == 0) {
-      // For empty fields, draw a cursor at the beginning position
-      ((AppWindow &)w).SetBackgroundColor(Theme::Input::cursor);
-      w.DrawString(position.x_, position.y_, " ");
-    } else {
-      ((AppWindow &)w).SetColor(Theme::Input::fg(true));
-
-      char buffer[2];
-      buffer[1] = 0;
-
-      for (size_t i = 0; i < len; i++) {
-        buffer[0] = value[i];
-        bool active = currentChar_ == i;
-        ((AppWindow &)w).SetBackgroundColor(active ? Theme::Input::cursor : Theme::Input::bg(true));
-        w.DrawString(position.x_, position.y_, buffer);
-        position.x_ += 1;
-      }
-    }
-  } else if (len != 0) {
-    ((AppWindow &)w).SetColor(Theme::Input::fg(false));
-    ((AppWindow &)w).SetBackgroundColor(Theme::Input::bg(false));
-    w.DrawString(position.x_, position.y_, value);
-  }
+  // borders pre and post text
+  char buffer[33];
+  npf_snprintf(buffer, sizeof(buffer), "%s:%-*.*s", label_.c_str(), MaxLength, MaxLength, value);
+  DrawLabeledField(w, position, buffer, currentChar_, 1);
+  focusWidth_ = MaxLength + 2;
 }
 
 template <uint8_t MaxLength> void UITextField<MaxLength>::OnClick() {
@@ -165,5 +145,9 @@ int UITextField<MaxLength>::GetFocusOffset() {
 
 template <uint8_t MaxLength>
 int UITextField<MaxLength>::GetFocusWidth() {
-  return GetString().size();
+  return focusWidth_;
 }
+
+// Explicit template instantiations so the linker can resolve symbols for the
+// MaxLength values used across the application.
+template class UITextField<16>; // MAX_INSTRUMENT_NAME_LENGTH, MAX_PROJECT_NAME_LENGTH, MAX_THEME_NAME_LENGTH

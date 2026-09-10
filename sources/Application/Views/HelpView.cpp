@@ -24,9 +24,7 @@ HelpView::~HelpView() {
 }
 
 void HelpView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  bool navDown = (mask & BM_NAV);
-  if (navDown != navDown_) {
-    navDown_ = navDown;
+  if (AppWindow::GetInstance()->buttonDown(BM_NAV) != mapShown_) {
     SetDirty(true);
   }
 
@@ -64,10 +62,8 @@ void HelpView::DrawView() {
   drawContent();
   drawScrollBar(SCREEN_WIDTH - 1, 2, pageSize, offset_, numLines_);
 
-  if (navDown_) {
-    ClearTextRect(0, SCREEN_HEIGHT - 5, 3, 5);
-    ClearTextRect(3, SCREEN_HEIGHT - 4, 1, 4);
-    ClearTextRect(4, SCREEN_HEIGHT - 3, 1, 3);
+  mapShown_ = AppWindow::GetInstance()->buttonDown(BM_NAV);
+  if (mapShown_) {
     drawMap();
   }
 }

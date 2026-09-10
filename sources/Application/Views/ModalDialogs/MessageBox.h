@@ -37,6 +37,7 @@ public:
   virtual void OnFocus();
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void AnimationUpdate() {};
+  const GUIRect GetFocusRect() override;
 
 protected:
   MessageBox(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);

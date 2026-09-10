@@ -17,9 +17,8 @@
 // A Simple class to represent rectangles. Note that the Constructor
 // is using top,left,bottom,right and NOT x,y coordinates
 
-class GUIRect {
-public:
-  GUIRect(int x0 = 0, int y0 = 0, int x1 = 0, int y1 = 0);
+struct GUIRect {
+  GUIRect(int x = 0, int y = 0, int w = 0, int h = 0);
   GUIRect(GUIPoint &, GUIPoint &);
 
   // Returns true if the specified point is contained in the rectangle.
@@ -37,7 +36,7 @@ public:
 
   // Returns a rectangle resulting of the intersection of the two rects
 
-  GUIRect Intersect(GUIRect &);
+  GUIRect Intersect(GUIRect);
 
   // Make sure the top/left/right/bottom are in correct order
 
@@ -50,27 +49,33 @@ public:
   // Accessor to the rectangle coordinates and size
 
   inline int Top() const {
-    return _topLeft.y_;
-  }
-  inline int Left() const {
-    return _topLeft.x_;
-  }
-  inline int Bottom() const {
-    return _bottomRight.y_;
-  }
-  inline int Right() const {
-    return _bottomRight.x_;
-  }
-  inline int Width() const {
-    return _bottomRight.x_ - _topLeft.x_;
-  }
-  inline int Height() const {
-    return _bottomRight.y_ - _topLeft.y_;
+    return y_;
   }
 
-public:
-  GUIPoint _topLeft;     // Top left Corner
-  GUIPoint _bottomRight; // Bottom Right Corner
+  inline int Left() const {
+    return x_;
+  }
+
+  inline int Bottom() const {
+    return y_ + h_;
+  }
+
+  inline int Right() const {
+    return x_ + w_;
+  }
+
+  inline int Width() const {
+    return w_;
+  }
+
+  inline int Height() const {
+    return h_;
+  }
+
+  int x_;
+  int y_;
+  int w_;
+  int h_;
 };
 
 #endif
