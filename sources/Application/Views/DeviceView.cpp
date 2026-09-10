@@ -129,8 +129,10 @@ DeviceView::~DeviceView() {
 }
 
 void DeviceView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed)
+  if (!pressed) {
+    FieldView::ProcessButtonMask(mask, pressed);
     return;
+  }
 
   FieldView::ProcessButtonMask(mask, pressed);
 

@@ -785,5 +785,9 @@ bool View::ConfirmStopPlayback(Token source) {
 }
 
 const GUIRect View::GetFocusRect() {
+  if (modalView_) {
+    return modalView_->GetFocusRect();
+  }
+
   return focusRect_;
 }

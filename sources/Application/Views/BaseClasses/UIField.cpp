@@ -52,10 +52,8 @@ void UIField::SetActive(bool active) {
   active_ = active;
 }
 
-int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset,
-                              int subSelectionLength) {
+int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset, int subSelectionLength) {
   w.SetBackgroundColor(backgroundColor_);
-  w.SetColor(Theme::View::fg);
 
   GUIPoint basePosition = position;
 
@@ -104,8 +102,8 @@ int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int
 
   // draw field ends (rounded buttons when focused, square blocks when unfocused)
 
-  char front = focus_ ? CHAR(char_button_border_left_s) : CHAR(char_block_left_s);
-  char end = focus_ ? CHAR(char_button_border_right_s) : CHAR(char_block_right_s);
+  char front = focus_ ? char_button_left(pressed_) : CHAR(char_block_left_s);
+  char end = focus_ ? char_button_right(pressed_) : CHAR(char_block_right_s);
 
   w.SetBackgroundColor(backgroundColor_);
 

@@ -243,6 +243,7 @@ ProjectView::~ProjectView() {
 
 void ProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (!pressed) {
+    FieldView::ProcessButtonMask(mask, pressed);
     return;
   }
 

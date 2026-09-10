@@ -116,7 +116,8 @@ void MessageBox::DrawView() {
     DrawString(2, y, line2_.c_str());
   }
 
-  y += 2; // gap before buttons
+  y += 2;       // gap before buttons
+  buttonY_ = y; // Store the Y position of the buttons for focus rectangle calculation
 
   // Center the buttons based on total calculated width
   int buttonStartX = (width - buttonWidth) / 2;
@@ -153,10 +154,6 @@ void MessageBox::OnPlayerUpdate(PlayerEventType, unsigned int currentTick) {
 }
 
 void MessageBox::OnFocus() {
-}
-
-const GUIRect MessageBox::GetFocusRect() {
-  return focusRect_;
 }
 
 void MessageBox::ProcessButtonMask(uint16_t mask, bool pressed) {

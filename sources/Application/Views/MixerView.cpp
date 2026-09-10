@@ -135,6 +135,7 @@ void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
         switchSoloMode();
       }
     }
+    FieldView::ProcessButtonMask(mask, pressed);
     // Force a full redraw of the mixer view
     SetDirty(true);
     return;

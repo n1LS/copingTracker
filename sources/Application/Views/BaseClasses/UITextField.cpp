@@ -33,11 +33,11 @@ void UITextField<MaxLength>::Draw(GUIWindow &w, int offset) {
   const char *value;
 
   // If the variable's value is empty, use the default value for display
-   if (!srcString.empty()) {
-     value = srcString.c_str();
-   } else {
-     value = defaultValue_.c_str();
-   }
+  if (!srcString.empty()) {
+    value = srcString.c_str();
+  } else {
+    value = defaultValue_.c_str();
+  }
 
   // borders pre and post text
   char buffer[33];

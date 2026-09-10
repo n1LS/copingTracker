@@ -93,12 +93,17 @@ public:
   int DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset = 0,
                        int subSelectionLength = 0);
 
+  void SetPressed(bool pressed) {
+    pressed_ = pressed;
+  }
+
 protected:
   uint8_t x_;
   uint8_t y_;
+  int focusWidth_;
   bool focus_;
   bool active_ = true;
-  int focusWidth_;
+  bool pressed_ = false;
   Color backgroundColor_ = Theme::View::bg;
   Color labelColor_ = Theme::View::fg;
   FieldConfiguration fieldConfig_ = defaultFieldConfiguration;
