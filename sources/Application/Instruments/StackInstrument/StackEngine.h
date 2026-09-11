@@ -131,7 +131,7 @@ typedef struct stack_voice_t {
     // pitch
     for (int o = 0; o < stackNumOscillators; o++) {
       int32_t value = pitch[o].tick();
-      frequency[o] = (uint32_t)((uint64_t)base_frequency[o] * value) >> 16;
+      frequency[o] = ((uint64_t)base_frequency[o] * value) >> 16;
     }
   }
 
@@ -222,7 +222,7 @@ typedef struct stack_voice_t {
     int16_t cents = (cent_offsets[osc] * (int16_t)parameters.spread * 25) / 255;
     uint32_t multiplier = compute_cent_multiplier(cents);
     notes[osc] = note;
-    base_frequency[osc] = (uint32_t)((uint64_t)frequencyLUT[note] * multiplier) >> 16;
+    base_frequency[osc] = ((uint64_t)frequencyLUT[note] * multiplier) >> 16;
     frequency[osc] = base_frequency[osc];
 
     set_oscillator_lut_index(osc, note);
