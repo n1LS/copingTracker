@@ -55,7 +55,7 @@ void HostSystem::Boot(int argc, char **argv) {
   audio_hints.audioAPI_ = "SDL2";
   audio_hints.audioDevice_ = "default";
   audio_hints.bufferSize_ = 1024;
-  audio_hints.preBufferCount_ = 2;
+  audio_hints.preBufferCount_ = 8;
 
   alignas(HostAudio) static char audio_mem[sizeof(HostAudio)];
   Audio::Install(new (audio_mem) HostAudio(audio_hints));
