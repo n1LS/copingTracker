@@ -20,6 +20,7 @@
 #include "BaseClasses/UIActionField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UITempoField.h"
+#include "Foundation/Constants/Version.h"
 #include "Services/Audio/Audio.h"
 #include "Services/Midi/MidiService.h"
 #include "System/System/System.h"
@@ -162,7 +163,7 @@ void DeviceView::DrawView() {
 
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);
-  DrawString(9, SCREEN_HEIGHT - 3, VERSION_STRING);
+  DrawString(9, SCREEN_HEIGHT - 3, PRODUCT_VERSION_STRING);
   DrawString(9, SCREEN_HEIGHT - 2, "props-north.com/one");
   DrawString(9, SCREEN_HEIGHT - 1, "props-north.com/discord");
 

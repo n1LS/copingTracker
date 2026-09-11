@@ -23,9 +23,9 @@ Audio::Audio(AudioSettings &hints) : settings_() {
   settings_.audioDevice_ = hints.audioDevice_;
 
   Trace::Log("AUDIO", "Audio object initialised with");
-  Trace::Log("AUDIO", "Api:%s", settings_.audioAPI_.c_str());
-  Trace::Log("AUDIO", "Device:%s", settings_.audioDevice_.c_str());
-  Trace::Log("AUDIO", "Buffer size:%d", settings_.bufferSize_);
+  Trace::Log("AUDIO", "Api:             %s", settings_.audioAPI_.c_str());
+  Trace::Log("AUDIO", "Device:          %s", settings_.audioDevice_.c_str());
+  Trace::Log("AUDIO", "Buffer size:     %d", settings_.bufferSize_);
   Trace::Log("AUDIO", "Pre Buffer Count:%d", settings_.preBufferCount_);
 }
 

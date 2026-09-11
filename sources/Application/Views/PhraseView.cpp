@@ -526,7 +526,7 @@ void PhraseView::warpToNeighbour(int offset) {
  *****************************************************************************/
 
 GUIRect PhraseView::getSelectionRect() {
-  GUIRect r(clipboard_.col_, clipboard_.row_, col_, row_);
+  GUIRect r(clipboard_.col_, clipboard_.row_, col_ - clipboard_.col_, row_ - clipboard_.row_);
   return r;
 }
 

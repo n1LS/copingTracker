@@ -84,6 +84,7 @@ void SongView::updateChain(int offset) {
   unsigned char chain = viewData_->UpdateSongChain(offset);
   if (chain != 0xFF) {
     viewData_->song_->chain_.SetUsed(chain);
+    lastChain_ = chain;
   }
   isDirty_ = true;
 }
@@ -229,8 +230,8 @@ void SongView::OnFocus() {
 
 GUIRect SongView::getSelectionRect() {
 
-  GUIRect selRect(clipboard_.x_, clipboard_.y_ + clipboard_.offset_, viewData_->songX_,
-                  viewData_->songY_ + viewData_->songOffset_);
+  GUIRect selRect(clipboard_.x_, clipboard_.y_ + clipboard_.offset_, viewData_->songX_ - clipboard_.x_,
+                  viewData_->songY_ + viewData_->songOffset_ - clipboard_.y_);
   return selRect;
 }
 

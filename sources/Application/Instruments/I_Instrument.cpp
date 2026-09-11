@@ -10,9 +10,9 @@
  */
 
 #include "I_Instrument.h"
-#include "../Model/Project.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Utils/char.h"
+#include "Foundation/Constants/Version.h"
 #include "System/Console/Trace.h"
 
 I_Instrument::~I_Instrument() {
@@ -21,7 +21,7 @@ I_Instrument::~I_Instrument() {
 
 void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {
   // Add firmware version information
-  printer->PushAttribute(XML_ATTR_VERSION, PROJECT_NUMBER);
+  printer->PushAttribute(XML_ATTR_VERSION, PRODUCT_VERSION);
   // Save the instrument type
   printer->PushAttribute(XML_ATTR_TYPE, InstrumentTypeNames[GetType()].full);
 

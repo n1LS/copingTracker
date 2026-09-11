@@ -205,8 +205,6 @@ void Player::Start(PlayMode mode, bool forceSongMode, MixerServiceMode msmMode, 
       break;
   }
 
-  Trace::Error("USELESS?");
-
   startTime_ = mixer_.GetAudioOut()->GetStreamTime();
 
   SetChanged();

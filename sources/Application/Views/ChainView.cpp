@@ -188,7 +188,8 @@ void ChainView::clonePosition() {
 ******************************************************************************/
 
 GUIRect ChainView::getSelectionRect() {
-  GUIRect r(clipboard_.col_, clipboard_.row_, viewData_->chainCol_, viewData_->chainRow_);
+  GUIRect r(clipboard_.col_, clipboard_.row_, viewData_->chainCol_ - clipboard_.col_,
+            viewData_->chainRow_ - clipboard_.row_);
   return r;
 }
 

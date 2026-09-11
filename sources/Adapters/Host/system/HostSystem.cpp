@@ -59,7 +59,6 @@ void HostSystem::Boot(int argc, char **argv) {
 
   alignas(HostAudio) static char audio_mem[sizeof(HostAudio)];
   Audio::Install(new (audio_mem) HostAudio(audio_hints));
-  Audio::GetInstance()->Init();
 
   alignas(HostSamplePool) static char pool_mem[sizeof(HostSamplePool)];
   SamplePool::Install(new (pool_mem) HostSamplePool());

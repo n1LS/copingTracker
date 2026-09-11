@@ -32,15 +32,15 @@ typedef struct InstrumentTypeName {
 } InstrumentTypeName;
 
 static const InstrumentTypeName InstrumentTypeNames[IT_LAST] = {
-    {.full = "None", .compact = "None"}, {.full = "Sample", .compact = "Smpl"}, {.full = "MIDI", .compact = "MIDI"},
-    {.full = "SID", .compact = "SID "},  {.full = "OPL3", .compact = "OPL3"},   {.full = "Chiptune", .compact = "Chip"},
-    {.full = "Drum", .compact = "Drum"}, {.full = "Stack", .compact = "Stck"},
+    {.full = "None", .compact = "None"}, {.full = "Sample", .compact = "Smpl"}, {.full = "Chiptune", .compact = "Chip"},
+    {.full = "Drum", .compact = "Drum"}, {.full = "Stack", .compact = "Stck"},  {.full = "MIDI", .compact = "MIDI"},
+    {.full = "SID", .compact = "SID "},  {.full = "OPL3", .compact = "OPL3"},
 };
 
 static const char *LongInstrumentNames[IT_LAST] = {
-    InstrumentTypeNames[IT_NONE].full, InstrumentTypeNames[IT_SAMPLE].full, InstrumentTypeNames[IT_MIDI].full,
-    InstrumentTypeNames[IT_SID].full,  InstrumentTypeNames[IT_OPAL].full,   InstrumentTypeNames[IT_CHIPTUNE].full,
-    InstrumentTypeNames[IT_DRUM].full, InstrumentTypeNames[IT_STACK].full,
+    InstrumentTypeNames[IT_NONE].full, InstrumentTypeNames[IT_SAMPLE].full, InstrumentTypeNames[IT_CHIPTUNE].full,
+    InstrumentTypeNames[IT_DRUM].full, InstrumentTypeNames[IT_STACK].full,  InstrumentTypeNames[IT_MIDI].full,
+    InstrumentTypeNames[IT_SID].full,  InstrumentTypeNames[IT_OPAL].full,
 };
 
 class I_Instrument : public VariableContainer, public Observable, public Persistent {

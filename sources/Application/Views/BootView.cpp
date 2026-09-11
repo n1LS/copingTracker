@@ -12,7 +12,7 @@
 #else
 #include "Adapters/Host/system/HostProjectLoader.h"
 #endif
-#include "Application/Model/Project.h"
+#include "Foundation/Constants/Version.h"
 #include "System/io/Status.h"
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -54,7 +54,7 @@ void BootView::DrawView() {
   // Preserve the build string at the bottom of the screen
   SetColor(Theme::View::inactive);
   SetBackgroundColor(Theme::View::bg);
-  DrawString((SCREEN_WIDTH - strlen(VERSION_STRING)) / 2, 22, VERSION_STRING);
+  DrawString((SCREEN_WIDTH - strlen(PRODUCT_VERSION_STRING)) / 2, 22, PRODUCT_VERSION_STRING);
 }
 
 void BootView::OnFocus() {

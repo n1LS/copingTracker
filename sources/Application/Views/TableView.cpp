@@ -147,7 +147,7 @@ void TableView::cutPosition() {
 }
 
 GUIRect TableView::getSelectionRect() {
-  GUIRect r(clipboard_.col_, clipboard_.row_, col_, row_);
+  GUIRect r(clipboard_.col_, clipboard_.row_, col_ - clipboard_.col_, row_ - clipboard_.col_);
   return r;
 }
 

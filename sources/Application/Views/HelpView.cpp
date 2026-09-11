@@ -14,7 +14,7 @@
 #include <Application/AppWindow.h>
 #include <nanoprintf.h>
 
-static const int tabCount = 5;
+static const int tabCount = docIdCount;
 static const int pageSize = 20;
 
 HelpView::HelpView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {

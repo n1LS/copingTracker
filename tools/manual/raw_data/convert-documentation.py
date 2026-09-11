@@ -102,7 +102,10 @@ def write_array(out, name, filename):
             if len(fg) != len(bg) or len(fg) != len(txt):
                 raise RuntimeError(
                     f"{filename}:{line_no}: line length mismatch "
-                    f"({len(fg)}, {len(bg)}, {len(txt)})"
+                    f"({len(fg)}, {len(bg)}, {len(txt)})\n"
+                    f"fg:   |{fg}|\n"
+                    f"bg:   |{bg}|\n"
+                    f"text: |{txt}|\n"
                 )
 
             values = []

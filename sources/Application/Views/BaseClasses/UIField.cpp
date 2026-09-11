@@ -52,7 +52,8 @@ void UIField::SetActive(bool active) {
   active_ = active;
 }
 
-int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset, int subSelectionLength) {
+int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int subSelectionOffset,
+                              int subSelectionLength) {
   w.SetBackgroundColor(backgroundColor_);
 
   GUIPoint basePosition = position;

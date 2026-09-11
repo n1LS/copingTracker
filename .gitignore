@@ -37,3 +37,4 @@ tools/sf2converter/ctsb_converter
 build-debug
 build-host
 build-xcode
+.env

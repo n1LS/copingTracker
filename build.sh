@@ -8,6 +8,7 @@ quick=false
 pretools=false
 bootloader=false
 minimal_gm=false
+host=false
 
 for arg in "$@"; do
     case "$arg" in
@@ -15,7 +16,16 @@ for arg in "$@"; do
         pre) pretools=true ;;
         bootloader) bootloader=true ;;
         minimal_gm) minimal_gm=true ;;
-        *) echo "Unknown option: $arg" >&2; exit 2 ;;
+        host) host=true ;;
+        *) 
+          echo "Unknown option: '$arg'. Available options are:"
+          echo "  quick      (skip cmake -S and prebuild steps)"
+          echo "  pre        (prebuild steps only)"
+          echo "  bootloader (build bootloader target)"
+          echo "  minimal_gm (do not write full gm set to keep the flash size down)"
+          echo "  host       (build host target)"
+          exit 2 
+          ;;
     esac
 done
 
@@ -40,6 +50,8 @@ if [ "$quick" = false ]; then
     ./format.sh 
     echo "5) Generating stack wavetables…"
     python3 ./tools/wavetable_generator/wavetable_generator.py sources/Application/Instruments/StackInstrument/StackWavetables.generated.h
+    echo "6) Updating the changelog"
+    python3 ./tools/manual/update-changelog.py TODO.md tools/manual/raw_data/changelog.copingDoc sources/Foundation/Constants/Version.h
 
     if [ "$pretools" = true ]; then
         exit 0
@@ -50,10 +62,20 @@ if [ "$quick" = false ]; then
     else
         echo "Building in device mode..."
     fi
-    cmake -S sources -B build -DPICO_SDK_PATH=$PWD/sources/Externals/pico-sdk -DCMAKE_TOOLCHAIN_FILE="$PICO_TOOLCHAIN_FILE"
+    if [ "$host" = true ]; then
+        echo "Preparing host build"
+        cmake -S sources/Adapters/Host -B build-host -DCMAKE_C_FLAGS="-w" -DCMAKE_CXX_FLAGS="-w"
+        echo "\nPrebuild steps are done.\n"
+    else
+        echo "Preparing pico-sdk build"
+        cmake -S sources -B build -DPICO_SDK_PATH=$PWD/sources/Externals/pico-sdk -DCMAKE_TOOLCHAIN_FILE="$PICO_TOOLCHAIN_FILE"
+    fi
 fi
 
-if [ "$bootloader" = true ]; then
+if [ "$host" = true ]; then
+    cmake --build build-host -j8
+    ./build-host/main/copingTracker
+elif [ "$bootloader" = true ]; then
     cmake --build build --target PatchBay -j8
     picotool load ./build/Adapters/copingTracker/bootloader/PatchBay.uf2 && picotool reboot
 else

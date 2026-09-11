@@ -1,0 +1,114 @@
+F                             
+C                             
+v0.1.0a             2026-09-11
+F                             
+0                             
+- Fixed host palette changes  
+F                             
+0                             
+  not updating instantly or on
+F                             
+0                             
+  full redraw                 
+F                             
+0                             
+- Fixed focusrect being one   
+F                             
+0                             
+  character too far right on  
+F                             
+0                             
+  ThemeView                   
+F                             
+0                             
+- Made navDown a global state 
+F                             
+0                             
+  available throughout the    
+F                             
+0                             
+  window                      
+F                             
+0                             
+- Fixed chain setting in      
+F                             
+0                             
+  SongView not storing        
+F                             
+0                             
+  correctly in lastChain      
+F                             
+0                             
+- Fixed mixer always showing  
+F                             
+0                             
+  C-0 instead of no note      
+F                             
+0                             
+- Added Host mode to run on   
+F                             
+0                             
+  desktop machines as well    
+F                             
+0                             
+- Added three completely new  
+F                             
+0                             
+  fonts                       
+F                             
+0                             
+- Updated rendering to support
+F                             
+0                             
+  full foreground/background  
+F                             
+0                             
+  color selection             
+F                             
+0                             
+- Added new multi-oscillator  
+F                             
+0                             
+  instrument Stack            
+F                             
+0                             
+- Added new 12-sound chiptune 
+F                             
+0                             
+  drum instrument             
+F                             
+0                             
+- Added GM bank support for a 
+F                             
+0                             
+  full 128-instrument set and 
+F                             
+0                             
+  multiple drumsets           
+F                             
+0                             
+- Added preview display to    
+F                             
+0                             
+  SongView for the currently  
+F                             
+0                             
+  selected chain              
+F                             
+0                             
+- Added preview display to    
+F                             
+0                             
+  ChainView for the currently 
+F                             
+0                             
+  selected phrase             
+F                             
+0                             
+- Relayouted all instrument   
+F                             
+0                             
+  views for consistency across
+F                             
+0                             
+  the platform                

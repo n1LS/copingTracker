@@ -15,6 +15,7 @@
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Player/SyncMaster.h"
+#include "Foundation/Constants/Version.h"
 #include "Foundation/Variables/WatchedVariable.h"
 #include "Groove.h"
 #include "Scale.h"
@@ -26,9 +27,7 @@
 #include <math.h>
 
 #define DEFAULT_CHANNEL_VOLUME 99
-
 #define DEFAULT_MASTER_VOLUME 60
-
 #define DATA_UNUSED_VALUE 0xFF
 
 Project::Project(const char *name)
@@ -397,7 +396,7 @@ void Project::RestoreContent(PersistencyDocument *doc) {
 void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
 
   // store project version
-  printer->PushAttribute(XML_ATTR_VERSION, PROJECT_NUMBER);
+  printer->PushAttribute(XML_ATTR_VERSION, PRODUCT_VERSION);
 
   // store table ratio if not one
   int tableRatio = SyncMaster::GetInstance()->GetTableRatio();

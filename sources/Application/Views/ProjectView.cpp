@@ -479,13 +479,3 @@ void ProjectView::ConfirmedStop(Token source) {
       break;
   }
 }
-
-const GUIRect ProjectView::GetFocusRect() {
-  ModalView *mv = GetModalView();
-
-  if (mv) {
-    return mv->GetFocusRect();
-  }
-
-  return focusRect_;
-}

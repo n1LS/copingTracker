@@ -65,6 +65,13 @@ void FieldView::Redraw() {
     (*it)->Draw(w_);
     it++;
   };
+
+  // A field only knows its focus width once it has been drawn (the value text
+  // length can change with the value, eg. "9%" -> "10%"). Refresh the cached
+  // rect here so subclasses reading focusRect_ directly see the new width.
+  if (focus_) {
+    UpdateFocusRect();
+  }
 }
 
 void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {

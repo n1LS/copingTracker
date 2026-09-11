@@ -22,11 +22,6 @@
 #include "Foundation/Variables/WatchedVariable.h"
 #include "Song.h"
 
-#define PROJECT_NUMBER "4.0.0"
-#define PROJECT_RELEASE "d"
-
-#define VERSION_STRING "copingTracker v" PROJECT_NUMBER PROJECT_RELEASE
-
 #define MAX_TAP 3
 
 const uint16_t MAX_TEMPO = 300;
