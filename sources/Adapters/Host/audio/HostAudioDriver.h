@@ -16,6 +16,15 @@
 #include <mutex>
 #include <thread>
 
+// The Host driver's SDL callback can request fragments far larger than one
+// tempo-slice (e.g. 4096 samples vs. a ~918-sample slice at 120 BPM). Unlike
+// the Pico (which only ever needs to stay one DMA buffer ahead of playback),
+// the producer thread here must be able to render several slices ahead so a
+// single large SDL callback can be filled without starving - i.e. without the
+// tick/render cadence (see ProducerLoop()) ever having to wait on pool depth.
+// This is deliberately decoupled from the Pico's SOUND_BUFFER_COUNT (2).
+#define HOST_POOL_SIZE 16
+
 class HostAudioDriver : public AudioDriver {
 public:
   HostAudioDriver(AudioSettings &settings);
@@ -43,6 +52,8 @@ private:
   std::chrono::system_clock::time_point start_time_;
   int samples_played_;
   std::mutex mutex_;
+
+  static AudioBufferData staticPool_[HOST_POOL_SIZE];
 
   // Renders playback slices ahead of time on a dedicated thread, mirroring
   // the Pico's core1 render thread that fills buffers ahead of the DMA IRQ

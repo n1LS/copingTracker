@@ -55,6 +55,7 @@ public:
 
 private:
   static picoTrackerAudioDriver *instance_;
+  static AudioBufferData staticPool_[SOUND_BUFFER_COUNT];
 
   AudioSettings settings_;
   static const char miniBlank_[MINI_BLANK_SIZE * 2 * sizeof(int16_t)];

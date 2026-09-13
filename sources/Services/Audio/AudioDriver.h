@@ -40,7 +40,15 @@ public:
   };
 
 public:
-  AudioDriver(AudioSettings &settings);
+  // poolSize/pool let a subclass use a deeper render-ahead pool than the
+  // Pico's DMA-double-buffering-driven default of SOUND_BUFFER_COUNT (2).
+  // SOUND_BUFFER_COUNT is a Pico DMA constraint (it only ever needs to be one
+  // buffer ahead of the one currently playing), not a general scheduling
+  // limit - drivers whose physical callback/fragment size can exceed one
+  // tempo slice (e.g. HostAudioDriver with large SDL fragments) need more
+  // slots so the tick/render cadence (see onAudioBufferTick()) never has to
+  // wait on pool depth.
+  AudioDriver(AudioSettings &settings, AudioBufferData *pool, int poolSize);
   virtual ~AudioDriver();
 
   virtual bool Init();
@@ -66,6 +74,10 @@ public:
 
   void OnNewBufferNeeded();
 
+  int GetPoolSize() {
+    return poolSize_;
+  }
+
 protected:
   void eatBuffer(void *buffer, int size); // size in bytes
   void onAudioBufferTick();
@@ -74,7 +86,8 @@ protected:
 
 protected:
   bool isPlaying_;
-  static AudioBufferData pool_[SOUND_BUFFER_COUNT];
+  AudioBufferData *pool_;
+  int poolSize_;
   int poolQueuePosition_;
   int poolPlayPosition_;
   int bufferPos_;

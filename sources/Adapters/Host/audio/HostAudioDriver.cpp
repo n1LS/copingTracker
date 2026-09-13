@@ -11,8 +11,10 @@
 #include <cstring>
 
 HostAudioDriver *HostAudioDriver::instance_ = nullptr;
+AudioBufferData HostAudioDriver::staticPool_[HOST_POOL_SIZE];
 
-HostAudioDriver::HostAudioDriver(AudioSettings &settings) : AudioDriver(settings), device_id_(0), samples_played_(0) {
+HostAudioDriver::HostAudioDriver(AudioSettings &settings)
+    : AudioDriver(settings, staticPool_, HOST_POOL_SIZE), device_id_(0), samples_played_(0) {
   instance_ = this;
 }
 
@@ -80,13 +82,13 @@ bool HostAudioDriver::StartDriver() {
     producerThread_.join();
   }
 
-  // Kick off the render thread with SOUND_BUFFER_COUNT - 1 permits, matching
+  // Kick off the render thread with HOST_POOL_SIZE - 1 permits, matching
   // picoTrackerAudioDriver's sem_init/sem_release sequence: this lets the
   // producer render that many slices ahead of the very first callback before
   // it has to wait for playback to free a slot.
   {
     std::lock_guard<std::mutex> lock(slotMutex_);
-    freeSlots_ = SOUND_BUFFER_COUNT - 1;
+    freeSlots_ = HOST_POOL_SIZE - 1;
   }
   running_ = true;
   producerThread_ = std::thread(&HostAudioDriver::ProducerLoop, this);
@@ -132,11 +134,19 @@ void HostAudioDriver::SDLAudioCallback(void *userdata, uint8_t *stream, int len)
   }
 }
 
-// Runs on a dedicated thread and renders one playback slice (playSampleCount_
-// frames) at a time, ahead of when the SDL callback needs it - analogous to
-// AudioThread() on core1 for the Pico. It only proceeds once a pool slot has
-// actually been freed by playback (freeSlots_ > 0), so it can never race
-// ahead of what has been consumed.
+// Runs on a dedicated thread and renders one playback slice at a time, ahead
+// of when the SDL callback needs it - analogous to AudioThread() on core1 for
+// the Pico. freeSlots_ is purely a render-ahead throttle (don't get more than
+// HOST_POOL_SIZE-1 slices ahead of playback); it does not determine how
+// much audio is produced per tick. Each iteration below fires exactly one
+// onAudioBufferTick()/OnNewBufferNeeded() pair, which together flush MIDI and
+// render exactly getPlaySampleCount() samples (the tempo-dependent slice size
+// from SyncMaster) via AudioOutDriver::Trigger()/AudioMixer::Render(). This
+// tempo-slice quantum is the actual scheduling clock, and it is completely
+// independent of the SDL fragment size (desired.samples) and of
+// HOST_POOL_SIZE/pool depth - those only affect how far ahead we render
+// and how many samples FillAudioBuffer() copies out per callback, never how
+// much is rendered per tick.
 void HostAudioDriver::ProducerLoop() {
   while (running_) {
     std::unique_lock<std::mutex> lock(slotMutex_);
@@ -175,7 +185,7 @@ void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
   while (remaining > 0 && hasData()) {
     AudioBufferData *buf = &pool_[poolPlayPosition_];
     if (buf->empty_) {
-      poolPlayPosition_ = (poolPlayPosition_ + 1) % SOUND_BUFFER_COUNT;
+      poolPlayPosition_ = (poolPlayPosition_ + 1) % HOST_POOL_SIZE;
       continue;
     }
 
@@ -187,7 +197,7 @@ void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
 
     if (buf->size_ <= 0) {
       buf->empty_ = true;
-      poolPlayPosition_ = (poolPlayPosition_ + 1) % SOUND_BUFFER_COUNT;
+      poolPlayPosition_ = (poolPlayPosition_ + 1) % HOST_POOL_SIZE;
       if (poolPlayPosition_ == poolQueuePosition_) {
         hasData_ = false;
       }
@@ -195,7 +205,7 @@ void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
       // Free slot consumed: let the producer render the next slice.
       {
         std::lock_guard<std::mutex> slotLock(slotMutex_);
-        if (freeSlots_ < SOUND_BUFFER_COUNT - 1) {
+        if (freeSlots_ < HOST_POOL_SIZE - 1) {
           freeSlots_++;
         }
       }
