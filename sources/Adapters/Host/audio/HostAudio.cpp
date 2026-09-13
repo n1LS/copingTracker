@@ -18,7 +18,7 @@ HostAudio::~HostAudio() {
 
 void HostAudio::Init() {
   AudioSettings audioSettings;
-  audioSettings.bufferSize_ = 1024;
+  audioSettings.bufferSize_ = 512;
   audioSettings.preBufferCount_ = 8;
 
   alignas(HostAudioDriver) static char audioDriver[sizeof(HostAudioDriver)];

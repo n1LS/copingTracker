@@ -8,12 +8,7 @@
 
 #include "HostAudioDriver.h"
 #include <algorithm>
-#include <chrono>
-#include <cstdio>
 #include <cstring>
-
-static int g_tickCount = 0;
-static std::chrono::steady_clock::time_point g_tickStart;
 
 HostAudioDriver *HostAudioDriver::instance_ = nullptr;
 
@@ -48,7 +43,6 @@ bool HostAudioDriver::InitDriver() {
   if (device_id_ == 0) {
     return false;
   }
-  fprintf(stderr, "AUDIODEBUG new device_id=%u\n", device_id_);
 
   start_time_ = std::chrono::system_clock::now();
   samples_played_ = 0;
@@ -56,6 +50,17 @@ bool HostAudioDriver::InitDriver() {
 }
 
 void HostAudioDriver::CloseDriver() {
+  // Always stop any previously-running producer thread before touching the
+  // SDL device: InitDriver()/StartDriver() can be invoked more than once on
+  // the same instance (e.g. once at boot, then again when a project is
+  // (re)loaded), and reassigning producerThread_ while the old thread is
+  // still joinable would call std::terminate().
+  running_ = false;
+  slotCv_.notify_all();
+  if (producerThread_.joinable()) {
+    producerThread_.join();
+  }
+
   if (device_id_ != 0) {
     SDL_CloseAudioDevice(device_id_);
     device_id_ = 0;
@@ -66,6 +71,26 @@ bool HostAudioDriver::StartDriver() {
   if (device_id_ == 0) {
     return false;
   }
+
+  // Guard against StartDriver() being called again while a producer thread
+  // from a previous Start() is still alive (see CloseDriver() comment).
+  running_ = false;
+  slotCv_.notify_all();
+  if (producerThread_.joinable()) {
+    producerThread_.join();
+  }
+
+  // Kick off the render thread with SOUND_BUFFER_COUNT - 1 permits, matching
+  // picoTrackerAudioDriver's sem_init/sem_release sequence: this lets the
+  // producer render that many slices ahead of the very first callback before
+  // it has to wait for playback to free a slot.
+  {
+    std::lock_guard<std::mutex> lock(slotMutex_);
+    freeSlots_ = SOUND_BUFFER_COUNT - 1;
+  }
+  running_ = true;
+  producerThread_ = std::thread(&HostAudioDriver::ProducerLoop, this);
+
   SDL_PauseAudioDevice(device_id_, 0);
   return true;
 }
@@ -73,6 +98,12 @@ bool HostAudioDriver::StartDriver() {
 void HostAudioDriver::StopDriver() {
   if (device_id_ != 0) {
     SDL_PauseAudioDevice(device_id_, 1);
+  }
+
+  running_ = false;
+  slotCv_.notify_all();
+  if (producerThread_.joinable()) {
+    producerThread_.join();
   }
 }
 
@@ -101,39 +132,47 @@ void HostAudioDriver::SDLAudioCallback(void *userdata, uint8_t *stream, int len)
   }
 }
 
+// Runs on a dedicated thread and renders one playback slice (playSampleCount_
+// frames) at a time, ahead of when the SDL callback needs it - analogous to
+// AudioThread() on core1 for the Pico. It only proceeds once a pool slot has
+// actually been freed by playback (freeSlots_ > 0), so it can never race
+// ahead of what has been consumed.
+void HostAudioDriver::ProducerLoop() {
+  while (running_) {
+    std::unique_lock<std::mutex> lock(slotMutex_);
+    slotCv_.wait(lock, [this] { return !running_ || freeSlots_ > 0; });
+    if (!running_) {
+      break;
+    }
+    freeSlots_--;
+    lock.unlock();
+
+    // onAudioBufferTick()/OnNewBufferNeeded() drive the actual DSP render
+    // (AudioOutDriver::Trigger() -> AudioMixer::Render()) and push the
+    // result into AudioDriver::pool_ via AddBuffer(). This is the
+    // potentially expensive part we want off the real-time audio thread.
+    // mutex_ guards the shared pool_/poolQueuePosition_/poolPlayPosition_
+    // state against the concurrent SDL callback thread (FillAudioBuffer).
+    std::lock_guard<std::mutex> poolLock(mutex_);
+    onAudioBufferTick();
+    OnNewBufferNeeded();
+  }
+}
+
 void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
   std::lock_guard<std::mutex> lock(mutex_);
 
   memset(stream, 0, len);
 
-  // Copy audio data from the buffer pool, generating exactly one more
-  // playback slice (playSampleCount_ frames) at a time, on demand, instead of
-  // firing a fixed tick once per SDL callback. This mirrors the Pico's
-  // DMA-IRQ-driven cadence: a tick/new-buffer is only produced when the pool
-  // has run dry, so the sequencer advances one slice per playSampleCount_
-  // frames of real audio time rather than once per fixed-size SDL fragment.
+  // Copy pre-rendered audio data from the buffer pool. Rendering itself
+  // happens on ProducerLoop(), so this real-time callback only ever does
+  // memcpy's and index bookkeeping - no DSP work - keeping it fast and
+  // avoiding the audible dropouts ("hollow" sound) that resulted from
+  // rendering synchronously inside the callback with no lookahead.
   int remaining = len;
   uint8_t *dest = stream;
 
-  while (remaining > 0) {
-    if (!hasData()) {
-      if (g_tickCount == 0) {
-        g_tickStart = std::chrono::steady_clock::now();
-      }
-      g_tickCount++;
-      if (g_tickCount % 48 == 0) {
-        double secs = std::chrono::duration<double>(std::chrono::steady_clock::now() - g_tickStart).count();
-        fprintf(stderr, "TICKDEBUG count=%d elapsed=%.3f rate=%.3f\n", g_tickCount, secs, g_tickCount / secs);
-      }
-      onAudioBufferTick();
-      OnNewBufferNeeded();
-      if (!hasData()) {
-        // Not playing (or nothing produced): leave the rest of the stream
-        // silent instead of spinning forever.
-        break;
-      }
-    }
-
+  while (remaining > 0 && hasData()) {
     AudioBufferData *buf = &pool_[poolPlayPosition_];
     if (buf->empty_) {
       poolPlayPosition_ = (poolPlayPosition_ + 1) % SOUND_BUFFER_COUNT;
@@ -152,6 +191,15 @@ void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
       if (poolPlayPosition_ == poolQueuePosition_) {
         hasData_ = false;
       }
+
+      // Free slot consumed: let the producer render the next slice.
+      {
+        std::lock_guard<std::mutex> slotLock(slotMutex_);
+        if (freeSlots_ < SOUND_BUFFER_COUNT - 1) {
+          freeSlots_++;
+        }
+      }
+      slotCv_.notify_one();
     }
   }
 

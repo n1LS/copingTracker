@@ -50,7 +50,7 @@ typedef struct ui_config_t {
 } ui_config_t;
 
 static struct chiptune_instrument_ui_t {
-  ui_config_t wave = {"Waveform:%-20.20s", 0, numWaveforms - 1, 1, 1, 4};
+  ui_config_t wave = {"Waveform:%-19.19s", 0, numWaveforms - 1, 1, 1, 4};
   ui_config_t transpose = {"Transpos:%+03d", -24, 24, 1, 12, 5};
   ui_config_t burst = {"Burst   : %02X", 1, 255, 1, 16, 0xa};
   ui_config_t arp = {"ArpSpeed: %02X", 1, 32, 1, 8, 0xb};
