@@ -24,6 +24,7 @@ struct AudioBufferData {
   int size_;
   bool empty_;
   void *driverData_;
+  size_t readOffset_;
 };
 
 class AudioDriver : public Observable {
@@ -68,7 +69,7 @@ public:
 
   virtual double GetStreamTime() = 0; // in secs
 
-  void AddBuffer(short *buffer, int size); // size in samples
+  virtual void AddBuffer(short *buffer, int size); // size in samples
 
   AudioSettings GetAudioSettings();
 

@@ -37,7 +37,7 @@ bool HostAudioDriver::InitDriver() {
   desired.freq = 44100;
   desired.format = AUDIO_S16;
   desired.channels = 2;
-  desired.samples = 1024;
+  desired.samples = 512;
   desired.callback = SDLAudioCallback;
   desired.userdata = this;
 
@@ -148,27 +148,28 @@ void HostAudioDriver::SDLAudioCallback(void *userdata, uint8_t *stream, int len)
 // and how many samples FillAudioBuffer() copies out per callback, never how
 // much is rendered per tick.
 void HostAudioDriver::ProducerLoop() {
-  while (running_) {
-    std::unique_lock<std::mutex> lock(slotMutex_);
-    slotCv_.wait(lock, [this] { return !running_ || freeSlots_ > 0; });
-    if (!running_) {
-      break;
-    }
-    freeSlots_--;
-    lock.unlock();
+  constexpr int kTargetQueuedSamples = 1024; // 23 ms latency @ 44.1 kHz
 
-    // onAudioBufferTick()/OnNewBufferNeeded() drive the actual DSP render
-    // (AudioOutDriver::Trigger() -> AudioMixer::Render()) and push the
-    // result into AudioDriver::pool_ via AddBuffer(). This is the
-    // potentially expensive part we want off the real-time audio thread.
-    // mutex_ guards the shared pool_/poolQueuePosition_/poolPlayPosition_
-    // state against the concurrent SDL callback thread (FillAudioBuffer).
+  while (running_) {
+    {
+      std::unique_lock<std::mutex> lock(slotMutex_);
+      slotCv_.wait(lock, [this] {
+        return !running_ || (freeSlots_ > 0 && queuedSamples_ < kTargetQueuedSamples);
+      });
+
+      if (!running_) {
+        break;
+      }
+
+      freeSlots_--;
+    }
+
+    // Render exactly one normal audio tick/buffer.
     std::lock_guard<std::mutex> poolLock(mutex_);
     onAudioBufferTick();
     OnNewBufferNeeded();
   }
 }
-
 void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
   std::lock_guard<std::mutex> lock(mutex_);
 
@@ -184,19 +185,24 @@ void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
 
   while (remaining > 0 && hasData()) {
     AudioBufferData *buf = &pool_[poolPlayPosition_];
+
     if (buf->empty_) {
       poolPlayPosition_ = (poolPlayPosition_ + 1) % HOST_POOL_SIZE;
       continue;
     }
 
-    int to_copy = (buf->size_ < remaining) ? buf->size_ : remaining;
-    memcpy(dest, buf->buffer_, to_copy);
-    dest += to_copy;
-    remaining -= to_copy;
-    buf->size_ -= to_copy;
+    int toCopy = (buf->size_ < remaining) ? buf->size_ : remaining;
+
+    memcpy(dest, buf->buffer_ + buf->readOffset_, toCopy);
+    dest += toCopy;
+    remaining -= toCopy;
+    buf->readOffset_ += toCopy;
+    buf->size_ -= toCopy;
 
     if (buf->size_ <= 0) {
       buf->empty_ = true;
+      buf->readOffset_ = 0;
+
       poolPlayPosition_ = (poolPlayPosition_ + 1) % HOST_POOL_SIZE;
       if (poolPlayPosition_ == poolQueuePosition_) {
         hasData_ = false;
@@ -213,5 +219,13 @@ void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
     }
   }
 
-  samples_played_ += (len - remaining) / (obtained_spec_.channels * sizeof(int16_t));
+  int newSamples = (len - remaining) / (obtained_spec_.channels * sizeof(int16_t));
+  
+  queuedSamples_ -= newSamples;
+  samples_played_ += newSamples;
+}
+
+void HostAudioDriver::AddBuffer(short *buffer, int samplecount) {
+  queuedSamples_ += samplecount;
+  AudioDriver::AddBuffer(buffer, samplecount);
 }

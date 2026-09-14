@@ -50,6 +50,8 @@ bool AudioMixer::Render(fixed *buffer, int samplecount) {
   fixed peakL = 0;
   fixed peakR = 0;
 
+  fixed *c = buffer;
+
   for (auto *mod : modules_) {
     if (!mod) {
       continue;
@@ -99,10 +101,8 @@ bool AudioMixer::Render(fixed *buffer, int samplecount) {
   // Apply volume to mix of all of this instance's "sub" audiomixers
   // TODO (democloid): This is wildly inefficient, doing this loop takes 4 - 5
   // times the time it takes a mix loop above. Some tests show that at least
-  // double performance is not hard to achieve
   if (gotData) {
-    fixed *c = buffer;
-
+    // double performance is not hard to achieve
     if (volume_ == FP_ONE) {
       // unity gain, no calculations to be done, just grab the levels
       for (int i = 0; i < samplecount; i += 32, c += 64) {
@@ -116,11 +116,11 @@ bool AudioMixer::Render(fixed *buffer, int samplecount) {
     } else {
       for (int i = 0; i < samplecount; i++) {
         // Right
-        fixed r = fp_mul(*c, volume_);
+        fixed r = fp_mul_coef(*c, volume_);
         *c++ = r;
 
         // Left
-        fixed l = fp_mul(*c, volume_);
+        fixed l = fp_mul_coef(*c, volume_);
         *c++ = l;
 
         // update the level every 32 sample pairs

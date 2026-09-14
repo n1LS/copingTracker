@@ -35,12 +35,13 @@ public:
   virtual bool StartDriver() override;
   virtual void StopDriver() override;
 
+  void AddBuffer(short *buffer, int samplecount) override;
+
   virtual bool Interlaced() override {
     return true;
   }
   virtual int GetPlayedBufferPercentage() override;
   virtual double GetStreamTime() override;
-
   static void SDLAudioCallback(void *userdata, uint8_t *stream, int len);
   void FillAudioBuffer(uint8_t *stream, int len);
 
@@ -51,6 +52,8 @@ private:
   SDL_AudioSpec obtained_spec_;
   std::chrono::system_clock::time_point start_time_;
   int samples_played_;
+  double avg_samples_played = 0;
+  int avg_sample_counter = 0;
   std::mutex mutex_;
 
   static AudioBufferData staticPool_[HOST_POOL_SIZE];
@@ -66,6 +69,7 @@ private:
   std::mutex slotMutex_;
   std::condition_variable slotCv_;
   int freeSlots_ = 0;
+  int queuedSamples_ = 0;
 
   static HostAudioDriver *instance_;
 };

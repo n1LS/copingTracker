@@ -47,7 +47,7 @@ if [ "$quick" = false ]; then
     python3 -m ctsb_converter $GM_FLAG "$GM_SF2_FILE" ../../sources/Application/Instruments
     cd ../..
     echo "4) Formatting source code…"
-    ./format.sh 
+    ./format.sh || true
     echo "5) Generating stack wavetables…"
     python3 ./tools/wavetable_generator/wavetable_generator.py sources/Application/Instruments/StackInstrument/StackWavetables.generated.h
     echo "6) Updating the changelog"
