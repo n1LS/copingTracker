@@ -72,7 +72,7 @@ void ListView::DrawListItems() {
     dataSource_->PrepareItemDrawing((int)i, isSelected, &fg, &bg, buffer, sizeof(buffer));
     SetColor(fg);
     SetBackgroundColor(bg);
-    dataSource_->DrawItem(x, y, i, isSelected, fg, bg, buffer);
+    dataSource_->DrawItem(x, y, (int)i, isSelected, fg, bg, buffer);
 
     if (isSelected) {
       SwapColors();
@@ -101,7 +101,7 @@ void ListView::DrawEmptyState() {
 }
 
 void ListView::HandleUp(bool page) {
-  int itemCount = dataSource_->GetItemCount();
+  size_t itemCount = dataSource_->GetItemCount();
 
   if (itemCount == 0) {
     return;
@@ -116,7 +116,7 @@ void ListView::HandleUp(bool page) {
   EnsureVisible();
 
   if (delegate_) {
-    delegate_->OnItemNavigated(currentIndex_);
+    delegate_->OnItemNavigated((int)currentIndex_);
   }
 
   isDirty_ = true;
@@ -138,7 +138,7 @@ void ListView::HandleDown(bool page) {
   EnsureVisible();
 
   if (delegate_) {
-    delegate_->OnItemNavigated(currentIndex_);
+    delegate_->OnItemNavigated((int)currentIndex_);
   }
 
   isDirty_ = true;
@@ -146,13 +146,13 @@ void ListView::HandleDown(bool page) {
 
 void ListView::HandleEnter() {
   if (delegate_) {
-    delegate_->OnItemSelected(currentIndex_, selectedTab_);
+    delegate_->OnItemSelected((int)currentIndex_, selectedTab_);
   }
 }
 
 void ListView::HandleEdit() {
   if (delegate_) {
-    delegate_->OnItemEdit(currentIndex_, selectedTab_);
+    delegate_->OnItemEdit((int)currentIndex_, selectedTab_);
   }
 }
 

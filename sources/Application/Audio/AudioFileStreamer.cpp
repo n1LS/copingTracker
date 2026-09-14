@@ -110,7 +110,7 @@ bool AudioFileStreamer::Start(const char *name, int startSample, bool looping) {
     // overflow FLASH_PAGE_SIZE  and the assertion in  WavFile::GetBuffer
     // requires size < FLASH_PAGE_SIZE/2, so we use 64 as a safe chunk size
     const int SAFE_CHUNK_SIZE = 64; // in samples
-    int remainingSize = size;
+    int remainingSize = (int)size;
     int currentPos = 0;
 
     while (remainingSize > 0) {

@@ -18,7 +18,7 @@
 #include <etl/string.h>
 
 // Forward declarations
-class GUIPoint;
+struct GUIPoint;
 
 // Progress message box with render progress display
 class RenderProgressModal : public ModalView {

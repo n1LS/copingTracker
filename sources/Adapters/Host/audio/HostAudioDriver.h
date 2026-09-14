@@ -52,8 +52,6 @@ private:
   SDL_AudioSpec obtained_spec_;
   std::chrono::system_clock::time_point start_time_;
   int samples_played_;
-  double avg_samples_played = 0;
-  int avg_sample_counter = 0;
   std::mutex mutex_;
 
   static AudioBufferData staticPool_[HOST_POOL_SIZE];
