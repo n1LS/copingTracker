@@ -66,7 +66,6 @@ static void SaveAsOverwriteCallback(View &v, ModalView &dialog) {
     return;
   }
 
-  PersistencyService *persist = PersistencyService::GetInstance();
   const char *projName = ((ProjectView &)v).getProjectName().c_str();
   const char *oldProjName = ((ProjectView &)v).getOldProjectName().c_str();
 
@@ -427,14 +426,14 @@ void ProjectView::OnPurge() {
   int removed = project_->PurgeSamples();
   char buffer[32];
   npf_snprintf(buffer, sizeof(buffer), "Removed %d sample%s.", removed, removed == 1 ? "" : "s");
-  MessageBox *mb = MessageBox::Create(*this, "Done", buffer, MBBF_OK);
+  ToastView::GetInstance()->Show(buffer, &ttSuccess, 1500);
 }
 
 void ProjectView::OnPurgeInstruments() {
   int removed = project_->PurgeInstruments();
   char buffer[32];
   npf_snprintf(buffer, sizeof(buffer), "Removed %d instrument%s.", removed, removed == 1 ? "" : "s");
-  MessageBox *mb = MessageBox::Create(*this, "Done", buffer, MBBF_OK);
+  ToastView::GetInstance()->Show(buffer, &ttSuccess, 1500);
 }
 
 void ProjectView::OnFocus() {

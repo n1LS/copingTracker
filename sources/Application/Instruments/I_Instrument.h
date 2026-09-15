@@ -32,7 +32,8 @@ typedef struct InstrumentTypeName {
 } InstrumentTypeName;
 
 static const InstrumentTypeName InstrumentTypeNames[IT_LAST] = {
-    {.full = "None", .compact = "None"}, {.full = "Sample", .compact = "Smpl"}, {.full = "Chiptune", .compact = "Chip"},
+    {.full = "--", .compact = "--  "},   {.full = "Sample", .compact = "Smpl"}, {.full = "Chiptune", .compact = "Chip"},
+
     {.full = "Drum", .compact = "Drum"}, {.full = "Stack", .compact = "Stck"},  {.full = "MIDI", .compact = "MIDI"},
     {.full = "SID", .compact = "SID "},  {.full = "OPL3", .compact = "OPL3"},
 };

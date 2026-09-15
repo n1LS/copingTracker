@@ -56,7 +56,6 @@ void InstrumentImportView::OnDirectorySetup() {
 void InstrumentImportView::detectInstrumentTypes() {
   instrumentTypeList_.clear();
 
-  auto fs = GetFileSystem();
   auto persistency = PersistencyService::GetInstance();
   char filePath[PFILENAME_SIZE];
 
@@ -81,7 +80,6 @@ void InstrumentImportView::detectInstrumentTypes() {
 void InstrumentImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
                                               size_t bufferSize) {
   (void)bufferSize; // Unused - use fixed size
-  auto fs = GetFileSystem();
 
   // Ensure instrumentTypeList_ is properly sized before accessing
   // This can happen if DrawView() is called before OnDirectorySetup() completes

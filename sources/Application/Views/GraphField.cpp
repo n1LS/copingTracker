@@ -108,7 +108,7 @@ bool GraphField::UpdateZoomWindow(uint32_t centerSample) {
     return changed;
   }
 
-  uint32_t zoomFactor = (zoomLevel_ < 31) ? (static_cast<uint32_t>(1) << zoomLevel_) : 0;
+  uint32_t zoomFactor = (zoomLevel_ < 31) ? (1 << zoomLevel_) : 0;
   if (zoomFactor == 0) {
     zoomFactor = 1;
   }
@@ -147,14 +147,14 @@ bool GraphField::AdjustZoom(int32_t delta, uint32_t centerSample) {
   if (sampleSize_ == 0) {
     return false;
   }
-  int32_t newLevel = static_cast<int32_t>(zoomLevel_) + static_cast<int32_t>(delta);
+  int32_t newLevel = zoomLevel_ + static_cast<int32_t>(delta);
   if (newLevel < 0) {
     newLevel = 0;
   }
-  if (newLevel > static_cast<int32_t>(maxZoomLevel_)) {
+  if (newLevel >= maxZoomLevel_) {
     newLevel = static_cast<int32_t>(maxZoomLevel_);
   }
-  if (newLevel == static_cast<int32_t>(zoomLevel_)) {
+  if (newLevel == zoomLevel_) {
     return false;
   }
   zoomLevel_ = static_cast<uint8_t>(newLevel);
@@ -244,29 +244,28 @@ int32_t GraphField::SampleToPixel(uint32_t sample) const {
   uint32_t rel = clamped - viewStart_;
   int32_t local = static_cast<int32_t>((static_cast<uint64_t>(rel) * width_) / viewSpan);
 
-  return static_cast<int32_t>(x_) + 1 + local;
+  return x_ + 1 + local;
 }
 
 void GraphField::DrawGraph(View &view) {
   if (needsFullRedraw_) {
     // clear area
 
-    GUIRect area(static_cast<int32_t>(x_), static_cast<int32_t>(y_), static_cast<int32_t>(x_) + width_,
-                 static_cast<int32_t>(y_) + height_);
+    GUIRect area(x_, y_, width_, height_);
     view.DrawRect(area, Theme::View::bg);
 
     // baseline
 
     if (showBaseline_) {
-      int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
-      GUIRect baseline(static_cast<int32_t>(x_) + 1, centerY, static_cast<int32_t>(x_) + width_ - 1, centerY + 1);
+      int32_t centerY = y_ + height_ / 2;
+      GUIRect baseline(x_, centerY, width_, 1);
       view.DrawRect(baseline, Theme::Waveform::baseline);
     }
 
     // draw waveform
 
     if (waveformValid_ && hasValidWindow()) {
-      int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
+      int32_t centerY = y_ + height_ / 2;
       int32_t maxColumns = std::min<int32_t>(width_, static_cast<int32_t>(CacheSize));
       for (int32_t x = 0; x < maxColumns; ++x) {
         uint8_t amplitude = waveformCache_[x];
@@ -275,13 +274,13 @@ void GraphField::DrawGraph(View &view) {
         }
         int32_t startY = centerY - amplitude / 2;
         int32_t endY = startY + amplitude;
-        if (startY < static_cast<int32_t>(y_) + 1) {
-          startY = static_cast<int32_t>(y_) + 1;
+        if (startY < y_ + 1) {
+          startY = y_ + 1;
         }
-        if (endY > static_cast<int32_t>(y_) + height_) {
-          endY = static_cast<int32_t>(y_) + height_;
+        if (endY > y_ + height_) {
+          endY = y_ + height_;
         }
-        GUIRect column(static_cast<int32_t>(x_) + 1 + x, startY, static_cast<int32_t>(x_) + 2 + x, endY);
+        GUIRect column(x_ + 1 + x, startY, 1, endY - startY);
         view.DrawRect(column, Theme::View::fg);
       }
     }
@@ -302,8 +301,17 @@ void GraphField::DrawGraph(View &view) {
   DrawMarkers(view);
 }
 
+void GraphField::DrawMarker(View &view, int index) {
+  int32_t x = SampleToPixel(markers_[index].sample);
+
+  if (x >= 0 && x <= BitmapWidth) {
+    GUIRect marker(x, y_, 1, height_);
+    view.DrawRect(marker, colorForIndex(index));
+  }
+}
+
 void GraphField::DrawMarkers(View &view) {
-  for (size_t i = 0; i < markerCount_; ++i) {
+  for (int i = 0; i < markerCount_; ++i) {
     // Redraw waveform at old marker position
     if (markers_[i].x >= 0) {
       redrawWaveformColumn(view, markers_[i].x);
@@ -311,12 +319,8 @@ void GraphField::DrawMarkers(View &view) {
 
     // Draw marker at new position if visible
     if (markers_[i].visible) {
-      int32_t x = SampleToPixel(markers_[i].sample);
-      if (x >= 0) {
-        GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_);
-        view.DrawRect(marker, colorForIndex((int)i));
-      }
-      markers_[i].x = x;
+      DrawMarker(view, i);
+      markers_[i].x = SampleToPixel(markers_[i].sample);
     } else {
       markers_[i].x = -1;
     }
@@ -324,24 +328,24 @@ void GraphField::DrawMarkers(View &view) {
 }
 
 void GraphField::redrawWaveformColumn(View &view, int32_t x) {
-  int32_t left = static_cast<int32_t>(x_);
-  int32_t right = static_cast<int32_t>(x_) + width_;
+  int32_t left = x_;
+  int32_t right = x_ + width_;
   if (x <= left || x > right) {
     return;
   }
-  GUIRect clearRect(x, static_cast<int32_t>(y_) + 1, x + 1, static_cast<int32_t>(y_) + height_);
+  GUIRect clearRect(x, y_, 1, height_);
   view.DrawRect(clearRect, Theme::View::bg);
 
   if (showBaseline_) {
-    int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
-    GUIRect baseline(x, centerY, x + 1, centerY + 1);
+    int32_t centerY = y_ + height_ / 2;
+    GUIRect baseline(x, centerY, 1, 1);
     view.DrawRect(baseline, Theme::Waveform::baseline);
   }
 
   if (!waveformValid_ || !hasValidWindow()) {
     return;
   }
-  int32_t cacheIndex = x - static_cast<int32_t>(x_) - 1;
+  int32_t cacheIndex = x - x_ - 1;
   if (cacheIndex < 0 || cacheIndex >= CacheSize) {
     return;
   }
@@ -349,14 +353,14 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
   if (amplitude == 0) {
     return;
   }
-  int32_t centerY = static_cast<int32_t>(y_) + height_ / 2;
+  int32_t centerY = y_ + height_ / 2;
   int32_t startY = centerY - amplitude / 2;
   int32_t endY = startY + amplitude;
 
-  startY = std::max(startY, static_cast<int32_t>(y_) + 1);
-  endY = std::min(endY, static_cast<int32_t>(y_) + height_ + 1);
+  startY = std::max(startY, (int32_t)y_);
+  endY = std::min(endY, (int32_t)y_ + height_);
 
-  GUIRect column(x, startY, x + 1, endY);
+  GUIRect column(x, startY, 1, endY - startY);
   view.DrawRect(column, Theme::View::fg);
 }
 
@@ -365,16 +369,16 @@ void GraphField::drawMarkersAt(View &view, int32_t x) {
     return;
   }
 
-  for (size_t i = 0; i < markerCount_; ++i) {
+  for (int i = 0; i < markerCount_; ++i) {
     if (!markers_[i].visible) {
       continue;
     }
-    int32_t markerX = SampleToPixel(markers_[i].sample);
-    if (markerX != x) {
+
+    if (SampleToPixel(markers_[i].sample) != x) {
       continue;
     }
-    GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_);
-    view.DrawRect(marker, colorForIndex((int)i));
+
+    DrawMarker(view, i);
   }
 }
 

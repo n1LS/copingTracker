@@ -35,7 +35,7 @@ void ToastView::Init(GUIWindow &w, ViewData *viewData) {
 #ifdef __PICO__
     __attribute__((section(".DATA_RAM")))
 #endif
-    static char toastStorage[sizeof(ToastView)];
+    alignas(AppWindow) static char toastStorage[sizeof(ToastView)];
     instance_ = new (toastStorage) ToastView(w, viewData);
   }
 }

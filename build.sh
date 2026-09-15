@@ -36,8 +36,8 @@ if [ "$quick" = false ]; then
     python3 import.py
     python3 font_bootloader.py > ../../sources/Adapters/copingTracker/bootloader/bl_font.generated.h
     cd ../..
-    echo "2) Converting the documentation"
-    python3 ./tools/manual/raw_data/convert-documentation.py ./tools/manual/raw_data/Documentation.rc sources/Foundation/Constants/Documentation.generated.h
+    echo "2) Updating the changelog"
+    python3 ./tools/manual/update-changelog.py TODO.md tools/manual/raw_data/changelog.copingDoc sources/Foundation/Constants/Version.h
     echo "3) Generating the GMBank data"
     cd tools/sf2converter
     GM_FLAG=""
@@ -50,8 +50,8 @@ if [ "$quick" = false ]; then
     ./format.sh || true
     echo "5) Generating stack wavetables…"
     python3 ./tools/wavetable_generator/wavetable_generator.py sources/Application/Instruments/StackInstrument/StackWavetables.generated.h
-    echo "6) Updating the changelog"
-    python3 ./tools/manual/update-changelog.py TODO.md tools/manual/raw_data/changelog.copingDoc sources/Foundation/Constants/Version.h
+    echo "6) Converting the documentation"
+    python3 ./tools/manual/raw_data/convert-documentation.py ./tools/manual/raw_data/Documentation.rc sources/Foundation/Constants/Documentation.generated.h
 
     if [ "$pretools" = true ]; then
         exit 0

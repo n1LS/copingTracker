@@ -645,8 +645,6 @@ void SampleEditorView::updateGraphMarkers() {
   bool hasSample = tempSampleSize_ > 0;
 
   if (hasSample) {
-    Color startColor = Theme::Waveform::marker(selectedMarker_ == MarkerStart);
-    Color endColor = Theme::Waveform::marker(selectedMarker_ == MarkerEnd);
     graphField_.SetMarker(0, start_, true);
     graphField_.SetMarker(1, end_, true);
   } else {

@@ -61,9 +61,9 @@ static void LoadProjectCallback(View &v, ModalView &dialog) {
     // Mirror PersistencyService::SaveProjectState byte-for-byte: write only the
     // bare project name (no newline, no terminator) to SD_BASE_DIR "/.current".
     auto fs = FileSystem::GetInstance();
-    auto current = fs->Open(SD_BASE_DIR "/.current", "w");
+    auto current = fs->Open(PROJECT_STATE_FILE, "w");
     if (!current) {
-      Trace::Log("SELECTPROJECTVIEW", "Could not open %s", SD_BASE_DIR "/.current");
+      Trace::Log("SELECTPROJECTVIEW", "Could not open %s", PROJECT_STATE_FILE);
       return;
     }
     current->Write(name, 1, strlen(name));

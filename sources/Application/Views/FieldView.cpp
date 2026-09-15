@@ -56,30 +56,34 @@ UIField *FieldView::GetFocus() {
 
 void FieldView::Redraw() {
 
-  if (focus_ == 0) {
+  if (focus_ == nullptr) {
     SetFocus(*fieldList_.begin());
   }
 
   auto it = fieldList_.begin();
   for (size_t i = 0; i < fieldList_.size(); i++) {
-    (*it)->Draw(w_);
+    // draw the focused item last to overlap all others
+    if (focus_ != *it) {
+      (*it)->Draw(w_);
+    }
     it++;
-  };
+  }
 
   // A field only knows its focus width once it has been drawn (the value text
   // length can change with the value, eg. "9%" -> "10%"). Refresh the cached
   // rect here so subclasses reading focusRect_ directly see the new width.
   if (focus_) {
+    // draw the focused item last to overlap all others
+    focus_->Draw(w_);
     UpdateFocusRect();
   }
 }
 
 void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
-  if (focus_ == 0) {
+  if (focus_ == nullptr) {
     focus_ = *fieldList_.begin();
     //  Empty field view, we don't have anything to do
-    if (focus_ == 0)
+    if (focus_ == nullptr)
       return;
     focus_->SetFocus();
   }
@@ -132,17 +136,17 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
       focus_->ProcessEditArrow(BM_RIGHT);
       isDirty_ = true;
     }
-  } else if (!(mask & (BM_ENTER | BM_EDIT | BM_ALT | BM_NAV | BM_PLAY))) {
-    if (mask & BM_DOWN) {
+  } else {
+    if (mask == BM_DOWN) {
       UIField *next = findAdjacentField(true, +1);
       SetFocus(next);
-    } else if (mask & BM_UP) {
+    } else if (mask == BM_UP) {
       UIField *prev = findAdjacentField(true, -1);
       SetFocus(prev);
-    } else if (mask & BM_RIGHT) {
+    } else if (mask == BM_RIGHT) {
       UIField *next = findAdjacentField(false, +1);
       SetFocus(next);
-    } else if (mask & BM_LEFT) {
+    } else if (mask == BM_LEFT) {
       UIField *prev = findAdjacentField(false, -1);
       SetFocus(prev);
     }
@@ -171,6 +175,9 @@ UIField *FieldView::findAdjacentField(bool vertical, int8_t direction) {
   for (auto it = fieldList_.begin(); it != fieldList_.end(); ++it) {
     UIField *field = *it;
     if (field->IsStatic())
+      continue;
+
+    if (field == focus_)
       continue;
 
     int32_t fy = field->GetPosition().y_;

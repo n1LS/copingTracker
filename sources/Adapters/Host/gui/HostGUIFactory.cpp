@@ -208,8 +208,6 @@ void HostGUIWindowImp::mirrorUIConnectionChanged(bool connected) {
 
 void HostGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t buttonMask) {
   int e = 1;
-  System *system = System::GetInstance();
-  unsigned long now = system ? system->GetClock() : 0;
   AppWindow *window = AppWindow::GetInstance();
   if (!window)
     return;

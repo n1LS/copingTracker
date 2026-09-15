@@ -16,6 +16,9 @@
 // [0, limit]. 0xFF is treated as uninitialized and reset to 0 unless limit
 // itself is 0xFF (i.e. the field uses the full uint8 range).
 inline void updateDataValue(unsigned char *c, int offset, unsigned char limit, bool wrap) {
+  if (c == nullptr)
+    return;
+
   int v = *c;
   if ((v == 0xFF) && (limit != 0xFF))
     v = 0;

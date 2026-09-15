@@ -52,8 +52,8 @@
 #define XML_ATTR_TABLE_RATIO "table-ratio"
 #define XML_ATTR_LENGTH "length"
 #define XML_ATTR_SLICE_PREFIX "sl"
-#define XML_ATTR_TABLE_ID "table-id"
 #define XML_ATTR_ID "id"
+
 #define XML_ATTR_INSTRUMENT_NAME "instrument-name"
 
 #define XML_ELEM_PARAMETER "parameter"

@@ -19,7 +19,6 @@
 #include "System/FileSystem/FileSystem.h"
 #include <cstring>
 
-#define PROJECT_STATE_FILE SD_BASE_DIR "/.current"
 #define MAX_DELETE_DEPTH 3
 
 PersistencyService::PersistencyService() : Service(Token::ServicePersistency) {};

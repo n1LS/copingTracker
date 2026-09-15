@@ -107,8 +107,15 @@ void HostSystem::SystemBootloader() {
 void HostSystem::SystemReboot() {
   AppWindow *window = AppWindow::GetInstance();
   if (window) {
+    // persist current project in local variable since we are not actually rebooting for a reload
+    char buffer[64];
+    if (PersistencyService::GetInstance()->LoadCurrentProjectName(buffer) != PERSIST_LOAD_FAILED) {
+      window->SetProjectName(buffer);
+    }
+
     window->SetDirty();
     window->Clear();
+
     ((ScreenView *)window->GetCurrentView())->Navigate(VT_BOOT, vtNone);
     window->SetBootLoadTriggered(false);
   }

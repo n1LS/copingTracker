@@ -61,7 +61,26 @@ bool HostSamplePool::loadSample(const char *name) {
   }
 
   sampleBuffers_[count_].resize(sampleSize);
-  wav->SetSampleBuffer((int16_t *)sampleBuffers_[count_].data());
+  uint8_t *dst = sampleBuffers_[count_].data();
+
+  // Unlike the Pico path (which streams sample data through flash_range_program
+  // as it's read), the Host pool keeps samples fully resident in a plain
+  // memory buffer, so the WAV data must actually be read into it here -
+  // SetSampleBuffer() only points the WavFile at where to read into.
+  wav->SetSampleBuffer((int16_t *)dst);
+  wav->Rewind();
+  uint32_t totalRead = 0;
+  uint32_t bytesRead = 0;
+  do {
+    if (!wav->Read(dst + totalRead, sampleSize - totalRead, &bytesRead)) {
+      Trace::Error("Failed reading sample data: %s", name);
+      wav->Close();
+      sampleBuffers_[count_].clear();
+      return false;
+    }
+    totalRead += bytesRead;
+  } while (bytesRead > 0 && totalRead < sampleSize);
+
   totalUsed_ += sampleSize;
 
   strncpy(nameStore_[count_], name, MAX_INSTRUMENT_FILENAME_LENGTH);

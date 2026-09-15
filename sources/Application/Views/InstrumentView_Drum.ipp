@@ -71,10 +71,6 @@ void InstrumentView::fillDrumParameters() {
 void InstrumentView::DrawViewDrum() {
   GUIPoint p = GetAnchor();
 
-  int currentID = viewData_->currentInstrumentID_;
-  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  I_Instrument *instr = bank->GetInstrument(currentID);
-  
   SetColor(Theme::View::fg);
   SetBackgroundColor(Theme::View::bg);
 
@@ -83,9 +79,6 @@ void InstrumentView::DrawViewDrum() {
   Color colors[4] = {Theme::SemanticColors::pitch, Theme::SemanticColors::effect, Theme::SemanticColors::volume, Theme::SemanticColors::sample(true)}; 
 
   for (int n = 0; n < 12; n++) {
-    Variable *v = instr->FindVariable(Token::enum_type(Token::DrumInstrumentParamsVoice0 + displayOrder[n]));
-    uint32_t wave = v->GetInt() % drumNumWaveforms;
-    
     UIHexVarField &field = hexVarField_[n];
     Variable *var = field.GetVariable();
     int column = field.GetColumn();

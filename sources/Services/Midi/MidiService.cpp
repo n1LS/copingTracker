@@ -195,7 +195,6 @@ void MidiService::updateActiveDevicesList(uint16_t config) {
 void MidiService::startDevice() {
   // look for the device
   for (auto dev : activeOutDevices_) {
-    auto name = dev->GetName();
     dev->Start();
   }
 }

@@ -208,10 +208,12 @@ void TablePlayback::ProcessStep(TablePlayerChange &tpc) {
         }
 
         // try local processing for if it changes current table or position
-
-        hopped_[0] = ProcessLocalCommand(0, *table_, tpc);
-        hopped_[1] = ProcessLocalCommand(1, *table_, tpc);
-        hopped_[2] = ProcessLocalCommand(2, *table_, tpc);
+        for (int n = 0; n < 3; n++) {
+          hopped_[n] = ProcessLocalCommand(n, *table_, tpc);
+          // the stop command can actually null table_ so we need to check and abort if that happens
+          if (table_ == nullptr)
+            return;
+        }
 
         instrument_->ProcessCommand(channel_, table_->getCmd(position_[0], 0), table_->getParam(position_[0], 0));
         instrument_->ProcessCommand(channel_, table_->getCmd(position_[1], 1), table_->getParam(position_[1], 1));

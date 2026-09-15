@@ -104,7 +104,7 @@ bool PersistencyDocument::NextSibling() {
     r_ = YXML_EREF;
 
     // Print additional debug info about the parser state
-    const char *stateStr = "unknown";
+    const char *stateStr;
     switch (r_) {
       case YXML_OK:
         stateStr = "YXML_OK";

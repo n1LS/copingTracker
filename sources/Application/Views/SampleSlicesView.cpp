@@ -70,14 +70,13 @@ void SampleSlicesView::Reset() {
 }
 
 void SampleSlicesView::OnFocus() {
-  ((AppWindow &)w_).Flush();
-
   stopPreview();
   instrumentIndex_ = static_cast<int32_t>(viewData_->currentInstrumentID_);
   instrument_ = currentInstrument();
   playKeyHeld_ = false;
   previewActive_ = false;
   sampleSize_ = 0;
+  initialDraw_ = true;
   hadModal_ = false;
   previewStartMs_ = 0;
   previewStartSample_ = 0;
@@ -100,14 +99,16 @@ void SampleSlicesView::OnFocus() {
     }
   }
 
-  sliceIndexVar_.SetInt(0, false);
-  updateSliceSelectionFromInstrument();
-  updateZoomLimits();
-  rebuildWaveform();
-  updateZoomWindow();
-  graphField_.RequestFullRedraw();
-  sliceCountVar_.SetInt(4, false);
   buildFieldLayout();
+
+  // graphfield setup
+  sliceIndexVar_.SetInt(0, false);
+  sliceCountVar_.SetInt(4, false);
+  updateSliceSelectionFromInstrument();
+  rebuildWaveform();
+  graphField_.RequestFullRedraw();
+  updateZoomLimits();
+  updateZoomWindow();
   isDirty_ = true;
 
   saveState();
@@ -276,7 +277,7 @@ void SampleSlicesView::drawStatusLabels() {
   DrawString(0, 16, "End");
   DrawString(0, 18, "Max. slices");
 
-  npf_snprintf(buffer, sizeof(buffer), "Slice      %c=", 'A' + slice);
+  npf_snprintf(buffer, sizeof(buffer), "Slice     %c=", 'A' + slice);
   DrawString(0, 14, buffer);
 
   npf_snprintf(buffer, sizeof(buffer), "Start  %08x", start);
@@ -285,7 +286,8 @@ void SampleSlicesView::drawStatusLabels() {
   npf_snprintf(buffer, sizeof(buffer), "End    %08x", sliceEndForIndex(static_cast<size_t>(slice), start));
   DrawString(0, 16, buffer);
 
-  npf_snprintf(buffer, sizeof(buffer), "Zoom      %dx/%dx", graphField_.ZoomLevel(), graphField_.MaxZoomLevel());
+  npf_snprintf(buffer, sizeof(buffer), "Zoom    %02dx/%02dx", graphField_.ZoomLevel() + 1,
+               graphField_.MaxZoomLevel() + 1);
   DrawString(0, 17, buffer);
 }
 
@@ -308,14 +310,13 @@ void SampleSlicesView::AnimationUpdate() {
     if (static_cast<float>(elapsedMs) >= previewDurationMs_) {
       previewCursorVisible_ = false;
       isDirty_ = true;
-      ((AppWindow &)w_).SetDirty();
     } else {
       float fraction = static_cast<float>(elapsedMs) / previewDurationMs_;
       uint32_t span = (previewEndSample_ > previewStartSample_) ? (previewEndSample_ - previewStartSample_) : 0;
       previewPlayheadSample_ = previewStartSample_ + static_cast<uint32_t>(fraction * static_cast<float>(span));
       isDirty_ = true;
-      ((AppWindow &)w_).SetDirty();
     }
+    ((AppWindow &)w_).SetDirty();
   }
 
   bool hasModal = HasModalView();
@@ -323,6 +324,12 @@ void SampleSlicesView::AnimationUpdate() {
   if (hadModal_ && !hasModal) {
     graphField_.RequestFullRedraw();
     isDirty_ = true;
+  }
+
+  if (initialDraw_) {
+    graphField_.RequestFullRedraw();
+    isDirty_ = true;
+    initialDraw_ = false;
   }
 
   // waveform always needs redrawing when previewing
@@ -391,15 +398,15 @@ void SampleSlicesView::buildFieldLayout() {
 
   GUIPoint position;
 
-  position.x_ = 13;
+  position.x_ = 12;
   position.y_ = 14;
-  intVarField_.emplace_back(position, sliceIndexVar_, "%2d", 0, static_cast<int32_t>(SampleInstrument::MaxSlices) - 1,
+  intVarField_.emplace_back(position, sliceIndexVar_, ":%2d", 0, static_cast<int32_t>(SampleInstrument::MaxSlices) - 1,
                             1, 4);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
-  position.x_ = 13;
+  position.x_ = 12;
   position.y_ = 18;
-  intVarField_.emplace_back(position, sliceCountVar_, "%2d", 1, static_cast<int32_t>(SampleInstrument::MaxSlices), 1,
+  intVarField_.emplace_back(position, sliceCountVar_, ":%2d", 1, static_cast<int32_t>(SampleInstrument::MaxSlices), 1,
                             4);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
@@ -511,8 +518,7 @@ void SampleSlicesView::drawWaveform() {
 
 void SampleSlicesView::clearWaveformRegion() {
   // Clear the entire waveform graphics area by drawing it with background color
-  GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, graphFieldPos_.x_ + GraphField::BitmapWidth,
-               graphFieldPos_.y_ + GraphField::BitmapHeight);
+  GUIRect rect(graphFieldPos_.x_, graphFieldPos_.y_, GraphField::BitmapWidth, GraphField::BitmapHeight);
   DrawRect(rect, Theme::View::bg);
 
   isDirty_ = true;

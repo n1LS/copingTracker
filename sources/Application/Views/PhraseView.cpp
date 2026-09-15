@@ -862,10 +862,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
         TableHolder *th = TableHolder::GetInstance();
         int current = phrase_->steps_[viewData_->currentPhrase_][row_].param1;
         if (current != -1) {
-          uint16_t next = th->Clone(current);
-          if (next != NO_MORE_TABLE) {
-            uint16_t *c = &phrase_->steps_[viewData_->currentPhrase_][row_].param1;
-          }
+          th->Clone(current);
         }
       }
       if ((col_ == colCmdVal2) &&
@@ -873,14 +870,12 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
         TableHolder *th = TableHolder::GetInstance();
         uint16_t next = th->Clone(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
         if (next != NO_MORE_TABLE) {
-          uint16_t *c = &phrase_->steps_[viewData_->currentPhrase_][row_].param2;
-          *c = next;
           isDirty_ = true;
           cmdEdit_.SetInt(next);
           Trace::Log("PHRASEVIEW", "Cloned table2 -> %04x", next);
         }
       }
-    };
+    }
     viewMode_ = VM_NORMAL;
     clipboard_.active_ = false;
     return;
@@ -1163,7 +1158,6 @@ void PhraseView::DrawView() {
       instrObj = bank->GetInstrument(lastInstr);
     }
 
-    unsigned char effectiveInstr = lastInstr;
     setTextProps(colNote, j, Theme::Phrase::note(j % ALT_ROW_NUMBER == 0));
 
     if (d == NO_NOTE) {
@@ -1199,15 +1193,23 @@ void PhraseView::DrawView() {
       DrawString(pos.x_, pos.y_, buffer);
       // todo: move outside of the loop
       if (j == row_) {
-        npf_snprintf(buffer, sizeof(buffer), "%2.2X:", d);
-        etl::string<SCREEN_WIDTH - BATTERY_GAUGE_WIDTH> instrLine = buffer;
         GUIPoint location = GetTitlePosition();
+
+        npf_snprintf(buffer, sizeof(buffer), "%2.2X:", d);
+        const int x = location.x_ + 10;
+        const int maxLength = SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - x - 2;
+        etl::string<SCREEN_WIDTH - BATTERY_GAUGE_WIDTH> instrLine = buffer;
         I_Instrument *instr = viewData_->project_->GetInstrumentBank()->GetInstrument(d);
         instrLine += instr->GetDisplayName();
 
         SetBackgroundColor(Theme::View::Title::bg);
         SetColor(Theme::View::Title::fg);
-        DrawString(location.x_ + 10, location.y_, instrLine.c_str());
+
+        DrawString(x, location.y_, instrLine.c_str());
+
+        if (instrLine.length() >= maxLength) {
+          DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, location.y_, CHAR(char_indicator_ellipsis_s));
+        }
       }
     }
     pos.y_++;

@@ -26,10 +26,10 @@
 #include "StackInstrument.h"
 #include "System/io/Status.h"
 
-#define XML_DEBUG_LOGGING 0
+#define XML_DEBUG_LOGGING 1
 
 // Contain all instrument definition
-InstrumentBank::InstrumentBank() : Persistent("INSTRUMENTBANK"), instrumentPool_() {
+InstrumentBank::InstrumentBank() : Persistent("InstrumentBank"), instrumentPool_() {
 
   for (size_t i = 0; i < instruments_.max_size(); i++) {
     instruments_[i] = &none_;
@@ -62,7 +62,7 @@ void InstrumentBank::SaveContent(tinyxml2::XMLPrinter *printer) {
     if (!instr->IsEmpty()) {
       byteToHexString(i, hex);
       printer->OpenElement(XML_ELEM_INSTRUMENT);
-      printer->PushAttribute(XML_ATTR_TABLE_ID, hex);
+      printer->PushAttribute(XML_ATTR_ID, hex);
 
       // Let the instrument save its own content
       instr->SaveContent(printer);
@@ -74,7 +74,6 @@ void InstrumentBank::SaveContent(tinyxml2::XMLPrinter *printer) {
 }
 
 void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
-
   bool elem = doc->FirstChild();
   while (elem) {
     // Check it is an instrument
@@ -131,7 +130,7 @@ void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
       }
     }
     elem = doc->NextSibling();
-  };
+  }
 }
 
 void InstrumentBank::Init() {

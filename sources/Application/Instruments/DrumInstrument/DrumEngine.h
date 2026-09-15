@@ -221,8 +221,6 @@ typedef struct drum_voice_t {
 
   inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const drum_parameters_t inParameters,
                       bool keepClocks = false) {
-    Trace::Log("Note On", "%d: %d %d %d %d", note % 12, inParameters.wave, inParameters.decay, inParameters.pitch,
-               inParameters.note);
     // bool retrigger is currently unused
     parameters = inParameters;
 
@@ -261,7 +259,7 @@ typedef struct drum_voice_t {
     envelope.trigger();
 
     // reset pitch envelope
-    pitch.set_rate(parameters.pitch << 4);
+    pitch.set_rate(parameters.pitch << 2);
     pitch.trigger();
 
     // glitch/character settings

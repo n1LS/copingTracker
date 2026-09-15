@@ -13,6 +13,7 @@
 #include "Application/Instruments/CommandList.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Utils/HexBuffers.h"
+#include "Application/Views/ToastView.h"
 #include "Phrase.h"
 #include "System/System/System.h"
 #include "System/io/Status.h"
@@ -51,18 +52,15 @@ void Song::RestoreContent(PersistencyDocument *doc) {
   while (elem) {
     if (!strcmp(XML_ELEM_SONG, doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)rows_);
-    };
+    }
     if (!strcmp(XML_ELEM_CHAIN_STEPS, doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)chain_.steps_);
-    };
+    }
     if (!strcmp(XML_ELEM_PHRASE_STEPS, doc->ElemName())) {
       restoreHexBuffer(doc, (uint8_t *)phrase_.steps_);
-    };
+    }
     elem = doc->NextSibling();
   }
-
-  // TODO rename
-  Status::Set("Restoring allocation");
 
   // Restore chain & phrase allocation table
 
@@ -82,7 +80,7 @@ void Song::RestoreContent(PersistencyDocument *doc) {
         chain_.SetUsed(i);
         phrase_.SetUsed(p);
       }
-    };
+    }
   }
 
   TableHolder *th = TableHolder::GetInstance();
@@ -101,6 +99,6 @@ void Song::RestoreContent(PersistencyDocument *doc) {
         step.param2 &= 0x7F;
         th->SetUsed(step.param2);
       }
-    };
+    }
   }
 }

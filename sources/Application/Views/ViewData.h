@@ -33,7 +33,7 @@ public:
   unsigned char *GetCurrentSongPointer();
 
   void UpdateChainCursor(int dx, int dy);
-  unsigned char UpdateChainCursorValue(int offset, int dx, int dy);
+  int UpdateChainCursorValue(int offset, int dx, int dy);
   void SetChainPhrase(unsigned char value);
   unsigned char *GetCurrentChainPointer();
 

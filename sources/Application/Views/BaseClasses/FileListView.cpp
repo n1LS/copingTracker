@@ -26,6 +26,9 @@ FileListView::FileListView(GUIWindow &w, ViewData *viewData, const FileListConfi
 FileListView::~FileListView() {
 }
 
+// single static instance to save ram (no multiple file lists parallel)
+etl::vector<int, MAX_FILE_INDEX_SIZE> FileListView::fileIndexList_;
+
 void FileListView::Reset() {
   topIndex_ = 0;
   currentIndex_ = 0;

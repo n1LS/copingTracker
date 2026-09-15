@@ -49,6 +49,12 @@ typedef struct adsr_envelope_t {
     coefficient = attack;
     state = adsrAttack;
     value = 0;
+
+    if (attack == 0) {
+      state = adsrDecay;
+      value = 0xffff;
+      coefficient = decay;
+    }
   }
 
   void release_note() {

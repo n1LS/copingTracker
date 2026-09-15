@@ -21,6 +21,8 @@
 #include "Foundation/T_Singleton.h"
 #include "PersistenceConstants.h"
 
+#define PROJECT_STATE_FILE SD_BASE_DIR "/.current"
+
 enum PersistencyResult {
   PERSIST_SAVED,
   PERSIST_LOAD_FAILED,
