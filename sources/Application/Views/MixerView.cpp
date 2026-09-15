@@ -315,7 +315,6 @@ void MixerView::DrawView() {
   // Draw title
 
   Player *player = Player::GetInstance();
-  Project *project = player->GetProject(); // Use Player's GetProject method
   DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song" : "Live");
 
   // Now draw busses
@@ -373,10 +372,6 @@ void MixerView::DrawView() {
 void MixerView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
   // Since this can be called from core1 via the Observer pattern,
   // we need to ensure we don't try directly calling draw functions here!
-
-  // Instead of drawing directly, we'll just update our state and let
-  // AnimationUpdate handle the actual drawing
-  Player *player = Player::GetInstance();
 
   if (eventType != PET_STOP) {
     // Flag that play time needs to be updated

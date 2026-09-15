@@ -153,9 +153,7 @@ void HostAudioDriver::ProducerLoop() {
   while (running_) {
     {
       std::unique_lock<std::mutex> lock(slotMutex_);
-      slotCv_.wait(lock, [this] {
-        return !running_ || (freeSlots_ > 0 && queuedSamples_ < kTargetQueuedSamples);
-      });
+      slotCv_.wait(lock, [this] { return !running_ || (freeSlots_ > 0 && queuedSamples_ < kTargetQueuedSamples); });
 
       if (!running_) {
         break;
@@ -220,7 +218,7 @@ void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
   }
 
   int newSamples = (len - remaining) / (obtained_spec_.channels * sizeof(int16_t));
-  
+
   queuedSamples_ -= newSamples;
   samples_played_ += newSamples;
 }

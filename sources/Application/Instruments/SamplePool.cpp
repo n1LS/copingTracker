@@ -24,6 +24,7 @@
 #include "System/FileSystem/I_File.h"
 #include "System/io/Status.h"
 #include "WavHeader.h"
+#include <System/Console/nanoprintf.h>
 #include <cstdint>
 #include <stdlib.h>
 #include <string.h>
@@ -57,7 +58,12 @@ void SamplePool::updateStatus(uint32_t index, uint32_t total, const char *messag
   progressBar_t progressBar;
   uint32_t percentage = (total > 0) ? (index * 100U) / total : 100U;
   fillProgressBar(index, total, &progressBar);
-  Status::Set("Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", message, (const char *)progressBar, percentage);
+
+  char buffer[128];
+  npf_snprintf(buffer, sizeof(buffer), "Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", message,
+               (const char *)progressBar, percentage);
+  ToastView *toast = ToastView::GetInstance();
+  toast->Show(buffer, &ttInfo, 50000);
 }
 
 void SamplePool::Load(const char *projectName) {
@@ -90,20 +96,6 @@ void SamplePool::Load(const char *projectName) {
         // Skip this sample and continue with the next one
         continue;
       }
-
-      // Show progress as percentage
-      int progress = (int)((i * 100) / totalSamples);
-      int prog10 = progress / 10;
-
-      /*
-      char progressBar[13];
-      for (int j = 1; j < 11; j++) {
-        progressBar[j] = j >= prog10 ? CHAR(char_battery_empty_s) : CHAR(char_block_full_s);
-      }
-      progressBar[0] = CHAR(char_button_border_left_s);
-      progressBar[11] = CHAR(char_button_border_right_s);
-      progressBar[12] = 0;
-      */
 
       updateStatus(importIndex, importCount, "Loading");
       loadSample(name);
@@ -186,7 +178,12 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   projectSamplePath.append(projectName);
   projectSamplePath.append("/" PROJECT_SAMPLES_DIR "/");
   projectSamplePath.append(projSampleFilename);
-  Status::Set("Loading %s->\n%s", name, projSampleFilename);
+
+  char text[64];
+  npf_snprintf(text, sizeof(text), "Loading %s", (char *)name);
+
+  ToastView *t = ToastView::GetInstance();
+  t->Show(text, &ttInfo, 50000);
 
   auto fout = FileSystem::GetInstance()->Open(projectSamplePath.c_str(), "w");
   if (!fout) {
@@ -367,15 +364,12 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   ev.type_ = SPET_INSERT;
   NotifyObservers(&ev);
 
-  ToastView *t = ToastView::GetInstance();
   t->Show(status ? "Loaded successfully." : "Loading failed.", status ? &ttSuccess : &ttError, 1500);
 
   return status ? (count_ - 1) : -1;
 }
 
 void SamplePool::PurgeSample(int i, const char *projectName) {
-  auto fs = FileSystem::GetInstance();
-
   etl::string<MAX_PROJECT_SAMPLE_PATH_LENGTH> buffer;
   etl::string_stream delPath(buffer);
 

@@ -1019,7 +1019,6 @@ void Player::moveToNextStep() {
       case QM_TICKSTART:
         liveQueueingMode_[i] = QM_NONE;
         if (findPlayable(&(liveQueuePosition_[i]), i, liveQueueChainPosition_[i])) {
-          liveTriggered = true;
           updateSongPos(liveQueuePosition_[i], i, liveQueueChainPosition_[i]);
         }
         return;

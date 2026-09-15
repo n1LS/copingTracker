@@ -104,7 +104,7 @@ float ConvertSampleToFloat(const uint8_t *samplePtr, uint16_t audioFormat, int32
 
 WavFile::WavFile()
     : file_(), readBufferSize_(0), samples_(nullptr), sampleBufferSize_(0), size_(0), sampleRate_(0), channelCount_(0),
-      bytePerSample_(0), audioFormat_(0), dataPosition_(0), readCount_(0) {
+      bytesPerSample_(0), audioFormat_(0), dataPosition_(0), readCount_(0) {
 }
 
 etl::expected<void, WAVEFILE_ERROR> WavFile::Open(const char *name) {
@@ -124,7 +124,7 @@ etl::expected<void, WAVEFILE_ERROR> WavFile::Open(const char *name) {
 
   sampleRate_ = header->sampleRate;
   channelCount_ = header->numChannels;
-  bytePerSample_ = header->bytesPerSample;
+  bytesPerSample_ = header->bytesPerSample;
   audioFormat_ = header->audioFormat;
 
   Trace::Debug("File data bytes: %u", header->dataChunkSize);
@@ -189,7 +189,7 @@ bool WavFile::GetBuffer(long start, long size) {
     return false;
   }
 
-  const int32_t bytesPerFrame = channelCount_ * bytePerSample_;
+  const int32_t bytesPerFrame = channelCount_ * bytesPerSample_;
   const int32_t maxFramesPerRead = (bytesPerFrame > 0) ? (BUFFER_SIZE / bytesPerFrame) : 0;
   if (maxFramesPerRead == 0) {
     Trace::Error("WAVFILE: Invalid frame sizing");
@@ -207,8 +207,8 @@ bool WavFile::GetBuffer(long start, long size) {
     readBlock(bufferStart, readSize);
 
     for (int32_t i = 0; i < framesThisRead * channelCount_; ++i) {
-      const uint8_t *samplePtr = readBuffer_ + i * bytePerSample_;
-      convertedBuffer_[dstOffset + i] = ConvertSampleToInt16(samplePtr, audioFormat_, bytePerSample_);
+      const uint8_t *samplePtr = readBuffer_ + i * bytesPerSample_;
+      convertedBuffer_[dstOffset + i] = ConvertSampleToInt16(samplePtr, audioFormat_, bytesPerSample_);
     }
     bufferStart += readSize;
     framesRemaining -= framesThisRead;
@@ -224,7 +224,7 @@ uint32_t WavFile::GetDiskSize(int note) {
 // rewind to start of data (no header)
 bool WavFile::Rewind() {
   file_->Seek(dataPosition_, SEEK_SET);
-  readCount_ = size_ * channelCount_ * bytePerSample_;
+  readCount_ = size_ * channelCount_ * bytesPerSample_;
   return true;
 }
 
@@ -244,7 +244,11 @@ bool WavFile::Read(void *buff, uint32_t btr, uint32_t *bytesRead) {
   // dst is always 16-bit
   uint32_t dstFrameSize = channelCount_ * 2;
   // src can be 8/16/24-bit
-  uint32_t srcFrameSize = channelCount_ * bytePerSample_;
+  uint32_t srcFrameSize = channelCount_ * bytesPerSample_;
+
+  if (srcFrameSize == 0)
+    return false;
+
   // the max number of frames we can read (floor)
   uint32_t dstFrames = btr / dstFrameSize;
   // Also cap by how many source bytes fit in caller buffer to avoid overflow
@@ -282,17 +286,17 @@ bool WavFile::Read(void *buff, uint32_t btr, uint32_t *bytesRead) {
   // Now adjust the samples
   uint8_t *src = static_cast<uint8_t *>(buff);
   int16_t *dst = static_cast<int16_t *>(buff);
-  if (bytePerSample_ == 1) {
+  if (bytesPerSample_ == 1) {
     // Expanding 8-bit to 16-bit; convert backward to avoid overwrite
     for (int32_t i = static_cast<int32_t>(totalSamples) - 1; i >= 0; --i) {
-      const uint8_t *samplePtr = src + i * bytePerSample_;
-      dst[i] = ConvertSampleToInt16(samplePtr, audioFormat_, bytePerSample_);
+      const uint8_t *samplePtr = src + i * bytesPerSample_;
+      dst[i] = ConvertSampleToInt16(samplePtr, audioFormat_, bytesPerSample_);
     }
   } else {
     // retain or shrink width
     for (uint32_t i = 0; i < totalSamples; ++i) {
-      const uint8_t *samplePtr = src + i * bytePerSample_;
-      dst[i] = ConvertSampleToInt16(samplePtr, audioFormat_, bytePerSample_);
+      const uint8_t *samplePtr = src + i * bytesPerSample_;
+      dst[i] = ConvertSampleToInt16(samplePtr, audioFormat_, bytesPerSample_);
     }
   }
   *bytesRead = framesRead * dstFrameSize;
@@ -314,7 +318,7 @@ bool WavFile::ReadFloat(float *buff, uint32_t maxSamples, uint32_t *samplesRead)
     return true;
   }
 
-  const uint32_t srcFrameSize = channelCount_ * bytePerSample_;
+  const uint32_t srcFrameSize = channelCount_ * bytesPerSample_;
   if (srcFrameSize == 0) {
     return false;
   }
@@ -353,8 +357,8 @@ bool WavFile::ReadFloat(float *buff, uint32_t maxSamples, uint32_t *samplesRead)
     float *dst = buff + (framesReadTotal * channelCount_);
 
     for (uint32_t i = 0; i < totalSamples; ++i) {
-      const uint8_t *samplePtr = src + i * bytePerSample_;
-      dst[i] = ConvertSampleToFloat(samplePtr, audioFormat_, bytePerSample_);
+      const uint8_t *samplePtr = src + i * bytesPerSample_;
+      dst[i] = ConvertSampleToFloat(samplePtr, audioFormat_, bytesPerSample_);
     }
 
     framesReadTotal += framesRead;

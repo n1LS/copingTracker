@@ -197,7 +197,6 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
     configDirty_ = true;
   }
 
-  Player *player = Player::GetInstance();
   Config *config = Config::GetInstance();
 
   switch (token) {

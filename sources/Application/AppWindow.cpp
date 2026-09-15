@@ -352,7 +352,6 @@ void AppWindow::Flush() {
   GUIPoint pos(0, 0);
 
   unsigned char *current = _screenChar;
-  unsigned char *previous = _preScreen;
   color_t *currentColor = _screenColor;
 
   if (transitionType_ != vtNone) {
@@ -430,7 +429,6 @@ void AppWindow::onLoadPhaseCComplete(bool success, const char *projectName) {
     return;
   }
 
-  PersistencyService *persist = PersistencyService::GetInstance();
   Player *player = Player::GetInstance();
   Project *project = &project_;
 
@@ -537,15 +535,12 @@ void AppWindow::UpdateColorsFromConfig() {
 }
 
 bool AppWindow::onEvent(GUIEvent &event) {
-
   // We need to tell the app to quit once we're out of the
   // mixer lock, otherwise the windows driver will never return
 
   shouldQuit_ = false;
 
   uint16_t v = 1 << event.GetValue();
-
-  MixerService *sm = MixerService::GetInstance();
 
   switch (event.GetType()) {
     case ET_PADBUTTONDOWN:
@@ -613,7 +608,7 @@ void AppWindow::AnimationUpdate() {
 
   if (awaitingProjectLoadAck_) {
     if (mask_ != 0) {
-      FileSystem::GetInstance()->DeleteFile("/.current");
+      FileSystem::GetInstance()->DeleteFile(PROJECT_STATE_FILE);
       createProjectOnLoad_ = false;
       projectLoader_.SetProjectName(UNNAMED_PROJECT_NAME);
       npf_snprintf(projectName_, sizeof(projectName_), "%s", UNNAMED_PROJECT_NAME);
@@ -723,7 +718,10 @@ void AppWindow::SetTransition(ViewTransition type) {
 }
 
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
-  if (d && (uintptr_t)d == (uintptr_t)Token::VarProjectName) {
+  if (d == nullptr)
+    return;
+
+  if ((uintptr_t)d == (uintptr_t)Token::VarProjectName) {
     // Update the stored project name from the project
     Project *project = viewData_.project_;
     if (project) {
@@ -950,4 +948,8 @@ bool AppWindow::AutoSave() {
     return true;
   }
   return false;
+}
+
+void AppWindow::SetProjectName(const char *name) {
+  npf_snprintf(projectName_, sizeof(projectName_), "%s", name);
 }

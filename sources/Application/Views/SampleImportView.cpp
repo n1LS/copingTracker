@@ -136,8 +136,6 @@ void SampleImportView::OnDirectorySetup() {
 void SampleImportView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
                                           size_t bufferSize) {
   (void)bufferSize; // Unused - use fixed size
-  auto fs = GetFileSystem();
-
   // Get filename
   char temp[PFILENAME_SIZE];
   GetFileName(index, temp, PFILENAME_SIZE);
@@ -206,10 +204,10 @@ void SampleImportView::DrawButtons(int selectedButton) {
 
   if (!inProjectSampleDir_) {
     x += DrawButton(x, y, "Import", selectedButton_ == 0);
-    x += DrawButton(x, y, "Edit", selectedButton_ == 1);
+    DrawButton(x, y, "Edit", selectedButton_ == 1);
   } else {
     x += DrawButton(x, y, "Edit", selectedButton_ == 0);
-    x += DrawButton(x, y, "Remove", selectedButton_ == 1);
+    DrawButton(x, y, "Remove", selectedButton_ == 1);
   }
 }
 

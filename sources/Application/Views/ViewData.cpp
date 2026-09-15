@@ -95,7 +95,7 @@ unsigned char *ViewData::GetCurrentSongPointer() {
   return &song_->rows_[songOffset_ + songY_].chains[songX_];
 }
 
-unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
+int ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
   unsigned char *c = 0;
   unsigned char limit = 0;
   bool wrap = false;
@@ -111,6 +111,8 @@ unsigned char ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
       limit = 0xFF;
       wrap = false;
       break;
+    default:
+      return -1;
   }
   updateData(c, offset, limit, wrap);
 

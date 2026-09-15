@@ -108,7 +108,6 @@ void AudioOutDriver::clipToMix() {
     };
     lastPeakVolume_ = peakL << 16;
     lastPeakVolume_ += peakR;
-    peakL = peakR = 0;
   }
 }
 

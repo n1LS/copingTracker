@@ -892,7 +892,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
           rpKrateCount = KRATE_SAMPLE_COUNT;
 
           // update the envelope as well
-          if (!rp->envelope_.tick()) {
+          if (rp->envelope_.tick()) {
             rp->finished_ = true; // Mark this channel as finished
           }
 
@@ -920,7 +920,6 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
             filtering = (rp->cutoff_ < i2fp(1)) || (rp->reso_ > i2fp(0));
 
             volfactor = fp_mul(rp->volume_, volscale);
-            pan = fp2i(rp->pan_);
 
             if (rpReverse) {
               fpSpeed = -rp->speed_;
@@ -1484,7 +1483,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
           while (it != rp->activeUpdaters_.end()) {
             if (*it == &rp->cutRamp_) {
               (*it)->Disable();
-              it = rp->activeUpdaters_.erase(it);
+              rp->activeUpdaters_.erase(it);
               break;
             }
             it++;
@@ -1496,7 +1495,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
           while (it != rp->activeUpdaters_.end()) {
             if (*it == &rp->resRamp_) {
               (*it)->Disable();
-              it = rp->activeUpdaters_.erase(it);
+              rp->activeUpdaters_.erase(it);
               break;
             }
             it++;

@@ -72,6 +72,8 @@ public:
   virtual void onLoadPhaseCComplete(bool success, const char *projectName) override;
   virtual void onLoadProgress(uint32_t index, uint32_t total, const char *message) override;
 
+  void SetProjectName(const char *name);
+
   char projectName_[MAX_PROJECT_NAME_LENGTH + 1];
 
   // Accessor for callback to update instruments

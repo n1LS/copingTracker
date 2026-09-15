@@ -78,7 +78,6 @@ void BootView::AnimationUpdate() {
     int fix = fixCount_;
 
     while (fix--) {
-      uint8_t rand = Random();
       RevealRandom();
       RevealColor();
     }

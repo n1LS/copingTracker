@@ -17,8 +17,6 @@ Audio::Audio(AudioSettings &hints) : settings_() {
   // Hints contains the basic information about the
   // default settings for the platform. All of the can
   // be overriden through the config file
-
-  Config *config = Config::GetInstance();
   settings_.audioAPI_ = hints.audioAPI_;
   settings_.audioDevice_ = hints.audioDevice_;
 

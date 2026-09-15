@@ -150,7 +150,11 @@ void InstrumentView::fillChiptuneParameters() {
 }
 
 void InstrumentView::DrawViewChiptune() {
+  /*
   int currentID = viewData_->currentInstrumentID_;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instr = bank->GetInstrument(currentID);
+
+  // TODO nILS: draw extra fields
+   */
 }

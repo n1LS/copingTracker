@@ -113,13 +113,13 @@ void InstrumentView::fillStackParameters() {
 }
 
 void InstrumentView::DrawViewStack() {
+    /* TODO nILS: re add those
   int i = viewData_->currentInstrumentID_;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instr = bank->GetInstrument(i);
   StackInstrument *instrument = (StackInstrument *)instr;
 
-  
-  /* TODO nILS: re add those
+
   GUIPoint p = GetAnchor();
   // indicators
   SetBackgroundColor(Theme::View::bg);

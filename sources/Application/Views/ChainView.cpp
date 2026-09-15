@@ -99,7 +99,10 @@ void ChainView::updateFocusRect() {
 }
 
 void ChainView::updateCursorValue(int offset, int dx, int dy) {
-  unsigned char v = viewData_->UpdateChainCursorValue(offset, dx, dy);
+  int v = viewData_->UpdateChainCursorValue(offset, dx, dy);
+
+  if (v == -1)
+    return;
 
   if (viewData_->chainCol_ == 0) {
     lastPhrase_ = v;

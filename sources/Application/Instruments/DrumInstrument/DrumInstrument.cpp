@@ -30,7 +30,6 @@ DrumInstrument::DrumInstrument()
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
-  InsertBaseVariables();
   variables_.insert(variables_.end(), &vVoice0_);
   variables_.insert(variables_.end(), &vVoice1_);
   variables_.insert(variables_.end(), &vVoice2_);
@@ -45,6 +44,7 @@ DrumInstrument::DrumInstrument()
   variables_.insert(variables_.end(), &vVoice11_);
 
   variables_.insert(variables_.end(), &vCharacter_);
+  InsertBaseVariables();
 }
 
 void DrumInstrument::Stop(int channel) {
@@ -56,7 +56,7 @@ bool DrumInstrument::Start(int channel, unsigned char note, uint8_t volume, bool
   // current voice
   uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
 
-  voices_[channel].note_on(note, calculatedVolume, retrigger, (drum_parameters_t)getInstrumentParameters(note));
+  voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters(note));
 
   return true;
 }

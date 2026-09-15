@@ -76,7 +76,7 @@ void TableHolder::SaveContent(tinyxml2::XMLPrinter *printer) {
   for (int i = 0; i < TABLE_COUNT; i++) {
     printer->OpenElement(XML_ELEM_TABLE);
     byteToHexString(i, hex);
-    printer->PushAttribute(XML_ATTR_TABLE_ID, hex);
+    printer->PushAttribute(XML_ATTR_ID, hex);
 
     Table &table = table_[i];
     if (!table.IsEmpty()) {

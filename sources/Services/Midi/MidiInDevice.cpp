@@ -235,9 +235,8 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
 
     case MidiMessage::MIDI_AFTERTOUCH:
       {
-        int note = event.data1_ & MIDI_DATA_MASK;
-        int data = event.data2_ & MIDI_DATA_MASK;
-
+        // int note = event.data1_ & MIDI_DATA_MASK;
+        // int data = event.data2_ & MIDI_DATA_MASK;
         // TODO: handle aftertouch
       }
       break;
@@ -256,16 +255,14 @@ void MidiInDevice::treatChannelEvent(MidiMessage &event) {
 
     case MidiMessage::MIDI_PROGRAM_CHANGE:
       {
-        int data = event.data1_ & MIDI_DATA_MASK;
-
+        // int data = event.data1_ & MIDI_DATA_MASK;
         // TODO: handle program change
       }
       break;
 
     case MidiMessage::MIDI_CHANNEL_AFTERTOUCH:
       {
-        int data = event.data1_ & MIDI_DATA_MASK;
-
+        // int data = event.data1_ & MIDI_DATA_MASK;
         // TODO: handle channel aftertouch
       }
       break;

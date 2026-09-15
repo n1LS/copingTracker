@@ -264,7 +264,6 @@ void InstrumentView::DrawViewSample_GMInstrument() {
   SetBackgroundColor(Theme::View::bg);
 
   Variable *gm = instrument->FindVariable(Token::SampleInstrumentGMInstrument);
-  Variable *sample = instrument->FindVariable(Token::SampleInstrumentSample);
 
   int ins = gm->GetInt();
   if (ins != NO_GM_INSTRUMENT) {

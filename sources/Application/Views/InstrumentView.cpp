@@ -219,7 +219,6 @@ void InstrumentView::onInstrumentChange() {
   ClearFocus();
 
   I_Instrument *old = getInstrument();
-  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
 
   if (getInstrument() != old) {
     getInstrument()->RemoveObserver(*this);
