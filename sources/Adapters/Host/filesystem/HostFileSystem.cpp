@@ -166,7 +166,12 @@ void HostFileSystem::list(etl::ivector<int> *fileIndexes, const char *filter, ui
   if (!fs::is_directory(currentDir_)) {
     return;
   }
+
   try {
+    if (options & loFolders) {
+      entries_.emplace_back("..");
+    }
+
     for (const auto &entry : fs::directory_iterator(currentDir_)) {
       bool isDir = fs::is_directory(entry);
       bool isFile = fs::is_regular_file(entry);
@@ -176,6 +181,7 @@ void HostFileSystem::list(etl::ivector<int> *fileIndexes, const char *filter, ui
         continue;
       entries_.push_back(entry);
     }
+
     if (fileIndexes) {
       for (int i = 0; i < (int)entries_.size() && fileIndexes->size() < fileIndexes->max_size(); ++i) {
         fileIndexes->push_back(i);

@@ -1,6 +1,126 @@
 F                             
 C                             
+v0.2.0a             2026-09-15
+0                             
+0                             
+                              
+F                             
+0                             
+- fixed message box not       
+F                             
+0                             
+  resetting focusRect_        
+F                             
+0                             
+- fixed hexvarfield focus of  
+F                             
+0                             
+  currently edited char in    
+F                             
+0                             
+  SampleInstrument loop       
+F                             
+0                             
+- fixed SampleInstrument      
+F                             
+0                             
+  sample persistence by       
+F                             
+0                             
+  correcting XML tag          
+F                             
+0                             
+  inconsistencies             
+F                             
+0                             
+- added full ADSR support to  
+F                             
+0                             
+  SampleInstrument            
+F                             
+0                             
+- fixed SampleInstrument      
+F                             
+0                             
+  sample loading on host      
+F                             
+0                             
+  adapter                     
+F                             
+0                             
+- fixed variable order issue  
+F                             
+0                             
+  in drum instrument after    
+F                             
+0                             
+  adding Vol/Pan to base      
+F                             
+0                             
+  instrument                  
+F                             
+0                             
+- added .. entry to file      
+F                             
+0                             
+  listings view on host       
+F                             
+0                             
+- fixed pressed/depressed     
+F                             
+0                             
+  glyphs for button ends      
+F                             
+0                             
+- fixed crash in              
+F                             
+0                             
+  SampleInstrument Adjust     
+F                             
+0                             
+  caused by redraw loop       
+F                             
+0                             
+- fixed PhraseView showing    
+F                             
+0                             
+  None instead of correct     
+F                             
+0                             
+  instrument                  
+F                             
+0                             
+- fixed alertview actions     
+F                             
+0                             
+  lacking correct focus       
+F                             
+0                             
+- fixed incorrect button ends 
+F                             
+0                             
+  on mixer                    
+F                             
+0                             
+- fixed double focus jump     
+F                             
+0                             
+  caused by miscalled         
+F                             
+0                             
+  ProcessNormalButtonMask on  
+F                             
+0                             
+  MixerView                   
+0                             
+0                             
+                              
+F                             
+C                             
 v0.1.0a             2026-09-11
+0                             
+0                             
+                              
 F                             
 0                             
 - Fixed host palette changes  

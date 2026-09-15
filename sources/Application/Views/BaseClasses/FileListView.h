@@ -240,7 +240,7 @@ private:
   FileListConfig config_;
   FileSystem *fs_;
 
-  etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
+  static etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
 
   etl::stack<uint8_t, MAX_DIRECTORY_STACK_DEPTH> dirIndexStack_; // Track cursor position per directory level
   bool atLocalRoot_ = true;                                      // No parent navigation available

@@ -63,6 +63,7 @@ void HelpView::DrawView() {
   drawScrollBar(SCREEN_WIDTH - 1, 2, pageSize, offset_, numLines_);
 
   mapShown_ = AppWindow::GetInstance()->buttonDown(BM_NAV);
+
   if (mapShown_) {
     drawMap();
   }
@@ -105,10 +106,20 @@ void HelpView::drawTabs() {
   }
 
   SetColor(Theme::View::fg);
-  if (x >= SCREEN_WIDTH || tabOffset_ < 0) {
-    DrawString(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1,
-               tabOffset_ < 0 ? char_indicator_leftRight_s : char_indicator_rightNoLeft_s);
+
+  char indicator = ' ';
+
+  if (x >= SCREEN_WIDTH) {
+    if (tabOffset_ == 0) {
+      indicator = CHAR(char_indicator_rightNoLeft_s);
+    } else if (tabOffset_ < 0) {
+      indicator = CHAR(char_indicator_leftRight_s);
+    }
+  } else if (tabOffset_ < 0) {
+    indicator = CHAR(char_indicator_leftNoRight_s);
   }
+
+  DrawChar(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, indicator);
 }
 
 void HelpView::OnFocus() {

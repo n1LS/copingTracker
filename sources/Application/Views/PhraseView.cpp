@@ -1193,15 +1193,23 @@ void PhraseView::DrawView() {
       DrawString(pos.x_, pos.y_, buffer);
       // todo: move outside of the loop
       if (j == row_) {
-        npf_snprintf(buffer, sizeof(buffer), "%2.2X:", d);
-        etl::string<SCREEN_WIDTH - BATTERY_GAUGE_WIDTH> instrLine = buffer;
         GUIPoint location = GetTitlePosition();
+
+        npf_snprintf(buffer, sizeof(buffer), "%2.2X:", d);
+        const int x = location.x_ + 10;
+        const int maxLength = SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - x - 2;
+        etl::string<SCREEN_WIDTH - BATTERY_GAUGE_WIDTH> instrLine = buffer;
         I_Instrument *instr = viewData_->project_->GetInstrumentBank()->GetInstrument(d);
         instrLine += instr->GetDisplayName();
 
         SetBackgroundColor(Theme::View::Title::bg);
         SetColor(Theme::View::Title::fg);
-        DrawString(location.x_ + 10, location.y_, instrLine.c_str());
+
+        DrawString(x, location.y_, instrLine.c_str());
+
+        if (instrLine.length() >= maxLength) {
+          DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, location.y_, CHAR(char_indicator_ellipsis_s));
+        }
       }
     }
     pos.y_++;

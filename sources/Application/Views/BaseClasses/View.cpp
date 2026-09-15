@@ -687,6 +687,7 @@ void View::drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index
     return; // no scrollbar needed
   }
 
+  SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::scrollbar);
 
   // Thumb size represents the ratio of visible items to total items

@@ -40,8 +40,8 @@ void UIActionField::Draw(GUIWindow &w, int offset) {
   w.SetBackgroundColor(backgroundColor_);
   w.SetColor(focus_ ? fieldConfig_.activeBackgroundColor : fieldConfig_.backgroundColor);
 
-  w.DrawChar(x - 1, y, CHAR(char_button_border_left_s));
-  w.DrawChar(x + (int)strlen(buffer), y, CHAR(char_button_border_right_s));
+  w.DrawChar(x - 1, y, char_button_left(pressed_));
+  w.DrawChar(x + (int)strlen(buffer), y, char_button_right(pressed_));
 }
 
 void UIActionField::OnClick() {

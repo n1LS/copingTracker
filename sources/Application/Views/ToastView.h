@@ -14,6 +14,7 @@ struct ToastType {
 };
 
 enum ToastDuration {
+  quick = 500,
   regular = 1500,
 };
 

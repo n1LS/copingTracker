@@ -82,21 +82,10 @@ void MixerView::updateCursor(int dx, int dy) {
   // Prevent wrapping by clamping values
   if (x < 0) {
     x = 0;
-  }
-  if (x > SONG_CHANNEL_COUNT) {
+  } else if (x > SONG_CHANNEL_COUNT) {
     x = SONG_CHANNEL_COUNT;
   }
   viewData_->songX_ = x;
-
-  // Update field focus to match the selected channel
-  if (x < SONG_CHANNEL_COUNT) {
-    // Channel 0-7
-    SetFocus(&channelVolumeFields_[x]);
-  } else {
-    // Master channel
-    SetFocus(&masterVolumeField_[0]);
-  }
-
   isDirty_ = true;
 }
 
@@ -213,13 +202,6 @@ void MixerView::processNormalButtonMask(unsigned int mask) {
     if (mask & BM_ALT) {
       unMuteAll();
     }
-  } else {
-    if (mask & BM_LEFT) {
-      updateCursor(-1, 0);
-    }
-    if (mask & BM_RIGHT) {
-      updateCursor(1, 0);
-    }
   }
 }
 
@@ -276,7 +258,7 @@ void MixerView::initChannelVolumeFields() {
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     // Create position for this channel's volume field
     GUIPoint fieldPos = position;
-    fieldPos.x_ = position.x_ + (i * CHANNELS_X_OFFSET_);
+    fieldPos.x_ = position.x_ + (i * CHANNELS_X_OFFSET_) - 1;
 
     // Find the variable for this channel's volume
     Variable *v = project->FindVariable(channelVolumeTokens[i]);
@@ -285,7 +267,7 @@ void MixerView::initChannelVolumeFields() {
       // NOTE: 99 is considered "unity" gain
       // Format: %2.2d = 2-digit decimal number with leading zeros
       // Use xOffset=1 and yOffset=5 for small/large increments
-      channelVolumeFields_.emplace_back(fieldPos, *v, "%2.2d", 0, 99, 1, 5);
+      channelVolumeFields_.emplace_back(fieldPos, *v, ":%2.2d", 0, 99, 1, 5);
 
       // Add the field to the fieldList_ for proper field navigation
       fieldList_.insert(fieldList_.end(), &channelVolumeFields_.back());
@@ -295,11 +277,11 @@ void MixerView::initChannelVolumeFields() {
   // Add master volume field to the right of channel volumes
   GUIPoint masterPos = position;
   // Position to the right of channel volumes
-  masterPos.x_ += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_);
+  masterPos.x_ += (SONG_CHANNEL_COUNT * CHANNELS_X_OFFSET_) - 1;
 
   Variable *v = project->FindVariable(Token::VarMasterVolume);
   if (v) {
-    masterVolumeField_.emplace_back(masterPos, *v, "%2.2d", 0, 99, 1, 5);
+    masterVolumeField_.emplace_back(masterPos, *v, ":%2.2d", 0, 99, 1, 5);
     fieldList_.insert(fieldList_.end(), &(*masterVolumeField_.begin()));
   }
 

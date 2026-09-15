@@ -68,6 +68,7 @@ public:
 
   int32_t SampleToPixel(uint32_t sample) const;
   void DrawGraph(View &view);
+  void DrawMarker(View &view, int index);
   void DrawMarkers(View &view);
 
   Color colorForIndex(int i);

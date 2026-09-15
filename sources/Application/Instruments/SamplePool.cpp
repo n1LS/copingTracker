@@ -184,6 +184,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
 
   ToastView *t = ToastView::GetInstance();
   t->Show(text, &ttInfo, 50000);
+  AppWindow::GetInstance()->Flush();
 
   auto fout = FileSystem::GetInstance()->Open(projectSamplePath.c_str(), "w");
   if (!fout) {

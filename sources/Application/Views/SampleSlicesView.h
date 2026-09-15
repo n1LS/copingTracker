@@ -85,6 +85,7 @@ private:
   uint32_t sampleSize_;
   GUIPoint graphFieldPos_;
   GraphField graphField_;
+  bool initialDraw_;
   bool hadModal_;
 
   bool playKeyHeld_;

@@ -1560,7 +1560,7 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SampleInstrument::GetDisplayName() {
 
   // If no sample is set (empty filename), return "NONE"
   if (sampleFileName.empty()) {
-    return etl::string<MAX_INSTRUMENT_NAME_LENGTH>("None");
+    return etl::string<MAX_INSTRUMENT_NAME_LENGTH>("No Sample");
   }
 
   // Strip .wav extension if present
