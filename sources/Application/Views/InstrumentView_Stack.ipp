@@ -118,9 +118,9 @@ void InstrumentView::DrawViewStack() {
   I_Instrument *instr = bank->GetInstrument(i);
   StackInstrument *instrument = (StackInstrument *)instr;
 
-  GUIPoint p = GetAnchor();
-
+  
   /* TODO nILS: re add those
+  GUIPoint p = GetAnchor();
   // indicators
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::fg);

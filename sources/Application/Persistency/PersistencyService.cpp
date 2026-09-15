@@ -336,7 +336,7 @@ PersistencyResult PersistencyService::SaveProjectState(const char *projectName) 
   if (!current) {
     return PERSIST_ERROR;
   }
-  current->Write(projectName, 1, strlen(projectName));
+  current->Write(projectName, 1, (int)strlen(projectName));
   return PERSIST_SAVED;
 }
 

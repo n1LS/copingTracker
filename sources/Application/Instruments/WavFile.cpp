@@ -182,7 +182,7 @@ long WavFile::readBlock(long start, long size) {
 bool WavFile::GetBuffer(long start, long size) {
   samples_ = convertedBuffer_;
 
-  const int32_t totalSamples = size * channelCount_;
+  const int32_t totalSamples = (int32_t)(size * channelCount_);
   const int32_t maxSamples = static_cast<int32_t>(sizeof(convertedBuffer_) / sizeof(int16_t));
   if (totalSamples > maxSamples) {
     Trace::Error("WAVFILE: Requested buffer too large (%ld frames)", size);
@@ -196,8 +196,8 @@ bool WavFile::GetBuffer(long start, long size) {
     return false;
   }
 
-  int32_t bufferStart = dataPosition_ + start * bytesPerFrame;
-  int32_t framesRemaining = size;
+  int32_t bufferStart = (int32_t)(dataPosition_ + start * bytesPerFrame);
+  int32_t framesRemaining = (int32_t)size;
   int32_t dstOffset = 0;
 
   while (framesRemaining > 0) {

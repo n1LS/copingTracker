@@ -30,6 +30,11 @@
 // mini blank buffer for underrun, initialized to 0
 const char picoTrackerAudioDriver::miniBlank_[MINI_BLANK_SIZE * 2 * sizeof(int16_t)] = {0};
 
+// The Pico only ever needs to be one buffer ahead of the one currently
+// playing via DMA, so it keeps the base class's default SOUND_BUFFER_COUNT
+// (2) pool depth, statically allocated here (no heap allowed).
+AudioBufferData picoTrackerAudioDriver::staticPool_[SOUND_BUFFER_COUNT];
+
 picoTrackerAudioDriver *picoTrackerAudioDriver::instance_ = NULL;
 semaphore_t core1_audio;
 
@@ -63,9 +68,16 @@ void AudioThread() {
 }
 
 void picoTrackerAudioDriver::BufferNeeded() {
-  // Audio tick processes MIDI among other things
-  // TODO: understand tick and buffer size relationship. currently not constant
-  // probably not right
+  // This pair fires once per playback slice, i.e. once per
+  // AudioOutDriver::Trigger() render of exactly getPlaySampleCount() samples
+  // (the tempo-dependent slice size from SyncMaster, e.g. ~918 samples at 120
+  // BPM). It is intentionally decoupled from any physical audio buffer/DMA
+  // fragment size: core1_audio (see OnChunkDone()/InitDriver()) only throttles
+  // how far ahead of playback we're allowed to render, it does not determine
+  // how much is rendered per tick. onAudioBufferTick() flushes MIDI, then
+  // OnNewBufferNeeded() advances the sequencer and renders the next slice via
+  // AudioMixer::Render(). Both are keyed off the same tempo-slice quantum, so
+  // sequencer/MIDI timing tracks tempo regardless of buffer/fragment size.
   // TODO: This could (should?) go into the main thread. If done tho, we get a
   // deadlock in malloc mutex due to malloc being called from core1 and isr
   // simultaneously
@@ -74,7 +86,8 @@ void picoTrackerAudioDriver::BufferNeeded() {
   instance_->OnNewBufferNeeded();
 }
 
-picoTrackerAudioDriver::picoTrackerAudioDriver(AudioSettings &settings) : AudioDriver(settings) {
+picoTrackerAudioDriver::picoTrackerAudioDriver(AudioSettings &settings)
+    : AudioDriver(settings, staticPool_, SOUND_BUFFER_COUNT) {
 
   isPlaying_ = false;
   picoTracker_exit = 0;

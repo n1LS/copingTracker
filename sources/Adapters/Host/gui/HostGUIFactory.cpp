@@ -68,13 +68,18 @@ private:
 HostGUIWindowImp::HostGUIWindowImp(GUICreateWindowParams &p) : window_(nullptr), renderer_(nullptr), texture_(nullptr) {
   chargfx_init();
 
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+
   window_ = SDL_CreateWindow(p.title ? p.title : "copingTracker", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                             320 * 2, 240 * 2, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+                             320 * 2, 240 * 2, SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
 
   if (window_) {
-    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+
+    renderer_ = SDL_CreateRenderer(window_, -1, 0);
     if (renderer_) {
       texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, 320, 240);
+      SDL_SetTextureScaleMode(texture_, SDL_ScaleModeNearest);
     }
   }
 }
@@ -168,7 +173,7 @@ void HostGUIWindowImp::Flush() {
   SDL_UpdateTexture(texture_, nullptr, pixels, 320 * 4);
 
   SDL_RenderClear(renderer_);
-  SDL_RenderCopy(renderer_, texture_, nullptr, nullptr);
+  SDL_RenderCopy(renderer_, texture_, 0, 0);
   SDL_RenderPresent(renderer_);
 }
 

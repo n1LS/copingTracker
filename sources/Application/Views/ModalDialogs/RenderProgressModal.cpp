@@ -154,7 +154,7 @@ void RenderProgressModal::AnimationUpdate() {
   if (renderComplete_) {
     ClearTextRect(0, y - 1, width, 1);
     SetColor(Theme::View::info);
-    int32_t x = (width - message_.size()) / 2;
+    int32_t x = (width - (int)message_.size()) / 2;
     DrawString(x, y - 1, message_.c_str());
   }
 

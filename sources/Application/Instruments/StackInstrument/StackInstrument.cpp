@@ -10,6 +10,8 @@
 
 #include "StackInstrument.h"
 
+#define range(a, b, c) std::min((c), std::max((b), (a)))
+
 stack_voice_t StackInstrument::voices_[SONG_CHANNEL_COUNT];
 
 // extract a signed nibble from the lowest nibble of a uint
@@ -147,7 +149,7 @@ stack_parameters_t StackInstrument::getInstrumentParameters() {
   params.volume = volume_.GetInt();
   params.brightness = brightness_.GetInt();
   params.glide = glide_.GetInt();
-  params.wave = wave_.GetInt();
+  params.wave = range(0, wave_.GetInt(), (int)stackWaveNone);
   params.transpose = transpose_.GetInt();
 
   return params;

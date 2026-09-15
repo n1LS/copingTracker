@@ -131,7 +131,7 @@ template <uint8_t MaxLength> void UITextField<MaxLength>::SetVariable(Variable &
 }
 
 template <uint8_t MaxLength> int UITextField<MaxLength>::GetFocusOffset() {
-  return strlen(label_.c_str());
+  return (int)strlen(label_.c_str());
 }
 
 template <uint8_t MaxLength> int UITextField<MaxLength>::GetFocusWidth() {

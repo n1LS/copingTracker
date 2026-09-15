@@ -351,8 +351,6 @@ void AppWindow::Flush() {
   Color currentBG = (Color)-1;
   GUIPoint pos(0, 0);
 
-  int count = 0;
-
   unsigned char *current = _screenChar;
   unsigned char *previous = _preScreen;
   color_t *currentColor = _screenColor;
@@ -381,7 +379,6 @@ void AppWindow::Flush() {
         }
 
         GUIWindow::DrawChar(pos.x_, pos.y_, *current);
-        count++;
       }
     }
   }

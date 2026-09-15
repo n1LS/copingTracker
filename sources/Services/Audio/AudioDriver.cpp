@@ -14,9 +14,8 @@
 #include "System/Console/n_assert.h"
 #include "System/System/System.h"
 
-AudioBufferData AudioDriver::pool_[SOUND_BUFFER_COUNT];
-
-AudioDriver::AudioDriver(AudioSettings &settings) {
+AudioDriver::AudioDriver(AudioSettings &settings, AudioBufferData *pool, int poolSize)
+    : pool_(pool), poolSize_(poolSize) {
   settings_ = settings;
 }
 
@@ -27,7 +26,7 @@ bool AudioDriver::Init() {
 
   // Clear all buffers
 
-  for (int i = 0; i < SOUND_BUFFER_COUNT; i++) {
+  for (int i = 0; i < poolSize_; i++) {
     pool_[i].size_ = 0;
     pool_[i].empty_ = true;
   };
@@ -77,7 +76,8 @@ void AudioDriver::AddBuffer(short *buffer, int samplecount) {
   memcpy(pool_[poolQueuePosition_].buffer_, (char *)buffer, len);
   pool_[poolQueuePosition_].size_ = len;
   pool_[poolQueuePosition_].empty_ = false;
-  poolQueuePosition_ = (poolQueuePosition_ + 1) % SOUND_BUFFER_COUNT;
+  pool_[poolQueuePosition_].readOffset_ = 0;
+  poolQueuePosition_ = (poolQueuePosition_ + 1) % poolSize_;
   hasData_ = true;
 }
 

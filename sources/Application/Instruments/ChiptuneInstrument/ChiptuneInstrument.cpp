@@ -83,7 +83,7 @@ void ChiptuneInstrument::ProcessCommand(int channel, Token token, uint16_t value
       break;
 
     case Token::InstrumentCommandCrush:
-      voices_[channel].bitcrush = value && 0x0f;
+      voices_[channel].bitcrush = value & 0x0f;
       voices_[channel].drive = value >> 8;
       break;
 

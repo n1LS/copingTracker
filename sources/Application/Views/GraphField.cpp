@@ -314,7 +314,7 @@ void GraphField::DrawMarkers(View &view) {
       int32_t x = SampleToPixel(markers_[i].sample);
       if (x >= 0) {
         GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_);
-        view.DrawRect(marker, colorForIndex(i));
+        view.DrawRect(marker, colorForIndex((int)i));
       }
       markers_[i].x = x;
     } else {
@@ -374,7 +374,7 @@ void GraphField::drawMarkersAt(View &view, int32_t x) {
       continue;
     }
     GUIRect marker(x, static_cast<int32_t>(y_) + 2, x + 1, static_cast<int32_t>(y_) + height_);
-    view.DrawRect(marker, colorForIndex(i));
+    view.DrawRect(marker, colorForIndex((int)i));
   }
 }
 
