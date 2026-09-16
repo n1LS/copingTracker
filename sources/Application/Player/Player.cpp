@@ -788,7 +788,6 @@ void Player::updateChainPos(int pos, int channel, int hop) {
  ********************************************************/
 
 void Player::updatePhrasePos(int pos, int channel) {
-
   viewData_->phrasePlayPos_[channel] = pos;
 
   // See if we need to delay the trigger
@@ -1032,6 +1031,7 @@ void Player::moveToNextStep() {
     }
 
     Groove *gs = Groove::GetInstance();
+    int phraseLength = project_->FindVariable(Token::VarPhraseLength)->GetInt();
 
     if (mixer_.IsChannelPlaying(i) && !liveTriggered) {
       playingChannel = true;
@@ -1039,7 +1039,7 @@ void Player::moveToNextStep() {
       if (gs->TriggerChannel(i)) { // If groove says it is time to play
         if (viewData_->currentPlayPhrase_[i] != 0xFF) {
           int pos = (viewData_->phrasePlayPos_[i]) + 1;
-          if (pos != 16) {
+          if (pos != phraseLength) {
             int hop = getChannelHop(i, pos);
             if (hop >= 0) {
               if (mode_ != PM_PHRASE) {
@@ -1113,7 +1113,9 @@ void Player::moveToNextPhrase(int channel, int hop) {
   // Look if there' any data at current position
   // which means we continue in the current chain
 
-  bool canContinue = (pos < 16);
+  int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
+
+  bool canContinue = (pos < phraseLength);
   if (canContinue) {
     canContinue = (viewData_->song_->chain_.steps_[chain][pos].phrase != 0xFF);
   }

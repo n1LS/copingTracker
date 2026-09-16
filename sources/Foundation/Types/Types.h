@@ -252,7 +252,7 @@ struct Token {
     VarKeyDelay = 139,
     VarKeyRepeat = 176,
 
-    StackInstrumentSpread = 229,
+    StackInstrumentSpread = 97,
     StackInstrumentWave = 183,
     StackInstrumentTranspose = 192,
     StackInstrumentAttack = 195,
@@ -261,14 +261,18 @@ struct Token {
     StackInstrumentRelease = 198,
     StackInstrumentBrightness = 227,
     StackInstrumentGlide = 228,
+    
+    VarPhraseLength = 254,
 
-    // 230-254 free  27
-    // 93-98 free     6
-    // 183 free       1
-    // 191-199 free   9
-    // 230-254 free  26
+    // 118-119 free  2
+    // 121-122 free  2
+    // 193-194 free  2
+    // 199 free      1
+    // 203 free      1
+    // 209 free      1
+    // 230-253 free 24
     // ----------------
-    //               48
+    //               34
 
     Default = 255, // "    "
   };
@@ -338,6 +342,7 @@ struct Token {
   ETL_ENUM_TYPE_16(VarUIFont, "ui-font")
   ETL_ENUM_TYPE_16(VarThemeName, "theme-name")
   ETL_ENUM_TYPE_16(VarScaleRoot, "scale-root")
+  ETL_ENUM_TYPE_16(VarPhraseLength, "phrase-length")
   ETL_ENUM_TYPE_16(SampleInstrumentSample, "Sample")
   ETL_ENUM_TYPE_16(SampleInstrumentInterpolation, "Interpolation")
   ETL_ENUM_TYPE_16(SampleInstrumentCrush, "Crush")

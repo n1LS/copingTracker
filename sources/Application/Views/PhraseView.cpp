@@ -1100,7 +1100,7 @@ void PhraseView::processSelectionButtonMask(uint16_t mask) {
   }
 }
 
-void PhraseView::setTextProps(int col, int row, Color textColor = Theme::View::fg) {
+void PhraseView::setTextProps(int col, int row, Color textColor = Theme::View::fg, int limit = 16) {
   bool highlighted = false;
 
   if (clipboard_.active_) {
@@ -1114,8 +1114,13 @@ void PhraseView::setTextProps(int col, int row, Color textColor = Theme::View::f
     }
   }
 
-  SetColor(highlighted ? Theme::View::bg : textColor);
   SetBackgroundColor(highlighted ? textColor : Theme::View::bg);
+
+  if (row >= limit) {
+    SetColor(Theme::View::inactive);
+  } else {
+    SetColor(highlighted ? Theme::View::bg : textColor);
+  }
 }
 
 void PhraseView::DrawView() {
@@ -1139,7 +1144,8 @@ void PhraseView::DrawView() {
 
   // Display row numbers
 
-  drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
+  int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
+  drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16, phraseLength);
 
   // Display notes
 
@@ -1158,7 +1164,7 @@ void PhraseView::DrawView() {
       instrObj = bank->GetInstrument(lastInstr);
     }
 
-    setTextProps(colNote, j, Theme::Phrase::note(j % ALT_ROW_NUMBER == 0));
+    setTextProps(colNote, j, Theme::Phrase::note(j % ALT_ROW_NUMBER == 0), phraseLength);
 
     if (d == NO_NOTE) {
       DrawString(pos.x_, pos.y_, "---");
@@ -1182,7 +1188,7 @@ void PhraseView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     SetBackgroundColor(Theme::View::bg);
-    setTextProps(colInstrument, j, Theme::Phrase::instrument(j % ALT_ROW_NUMBER == 0));
+    setTextProps(colInstrument, j, Theme::Phrase::instrument(j % ALT_ROW_NUMBER == 0), phraseLength);
 
     unsigned char d = stepsBase[j].instrument;
 
@@ -1222,7 +1228,7 @@ void PhraseView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     uint8_t vol = stepsBase[j].volume;
-    setTextProps(colVolume, j, Theme::Phrase::volume(j % ALT_ROW_NUMBER == 0));
+    setTextProps(colVolume, j, Theme::Phrase::volume(j % ALT_ROW_NUMBER == 0), phraseLength);
     DrawChar(pos.x_, pos.y_, vol == 0xFF ? '-' : hexChars[vol & 0xF]);
     pos.y_++;
   }
@@ -1234,7 +1240,7 @@ void PhraseView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     Token command = Token::enum_type(stepsBase[j].cmd1);
-    setTextProps(colCmd1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
+    setTextProps(colCmd1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0), phraseLength);
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == colCmd1 || col_ == colCmdVal1)) {
@@ -1251,7 +1257,7 @@ void PhraseView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     uint16_t p = stepsBase[j].param1;
-    setTextProps(colCmdVal1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
+    setTextProps(colCmdVal1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0), phraseLength);
     wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;
@@ -1264,7 +1270,7 @@ void PhraseView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     Token command = Token::enum_type(stepsBase[j].cmd2);
-    setTextProps(colCmd2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
+    setTextProps(colCmd2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0), phraseLength);
     DrawString(pos.x_, pos.y_, command.c_str());
     pos.y_++;
     if (j == row_ && (col_ == colCmd2 || col_ == colCmdVal2)) {
@@ -1281,7 +1287,7 @@ void PhraseView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     uint16_t p = stepsBase[j].param2;
-    setTextProps(colCmdVal2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
+    setTextProps(colCmdVal2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0), phraseLength);
     wordToHexString(p, buffer);
     DrawString(pos.x_, pos.y_, buffer);
     pos.y_++;

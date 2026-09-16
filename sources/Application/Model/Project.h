@@ -92,6 +92,7 @@ private:
   Variable transpose_;
   Variable scale_;
   Variable scaleRoot_;
+  Variable phraseLength_;
   StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> projectName_;
 };
 
