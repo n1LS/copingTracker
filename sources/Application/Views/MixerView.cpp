@@ -297,7 +297,7 @@ void MixerView::DrawView() {
   // Draw title
 
   Player *player = Player::GetInstance();
-  DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song" : "Live");
+  DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song Mixer" : "Live Mixer");
 
   // Now draw busses
   // we start at the bottom of the VU meter and draw it growing upwards

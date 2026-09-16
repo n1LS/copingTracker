@@ -971,11 +971,7 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
       Navigate(VT_CHAIN, vtRevealFromLeft);
     } else if (mask & BM_RIGHT) {
       unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
-      if (*c != 0xFF) {
-        viewData_->currentInstrumentID_ = *c;
-      } else {
-        viewData_->currentInstrumentID_ = lastInstr_;
-      }
+      viewData_->currentInstrumentID_ = (*c != 0xFF) ? *c : lastInstr_;
       if (viewData_->currentInstrumentID_ != 0xFF) {
         Navigate(VT_INSTRUMENT, vtRevealFromRight);
       }
@@ -1003,8 +999,9 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
     if (mask & BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
-    if (mask & BM_ALT)
+    if (mask & BM_ALT) {
       unMuteAll();
+    }
 
   } else if (mask & BM_ALT) {
     // ALT Modifier
