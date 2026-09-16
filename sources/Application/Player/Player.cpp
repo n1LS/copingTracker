@@ -697,7 +697,7 @@ bool Player::ProcessChannelCommand(int channel, Token cmd, uint16_t param) {
       {
         TableHolder *th = TableHolder::GetInstance();
         TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
-        param = param & 0x7F;
+        param = std::std::min(param, TABLE_COUNT - 1);
         Table &table = th->GetTable(param);
         tpb.Start(instr, table, false);
         return true;

@@ -293,14 +293,14 @@ void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
         MidiMessage msg;
         msg.status_ = MidiMessage::MIDI_CONTROL_CHANGE + mchannel;
         msg.data1_ = (value & 0x7F00) >> 8;
-        msg.data2_ = (value & 0x7F);
+        msg.data2_ = std::min(value, 0x7F);
         svc_->QueueMessage(msg);
       };
       break;
 
     case Token::InstrumentCommandMidiPC:
       {
-        SendProgramChange(mchannel, value & 0x7F);
+        SendProgramChange(mchannel, std::min(value, 0x7F));
       };
       break;
 
