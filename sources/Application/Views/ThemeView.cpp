@@ -11,6 +11,7 @@
 
 #include "ThemeView.h"
 #include "Application/AppWindow.h"
+#include "Application/Views/ToastView.h"
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
@@ -495,9 +496,12 @@ void ThemeView::exportThemeWithName(const char *themeName, bool overwrite) {
   }
 
   // Show result message
-  MessageBox *resultMb =
-      MessageBox::Create(*this, "Theme", result ? "Theme exported successfully " : "Failed to export theme", MBBF_OK);
-  DoModal(resultMb);
+  if (result) {
+    ToastView::GetInstance()->Show("Theme exported successfully", &ttSuccess, ToastDuration::regular);
+  } else {
+    MessageBox *resultMb = MessageBox::Create(*this, "Theme", "Failed to export theme", MBBF_OK);
+    DoModal(resultMb);
+  }
 }
 
 void ThemeView::OnFocus() {

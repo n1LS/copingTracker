@@ -11,6 +11,7 @@
 
 #include "ThemeImportView.h"
 #include "Application/AppWindow.h"
+#include "Application/Views/ToastView.h"
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
@@ -59,9 +60,9 @@ void ThemeImportView::onImportTheme(const char *filename) {
     // make sure we redraw everything with the new colors
     Clear();
 
-    // Show success message
-    MessageBox *mb = MessageBox::Create(*this, "Import", "Theme imported successfully", MBBF_OK);
-    DoModal(mb, ModalViewCallback::create<ThemeImportView, &ThemeImportView::onImportThemeModalDismiss>(*this));
+    // Show success message, navigate back
+    Navigate(VT_THEME, vtRevealFromCenter);
+    ToastView::GetInstance()->Show("Theme imported successfully", &ttSuccess, ToastDuration::regular);
   } else {
     // Show error message
     MessageBox *mb = MessageBox::Create(*this, "Import", "Failed to import theme", MBBF_OK);
