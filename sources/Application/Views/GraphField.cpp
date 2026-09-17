@@ -311,7 +311,7 @@ void GraphField::DrawMarker(View &view, int index) {
 }
 
 void GraphField::DrawMarkers(View &view) {
-  for (int i = 0; i < markerCount_; ++i) {
+  for (size_t i = 0; i < markerCount_; ++i) {
     // Redraw waveform at old marker position
     if (markers_[i].x >= 0) {
       redrawWaveformColumn(view, markers_[i].x);
@@ -369,7 +369,7 @@ void GraphField::drawMarkersAt(View &view, int32_t x) {
     return;
   }
 
-  for (int i = 0; i < markerCount_; ++i) {
+  for (size_t i = 0; i < markerCount_; ++i) {
     if (!markers_[i].visible) {
       continue;
     }

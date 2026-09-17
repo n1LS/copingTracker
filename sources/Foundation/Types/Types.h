@@ -390,7 +390,7 @@ struct Token {
 
   ETL_ENUM_TYPE_16(StackInstrumentSpread, "Spread")
   ETL_ENUM_TYPE_16(StackInstrumentWave, "Wave")
-  ETL_ENUM_TYPE_16(StackInstrumentTranspose , "Transpose")
+  ETL_ENUM_TYPE_16(StackInstrumentTranspose, "Transpose")
   ETL_ENUM_TYPE_16(StackInstrumentAttack, "Attack")
   ETL_ENUM_TYPE_16(StackInstrumentDecay, "Decay")
   ETL_ENUM_TYPE_16(StackInstrumentSustain, "Sustain")

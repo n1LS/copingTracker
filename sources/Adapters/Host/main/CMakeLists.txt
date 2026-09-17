@@ -15,6 +15,7 @@ target_link_libraries(copingTracker
   application
   foundation_services
   foundation
+  memory_pool
   SDL2::SDL2
 )
 

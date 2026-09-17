@@ -1210,7 +1210,7 @@ void PhraseView::DrawView() {
 
         DrawString(x, location.y_, instrLine.c_str());
 
-        if (instrLine.length() >= maxLength) {
+        if ((int)instrLine.length() >= maxLength) {
           DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, location.y_, CHAR(char_indicator_ellipsis_s));
         }
       }

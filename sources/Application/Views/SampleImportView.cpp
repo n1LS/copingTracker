@@ -172,7 +172,7 @@ void SampleImportView::GetStatusInfo(char *buffer, size_t bufferSize) {
 
   uint32_t filesize = 0;
   if (!IsEmpty()) {
-    unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+    unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
     // only get file size if it's a file not a dir
     if (fs->getFileType(fileIndex) == PFT_FILE) {
       filesize = (uint32_t)fs->getFileSize(fileIndex);
@@ -218,7 +218,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
     if (enterKeyHeld_ && !(mask & BM_ENTER)) {
       enterKeyHeld_ = false;
       if (pendingDirEnterOnRelease_ && !IsEmpty()) {
-        unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+        unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
         auto fs = GetFileSystem();
         if (fs->getFileType(fileIndex) == PFT_DIR) {
           char name[PFILENAME_SIZE];
@@ -271,7 +271,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       if (!hasFiles) {
         return false;
       }
-      unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+      unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
       char name[PFILENAME_SIZE];
       fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 
@@ -318,7 +318,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
           return false;
         }
         if (selectedButton_ == 0) { // Edit
-          unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+          unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
           char name[PFILENAME_SIZE];
           fs->getFileName(fileIndex, name, PFILENAME_SIZE);
           showSampleEditor(name, true);
@@ -332,7 +332,7 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
         pendingDirEnterOnRelease_ = false;
         return false;
       }
-      unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+      unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
       // we can't import or edit dirs!
       if (fs->getFileType(fileIndex) != PFT_DIR) {
         if (selectedButton_ == 0) { // Import
@@ -390,7 +390,7 @@ void SampleImportView::import() {
   }
 
   auto fs = GetFileSystem();
-  unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+  unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
   char name[PFILENAME_SIZE];
   fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 
@@ -442,7 +442,7 @@ void SampleImportView::onConfirmRemoveProjectSample(View &view, ModalView &dialo
 
   // Get the current sample filename
   auto fs = GetFileSystem();
-  unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+  unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
   char name[PFILENAME_SIZE];
   fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 
@@ -476,7 +476,7 @@ void SampleImportView::remove() {
 
   // Get the current sample filename
   auto fs = GetFileSystem();
-  unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+  unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
   char name[PFILENAME_SIZE];
   fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 
@@ -490,7 +490,7 @@ void SampleImportView::remove() {
 void SampleImportView::ConfirmRemoveSample() {
   // Get the current sample filename
   auto fs = GetFileSystem();
-  unsigned fileIndex = GetFileList()[GetCurrentIndex()];
+  unsigned fileIndex = MemoryPool::Get()[GetCurrentIndex()];
   char name[PFILENAME_SIZE];
   fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 

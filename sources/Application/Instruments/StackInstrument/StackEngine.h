@@ -232,7 +232,7 @@ typedef struct stack_voice_t {
     }
   }
 
-  inline int32_t set_pitch_rate(uint8_t rate) {
+  inline void set_pitch_rate(uint8_t rate) {
     rate = 255 - rate;
     pitch_rate = (static_cast<uint16_t>(rate) << 8) | rate;
   }
@@ -333,7 +333,7 @@ typedef struct stack_voice_t {
       case 9: // glide
         parameters.glide = value;
         for (int o = 0; o < stackNumOscillators; o++) {
-          pitch_rate = set_pitch_rate(value);
+          set_pitch_rate(value);
         }
         break;
       default:
