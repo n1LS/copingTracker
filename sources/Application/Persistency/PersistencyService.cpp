@@ -207,7 +207,6 @@ PersistencyResult PersistencyService::AutoSaveProjectData(const char *projectNam
 }
 
 PersistencyResult PersistencyService::SaveProjectData(const char *projectName, bool autosave) {
-
   const char *filename = autosave ? AUTO_SAVE_FILENAME : PROJECT_FILENAME;
 
   etl::vector<const char *, 3> segments = {PROJECTS_DIR, projectName, filename};

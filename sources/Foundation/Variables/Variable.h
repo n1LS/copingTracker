@@ -43,6 +43,7 @@ public:
   float GetFloat();
   virtual void SetString(const char *string, bool notify = true);
   virtual etl::string<MAX_VARIABLE_STRING_LENGTH> GetString();
+  virtual etl::string<MAX_VARIABLE_STRING_LENGTH> GetPersistenceString();
   void SetBool(bool value, bool notify = true);
   bool GetBool();
   void CopyFrom(Variable &other);

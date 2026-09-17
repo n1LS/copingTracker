@@ -420,7 +420,7 @@ void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
 
     printer->OpenElement(XML_ELEM_PARAMETER);
     printer->PushAttribute(XML_ATTR_NAME, currentVar->GetName());
-    printer->PushAttribute(XML_ATTR_VALUE, currentVar->GetString().c_str());
+    printer->PushAttribute(XML_ATTR_VALUE, currentVar->GetPersistenceString().c_str());
     printer->CloseElement();
     it++;
   }
