@@ -11,7 +11,7 @@
 #include "Application/Instruments/EnvelopeGenerators.h"
 #include "Application/Utils/fixed.h"
 #include "StackWavetables.generated.h"
-#include <cstdint>
+#include <stdint.h>
 
 #include "System/Console/Trace.h"
 
@@ -39,26 +39,9 @@ typedef struct stack_parameters_t {
   uint8_t brightness;
   uint8_t glide;
   uint8_t wave;
+  uint16_t chord;
   int8_t transpose;
 } stack_parameters_t;
-
-typedef struct stack_pitch_envelope_t {
-  int32_t value;
-  int32_t rate;
-
-  void trigger() {
-    value = 0xffff;
-  }
-
-  int32_t tick() {
-    value -= (static_cast<uint32_t>(value) * rate) >> 16;
-    return value;
-  }
-
-  void set_rate(uint8_t inRate) {
-    rate = (static_cast<uint16_t>(inRate) << 8) | inRate;
-  }
-} stack_pitch_envelope_t;
 
 // (!) alignment has to be manually kept in this struct to allow using pack()
 //     to keep the size as small as possible
@@ -86,7 +69,7 @@ typedef struct stack_voice_t {
   uint32_t time; // sample counter
   uint32_t timeToLive;
 
-  stack_pitch_envelope_t pitch[5]; // pitch envelopes (8 bytes)
+  int32_t pitch_rate; // pitch envelopes (8 bytes)
 
   stack_flags flags;
   uint8_t notes[5];
@@ -123,15 +106,17 @@ typedef struct stack_voice_t {
     // processing at ~100Hz
 
     // volume
-    envelope.tick(); // TODO nILS: handle output value to know when to kill the note on NOTE_OFF -> release ringing out
+    if (envelope.tick()) {
+      stop();
+    }
 
     // recompute combined gain when envelope, pan or volume changes
     level = (parameters.volume * volume * envelope.value) >> 24;
 
-    // pitch
+    // pitch: slew the live frequency towards the target base_frequency (glide)
     for (int o = 0; o < stackNumOscillators; o++) {
-      int32_t value = pitch[o].tick();
-      frequency[o] = (int32_t)(((uint64_t)base_frequency[o] * value) >> 16);
+      int64_t diff = (int64_t)base_frequency[o] - (int64_t)frequency[o];
+      frequency[o] += (int32_t)((diff * pitch_rate) >> 16);
     }
   }
 
@@ -207,7 +192,7 @@ typedef struct stack_voice_t {
     *right = sample;
   }
 
-  inline void set_oscillator_note(int osc, int note) {
+  inline void set_oscillator_note(int osc, int note, int glide) {
     const int8_t cent_offsets[5] = {0, -1, 1, -2, 2};
 
     // clip note
@@ -223,7 +208,11 @@ typedef struct stack_voice_t {
     uint32_t multiplier = compute_cent_multiplier(cents);
     notes[osc] = note;
     base_frequency[osc] = (int32_t)(((uint64_t)frequencyLUT[note] * multiplier) >> 16);
-    frequency[osc] = base_frequency[osc];
+
+    // no glide: snap immediately, otherwise let tick_100Hz() slew towards the new target
+    if (glide == 0) {
+      frequency[osc] = base_frequency[osc];
+    }
 
     set_oscillator_lut_index(osc, note);
   }
@@ -243,6 +232,11 @@ typedef struct stack_voice_t {
     }
   }
 
+  inline void set_pitch_rate(uint8_t rate) {
+    rate = 255 - rate;
+    pitch_rate = (static_cast<uint16_t>(rate) << 8) | rate;
+  }
+
   inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const stack_parameters_t inParameters,
                       bool keepClocks = false) {
     // bool retrigger is currently unused
@@ -257,13 +251,25 @@ typedef struct stack_voice_t {
 
     this->note = note;
 
-    // oscillator frequency setup
-    for (uint8_t o = 0; o < stackNumOscillators; o++) {
-      set_oscillator_note(o, note + parameters.transpose);
+    // set the pitch envelopes up for glide
+    set_pitch_rate(parameters.glide);
 
-      // reset oscillator phase
+    // oscillator frequency setup
+    uint16_t chord = parameters.chord;
+    set_oscillator_note(0, note + parameters.transpose, 0);
+
+    for (uint8_t o = stackNumOscillators - 1; o > 1; o--) {
+      set_oscillator_note(o, note + parameters.transpose + (chord & 0xf), 0);
+
+      // move the chord
+      chord >>= 4;
+    }
+
+    for (uint8_t o = 1; o < stackNumOscillators; o++) {
+      // reset the phase
       phase[o] = 0;
     }
+
     wave = (stack_wave_type_e)parameters.wave;
 
     timeToLive = -1;
@@ -282,12 +288,6 @@ typedef struct stack_voice_t {
     envelope.set_sustain(parameters.sustain);
     envelope.set_release(parameters.release);
     envelope.trigger();
-
-    // reset pitch envelope
-    for (int o = 0; o < stackNumOscillators; o++) {
-      pitch[o].set_rate(parameters.glide << 4);
-      pitch[o].trigger();
-    }
   }
 
   /****************************************************************************
@@ -321,7 +321,7 @@ typedef struct stack_voice_t {
       case 7: // spread
         parameters.spread = value;
         for (int o = 0; o < stackNumOscillators; o++) {
-          set_oscillator_note(o, notes[o]);
+          set_oscillator_note(o, notes[o], parameters.glide);
         }
         break;
       case 8: // brightness
@@ -333,7 +333,7 @@ typedef struct stack_voice_t {
       case 9: // glide
         parameters.glide = value;
         for (int o = 0; o < stackNumOscillators; o++) {
-          pitch[o].set_rate(value << 4);
+          set_pitch_rate(value);
         }
         break;
       default:
@@ -348,11 +348,12 @@ typedef struct stack_voice_t {
 
   void set_chord(int8_t a, int8_t b, int8_t c, int8_t d) {
     int baseNote = note + parameters.transpose;
+    int glide = parameters.glide;
 
-    set_oscillator_note(1, baseNote + a);
-    set_oscillator_note(2, baseNote + b);
-    set_oscillator_note(3, baseNote + c);
-    set_oscillator_note(4, baseNote + d);
+    set_oscillator_note(1, baseNote + a, glide);
+    set_oscillator_note(2, baseNote + b, glide);
+    set_oscillator_note(3, baseNote + c, glide);
+    set_oscillator_note(4, baseNote + d, glide);
   }
 } stack_voice_t;
 #pragma pack(pop)

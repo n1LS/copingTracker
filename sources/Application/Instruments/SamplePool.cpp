@@ -22,6 +22,7 @@
 #include "System/Console/Trace.h"
 #include "System/FileSystem/FileSystem.h"
 #include "System/FileSystem/I_File.h"
+#include "System/Memory/MemoryPool.h"
 #include "System/io/Status.h"
 #include "WavHeader.h"
 #include <System/Console/nanoprintf.h>
@@ -75,7 +76,7 @@ void SamplePool::Load(const char *projectName) {
   }
   // First, find all wav files
   updateStatus(0, 0, "Scanning samples");
-  etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes;
+  etl::vector<int, MAX_FILE_INDEX_SIZE> &fileIndexes = MemoryPool::Get();
   fs->list(&fileIndexes, ".wav");
   char name[PFILENAME_SIZE];
   uint32_t totalSamples = (uint32_t)fileIndexes.size();

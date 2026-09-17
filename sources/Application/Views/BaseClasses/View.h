@@ -316,7 +316,7 @@ protected:
   void drawMap();
   void drawRegularNote(const GUIPoint &pos, uint8_t channel);
   void drawNotes();
-  void drawRowNumbers(int x, int y, int start, int numRows);
+  void drawRowNumbers(int x, int y, int start, int numRows, int limit = 256);
   void drawCommandLegend(uint8_t x, uint8_t y, Token command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();

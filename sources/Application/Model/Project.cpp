@@ -42,7 +42,8 @@ Project::Project(const char *name)
       channelVolume7_(Token::VarChannel7Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume8_(Token::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME), wrap_(Token::VarWrap, false),
       transpose_(Token::VarTranspose, 0), scale_(Token::VarScale, scaleNames, numScales, 0),
-      scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), projectName_(Token::VarProjectName, name) {
+      scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), phraseLength_(Token::VarPhraseLength, 16),
+      projectName_(Token::VarProjectName, name) {
 
   this->variables_.insert(variables_.end(), &tempo_);
   this->variables_.insert(variables_.end(), &masterVolume_);
@@ -62,6 +63,7 @@ Project::Project(const char *name)
   this->variables_.insert(variables_.end(), &scale_);
   scale_.SetInt(0);
   this->variables_.insert(variables_.end(), &scaleRoot_);
+  this->variables_.insert(variables_.end(), &phraseLength_);
   scaleRoot_.SetInt(0); // Default to C (0)
   this->variables_.insert(variables_.end(), &projectName_);
 
@@ -108,6 +110,7 @@ void Project::Load(const char *name) {
   transpose_.Reset();
   scale_.Reset();
   scaleRoot_.Reset();
+  phraseLength_.Reset();
 
   if (name) {
     projectName_.SetString(name, true);
@@ -417,7 +420,7 @@ void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
 
     printer->OpenElement(XML_ELEM_PARAMETER);
     printer->PushAttribute(XML_ATTR_NAME, currentVar->GetName());
-    printer->PushAttribute(XML_ATTR_VALUE, currentVar->GetString().c_str());
+    printer->PushAttribute(XML_ATTR_VALUE, currentVar->GetPersistenceString().c_str());
     printer->CloseElement();
     it++;
   }

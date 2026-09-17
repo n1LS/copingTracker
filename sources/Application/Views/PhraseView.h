@@ -84,7 +84,7 @@ protected:
   void processNormalButtonMask(uint16_t mask);
   void processSelectionButtonMask(uint16_t mask);
 
-  void setTextProps(int row, int col, Color textColor);
+  void setTextProps(int row, int col, Color textColor, int limit);
   bool getEffectiveInstrumentForRow(int row, uint8_t &instrumentId) const;
 
 private:

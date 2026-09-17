@@ -37,7 +37,7 @@ void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {
   for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
     printer->OpenElement(XML_ELEM_PARAMETER);
     printer->PushAttribute(XML_ATTR_NAME, (*it)->GetName());
-    printer->PushAttribute(XML_ATTR_VALUE, (*it)->GetString().c_str());
+    printer->PushAttribute(XML_ATTR_VALUE, (*it)->GetPersistenceString().c_str());
     printer->CloseElement(); // PARAM
   }
 }

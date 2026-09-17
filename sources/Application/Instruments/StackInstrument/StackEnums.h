@@ -49,7 +49,8 @@ enum stack_instrument_defaults_e {
   stackDefaultRelease = 0,
   stackDefaultVolume = 0x80,
   stackDefaultBrightness = stackBrightnessMax,
-  stackDefaultGlide = 0
+  stackDefaultGlide = 0,
+  stackDefaultChord = 0x0000,
 };
 
 typedef union stack_flags {

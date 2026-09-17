@@ -750,13 +750,18 @@ void View::DrawTitle(const char *format, ...) {
   DrawString(pos.x_, pos.y_, buffer);
 }
 
-void View::drawRowNumbers(int x, int y, int start, int numRows) {
+void View::drawRowNumbers(int x, int y, int start, int numRows, int limit) {
   SetBackgroundColor(Theme::View::bg);
 
   char row[3];
 
   for (int j = 0; j < numRows; j++) {
-    SetColor(Theme::View::index((j + start) % ALT_ROW_NUMBER == 0));
+    int index = j + start;
+    if (index < limit) {
+      SetColor(Theme::View::index((index) % ALT_ROW_NUMBER == 0));
+    } else {
+      SetColor(Theme::View::inactive);
+    }
     byteToHexString(j, row);
     DrawString(x, y + j, row);
   }

@@ -13,6 +13,7 @@
 #include "Externals/etl/include/etl/vector.h"
 #include "ListView.h"
 #include "System/FileSystem/FileSystem.h"
+#include "System/Memory/MemoryPool.h"
 #include "ViewData.h"
 #include <algorithm>
 #include <cstring>
@@ -135,10 +136,6 @@ protected:
   FileSystem *GetFileSystem() const {
     return fs_;
   }
-  // Get current directory listing
-  const etl::vector<int, MAX_FILE_INDEX_SIZE> &GetFileList() const {
-    return fileIndexList_;
-  }
   // Set current selection index
   void SetCurrentIndex(size_t index);
   // Navigate to parent directory
@@ -155,7 +152,7 @@ protected:
   uint32_t GetFileSize(size_t index) const;
   // Check if list is empty
   bool IsEmpty() const {
-    return fileIndexList_.empty();
+    return MemoryPool::Get().empty();
   }
   // Get page size
   size_t GetPageSize() const {
@@ -239,8 +236,6 @@ private:
 
   FileListConfig config_;
   FileSystem *fs_;
-
-  static etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexList_;
 
   etl::stack<uint8_t, MAX_DIRECTORY_STACK_DEPTH> dirIndexStack_; // Track cursor position per directory level
   bool atLocalRoot_ = true;                                      // No parent navigation available

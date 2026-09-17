@@ -167,6 +167,12 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   intVarField_.emplace_back(position, *v, "Scale root:%s", 0, 11, 1, 1);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
+  // Add Phrase Length field
+  position.y_ += 1;
+  v = project_->FindVariable(Token::VarPhraseLength);
+  intVarField_.emplace_back(position, *v, "Phrase len:%d", 2, 16, 1, 4);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+
   position.y_ += 2;
   actionField_.emplace_back("Sample Pool", Token::ActionImport, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
@@ -426,14 +432,14 @@ void ProjectView::OnPurge() {
   int removed = project_->PurgeSamples();
   char buffer[32];
   npf_snprintf(buffer, sizeof(buffer), "Removed %d sample%s.", removed, removed == 1 ? "" : "s");
-  ToastView::GetInstance()->Show(buffer, &ttSuccess, 1500);
+  ToastView::GetInstance()->Show(buffer, &ttSuccess, ToastDuration::regular);
 }
 
 void ProjectView::OnPurgeInstruments() {
   int removed = project_->PurgeInstruments();
   char buffer[32];
   npf_snprintf(buffer, sizeof(buffer), "Removed %d instrument%s.", removed, removed == 1 ? "" : "s");
-  ToastView::GetInstance()->Show(buffer, &ttSuccess, 1500);
+  ToastView::GetInstance()->Show(buffer, &ttSuccess, ToastDuration::regular);
 }
 
 void ProjectView::OnFocus() {

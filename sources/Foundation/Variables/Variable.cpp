@@ -241,6 +241,37 @@ etl::string<MAX_VARIABLE_STRING_LENGTH> Variable::GetString() {
   return etl::string<MAX_VARIABLE_STRING_LENGTH>(buf, etl::strlen(buf));
 }
 
+etl::string<MAX_VARIABLE_STRING_LENGTH> Variable::GetPersistenceString() {
+  char buf[MAX_VARIABLE_STRING_LENGTH];
+  switch (type_) {
+    // !!! NOTE !!! we don't want to enable nanoprintf's float support so we just
+    // cast to int here because we don't really display floats anyway
+    case FLOAT:
+      npf_snprintf(buf, sizeof(buf), "%f", (int)value_.float_);
+      break;
+    case INT:
+      npf_snprintf(buf, sizeof(buf), "%d", value_.int_);
+      break;
+    case BOOL:
+      npf_snprintf(buf, sizeof(buf), "%s", value_.bool_ ? "true" : "false");
+      break;
+    case STRING:
+      if (stringValue_) {
+        return etl::string<MAX_VARIABLE_STRING_LENGTH>(stringValue_->c_str());
+      }
+      return "";
+    case CHAR_LIST:
+      if ((value_.index_ < 0) || (value_.index_ >= listSize_)) {
+        return "";
+      } else {
+        return list_[value_.index_];
+      }
+      break;
+  };
+
+  return etl::string<MAX_VARIABLE_STRING_LENGTH>(buf, etl::strlen(buf));
+}
+
 void Variable::CopyFrom(Variable &other) {
   type_ = other.type_;
   value_ = other.value_;

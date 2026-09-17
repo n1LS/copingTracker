@@ -19,6 +19,8 @@
 #include "Services/Midi/MidiMessage.h"
 #include "System/Console/Trace.h"
 
+#define min(a, b) ((a < b) ? (a) : (b))
+
 MidiService *MidiInstrument::svc_ = 0;
 TimerService *MidiInstrument::timerSvc_ = 0;
 MidiInstrument::NoteOffInfo MidiInstrument::NoteOffInfo::current = {0, 0};
@@ -293,14 +295,14 @@ void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
         MidiMessage msg;
         msg.status_ = MidiMessage::MIDI_CONTROL_CHANGE + mchannel;
         msg.data1_ = (value & 0x7F00) >> 8;
-        msg.data2_ = (value & 0x7F);
+        msg.data2_ = min(value, 0x7F);
         svc_->QueueMessage(msg);
       };
       break;
 
     case Token::InstrumentCommandMidiPC:
       {
-        SendProgramChange(mchannel, value & 0x7F);
+        SendProgramChange(mchannel, min(value, 0x7F));
       };
       break;
 

@@ -30,6 +30,7 @@ target_link_libraries(copingTracker PUBLIC
     # These define interfaces that the adapters implement
     system_timer
     system_console
+    memory_pool
     profiler
 
     # --- Foundation Libraries (Lowest-level, most things depend on these) ---

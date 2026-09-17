@@ -32,6 +32,10 @@ int32_t DecodeRetriggerOffset(int32_t value) {
 
 // Private constructor - Singleton
 
+#define min(a, b) ((a < b) ? (a) : (b))
+#define max(a, b) ((a > b) ? (a) : (b))
+#define clamp(a, b, c) min(c, max(a, b))
+
 Player::Player() : mixer_() {
   isRunning_ = false;
   viewData_ = 0;
@@ -685,7 +689,7 @@ bool Player::ProcessChannelCommand(int channel, Token cmd, uint16_t param) {
       return true;
     case Token::InstrumentCommandTempo:
       {
-        param = std::clamp(param, MIN_TEMPO, MAX_TEMPO);
+        param = clamp(param, MIN_TEMPO, MAX_TEMPO);
         Variable *v = project_->FindVariable(Token::VarTempo);
         v->SetInt(param);
         SyncMaster *sync = SyncMaster::GetInstance();
@@ -697,7 +701,7 @@ bool Player::ProcessChannelCommand(int channel, Token cmd, uint16_t param) {
       {
         TableHolder *th = TableHolder::GetInstance();
         TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
-        param = param & 0x7F;
+        param = min(param, TABLE_COUNT - 1);
         Table &table = th->GetTable(param);
         tpb.Start(instr, table, false);
         return true;
@@ -788,7 +792,6 @@ void Player::updateChainPos(int pos, int channel, int hop) {
  ********************************************************/
 
 void Player::updatePhrasePos(int pos, int channel) {
-
   viewData_->phrasePlayPos_[channel] = pos;
 
   // See if we need to delay the trigger
@@ -1032,6 +1035,7 @@ void Player::moveToNextStep() {
     }
 
     Groove *gs = Groove::GetInstance();
+    int phraseLength = project_->FindVariable(Token::VarPhraseLength)->GetInt();
 
     if (mixer_.IsChannelPlaying(i) && !liveTriggered) {
       playingChannel = true;
@@ -1039,7 +1043,7 @@ void Player::moveToNextStep() {
       if (gs->TriggerChannel(i)) { // If groove says it is time to play
         if (viewData_->currentPlayPhrase_[i] != 0xFF) {
           int pos = (viewData_->phrasePlayPos_[i]) + 1;
-          if (pos != 16) {
+          if (pos != phraseLength) {
             int hop = getChannelHop(i, pos);
             if (hop >= 0) {
               if (mode_ != PM_PHRASE) {
@@ -1113,7 +1117,9 @@ void Player::moveToNextPhrase(int channel, int hop) {
   // Look if there' any data at current position
   // which means we continue in the current chain
 
-  bool canContinue = (pos < 16);
+  int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
+
+  bool canContinue = (pos < phraseLength);
   if (canContinue) {
     canContinue = (viewData_->song_->chain_.steps_[chain][pos].phrase != 0xFF);
   }

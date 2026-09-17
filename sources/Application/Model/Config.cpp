@@ -453,7 +453,7 @@ void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
       printer->PushAttribute(XML_ATTR_VALUE, buf);
     } else {
       // all other settings need to be saved as thier String values
-      printer->PushAttribute(XML_ATTR_VALUE, var->GetString().c_str());
+      printer->PushAttribute(XML_ATTR_VALUE, var->GetPersistenceString().c_str());
     }
     printer->CloseElement();
     it++;
