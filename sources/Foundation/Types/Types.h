@@ -261,7 +261,8 @@ struct Token {
     StackInstrumentRelease = 198,
     StackInstrumentBrightness = 227,
     StackInstrumentGlide = 228,
-    
+    StackInstrumentChord = 230,
+
     VarPhraseLength = 254,
 
     // 118-119 free  2
@@ -386,6 +387,17 @@ struct Token {
   ETL_ENUM_TYPE_16(SIDInstrumentADSR, "OscADSR")
   ETL_ENUM_TYPE_16(SIDInstrumentFilterOn, "VoiceFilterOn")
   ETL_ENUM_TYPE_16(SIDInstrumentOSCNumber, "OscNum")
+
+  ETL_ENUM_TYPE_16(StackInstrumentSpread, "Spread")
+  ETL_ENUM_TYPE_16(StackInstrumentWave, "Wave")
+  ETL_ENUM_TYPE_16(StackInstrumentTranspose , "Transpose")
+  ETL_ENUM_TYPE_16(StackInstrumentAttack, "Attack")
+  ETL_ENUM_TYPE_16(StackInstrumentDecay, "Decay")
+  ETL_ENUM_TYPE_16(StackInstrumentSustain, "Sustain")
+  ETL_ENUM_TYPE_16(StackInstrumentRelease, "Release")
+  ETL_ENUM_TYPE_16(StackInstrumentBrightness, "Brightness")
+  ETL_ENUM_TYPE_16(StackInstrumentGlide, "Glide")
+  ETL_ENUM_TYPE_16(StackInstrumentChord, "Chord")
 
   // channel variable not currently used by OPAL instruments but maybe in future
   ETL_ENUM_TYPE_16(OPALInstrumentChannel, "Channel")

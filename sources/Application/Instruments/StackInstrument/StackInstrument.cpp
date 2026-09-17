@@ -25,7 +25,7 @@ StackInstrument::StackInstrument()
       sustain_(Token::StackInstrumentSustain, stackDefaultSustain),
       release_(Token::StackInstrumentRelease, stackDefaultRelease),
       brightness_(Token::StackInstrumentBrightness, stackDefaultBrightness),
-      glide_(Token::StackInstrumentGlide, stackDefaultGlide) {
+      glide_(Token::StackInstrumentGlide, stackDefaultGlide), chord_(Token::StackInstrumentChord, stackDefaultChord) {
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
@@ -39,6 +39,7 @@ StackInstrument::StackInstrument()
   variables_.insert(variables_.end(), &release_);
   variables_.insert(variables_.end(), &brightness_);
   variables_.insert(variables_.end(), &glide_);
+  variables_.insert(variables_.end(), &chord_);
 }
 
 StackInstrument::~StackInstrument() {
@@ -151,6 +152,7 @@ stack_parameters_t StackInstrument::getInstrumentParameters() {
   params.glide = glide_.GetInt();
   params.wave = range(0, wave_.GetInt(), (int)stackWaveNone);
   params.transpose = transpose_.GetInt();
+  params.chord = chord_.GetInt();
 
   return params;
 }

@@ -34,6 +34,15 @@ void InstrumentView::fillStackParameters() {
   fieldList_.insert(fieldList_.end(), &intVarField_.back());  
   addIndexToLine(5, position.y_, true);
 
+  // Chord
+  position.y_++;
+  v = instrument->FindVariable(Token::StackInstrumentChord);
+  hexVarField_.emplace_back(position, *v, 4,  "Chord  :%04X", 0x0000, 0xffff, 16);
+  hexVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  hexVarField_.back().SetLabelColor(Theme::SemanticColors::pitch);
+  fieldList_.insert(fieldList_.end(), &hexVarField_.back());  
+  addIndexToLine(6, position.y_, true);
+
   // Glide
   position.y_++;
   v = instrument->FindVariable(Token::StackInstrumentGlide);
@@ -41,7 +50,7 @@ void InstrumentView::fillStackParameters() {
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::pitch);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());  
-  addIndexToLine(6, position.y_, true);
+  addIndexToLine(7, position.y_, true);
 
   // Spread
   position.y_++;
@@ -53,7 +62,7 @@ void InstrumentView::fillStackParameters() {
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());  
-  addIndexToLine(7, position.y_, true);
+  addIndexToLine(8, position.y_, true);
 
   // Brightness/Timber
   position.y_++;
@@ -62,7 +71,7 @@ void InstrumentView::fillStackParameters() {
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());  
-  addIndexToLine(8, position.y_, true);
+  addIndexToLine(9, position.y_, true);
 
   // Attack
   position.y_++;
@@ -74,7 +83,7 @@ void InstrumentView::fillStackParameters() {
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());  
-  addIndexToLine(9, position.y_, true);
+  addIndexToLine(10, position.y_, true);
 
   // Decay
   position.y_++;
@@ -83,7 +92,7 @@ void InstrumentView::fillStackParameters() {
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());  
-  addIndexToLine(10, position.y_, true);
+  addIndexToLine(11, position.y_, true);
 
   // Sustain
   position.y_++;
@@ -92,7 +101,7 @@ void InstrumentView::fillStackParameters() {
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());  
-  addIndexToLine(11, position.y_, true);
+  addIndexToLine(12, position.y_, true);
   
   // Release
   position.y_++;
@@ -101,7 +110,7 @@ void InstrumentView::fillStackParameters() {
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());  
-  addIndexToLine(12, position.y_, true);
+  addIndexToLine(13, position.y_, true);
 
   // default Items
 

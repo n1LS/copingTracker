@@ -80,7 +80,7 @@ private:
 
   stack_parameters_t getInstrumentParameters();
 
-  etl::list<Variable *, 13> variables_;
+  etl::list<Variable *, 14> variables_;
 
   Variable spread_;
   Variable wave_;
@@ -91,6 +91,7 @@ private:
   Variable release_;
   Variable brightness_;
   Variable glide_;
+  Variable chord_;
 };
 
 #endif
