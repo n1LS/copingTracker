@@ -32,7 +32,7 @@ static GUIEventPadButtonType eventMappingHost[11] = {
     EPBT_POWER   // unused
 };
 
-class HostGUIWindowImp : public I_GUIWindowImp, public I_Observer  {
+class HostGUIWindowImp : public I_GUIWindowImp, public I_Observer {
 public:
   HostGUIWindowImp(GUICreateWindowParams &p);
   virtual ~HostGUIWindowImp();

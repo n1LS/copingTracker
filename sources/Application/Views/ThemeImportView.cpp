@@ -11,10 +11,10 @@
 
 #include "ThemeImportView.h"
 #include "Application/AppWindow.h"
-#include "Application/Views/ToastView.h"
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
+#include "Application/Views/ToastView.h"
 #include "ModalDialogs/MessageBox.h"
 #include "System/Console/Trace.h"
 #include "System/FileSystem/FileSystem.h"
