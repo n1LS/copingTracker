@@ -32,7 +32,7 @@ static GUIEventPadButtonType eventMappingHost[11] = {
     EPBT_POWER   // unused
 };
 
-class HostGUIWindowImp : public I_GUIWindowImp {
+class HostGUIWindowImp : public I_GUIWindowImp, public I_Observer  {
 public:
   HostGUIWindowImp(GUICreateWindowParams &p);
   virtual ~HostGUIWindowImp();
@@ -57,6 +57,7 @@ public:
   virtual void mirrorUIConnectionChanged(bool connected) override;
 
   static void ProcessButtonChange(uint16_t changeMask, uint16_t buttonMask);
+  virtual void Update(Observable &o, I_ObservableData *d);
 
 private:
   SDL_Window *window_;
@@ -74,14 +75,20 @@ HostGUIWindowImp::HostGUIWindowImp(GUICreateWindowParams &p) : window_(nullptr),
                              320 * 2, 240 * 2, SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
 
   if (window_) {
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-
     renderer_ = SDL_CreateRenderer(window_, -1, 0);
     if (renderer_) {
       texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, 320, 240);
       SDL_SetTextureScaleMode(texture_, SDL_ScaleModeNearest);
     }
   }
+
+  Config *config = Config::GetInstance();
+  auto uiFontVar = (WatchedVariable *)config->FindVariable(Token::VarUIFont);
+
+  // register to receive updates to mirrorUI setting
+  uiFontVar->AddObserver(*this);
+  auto uifontIndex = uiFontVar->GetInt();
+  chargfx_set_font_index(uifontIndex);
 }
 
 HostGUIWindowImp::~HostGUIWindowImp() {
@@ -194,6 +201,7 @@ void HostGUIWindowImp::SendPalette() {
 void HostGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount) {
   if (!palette)
     return;
+
   for (int i = 0; i < colorCount && i < 16; ++i) {
     uint16_t rgb565 = ((palette[i].r_ >> 3) << 11) | ((palette[i].g_ >> 2) << 5) | (palette[i].b_ >> 3);
     chargfx_set_palette_color(i, rgb565);
@@ -222,7 +230,25 @@ void HostGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t buttonM
   }
 }
 
+void HostGUIWindowImp::Update(Observable &o, I_ObservableData *d) {
+  WatchedVariable &v = (WatchedVariable &)o;
+  switch (v.GetID()) {
+    case Token::VarMirrorUI:
+      // the host application (currently) does not support mirrorUI
+      break;
+    case Token::VarUIFont:
+      {
+        auto uifont = v.GetInt();
+        chargfx_set_font_index(uifont);
+        // TODO (if supporting mirrorUI) SendFont()
+        break;
+      }
+  }
+}
+
 static HostGUIWindowImp *s_window_imp = nullptr;
+
+/******************************************************************************/
 
 class HostEventManager : public EventManager {
 public:
