@@ -20,6 +20,10 @@ FieldView::FieldView(GUIWindow &w, ViewData *data) : ScreenView(w, data) {
 }
 
 void FieldView::UpdateFocusRect() {
+  if (!focus_) {
+    return;
+  }
+
   GUIPoint pos = focus_->GetPosition();
   int w = focus_->GetFocusWidth();
   int dx = focus_->GetFocusOffset();
