@@ -503,7 +503,7 @@ void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Col
                                       size_t bufferSize) {
   // Default implementation: draw filename with directory/file icon
   char temp[32];
-  GetFileName(index, temp, PFILENAME_SIZE);
+  GetFileName(index, temp, sizeof(temp));
 
   bool isDirectory = IsDirectory(index);
 
