@@ -879,6 +879,10 @@ void SongView::DrawView() {
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
   }
+
+  needsPlayTimeUpdate_ = true;
+  needsUIUpdate_ = true;
+  AnimationUpdate();
 }
 
 void SongView::drawChainPreview() {
@@ -965,13 +969,15 @@ void SongView::AnimationUpdate() {
     drawNotes();
 
     // Only handle play time updates if needed
-    if (needsPlayTimeUpdate_) {
-      GUIPoint timePos = 0;
-      timePos.x_ = 27;
-      timePos.y_ += 1;
-      SetColor(Theme::View::fg);
+    GUIPoint timePos = {27, 1};
+    SetColor(Theme::View::fg);
+    SetBackgroundColor(Theme::View::bg);
+
+    if (needsPlayTimeUpdate_ && Player::GetInstance()->IsRunning()) {
       drawPlayTime(player, timePos);
       needsPlayTimeUpdate_ = false;
+    } else {
+      DrawString(timePos.x_, timePos.y_, "     ");
     }
 
     // Handle position updates
