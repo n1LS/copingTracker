@@ -32,6 +32,10 @@ int32_t DecodeRetriggerOffset(int32_t value) {
 
 // Private constructor - Singleton
 
+#define min(a, b) ((a < b) ? (a) : (b))
+#define max(a, b) ((a > b) ? (a) : (b))
+#define clamp(a, b, c) min(c, max(a, b))
+
 Player::Player() : mixer_() {
   isRunning_ = false;
   viewData_ = 0;
@@ -685,7 +689,7 @@ bool Player::ProcessChannelCommand(int channel, Token cmd, uint16_t param) {
       return true;
     case Token::InstrumentCommandTempo:
       {
-        param = std::clamp(param, MIN_TEMPO, MAX_TEMPO);
+        param = clamp(param, MIN_TEMPO, MAX_TEMPO);
         Variable *v = project_->FindVariable(Token::VarTempo);
         v->SetInt(param);
         SyncMaster *sync = SyncMaster::GetInstance();
@@ -697,7 +701,7 @@ bool Player::ProcessChannelCommand(int channel, Token cmd, uint16_t param) {
       {
         TableHolder *th = TableHolder::GetInstance();
         TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
-        param = std::std::min(param, TABLE_COUNT - 1);
+        param = min(param, TABLE_COUNT - 1);
         Table &table = th->GetTable(param);
         tpb.Start(instr, table, false);
         return true;
