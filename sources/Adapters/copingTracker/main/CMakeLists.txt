@@ -22,6 +22,7 @@ target_link_libraries(copingTracker PUBLIC
     application_views
     application_views_baseclasses
     application_model
+    memory_pool
 
     # --- Service Libraries ---
     services_audio
@@ -30,7 +31,6 @@ target_link_libraries(copingTracker PUBLIC
     # These define interfaces that the adapters implement
     system_timer
     system_console
-    memory_pool
     profiler
 
     # --- Foundation Libraries (Lowest-level, most things depend on these) ---
