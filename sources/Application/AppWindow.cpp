@@ -134,6 +134,10 @@ struct AppWindowViews {
     sampleEditorView.AddObserver(window);
     sampleSlicesView.AddObserver(window);
     bootView.AddObserver(window);
+
+    auto config = Config::GetInstance();
+    auto caseVar = (WatchedVariable *)config->FindVariable(Token::VarTextCase);
+    caseVar->AddObserver(window);
   };
 
   AppWindowViews(GUIWindow &w, ViewData &viewData)
@@ -254,9 +258,23 @@ void AppWindow::DrawString(int x, int y, const char *string) {
   }
 }
 
-void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
+void AppWindow::DrawChar(int x, int y, char c, bool transparent) {
   if (y < 0 || y >= SCREEN_HEIGHT || x < 0 || x >= SCREEN_WIDTH) {
     return;
+  }
+
+  // repact user settable case
+  switch (case_) {
+    case tcUpper:
+      if (c >= 'a' && c <= 'z') {
+          c -= 'a' - 'A';
+      }
+      break;
+    case tcLower:
+      if (c >= 'A' && c <= 'Z') {
+          c += 'a' - 'A';
+      }
+      break;
   }
 
   int index = x + SCREEN_WIDTH * y;
@@ -530,7 +548,7 @@ void AppWindow::UpdateColorsFromConfig() {
   defineColor(Token::VarColor_D, colorPalette_[13], 13);
   defineColor(Token::VarColor_E, colorPalette_[14], 14);
   defineColor(Token::VarColor_F, colorPalette_[15], 15);
-
+  
   GetImpWindow()->SetPalette(colorPalette_, NUM_COLORS);
 }
 
@@ -720,6 +738,12 @@ void AppWindow::SetTransition(ViewTransition type) {
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
   if (d == nullptr)
     return;
+
+  switch (uintptr_t(d)) {
+    case (uintptr_t)Token::VarTextCase:
+      case_ = (TextCase)Config::GetInstance()->FindVariable(Token::VarTextCase)->GetInt();
+      return;
+  }
 
   if ((uintptr_t)d == (uintptr_t)Token::VarProjectName) {
     // Update the stored project name from the project

@@ -43,7 +43,7 @@ public: // I_GUIWindowImp implementation
   virtual void SetColor(Color color) override;
   virtual void SetBackgroundColor(Color color) override;
   virtual void DrawRect(const GUIRect rect) override;
-  virtual void DrawChar(int x, int y, const char c, bool transparent = false) override;
+  virtual void DrawChar(int x, int y, char c, bool transparent = false) override;
   virtual void DrawString(int x, int y, const char *string) override;
   virtual GUIRect GetRect();
   virtual void Invalidate();

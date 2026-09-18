@@ -417,7 +417,7 @@ void View::DrawTintString(int x, int y, const TintChar *data) {
   }
 }
 
-void View::DrawChar(int x, int y, const char character, bool transparent) {
+void View::DrawChar(int x, int y, char character, bool transparent) {
   w_.DrawChar(x, y, character, transparent);
 }
 

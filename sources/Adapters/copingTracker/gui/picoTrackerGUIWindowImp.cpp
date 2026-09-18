@@ -110,7 +110,7 @@ void picoTrackerGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount
   }
 }
 
-void picoTrackerGUIWindowImp::DrawChar(int x, int y, const char c, bool transparent) {
+void picoTrackerGUIWindowImp::DrawChar(int x, int y, char c, bool transparent) {
   chargfx_set_cursor(x, y);
   chargfx_putc(c, transparent);
 }

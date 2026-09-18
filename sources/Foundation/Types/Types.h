@@ -15,6 +15,13 @@
 #include "Externals/etl/include/etl/enum_type.h"
 #include <stdint.h>
 
+enum TextCase {
+  tcRegular,
+  tcUpper,
+  tcLower,
+  Count
+};
+
 struct Token {
   // While the names of the Token codes can be changed, their values CANNOT.
   // Values are used as is in save files, so any changes would cause save files
@@ -172,6 +179,7 @@ struct Token {
     VarMidiClockSync = 151,
     VarMirrorUI = 140,
     VarUIFont = 141,
+    VarTextCase = 118,
 
     VarChannel1Volume = 163,
     VarChannel2Volume = 164,
@@ -265,7 +273,7 @@ struct Token {
 
     VarPhraseLength = 254,
 
-    // 118-119 free  2
+    // 119 free      1
     // 121-122 free  2
     // 193-194 free  2
     // 199 free      1
@@ -273,7 +281,7 @@ struct Token {
     // 209 free      1
     // 230-253 free 24
     // ----------------
-    //               34
+    //               33
 
     Default = 255, // "    "
   };
@@ -341,6 +349,7 @@ struct Token {
   ETL_ENUM_TYPE_16(VarMidiClockSync, "midi-clock-sync")
   ETL_ENUM_TYPE_16(VarMirrorUI, "mirror-ui")
   ETL_ENUM_TYPE_16(VarUIFont, "ui-font")
+  ETL_ENUM_TYPE_16(VarTextCase, "text-case")
   ETL_ENUM_TYPE_16(VarThemeName, "theme-name")
   ETL_ENUM_TYPE_16(VarScaleRoot, "scale-root")
   ETL_ENUM_TYPE_16(VarPhraseLength, "phrase-length")

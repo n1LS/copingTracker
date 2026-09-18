@@ -42,7 +42,7 @@ public:
   virtual void SetBackgroundColor(Color color) override;
   virtual void ClearTextRect(GUIRect rect) override;
   virtual void DrawString(int x, int y, const char *string) override;
-  virtual void DrawChar(int x, int y, const char c, bool transparent = false) override;
+  virtual void DrawChar(int x, int y, char c, bool transparent = false) override;
   virtual GUIRect GetRect() override;
   virtual const GUIRect GetFocusRect() const override;
   virtual void Invalidate() override;
@@ -137,7 +137,7 @@ void HostGUIWindowImp::DrawString(int x, int y, const char *string) {
   }
 }
 
-void HostGUIWindowImp::DrawChar(int x, int y, const char c, bool transparent) {
+void HostGUIWindowImp::DrawChar(int x, int y, char c, bool transparent) {
   chargfx_set_cursor(x, y);
   chargfx_putc(c, transparent);
 }

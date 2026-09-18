@@ -73,7 +73,7 @@ private:
   };
 
   ColorComponentTarget *selectedColorComponentTarget();
-  etl::vector<UIIntVarField, 2> intVarField_; // font selector + selected color component
+  etl::vector<UIIntVarField, 3> intVarField_; // font selector + selected color component
   etl::vector<UISwatchField, COLOR_COUNT> swatchField_;
   etl::vector<UIStaticField, COLOR_COUNT> staticField_;
   Variable colorComponentVar_;

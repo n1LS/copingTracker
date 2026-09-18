@@ -25,7 +25,7 @@ public:
   virtual void SetBackgroundColor(Color color) = 0;
   virtual void ClearTextRect(GUIRect) = 0;
   virtual void DrawString(int x, int y, const char *string) = 0;
-  virtual void DrawChar(int x, int y, const char c, bool transparent = false) = 0;
+  virtual void DrawChar(int x, int y, char c, bool transparent = false) = 0;
 
   virtual GUIRect GetRect() = 0;
   virtual const GUIRect GetFocusRect() const = 0;

@@ -99,6 +99,8 @@ static const ConfigParam configParams[] = {
     CONFIG(Token::VarMirrorUI, {.intValue = DEFAULT_REMOTEUI}, mirrorUIOnOff, 2, false),
     CONFIG(Token::VarUIFont, {.intValue = ThemeConstants::DEFAULT_UIFONT}, ThemeConstants::THEME_FONT_NAMES,
            ThemeConstants::THEME_FONT_COUNT, false),
+    CONFIG(Token::VarTextCase, {.intValue = ThemeConstants::DEFAULT_CASE}, ThemeConstants::THEME_FONT_NAMES,
+           ThemeConstants::THEME_FONT_COUNT, false),
 
     // Display brightness setting
     CONFIG(Token::VarBacklightLevel, {.intValue = DEFAULT_BACKLIGHT_LEVEL}, nullptr, 0, false),
@@ -138,6 +140,7 @@ Config::Config()
       commandInputMode_(Token::VarConfigCommandPicker, commandPickerOptions, 2, DEFAULT_USE_COMMAND_PICKER),
       uiFont_(Token::VarUIFont, ThemeConstants::THEME_FONT_NAMES, ThemeConstants::THEME_FONT_COUNT,
               ThemeConstants::DEFAULT_UIFONT),
+      textCase_(Token::VarTextCase, ThemeConstants::TEXT_CASE_NAMES, TextCase::Count, ThemeConstants::DEFAULT_CASE),
       themeName_(Token::VarThemeName, ThemeConstants::DEFAULT_THEME_NAME),
       backlightLevel_(Token::VarBacklightLevel, DEFAULT_BACKLIGHT_LEVEL),
       outputVolume_(Token::VarOutputVolume, DEFAULT_OUTPUT_VOLUME), keyDelay_(Token::VarKeyDelay, DEFAULT_KEY_DELAY),
@@ -167,6 +170,7 @@ Config::Config()
   variables_.push_back(&importResampler_);
   variables_.push_back(&commandInputMode_);
   variables_.push_back(&uiFont_);
+  variables_.push_back(&textCase_);
   variables_.push_back(&themeName_);
   variables_.push_back(&backlightLevel_);
   variables_.push_back(&outputVolume_);
