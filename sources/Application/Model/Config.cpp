@@ -415,6 +415,16 @@ bool Config::SaveTheme(tinyxml2::XMLPrinter *printer, const char *themeName) {
     printer->CloseElement(); // Font
   }
 
+  // Save the case setting
+  Variable *caseVar = FindVariable(Token::VarUIFont);
+  if (caseVar) {
+    printer->OpenElement(XML_ELEM_CASE);
+    char buf[16];
+    npf_snprintf(buf, sizeof(buf), "%d", caseVar->GetInt());
+    printer->PushAttribute(XML_ATTR_VALUE, buf);
+    printer->CloseElement(); // case
+  }
+
   // Write color variables
   WriteColorVariables(printer);
 
@@ -487,7 +497,7 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
       Trace::Log("CONFIG", "Processing element: %s", elemName);
 
       if (strcmp(elemName, XML_ELEM_FONT) == 0) {
-        // Process Font element attributes
+        // Process Font element attribute
         while (doc->NextAttribute()) {
           if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
             Trace::Log("CONFIG", "Found font value: %s", doc->attrval_);
@@ -499,6 +509,22 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
             if (fontVar) {
               fontVar->SetInt(fontValue);
               Trace::Log("CONFIG", "Set font variable to: %d", fontValue);
+            }
+          }
+        }
+      } else if (strcmp(elemName, XML_ELEM_CASE) == 0) {
+        // Process text case attribute
+        while (doc->NextAttribute()) {
+          if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
+            Trace::Log("CONFIG", "Found text-case value: %s", doc->attrval_);
+            // Parse font value as decimal
+            int fontValue = atoi(doc->attrval_);
+            Trace::Log("CONFIG", "Parsed text-case  value: %d", fontValue);
+
+            Variable *caseVar = FindVariable(Token::VarTextCase);
+            if (caseVar) {
+              caseVar->SetInt(fontValue);
+              Trace::Log("CONFIG", "Set text-case variable to: %d", fontValue);
             }
           }
         }

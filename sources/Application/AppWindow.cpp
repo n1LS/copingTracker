@@ -197,6 +197,10 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   UpdateColorsFromConfig();
 
+  // load text CASE Setting
+  auto caseVar = Config::GetInstance()->FindVariable(Token::VarTextCase);
+  case_ = static_cast<TextCase>(caseVar->GetInt());
+
   GUIWindow::Clear();
 
   static AppWindowViews views(*this, viewData_);

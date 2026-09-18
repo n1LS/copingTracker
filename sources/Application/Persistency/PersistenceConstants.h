@@ -66,6 +66,7 @@
 #define XML_ELEM_DATA "data"
 #define XML_ELEM_CONFIGURATION "configuration"
 #define XML_ELEM_FONT "font"
+#define XML_ELEM_CASE "text-case"
 #define XML_ELEM_THEME_NAME "theme-name"
 #define XML_ELEM_COMMAND1 "command1"
 #define XML_ELEM_COMMAND2 "command2"

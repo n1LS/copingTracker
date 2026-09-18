@@ -53,14 +53,6 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   position.x_ -= 8;
   position.y_ += 2;
 
-  // Font selection
-  Variable *fontVar = config->FindVariable(Token::VarUIFont);
-  intVarField_.emplace_back(position, *fontVar, "Font     :%s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
-                            ThemeConstants::THEME_FONT_COUNT - 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-  intVarField_.back().AddObserver(*this);
-  position.y_ += 1;
-
   // Get the current theme name from Config
   Variable *configThemeVar = config->FindVariable(Token::VarThemeName);
   etl::string<MAX_THEME_NAME_LENGTH> currentThemeName = "default";
@@ -71,7 +63,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   }
 
   // Create the label and default value as variables to avoid temporary objects
-  auto label = etl::string<MAX_UITEXTFIELD_LABEL_LENGTH>("Theme    ");
+  auto label = etl::string<MAX_UITEXTFIELD_LABEL_LENGTH>("Theme     ");
   auto defaultValue = etl::string<MAX_THEME_NAME_LENGTH>(currentThemeName);
 
   themeNameVar_.SetString(currentThemeName.c_str(), false);
@@ -87,6 +79,14 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   // Initialize the export theme name
   exportThemeName_ = currentThemeName;
+  position.y_++;
+
+  // Font selection
+  Variable *fontVar = config->FindVariable(Token::VarUIFont);
+  intVarField_.emplace_back(position, *fontVar, "Font     :%s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
+                            ThemeConstants::THEME_FONT_COUNT - 1);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
   position.y_ += 1;
 
   // TEXT case Selection
@@ -97,9 +97,8 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   intVarField_.back().AddObserver(*this);
   position.y_ += 1;
 
-
   // Colors 0..15
-  position.y_ += 3;
+  position.y_ += 1;
   addColorField("Black", config->FindVariable(Token::VarColor_0), BLACK, position);
   position.y_ += 1;
   addColorField("Maroon", config->FindVariable(Token::VarColor_1), RED, position);
