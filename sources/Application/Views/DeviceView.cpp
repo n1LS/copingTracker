@@ -47,7 +47,6 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   auto config = Config::GetInstance();
 
   Variable *v;
-
   v = config->FindVariable(Token::VarMidiDevice);
   intVarField_.emplace_back(position, *v, "MIDI device  :%s", 0, 3, 1, 1);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
@@ -85,26 +84,26 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   position.y_ += 2;
   v = config->FindVariable(Token::VarPreviewVolume);
-  intVarField_.emplace_back(position, *v, "Preview volume    :%2d", 0, 99, 1, 10);
+  intVarField_.emplace_back(position, *v, "Preview volume  :%2d", 0, 99, 1, 10);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarBacklightLevel);
   // MIN brightness is 0xF (15)
-  intVarField_.emplace_back(position, *v, "Display brightness:%2.2X", 0xF, 0xFF, 1, 16);
+  intVarField_.emplace_back(position, *v, "LCD Brightness  :%2.2X", 0xF, 0xFF, 1, 16);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarImportResampler);
-  intVarField_.emplace_back(position, *v, "Import resampler  :%s", 0, v->GetListSize() - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Import resampler:%s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarConfigCommandPicker);
-  intVarField_.emplace_back(position, *v, "Command input mode:%s", 0, v->GetListSize() - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Command input   :%s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
@@ -118,12 +117,10 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
-#ifndef ADV
   position.y_ += 1;
   actionField_.emplace_back(char_symbols_usb_s " USB Storage", Token::ActionMassStorage, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
-#endif
 }
 
 DeviceView::~DeviceView() {

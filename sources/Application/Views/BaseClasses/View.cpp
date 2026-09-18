@@ -315,8 +315,6 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 void View::drawPlayTime(Player *player, GUIPoint pos) {
   char strbuffer[10];
 
-  SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::View::fg);
   int time = int(player->GetPlayTime());
   int mi = time / 60;
   int se = time - mi * 60;
@@ -748,6 +746,13 @@ void View::DrawTitle(const char *format, ...) {
   }
 
   DrawString(pos.x_, pos.y_, buffer);
+
+  memset(buffer, CHAR(char_block_top_s), SCREEN_WIDTH);
+  buffer[SCREEN_WIDTH] = 0;
+
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::Title::bg);
+  DrawString(0, 1, buffer);
 }
 
 void View::drawRowNumbers(int x, int y, int start, int numRows, int limit) {
