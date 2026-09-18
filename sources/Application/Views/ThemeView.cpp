@@ -91,8 +91,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   // TEXT case Selection
   Variable *caseVar = config->FindVariable(Token::VarTextCase);
-  intVarField_.emplace_back(position, *caseVar, "Text Case:%s", 0, TextCase::Count - 1, 1,
-                            TextCase::Count - 1);
+  intVarField_.emplace_back(position, *caseVar, "Text Case:%s", 0, TextCase::Count - 1, 1, TextCase::Count - 1);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
   position.y_ += 1;

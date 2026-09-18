@@ -64,9 +64,7 @@ protected:
   void warpToNext(int offset);
   void onInstrumentChange();
   void fillSampleParameters();
-  void fillSIDParameters();
   void fillMidiParameters();
-  void fillOpalParameters();
   void fillChiptuneParameters();
   void fillDrumParameters();
   void fillStackParameters();

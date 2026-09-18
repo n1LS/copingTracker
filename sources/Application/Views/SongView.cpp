@@ -10,8 +10,8 @@
  */
 
 #include "SongView.h"
-#include "Application/Player/Player.h"
 #include "Application/AppWindow.h"
+#include "Application/Player/Player.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/BaseClasses/View.h"
 #include "Application/Views/SampleEditorView.h"

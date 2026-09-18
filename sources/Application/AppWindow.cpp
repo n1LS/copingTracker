@@ -271,13 +271,15 @@ void AppWindow::DrawChar(int x, int y, char c, bool transparent) {
   switch (case_) {
     case tcUpper:
       if (c >= 'a' && c <= 'z') {
-          c -= 'a' - 'A';
+        c -= 'a' - 'A';
       }
       break;
     case tcLower:
       if (c >= 'A' && c <= 'Z') {
-          c += 'a' - 'A';
+        c += 'a' - 'A';
       }
+      break;
+    default:
       break;
   }
 
@@ -552,7 +554,7 @@ void AppWindow::UpdateColorsFromConfig() {
   defineColor(Token::VarColor_D, colorPalette_[13], 13);
   defineColor(Token::VarColor_E, colorPalette_[14], 14);
   defineColor(Token::VarColor_F, colorPalette_[15], 15);
-  
+
   GetImpWindow()->SetPalette(colorPalette_, NUM_COLORS);
 }
 

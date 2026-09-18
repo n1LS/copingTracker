@@ -10,13 +10,11 @@ add_library(application_instruments
   InstrumentBank.cpp
   InstrumentNameVariable.cpp
   MidiInstrument.cpp
-  OpalInstrument.cpp
   NoneInstrument.cpp
   SRPUpdaters.cpp
   SampleInstrument.cpp
   SamplePool.cpp
   SampleVariable.cpp
-  SIDInstrument.cpp
   SoundSource.cpp
   WavFile.cpp
   WavFileWriter.cpp
@@ -26,8 +24,6 @@ add_library(application_instruments
 target_link_libraries(application_instruments PUBLIC
   foundation_services
   system_io
-  crsid
-  opal
   SampleRate::samplerate
   etl
   application_utils

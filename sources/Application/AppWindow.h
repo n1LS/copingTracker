@@ -130,7 +130,7 @@ private:
   View *currentView_;
 
   bool shouldQuit_;
-  TextCase  case_;
+  TextCase case_;
   uint16_t mask_;
 
   bool lowBatteryState_;

@@ -731,7 +731,7 @@ void View::DrawTitle(const char *format, ...) {
 
   va_list val;
   va_start(val, format);
-  static char buffer[maxLength + 1];
+  static char buffer[SCREEN_WIDTH + 1];
   npf_vsnprintf(buffer, sizeof(buffer), format, val);
   va_end(val);
 

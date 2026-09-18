@@ -11,7 +11,6 @@
 
 #include "InstrumentBank.h"
 #include "Application/Instruments/MidiInstrument.h"
-#include "Application/Instruments/SIDInstrument.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Model/Config.h"
@@ -21,8 +20,6 @@
 #include "DrumInstrument.h"
 #include "Filters.h"
 #include "MidiInstrument.h"
-#include "OpalInstrument.h"
-#include "SIDInstrument.h"
 #include "StackInstrument.h"
 #include "System/io/Status.h"
 
@@ -148,13 +145,6 @@ InstrumentAssignResult InstrumentBank::AssignInstrumentToSlot(InstrumentType typ
     case IT_MIDI:
       current = instrumentPool_.create<MidiInstrument>();
       break;
-    case IT_SID:
-      // TODO need to figure out how to properly manage sid oc count
-      current = instrumentPool_.create<SIDInstrument>(SID1);
-      break;
-    case IT_OPAL:
-      current = instrumentPool_.create<OpalInstrument>();
-      break;
     case IT_CHIPTUNE:
       current = instrumentPool_.create<ChiptuneInstrument>();
       break;
@@ -193,12 +183,6 @@ void InstrumentBank::purgeInstrument(I_Instrument *instrument) {
       break;
     case IT_MIDI:
       instrumentPool_.destroy(static_cast<MidiInstrument *>(instrument));
-      break;
-    case IT_SID:
-      instrumentPool_.destroy(static_cast<SIDInstrument *>(instrument));
-      break;
-    case IT_OPAL:
-      instrumentPool_.destroy(static_cast<OpalInstrument *>(instrument));
       break;
     case IT_CHIPTUNE:
       instrumentPool_.destroy(static_cast<ChiptuneInstrument *>(instrument));

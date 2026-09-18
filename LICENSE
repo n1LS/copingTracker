@@ -48,32 +48,22 @@ subject to its own license. Below is a summary of included external code:
    SPDX-License-Identifier: Zlib
    License file: sources/Externals/TinyXML2/LICENSE.txt
 
-3. cRSID
-   Path: sources/Externals/cRSID
-   SPDX-License-Identifier: WTFPL
-   License file: sources/Externals/cRSID/README.txt
-
-4. etl
+3. etl
    Path: sources/Externals/etl
    SPDX-License-Identifier: MIT
    License file: sources/Externals/etl/LICENSE
 
-5. opal
-   Path: sources/Externals/opal
-   SPDX-License-Identifier: Unlicense
-   License file: sources/Externals/opal/LICENSE.md
-
-6. pico-sdk
+4. pico-sdk
    Path: sources/Externals/pico-sdk
    SPDX-License-Identifier: BSD-3-Clause
    License file: sources/Externals/pico-sdk/LICENSE.TXT
 
-7. tinyusb
+5. tinyusb
    Path: sources/Externals/tinyusb
    SPDX-License-Identifier: MIT
    License file: sources/Externals/tinyusb/LICENSE
 
-8. yxml
+6. yxml
    Path: sources/Externals/yxml
    SPDX-License-Identifier: MIT
    License file: sources/Externals/yxml/COPYING

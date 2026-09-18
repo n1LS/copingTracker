@@ -12,7 +12,6 @@
 #include "InstrumentView.h"
 #include "Application/Instruments/GMBank_data.generated.h"
 #include "Application/Instruments/MidiInstrument.h"
-#include "Application/Instruments/SIDInstrument.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Instruments/StackInstrument/StackInstrument.h"
@@ -296,14 +295,8 @@ void InstrumentView::refreshInstrumentFields() {
     case IT_MIDI:
       fillMidiParameters();
       break;
-    case IT_SID:
-      fillSIDParameters();
-      break;
     case IT_SAMPLE:
       fillSampleParameters();
-      break;
-    case IT_OPAL:
-      fillOpalParameters();
       break;
     case IT_CHIPTUNE:
       fillChiptuneParameters();
@@ -347,221 +340,11 @@ void InstrumentView::refreshInstrumentFields() {
 void InstrumentView::fillNoneParameters() {
 }
 
-void InstrumentView::fillSIDParameters() {
-  int i = viewData_->currentInstrumentID_;
-  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  SIDInstrument *instrument = (SIDInstrument *)bank->GetInstrument(i);
-  GUIPoint position = GetAnchor();
-
-  // offset y to account for instrument type, name and export/import fields
-  position.y_ += 1;
-
-  staticField_.emplace_back(position, instrument->GetChipName());
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  position.y_ += 2;
-  staticField_.emplace_back(position, "Oscillator Settings" char_line_5_s);
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  position.y_ += 2;
-  Variable *v = instrument->FindVariable(Token::SIDInstrumentOSCNumber);
-  intVarField_.emplace_back(position, *v, "Oscillator    :%1.1X", 0, 0x2, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SIDInstrumentPulseWidth);
-  intVarField_.emplace_back(position, *v, sub_item "Pulsewidth:%2.2X", 0, 0xFFF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SIDInstrumentWaveform);
-
-  intVarField_.emplace_back(position, *v, sub_item "Waveform  :%s", 0, DWF_LAST - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SIDInstrumentVSync);
-  intVarField_.emplace_back(position, *v, sub_item "Osc Sync  :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::SIDInstrumentRingModulator);
-  intVarField_.emplace_back(position, *v, last_sub_item "Ring Mod  :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 2;
-  v = instrument->FindVariable(Token::SIDInstrumentADSR);
-  hexVarField_.emplace_back(UIHexVarField(position, *v, 4, "Env. A/D/S/R  :%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
-
-  position.y_ += 2;
-  staticField_.emplace_back(position, "Chip Settings" char_line_11_s);
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  position.y_ += 2;
-  v = instrument->FindVariable(Token::SIDInstrumentFilterOn);
-  intVarField_.emplace_back(position, *v, "Filter        :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  switch (instrument->GetChip()) {
-    case SID1:
-      v = instrument->FindVariable(Token::SIDInstrument1FilterCut);
-      break;
-    case SID2:
-      v = instrument->FindVariable(Token::SIDInstrument2FilterCut);
-      break;
-  }
-  intVarField_.emplace_back(position, *v, sub_item "Cutoff    :%1.1X", 0, 0x7FF, 1, 0x10);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  switch (instrument->GetChip()) {
-    case SID1:
-      v = instrument->FindVariable(Token::SIDInstrument1FilterResonance);
-      break;
-    case SID2:
-      v = instrument->FindVariable(Token::SIDInstrument2FilterResonance);
-      break;
-  }
-  intVarField_.emplace_back(position, *v, sub_item "Resonance :%1.1X", 0, 0xF, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  switch (instrument->GetChip()) {
-    case SID1:
-      v = instrument->FindVariable(Token::SIDInstrument1FilterMode);
-      break;
-    case SID2:
-      v = instrument->FindVariable(Token::SIDInstrument2FilterMode);
-      break;
-  }
-  intVarField_.emplace_back(position, *v, last_sub_item "Mode      :%s", 0, DFM_LAST - 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 2;
-  switch (instrument->GetChip()) {
-    case SID1:
-      v = instrument->FindVariable(Token::SIDInstrument1Volume);
-      break;
-    case SID2:
-      v = instrument->FindVariable(Token::SIDInstrument2Volume);
-      break;
-  }
-  intVarField_.emplace_back(position, *v, "Volume        :%1.1X", 0, 0xF, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-}
-
 #include "InstrumentView_Chiptune.ipp"
 #include "InstrumentView_Drum.ipp"
 #include "InstrumentView_MIDI.ipp"
 #include "InstrumentView_Sample.ipp"
 #include "InstrumentView_Stack.ipp"
-
-void InstrumentView::fillOpalParameters() {
-  int i = viewData_->currentInstrumentID_;
-  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  I_Instrument *instr = bank->GetInstrument(i);
-  OpalInstrument *instrument = (OpalInstrument *)instr;
-  GUIPoint position = GetAnchor();
-
-  // extra y spacing to allow for gap between export/import and parameters
-  position.y_ += 2;
-  staticField_.emplace_back(position, "General Settings" char_line_8_s);
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  position.y_ += 2;
-  Variable *v = instrument->FindVariable(Token::OPALInstrumentAlgorithm);
-  intVarField_.emplace_back(position, *v, "Algorithm     :%s", 0, 1, 1, 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::OPALInstrumentDeepTremeloVibrato);
-  bitmaskVarField_.emplace_back(UIBitmaskVarField(position, *v, "Deep Trem/Vib :%02b", 2));
-  fieldList_.insert(fieldList_.end(), &bitmaskVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::OPALInstrumentFeedback);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Feedback      :%1.1X", 0, 0x07, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 2;
-  staticField_.emplace_back(position, "Operator Settings" char_line_7_s);
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  // operator settings
-  position.y_ += 2;
-  staticField_.emplace_back(position, "               Op 1" char_border_single_vertical_s "Op 2");
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  position.y_ += 1;
-  staticField_.emplace_back(position, "               " char_line_4_s char_border_single_cross_s char_line_4_s);
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-
-  // vertical table separator
-  GUIPoint p = position + GUIPoint(19, 1);
-  for (int n = 0; n < 6; n++) {
-    staticField_.emplace_back(p, char_border_single_vertical_s);
-    fieldList_.insert(fieldList_.end(), &staticField_.back());
-    p.y_ += 1;
-  }
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::OPALInstrumentOp1Level);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Level         :%2.2X", 0, 63, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  v = instrument->FindVariable(Token::OPALInstrumentOp2Level);
-  intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%2.2X", 0, 63, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::OPALInstrumentOp1Multiplier);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Multiplier    :%1.1X", 0, 15, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  v = instrument->FindVariable(Token::OPALInstrumentOp2Multiplier);
-  intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%1.1X", 0, 15, 1, 1, 0));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::OPALInstrumentOp1ADSR);
-  hexVarField_.emplace_back(UIHexVarField(position, *v, 4, "A/D/S/R       :%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
-
-  v = instrument->FindVariable(Token::OPALInstrumentOp2ADSR);
-  hexVarField_.emplace_back(UIHexVarField(position + GUIPoint(20, 0), *v, 4, "%4.4X", 0, 0xFFFF, 16, true));
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::OPALInstrumentOp1WaveShape);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Shape         :%s", 0, 7, 1, 1));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  v = instrument->FindVariable(Token::OPALInstrumentOp2WaveShape);
-  intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 7, 1, 1));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::OPALInstrumentOp1TremVibSusKSR);
-  bitmaskVarField_.emplace_back(UIBitmaskVarField(position, *v, "TR/VB/SU/KSR  :%04b", 4));
-  fieldList_.insert(fieldList_.end(), &bitmaskVarField_.back());
-
-  v = instrument->FindVariable(Token::OPALInstrumentOp2TremVibSusKSR);
-  bitmaskVarField_.emplace_back(UIBitmaskVarField(position + GUIPoint(20, 0), *v, "%04b", 4));
-  fieldList_.insert(fieldList_.end(), &bitmaskVarField_.back());
-
-  position.y_ += 1;
-  v = instrument->FindVariable(Token::OPALInstrumentOp1KeyScaleLevel);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "Keyscale      :%s", 0, 3, 1, 1));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  v = instrument->FindVariable(Token::OPALInstrumentOp2KeyScaleLevel);
-  intVarField_.emplace_back(UIIntVarField(position + GUIPoint(20, 0), *v, "%s", 0, 3, 1, 1));
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-
-  Trace::Error("OPAL fill done, total fields: %d", fieldList_.size());
-}
 
 void InstrumentView::warpToNext(int offset) {
   int instrument = viewData_->currentInstrumentID_ + offset;
