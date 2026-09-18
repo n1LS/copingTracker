@@ -39,28 +39,19 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   auto config = Config::GetInstance();
 
   // Add import/export buttons at the top
-  GUIPoint actionPos = position;
 
-  actionPos.y_ -= 1;
+  position.y_ -= 1;
 
-  actionField_.emplace_back("Import", Token::ActionImport, actionPos);
+  actionField_.emplace_back("Import", Token::ActionImport, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
-  actionPos.x_ += 8;
-  actionField_.emplace_back("Export", Token::ActionExport, actionPos);
+  position.x_ += 8;
+  actionField_.emplace_back("Export", Token::ActionExport, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
-  actionPos.y_ += 2;
-
-  // Font selection
-  position.y_ = FONT_FIELD_LINE;
-  Variable *fontVar = config->FindVariable(Token::VarUIFont);
-  intVarField_.emplace_back(position, *fontVar, "Font :%s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
-                            ThemeConstants::THEME_FONT_COUNT - 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-  intVarField_.back().AddObserver(*this);
-  position.y_ += 1;
+  position.x_ -= 8;
+  position.y_ += 2;
 
   // Get the current theme name from Config
   Variable *configThemeVar = config->FindVariable(Token::VarThemeName);
@@ -72,7 +63,7 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   }
 
   // Create the label and default value as variables to avoid temporary objects
-  auto label = etl::string<MAX_UITEXTFIELD_LABEL_LENGTH>("Theme ");
+  auto label = etl::string<MAX_UITEXTFIELD_LABEL_LENGTH>("Theme     ");
   auto defaultValue = etl::string<MAX_THEME_NAME_LENGTH>(currentThemeName);
 
   themeNameVar_.SetString(currentThemeName.c_str(), false);
@@ -88,9 +79,25 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
 
   // Initialize the export theme name
   exportThemeName_ = currentThemeName;
+  position.y_++;
+
+  // Font selection
+  Variable *fontVar = config->FindVariable(Token::VarUIFont);
+  intVarField_.emplace_back(position, *fontVar, "Font     :%s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
+                            ThemeConstants::THEME_FONT_COUNT - 1);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
+  position.y_ += 1;
+
+  // TEXT case Selection
+  Variable *caseVar = config->FindVariable(Token::VarTextCase);
+  intVarField_.emplace_back(position, *caseVar, "Text Case:%s", 0, TextCase::Count - 1, 1, TextCase::Count - 1);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
+  position.y_ += 1;
 
   // Colors 0..15
-  position.y_ += 3;
+  position.y_ += 1;
   addColorField("Black", config->FindVariable(Token::VarColor_0), BLACK, position);
   position.y_ += 1;
   addColorField("Maroon", config->FindVariable(Token::VarColor_1), RED, position);
@@ -359,6 +366,7 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
       }
     // if font changes call redraw all fields
     case Token::VarUIFont:
+    case Token::VarTextCase:
       {
         // need to force redraw of entire screen to update for font change
         DrawView();

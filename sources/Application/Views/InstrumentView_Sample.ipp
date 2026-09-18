@@ -229,6 +229,7 @@ void InstrumentView::fillSampleParameters() {
 void InstrumentView::DrawViewSample() {
   // slice count
 
+  SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::SemanticColors::sample(true));
   DrawString(1, 8, "Slices");
 

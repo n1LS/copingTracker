@@ -6,6 +6,6 @@
  * This file is part of the copingTracker firmware
  */
 
- #include "MemoryPool.h"
+#include "MemoryPool.h"
 
- etl::vector<int, MAX_FILE_INDEX_SIZE> MemoryPool::fileIndexes_;
+etl::vector<int, MAX_FILE_INDEX_SIZE> MemoryPool::fileIndexes_;

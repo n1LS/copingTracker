@@ -10,6 +10,7 @@
  */
 
 #include "SongView.h"
+#include "Application/AppWindow.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/BaseClasses/View.h"
@@ -969,15 +970,13 @@ void SongView::AnimationUpdate() {
     drawNotes();
 
     // Only handle play time updates if needed
-    GUIPoint timePos = {27, 1};
-    SetColor(Theme::View::fg);
-    SetBackgroundColor(Theme::View::bg);
+    GUIPoint timePos = {SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 6, 0};
+    SetColor(Theme::View::Title::fg);
+    SetBackgroundColor(Theme::View::Title::bg);
 
     if (needsPlayTimeUpdate_ && Player::GetInstance()->IsRunning()) {
       drawPlayTime(player, timePos);
       needsPlayTimeUpdate_ = false;
-    } else {
-      DrawString(timePos.x_, timePos.y_, "     ");
     }
 
     // Handle position updates

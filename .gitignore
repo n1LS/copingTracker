@@ -38,3 +38,4 @@ build-debug
 build-host
 build-xcode
 .env
+tools/ram_usage/__pycache__

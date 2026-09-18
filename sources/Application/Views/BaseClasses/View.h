@@ -287,7 +287,7 @@ public:
   virtual void ClearTextRect(int x, int y, int w, int h);
   virtual void DrawString(int x, int y, const char *text);
   virtual void DrawTintString(int x, int y, const TintChar *data);
-  virtual void DrawChar(int x, int y, const char character, bool transparent = false);
+  virtual void DrawChar(int x, int y, char character, bool transparent = false);
   virtual void DrawRect(const GUIRect r, Color color);
 
   virtual void ConfirmedStop(Token sender);

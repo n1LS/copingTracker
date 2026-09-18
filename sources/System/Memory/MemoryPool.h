@@ -13,13 +13,13 @@
 #include "System/FileSystem/FileSystem.h"
 
 class MemoryPool {
- public:
-    static etl::vector<int, MAX_FILE_INDEX_SIZE> &Get() {
-        return fileIndexes_;
-    }
+public:
+  static etl::vector<int, MAX_FILE_INDEX_SIZE> &Get() {
+    return fileIndexes_;
+  }
 
- private:
-    static etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes_;
+private:
+  static etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes_;
 };
 
 #endif

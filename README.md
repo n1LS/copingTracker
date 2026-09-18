@@ -17,8 +17,6 @@ _copingTracker_ is essentially _picoTracker_ having an existential crisis - jumb
     * internal 135 instrument GM Bank
     * Chiptune Drum
     * Chiptune Lead
-    * SID instruments
-    * OPAL instruments
 * 8 or 16bit samples up to 44.1kHz, mono or stereo
 * 16bit/44.1kHz/Stereo audio output
 
@@ -33,12 +31,8 @@ The picoTracker is powered by an RP2040 microcontroller and supports the followi
 
 ## Limitations
 
-* The pico will probably struggle with 8 song channels playing at the same time in most cases (chiptune instruments are fine, sample, SID and OPAL are not)
+* The pico will probably struggle with 8 song channels playing at the same time in most cases (chiptune instruments are fine, sample might not be)
 * Samples are copied to flash upon load and played from there. Since flash has to be shared with program code, only 8MB is available for it when using the typical 16M flash
-
-## Experimental Features
-
-The CSID and OPAL synth instruments are expermental and may change in significantly in functionality or even be removed in future releases.
 
 ## MANUAL
 

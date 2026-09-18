@@ -55,7 +55,7 @@ void GUIWindow::DrawRect(const GUIRect r) {
   _imp->DrawRect(r);
 }
 
-void GUIWindow::DrawChar(int x, int y, const char c, bool transparent) {
+void GUIWindow::DrawChar(int x, int y, char c, bool transparent) {
   _imp->DrawChar(x, y, c, transparent);
 }
 

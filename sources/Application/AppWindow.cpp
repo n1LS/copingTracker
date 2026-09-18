@@ -134,6 +134,10 @@ struct AppWindowViews {
     sampleEditorView.AddObserver(window);
     sampleSlicesView.AddObserver(window);
     bootView.AddObserver(window);
+
+    auto config = Config::GetInstance();
+    auto caseVar = (WatchedVariable *)config->FindVariable(Token::VarTextCase);
+    caseVar->AddObserver(window);
   };
 
   AppWindowViews(GUIWindow &w, ViewData &viewData)
@@ -192,6 +196,10 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
   MidiService::GetInstance()->Init();
 
   UpdateColorsFromConfig();
+
+  // load text CASE Setting
+  auto caseVar = Config::GetInstance()->FindVariable(Token::VarTextCase);
+  case_ = static_cast<TextCase>(caseVar->GetInt());
 
   GUIWindow::Clear();
 
@@ -254,9 +262,25 @@ void AppWindow::DrawString(int x, int y, const char *string) {
   }
 }
 
-void AppWindow::DrawChar(int x, int y, const char c, bool transparent) {
+void AppWindow::DrawChar(int x, int y, char c, bool transparent) {
   if (y < 0 || y >= SCREEN_HEIGHT || x < 0 || x >= SCREEN_WIDTH) {
     return;
+  }
+
+  // repact user settable case
+  switch (case_) {
+    case tcUpper:
+      if (c >= 'a' && c <= 'z') {
+        c -= 'a' - 'A';
+      }
+      break;
+    case tcLower:
+      if (c >= 'A' && c <= 'Z') {
+        c += 'a' - 'A';
+      }
+      break;
+    default:
+      break;
   }
 
   int index = x + SCREEN_WIDTH * y;
@@ -720,6 +744,12 @@ void AppWindow::SetTransition(ViewTransition type) {
 void AppWindow::Update(Observable &o, I_ObservableData *d) {
   if (d == nullptr)
     return;
+
+  switch (uintptr_t(d)) {
+    case (uintptr_t)Token::VarTextCase:
+      case_ = (TextCase)Config::GetInstance()->FindVariable(Token::VarTextCase)->GetInt();
+      return;
+  }
 
   if ((uintptr_t)d == (uintptr_t)Token::VarProjectName) {
     // Update the stored project name from the project

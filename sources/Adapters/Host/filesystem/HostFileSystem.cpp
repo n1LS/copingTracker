@@ -175,6 +175,10 @@ void HostFileSystem::list(etl::ivector<int> *fileIndexes, const char *filter, ui
     for (const auto &entry : fs::directory_iterator(currentDir_)) {
       bool isDir = fs::is_directory(entry);
       bool isFile = fs::is_regular_file(entry);
+      bool isHidden = entry.path().filename().string().starts_with('.');
+
+      if (isHidden && !(options & loHidden))
+        continue;
       if (isDir && !(options & loFolders))
         continue;
       if (isFile && !(options & loFiles))

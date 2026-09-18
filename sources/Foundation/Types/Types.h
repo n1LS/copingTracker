@@ -15,6 +15,8 @@
 #include "Externals/etl/include/etl/enum_type.h"
 #include <stdint.h>
 
+enum TextCase { tcRegular, tcUpper, tcLower, Count };
+
 struct Token {
   // While the names of the Token codes can be changed, their values CANNOT.
   // Values are used as is in save files, so any changes would cause save files
@@ -84,46 +86,6 @@ struct Token {
     MidiInstrumentName = 144,
     MidiInstrumentProgram = 160,
 
-    SIDInstrumentWaveform = 72,
-    SIDInstrument1FilterCut = 79,
-    SIDInstrument2FilterCut = 83,
-    SIDInstrument3FilterCut = 87,
-    SIDInstrument1FilterResonance = 80,
-    SIDInstrument2FilterResonance = 84,
-    SIDInstrument3FilterResonance = 88,
-    SIDInstrument1FilterMode = 81,
-    SIDInstrument2FilterMode = 85,
-    SIDInstrument3FilterMode = 89,
-    SIDInstrument1Volume = 82,
-    SIDInstrument2Volume = 86,
-    SIDInstrument3Volume = 90,
-    SIDInstrumentPulseWidth = 71,
-    SIDInstrumentVSync = 75,
-    SIDInstrumentRingModulator = 76,
-    SIDInstrumentADSR = 77,
-    SIDInstrumentFilterOn = 78,
-    SIDInstrumentVoice3Off = 91,
-    SIDInstrumentOSCNumber = 142,
-
-    OPALInstrumentChannel = 123,
-    OPALInstrumentAlgorithm = 124,
-    OPALInstrumentFeedback = 125,
-    OPALInstrumentDeepTremeloVibrato = 126,
-
-    OPALInstrumentOp1Level = 127,
-    OPALInstrumentOp1Multiplier = 128,
-    OPALInstrumentOp1KeyScaleLevel = 129,
-    OPALInstrumentOp1ADSR = 130,
-    OPALInstrumentOp1WaveShape = 131,
-    OPALInstrumentOp1TremVibSusKSR = 132,
-
-    OPALInstrumentOp2Level = 133,
-    OPALInstrumentOp2Multiplier = 134,
-    OPALInstrumentOp2KeyScaleLevel = 135,
-    OPALInstrumentOp2ADSR = 136,
-    OPALInstrumentOp2WaveShape = 137,
-    OPALInstrumentOp2TremVibSusKSR = 138,
-
     ServicePersistency = 57,
 
     TrigTempoTap = 65,
@@ -172,6 +134,7 @@ struct Token {
     VarMidiClockSync = 151,
     VarMirrorUI = 140,
     VarUIFont = 141,
+    VarTextCase = 118,
 
     VarChannel1Volume = 163,
     VarChannel2Volume = 164,
@@ -265,7 +228,7 @@ struct Token {
 
     VarPhraseLength = 254,
 
-    // 118-119 free  2
+    // 119 free      1
     // 121-122 free  2
     // 193-194 free  2
     // 199 free      1
@@ -273,7 +236,7 @@ struct Token {
     // 209 free      1
     // 230-253 free 24
     // ----------------
-    //               34
+    //               33
 
     Default = 255, // "    "
   };
@@ -341,6 +304,7 @@ struct Token {
   ETL_ENUM_TYPE_16(VarMidiClockSync, "midi-clock-sync")
   ETL_ENUM_TYPE_16(VarMirrorUI, "mirror-ui")
   ETL_ENUM_TYPE_16(VarUIFont, "ui-font")
+  ETL_ENUM_TYPE_16(VarTextCase, "text-case")
   ETL_ENUM_TYPE_16(VarThemeName, "theme-name")
   ETL_ENUM_TYPE_16(VarScaleRoot, "scale-root")
   ETL_ENUM_TYPE_16(VarPhraseLength, "phrase-length")
@@ -372,21 +336,6 @@ struct Token {
   ETL_ENUM_TYPE_16(MidiInstrumentName, "MidiName")
   ETL_ENUM_TYPE_16(MidiInstrumentNoteLength, "NoteLength")
   ETL_ENUM_TYPE_16(MidiInstrumentProgram, "Program")
-  ETL_ENUM_TYPE_16(SIDInstrumentWaveform, "OscWaveform")
-  ETL_ENUM_TYPE_16(SIDInstrument1FilterCut, "FilterCutoff1")
-  ETL_ENUM_TYPE_16(SIDInstrument1FilterResonance, "FilterResonance1")
-  ETL_ENUM_TYPE_16(SIDInstrument1FilterMode, "FilterMode1")
-  ETL_ENUM_TYPE_16(SIDInstrument1Volume, "Volume1")
-  ETL_ENUM_TYPE_16(SIDInstrument2FilterCut, "FilterCutoff2")
-  ETL_ENUM_TYPE_16(SIDInstrument2FilterResonance, "FilterResonance2")
-  ETL_ENUM_TYPE_16(SIDInstrument2FilterMode, "FilterMode2")
-  ETL_ENUM_TYPE_16(SIDInstrument2Volume, "Volume2")
-  ETL_ENUM_TYPE_16(SIDInstrumentPulseWidth, "OscPulseWidth")
-  ETL_ENUM_TYPE_16(SIDInstrumentVSync, "OscSync")
-  ETL_ENUM_TYPE_16(SIDInstrumentRingModulator, "OscRingMod")
-  ETL_ENUM_TYPE_16(SIDInstrumentADSR, "OscADSR")
-  ETL_ENUM_TYPE_16(SIDInstrumentFilterOn, "VoiceFilterOn")
-  ETL_ENUM_TYPE_16(SIDInstrumentOSCNumber, "OscNum")
 
   ETL_ENUM_TYPE_16(StackInstrumentSpread, "Spread")
   ETL_ENUM_TYPE_16(StackInstrumentWave, "Wave")
@@ -398,26 +347,6 @@ struct Token {
   ETL_ENUM_TYPE_16(StackInstrumentBrightness, "Brightness")
   ETL_ENUM_TYPE_16(StackInstrumentGlide, "Glide")
   ETL_ENUM_TYPE_16(StackInstrumentChord, "Chord")
-
-  // channel variable not currently used by OPAL instruments but maybe in future
-  ETL_ENUM_TYPE_16(OPALInstrumentChannel, "Channel")
-  ETL_ENUM_TYPE_16(OPALInstrumentAlgorithm, "Algorithm")
-  ETL_ENUM_TYPE_16(OPALInstrumentFeedback, "Feedback")
-  ETL_ENUM_TYPE_16(OPALInstrumentDeepTremeloVibrato, "DeepTremVibrato")
-
-  ETL_ENUM_TYPE_16(OPALInstrumentOp1Level, "Op1Level")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp1Multiplier, "Op1Multiplier")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp1KeyScaleLevel, "Op1KeyscaleLevel")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp1ADSR, "Op1ADSR")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp1WaveShape, "Op1Waveshape")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp1TremVibSusKSR, "Op1TremVibSusKSR")
-
-  ETL_ENUM_TYPE_16(OPALInstrumentOp2Level, "Op2Level")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp2Multiplier, "Op2Multiplier")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp2KeyScaleLevel, "Op2KeyScaleLevel")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp2ADSR, "Op2ADSR")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp2WaveShape, "Op2Waveshape")
-  ETL_ENUM_TYPE_16(OPALInstrumentOp2TremVibSusKSR, "Op2TremVibSusKSR")
 
   ETL_ENUM_TYPE_16(VarColor_0, "color0")
   ETL_ENUM_TYPE_16(VarColor_1, "color1")

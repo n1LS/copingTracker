@@ -40,7 +40,7 @@ public:
   bool ImportTheme(const char *themeName);
 
 private:
-  etl::list<Variable *, 29> variables_;
+  etl::list<Variable *, 30> variables_;
   // Config variables (kept as members to avoid heap allocation)
   WatchedVariable color0_;
   WatchedVariable color1_;
@@ -66,6 +66,7 @@ private:
   WatchedVariable importResampler_;
   WatchedVariable commandInputMode_;
   WatchedVariable uiFont_;
+  WatchedVariable textCase_;
   StringVariable<MAX_VARIABLE_STRING_LENGTH> themeName_;
   WatchedVariable backlightLevel_;
   WatchedVariable outputVolume_;
