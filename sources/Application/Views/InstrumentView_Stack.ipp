@@ -75,7 +75,7 @@ void InstrumentView::fillStackParameters() {
 
   // Attack
   position.y_++;
-  addTitleLabel("Effects", position.y_);
+  addTitleLabel("Volume", position.y_);
 
   position.y_++;
   v = instrument->FindVariable(Token::StackInstrumentAttack);
