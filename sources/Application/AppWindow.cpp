@@ -441,7 +441,13 @@ void AppWindow::onLoadProgress(uint32_t index, uint32_t total, const char *messa
 
 void AppWindow::onLoadPhaseCComplete(bool success, const char *projectName) {
   // Phase C: view-level completion work after sample loading
+  // do not trigger that if loading the default project failed otherwise we end up in a loop
   if (!success) {
+    if (strcmp(projectName, UNNAMED_PROJECT_NAME) == 0) {
+      // TODO nILS: Loading the default project failed. We need to create a new one and stop.
+      return;
+    }
+
     Trace::Error("Failed to load project '%s'. Waiting for key press to load untitled", projectName);
     npf_snprintf(projectName_, sizeof(projectName_), "%s", projectName);
     awaitingProjectLoadAck_ = true;
@@ -505,6 +511,11 @@ void AppWindow::onLoadPhaseCComplete(bool success, const char *projectName) {
     currentView_->SetDirty(true);
     SetDirty();
   }
+
+  // The load is complete; clear the "About to load project" status that was
+  // printed during Phase A (Project::Load()). This prevents the stale message
+  // from persisting in the frame buffer and randomly reappearing on screen.
+  Status::Set("");
 }
 
 LoadProjectResult AppWindow::LoadProject(const char *projectName) {
@@ -910,34 +921,37 @@ void AppWindow::Print(char *line) {
     current_y = 14;
   }
 
-  // Use strtok to split the string by newline characters
-  char *token = strtok(line, "\n");
+  // Use strtok to split the string by newline characters.
+  // strtok(line, "\n") returns NULL for an empty line; treat that as a single
+  // blank line so that Status::Set("") actually blanks the status area and
+  // clears any previously printed status (e.g. a stale "About to load project"
+  // left over from Project::Load()).
+  char *token = (line && line[0]) ? strtok(line, "\n") : nullptr;
 
   char emptyLine[SCREEN_WIDTH + 1];
   memset(emptyLine, ' ', sizeof(emptyLine) - 1);
   emptyLine[SCREEN_WIDTH] = 0;
 
-  char outLine[33];
-  memset(outLine, ' ', sizeof(outLine) - 1);
-  outLine[32] = 0;
-
-  while (token != NULL) {
-    // Stop if we are about to overwrite the build string line
-    if (current_y > 22) {
-      break;
-    }
-
+  // Always blank the intended number of status lines and draw the token text on
+  // top when present. Running the loop for lineCount rows even when line is
+  // empty guarantees a blank Status::Set() clears any stale status text.
+  for (int row = 0; row < lineCount && current_y <= 22; row++, current_y++) {
     // Horizontally center the current line of text
     int position = 32; // Assumes a screen width of 32 characters
-    position -= strlen(token);
-    position /= 2;
+    if (token) {
+      position -= strlen(token);
+      position /= 2;
+    }
 
     DrawString(0, current_y, emptyLine);
-    DrawString(position, current_y, token);
+    if (token) {
+      DrawString(position, current_y, token);
+    }
 
     // Get the next line
-    token = strtok(NULL, "\n");
-    current_y++;
+    if (token) {
+      token = strtok(NULL, "\n");
+    }
   }
 }
 

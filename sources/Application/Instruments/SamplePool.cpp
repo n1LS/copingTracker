@@ -76,7 +76,7 @@ void SamplePool::Load(const char *projectName) {
   }
   // First, find all wav files
   updateStatus(0, 0, "Scanning samples");
-  etl::vector<int, MAX_FILE_INDEX_SIZE> &fileIndexes = MemoryPool::Get();
+  etl::ivector<int> &fileIndexes = MemoryPool::Get();
   fs->list(&fileIndexes, ".wav");
   char name[PFILENAME_SIZE];
   uint32_t totalSamples = (uint32_t)fileIndexes.size();
@@ -147,13 +147,6 @@ uint32_t SamplePool::FindSampleIndexByName(const etl::string<MAX_INSTRUMENT_FILE
   return -1;
 }
 
-#define IMPORT_CHUNK_SIZE 512
-static constexpr int32_t kImportInputSamples = IMPORT_CHUNK_SIZE / static_cast<int32_t>(sizeof(int16_t));
-static constexpr int32_t kImportMaxOutputSamples = (kImportInputSamples * SRC_MAX_RATIO) + 8;
-static float importResampleIn_[kImportInputSamples];
-static float importResampleOut_[kImportMaxOutputSamples];
-static int16_t importResampleOutInt16_[kImportMaxOutputSamples];
-
 int SamplePool::ImportSample(const char *name, const char *projectName) {
   if (count_ == MAX_SAMPLES) {
     return -1;
@@ -204,13 +197,25 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
     return -1;
   }
 
-  // copy file to current project as 16-bit PCM
-  uint8_t buffer[IMPORT_CHUNK_SIZE];
+  // copy file to current project as 16-bit PCM.
+  // Scratch storage is pooled in MemoryPool since it is only needed for the
+  // lifetime of a single (one-at-a-time) sample import operation, and is
+  // overlaid with the resample buffers below since only one of the two is
+  // ever used per import.
+  uint8_t *buffer = MemoryPool::GetImportRawCopyBuffer();
   uint32_t bytesRead = 0;
   uint32_t samplesRead = 0;
   uint32_t totalRead = 0;
   uint32_t totalWrittenFrames = 0;
   uint32_t totalSize = wav.GetDiskSize(-1);
+
+  // Scratch storage is pooled in MemoryPool since it is only needed for the
+  // lifetime of a single (one-at-a-time) sample import operation.
+  float *importResampleIn_ = MemoryPool::GetImportResampleIn();
+  float *importResampleOut_ = MemoryPool::GetImportResampleOut();
+  int16_t *importResampleOutInt16_ = MemoryPool::GetImportResampleOutInt16();
+  static constexpr int32_t kImportInputSamples = MemoryPool::kImportInputSamples;
+  static constexpr int32_t kImportMaxOutputSamples = MemoryPool::kImportMaxOutputSamples;
 
   importName = name;
 
@@ -237,7 +242,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
 
   while (true) {
     if (!shouldResample) {
-      if (!wav.Read(buffer, sizeof(buffer), &bytesRead)) {
+      if (!wav.Read(buffer, MemoryPool::kImportChunkSize, &bytesRead)) {
         Trace::Error("Failed reading sample data from:%s", name);
         return -1;
       }

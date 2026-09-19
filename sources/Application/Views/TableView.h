@@ -75,12 +75,12 @@ private:
   UIHexVarField cmdEditField_;
 
   struct clipboard {
-    bool active_;
     int col_;
     int row_;
     int width_;
     int height_;
     TableStep steps_[16];
+    bool active_;
   } clipboard_;
 
   int saveCol_;

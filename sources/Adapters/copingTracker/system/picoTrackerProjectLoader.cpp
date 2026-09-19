@@ -17,12 +17,12 @@
 
 namespace {
 struct LoadState {
-  char projectName[MAX_PROJECT_NAME_LENGTH + 1] = {0};
-  volatile bool inProgress = false;
-  volatile bool complete = false;
   uint32_t progressIndex = 0;
   uint32_t progressTotal = 0;
   char progressMessage[64] = {0};
+  char projectName[MAX_PROJECT_NAME_LENGTH + 1] = {0};
+  volatile bool inProgress = false;
+  volatile bool complete = false;
 };
 
 LoadState g_state;

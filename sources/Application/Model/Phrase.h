@@ -15,17 +15,17 @@
 #include "Foundation/Types/Types.h"
 
 #define PHRASE_COUNT 0x80
-#define NO_MORE_PHRASE 0x81
+#define NO_MORE_PHRASE (PHRASE_COUNT + 1)
 #define STEPS_PER_PHRASE 16
 
 struct PhraseStep {
+  uint16_t param1;
+  uint16_t param2;
   uint8_t note;
+  uint8_t volume;
   uint8_t instrument;
   uint8_t cmd1;
   uint8_t cmd2;
-  uint16_t param1;
-  uint16_t param2;
-  uint8_t volume;
 };
 
 class Phrase {

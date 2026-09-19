@@ -18,7 +18,6 @@
 #include "SRPUpdaters.h"
 
 struct renderParams {
-
   void *sampleBuffer_; // wavdata
   int channelCount_;
 
@@ -33,14 +32,9 @@ struct renderParams {
   fixed speed_;      // speed at which we currently travel the stream
   fixed baseVolume_; // Base volume the instrument was triggered with
   fixed volume_;     // Current volume
-  bool reverse_;     // true if we we go backwards in stream
-
-  bool retrig_;      // true if we're retriggering
   int retrigLoop_;   // number of ticks before retrig
   int retrigCount_;  // current tick countdown before retrig
   int retrigOffset_; // offset in ticks after retrig
-
-  bool finished_; // the instrument has cut off
 
   fixed baseFCut_;
   fixed baseFRes_;
@@ -54,13 +48,19 @@ struct renderParams {
   fixed fbTun_;
   fixed fbMix_;
 
+  fixed basePan_; // panning
+  fixed pan_;
+
+  bool reverse_;  // true if we we go backwards in stream
+  bool retrig_;   // true if we're retriggering
+  bool finished_; // the instrument has cut off
+
   unsigned char crush_; // crush
   unsigned char drive_; // crush drive
 
   unsigned char downsample_; // downsampling
-
-  fixed basePan_; // panning
-  fixed pan_;
+  bool couldClick_;
+  char midiNote_; // Current midi note
 
   // Size of this struct same as max number of updaters
   etl::vector<I_SRPUpdater *, 10> activeUpdaters_;
@@ -77,9 +77,6 @@ struct renderParams {
 
   adsr_envelope_t envelope_;
 
-  bool couldClick_;
-
-  char midiNote_; // Current midi note
   bool sliceActive_;
   uint8_t activeSliceIndex_;
   int loopModeValue_;

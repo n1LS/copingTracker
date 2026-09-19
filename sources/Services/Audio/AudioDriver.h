@@ -20,11 +20,11 @@
 #define MAX_SAMPLE_COUNT 1875
 
 struct AudioBufferData {
-  char buffer_[MAX_SAMPLE_COUNT * 2 * sizeof(uint16_t)];
   int size_;
-  bool empty_;
   void *driverData_;
+  char buffer_[MAX_SAMPLE_COUNT * 2 * sizeof(uint16_t)];
   size_t readOffset_;
+  bool empty_;
 };
 
 class AudioDriver : public Observable {

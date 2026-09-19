@@ -83,8 +83,8 @@ public:
   // Structure to hold note-off information
   struct NoteOffInfo {
     int channel;
-    uint8_t note;
     static NoteOffInfo current;
+    uint8_t note;
   };
 
 private:

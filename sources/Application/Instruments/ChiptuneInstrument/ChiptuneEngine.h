@@ -119,8 +119,8 @@ typedef struct voice_t {
   } volume;
 
   struct vibrato {
-    uint16_t phase;              // sine lfo phase
     int32_t swing;               // frequency diff between current note and next semitone
+    uint16_t phase;              // sine lfo phase
     uint16_t frequency = 0x0FFF; // vibrato frequency
     uint16_t delay;              // ticks before auto-vibrato starts
     uint8_t depth;               // vibrato depth to apply

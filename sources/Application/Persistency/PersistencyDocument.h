@@ -15,6 +15,7 @@
 #include "Externals/yxml/yxml.h"
 #include "System/FileSystem/FileHandle.h"
 #include "System/FileSystem/FileSystem.h"
+#include "System/Memory/MemoryPool.h"
 
 class PersistencyDocument {
 public:
@@ -28,21 +29,36 @@ public:
     return r_ < YXML_OK;
   }
 
+  char *attrname() {
+    return MemoryPool::persistencyAttrName();
+  }
+  char *attrval() {
+    return MemoryPool::persistencyAttrVal();
+  }
+  char *content() {
+    return MemoryPool::persistencyAttrContent();
+  }
+  int contentsize() {
+    return MemoryPool::persistencyAttrContentSize;
+  }
+  int attrsize() {
+    return MemoryPool::persistencyAttrSize;
+  }
+  int attrnamesize() {
+    return MemoryPool::persistencyAttrNameSize;
+  }
+
   bool FirstChild();
   bool NextSibling();
   bool NextAttribute();
   bool HasContent();
   char *ElemName();
 
-  char attrname_[64];
-  char attrval_[64];
-  char content_[129]; // 128 + \0
   yxml_ret_t r_;
 
   int version_;
 
 private:
-  inline static char stack_[1024];
   inline static yxml_t state_[1];
   FileHandle fp_;
 };

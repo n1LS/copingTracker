@@ -19,9 +19,9 @@
 #include <stdlib.h>
 
 struct BatteryState {
-  uint8_t percentage;
   uint16_t voltage_mv;   // millivolts
   int16_t temperature_c; // celsius
+  uint8_t percentage;
   bool charging;
   bool error; // error: no available state for battery
 };

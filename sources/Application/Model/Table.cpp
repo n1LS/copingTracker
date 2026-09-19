@@ -26,7 +26,6 @@ void Table::Reset() {
     steps_[i].cmd1 = Token(Token::InstrumentCommandNone).raw8();
     steps_[i].cmd2 = Token(Token::InstrumentCommandNone).raw8();
     steps_[i].cmd3 = Token(Token::InstrumentCommandNone).raw8();
-    steps_[i]._pad = 0;
     steps_[i].param1 = 0;
     steps_[i].param2 = 0;
     steps_[i].param3 = 0;
@@ -111,9 +110,9 @@ void TableHolder::RestoreContent(PersistencyDocument *doc) {
       unsigned char id = '\0';
       bool attr = doc->NextAttribute();
       while (attr) {
-        if (!strcmp(doc->attrname_, XML_ATTR_ID)) {
-          unsigned char b1 = (hexNibble(doc->attrval_[0])) << 4;
-          unsigned char b2 = hexNibble(doc->attrval_[1]);
+        if (!strcmp(doc->attrname(), XML_ATTR_ID)) {
+          unsigned char b1 = (hexNibble(doc->attrval()[0])) << 4;
+          unsigned char b2 = hexNibble(doc->attrval()[1]);
           id = b1 + b2;
           // found what we wanted
           break;

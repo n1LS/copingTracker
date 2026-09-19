@@ -360,11 +360,11 @@ void Project::RestoreContent(PersistencyDocument *doc) {
   doc->version_ = 32;
   int tableRatio = 0;
   while (attr) {
-    if (!strcmp(doc->attrname_, XML_ATTR_VERSION)) {
-      doc->version_ = int(atof(doc->attrval_) * 100);
+    if (!strcmp(doc->attrname(), XML_ATTR_VERSION)) {
+      doc->version_ = int(atof(doc->attrval()) * 100);
     }
-    if (!strcmp(doc->attrname_, XML_ATTR_TABLE_RATIO)) {
-      tableRatio = atoi(doc->attrval_);
+    if (!strcmp(doc->attrname(), XML_ATTR_TABLE_RATIO)) {
+      tableRatio = atoi(doc->attrval());
     }
     attr = doc->NextAttribute();
   }
@@ -379,11 +379,11 @@ void Project::RestoreContent(PersistencyDocument *doc) {
     char name[MAX_VARIABLE_STRING_LENGTH + 1];
     char value[MAX_VARIABLE_STRING_LENGTH + 1];
     while (attr) {
-      if (!strcmp(doc->attrname_, XML_ATTR_NAME)) {
-        strcpy(name, doc->attrval_);
+      if (!strcmp(doc->attrname(), XML_ATTR_NAME)) {
+        strcpy(name, doc->attrval());
       }
-      if (!strcmp(doc->attrname_, XML_ATTR_VALUE)) {
-        strcpy(value, doc->attrval_);
+      if (!strcmp(doc->attrname(), XML_ATTR_VALUE)) {
+        strcpy(value, doc->attrval());
       }
       attr = doc->NextAttribute();
     }

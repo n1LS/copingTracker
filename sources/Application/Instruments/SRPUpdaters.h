@@ -95,10 +95,10 @@ public:
   virtual void UpdateSRP(struct RUParams &rup);
 
 private:
+  fixed current_;
   uint8_t arp_[5];      // Arp setting
   uint8_t arpPosition_; // Position of in the arpegiator
   uint8_t arpLength_;   // Length of arp data
-  fixed current_;
 };
 
 class Panner : public I_SRPUpdater {
@@ -125,9 +125,9 @@ public:
 
 private:
   fixed current_;
-  uint8_t depth_;
   uint16_t phase_;
   uint16_t rate_;
+  uint8_t depth_;
 };
 
 #endif
