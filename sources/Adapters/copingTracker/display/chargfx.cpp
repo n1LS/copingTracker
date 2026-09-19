@@ -178,15 +178,12 @@ void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) 
   ili9341_command_param(LCD_MADCTL_DEFAULT);
 }
 
-inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-  assert(height <= BUFFER_CHARS);
-
+inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width) {
   uint16_t screen_x = x * CHAR_WIDTH;
-  uint16_t screen_y = (TEXT_HEIGHT - height - y) * CHAR_HEIGHT;
+  uint16_t screen_y = (TEXT_HEIGHT - 1 - y) * CHAR_HEIGHT;
   uint16_t screen_width = width * CHAR_WIDTH;
-  uint16_t screen_height = height * CHAR_HEIGHT;
 
-  ili9341_transmit32(ILI9341_CASET, screen_y, screen_y + screen_height - 1);
+  ili9341_transmit32(ILI9341_CASET, screen_y, screen_y + CHAR_HEIGHT - 1);
   ili9341_transmit32(ILI9341_PASET, screen_x, screen_x + screen_width - 1);
 
   ili9341_set_command(ILI9341_RAMWR);
@@ -199,7 +196,7 @@ inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
   for (int page = x; page < x + width; page++) {
     uint16_t *buffer_idx = buffer;
 
-    for (int col = y + height - 1; col >= y; col--) {
+    for (int col = y; col >= y; col--) {
       int idx = col * TEXT_WIDTH + page;
 
       uint8_t character = screen[idx];
@@ -226,7 +223,7 @@ inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
     }
 
     dma_channel_set_read_addr(DISPLAY_DMA_CH, buffer, false);
-    dma_channel_set_trans_count(DISPLAY_DMA_CH, CHAR_WIDTH * screen_height * sizeof(uint16_t), true);
+    dma_channel_set_trans_count(DISPLAY_DMA_CH, CHAR_WIDTH * CHAR_HEIGHT * sizeof(uint16_t), true);
 
     haveDmaInFlight = true;
 
@@ -395,14 +392,14 @@ void chargfx_draw_changed() {
 
         changed[idx] = false;
       } else if (start >= 0) {
-        chargfx_draw_region(start, y, x - start, 1);
+        chargfx_draw_region(start, y, x - start);
 
         start = -1;
       }
     }
 
     if (start >= 0) {
-      chargfx_draw_region(start, y, TEXT_WIDTH - start, 1);
+      chargfx_draw_region(start, y, TEXT_WIDTH - start);
     }
   }
 }
@@ -410,7 +407,7 @@ void chargfx_draw_changed() {
 void chargfx_draw_screen() {
   // draw the whole screen
   for (int y = 0; y < TEXT_HEIGHT; y++) {
-    chargfx_draw_region(0, y, TEXT_WIDTH, 1);
+    chargfx_draw_region(0, y, TEXT_WIDTH);
   }
 }
 

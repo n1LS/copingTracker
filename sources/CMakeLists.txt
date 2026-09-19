@@ -51,6 +51,7 @@ if(NOT USE_LCD)
 endif()
 message(USE_LCD="${USE_LCD}")
 add_compile_definitions(${USE_LCD})
+add_compile_definitions(__PICO__)
 # add_compile_definitions(LCD_ST7789)
 
 set(CMAKE_CXX_FLAGS

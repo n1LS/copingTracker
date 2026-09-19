@@ -66,8 +66,14 @@ public:
     backgroundColor_ = color;
   }
 
+  void SetLabelColors(Color color, Color inactive) {
+    labelColor_ = color;
+    inactiveLabelColor_ = inactive;
+  }
+
   void SetLabelColor(Color color) {
     labelColor_ = color;
+    inactiveLabelColor_ = color;
   }
 
   void SetFieldConfiguration(const FieldConfiguration config) {
@@ -106,6 +112,7 @@ protected:
   bool pressed_ = false;
   Color backgroundColor_ = Theme::View::bg;
   Color labelColor_ = Theme::View::fg;
+  Color inactiveLabelColor_ = Theme::View::inactive;
   FieldConfiguration fieldConfig_ = defaultFieldConfiguration;
 };
 #endif

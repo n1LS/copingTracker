@@ -18,15 +18,15 @@
 #define TEXT_HEIGHT 24
 #define CHAR_HEIGHT 10
 #define CHAR_WIDTH 10
-#define BUFFER_CHARS 24
+#define BUFFER_CHARS 1
 
 void chargfx_init();
 void chargfx_clear();
 void chargfx_draw_screen();
 void chargfx_draw_changed();
 void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width);
-void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width);
+void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width);
 void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 void chargfx_set_foreground(Color color);
 void chargfx_set_background(Color color);

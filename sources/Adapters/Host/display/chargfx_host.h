@@ -37,6 +37,6 @@ uint32_t *chargfx_get_pixel_buffer();
 void chargfx_draw_screen();
 void chargfx_draw_changed();
 void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width);
-void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width);
+void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width);
 void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
