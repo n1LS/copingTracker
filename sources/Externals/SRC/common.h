@@ -91,7 +91,7 @@
 #define WARN_UNUSED
 #endif
 
-#include "samplerate.h"
+#include "include/samplerate.h"
 
 enum {
   SRC_FALSE = 0,

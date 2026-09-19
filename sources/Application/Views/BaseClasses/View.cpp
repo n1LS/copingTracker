@@ -29,16 +29,16 @@ int View::margin_ = 0;
 int View::songRowCount_ = 16;
 
 BatteryState View::batteryState_ = {
-    .percentage = 0,
     .voltage_mv = 0,
     .temperature_c = 0,
+    .percentage = 0,
     .charging = false,
 };
 
 BatteryState View::latestBatteryState_ = {
-    .percentage = 0,
     .voltage_mv = 0,
     .temperature_c = 0,
+    .percentage = 0,
     .charging = false,
 };
 

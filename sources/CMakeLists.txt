@@ -6,13 +6,16 @@ set(CMAKE_CXX_STANDARD 23)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compile_commands.json")
 
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+
 add_compile_options(
   -Werror
   -Wall
   -Wno-format # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int
   -fstack-usage
   -fcallgraph-info=su # include above info in callgraph
-  -Wstack-usage=2074 # allows high watermark at the time this option was added TODO: reduce this for safety and/or reduce stack size
+  -Wstack-usage=1536 # allows high watermark at the time this option was added TODO: reduce this for safety and/or reduce stack size
 
   # stm HAL
   -Wno-unused-variable
@@ -51,6 +54,7 @@ if(NOT USE_LCD)
 endif()
 message(USE_LCD="${USE_LCD}")
 add_compile_definitions(${USE_LCD})
+add_compile_definitions(__PICO__)
 # add_compile_definitions(LCD_ST7789)
 
 set(CMAKE_CXX_FLAGS
@@ -77,7 +81,7 @@ target_compile_options(copingTracker PRIVATE
 )
 
 target_compile_definitions(copingTracker PUBLIC
-  #	PICO_HEAP_SIZE=204800
+  PICO_HEAP_SIZE=204800
   PICO_DEBUG_MALLOC_LOW_WATER=1000
   PICO_MALLOC_PANIC=0
   PICO_STACK_SIZE=4096

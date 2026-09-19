@@ -97,8 +97,8 @@ private:
 
   struct Marker {
     uint32_t sample = 0;
-    bool visible = false;
     int32_t x;
+    bool visible = false;
   };
 
   Marker markers_[MaxMarkers];

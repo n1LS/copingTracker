@@ -424,12 +424,12 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
   InstrumentType importedType = IT_NONE;
   bool hasAttr = doc.NextAttribute();
   while (hasAttr) {
-    if (!strcasecmp(doc.attrname_, XML_ATTR_TYPE)) {
-      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval_);
+    if (!strcasecmp(doc.attrname(), XML_ATTR_TYPE)) {
+      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval());
 
       // Map the type string to InstrumentType enum
       for (int i = 0; i < IT_LAST; i++) {
-        if (!strcasecmp(doc.attrval_, InstrumentTypeNames[i].full)) {
+        if (!strcasecmp(doc.attrval(), InstrumentTypeNames[i].full)) {
           importedType = static_cast<InstrumentType>(i);
           Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
           break;
@@ -469,16 +469,16 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
   etl::string<32> versionInfo;
 
   while (hasAttr) {
-    if (!strcasecmp(doc.attrname_, XML_ATTR_VERSION)) {
+    if (!strcasecmp(doc.attrname(), XML_ATTR_VERSION)) {
       // Store version information for logging
-      versionInfo = doc.attrval_;
-      Trace::Log("PERSISTENCYSERVICE", "Instrument file version: %s", doc.attrval_);
-    } else if (!strcasecmp(doc.attrname_, XML_ATTR_TYPE)) {
-      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval_);
+      versionInfo = doc.attrval();
+      Trace::Log("PERSISTENCYSERVICE", "Instrument file version: %s", doc.attrval());
+    } else if (!strcasecmp(doc.attrname(), XML_ATTR_TYPE)) {
+      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval());
 
       // Map the type string to InstrumentType enum
       for (int i = 0; i < IT_LAST; i++) {
-        if (!strcasecmp(doc.attrval_, InstrumentTypeNames[i].full)) {
+        if (!strcasecmp(doc.attrval(), InstrumentTypeNames[i].full)) {
           importedType = static_cast<InstrumentType>(i);
           Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
           break;

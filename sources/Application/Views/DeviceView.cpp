@@ -112,6 +112,7 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
+#ifdef __PICO__
   position.y_ += 2;
   actionField_.emplace_back("Firmware update", Token::ActionBootSelect, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
@@ -121,6 +122,7 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   actionField_.emplace_back(char_symbols_usb_s " USB Storage", Token::ActionMassStorage, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
+#endif
 }
 
 DeviceView::~DeviceView() {

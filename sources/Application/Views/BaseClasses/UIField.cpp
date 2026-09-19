@@ -68,7 +68,7 @@ int UIField::DrawLabeledField(GUIWindow &w, GUIPoint position, char *buffer, int
   if (colon) {
     buffer[colonIndex] = 0;
 
-    w.SetColor(labelColor_);
+    w.SetColor(active_ ? labelColor_ : inactiveLabelColor_);
     w.DrawString(position.x_, position.y_, buffer);
 
     position.x_ += colonIndex + 1;

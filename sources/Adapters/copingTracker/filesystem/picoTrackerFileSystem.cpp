@@ -10,13 +10,14 @@
 
 #include "picoTrackerFileSystem.h"
 #include "Externals/etl/include/etl/pool.h"
+#include "System/Memory/MemoryPool.h"
 #include "pico/multicore.h"
 #include <cstring>
 
 // Global mutex for thread safety
 Mutex mutex;
 
-constexpr uint32_t MAX_OPEN_FILES = 10;
+constexpr uint32_t MAX_OPEN_FILES = 4;
 
 static etl::pool<picoTrackerFile, MAX_OPEN_FILES> filePool;
 
@@ -293,12 +294,12 @@ bool picoTrackerFileSystem::CopyFile(const char *srcFilename, const char *destFi
   auto fDest = sd.open(destFilename, O_WRITE | O_CREAT);
 
   int n = 0;
-  int bufferSize = sizeof(fileBuffer_);
+  int bufferSize = sizeof(MemoryPool::fileBuffer());
   while (true) {
-    n = fSrc.read(fileBuffer_, bufferSize);
+    n = fSrc.read(MemoryPool::fileBuffer(), bufferSize);
     // check for read error and only write if no error
     if (n >= 0) {
-      fDest.write(fileBuffer_, n);
+      fDest.write(MemoryPool::fileBuffer(), n);
     } else {
       Trace::Error("Failed to read file: %s", srcFilename);
       return false;

@@ -222,16 +222,16 @@ Config::Config()
       // easy way to look that that up in configParams data above
       if (!strcmp(doc.ElemName(), XML_ELEM_THEME_NAME)) {
         if (Variable *themeVar = FindVariable(Token::VarThemeName)) {
-          themeVar->SetString(doc.attrval_);
-          Trace::Log("CONFIG", "Read Theme Name:%s", doc.attrval_);
+          themeVar->SetString(doc.attrval());
+          Trace::Log("CONFIG", "Read Theme Name:%s", doc.attrval());
         }
       } else {
         // Find the variable by name in configParams
         for (const auto &param : configParams) {
           if (!strcmp(doc.ElemName(), param.name)) {
             if (Variable *var = FindVariable(param.token)) {
-              var->SetInt(atoi(doc.attrval_));
-              Trace::Log("CONFIG", "Set %s = %s", param.name, doc.attrval_);
+              var->SetInt(atoi(doc.attrval()));
+              Trace::Log("CONFIG", "Set %s = %s", param.name, doc.attrval());
             }
             break;
           }
@@ -304,21 +304,21 @@ void Config::ReadColorVariable(PersistencyDocument *doc) {
 
     // Get the name and value attributes
     while (doc->NextAttribute()) {
-      if (strcmp(doc->attrname_, XML_ATTR_NAME) == 0) {
+      if (strcmp(doc->attrname(), XML_ATTR_NAME) == 0) {
         // Use safer string copy to ensure null-termination
-        size_t len = strlen(doc->attrval_);
+        size_t len = strlen(doc->attrval());
         if (len >= sizeof(colorName)) {
           len = sizeof(colorName) - 1; // Truncate if too long
         }
-        memcpy(colorName, doc->attrval_, len);
+        memcpy(colorName, doc->attrval(), len);
         colorName[len] = '\0'; // Ensure null-termination
-      } else if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
+      } else if (strcmp(doc->attrname(), XML_ATTR_VALUE) == 0) {
         // Use safer string copy to ensure null-termination
-        size_t len = strlen(doc->attrval_);
+        size_t len = strlen(doc->attrval());
         if (len >= sizeof(colorValue)) {
           len = sizeof(colorValue) - 1; // Truncate if too long
         }
-        memcpy(colorValue, doc->attrval_, len);
+        memcpy(colorValue, doc->attrval(), len);
         colorValue[len] = '\0'; // Ensure null-termination
       }
     }
@@ -499,10 +499,10 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
       if (strcmp(elemName, XML_ELEM_FONT) == 0) {
         // Process Font element attribute
         while (doc->NextAttribute()) {
-          if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
-            Trace::Log("CONFIG", "Found font value: %s", doc->attrval_);
+          if (strcmp(doc->attrname(), XML_ATTR_VALUE) == 0) {
+            Trace::Log("CONFIG", "Found font value: %s", doc->attrval());
             // Parse font value as decimal
-            int fontValue = atoi(doc->attrval_);
+            int fontValue = atoi(doc->attrval());
             Trace::Log("CONFIG", "Parsed font value: %d", fontValue);
 
             Variable *fontVar = FindVariable(Token::VarUIFont);
@@ -515,10 +515,10 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
       } else if (strcmp(elemName, XML_ELEM_CASE) == 0) {
         // Process text case attribute
         while (doc->NextAttribute()) {
-          if (strcmp(doc->attrname_, XML_ATTR_VALUE) == 0) {
-            Trace::Log("CONFIG", "Found text-case value: %s", doc->attrval_);
+          if (strcmp(doc->attrname(), XML_ATTR_VALUE) == 0) {
+            Trace::Log("CONFIG", "Found text-case value: %s", doc->attrval());
             // Parse font value as decimal
-            int fontValue = atoi(doc->attrval_);
+            int fontValue = atoi(doc->attrval());
             Trace::Log("CONFIG", "Parsed text-case  value: %d", fontValue);
 
             Variable *caseVar = FindVariable(Token::VarTextCase);

@@ -72,10 +72,10 @@ SampleInstrument::SampleInstrument()
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
-  InsertBaseVariables();
-  variables_.insert(variables_.end(), &sample_);
   sample_.AddObserver(*this);
 
+  InsertBaseVariables();
+  variables_.insert(variables_.end(), &sample_);
   variables_.insert(variables_.end(), &interpolation_);
   variables_.insert(variables_.end(), &crush_);
   variables_.insert(variables_.end(), &drive_);
@@ -1601,10 +1601,10 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
 
   bool hasAttr = doc->NextAttribute();
   while (hasAttr) {
-    if (!strcasecmp(doc->attrname_, XML_ATTR_TYPE)) {
-      Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval_);
-    } else if (!strncasecmp(doc->attrname_, XML_ATTR_SLICE_PREFIX, 2)) {
-      setSliceFromString(doc->attrname_ + 2, doc->attrval_);
+    if (!strcasecmp(doc->attrname(), XML_ATTR_TYPE)) {
+      Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval());
+    } else if (!strncasecmp(doc->attrname(), XML_ATTR_SLICE_PREFIX, 2)) {
+      setSliceFromString(doc->attrname() + 2, doc->attrval());
     }
     hasAttr = doc->NextAttribute();
   }
@@ -1617,11 +1617,11 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
     etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> value;
 
     while (attr) {
-      if (!strcasecmp(doc->attrname_, XML_ATTR_NAME)) {
-        name = doc->attrval_;
+      if (!strcasecmp(doc->attrname(), XML_ATTR_NAME)) {
+        name = doc->attrval();
       }
-      if (!strcasecmp(doc->attrname_, XML_ATTR_VALUE)) {
-        value = doc->attrval_;
+      if (!strcasecmp(doc->attrname(), XML_ATTR_VALUE)) {
+        value = doc->attrval();
       }
       attr = doc->NextAttribute();
     }

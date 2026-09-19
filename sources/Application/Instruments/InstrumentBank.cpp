@@ -83,17 +83,17 @@ void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
       bool hasType = false;
       bool hasAttr = doc->NextAttribute();
       while (hasAttr) {
-        if (!strcasecmp(doc->attrname_, XML_ATTR_ID)) {
-          unsigned char b1 = (hexNibble(doc->attrval_[0])) << 4;
-          unsigned char b2 = hexNibble(doc->attrval_[1]);
+        if (!strcasecmp(doc->attrname(), XML_ATTR_ID)) {
+          unsigned char b1 = (hexNibble(doc->attrval()[0])) << 4;
+          unsigned char b2 = hexNibble(doc->attrval()[1]);
           id = b1 + b2;
           hasId = true;
 #if XML_DEBUG_LOGGING
           Trace::Log("InstrumentBank", "instrument ID from xml:%d", id);
 #endif
         }
-        if (!strcasecmp(doc->attrname_, XML_ATTR_TYPE)) {
-          strncpy(instype, doc->attrval_, sizeof(instype) - 1);
+        if (!strcasecmp(doc->attrname(), XML_ATTR_TYPE)) {
+          strncpy(instype, doc->attrval(), sizeof(instype) - 1);
           instype[sizeof(instype) - 1] = '\0';
           hasType = true;
 #if XML_DEBUG_LOGGING

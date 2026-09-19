@@ -12,10 +12,11 @@
 #include "PersistencyDocument.h"
 #include "System/Console/Trace.h"
 #include "System/Console/nanoprintf.h"
+#include "System/Memory/MemoryPool.h"
 
 PersistencyDocument::PersistencyDocument() {
   version_ = 0;
-  yxml_init(state_, stack_, sizeof(stack_));
+  yxml_init(state_, MemoryPool::persistencyStack(), MemoryPool::persistencyStackSize);
   r_ = YXML_OK; // initialize to ok value
 }
 
@@ -38,7 +39,7 @@ bool PersistencyDocument::Load(const char *filename) {
   }
 
   // Reset the XML parser state
-  yxml_init(state_, stack_, sizeof(stack_));
+  yxml_init(state_, MemoryPool::persistencyStack(), MemoryPool::persistencyStackSize);
   r_ = YXML_OK;
 
   // Verify we can read from the file
@@ -227,23 +228,23 @@ bool PersistencyDocument::NextAttribute() {
         return false;
         break;
       case YXML_ATTRSTART:
-        npf_snprintf(attrname_, sizeof(attrname_), "%s", state_->attr);
+        npf_snprintf(attrname(), MemoryPool::persistencyAttrNameSize, "%s", state_->attr);
         break;
       case YXML_ATTRVAL:
-        if (cur < int(sizeof(attrval_) - 1)) {
-          attrval_[cur] = state_->data[0];
+        if (cur < MemoryPool::persistencyAttrSize - 1) {
+          attrval()[cur] = state_->data[0];
           cur++;
         } else {
-          Trace::Error("NextAttribute overflow for attr '%s'", attrname_);
+          Trace::Error("NextAttribute overflow for attr '%s'", attrname());
           // we use r_ = YXML_EREF to signal that the xml parsing had a fatal
           // error
           r_ = YXML_EREF;
-          attrval_[0] = '\0';
+          attrval()[0] = '\0';
           return false;
         }
         break;
       case YXML_ATTREND:
-        attrval_[cur] = '\0';
+        attrval()[cur] = '\0';
         return true;
         break;
       case YXML_EEOF:
@@ -274,8 +275,8 @@ bool PersistencyDocument::HasContent() {
   // if YXML_CONTENT happened before reaching here, there is already one
   // character in the buffer
   if (r_ == YXML_CONTENT) {
-    if (cur < int(sizeof(content_) - 1)) {
-      content_[cur] = state_->data[0];
+    if (cur < contentsize() - 1) {
+      content()[cur] = state_->data[0];
       cur++;
       found = true;
     } else {
@@ -294,14 +295,14 @@ bool PersistencyDocument::HasContent() {
         break;
       case YXML_ELEMEND:
         if (found) {
-          content_[cur] = '\0';
+          content()[cur] = '\0';
           return true;
         }
         return false;
         break;
       case YXML_CONTENT:
-        if (cur < int(sizeof(content_) - 1)) {
-          content_[cur] = state_->data[0];
+        if (cur < contentsize() - 1) {
+          content()[cur] = state_->data[0];
           cur++;
           found = true;
         } else {

@@ -681,21 +681,26 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       }
     case Token::SampleInstrumentSample:
       {
-        // changing the sample clears the GM Instrument
-        Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
-        if (gmVar) {
-          gmVar->SetInt(NO_GM_INSTRUMENT);
-          // find the intput field and set it inactive
-          gmInputField_->SetActive(false);
-        }
-
         I_Instrument *instr = getInstrument();
         if (!instr || instr->GetType() != IT_SAMPLE) {
           break;
         }
 
         Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
-        sampleInputField_->SetActive(sampleVar->GetInt() != NO_GM_INSTRUMENT);
+
+        if (sampleVar->GetInt() != NO_SAMPLE) {
+          // changing the sample clears the GM Instrument
+          Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
+          if (gmVar) {
+            gmVar->SetInt(NO_GM_INSTRUMENT);
+            // find the intput field and set it inactive
+            gmInputField_->SetActive(false);
+          }
+        } else {
+          break;
+        }
+
+        sampleInputField_->SetActive(sampleVar->GetInt() != NO_SAMPLE);
 
         SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
         int newIndex = sampleInstr->GetSampleIndex();

@@ -25,13 +25,12 @@
 #define NO_MORE_TABLE TABLE_COUNT + 10
 
 struct TableStep {
-  uint8_t cmd1;
-  uint8_t cmd2;
-  uint8_t cmd3;
-  uint8_t _pad;
   uint16_t param1;
   uint16_t param2;
   uint16_t param3;
+  uint8_t cmd1;
+  uint8_t cmd2;
+  uint8_t cmd3;
 };
 
 class Table {

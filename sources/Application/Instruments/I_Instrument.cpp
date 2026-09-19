@@ -46,8 +46,8 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
   // First, check for TYPE attribute in the INSTRUMENT element
   bool hasAttr = doc->NextAttribute();
   while (hasAttr) {
-    if (!strcasecmp(doc->attrname_, XML_ATTR_TYPE)) {
-      Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval_);
+    if (!strcasecmp(doc->attrname(), XML_ATTR_TYPE)) {
+      Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval());
       // TODO: We already know the instrument type so need to validate it
       // matches the imported one here
     }
@@ -64,11 +64,11 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
     char name[MAX_VARIABLE_STRING_LENGTH + 1] = "";
     char value[MAX_VARIABLE_STRING_LENGTH + 1] = "";
     while (hasAttr) {
-      if (!strcasecmp(doc->attrname_, XML_ATTR_NAME)) {
-        strcpy(name, doc->attrval_);
+      if (!strcasecmp(doc->attrname(), XML_ATTR_NAME)) {
+        strcpy(name, doc->attrval());
       }
-      if (!strcasecmp(doc->attrname_, XML_ATTR_VALUE)) {
-        strcpy(value, doc->attrval_);
+      if (!strcasecmp(doc->attrname(), XML_ATTR_VALUE)) {
+        strcpy(value, doc->attrval());
       }
       hasAttr = doc->NextAttribute();
     }

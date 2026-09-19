@@ -89,12 +89,12 @@ void restoreHexBuffer(PersistencyDocument *doc, unsigned char *destination) {
       int length = 0;
       bool gotData = false;
       while (hasAttr) {
-        if (!strcmp(doc->attrname_, XML_ATTR_VALUE)) {
-          data = atoi(doc->attrval_);
+        if (!strcmp(doc->attrname(), XML_ATTR_VALUE)) {
+          data = atoi(doc->attrval());
           gotData = true;
         }
-        if (!strcmp(doc->attrname_, XML_ATTR_LENGTH)) {
-          length = atoi(doc->attrval_);
+        if (!strcmp(doc->attrname(), XML_ATTR_LENGTH)) {
+          length = atoi(doc->attrval());
         }
         hasAttr = doc->NextAttribute();
       }
@@ -104,8 +104,8 @@ void restoreHexBuffer(PersistencyDocument *doc, unsigned char *destination) {
       dst += length;
     } else {
       if (doc->HasContent()) {
-        for (unsigned int i = 0; i < strlen(doc->content_) / 2; i++) {
-          *dst++ = hexStringToByte(doc->content_ + i * 2);
+        for (unsigned int i = 0; i < strlen(doc->content()) / 2; i++) {
+          *dst++ = hexStringToByte(doc->content() + i * 2);
         }
       }
     }

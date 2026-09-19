@@ -24,7 +24,7 @@ void InstrumentView::fillSampleParameters() {
   v = instrument->FindVariable(Token::SampleInstrumentGMInstrument);
   intVarOffField_.emplace_back(position, *v, "GM Instr:%03d", 0, kGMInstrumentCount - 1, 1, 0x10);
   intVarOffField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
-  intVarOffField_.back().SetLabelColor(Theme::SemanticColors::sample(true));
+  intVarOffField_.back().SetLabelColors(Theme::SemanticColors::sample(true), Theme::SemanticColors::sample(false));
   gmInputField_ = &intVarOffField_.back();
   gmInputField_->SetActive(v->GetInt() != NO_GM_INSTRUMENT);
   fieldList_.insert(fieldList_.end(), &intVarOffField_.back());
@@ -33,7 +33,7 @@ void InstrumentView::fillSampleParameters() {
   position.y_++;
   v = instrument->FindVariable(Token::SampleInstrumentSample);
   intVarField_.emplace_back(position, *v, "Sample  :%-19.19s", 0, sp->GetNameListSize() - 1, 1, 0x10);
-  intVarField_.back().SetLabelColor(Theme::SemanticColors::sample(true));
+  intVarField_.back().SetLabelColors(Theme::SemanticColors::sample(true), Theme::SemanticColors::sample(false));
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   sampleInputField_ = &intVarField_.back();
   sampleInputField_->SetActive(v->GetInt() != NO_SAMPLE);

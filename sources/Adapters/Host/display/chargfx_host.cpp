@@ -278,18 +278,16 @@ void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width) {
   }
 }
 
-void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-  for (int cy = 0; cy < height; ++cy) {
-    for (int cx = 0; cx < width; ++cx) {
-      int idx = (y + cy) * CHARGFX_TEXT_WIDTH + (x + cx);
-      changed[idx] = true;
-    }
+void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width) {
+  for (int cx = 0; cx < width; ++cx) {
+    int idx = y * CHARGFX_TEXT_WIDTH + (x + cx);
+    changed[idx] = true;
   }
   chargfx_draw_changed();
 }
 
-void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-  chargfx_draw_region(x, y, width, height);
+void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width) {
+  chargfx_draw_region(x, y, width);
 }
 
 void chargfx_fill_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {

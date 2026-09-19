@@ -137,7 +137,7 @@ void SerialDebugUI::listFiles(const char *path) {
   if (!fs->chdir(path)) {
     Trace::Error("failed to ls files path:%s", path);
   }
-  etl::vector<int, MAX_FILE_INDEX_SIZE> &fileIndexes = MemoryPool::Get();
+  etl::ivector<int> &fileIndexes = MemoryPool::Get();
   fs->list(&fileIndexes, "", loDefault);
 
   char name[PFILENAME_SIZE];
