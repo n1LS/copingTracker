@@ -67,6 +67,7 @@ public:
   };
 
   void noteDisplay(uint8_t note, char (&out)[4]) override;
+  void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) override;
 
   bool IsMulti();
 

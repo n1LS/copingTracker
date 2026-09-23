@@ -43,8 +43,8 @@ void GUIWindow::ClearTextRect(GUIRect r) {
   _imp->ClearTextRect(r);
 }
 
-void GUIWindow::DrawString(int x, int y, const char *string) {
-  _imp->DrawString(x, y, string);
+void GUIWindow::DrawString(int x, int y, const char *string, Font font) {
+  _imp->DrawString(x, y, string, font);
 }
 
 void GUIWindow::SetCurrentRectColor(Color color) {
@@ -55,8 +55,8 @@ void GUIWindow::DrawRect(const GUIRect r) {
   _imp->DrawRect(r);
 }
 
-void GUIWindow::DrawChar(int x, int y, char c, bool transparent) {
-  _imp->DrawChar(x, y, c, transparent);
+void GUIWindow::DrawChar(int x, int y, char c, Font font, bool transparent) {
+  _imp->DrawChar(x, y, c, font, transparent);
 }
 
 void GUIWindow::Clear() {

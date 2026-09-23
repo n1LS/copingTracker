@@ -43,8 +43,8 @@ public: // I_GUIWindowImp implementation
   virtual void SetColor(Color color) override;
   virtual void SetBackgroundColor(Color color) override;
   virtual void DrawRect(const GUIRect rect) override;
-  virtual void DrawChar(int x, int y, char c, bool transparent = false) override;
-  virtual void DrawString(int x, int y, const char *string) override;
+  virtual void DrawChar(int x, int y, char c, Font font = fRegular, bool transparent = false) override;
+  virtual void DrawString(int x, int y, const char *string, Font font = fRegular) override;
   virtual GUIRect GetRect();
   virtual void Invalidate();
   virtual void Flush();
@@ -54,7 +54,6 @@ public: // I_GUIWindowImp implementation
   virtual void ClearTextRect(GUIRect rect);
   virtual void PushEvent(GUIEvent &event);
 
-  virtual void SendFont(uint8_t uifontIndex);
   virtual void SendPalette();
   virtual void SetPalette(const GUIColor *palette, int colorCount) override;
   virtual const GUIRect GetFocusRect() const override;

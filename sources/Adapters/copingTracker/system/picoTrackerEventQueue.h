@@ -14,13 +14,13 @@
 #include "Externals/etl/include/etl/queue_spsc_atomic.h"
 #include "Foundation/T_Singleton.h"
 
-enum picoTrackerEventType { PICO_REDRAW, PICO_FLUSH, PICO_CLOCK, LAST };
+enum EventType { etRedraw, etFlush, etClock, count };
 
 class picoTrackerEvent {
 public:
-  picoTrackerEvent(picoTrackerEventType type) : type_(type) {
+  picoTrackerEvent(EventType type) : type_(type) {
   }
-  picoTrackerEventType type_;
+  EventType type_;
 };
 
 inline bool operator==(const picoTrackerEvent &lhs, const picoTrackerEvent &rhs) {

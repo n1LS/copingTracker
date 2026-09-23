@@ -19,6 +19,7 @@ public:
   virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
   virtual void DrawView() override;
   virtual void OnFocus();
+  virtual void AnimationUpdate() override;
 
 private:
   void setTab(int index);

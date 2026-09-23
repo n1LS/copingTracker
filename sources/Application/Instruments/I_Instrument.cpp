@@ -128,3 +128,24 @@ void I_Instrument::noteDisplay(uint8_t note, char (&out)[4]) {
     noteToString(note, out);
   }
 }
+
+void I_Instrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) {
+  npf_snprintf(line2, sizeof(line2), "  ");
+
+  if (note == NO_NOTE) {
+    strcpy(line1, "--");
+  } else if (note == NOTE_OFF) {
+    strcpy(line1, "off");
+  } else {
+    char buf[4];
+    noteToString(note, buf);
+
+    line1[0] = buf[0];
+    line1[1] = buf[1];
+    line1[2] = '\0';
+
+    line2[0] = ' ';
+    line2[1] = buf[2];
+    line2[2] = '\0';
+  }
+}

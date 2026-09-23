@@ -38,7 +38,7 @@ const uint32_t DEFAULT_COLOR15 = 0xDEDEDE;
 const TextCase DEFAULT_CASE = tcRegular;
 const int DEFAULT_UIFONT = 0x0;
 inline const int THEME_FONT_COUNT = FONT_COUNT;
-inline const char *THEME_FONT_NAMES[THEME_FONT_COUNT] = {"Regular", "Bold", "Block"};
+inline const char *THEME_FONT_NAMES[THEME_FONT_COUNT] = {"Regular", "Bold", "Graphic"};
 inline const char *TEXT_CASE_NAMES[TextCase::Count] = {"Regular", "UPPER", "lower"};
 inline const char *DEFAULT_THEME_NAME = "Default";
 } // namespace ThemeConstants

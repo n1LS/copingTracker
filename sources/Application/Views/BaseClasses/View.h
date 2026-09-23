@@ -22,6 +22,7 @@
 #include "Application/Utils/updateData.h"
 #include "Externals/etl/include/etl/delegate.h"
 #include "Foundation/Types/Colors.h"
+#include "Foundation/Types/GraphicTypes.h"
 #include "Foundation/Types/ViewType.h"
 #include "I_Action.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
@@ -285,9 +286,9 @@ public:
   virtual void SetColor(Color cd);
   virtual void SetBackgroundColor(Color cd);
   virtual void ClearTextRect(int x, int y, int w, int h);
-  virtual void DrawString(int x, int y, const char *text);
-  virtual void DrawTintString(int x, int y, const TintChar *data);
-  virtual void DrawChar(int x, int y, char character, bool transparent = false);
+  virtual void DrawString(int x, int y, const char *text, Font font = fRegular);
+  virtual void DrawTintString(int x, int y, const TintChar *data, Font font = fRegular);
+  virtual void DrawChar(int x, int y, char character, Font font = fRegular, bool transparent = false);
   virtual void DrawRect(const GUIRect r, Color color);
 
   virtual void ConfirmedStop(Token sender);
@@ -315,6 +316,7 @@ protected:
 
   void drawMap();
   void drawRegularNote(const GUIPoint &pos, uint8_t channel);
+  void drawInstrument(const GUIPoint &pos, uint8_t instrument);
   void drawNotes();
   void drawRowNumbers(int x, int y, int start, int numRows, int limit = 256);
   void drawCommandLegend(uint8_t x, uint8_t y, Token command);

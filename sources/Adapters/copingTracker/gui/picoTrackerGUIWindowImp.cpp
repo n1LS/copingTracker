@@ -46,15 +46,9 @@ picoTrackerGUIWindowImp::picoTrackerGUIWindowImp(GUICreateWindowParams &p) {
   auto mirrorUI = mirrorUIVar->GetInt();
   mirrorUIEnabled_ = mirrorUI != 0;
 
-  auto uiFontVar = (WatchedVariable *)config->FindVariable(Token::VarUIFont);
-
-  // register to receive updates to mirrorUI setting
-  uiFontVar->AddObserver(*this);
-  auto uifontIndex = uiFontVar->GetInt();
-  chargfx_set_font_index(uifontIndex);
+  chargfx_set_font(fRegular);
 
   if (mirrorUIEnabled_) {
-    SendFont(uifontIndex);
     SendPalette();
   }
 };
@@ -65,14 +59,6 @@ picoTrackerGUIWindowImp::~picoTrackerGUIWindowImp() {
 void picoTrackerGUIWindowImp::mirrorUIConnectionChanged(bool connected) {
   if (connected && mirrorUIEnabled_) {
     mirrorUI_connected();
-  }
-}
-
-void picoTrackerGUIWindowImp::SendFont(uint8_t uifontIndex) {
-  if (mirrorUIEnabled_) {
-    mirrorUICommand *command = mirrorUI_getCommand();
-    mirrorUI_command_Font(command, uifontIndex);
-    mirrorUI_sendCommand(command);
   }
 }
 
@@ -110,18 +96,19 @@ void picoTrackerGUIWindowImp::SetPalette(const GUIColor *palette, int colorCount
   }
 }
 
-void picoTrackerGUIWindowImp::DrawChar(int x, int y, char c, bool transparent) {
+void picoTrackerGUIWindowImp::DrawChar(int x, int y, char c, Font font, bool transparent) {
   chargfx_set_cursor(x, y);
+  chargfx_set_font(font);
   chargfx_putc(c, transparent);
 }
 
-void picoTrackerGUIWindowImp::DrawString(int x, int y, const char *string) {
+void picoTrackerGUIWindowImp::DrawString(int x, int y, const char *string, Font font) {
   if (!string) {
     return;
   }
 
   for (const char *current = string; *current; ++current, ++x) {
-    DrawChar(x, y, *current);
+    DrawChar(x, y, *current, font);
   }
 }
 
@@ -158,7 +145,8 @@ void picoTrackerGUIWindowImp::Unlock() {
 
 void picoTrackerGUIWindowImp::Flush() {
   if (mirrorUIEnabled_) {
-    uint8_t *scr, *col;
+    ScreenCharacter *scr;
+    uint8_t *col;
     bool *chg;
     chargfx_get_screen_storage(&scr, &col, &chg);
     mirrorUI_flush(scr, col, chg);
@@ -172,7 +160,7 @@ void picoTrackerGUIWindowImp::Flush() {
 }
 
 void picoTrackerGUIWindowImp::Invalidate() {
-  picoTrackerEventQueue::GetInstance()->push(picoTrackerEvent(PICO_FLUSH));
+  picoTrackerEventQueue::GetInstance()->push(picoTrackerEvent(etFlush));
 };
 
 void picoTrackerGUIWindowImp::PushEvent(GUIEvent &event) {
@@ -190,23 +178,16 @@ const GUIRect picoTrackerGUIWindowImp::GetFocusRect() const {
 
 void picoTrackerGUIWindowImp::ProcessEvent(picoTrackerEvent &event) {
   switch (event.type_) {
-    case PICO_REDRAW:
+    case etRedraw:
       instance_->_window->Update(true);
-      // send font update
-      if (instance_->mirrorUIEnabled_) {
-        Config *config = Config::GetInstance();
-        auto uiFontVar = config->FindVariable(Token::VarUIFont);
-        int uifontIndex = uiFontVar->GetInt();
-        instance_->SendFont(uifontIndex);
-      }
       break;
-    case PICO_FLUSH:
+    case etFlush:
       instance_->_window->Update(false);
       break;
-    case PICO_CLOCK:
+    case etClock:
       instance_->_window->ClockTick();
       break;
-    case LAST:
+    case count:
       break;
   }
 }
@@ -233,15 +214,6 @@ void picoTrackerGUIWindowImp::Update(Observable &o, I_ObservableData *d) {
       {
         auto mirrorUI = v.GetInt();
         mirrorUIEnabled_ = mirrorUI != 0;
-        break;
-      }
-    case Token::VarUIFont:
-      {
-        auto uifont = v.GetInt();
-        chargfx_set_font_index(uifont);
-        if (mirrorUIEnabled_) {
-          SendFont(uifont);
-        }
         break;
       }
   }

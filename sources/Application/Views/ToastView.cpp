@@ -147,17 +147,17 @@ void ToastView::Draw(GUIWindow &w) {
 
   // top margin line
   SetColor(Theme::Dialog::bg);
-  DrawChar(0, y, CHAR(char_filledHalfBorder_topLeft_s), true);
-  DrawChar(SCREEN_WIDTH - 1, y, CHAR(char_filledHalfBorder_topRight_s), true);
+  DrawChar(0, y, CHAR(char_filledHalfBorder_topLeft_s), fRegular, true);
+  DrawChar(SCREEN_WIDTH - 1, y, CHAR(char_filledHalfBorder_topRight_s), fRegular, true);
 
   for (int x = 1; x < SCREEN_WIDTH - 1; x++) {
-    DrawChar(x, y, CHAR(char_block_bottom_s), true);
+    DrawChar(x, y, CHAR(char_block_bottom_s), fRegular, true);
   }
 
   // border left and right
   for (int i = 0; i < lineCount_ && y + i < SCREEN_HEIGHT; i++) {
-    DrawChar(0, y + 1 + i, CHAR(char_block_left_s), true);
-    DrawChar(SCREEN_WIDTH - 1, y + 1 + i, CHAR(char_block_right_s), true);
+    DrawChar(0, y + 1 + i, CHAR(char_block_left_s), fRegular, true);
+    DrawChar(SCREEN_WIDTH - 1, y + 1 + i, CHAR(char_block_right_s), fRegular, true);
   }
 
   // messages

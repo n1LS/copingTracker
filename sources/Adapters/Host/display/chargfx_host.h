@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Foundation/Types/Colors.h"
+#include "Foundation/Types/GraphicTypes.h"
 #include <cstdint>
 
 #define CHARGFX_TEXT_WIDTH 32
@@ -29,9 +30,9 @@ uint8_t chargfx_get_cursor_x();
 uint8_t chargfx_get_cursor_y();
 void chargfx_putc(char c, bool transparent = false);
 void chargfx_set_palette_color(int idx, uint16_t rgb565_color);
-void chargfx_set_font_index(uint8_t idx);
-uint8_t chargfx_get_font_index();
-void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool **outChanged);
+void chargfx_set_font(Font idx);
+Font chargfx_get_font();
+void chargfx_get_screen_storage(ScreenCharacter **outScreen, uint8_t **outColors, bool **outChanged);
 uint16_t *chargfx_get_palette();
 uint32_t *chargfx_get_pixel_buffer();
 void chargfx_draw_screen();

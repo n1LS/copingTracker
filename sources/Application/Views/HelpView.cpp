@@ -11,6 +11,7 @@
 
 #include "HelpView.h"
 #include "Foundation/Constants/Documentation.generated.h"
+#include "Foundation/Constants/GraphicCharacters.h"
 #include <Application/AppWindow.h>
 #include <nanoprintf.h>
 
@@ -55,6 +56,9 @@ void HelpView::ProcessButtonMask(uint16_t mask, bool pressed) {
 }
 
 void HelpView::DrawView() {
+  SetColor(WHITE);
+  SetBackgroundColor(BLACK);
+
   Clear();
   DrawTitle(char_back_s " Help!");
 
@@ -167,4 +171,8 @@ void HelpView::setTab(int tab) {
 void HelpView::scrollBy(int delta) {
   offset_ = std::max(0, std::min(offset_ + delta, numLines_ - pageSize));
   SetDirty(true);
+}
+
+void HelpView::AnimationUpdate() {
+  ScreenView::AnimationUpdate();
 }

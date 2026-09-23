@@ -7,6 +7,7 @@
  */
 
 #include "chargfx_host.h"
+#include "Foundation/Types/GraphicTypes.h"
 #include "font.generated.h"
 #include <algorithm>
 #include <cstring>
@@ -15,9 +16,9 @@ static Color screen_bg_color = BLACK;
 static Color screen_fg_color = WHITE;
 static int cursor_x = 0;
 static int cursor_y = 0;
-static uint8_t ui_font_index = 0;
+static Font ui_font = fRegular;
 
-static uint8_t screen[CHARGFX_TEXT_HEIGHT * CHARGFX_TEXT_WIDTH] = {0};
+static ScreenCharacter screen[CHARGFX_TEXT_HEIGHT * CHARGFX_TEXT_WIDTH] = {0};
 static uint8_t colors[CHARGFX_TEXT_HEIGHT * CHARGFX_TEXT_WIDTH] = {0};
 static bool changed[CHARGFX_TEXT_HEIGHT * CHARGFX_TEXT_WIDTH] = {0};
 static uint32_t pixel_buffer[CHARGFX_SCREEN_HEIGHT * CHARGFX_SCREEN_WIDTH] = {0};
@@ -71,12 +72,12 @@ uint8_t chargfx_get_cursor_y() {
   return cursor_y;
 }
 
-void chargfx_set_font_index(uint8_t idx) {
-  ui_font_index = idx;
+void chargfx_set_font(Font idx) {
+  ui_font = idx;
 }
 
-uint8_t chargfx_get_font_index() {
-  return ui_font_index;
+Font chargfx_get_font() {
+  return ui_font;
 }
 
 void chargfx_putc(char c, bool transparent) {
@@ -89,8 +90,9 @@ void chargfx_putc(char c, bool transparent) {
     color = (screen_fg_color << 4) | screen_bg_color;
   }
 
-  if (screen[idx] != (uint8_t)c || colors[idx] != color) {
-    screen[idx] = c;
+  if (screen[idx].character != (uint8_t)c || screen[idx].font != ui_font || colors[idx] != color) {
+    screen[idx].character = c;
+    screen[idx].font = ui_font;
     colors[idx] = color;
     changed[idx] = true;
   }
@@ -110,7 +112,7 @@ uint32_t *chargfx_get_pixel_buffer() {
   return pixel_buffer;
 }
 
-void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool **outChanged) {
+void chargfx_get_screen_storage(ScreenCharacter **outScreen, uint8_t **outColors, bool **outChanged) {
   if (outScreen)
     *outScreen = screen;
   if (outColors)
@@ -119,9 +121,8 @@ void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool *
     *outChanged = changed;
 }
 
-static void RasterizeChar(uint8_t ch, uint8_t fg, uint8_t bg, int screen_x, int screen_y) {
-  const font_t *font = fonts[ui_font_index];
-  const uint16_t *glyph = (*font)[ch];
+static void RasterizeChar(ScreenCharacter ch, uint8_t fg, uint8_t bg, int screen_x, int screen_y) {
+  const uint16_t *glyph = font_bitmaps[ch.word];
 
   uint32_t fg_color = RGB565toRGB888(palette[fg]);
   uint32_t bg_color = RGB565toRGB888(palette[bg]);
@@ -171,7 +172,7 @@ static uint16_t rgb565_brightness(uint16_t color, uint8_t brightness) {
   return (uint16_t)((red << 11) | (green << 5) | blue);
 }
 
-static void RasterizeCharWithPulse(uint8_t ch, uint8_t fg, uint8_t bg, int screen_x, int screen_y, int pulse) {
+static void RasterizeCharWithPulse(ScreenCharacter ch, uint8_t fg, uint8_t bg, int screen_x, int screen_y, int pulse) {
   uint16_t fg_normal = palette[fg];
   uint16_t bg_normal = palette[bg];
   uint16_t fg_pulse = rgb565_brightness(fg_normal, pulse);
@@ -182,14 +183,11 @@ static void RasterizeCharWithPulse(uint8_t ch, uint8_t fg, uint8_t bg, int scree
   uint32_t fg_pulse_rgb = RGB565toRGB888(fg_pulse);
   uint32_t bg_pulse_rgb = RGB565toRGB888(bg_pulse);
 
-  const font_t *font = fonts[ui_font_index];
-  const uint16_t *glyph = (*font)[ch];
+  const uint16_t *glyph = font_bitmaps[ch.word];
   const uint16_t empty_mask[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-  const uint16_t (*font_mask)[10] = font_masks[ui_font_index];
-  const int8_t *font_mask_index = font_mask_indices[ui_font_index];
-  int8_t mask_index = font_mask_index[ch];
-  const uint16_t *mask = (mask_index == -1) ? empty_mask : font_mask[mask_index];
+  int8_t mask_index = font_mask_indices[ch.word];
+  const uint16_t *mask = (mask_index == -1) ? empty_mask : font_masks_all[mask_index];
 
   for (int py = 0; py < CHARGFX_CHAR_HEIGHT; ++py) {
     uint16_t pixels = glyph[py];
@@ -217,7 +215,7 @@ void chargfx_draw_screen() {
   for (int y = 0; y < CHARGFX_TEXT_HEIGHT; ++y) {
     for (int x = 0; x < CHARGFX_TEXT_WIDTH; ++x) {
       int idx = y * CHARGFX_TEXT_WIDTH + x;
-      uint8_t ch = screen[idx];
+      ScreenCharacter ch = screen[idx];
       uint8_t color_byte = colors[idx];
       uint8_t fg = (color_byte >> 4) & 0x0F;
       uint8_t bg = color_byte & 0x0F;
@@ -236,7 +234,8 @@ void chargfx_draw_changed() {
 
       if (!changed[idx])
         continue;
-      uint8_t ch = screen[idx];
+
+      ScreenCharacter ch = screen[idx];
       uint8_t color_byte = colors[idx];
       uint8_t fg = (color_byte >> 4) & 0x0F;
       uint8_t bg = color_byte & 0x0F;
@@ -268,7 +267,7 @@ void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width) {
 
   for (int i = 0; i < width; ++i) {
     int idx = y * CHARGFX_TEXT_WIDTH + (x + i);
-    uint8_t ch = screen[idx];
+    ScreenCharacter ch = screen[idx];
     uint8_t color_byte = colors[idx];
     uint8_t fg = (color_byte >> 4) & 0x0F;
     uint8_t bg = color_byte & 0x0F;

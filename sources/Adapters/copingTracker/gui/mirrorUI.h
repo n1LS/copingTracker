@@ -8,6 +8,7 @@
  */
 
 #include "Foundation/Types/Colors.h"
+#include "Foundation/Types/GraphicTypes.h"
 #include "System/mirrorUI/mirrorUIProtocol.h"
 #include <cstdint>
 
@@ -17,7 +18,7 @@
 #define ITF_NUM_CDC_0 0
 #define USB_TIMEOUT_US 500000
 
-void mirrorUI_flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullscreenUpdate = false);
+void mirrorUI_flush(ScreenCharacter *screen, uint8_t *colors, bool *changed, bool fullscreenUpdate = false);
 void mirrorUI_sendCommand(mirrorUICommand *command);
 void mirrorUI_sendPalette(uint16_t *color);
 void mirrorUI_sendRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, Color color);

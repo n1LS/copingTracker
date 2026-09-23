@@ -19,7 +19,7 @@
 void critical_error_message(const char *message, int guruId, bool (*externalCallback)(void)) {
   chargfx_init();
 
-  chargfx_set_font_index(0);
+  chargfx_set_font(fRegular);
 
   chargfx_set_palette_color(0, 0x0000); // BLACK
   chargfx_set_palette_color(1, 0xF800); // RED

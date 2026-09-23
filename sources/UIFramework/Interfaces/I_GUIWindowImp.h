@@ -12,6 +12,7 @@
 #ifndef _I_GUIWINDOWIMP_H_
 #define _I_GUIWINDOWIMP_H_
 
+#include "Foundation/Types/GraphicTypes.h"
 #include "I_GUIGraphics.h"
 #include "UIFramework/BasicDatas/GUICreateWindowParams.h"
 #include "UIFramework/BasicDatas/GUIEvent.h"
@@ -36,7 +37,6 @@ public:
   virtual void PushEvent(GUIEvent &) = 0;
   virtual void DrawRect(const GUIRect r) = 0;
 
-  virtual void SendFont(uint8_t uifontIndex) = 0;
   virtual void SendPalette() = 0;
   virtual void SetPalette(const GUIColor *palette, int colorCount) = 0;
 

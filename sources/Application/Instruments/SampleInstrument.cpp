@@ -1720,3 +1720,22 @@ void SampleInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
   // default handling regular notes
   I_Instrument::noteDisplay(note, out);
 }
+
+void SampleInstrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) {
+  // special handling for slices
+  if (HasSlicesForPlayback()) {
+    npf_snprintf(line1, sizeof(line1), "SL");
+
+    if (ShouldDisplaySliceForNote(note)) {
+      uint8_t sliceIndex = static_cast<uint8_t>(note - SampleInstrument::SliceNoteBase);
+      npf_snprintf(line2, sizeof(line2), "%02u", static_cast<unsigned>(sliceIndex));
+    } else {
+      npf_snprintf(line2, sizeof(line2), "**");
+    }
+
+    return;
+  }
+
+  // default handling regular notes
+  I_Instrument::noteDisplayCondensed(note, line1, line2);
+}
