@@ -7,15 +7,15 @@
 
 #define char_battery_left_s "\x80"
 
-#define gchar_key_low_off   "\x06"
-#define gchar_key_low_on    "\x07"
-#define gchar_key_end       "\x08"
-#define gchar_key_hi        "\x09\x0a\x0b\x09\x0a\x0a\x0b"
-#define gchar_key_hi_1      "\x0c\x0d\x0b\x09\x0a\x0a\x0b"
-#define gchar_key_hi_3      "\x09\x0a\x0b\x09\x0a\x0a\x0b"
-#define gchar_key_hi_6      "\x09\x0a\x0b\x09\x0a\x0a\x0b"
-#define gchar_key_hi_8      "\x09\x0a\x0b\x09\x0a\x0a\x0b"
-#define gchar_key_hi_a      "\x09\x0a\x0b\x09\x0a\x0a\x0b"
+#define gchar_key_low_off "\x06"
+#define gchar_key_low_on "\x07"
+#define gchar_key_end "\x08"
+#define gchar_key_hi "\x09\x0a\x0b\x09\x0a\x0a\x0b"
+#define gchar_key_hi_1 "\x0c\x0d\x0b\x09\x0a\x0a\x0b"
+#define gchar_key_hi_3 "\x09\x0a\x0b\x09\x0a\x0a\x0b"
+#define gchar_key_hi_6 "\x09\x0a\x0b\x09\x0a\x0a\x0b"
+#define gchar_key_hi_8 "\x09\x0a\x0b\x09\x0a\x0a\x0b"
+#define gchar_key_hi_a "\x09\x0a\x0b\x09\x0a\x0a\x0b"
 
 /*
 static void drawPiano(uint16_t keys, char upper[8], char lower[8]) {

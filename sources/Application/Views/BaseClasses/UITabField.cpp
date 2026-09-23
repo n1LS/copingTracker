@@ -43,10 +43,10 @@ void UITabField::Draw(GUIWindow &window, int offset) {
     if (index == t) {
       Color bg = focus_ ? Theme::PanelInput::bg(true) : Theme::View::Tab::bg(true);
       Color fg = focus_ ? Theme::PanelInput::fg(true) : Theme::View::Tab::fg(true);
-      
+
       w.SetBackgroundColor(backgroundColor_);
       w.SetColor(bg);
-      
+
       w.DrawChar(x, position.y_, CHAR(char_button_border_left_s));
       w.DrawChar(x + 1 + len, position.y_, CHAR(char_button_border_right_s));
 
