@@ -12,9 +12,6 @@
 #include "ModalView.h"
 #include "Application/AppWindow.h"
 
-// TODO remove
-#include "System/System/System.h"
-
 uint32_t ModalView::nextInstanceId_ = 0;
 
 ModalView::ModalView(View &v)

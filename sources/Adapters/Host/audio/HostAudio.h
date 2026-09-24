@@ -16,6 +16,8 @@ public:
   HostAudio(AudioSettings &hints);
   virtual ~HostAudio();
 
+  virtual int GetSampleRate() override;
+
   virtual void Init() override;
   virtual void Close() override;
 };

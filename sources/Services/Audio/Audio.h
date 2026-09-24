@@ -29,10 +29,10 @@ public:
   virtual void Close() = 0;
   virtual int GetSampleRate() {
     return 44100;
-  };
+  }
   virtual int GetMixerVolume() {
     return 100;
-  };
+  }
   virtual void SetMixerVolume(int volume) {};
   virtual void SetAudioLevel(int level) {};
 

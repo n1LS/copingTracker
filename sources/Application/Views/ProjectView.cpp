@@ -293,6 +293,11 @@ void ProjectView::DrawView() {
   drawMap();
 }
 
+void ProjectView::AlertRenderFail(const char *title) {
+  MessageBox *mb = MessageBox::Create(*this, title, "Rendering failed:", "Song row 00 has no phrases", MBBF_OK);
+  DoModal(mb);
+}
+
 void ProjectView::Update(Observable &, I_ObservableData *data) {
 
   if (!hasFocus_) {
@@ -385,14 +390,11 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
     case Token::ActionRenderMixdown:
       if (!player->IsRunning()) {
         if (!canRenderFromFirstSongRow()) {
-          MessageBox *mb =
-              MessageBox::Create(*this, "Render", "      Render failed", "Song row 00 has no phrases", MBBF_OK);
-          DoModal(mb);
+          AlertRenderFail("Mixdown");
           break;
         }
         // Show a dialog with a Stop button during rendering
-        RenderProgressModal *renderDialog =
-            RenderProgressModal::Create(*this, "Rendering", "", RenderProgressModal::ProgressDisplayMode::SongPercent);
+        RenderProgressModal *renderDialog = RenderProgressModal::Create(*this, "Mixdown", "Rendering" char_indicator_ellipsis_s, RenderProgressModal::ProgressDisplayMode::pdmPercentage);
         DoModal(renderDialog, ModalViewCallback::create<&RenderStopCallback>());
 
         // Start playback in rendering mode with MSM_FILE
@@ -402,14 +404,12 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
     case Token::ActionRenderStems:
       if (!player->IsRunning()) {
         if (!canRenderFromFirstSongRow()) {
-          MessageBox *mb =
-              MessageBox::Create(*this, "Render", "      Render failed", "Song row 00 has no phrases", MBBF_OK);
-          DoModal(mb);
+          AlertRenderFail("Stems Rendering");
           break;
         }
         // Show a dialog with a Stop button during rendering
         RenderProgressModal *renderDialog = RenderProgressModal::Create(
-            *this, "Stems Rendering", "", RenderProgressModal::ProgressDisplayMode::SongPercent);
+            *this, "Stems Rendering", "", RenderProgressModal::ProgressDisplayMode::pdmPercentage);
         DoModal(renderDialog, ModalViewCallback::create<&RenderStopCallback>());
 
         // Start playback in rendering mode with MSM_FILESPLIT

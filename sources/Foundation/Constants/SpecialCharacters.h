@@ -236,13 +236,33 @@ static const char char_ruler_lookup[] = {CHAR(char_h_ruler_0_s),
 
 #define char_v_bar(x) (char_v_bar_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
 
-static inline uint8_t map_255_to_bargraph(uint8_t value) {
+static inline uint8_t map_255_to_bargraph6(uint8_t value) {
   if (value <= 1) {
     return value + 1;
   } else if (value >= 254) {
     return value - 195;
   }
   return 2 + ((value - 1) * 55 + 126) / 250;
+}
+
+static inline uint8_t map_100_to_bargraph10(uint8_t value) {
+  if (value <= 1) {
+    return value + 1;
+  } else if (value >= 254) {
+    return value - 155;  // 254 → 99, 255 → 100
+  }
+
+  return 2 + ((value - 1) * 95 + 126) / 250;
+}
+
+static inline uint8_t map_255_to_bargraph10(uint8_t value) {
+  if (value <= 1) {
+    return value + 1;
+  } else if (value >= 254) {
+    return value - 155;  // 254 → 99, 255 → 100
+  }
+
+  return 2 + ((value - 1) * 95 + 126) / 250;
 }
 
 static inline uint8_t map_12_to_bargraph(uint8_t value) {
@@ -276,6 +296,29 @@ static inline void horizontal_bar_graph_6(char *buffer, uint8_t value) {
   }
 
   buffer[6] = 0;
+}
+
+static inline void horizontal_bar_graph_10(char *buffer, uint8_t value) {
+  int v = value;
+  bool lastWas9 = false;
+
+  for (int n = 0; n < 10; n++) {
+    if (lastWas9) {
+      buffer[n] = char_h_bar_lookup[11];
+      lastWas9 = false;
+    } else if (v >= 10) {
+      buffer[n] = char_h_bar_lookup[10];
+      lastWas9 = (v == 10);
+    } else if (v > 0) {
+      buffer[n] = char_h_bar_lookup[v];
+    } else {
+      buffer[n] = char_h_bar_lookup[0];
+    }
+
+    v -= 10;
+  }
+
+  buffer[10] = 0;
 }
 
 static inline void horizontal_ruler_6(char *buffer, uint8_t value) {

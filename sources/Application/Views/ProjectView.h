@@ -71,6 +71,8 @@ private:
   unsigned long lastTick_;
   unsigned long lastClock_;
 
+  void AlertRenderFail(const char *title);
+
   // Statically allocated field vectors
   etl::vector<UITempoField, 1> tempoField_;
   etl::vector<UIIntVarField, 5> intVarField_;
