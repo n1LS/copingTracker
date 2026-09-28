@@ -48,6 +48,7 @@ public:
   void DrawViewSample();
   void DrawViewSample_GMInstrument();
   void DrawViewStack();
+  void DrawViewLSDJKit();
   void AnimationUpdateSample();
   virtual void AnimationUpdate() override;
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
@@ -69,6 +70,7 @@ protected:
   void fillDrumParameters();
   void fillStackParameters();
   void fillNoneParameters();
+  void fillLSDJKitParameters();
   I_Instrument *getInstrument();
   void Update(Observable &o, I_ObservableData *d);
   void refreshInstrumentFields();

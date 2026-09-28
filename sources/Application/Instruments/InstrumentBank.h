@@ -18,6 +18,7 @@
 #include "ChiptuneInstrument/ChiptuneInstrument.h"
 #include "DrumInstrument/DrumInstrument.h"
 #include "Externals/etl/include/etl/variant_pool.h"
+#include "LSDJKitInstrument/LSDJKitInstrument.h"
 #include "MidiInstrument.h"
 #include "NoneInstrument.h"
 #include "SampleInstrument.h"
@@ -60,7 +61,7 @@ public:
 private:
   etl::array<I_Instrument *, MAX_INSTRUMENT_COUNT> instruments_;
   etl::variant_pool<MAX_INSTRUMENT_COUNT, SampleInstrument, MidiInstrument, ChiptuneInstrument, DrumInstrument,
-                    StackInstrument>
+                    StackInstrument, LSDJKitInstrument>
       instrumentPool_;
   NoneInstrument none_ = NoneInstrument();
   uint16_t sidOscCount = 0;

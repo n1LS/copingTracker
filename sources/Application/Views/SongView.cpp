@@ -802,6 +802,7 @@ void SongView::DrawView() {
   DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song %s" : "Live %s", v->GetString().c_str());
 
   // Compute song grid location
+
   GUIPoint anchor = GetAnchor();
 
   // Draw section header

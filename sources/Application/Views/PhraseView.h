@@ -46,6 +46,7 @@ public:
   void Reset();
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
+  void DrawEditingValue();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
@@ -85,7 +86,7 @@ protected:
   void processSelectionButtonMask(uint16_t mask);
 
   void setTextProps(int row, int col, Color textColor, int limit);
-  bool getEffectiveInstrumentForRow(int row, uint8_t &instrumentId) const;
+  uint8_t getEffectiveInstrumentForRow(int row);
 
 private:
   int row_;
@@ -112,6 +113,7 @@ private:
 
   PhraseColumn saveCol_;
   int saveRow_;
+  int expandFrame_ = 0;
 
   // Flags to track which UI elements need updating
   // These prevent core1 from directly updating the UI

@@ -57,6 +57,14 @@ void mirrorUI_sendCommand(mirrorUICommand *command) {
   tud_cdc_write_flush(); // flush once at end
 }
 
+// Emit the run of characters accumulated in command_.payload. The payload
+// holds a 4 byte header (cmd, length, x, y) followed by 3 bytes per character.
+static void sendCharacterRun(int length) {
+  command_.payload[1] = length;
+  command_.payloadSize = length * 3 + 4;
+  mirrorUI_sendCommand(&command_);
+}
+
 void mirrorUI_flush(ScreenCharacter *screen, uint8_t *colors, bool *changed, bool fullUpdate) {
   int index = 0;
 
@@ -96,9 +104,7 @@ void mirrorUI_flush(ScreenCharacter *screen, uint8_t *colors, bool *changed, boo
             length++;
           } else {
             // done with this block, output
-            command_.payload[1] = length;
-            command_.payloadSize = length * 3 + 4; // TODO nILS: DRY. this happens twice, clean up into single occurence
-            mirrorUI_sendCommand(&command_);
+            sendCharacterRun(length);
             // clear
             length = 0;
             // reset state
@@ -111,9 +117,7 @@ void mirrorUI_flush(ScreenCharacter *screen, uint8_t *colors, bool *changed, boo
 
     if (state == IN_CHANGED) {
       // ended with a block at the end of the row
-      command_.payload[1] = length;
-      command_.payloadSize = length * 3 + 4;
-      mirrorUI_sendCommand(&command_);
+      sendCharacterRun(length);
     }
   }
 }

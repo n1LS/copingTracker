@@ -155,7 +155,7 @@ void ThemeView::DrawView() {
   // just draw the RGB column headings directly:
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::inactive);
-  DrawString(21, 7, "R  G  B");
+  DrawString(21, 6, "R  G  B");
 }
 
 void ThemeView::addSwatchField(Color color, GUIPoint position) {

@@ -1,6 +1,7 @@
 add_library(application_instruments
   ChiptuneInstrument/ChiptuneInstrument.cpp
   DrumInstrument/DrumInstrument.cpp
+  LSDJKitInstrument/LSDJKitInstrument.cpp
   StackInstrument/StackInstrument.cpp
   CommandList.cpp
   Filters.cpp
@@ -34,6 +35,7 @@ target_include_directories(application_instruments PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/ChiptuneInstrument
   ${CMAKE_CURRENT_SOURCE_DIR}/DrumInstrument
+  ${CMAKE_CURRENT_SOURCE_DIR}/LSDJKitInstrument
   ${CMAKE_CURRENT_SOURCE_DIR}/StackInstrument
 )
 

@@ -1,0 +1,203 @@
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Copyright (c) 2026 nILS Podewski
+ *
+ * This file is part of the copingTracker firmware
+ */
+
+#include "LSDJKitInstrument.h"
+#include "Foundation/Constants/SpecialCharacters.h"
+#include "I_Instrument.h"
+#include "LSDJKits.generated.h"
+#include <string.h>
+
+lsdjkit_voice_t LSDJKitInstrument::voices_[SONG_CHANNEL_COUNT];
+
+LSDJKitInstrument::LSDJKitInstrument()
+    : I_Instrument(&variables_),
+      vKit1_(Token::LSDJKitInstrumentKit1, lsdjKits::kitNames, lsdjKits::drum_kit_count, defaultKit1),
+      vKit2_(Token::LSDJKitInstrumentKit2, lsdjKits::kitNames, lsdjKits::drum_kit_count, defaultKit2),
+      vBitDepth_(Token::LSDJKitInstrumentBitDepth, defaultBitDepth) {
+  // Initialize exported variables
+  // name_ is now an etl::string in the base class, not a Variable
+  variables_.insert(variables_.end(), &vKit1_);
+  variables_.insert(variables_.end(), &vKit2_);
+  variables_.insert(variables_.end(), &vBitDepth_);
+
+  InsertBaseVariables();
+}
+
+void LSDJKitInstrument::Stop(int channel) {
+  voices_[channel].stop();
+}
+
+bool LSDJKitInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
+  // get the instrument parameters from the instrument and pass them to the
+  // current voice
+  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
+
+  voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters(note));
+
+  return true;
+}
+
+bool LSDJKitInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
+  // PROFILE_SCOPE("LSDJKitInstrument::Render");
+  lsdjkit_voice_t &v = voices_[channel];
+
+  for (int s = 0; s < size; s++) {
+    v.sample(buffer, buffer + 1);
+
+    // Output to both channels
+    buffer += 2;
+  }
+
+  return true;
+}
+
+void LSDJKitInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  switch (token) {
+    case Token::InstrumentCommandSetInstrumentParameter:
+      voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
+      break;
+
+    case Token::InstrumentCommandArpeggiator:
+      break;
+
+    case Token::InstrumentCommandKill:
+    case Token::InstrumentCommandGateOff:
+      voices_[channel].stop();
+      break;
+
+    case Token::InstrumentCommandCrush:
+      voices_[channel].bit_depth = std::min(std::max(value & 0x0f, 1), 8);
+      voices_[channel].drive = value >> 8;
+      break;
+
+    case Token::InstrumentCommandVibrato:
+      break;
+
+    case Token::InstrumentCommandPan:
+      break;
+
+    case Token::InstrumentCommandPitchSlide:
+      break;
+
+    case Token::InstrumentCommandLegato:
+      break;
+
+    case Token::InstrumentCommandVolume:
+      voices_[channel].volume = value & 0xff;
+      break;
+
+    case Token::InstrumentCommandPitchFineTune:
+      break;
+
+    case Token::InstrumentCommandInstrumentRetrigger:
+      break;
+  }
+}
+
+// TODO nILS: implement and adjust accordingly
+bool LSDJKitInstrument::SupportsCommand(Token token) {
+  return false;
+}
+
+void LSDJKitInstrument::SetStepVolume(int channel, uint8_t volume) {
+  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
+  voices_[channel].set_step_volume(calculatedVolume);
+}
+
+lsdjkit_parameters_t LSDJKitInstrument::getInstrumentParameters(uint8_t note) {
+  lsdjkit_parameters_t params;
+
+  params.kit1 = FindVariable(Token::LSDJKitInstrumentKit1)->GetInt();
+  params.kit2 = FindVariable(Token::LSDJKitInstrumentKit2)->GetInt();
+  params.bit_depth = FindVariable(Token::LSDJKitInstrumentBitDepth)->GetInt();
+
+  return params;
+}
+
+void LSDJKitInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
+  if (note <= LSDJKIT_HIGHEST_NOTE) {
+    Variable *vars[2] = {&vKit1_, &vKit2_};
+    int notes[2] = {note / 15, note % 15};
+
+    for (int n = 0; n < 2; n++) {
+      int kitId = vars[n]->GetInt();
+      const lsdjKits::Kit *kit = &lsdjKits::kits[kitId];
+      int sampleId = notes[n];
+
+      if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+        out[n * 2] = '-';
+      } else {
+        out[n * 2] = kit->samples[sampleId - 1].name[0];
+      }
+    }
+
+    out[1] = ':';
+    out[3] = 0;
+
+    return;
+  }
+
+  I_Instrument::noteDisplay(note, out);
+}
+
+void LSDJKitInstrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) {
+  if (note <= LSDJKIT_HIGHEST_NOTE) {
+    const char *hex = "-123456789ABCDEF";
+
+    Variable *vars[2] = {&vKit1_, &vKit2_};
+    int notes[2] = {note / 15, note % 15};
+
+    char *lines[2] = {line1, line2};
+
+    for (int n = 0; n < 2; n++) {
+      int kitId = vars[n]->GetInt();
+      const lsdjKits::Kit *kit = &lsdjKits::kits[kitId];
+      int sampleId = notes[n];
+
+      if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+        lines[n][0] = '-';
+        lines[n][1] = '-';
+      } else {
+        lines[n][0] = kit->samples[sampleId - 1].name[0];
+        lines[n][1] = kit->samples[sampleId - 1].name[1];
+      }
+    }
+
+    line1[2] = 0;
+    line2[2] = 0;
+
+    return;
+  }
+
+  I_Instrument::noteDisplayCondensed(note, line1, line2);
+}
+
+void LSDJKitInstrument::focusedNoteDisplay(uint8_t note, char (&line)[12]) {
+  Variable *vars[2] = {&vKit1_, &vKit2_};
+  int notes[2] = {note / 15, note % 15};
+
+  for (int n = 0; n < 2; n++) {
+    int kitId = vars[n]->GetInt();
+    const lsdjKits::Kit *kit = &lsdjKits::kits[kitId];
+
+    int sampleId = notes[n];
+
+    if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+      strcpy(line + 1 + n * 4, "---");
+    } else {
+      strcpy(line + 1 + n * 4, kit->samples[sampleId - 1].name);
+    }
+  }
+
+  // the second strcpy already terminated the string at line[7]
+
+  line[0] = CHAR(char_button_up_down_s);
+  line[4] = ':';
+  line[8] = CHAR(char_button_left_right_s);
+  line[9] = '\0';
+}

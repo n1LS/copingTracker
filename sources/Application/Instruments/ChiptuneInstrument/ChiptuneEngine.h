@@ -596,14 +596,13 @@ typedef struct voice_t {
   }
 
   void set_instrument_parameter(uint8_t param, uint8_t value) {
-    Trace::Error("Set parameter %d to %d", param, value);
     switch (param) {
       case 0:                                                                             // waveform
         wave = static_cast<chiptune_wave_type_e>(std::min(value, (uint8_t)waveLastItem)); // clamp to valid range
         break;
       case 1:                                 // transpose
         parameters.transpose = (int8_t)value; // reinterpret as signed
-        // TODO nILS: there's more to this in the case of ARP or the likes
+        // TODO nILS: there's more to this in the case of ARP or the likes currently running
         break;
       case 2: // level
         volume.level = value;

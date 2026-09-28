@@ -22,6 +22,28 @@
 #define gchar_cup_2 "\x52"
 #define gchar_cup_3 "\x53"
 
+#define gchar_icon_yes "\x60"
+#define gchar_icon_no "\x61"
+#define gchar_icon_info "\x62"
+#define gchar_icon_warning "\x63"
+
+#define char_v_bar_0_s " "
+#define char_v_bar_1_s "\xA0"
+#define char_v_bar_2_s "\xA1"
+#define char_v_bar_3_s "\xA2"
+#define char_v_bar_4_s "\xA3"
+#define char_v_bar_5_s "\xA4"
+#define char_v_bar_6_s "\xA5"
+#define char_v_bar_7_s "\xA6"
+#define char_v_bar_8_s "\xA7"
+#define char_v_bar_9_s "\xA8"
+#define char_v_bar_10_s "\xA9"
+
+static const char char_v_bar_lookup[] = {CHAR(char_v_bar_0_s), CHAR(char_v_bar_1_s), CHAR(char_v_bar_2_s),
+                                         CHAR(char_v_bar_3_s), CHAR(char_v_bar_4_s), CHAR(char_v_bar_5_s),
+                                         CHAR(char_v_bar_6_s), CHAR(char_v_bar_7_s), CHAR(char_v_bar_8_s),
+                                         CHAR(char_v_bar_9_s), CHAR(char_v_bar_10_s)};
+
 /*
 static void drawPiano(uint16_t keys, char upper[8], char lower[8]) {
     // White keys: C D E F G A B

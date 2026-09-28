@@ -173,6 +173,6 @@ void ToastView::Draw(GUIWindow &w) {
   SetBackgroundColor(Theme::Dialog::bg);
 
   if (iconY < SCREEN_HEIGHT) {
-    DrawString(2, iconY, type_.symbol);
+    DrawString(2, iconY, type_.symbol, fGraphic);
   }
 }

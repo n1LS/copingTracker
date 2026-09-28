@@ -73,7 +73,7 @@ private:
   int progressChannel_ = -1;
   bool startSongRowCaptured_ = false;
 
-    uint8_t percentDone_;
+  uint8_t percentDone_;
 
   unsigned int animationFrame_ = 0;
 

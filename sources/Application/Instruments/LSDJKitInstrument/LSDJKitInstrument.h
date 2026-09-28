@@ -11,15 +11,18 @@
 #include "Application/Instruments/I_Instrument.h"
 #include "Application/Model/Song.h"
 #include "Application/Persistency/PersistenceConstants.h"
-#include "DrumEngine.h"
+#include "LSDJKitEngine.h"
 #include "System/Console/Trace.h"
 #include <cstdint>
 
-class DrumInstrument : public I_Instrument {
+// two kits of 15 samples each, encoded as note = kit1Sample * 15 + kit2Sample
+#define LSDJKIT_HIGHEST_NOTE 225
+
+class LSDJKitInstrument : public I_Instrument {
 
 public:
-  DrumInstrument();
-  virtual ~DrumInstrument() {};
+  LSDJKitInstrument();
+  virtual ~LSDJKitInstrument() {};
 
   virtual bool Init() {
     return true;
@@ -34,8 +37,16 @@ public:
   bool SupportsCommand(Token token);
 
   virtual InstrumentType GetType() {
-    return IT_DRUM;
-  };
+    return IT_LSDJKIT;
+  }
+
+  virtual bool SupportsScales() override {
+    return false;
+  }
+
+  virtual uint8_t GetHighestNote() override {
+    return LSDJKIT_HIGHEST_NOTE;
+  }
 
   // Start & stop the instument
   virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true);
@@ -63,36 +74,27 @@ public:
     return &variables_;
   }
 
-  virtual bool SupportsScales() override {
-    return false;
-  }
-
   void setChannel(uint8_t channel);
 
   void noteDisplay(uint8_t note, char (&out)[4]) override;
   void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) override;
+  void focusedNoteDisplay(uint8_t note, char (&line)[12]);
+
+  virtual int GetNoteIncrement(bool small) override {
+    return small ? 1 : 15;
+  }
 
 private:
-  static drum_voice_t voices_[SONG_CHANNEL_COUNT];
+  static lsdjkit_voice_t voices_[SONG_CHANNEL_COUNT];
 
-  etl::list<Variable *, 17> variables_;
+  etl::list<Variable *, 7> variables_;
 
-  Variable vVoice0_;
-  Variable vVoice1_;
-  Variable vVoice2_;
-  Variable vVoice3_;
-  Variable vVoice4_;
-  Variable vVoice5_;
-  Variable vVoice6_;
-  Variable vVoice7_;
-  Variable vVoice8_;
-  Variable vVoice9_;
-  Variable vVoice10_;
-  Variable vVoice11_;
-
-  Variable vCharacter_;
+  Variable vKit1_;
+  Variable vKit2_;
+  Variable vBitDepth_;
 
   void RunCommand(int channel);
   void CommandInitArp(int channel, uint16_t value);
-  drum_parameters_t getInstrumentParameters(uint8_t note);
+
+  lsdjkit_parameters_t getInstrumentParameters(uint8_t note);
 };

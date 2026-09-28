@@ -17,6 +17,7 @@
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Foundation/Constants/GraphicCharacters.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalView.h"
 #include "System/Console/Trace.h"
@@ -286,7 +287,6 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 
   if (forceRedraw || leftChanged || rightChanged) {
     // If forcing redraw or level changed, redraw the entire meter
-
     // Then draw the active cells with inversion enabled
 
     for (int i = 0; i < VU_METER_HEIGHT; i++) {
@@ -301,12 +301,12 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 
       // draw left channel if changed
       if (leftChanged) {
-        DrawChar(pos.x_, pos.y_ - i, char_v_bar(leftBars - 10 * i));
+        DrawChar(pos.x_, pos.y_ - i, char_v_bar(leftBars - 10 * i), fGraphic);
       }
 
       // draw right channel if changed
       if (rightChanged) {
-        DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(rightBars - 10 * i));
+        DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(rightBars - 10 * i), fGraphic);
       }
     }
   }
@@ -771,7 +771,7 @@ void View::drawRowNumbers(int x, int y, int start, int numRows, int limit) {
     } else {
       SetColor(Theme::View::inactive);
     }
-    byteToHexString(j, row);
+    byteToHexString(index, row);
     DrawString(x, y + j, row);
   }
 }

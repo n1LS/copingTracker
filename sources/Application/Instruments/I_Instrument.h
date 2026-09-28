@@ -18,10 +18,11 @@
 #include "Application/Utils/fixed.h"
 #include "Application/Utils/stringutils.h"
 #include "Externals/etl/include/etl/string.h"
+#include "Foundation/Constants/SpecialCharacters.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
 
-enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_CHIPTUNE, IT_DRUM, IT_STACK, IT_MIDI, IT_LAST };
+enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_CHIPTUNE, IT_DRUM, IT_STACK, IT_LSDJKIT, IT_MIDI, IT_LAST };
 
 // non-linear volume (4-bit) mapping to volume scaler
 static const uint8_t volumeLUT[16] = {0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 160, 193, 228, 245, 255};
@@ -29,16 +30,30 @@ static const uint8_t volumeLUT[16] = {0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 
 typedef struct InstrumentTypeName {
   const char *full;
   const char *compact;
+  const char *persistence;
 } InstrumentTypeName;
 
 static const InstrumentTypeName InstrumentTypeNames[IT_LAST] = {
-    {.full = "--", .compact = "--  "},   {.full = "Sample", .compact = "Smpl"}, {.full = "Chiptune", .compact = "Chip"},
-    {.full = "Drum", .compact = "Drum"}, {.full = "Stack", .compact = "Stck"},  {.full = "MIDI", .compact = "MIDI"},
+    {.full = "--", .compact = "--", .persistence = "none"},
+    {.full = "Sample", .compact = "Smpl", .persistence = "sample"},
+    {.full = "Chiptune", .compact = "Chip", .persistence = "chiptune"},
+    {.full = "Drum", .compact = "Drum", .persistence = "drum"},
+    {.full = "Stack", .compact = "Stck", .persistence = "stack"},
+    {.full = char_lsdj_s "Kit", .compact = char_lsdj_s "Kt", .persistence = "lsdj-kit"},
+    {.full = "MIDI", .compact = "MIDI", .persistence = "midi"},
 };
 
 static const char *LongInstrumentNames[IT_LAST] = {
     InstrumentTypeNames[IT_NONE].full, InstrumentTypeNames[IT_SAMPLE].full, InstrumentTypeNames[IT_CHIPTUNE].full,
-    InstrumentTypeNames[IT_DRUM].full, InstrumentTypeNames[IT_STACK].full,  InstrumentTypeNames[IT_MIDI].full,
+    InstrumentTypeNames[IT_DRUM].full, InstrumentTypeNames[IT_STACK].full,  InstrumentTypeNames[IT_LSDJKIT].full,
+    InstrumentTypeNames[IT_MIDI].full,
+};
+
+static const char *CompactInstrumentNames[IT_LAST] = {
+    InstrumentTypeNames[IT_NONE].compact,     InstrumentTypeNames[IT_SAMPLE].compact,
+    InstrumentTypeNames[IT_CHIPTUNE].compact, InstrumentTypeNames[IT_DRUM].compact,
+    InstrumentTypeNames[IT_STACK].compact,    InstrumentTypeNames[IT_LSDJKIT].compact,
+    InstrumentTypeNames[IT_MIDI].compact,
 };
 
 class I_Instrument : public VariableContainer, public Observable, public Persistent {
@@ -73,12 +88,24 @@ public:
 
   virtual bool IsInitialized() = 0;
 
+  virtual int GetNoteIncrement(bool small) {
+    return small ? 1 : 12;
+  }
   virtual void SetStepVolume(int channel, uint8_t volume) = 0;
 
   virtual bool IsEmpty() = 0;
+  virtual bool SupportsScales() {
+    return true;
+  }
+
+  // highest note that can be entered for this instrument in the phrase editor
+  virtual uint8_t GetHighestNote() {
+    return HIGHEST_NOTE;
+  }
 
   virtual void noteDisplay(uint8_t note, char (&out)[4]);
   virtual void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]);
+  virtual void focusedNoteDisplay(uint8_t note, char (&line)[12]);
 
   virtual InstrumentType GetType() = 0;
 

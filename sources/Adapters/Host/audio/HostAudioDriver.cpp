@@ -120,7 +120,7 @@ int HostAudioDriver::GetPlayedBufferPercentage() {
 }
 
 int HostAudioDriver::GetSampleRate() {
-    return obtained_spec_.freq;
+  return obtained_spec_.freq;
 }
 
 double HostAudioDriver::GetStreamTime() {

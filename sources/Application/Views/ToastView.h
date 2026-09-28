@@ -2,6 +2,7 @@
 
 #include "Application/AppWindow.h"
 #include "Application/Views/BaseClasses/View.h"
+#include "Foundation/Constants/GraphicCharacters.h"
 #include "System/System/System.h"
 #include <string.h>
 
@@ -18,10 +19,10 @@ enum ToastDuration {
   regular = 1500,
 };
 
-constexpr ToastType ttInfo = {"i", Theme::Dialog::Icon::info};
-constexpr ToastType ttError = {"X", Theme::Dialog::Icon::error};
-constexpr ToastType ttSuccess = {"I", Theme::Dialog::Icon::success};
-constexpr ToastType ttWarning = {"!", Theme::Dialog::Icon::warning};
+constexpr ToastType ttInfo = {gchar_icon_info, Theme::Dialog::Icon::info};
+constexpr ToastType ttError = {gchar_icon_no, Theme::Dialog::Icon::error};
+constexpr ToastType ttSuccess = {gchar_icon_yes, Theme::Dialog::Icon::success};
+constexpr ToastType ttWarning = {gchar_icon_warning, Theme::Dialog::Icon::warning};
 
 class ToastView : public View {
 public:
