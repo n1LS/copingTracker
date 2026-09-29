@@ -162,11 +162,13 @@ bool picoTrackerAudioDriver::InitDriver() {
   irq_set_exclusive_handler(DMA_IRQ_0 + AUDIO_DMA_IRQ, audio_i2s_dma_irq_handler);
   dma_irqn_set_channel_enabled(AUDIO_DMA_IRQ, AUDIO_DMA, true);
 
-  // Set PIO frequency
+  // Set PIO frequency. clk_sys is chosen in platform_init() precisely so that
+  // it divides evenly by the engine rate; assert the pairing still holds.
   uint32_t system_clock_frequency = clock_get_hz(clk_sys);
-  int sample_freq = 44100;
+  static_assert((220500000u * 2u) % SAMPLE_RATE_HZ == 0,
+                "clk_sys (220.5 MHz) must divide evenly by SAMPLE_RATE_HZ for an exact I2S clock");
   // This number is exactly 10000 for our 220.5MHz core freq
-  uint32_t divider = system_clock_frequency * 2 / sample_freq; // avoid arithmetic overflow
+  uint32_t divider = system_clock_frequency * 2 / SAMPLE_RATE_HZ; // avoid arithmetic overflow
   pio_sm_set_clkdiv_int_frac(AUDIO_PIO, AUDIO_SM, divider >> 8u, divider & 0xffu);
 
   // Enable audio

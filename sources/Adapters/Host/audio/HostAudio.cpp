@@ -9,6 +9,7 @@
 #include "HostAudio.h"
 #include "HostAudioDriver.h"
 #include "Services/Audio/AudioOutDriver.h"
+#include "config/AudioConstants.h"
 
 HostAudio::HostAudio(AudioSettings &hints) : Audio(hints) {
 }
@@ -39,14 +40,10 @@ void HostAudio::Init() {
 }
 
 int HostAudio::GetSampleRate() {
-  AudioOutDriver *out = static_cast<AudioOutDriver *>(GetFirstOutput());
-  if (!out) {
-    return 0;
-  }
-
-  HostAudioDriver *driver = static_cast<HostAudioDriver *>(out->GetDriver());
-
-  return driver->GetSampleRate();
+  // Build time constant rather than the opened device's rate: this used to
+  // return 0 before Init(), which fed a divide by zero into SyncMaster and
+  // SampleInstrument. InitDriver() refuses to start on a rate mismatch.
+  return SAMPLE_RATE_HZ;
 }
 
 void HostAudio::Close() {

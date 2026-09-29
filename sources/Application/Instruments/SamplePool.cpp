@@ -25,6 +25,7 @@
 #include "System/Memory/MemoryPool.h"
 #include "System/io/Status.h"
 #include "WavHeader.h"
+#include "config/AudioConstants.h"
 #include <System/Console/nanoprintf.h>
 #include <cstdint>
 #include <stdlib.h>
@@ -189,8 +190,10 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   const int32_t sourceSampleRate = wav.GetSampleRate(-1);
   const int32_t channelCount = wav.GetChannelCount(-1);
   const int32_t importResampler = Config::GetInstance()->GetValue(Token::VarImportResampler);
-  const bool shouldResample = (importResampler > 0) && (sourceSampleRate != 44100);
-  const int32_t outputSampleRate = shouldResample ? 44100 : sourceSampleRate;
+  // imports are resampled to the engine rate; sourceSampleRate is the
+  // incoming file's own rate and stays independent
+  const bool shouldResample = (importResampler > 0) && (sourceSampleRate != (int32_t)SAMPLE_RATE_HZ);
+  const int32_t outputSampleRate = shouldResample ? (int32_t)SAMPLE_RATE_HZ : sourceSampleRate;
 
   if (!WavHeaderWriter::WriteHeader(fout.get(), outputSampleRate, channelCount, 16)) {
     Trace::Error("Failed to write WAV header for:%s", projectSamplePath);
@@ -238,7 +241,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
     src_reset(resampler);
   }
 
-  const double srcRatio = shouldResample ? (44100.0 / static_cast<double>(sourceSampleRate)) : 1.0;
+  const double srcRatio = shouldResample ? (SAMPLE_RATE_F / static_cast<double>(sourceSampleRate)) : 1.0;
 
   while (true) {
     if (!shouldResample) {

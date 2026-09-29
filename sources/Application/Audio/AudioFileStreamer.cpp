@@ -17,6 +17,7 @@
 #include "System/FileSystem/FileSystem.h"
 #include "System/System/System.h"
 #include "System/io/Status.h"
+#include "config/AudioConstants.h"
 #include <string.h>
 #include <vector>
 
@@ -26,9 +27,9 @@ int16_t AudioFileStreamer::singleCycleBuffer_[SINGLE_CYCLE_MAX_SAMPLE_SIZE] = {0
 AudioFileStreamer::AudioFileStreamer() {
   mode_ = AFSM_STOPPED;
   position_ = 0;
-  fileSampleRate_ = 44100;   // Default
-  systemSampleRate_ = 44100; // Default
-  fpSpeed_ = FP_ONE;         // Default 1.0 in fixed point
+  fileSampleRate_ = SAMPLE_RATE_HZ;   // Default
+  systemSampleRate_ = SAMPLE_RATE_HZ; // Default
+  fpSpeed_ = FP_ONE;                  // Default 1.0 in fixed point
   project_ = NULL;
   singleCycleData_ = NULL;
   stopRequested_ = false;

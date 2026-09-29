@@ -14,11 +14,12 @@
 // Tables are precalculated rather than embedded to allow tweaking the
 // parameters of the functions (e.g. envelope curve) on the fly and to avoid
 // having to recalculate the table if the sample rate changes
+#include "config/AudioConstants.h"
 #include <array>
 #include <cmath>
 #include <cstdint>
 
-static constexpr float kSampleRate = 44100.0;
+static constexpr float kSampleRate = SAMPLE_RATE_F;
 
 // power function
 consteval double pow_ct(double base, double exp) {

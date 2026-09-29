@@ -13,6 +13,7 @@
 #include "Externals/SRC/common.h"
 #include "System/Console/Trace.h"
 #include "System/FileSystem/I_File.h"
+#include "config/AudioConstants.h"
 
 namespace {
 
@@ -192,8 +193,10 @@ etl::expected<WavHeaderInfo, WAVEFILE_ERROR> WavHeaderWriter::ReadHeader(I_File 
   }
 
   bool enableResampling = Config::GetInstance()->GetValue(Token::VarImportResampler) > 0;
-  if ((!enableResampling && info.sampleRate > 44100) || (info.sampleRate < 44100 / SRC_MAX_RATIO) ||
-      (info.sampleRate > 44100 * SRC_MAX_RATIO)) {
+  // bounds are expressed relative to the engine rate, since that is what the
+  // resampler has to reach from the incoming file's rate
+  if ((!enableResampling && info.sampleRate > SAMPLE_RATE_HZ) || (info.sampleRate < SAMPLE_RATE_HZ / SRC_MAX_RATIO) ||
+      (info.sampleRate > SAMPLE_RATE_HZ * SRC_MAX_RATIO)) {
     Trace::Error("WavHeaderWriter: Unsupported sample rate %u", info.sampleRate);
     return etl::unexpected(UNSUPPORTED_SAMPLERATE);
   }
