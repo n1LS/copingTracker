@@ -388,7 +388,7 @@ void MixerView::AnimationUpdate() {
   // This ensures all UI drawing happens in the same thread (core0)
   if (needsPlayTimeUpdate_) {
     // explicitly position timer directly next to the battery gauge
-    GUIPoint timePos = {SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 6, 0};
+    GUIPoint timePos = {SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 8, 0};
     SetColor(Theme::View::Title::fg);
     SetBackgroundColor(Theme::View::Title::bg);
     drawPlayTime(player, timePos);

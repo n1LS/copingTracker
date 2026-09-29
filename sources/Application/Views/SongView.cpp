@@ -965,13 +965,14 @@ void SongView::AnimationUpdate() {
 
   // Always update VU meter even if other parts of UI dont need updating
   drawMasterVuMeter(player);
+  drawTitleVuMeter(player);
 
   // Use the consolidated flag for all UI updates
   if (needsUIUpdate_) {
     drawNotes();
 
     // Only handle play time updates if needed
-    GUIPoint timePos = {SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 6, 0};
+    GUIPoint timePos = {SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 8, 0};
     SetColor(Theme::View::Title::fg);
     SetBackgroundColor(Theme::View::Title::bg);
 

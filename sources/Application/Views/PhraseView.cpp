@@ -1439,9 +1439,6 @@ void PhraseView::AnimationUpdate() {
     return;
   }
 
-  // Always update VU meter even if other parts of UI dont need updating
-  drawMasterVuMeter(player, false, 25);
-
   // Handle any pending updates from OnPlayerUpdate using the consolidated flag
   // This ensures all UI drawing happens on the "main" thread (core0)
   if (needsUIUpdate_) {
