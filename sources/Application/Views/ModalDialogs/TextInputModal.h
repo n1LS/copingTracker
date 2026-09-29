@@ -41,8 +41,7 @@ public:
   virtual void OnFocus() override {
   }
   virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
-  virtual void AnimationUpdate() override {
-  }
+  virtual void AnimationUpdate() override;
 
   // Valid once the modal finished with TIM_ACCEPT.
   const etl::istring &GetValue() const {
@@ -59,10 +58,16 @@ private:
   // Number of columns actually occupied by the given grid row.
   uint8_t columnsInRow(uint8_t row) const;
 
+  // Cursor's on screen column, clipped to the last editable position.
+  uint8_t cursorColumn() const;
+
   void insertChar(char c);
   void deleteChar();
   void moveGrid(int8_t dx, int8_t dy);
   void drawHighlight(int x, int y, int width);
+  // Screen x and cell width of a grid cell. The SPACE cell on the last row
+  // spans several columns, every other cell is one character wide.
+  void cellGeometry(uint8_t row, uint8_t col, int &x, int &width) const;
 
   static bool inUse_;
   static void *storage_;
