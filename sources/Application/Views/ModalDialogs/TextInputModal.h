@@ -71,9 +71,9 @@ private:
   etl::string<MAX_TEXT_INPUT_LABEL_LENGTH> label_;
 
   uint8_t maxLength_;
-  uint8_t cursor_ = 0;   // insertion point within value_
-  uint8_t gridRow_ = 0;  // 0..3
-  uint8_t gridCol_ = 0;  // 0..12
+  uint8_t cursor_ = 0;  // insertion point within value_
+  uint8_t gridRow_ = 0; // 0..3
+  uint8_t gridCol_ = 0; // 0..12
   bool upperCase_ = true;
 };
 

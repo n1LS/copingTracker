@@ -258,14 +258,18 @@ void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width, uint8_t height
     width -= x + width - CHARGFX_TEXT_WIDTH;
   }
 
+  // One pulse step per frame, not per row: keeping this inside the dy loop
+  // made multi-row focus rects pulse N times faster and shaded each row
+  // differently.
+  static uint8_t pulse = 0;
+  pulse++;
+
   for (int dy = 0; dy < height; dy++) {
     for (int i = 0; i < width; ++i) {
       int idx = (y + dy) * CHARGFX_TEXT_WIDTH + (x + i);
       changed[idx] = true;
     }
-    static uint8_t pulse = 0;
-    pulse++;
-  
+
     for (int i = 0; i < width; ++i) {
       int idx = (y + dy) * CHARGFX_TEXT_WIDTH + (x + i);
       ScreenCharacter ch = screen[idx];

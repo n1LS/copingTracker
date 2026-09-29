@@ -69,7 +69,8 @@ public:
   virtual uint8_t GetEditorMaxLength() {
     return 0;
   }
-  virtual void ApplyEditedValue(const char *value) {}
+  virtual void ApplyEditedValue(const char *value) {
+  }
   void SetFocus();
   void ClearFocus();
   void SetActive(bool active);

@@ -19,8 +19,8 @@
 #define GRID_ROWS 4
 #define GRID_X0 0 // leaves column 0 free for the first column's corner glyphs
 #define GRID_Y0 3 // row 0's highlight corners sit at y=2, clear of the cursor at y=1
-#define CELL_W 2 // characters sit every other column
-#define CELL_H 2 // ... and every other row
+#define CELL_W 2  // characters sit every other column
+#define CELL_H 2  // ... and every other row
 
 #define CONTENT_W (GRID_X0 + (GRID_COLS - 1) * CELL_W + 1) // 27
 #define CONTENT_H 14
@@ -153,7 +153,7 @@ void TextInputModal::drawHighlight(int x, int y, int width) {
   DrawChar(x - 1, y - 1, CHAR(char_filledHalfBorder_topLeft_s), fRegular, true);
   DrawChar(x - 1, y, CHAR(char_block_left_s));
   DrawChar(x - 1, y + 1, CHAR(char_filledHalfBorder_bottomLeft_s), fRegular, true);
-  
+
   DrawChar(x + width, y - 1, CHAR(char_filledHalfBorder_topRight_s), fRegular, true);
   DrawChar(x + width, y, CHAR(char_block_right_s));
   DrawChar(x + width, y + 1, CHAR(char_filledHalfBorder_bottomRight_s), fRegular, true);
@@ -178,7 +178,7 @@ void TextInputModal::DrawView() {
 
   SetBackgroundColor(Theme::Dialog::bg);
   SetColor(Theme::Dialog::Selectable::fg(true));
-  DrawChar(x  -1, 0, CHAR(char_button_border_left_s));
+  DrawChar(x - 1, 0, CHAR(char_button_border_left_s));
   DrawChar(x + maxLength_, 0, CHAR(char_button_border_right_s));
 
   SetColor(Theme::Dialog::Selectable::bg(true));
@@ -215,15 +215,18 @@ void TextInputModal::DrawView() {
   }
 
   // The space cell needs a visible affordance, it is otherwise blank.
-  
+
   bool active = gridRow_ == 3;
   SetColor(Theme::Dialog::Selectable::fg(active));
   SetBackgroundColor(Theme::Dialog::Selectable::bg(active));
-  DrawString(GRID_X0, GRID_Y0 + ROW_SPACE * CELL_H, "Space");
+  DrawString(GRID_X0 + CONTENT_W / 2 - 3, GRID_Y0 + ROW_SPACE * CELL_H, "Space");
 
   // --- highlight -----------------------------------------------------------
   int hx = GRID_X0 + gridCol_ * CELL_W;
   int hy = GRID_Y0 + gridRow_ * CELL_H;
+  if (active) {
+    hx += CONTENT_W / 2 - 3;
+  }
   int selWidth = (gridRow_ == 3) ? 5 : 1;
   drawHighlight(hx, hy, selWidth);
   focusRect_ = GUIRect(hx + left_ - 1, hy + top_ - 1, selWidth + 2, 3);
@@ -232,12 +235,12 @@ void TextInputModal::DrawView() {
   SetColor(Theme::Dialog::inactive);
   SetBackgroundColor(Theme::Dialog::bg);
   int ly = GRID_Y0 + (GRID_ROWS - 1) * CELL_H + 2;
-  DrawString(GRID_X0, ly,     char_key_play_s  " OK     ");
-  DrawString(GRID_X0, ly + 1, char_key_edit_s  " lower  " char_key_nav_s "+" char_key_left_s  " Abort");
+  DrawString(GRID_X0, ly, char_key_play_s " OK");
+  DrawString(GRID_X0, ly + 1, char_key_edit_s " lower     " char_key_nav_s "+" char_key_left_s " Abort");
   if (!upperCase_) {
     DrawString(GRID_X0 + 2, ly + 1, "UPPER");
   }
-  DrawString(GRID_X0, ly + 2, char_key_enter_s " Use    " char_key_alt_s "+" char_key_enter_s " Backspc");
+  DrawString(GRID_X0, ly + 2, char_key_enter_s " Use       " char_key_alt_s "+" char_key_enter_s " Backspc");
 }
 
 void TextInputModal::ProcessButtonMask(uint16_t mask, bool pressed) {

@@ -282,14 +282,14 @@ static uint16_t rgb565_brightness(uint16_t color, uint8_t brightness) {
   return SWAP_BYTES(adjusted);
 }
 
-inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width, int height) {
+// `pulse` is passed in rather than kept static here: this is called once per
+// row, so owning the counter would make a multi-row focus rect pulse N times
+// faster and shade each row differently.
+inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width, uint8_t pulse) {
   uint16_t screen_x = x * CHAR_WIDTH;
   uint16_t screen_y = (TEXT_HEIGHT - 1 - y) * CHAR_HEIGHT;
   uint16_t screen_width = width * CHAR_WIDTH;
   uint16_t screen_height = CHAR_HEIGHT;
-
-  static uint8_t pulse = 0;
-  pulse++;
 
   uint16_t currentPalette[16];
 
@@ -423,8 +423,12 @@ void chargfx_get_screen_storage(ScreenCharacter **outScreen, uint8_t **outColors
 
 void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   width = (x + width > TEXT_WIDTH) ? TEXT_WIDTH - x : width;
-  
+
+  // One pulse step per frame, shared by every row of the rect.
+  static uint8_t pulse = 0;
+  pulse++;
+
   for (int dy = 0; dy < height; dy++) {
-    chargfx_draw_highlight_region(x, y + dy, width);
+    chargfx_draw_highlight_region(x, y + dy, width, pulse);
   }
 }
