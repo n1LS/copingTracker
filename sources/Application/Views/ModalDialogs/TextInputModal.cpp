@@ -13,28 +13,38 @@
 
 // Grid geometry, in content relative character cells.
 //
-// Rows are spaced one blank row apart so the highlight corners drawn at
-// (x +- 1, y +- 1) never land on a neighbouring row's characters.
-#define GRID_COLS 13
+// Rows are spaced one blank row apart so the highlight brackets drawn at
+// (y +- 1) never land on a neighbouring row's characters. Columns are spaced
+// two apart for the same reason horizontally.
+#define GRID_COLS 11
 #define GRID_ROWS 4
-#define GRID_X0 0 // leaves column 0 free for the first column's corner glyphs
-#define GRID_Y0 3 // row 0's highlight corners sit at y=2, clear of the cursor at y=1
+#define GRID_X0 2 // leaves column 1 free for the first column's bracket
+#define GRID_Y0 7 // row 0's top bracket sits at y=6, clear of the cursor row
 #define CELL_W 2  // characters sit every other column
 #define CELL_H 2  // ... and every other row
 
-#define CONTENT_W (GRID_X0 + (GRID_COLS - 1) * CELL_W + 1) // 27
-#define CONTENT_H 14
+// Window spans the widest bracket plus a border column either side.
+#define WINDOW_W (GRID_X0 + (GRID_COLS - 1) * CELL_W + 3)
+#define WINDOW_H 19
 
-// Rows 0 and 1 hold the letters (case swapped by EDIT), row 2 the digits and
-// the filename safe punctuation, row 3 the single space cell. The character
-// repertoire deliberately matches getNext() in Application/Utils/stringutils.cpp
-// so that every value stays usable as a filename.
-static const char *kUpperRows[2] = {"ABCDEFGHIJKLM", "NOPQRSTUVWXYZ"};
-static const char *kLowerRows[2] = {"abcdefghijklm", "nopqrstuvwxyz"};
-static const char *kDigitRow = "0123456789-._";
+// The value field spans the same visual width as the character grid, so its
+// background lines up with the columns below it. The editable run is only
+// maxLength_ long; the remainder is background padding.
+#define FIELD_W ((GRID_COLS - 1) * CELL_W + 1)
 
-#define ROW_DIGITS 2
-#define ROW_SPACE 3
+// The character repertoire deliberately matches getNext() in
+// Application/Utils/stringutils.cpp so every value stays usable as a filename.
+// Rows 0-2 are letters and punctuation (letters case swapped by EDIT), row 3
+// holds the wide SPACE cell followed by '.' and the remaining digits.
+static const char *kUpperRows[3] = {"ABCDEFGHIJK", "LMNOPQRSTUV", "WXYZ_-01234"};
+static const char *kLowerRows[3] = {"abcdefghijk", "lmnopqrstuv", "wxyz_-01234"};
+static const char *kLastRow = ".56789";
+
+// Row 3 layout: the SPACE cell occupies columns 0..4, then kLastRow's
+// characters occupy columns 5..10.
+#define ROW_LAST 3
+#define SPACE_COLS 5
+#define SPACE_LABEL "  SPACE  "
 
 bool TextInputModal::inUse_ = false;
 alignas(TextInputModal) static unsigned char TextInputModalStorage[sizeof(TextInputModal)];
@@ -87,33 +97,52 @@ void TextInputModal::Destroy() {
 }
 
 uint8_t TextInputModal::columnsInRow(uint8_t row) const {
-  switch (row) {
-    case 0:
-    case 1:
-      return GRID_COLS;
-    case ROW_DIGITS:
-      return (uint8_t)strlen(kDigitRow);
-    case ROW_SPACE:
-    default:
-      return 1;
-  }
+  // Every row is the full width: on the last row the SPACE cell simply covers
+  // the first SPACE_COLS columns, so navigating over them lands on SPACE.
+  return GRID_COLS;
 }
 
 char TextInputModal::highlightedChar() const {
-  switch (gridRow_) {
-    case 0:
-    case 1:
-      return (upperCase_ ? kUpperRows : kLowerRows)[gridRow_][gridCol_];
-    case ROW_DIGITS:
-      return kDigitRow[gridCol_];
-    case ROW_SPACE:
-    default:
-      return ' ';
+  if (gridRow_ < ROW_LAST) {
+    return (upperCase_ ? kUpperRows : kLowerRows)[gridRow_][gridCol_];
   }
+  if (gridCol_ < SPACE_COLS) {
+    return ' ';
+  }
+  return kLastRow[gridCol_ - SPACE_COLS];
+}
+
+void TextInputModal::cellGeometry(uint8_t row, uint8_t col, int &x, int &width) const {
+  if (row == ROW_LAST && col < SPACE_COLS) {
+    // The SPACE cell is drawn as one wide button covering columns 0..4.
+    x = GRID_X0;
+    width = (int)strlen(SPACE_LABEL);
+    return;
+  }
+  x = GRID_X0 + col * CELL_W;
+  width = 1;
+}
+
+uint8_t TextInputModal::cursorColumn() const {
+  // The cursor sits at the insertion point, clipped to the last editable
+  // column so it stays inside the field when the value is full.
+  return (cursor_ >= maxLength_) ? (uint8_t)(maxLength_ - 1) : cursor_;
 }
 
 void TextInputModal::insertChar(char c) {
+  if (cursor_ >= maxLength_) {
+    // Field is full and the cursor has clipped to the last column: keep
+    // typing overwrites that character instead of doing nothing.
+    if (maxLength_ > 0) {
+      value_[maxLength_ - 1] = c;
+    }
+    return;
+  }
   if (value_.size() >= maxLength_) {
+    // Full, but the cursor is mid-string: overwrite in place rather than
+    // silently dropping the keypress.
+    value_[cursor_] = c;
+    cursor_++;
     return;
   }
   value_.insert(value_.begin() + cursor_, c);
@@ -134,14 +163,31 @@ void TextInputModal::moveGrid(int8_t dx, int8_t dy) {
   }
 
   if (dx != 0) {
-    uint8_t cols = columnsInRow(gridRow_);
-    gridCol_ = (uint8_t)((gridCol_ + dx + cols) % cols);
+    if (gridRow_ == ROW_LAST) {
+      // SPACE covers columns 0..SPACE_COLS-1 and behaves as a single cell, so
+      // step over the whole run in one move.
+      if (dx > 0) {
+        if (gridCol_ < SPACE_COLS) {
+          gridCol_ = SPACE_COLS;
+        } else if (gridCol_ + 1 >= GRID_COLS) {
+          gridCol_ = 0;
+        } else {
+          gridCol_++;
+        }
+      } else {
+        if (gridCol_ <= SPACE_COLS) {
+          gridCol_ = (gridCol_ == 0) ? (uint8_t)(GRID_COLS - 1) : 0;
+        } else {
+          gridCol_--;
+        }
+      }
+    } else {
+      gridCol_ = (uint8_t)((gridCol_ + dx + GRID_COLS) % GRID_COLS);
+    }
   }
-  // Moving onto a shorter row (digits, space) can leave the column past the
-  // end, so clamp after any move.
-  uint8_t cols = columnsInRow(gridRow_);
-  if (gridCol_ >= cols) {
-    gridCol_ = (uint8_t)(cols - 1);
+
+  if (gridCol_ >= GRID_COLS) {
+    gridCol_ = (uint8_t)(GRID_COLS - 1);
   }
 }
 
@@ -165,40 +211,31 @@ void TextInputModal::drawHighlight(int x, int y, int width) {
 }
 
 void TextInputModal::DrawView() {
-  SetWindow(CONTENT_W, CONTENT_H);
-  SetBackgroundColor(Theme::Dialog::bg);
+  // DrawWindow paints the frame, the title bar and the body fill. Position the
+  // window via left_/top_ and draw at (0,0): ModalView's DrawChar/DrawString
+  // overrides add the offset, so every coordinate here is window relative.
+  left_ = (SCREEN_WIDTH - WINDOW_W) / 2;
+  top_ = (SCREEN_HEIGHT - WINDOW_H) / 2;
+  DrawWindow(0, 0, WINDOW_W, WINDOW_H, label_.c_str());
 
-  // --- title and current value -------------------------------------------
-  int x = GRID_X0;
-  if (!label_.empty()) {
-    SetColor(Theme::Dialog::fg);
-    DrawString(x, 0, label_.c_str(), fBold);
-    x += (int)label_.size() + 1;
-  }
+  // --- current value ------------------------------------------------------
+  // Same bracketed treatment as the highlighted grid cell, drawn permanently.
+  const int fieldX = GRID_X0;
+  const int fieldY = 4;
+  drawHighlight(fieldX, fieldY, FIELD_W);
 
-  SetBackgroundColor(Theme::Dialog::bg);
+  // Background runs the full field width even though only the first
+  // maxLength_ cells are editable.
   SetColor(Theme::Dialog::Selectable::fg(true));
-  DrawChar(x - 1, 0, CHAR(char_button_border_left_s));
-  DrawChar(x + maxLength_, 0, CHAR(char_button_border_right_s));
-
-  SetColor(Theme::Dialog::Selectable::bg(true));
-  SetBackgroundColor(Theme::Dialog::Selectable::fg(true));
-  for (uint8_t i = 0; i < maxLength_; i++) {
-    char c = (i < value_.size()) ? value_[i] : ' ';
-    DrawChar(x + i, 0, c);
+  SetBackgroundColor(Theme::Dialog::Selectable::bg(true));
+  for (int i = 0; i < FIELD_W; i++) {
+    char c = (i < (int)value_.size()) ? value_[i] : ' ';
+    DrawChar(fieldX + i, fieldY, c);
   }
 
-  // Text cursor: a block under the insertion point.
-  SetBackgroundColor(Theme::Dialog::bg);
-  SetColor(Theme::Dialog::Selectable::bg(true));
-  DrawChar(x + cursor_, 1, CHAR(char_upper_cursor_s), fRegular, true);
-
-  // --- character grid ------------------------------------------------------
-  SetBackgroundColor(Theme::Dialog::bg);
-  SetColor(Theme::Dialog::fg);
-
+  // --- character grid -----------------------------------------------------
   const char **letterRows = upperCase_ ? kUpperRows : kLowerRows;
-  for (uint8_t r = 0; r < 2; r++) {
+  for (uint8_t r = 0; r < ROW_LAST; r++) {
     for (uint8_t c = 0; c < GRID_COLS; c++) {
       bool active = (r == gridRow_ && c == gridCol_);
       SetColor(Theme::Dialog::Selectable::fg(active));
@@ -207,40 +244,36 @@ void TextInputModal::DrawView() {
     }
   }
 
-  for (uint8_t c = 0; c < strlen(kDigitRow); c++) {
-    bool active = (gridRow_ == 2 && c == gridCol_);
+  const int lastY = GRID_Y0 + ROW_LAST * CELL_H;
+  bool spaceActive = (gridRow_ == ROW_LAST && gridCol_ < SPACE_COLS);
+  SetColor(Theme::Dialog::Selectable::fg(spaceActive));
+  SetBackgroundColor(Theme::Dialog::Selectable::bg(spaceActive));
+  DrawString(GRID_X0, lastY, SPACE_LABEL);
+
+  for (uint8_t i = 0; i < strlen(kLastRow); i++) {
+    uint8_t c = (uint8_t)(SPACE_COLS + i);
+    bool active = (gridRow_ == ROW_LAST && c == gridCol_);
     SetColor(Theme::Dialog::Selectable::fg(active));
     SetBackgroundColor(Theme::Dialog::Selectable::bg(active));
-    DrawChar(GRID_X0 + c * CELL_W, GRID_Y0 + ROW_DIGITS * CELL_H, kDigitRow[c]);
+    DrawChar(GRID_X0 + c * CELL_W, lastY, kLastRow[i]);
   }
 
-  // The space cell needs a visible affordance, it is otherwise blank.
-
-  bool active = gridRow_ == 3;
-  SetColor(Theme::Dialog::Selectable::fg(active));
-  SetBackgroundColor(Theme::Dialog::Selectable::bg(active));
-  DrawString(GRID_X0 + CONTENT_W / 2 - 3, GRID_Y0 + ROW_SPACE * CELL_H, "Space");
-
-  // --- highlight -----------------------------------------------------------
-  int hx = GRID_X0 + gridCol_ * CELL_W;
+  // --- highlight ----------------------------------------------------------
+  int hx, hw;
+  cellGeometry(gridRow_, gridCol_, hx, hw);
   int hy = GRID_Y0 + gridRow_ * CELL_H;
-  if (active) {
-    hx += CONTENT_W / 2 - 3;
-  }
-  int selWidth = (gridRow_ == 3) ? 5 : 1;
-  drawHighlight(hx, hy, selWidth);
-  focusRect_ = GUIRect(hx + left_ - 1, hy + top_ - 1, selWidth + 2, 3);
+  drawHighlight(hx, hy, hw);
+  focusRect_ = GUIRect(hx + left_ - 1, hy + top_ - 1, hw + 2, 3);
 
-  // --- legend --------------------------------------------------------------
+  // --- legend -------------------------------------------------------------
   SetColor(Theme::Dialog::inactive);
   SetBackgroundColor(Theme::Dialog::bg);
   int ly = GRID_Y0 + (GRID_ROWS - 1) * CELL_H + 2;
   DrawString(GRID_X0, ly, char_key_play_s " OK");
-  DrawString(GRID_X0, ly + 1, char_key_edit_s " lower     " char_key_nav_s "+" char_key_left_s " Abort");
-  if (!upperCase_) {
-    DrawString(GRID_X0 + 2, ly + 1, "UPPER");
-  }
-  DrawString(GRID_X0, ly + 2, char_key_enter_s " Use       " char_key_alt_s "+" char_key_enter_s " Backspc");
+  DrawString(GRID_X0, ly + 1, char_key_enter_s " Use");
+  DrawString(GRID_X0, ly + 2, upperCase_ ? char_key_edit_s " lower" : char_key_edit_s " UPPER");
+  DrawString(GRID_X0 + 9, ly + 1, char_key_nav_s "+" char_key_left_s " Abort");
+  DrawString(GRID_X0 + 9, ly + 2, char_key_alt_s "+" char_key_enter_s " Backspace");
 }
 
 void TextInputModal::ProcessButtonMask(uint16_t mask, bool pressed) {
@@ -291,4 +324,16 @@ void TextInputModal::ProcessButtonMask(uint16_t mask, bool pressed) {
     moveGrid(0, +1);
     isDirty_ = true;
   }
+}
+
+void TextInputModal::AnimationUpdate() {
+  // Text cursor sits on its own row below the field. It clips to the last
+  // editable column: once the value is full, typing overwrites there rather
+  // than running the cursor off the end.
+  bool visible = (AppWindow::GetInstance()->GetAnimationFrameCounter() >> 4) & 1;
+  char character = visible ? CHAR(char_block_top_s) : CHAR(char_upper_cursor_s);
+
+  SetBackgroundColor(Theme::Dialog::bg);
+  SetColor(Theme::Dialog::Selectable::bg(true));
+  DrawChar(GRID_X0 + cursorColumn(), 5, character);
 }
