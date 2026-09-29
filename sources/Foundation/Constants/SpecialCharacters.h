@@ -161,6 +161,8 @@
 #define char_border_double_verticalRight_s "\xCC"
 #define char_border_double_cross_s "\xCE"
 
+#define char_upper_cursor_s "\xCF"
+
 #define char_dotted_horizontal_s "\xC6"
 #define char_back_s "\xC7"
 

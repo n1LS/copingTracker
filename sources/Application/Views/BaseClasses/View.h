@@ -178,6 +178,7 @@ struct Theme {
   struct Dialog {
     FIXED(bg, LIGHT_GRAY)
     FIXED(fg, BLACK)
+    FIXED(inactive, DARK_GRAY)
 
     struct Icon {
       FIXED(info, LIGHT_YELLOW);
@@ -194,6 +195,11 @@ struct Theme {
     struct Button {
       SWITCHABLE(fg, BLACK, WHITE)
       SWITCHABLE(bg, LIGHT_GREEN, DARK_GRAY)
+    };
+
+    struct Selectable {
+      SWITCHABLE(fg, WHITE, BLACK)
+      SWITCHABLE(bg, BLACK, LIGHT_GRAY)
     };
   };
 

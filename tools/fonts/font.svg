@@ -27,9 +27,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="28.378952"
-     inkscape:cx="561.84246"
-     inkscape:cy="64.889641"
+     inkscape:zoom="1.8847159"
+     inkscape:cx="181.19442"
+     inkscape:cy="145.11471"
      inkscape:document-units="px"
      inkscape:current-layer="layer4"
      showgrid="true"
@@ -15178,4 +15178,13 @@
        style="font-size:6.53197px;line-height:1.125;font-family:'C64 Pro Mono';-inkscape-font-specification:'C64 Pro Mono';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;stroke-width:0.707105px"
        d="m 576,206 v -1 h 1 v 1 z"
        id="path895"
-       aria-label="-" /></g></svg>
+       aria-label="-" /><path
+       id="path53"
+       style="display:inline;overflow:visible;fill:#000000;stroke-width:2.5;marker:none;enable-background:accumulate"
+       d="m 150,264 h 10 v 2 h -10 z" /><path
+       id="path74"
+       style="display:inline;overflow:visible;fill:#000000;stroke-width:2.5;marker:none;enable-background:accumulate"
+       d="m 330,264 h 10 v 2 h -10 z" /><path
+       id="path77"
+       style="display:inline;overflow:visible;fill:#000000;stroke-width:2.5;marker:none;enable-background:accumulate"
+       d="m 510,264 h 10 v 2 h -10 z" /></g></svg>

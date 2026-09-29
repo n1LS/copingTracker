@@ -194,7 +194,7 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   int xalign = position.x_;
 
   v = project_->FindVariable(Token::VarProjectName);
-  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Project   :");
+  auto label = etl::make_string_with_capacity<MAX_UITEXTFIELD_LABEL_LENGTH>("Project");
   auto defaultName = etl::make_string_with_capacity<MAX_PROJECT_NAME_LENGTH>(UNNAMED_PROJECT_NAME);
   textField_.emplace_back(*v, position, label, Token::ActionProjectRename, defaultName);
   nameField_ = &textField_.back();
