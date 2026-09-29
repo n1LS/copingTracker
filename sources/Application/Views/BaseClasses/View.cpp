@@ -549,10 +549,10 @@ void View::DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool 
   }
 }
 
-int View::DrawButton(int x, int y, const char *title, bool selected) {
+int View::DrawButton(int x, int y, const char *title, bool selected, Color background) {
   int len = (int)strlen(title);
 
-  SetBackgroundColor(Theme::View::bg);
+  SetBackgroundColor(background);
   SetColor(Theme::View::Button::bg(selected));
   DrawString(x, y, char_button_border_left_s);
 
@@ -560,7 +560,7 @@ int View::DrawButton(int x, int y, const char *title, bool selected) {
   SetColor(Theme::View::Button::fg(selected));
   DrawString(x + 1, y, title);
 
-  SetBackgroundColor(Theme::View::bg);
+  SetBackgroundColor(background);
   SetColor(Theme::View::Button::bg(selected));
   DrawString(x + 1 + len, y, char_button_border_right_s);
 

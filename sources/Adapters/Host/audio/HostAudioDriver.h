@@ -35,6 +35,8 @@ public:
   virtual bool StartDriver() override;
   virtual void StopDriver() override;
 
+  virtual int GetSampleRate() override;
+
   void AddBuffer(short *buffer, int samplecount) override;
 
   virtual bool Interlaced() override {

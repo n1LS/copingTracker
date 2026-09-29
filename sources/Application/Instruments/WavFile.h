@@ -35,7 +35,7 @@ public:
   virtual void *GetSampleBuffer(int note);
   void SetSampleBuffer(int16_t *ptr);
   virtual int GetSize(int note);
-  virtual int GetSampleRate(int note);
+  virtual int GetSampleRate(int note) override;
   virtual int GetChannelCount(int note);
   virtual int GetRootNote(int note);
   bool GetBuffer(long start, long sampleCount); // values in samples

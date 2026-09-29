@@ -146,32 +146,32 @@ void InstrumentView::DrawViewStack() {
 
   // volume
   var = instrument->FindVariable(Token::InstrumentParameterVolume);
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 4, buffer);
  
   // attack
   var = instrument->FindVariable(Token::StackInstrumentAttack);
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 6, buffer);
  
   // decay
   var = instrument->FindVariable(Token::StackInstrumentDecay);
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 7, buffer);
 
   // sustain
   var = instrument->FindVariable(Token::StackInstrumentSustain);
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 8, buffer);
 
   // release
   var = instrument->FindVariable(Token::StackInstrumentRelease);
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 9, buffer);
 
   // spread
   var = instrument->FindVariable(Token::StackInstrumentSpread);
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 11, buffer);
 
   // brightness
@@ -181,7 +181,7 @@ void InstrumentView::DrawViewStack() {
 
   // glide
   var = instrument->FindVariable(Token::StackInstrumentGlide);
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
   DrawString(p.x_ + 18, p.y_ + 13, buffer);
 */
 }

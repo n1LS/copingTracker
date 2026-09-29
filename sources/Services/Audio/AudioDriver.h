@@ -67,6 +67,8 @@ public:
   virtual void OnAudioActive(bool active) {
   }
 
+  virtual int GetSampleRate() = 0;
+
   virtual double GetStreamTime() = 0; // in secs
 
   virtual void AddBuffer(short *buffer, int size); // size in samples

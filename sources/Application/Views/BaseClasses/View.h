@@ -329,8 +329,10 @@ protected:
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);
   void DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half);
   void DrawWindow(int32_t x, int32_t y, int32_t width, int32_t height, const char *title);
-  int DrawButton(int x, int y, const char *title, bool selected); // returns width of the drawn button
-  int DrawTab(int x, int y, const char *title, bool selected);    // returns width of the drawn tab
+  // returns width of the drawn button
+  int DrawButton(int x, int y, const char *title, bool selected, Color background = Theme::View::bg);
+  // returns width of the drawn tab
+  int DrawTab(int x, int y, const char *title, bool selected);
 
   static int32_t amplitudeToBar(uint16_t level) {
     int dB = amplitudeToDb(level);

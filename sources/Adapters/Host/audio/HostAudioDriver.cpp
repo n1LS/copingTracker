@@ -119,6 +119,10 @@ int HostAudioDriver::GetPlayedBufferPercentage() {
   return std::max(0, 100 - (queued * 100 / max));
 }
 
+int HostAudioDriver::GetSampleRate() {
+    return obtained_spec_.freq;
+}
+
 double HostAudioDriver::GetStreamTime() {
   auto now = std::chrono::system_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time_);

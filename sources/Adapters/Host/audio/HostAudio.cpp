@@ -38,7 +38,18 @@ void HostAudio::Init() {
   }
 }
 
+int HostAudio::GetSampleRate() {
+  AudioOutDriver *out = static_cast<AudioOutDriver *>(GetFirstOutput());
+  if (!out) {
+    return 0;
+  }
+
+  HostAudioDriver *driver = static_cast<HostAudioDriver *>(out->GetDriver());
+
+  return driver->GetSampleRate();
+}
+
 void HostAudio::Close() {
-  // Audio::Close() is not implemented in the base class
-  // Just stub this for now
+  AudioOutDriver *out = static_cast<AudioOutDriver *>(GetFirstOutput());
+  out->Close();
 }

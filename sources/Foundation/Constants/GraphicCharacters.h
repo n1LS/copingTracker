@@ -17,6 +17,11 @@
 #define gchar_key_hi_8 "\x09\x0a\x0b\x09\x0a\x0a\x0b"
 #define gchar_key_hi_a "\x09\x0a\x0b\x09\x0a\x0a\x0b"
 
+#define gchar_cup_0 "\x50"
+#define gchar_cup_1 "\x51"
+#define gchar_cup_2 "\x52"
+#define gchar_cup_3 "\x53"
+
 /*
 static void drawPiano(uint16_t keys, char upper[8], char lower[8]) {
     // White keys: C D E F G A B

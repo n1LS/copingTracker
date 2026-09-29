@@ -10,12 +10,40 @@
  */
 
 #include "RenderProgressModal.h"
+#include "Application/AppWindow.h"
 #include "Application/Player/Player.h"
 #include "Application/Views/BaseClasses/View.h"
+#include "Foundation/Constants/GraphicCharacters.h"
+#include "Foundation/Constants/SpecialCharacters.h"
+#include "Services/Audio/Audio.h"
 #include "UIFramework/BasicDatas/GUIPoint.h"
 #include <cstdint>
 #include <new>
 #include <stdio.h>
+#include <nanoprintf.h>
+
+static const char *messages[20] = {
+  "Cooking" char_indicator_ellipsis_s,
+  "Blending" char_indicator_ellipsis_s,
+  "Converting" char_indicator_ellipsis_s,
+  "Polishing" char_indicator_ellipsis_s,
+  "Fine-tuning" char_indicator_ellipsis_s,
+  "Balancing" char_indicator_ellipsis_s,
+  "Processing" char_indicator_ellipsis_s,
+  "Assembling" char_indicator_ellipsis_s,
+  "Combining" char_indicator_ellipsis_s,
+  "Mixing tracks" char_indicator_ellipsis_s,
+  "Shaping sound" char_indicator_ellipsis_s,
+  "Adding shine" char_indicator_ellipsis_s,
+  "One more pass" char_indicator_ellipsis_s,
+  "Making magic" char_indicator_ellipsis_s,
+  "Building mix" char_indicator_ellipsis_s,
+  "Exporting" char_indicator_ellipsis_s,
+  "Wrapping up" char_indicator_ellipsis_s,
+  "Finalizing" char_indicator_ellipsis_s,
+  "Almost there" char_indicator_ellipsis_s,
+  "Finishing up" char_indicator_ellipsis_s,
+};
 
 bool RenderProgressModal::inUse_ = false;
 alignas(RenderProgressModal) static unsigned char RenderProgressModalStorage[sizeof(RenderProgressModal)];
@@ -36,13 +64,6 @@ RenderProgressModal::RenderProgressModal(View &view, const char *title, const ch
                                          ProgressDisplayMode progressDisplayMode)
     : ModalView(view), title_(title), message_(message), totalSamples_(0.0f),
       progressDisplayMode_(progressDisplayMode) {
-  dialogWidth_ = (uint32_t)title_.size();
-  if (message_.size() > dialogWidth_) {
-    dialogWidth_ = (uint32_t)message_.size();
-  }
-  if (dialogWidth_ < 16u) {
-    dialogWidth_ = 16u;
-  }
 }
 
 RenderProgressModal::~RenderProgressModal() {
@@ -55,33 +76,14 @@ void RenderProgressModal::Destroy() {
 
 void RenderProgressModal::DrawView() {
   // Calculate window size
-  const uint32_t width = getDialogWidth();
-  SetWindow(width, 5); // Height of 5 for title, message, time/progress, and
-                       // button with blank line sep
+  // SetWindow(dialogWidth_,  dialogHeight_);
+  const int x = (SCREEN_WIDTH - dialogWidth_) / 2;
+  const int y = (SCREEN_HEIGHT - dialogHeight_) / 2;
 
-  // Draw title
-  int32_t y = 0;
-  int32_t x = (int32_t)(width - title_.size()) / 2;
-  SetColor(Theme::View::warning);
-  DrawString(x, y, title_.c_str());
+  DrawWindow(x, y, dialogWidth_, dialogHeight_, title_.c_str());
 
-  // Draw message
-  y++;
-  x = (int32_t)(width - message_.size()) / 2;
-  DrawString(x, y, message_.c_str());
-
-  // Draw render progress
-  y++;
-  GUIPoint progressPos(width / 2 - 2, y); // Center the progress display
-  drawRenderProgress(progressPos);
-
-  // Draw action button
-  // todo: drawing with button ends
-  SetColor(Theme::Button::fg(false));
-  y += 2;
-  // Use a fixed-width label area to avoid stale characters when label shrinks.
-  x = width / 2 - 3;
-  DrawString(x, y, renderComplete_ ? "  OK  " : "Cancel");
+  // draw progress
+  DrawFilledBorder(x + 1, y + 6, dialogWidth_ - 2, 3, BLACK, true);
 }
 
 void RenderProgressModal::OnPlayerUpdate(PlayerEventType eventType, unsigned int currentTick) {
@@ -93,7 +95,11 @@ void RenderProgressModal::OnFocus() {
 }
 
 void RenderProgressModal::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (mask & BM_ENTER && pressed) {
+    if (!pressed) {
+        return;
+    }
+
+  if (mask & BM_ENTER) {
     // If player is still running, stop it first
     Player *player = Player::GetInstance();
     if (player && player->IsRunning()) {
@@ -103,6 +109,7 @@ void RenderProgressModal::ProcessButtonMask(uint16_t mask, bool pressed) {
     EndModal(0);
     return; // Return early to prevent setting dirty flag unnecessarily
   }
+    
   // Only set dirty if we didn't handle the button press
   isDirty_ = true;
 }
@@ -116,78 +123,76 @@ void RenderProgressModal::AnimationUpdate() {
 
   if (isRunning) {
     renderStarted_ = true;
-    if (progressDisplayMode_ == ProgressDisplayMode::ElapsedTime) {
-      totalSamples_ = player->GetPlayTime() * SAMPLE_RATE;
-    } else {
-      // calculate the percentage progress of the song we have rendered
-      bool hasActiveRow = false;
-      const int currentRow = getCurrentRenderedSongRow(&hasActiveRow);
-      if (hasActiveRow) {
-        if (!startSongRowCaptured_) {
-          startSongRow_ = currentRow;
-          startSongRowCaptured_ = true;
-          initializeSongProgressTracking();
-        }
-        if (progressChannel_ >= 0) {
-          const int renderedUnits = calculateChannelRenderedUnits(progressChannel_, startSongRow_);
-          if (renderedUnits > renderedUnits_) {
-            renderedUnits_ = renderedUnits;
-          }
-        }
-      }
+    if (progressDisplayMode_ == ProgressDisplayMode::pdmElapsedTime) {
+      totalSamples_ = player->GetPlayTime() * Audio::GetInstance()->GetSampleRate();
     }
-    isDirty_ = true;
+    // calculate the percentage progress of the song we have rendered
+  bool hasActiveRow = false;
+  const int currentRow = getCurrentRenderedSongRow(&hasActiveRow);
+  if (hasActiveRow) {
+    if (!startSongRowCaptured_) {
+      startSongRow_ = currentRow;
+      startSongRowCaptured_ = true;
+      initializeSongProgressTracking();
+    }
+    if (progressChannel_ >= 0) {
+      const int renderedUnits = calculateChannelRenderedUnits(progressChannel_, startSongRow_);
+      if (renderedUnits > renderedUnits_) {
+        renderedUnits_ = renderedUnits;
+      }
+
+    percentDone_ = calculateSongRenderPercent();
+  }
+    }
   } else if (renderStarted_ && !renderComplete_) {
     renderComplete_ = true;
-    message_ = "Render Complete!";
-    isDirty_ = true;
+      percentDone_ = 100;
+    message_ = "Render complete!";
   }
 
-  if (!isDirty_) {
-    return;
-  }
-  isDirty_ = false;
+  const int x = (SCREEN_WIDTH - dialogWidth_) / 2;
+  const int y = (SCREEN_HEIGHT - dialogHeight_) / 2;
 
-  const uint32_t width = getDialogWidth();
-  int32_t y = 2;
+  // draw progress
+  drawRenderProgress(x + 2, y + 7);
 
-  if (renderComplete_) {
-    ClearTextRect(0, y - 1, width, 1);
-    SetColor(Theme::View::info);
-    int32_t x = (width - (int)message_.size()) / 2;
-    DrawString(x, y - 1, message_.c_str());
-  }
+  // action button
+  DrawButton(x + 6, y + 10, renderComplete_ ? "  OK  " : "Cancel", true, Theme::Dialog::bg);
+    focusRect_ = GUIRect(x + 6, y + 10, 8, 1);
 
-  GUIPoint progressPos(width / 2 - 2, y);
-  SetColor(Theme::View::fg);
-  drawRenderProgress(progressPos);
-
-  // Keep button label in sync with render state.
-  ClearTextRect(0, y + 1, width, 1);
-  DrawString(width / 2 - 3, y + 2, renderComplete_ ? "  OK  " : "Cancel");
+    // Draw message
+    SetColor(Theme::Dialog::fg);
+    SetBackgroundColor(Theme::Dialog::bg);
+    char buf[16];
+    if (renderComplete_) {
+      npf_snprintf(buf, sizeof(buf), "%s", "Rendering done. ");
+    } else {
+      memset(buf, ' ', 16);
+      npf_snprintf(buf, sizeof(buf), "%-16.16s%", messages[percentDone_ / 5]);
+    }
+    DrawString(x + 2, y + 4, buf);
 }
 
-void RenderProgressModal::drawRenderProgress(GUIPoint &pos) {
-  const char *spinnerchars = "|/-\\";
-  char spinner = spinnerchars[spinner_++ % 4];
+void RenderProgressModal::drawRenderProgress(int x, int y) {
+  animationFrame_++;
 
-  char buffer[12];
-  if (progressDisplayMode_ == ProgressDisplayMode::SongPercent) {
-    uint8_t percent = calculateSongRenderPercent();
-    sprintf(buffer, "%3d%% %c", percent, spinner);
+  char buf[16];
+  SetColor(WHITE);
+  SetBackgroundColor(BLACK);
+  horizontal_bar_graph_10(buf, percentDone_);
+  DrawString(x, y, buf);
+
+  if (progressDisplayMode_ == ProgressDisplayMode::pdmPercentage) {
+    sprintf(buf, "  %3d%%", percentDone_);
   } else {
     // Calculate time in seconds from total samples
-    uint8_t seconds = static_cast<uint8_t>(totalSamples_ / SAMPLE_RATE);
+    uint8_t seconds = static_cast<uint8_t>(totalSamples_ / Audio::GetInstance()->GetSampleRate());
     uint8_t minutes = seconds / 60;
     seconds %= 60;
-    sprintf(buffer, "%02d:%02d %c", minutes, seconds, spinner);
+    sprintf(buf, " %02d:%02d", minutes, seconds);
   }
-
-  DrawString(pos.x_, pos.y_, buffer);
-}
-
-uint32_t RenderProgressModal::getDialogWidth() const {
-  return dialogWidth_;
+  
+  DrawString(x + 10, y, buf);
 }
 
 int RenderProgressModal::getCurrentRenderedSongRow(bool *hasActive) const {
@@ -366,5 +371,6 @@ int RenderProgressModal::calculateSongRenderPercent() const {
   if (percent > 99) {
     percent = 99;
   }
+
   return percent;
 }

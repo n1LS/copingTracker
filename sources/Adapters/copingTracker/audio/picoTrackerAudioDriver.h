@@ -29,10 +29,10 @@ public:
   virtual int GetPlayedBufferPercentage();
   virtual int GetSampleRate() {
     return 44100;
-  };
+  }
   virtual bool Interlaced() {
     return true;
-  };
+  }
 
   // Additional
   void OnChunkDone();

@@ -1410,6 +1410,7 @@ void PhraseView::AnimationUpdate() {
       }
     }
 
+    /*
     // Piano Rool Temp
     char black[8];
     char white[8];
@@ -1452,6 +1453,8 @@ void PhraseView::AnimationUpdate() {
       DrawString(5 + 7 * octave, 20, black, fGraphic);
       DrawString(5 + 7 * octave, 19, white, fGraphic);
     }
+    */
+
     // Create a memory barrier to ensure proper synchronization between cores
     createMemoryBarrier();
 
