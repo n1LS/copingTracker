@@ -29,7 +29,8 @@ Requires Pillow (as does the font tooling).
 
 Glyphs are drawn to a canvas from a 1-bit atlas extracted from the font PNG, so
 the output is pixel identical to the device including the ANSI-style box drawing and
-other icon and UI glyphs, which exist only in the font and have no Unicode equivalent.
+other icon and UI
+ glyphs, which exist only in the font and have no Unicode equivalent.
 
 A transparent `<pre>` sits on top of the canvas so the text stays selectable,
 searchable and readable by screen readers. Its letter spacing and font size are
