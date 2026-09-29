@@ -52,7 +52,7 @@ void StackInstrument::Stop(int channel) {
 bool StackInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // get the instrument parameters from the instrument and pass them to the
   // current voice
-  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
+  uint8_t calculatedVolume = EffectiveVolume(volume);
 
   voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters());
 
@@ -135,7 +135,7 @@ bool StackInstrument::SupportsCommand(Token token) {
 }
 
 void StackInstrument::SetStepVolume(int channel, uint8_t volume) {
-  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
+  uint8_t calculatedVolume = EffectiveVolume(volume);
   voices_[channel].set_step_volume(calculatedVolume);
 }
 
@@ -147,7 +147,6 @@ stack_parameters_t StackInstrument::getInstrumentParameters() {
   params.decay = decay_.GetInt();
   params.sustain = sustain_.GetInt();
   params.release = release_.GetInt();
-  params.volume = volume_.GetInt();
   params.brightness = brightness_.GetInt();
   params.glide = glide_.GetInt();
   params.wave = range(0, wave_.GetInt(), (int)stackWaveNone);

@@ -46,7 +46,7 @@ void ChiptuneInstrument::Stop(int channel) {
 bool ChiptuneInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // get the instrument parameters from the instrument and pass them to the
   // current voice
-  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
+  uint8_t calculatedVolume = EffectiveVolume(volume);
 
   voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters());
 
@@ -123,7 +123,7 @@ bool ChiptuneInstrument::SupportsCommand(Token token) {
 }
 
 void ChiptuneInstrument::SetStepVolume(int channel, uint8_t volume) {
-  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
+  uint8_t calculatedVolume = EffectiveVolume(volume);
   voices_[channel].set_step_volume(calculatedVolume);
 }
 
@@ -133,7 +133,6 @@ InstrumentParameters ChiptuneInstrument::getInstrumentParameters() {
   params.wave = (chiptune_wave_type_e)vWaveform_.GetInt();
   params.attack = vAttack_.GetInt();
   params.decay = vDecay_.GetInt();
-  params.level = volume_.GetInt();
   // off == -1, map to uint8_t range
   params.length = vLength_.GetInt() < 0 ? 0 : vLength_.GetInt();
   params.burst = vBurst_.GetInt() < 0 ? 0 : vBurst_.GetInt();

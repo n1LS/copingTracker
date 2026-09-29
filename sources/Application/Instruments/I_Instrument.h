@@ -103,6 +103,17 @@ public:
     return HIGHEST_NOTE;
   }
 
+  // Folds the instrument's own volume together with the per step volume from
+  // the phrase into the single value the engines use as their gain. Engines
+  // must not read volume_ themselves: doing this once here keeps the
+  // multiply out of the per sample path, since every engine already caches a
+  // precomputed level that is only refreshed at 100 Hz.
+  uint8_t EffectiveVolume(uint8_t stepVolume) {
+    // 256 (not 255) so an unset step volume is exact unity
+    uint32_t step = (stepVolume == NO_VOLUME) ? 256 : volumeLUT[stepVolume];
+    return (uint8_t)(((uint32_t)volume_.GetInt() * step) >> 8);
+  }
+
   virtual void noteDisplay(uint8_t note, char (&out)[4]);
   virtual void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]);
   virtual void focusedNoteDisplay(uint8_t note, char (&line)[12]);

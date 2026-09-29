@@ -39,14 +39,14 @@ static_assert(sizeof(lsdjkit_parameters_t) == 4, "Check sizeof(lsdjkit_parameter
 typedef struct lsdjkit_voice_t {
   lsdjkit_parameters_t parameters; // parameters passed from instrument
 
-  uint32_t phase[2];          // oscillator phases
-  uint32_t lastSample = 0;    // used for both the last sample for pulse smoothing
-                              // and as the lcg register for the noise
-  
+  uint32_t phase[2];       // oscillator phases
+  uint32_t lastSample = 0; // used for both the last sample for pulse smoothing
+                           // and as the lcg register for the noise
+
   uint32_t time; // sample counter
   uint16_t tick; // sample counter for 100Hz updates
   uint8_t tock;  // sample counter for 1000Hz updates
-  
+
   uint8_t volume;
   uint8_t level;
   uint8_t bit_depth;
@@ -55,7 +55,7 @@ typedef struct lsdjkit_voice_t {
   uint8_t note;
   uint8_t drive;
   uint8_t buffer;
-  
+
   lsdjkit_flags flags;
 
   uint32_t timeToLive;
@@ -97,7 +97,6 @@ typedef struct lsdjkit_voice_t {
     if (tick == 0) {
       tick = lsdjkitTicks100Hz;
       tick_100Hz();
-
     }
 
     // warm loop @ ~1000 Hz ----------------------------------------------------
@@ -113,7 +112,7 @@ typedef struct lsdjkit_voice_t {
 
     // advance phase
     int32_t sample = 0;
-    
+
     for (int kit = 0; kit < 2; kit++) {
       uint32_t index = phase[kit];
 
@@ -128,8 +127,8 @@ typedef struct lsdjkit_voice_t {
           case 5: wave = (wave & 0xf8) | (wave >> 5); break;
           case 6: wave = (wave & 0xfc) | (wave >> 6); break;
           case 7: wave = (wave & 0xfe) | (wave >> 7); break;
-          case 8: break;          
-          default: 
+          case 8: break;
+          default:
             break; // 8 bit
         }
         */
@@ -137,6 +136,13 @@ typedef struct lsdjkit_voice_t {
         sample += wave << 21;
       }
     }
+
+    // apply gain. volume already has the instrument volume folded in by
+    // I_Instrument::EffectiveVolume and only changes at note on / step
+    // volume, so there is nothing to precompute per tick here. Shifting
+    // first keeps the result in the same range it had before the gain stage
+    // existed (>> 8 then * 255 is a no-op within rounding).
+    sample = (sample >> 8) * volume;
 
     // apply panning
     *left = sample;

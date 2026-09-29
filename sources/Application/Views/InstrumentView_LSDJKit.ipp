@@ -45,6 +45,15 @@
   intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   addIndexToLine(6, position.y_);
+
+  // row Table / Automate
+
+  addTitleLabel("Volume", 20);
+  AddTableRow();
+
+  addTitleLabel("Automation", 22);
+  AddVolumeRow();
+
 }
 
 void InstrumentView::DrawViewLSDJKit() {
