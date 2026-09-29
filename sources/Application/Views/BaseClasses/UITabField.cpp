@@ -41,13 +41,17 @@ void UITabField::Draw(GUIWindow &window, int offset) {
     int len = (int)strlen(tabs_[t]);
 
     if (index == t) {
+      Color bg = focus_ ? Theme::PanelInput::bg(true) : Theme::View::Tab::bg(true);
+      Color fg = focus_ ? Theme::PanelInput::fg(true) : Theme::View::Tab::fg(true);
+
       w.SetBackgroundColor(backgroundColor_);
-      w.SetColor(Theme::View::Tab::bg(true));
+      w.SetColor(bg);
+
       w.DrawChar(x, position.y_, CHAR(char_button_border_left_s));
       w.DrawChar(x + 1 + len, position.y_, CHAR(char_button_border_right_s));
 
-      w.SetBackgroundColor(Theme::View::Tab::bg(true));
-      w.SetColor(Theme::View::Tab::fg(true));
+      w.SetBackgroundColor(bg);
+      w.SetColor(fg);
       w.DrawString(x + 1, position.y_, tabs_[t]);
 
       nextSpace = &noSpace;

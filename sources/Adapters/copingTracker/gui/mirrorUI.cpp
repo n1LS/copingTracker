@@ -57,7 +57,7 @@ void mirrorUI_sendCommand(mirrorUICommand *command) {
   tud_cdc_write_flush(); // flush once at end
 }
 
-void mirrorUI_flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUpdate) {
+void mirrorUI_flush(ScreenCharacter *screen, uint8_t *colors, bool *changed, bool fullUpdate) {
   int index = 0;
 
 #define WAITING_FOR_CHANGED 0
@@ -80,7 +80,8 @@ void mirrorUI_flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUp
             command_.payload[3] = y;
             ptr = 4;
             command_.payload[ptr++] = colors[index];
-            command_.payload[ptr++] = screen[index];
+            command_.payload[ptr++] = screen[index].font;
+            command_.payload[ptr++] = screen[index].character;
             length++;
           }
           break;
@@ -90,12 +91,13 @@ void mirrorUI_flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUp
               ((x + 2 < SCREEN_WIDTH) && changed[index + 2]) || ((x + 3 < SCREEN_WIDTH) && changed[index + 3])) {
             // keep going
             command_.payload[ptr++] = colors[index];
-            command_.payload[ptr++] = screen[index];
+            command_.payload[ptr++] = screen[index].font;
+            command_.payload[ptr++] = screen[index].character;
             length++;
           } else {
             // done with this block, output
             command_.payload[1] = length;
-            command_.payloadSize = length * 2 + 4;
+            command_.payloadSize = length * 3 + 4; // TODO nILS: DRY. this happens twice, clean up into single occurence
             mirrorUI_sendCommand(&command_);
             // clear
             length = 0;
@@ -110,7 +112,7 @@ void mirrorUI_flush(uint8_t *screen, uint8_t *colors, bool *changed, bool fullUp
     if (state == IN_CHANGED) {
       // ended with a block at the end of the row
       command_.payload[1] = length;
-      command_.payloadSize = length * 2 + 4;
+      command_.payloadSize = length * 3 + 4;
       mirrorUI_sendCommand(&command_);
     }
   }
@@ -156,12 +158,9 @@ void mirrorUI_sendRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
 void mirrorUI_connected() {
   // send palette
   mirrorUI_sendPalette(chargfx_get_palette());
-  // send font
-  mirrorUICommand *command = mirrorUI_getCommand();
-  mirrorUI_command_Font(command, chargfx_get_font_index());
-  mirrorUI_sendCommand(command);
   // send screen
-  uint8_t *scr, *col;
+  ScreenCharacter *scr;
+  uint8_t *col;
   bool *chg;
   chargfx_get_screen_storage(&scr, &col, &chg);
   mirrorUI_flush(scr, col, chg, true);

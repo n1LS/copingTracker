@@ -42,8 +42,8 @@ public: // I_GUIGraphics implementation
   virtual void SetColor(Color color);
   virtual void SetBackgroundColor(Color color);
   virtual void ClearTextRect(GUIRect rect);
-  virtual void DrawChar(int x, int y, char c, bool transparent = false);
-  virtual void DrawString(int x, int y, const char *string);
+  virtual void DrawChar(int x, int y, char c, Font font = fRegular, bool transparent = false);
+  virtual void DrawString(int x, int y, const char *string, Font font = fRegular);
   virtual void DrawRect(const GUIRect rect);
   virtual void SetCurrentRectColor(Color color);
   virtual GUIRect GetRect();

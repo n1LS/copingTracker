@@ -81,14 +81,6 @@ ThemeView::ThemeView(GUIWindow &w, ViewData *data)
   exportThemeName_ = currentThemeName;
   position.y_++;
 
-  // Font selection
-  Variable *fontVar = config->FindVariable(Token::VarUIFont);
-  intVarField_.emplace_back(position, *fontVar, "Font     :%s", 0, ThemeConstants::THEME_FONT_COUNT - 1, 1,
-                            ThemeConstants::THEME_FONT_COUNT - 1);
-  fieldList_.insert(fieldList_.end(), &intVarField_.back());
-  intVarField_.back().AddObserver(*this);
-  position.y_ += 1;
-
   // TEXT case Selection
   Variable *caseVar = config->FindVariable(Token::VarTextCase);
   intVarField_.emplace_back(position, *caseVar, "Text Case:%s", 0, TextCase::Count - 1, 1, TextCase::Count - 1);
@@ -365,7 +357,6 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
         return;
       }
     // if font changes call redraw all fields
-    case Token::VarUIFont:
     case Token::VarTextCase:
       {
         // need to force redraw of entire screen to update for font change

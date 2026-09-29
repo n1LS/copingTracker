@@ -49,9 +49,9 @@ const uint16_t AUTOSAVE_INTERVAL_IN_SECONDS = 1 * 60;
 
 AppWindow *instance = 0;
 
-unsigned char AppWindow::_screenChar[SCREEN_CHARS];
+ScreenCharacter AppWindow::_screen[SCREEN_CHARS];
+ScreenCharacter AppWindow::_preScreen[SCREEN_CHARS];
 color_t AppWindow::_screenColor[SCREEN_CHARS];
-unsigned char AppWindow::_preScreen[SCREEN_CHARS];
 color_t AppWindow::_preScreenColor[SCREEN_CHARS];
 
 GUIColor AppWindow::colorPalette_[NUM_COLORS] = {
@@ -211,8 +211,8 @@ AppWindow::AppWindow(I_GUIWindowImp &imp, const char *projectName)
 
   views_->AddObservers(*this);
 
-  memset(_preScreen, 0, SCREEN_CHARS);
-  memset(_screenChar, ' ', SCREEN_CHARS);
+  memset(_preScreen, 0, SCREEN_CHARS * sizeof(ScreenCharacter));
+  memset(_screen, ' ', SCREEN_CHARS * sizeof(ScreenCharacter));
   memset(_screenColor, 0, SCREEN_CHARS);
 
   ToastView::Init(*this, &viewData_);
@@ -252,17 +252,17 @@ void appwindow_set_sdcard_present(bool present) {
   }
 }
 
-void AppWindow::DrawString(int x, int y, const char *string) {
+void AppWindow::DrawString(int x, int y, const char *string, Font font) {
   if (!string) {
     return;
   }
 
   for (const char *current = string; *current; ++current, ++x) {
-    DrawChar(x, y, *current);
+    DrawChar(x, y, *current, font);
   }
 }
 
-void AppWindow::DrawChar(int x, int y, char c, bool transparent) {
+void AppWindow::DrawChar(int x, int y, char c, Font font, bool transparent) {
   if (y < 0 || y >= SCREEN_HEIGHT || x < 0 || x >= SCREEN_WIDTH) {
     return;
   }
@@ -284,7 +284,8 @@ void AppWindow::DrawChar(int x, int y, char c, bool transparent) {
   }
 
   int index = x + SCREEN_WIDTH * y;
-  _screenChar[index] = c;
+  _screen[index].font = font;
+  _screen[index].character = c;
 
   if (transparent) {
     _screenColor[index].fg = color_.fg;
@@ -296,8 +297,8 @@ void AppWindow::DrawChar(int x, int y, char c, bool transparent) {
 void AppWindow::Clear() {
   color_t base = (color_t){.fg = Theme::View::fg, .bg = Theme::View::bg};
 
-  memset(_preScreen, ' ', SCREEN_CHARS);
-  memset(_screenChar, 0, SCREEN_CHARS);
+  memset(_preScreen, ' ', SCREEN_CHARS * sizeof(ScreenCharacter));
+  memset(_screen, 0, SCREEN_CHARS * sizeof(ScreenCharacter));
   memset(_screenColor, base.byte, SCREEN_CHARS);
 }
 
@@ -328,11 +329,12 @@ void AppWindow::ClearTextRect(GUIRect r) {
     return;
   }
 
-  unsigned char *st = _screenChar + x + (SCREEN_WIDTH * y);
+  ScreenCharacter *st = _screen + x + (SCREEN_WIDTH * y);
   color_t *pr = _screenColor + x + (SCREEN_WIDTH * y);
   for (int i = 0; i < h; i++) {
     for (int j = 0; j < w; j++) {
-      *st++ = ' ';
+      st->word = 0;
+      st++;
       *pr++ = {.byte = 0};
     }
     st += (SCREEN_WIDTH - w);
@@ -340,22 +342,17 @@ void AppWindow::ClearTextRect(GUIRect r) {
   }
 }
 
-#define GUI(f, c, p)                                                                                                   \
-  {                                                                                                                    \
-    GUIWindow::SetColor(f->fg);                                                                                        \
-    GUIWindow::SetBackgroundColor(f->bg);                                                                              \
-    GUIWindow::DrawChar(p.x_, p.y_, *c);                                                                               \
-  }
-
 void AppWindow::FlushTransition() {
   for (int y = 0; y < SCREEN_HEIGHT; y++) {
     for (int x = 0; x < SCREEN_WIDTH; x++) {
-      unsigned char *current = _screenChar + y * SCREEN_WIDTH + x;
+      ScreenCharacter *current = _screen + y * SCREEN_WIDTH + x;
       color_t *currentColor = _screenColor + y * SCREEN_WIDTH + x;
       GUIPoint pos = {x, y};
       bool draw = ((x & 1) == 0 && (y & 1) == 0) || (transitionFrame_ >= 1 && (x & 1) == 1 && (y & 1) == 1);
       if (draw) {
-        GUI(currentColor, current, pos);
+        GUIWindow::SetColor(currentColor->fg);
+        GUIWindow::SetBackgroundColor(currentColor->bg);
+        GUIWindow::DrawChar(pos.x_, pos.y_, current->character, current->font);
       }
     }
   }
@@ -375,7 +372,7 @@ void AppWindow::Flush() {
   Color currentBG = (Color)-1;
   GUIPoint pos(0, 0);
 
-  unsigned char *current = _screenChar;
+  ScreenCharacter *current = _screen;
   color_t *currentColor = _screenColor;
 
   if (transitionType_ != vtNone) {
@@ -401,7 +398,7 @@ void AppWindow::Flush() {
           GUIWindow::SetBackgroundColor(bg);
         }
 
-        GUIWindow::DrawChar(pos.x_, pos.y_, *current);
+        GUIWindow::DrawChar(pos.x_, pos.y_, current->character, (Font)current->font);
       }
     }
   }
@@ -736,9 +733,9 @@ void AppWindow::AnimationUpdate() {
   // will return false if auto save was unsuccessful because eg. the sequencer
   // is running
   // we do this here because for sheer convenience because this
-  // this callback is called PICO_CLOCK_HZ times a second and we have easy
+  // this callback is called etClock_HZ times a second and we have easy
   // access in this class to the player, projectname and persistence service
-  if ((++lastAutoSave / PICO_CLOCK_HZ) > AUTOSAVE_INTERVAL_IN_SECONDS) {
+  if ((++lastAutoSave / etClock_HZ) > AUTOSAVE_INTERVAL_IN_SECONDS) {
     if (AutoSave()) {
       lastAutoSave = 0;
     }

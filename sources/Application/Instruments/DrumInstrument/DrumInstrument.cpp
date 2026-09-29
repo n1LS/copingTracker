@@ -145,3 +145,21 @@ void DrumInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
 
   I_Instrument::noteDisplay(note, out);
 }
+
+void DrumInstrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) {
+  if (note >= LOWEST_NOTE && note <= HIGHEST_NOTE) {
+    int idx = note % 12;
+
+    line1[0] = drumShortNames[idx][0];
+    line1[1] = drumShortNames[idx][1];
+    line1[2] = '\0';
+
+    line2[0] = drumShortNames[idx][2];
+    line2[1] = ' ';
+    line2[2] = '\0';
+
+    return;
+  }
+
+  I_Instrument::noteDisplayCondensed(note, line1, line2);
+}

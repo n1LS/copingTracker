@@ -58,9 +58,9 @@ bool timerHandler(repeating_timer_t *rt) {
   queue = picoTrackerEventQueue::GetInstance();
   gTime_++;
 
-  // send a clock (PICO_CLOCK) with the current tick value
-  if (gTime_ % PICO_CLOCK_INTERVAL == 0) {
-    queue->push(picoTrackerEvent(PICO_CLOCK));
+  // send a clock (etClock) with the current tick value
+  if (gTime_ % etClock_INTERVAL == 0) {
+    queue->push(picoTrackerEvent(etClock));
   }
   return true;
 }
@@ -130,7 +130,7 @@ int picoTrackerEventManager::MainLoop() {
 
     ProcessInputEvent();
     if (!queue->empty()) {
-      picoTrackerEvent event(picoTrackerEventType::LAST);
+      picoTrackerEvent event(EventType::count);
       queue->pop_into(event);
       events++;
       redrawing_ = true;

@@ -133,7 +133,6 @@ struct Token {
     VarMidiSync = 112,
     VarMidiClockSync = 151,
     VarMirrorUI = 140,
-    VarUIFont = 141,
     VarTextCase = 118,
 
     VarChannel1Volume = 163,
@@ -230,13 +229,14 @@ struct Token {
 
     // 119 free      1
     // 121-122 free  2
+    // 141 free      1
     // 193-194 free  2
     // 199 free      1
     // 203 free      1
     // 209 free      1
     // 230-253 free 24
     // ----------------
-    //               33
+    //              33
 
     Default = 255, // "    "
   };
@@ -303,7 +303,6 @@ struct Token {
   ETL_ENUM_TYPE_16(VarMidiSync, "midi-sync")
   ETL_ENUM_TYPE_16(VarMidiClockSync, "midi-clock-sync")
   ETL_ENUM_TYPE_16(VarMirrorUI, "mirror-ui")
-  ETL_ENUM_TYPE_16(VarUIFont, "ui-font")
   ETL_ENUM_TYPE_16(VarTextCase, "text-case")
   ETL_ENUM_TYPE_16(VarThemeName, "theme-name")
   ETL_ENUM_TYPE_16(VarScaleRoot, "scale-root")

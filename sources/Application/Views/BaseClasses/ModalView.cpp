@@ -54,13 +54,13 @@ void ModalView::ClearTextRect(int x, int y, int w, int h) {
 }
 
 // DrawString override to account for modal window position
-void ModalView::DrawString(int x, int y, const char *text) {
-  View::DrawString(x + left_, y + top_, text);
+void ModalView::DrawString(int x, int y, const char *text, Font font) {
+  View::DrawString(x + left_, y + top_, text, font);
 }
 
 // DrawChar override to account for modal window position
-void ModalView::DrawChar(int x, int y, char c, bool transparent) {
-  View::DrawChar(x + left_, y + top_, c, transparent);
+void ModalView::DrawChar(int x, int y, char c, Font font, bool transparent) {
+  View::DrawChar(x + left_, y + top_, c, font, transparent);
 }
 
 GUIPoint ModalView::GetAnchor() {

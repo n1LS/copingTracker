@@ -30,8 +30,8 @@ public:
 protected:
   void SetWindow(int width, int height);
   virtual void ClearTextRect(int x, int y, int w, int h);
-  virtual void DrawString(int x, int y, const char *text);
-  virtual void DrawChar(int x, int y, char c, bool transparent = false);
+  virtual void DrawString(int x, int y, const char *text, Font font = fRegular);
+  virtual void DrawChar(int x, int y, char c, Font font = fRegular, bool transparent = false);
 
   // Override GetAnchor to account for modal window position
   virtual GUIPoint GetAnchor();

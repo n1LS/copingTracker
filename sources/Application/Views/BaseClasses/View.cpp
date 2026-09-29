@@ -139,6 +139,16 @@ void View::drawMap() {
   }
 }
 
+void View::drawInstrument(const GUIPoint &pos, uint8_t instrument) {
+  char buf[3] = {' ', ' ', 0};
+
+  if (instrument != NO_INSTRUMENT) {
+    byteToHexString(instrument, buf);
+  }
+
+  DrawString(pos.x_, pos.y_, buf); // draw instrument number
+}
+
 void View::drawRegularNote(const GUIPoint &pos, uint8_t channel) {
   Player *player = Player::GetInstance();
 
@@ -191,30 +201,24 @@ void View::drawNotes() {
     SetBackgroundColor(Theme::Notes::bg(highlighted));
     SetColor(Theme::Notes::fg(highlighted));
 
-    if (player->IsRunning() && viewData_->playMode_ != PM_AUDITION) {
-      uint8_t sliceIndex = 0;
-      if (player->GetPlayedSliceIndex(i, sliceIndex)) {
-        DrawString(pos.x_, pos.y_, "SL");
-        pos.y_++;
-        char buf[3];
-        buf[0] = static_cast<char>('0' + (sliceIndex / 10));
-        buf[1] = static_cast<char>('0' + (sliceIndex % 10));
-        buf[2] = '\0';
-        DrawString(pos.x_, pos.y_, buf);
-        pos.y_++;
+    char line1[3] = {' ', ' ', 0};
+    char line2[3] = {' ', ' ', 0};
 
-        uint8_t instrument = player->GetPlayedInstrument(i);
-        if (instrument == NO_INSTRUMENT) {
-          strcpy(buf, "--");
-        } else {
-          byteToHexString(instrument, buf);
-        }
-        DrawString(pos.x_, pos.y_, buf); // draw instrument number
-      } else {
-        drawRegularNote(pos, i);
+    if (player->IsRunning() && viewData_->playMode_ != PM_AUDITION) {
+      I_Instrument *instrument = PlayerMixer::GetInstance()->GetInstrument(i);
+
+      if (instrument) {
+        instrument->noteDisplayCondensed(player->GetChannelNote(i), line1, line2);
       }
+    }
+
+    DrawString(pos.x_, pos.y_, line1);
+    DrawString(pos.x_, pos.y_ + 1, line2);
+
+    if (player->IsRunning()) {
+      drawInstrument(pos + GUIPoint(0, 2), player->GetPlayedInstrument(i));
     } else {
-      drawRegularNote(pos, i);
+      DrawString(pos.x_, pos.y_ + 2, "  ");
     }
 
     pos.y_ = initialY;
@@ -401,24 +405,24 @@ void View::ClearTextRect(int x, int y, int w, int h) {
   w_.ClearTextRect(rect);
 }
 
-void View::DrawString(int x, int y, const char *text) {
-  w_.DrawString(x, y, text);
+void View::DrawString(int x, int y, const char *text, Font font) {
+  w_.DrawString(x, y, text, font);
 }
 
-void View::DrawTintString(int x, int y, const TintChar *data) {
+void View::DrawTintString(int x, int y, const TintChar *data, Font font) {
   TintChar *cell = (TintChar *)data;
 
   while (cell->character != 0) {
     w_.SetColor(cell->fgBg.fg);
     w_.SetBackgroundColor(cell->fgBg.bg);
-    w_.DrawChar(x, y, cell->character, false);
+    w_.DrawChar(x, y, cell->character, font, false);
     x++;
     cell++;
   }
 }
 
-void View::DrawChar(int x, int y, char character, bool transparent) {
-  w_.DrawChar(x, y, character, transparent);
+void View::DrawChar(int x, int y, char character, Font font, bool transparent) {
+  w_.DrawChar(x, y, character, font, transparent);
 }
 
 void View::DrawRect(const GUIRect r, Color color) {
@@ -437,7 +441,7 @@ void View::drawBattery() {
   SetBackgroundColor(Theme::View::Title::bg);
 
   const uint32_t frameCounter = AppWindow::GetAnimationFrameCounter();
-  const bool sampleNow = (frameCounter % PICO_CLOCK_HZ) == 0;
+  const bool sampleNow = (frameCounter % etClock_HZ) == 0;
 
   // Sample the battery once per second.
   if (sampleNow) {
@@ -453,7 +457,7 @@ void View::drawBattery() {
         batteryState_ = latestBatteryState_;
         lastBatteryDisplayFrame_ = frameCounter;
       } else {
-        constexpr uint32_t kBatteryDisplayUpdateFrames = PICO_CLOCK_HZ * 120;
+        constexpr uint32_t kBatteryDisplayUpdateFrames = etClock_HZ * 120;
         if ((frameCounter - lastBatteryDisplayFrame_) >= kBatteryDisplayUpdateFrames) {
           // While discharging, update the display at most every 120 seconds.
           batteryState_ = latestBatteryState_;
@@ -590,18 +594,18 @@ void View::DrawWindow(int32_t x, int32_t y, int32_t width, int32_t height, const
   SetBackgroundColor(Theme::Dialog::Title::bg);
 
   // top corners
-  DrawChar(x, y, chars[0], true);
-  DrawChar(x + width - 1, y, chars[1], true);
+  DrawChar(x, y, chars[0], fRegular, true);
+  DrawChar(x + width - 1, y, chars[1], fRegular, true);
 
   // top border
   for (int32_t i = x + 1; i < x + width - 1; i++) {
-    DrawChar(i, y, chars[4], true);
+    DrawChar(i, y, chars[4], fRegular, true);
   }
 
   // title vertical borders
   for (int j = 1; j < 3; j++) {
-    DrawChar(x, y + j, chars[5], true);
-    DrawChar(x + width - 1, y + j, chars[7], true);
+    DrawChar(x, y + j, chars[5], fRegular, true);
+    DrawChar(x + width - 1, y + j, chars[7], fRegular, true);
   }
 
   // title
@@ -616,18 +620,18 @@ void View::DrawWindow(int32_t x, int32_t y, int32_t width, int32_t height, const
   DrawString(x + 1, y + 2, buffer);
 
   // bottom corners
-  DrawChar(x, y + height - 1, chars[2], true);
-  DrawChar(x + width - 1, y + height - 1, chars[3], true);
+  DrawChar(x, y + height - 1, chars[2], fRegular, true);
+  DrawChar(x + width - 1, y + height - 1, chars[3], fRegular, true);
 
   // bottom borders
   for (int32_t i = x + 1; i < x + width - 1; i++) {
-    DrawChar(i, y + height - 1, chars[6], true);
+    DrawChar(i, y + height - 1, chars[6], fRegular, true);
   }
 
   // vertical borders
   for (int32_t j = y + 3; j < y + height - 1; j++) {
-    DrawChar(x, j, chars[5], true);
-    DrawChar(x + width - 1, j, chars[7], true);
+    DrawChar(x, j, chars[5], fRegular, true);
+    DrawChar(x + width - 1, j, chars[7], fRegular, true);
   }
 
   // fill
@@ -653,21 +657,21 @@ void View::DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height,
   SetColor(fill);
 
   // corners
-  DrawChar(x, y, chars[0], true);
-  DrawChar(x + width - 1, y, chars[1], true);
-  DrawChar(x, y + height - 1, chars[2], true);
-  DrawChar(x + width - 1, y + height - 1, chars[3], true);
+  DrawChar(x, y, chars[0], fRegular, true);
+  DrawChar(x + width - 1, y, chars[1], fRegular, true);
+  DrawChar(x, y + height - 1, chars[2], fRegular, true);
+  DrawChar(x + width - 1, y + height - 1, chars[3], fRegular, true);
 
   // horizontal borders
   for (int32_t i = x + 1; i < x + width - 1; i++) {
-    DrawChar(i, y, chars[4], true);
-    DrawChar(i, y + height - 1, chars[6], true);
+    DrawChar(i, y, chars[4], fRegular, true);
+    DrawChar(i, y + height - 1, chars[6], fRegular, true);
   }
 
   // left and right borders
   for (int32_t j = y + 1; j < y + height - 1; j++) {
-    DrawChar(x, j, chars[5], true);
-    DrawChar(x + width - 1, j, chars[7], true);
+    DrawChar(x, j, chars[5], fRegular, true);
+    DrawChar(x + width - 1, j, chars[7], fRegular, true);
   }
 
   // fill
@@ -745,7 +749,7 @@ void View::DrawTitle(const char *format, ...) {
     buffer[maxLength] = '\0';
   }
 
-  DrawString(pos.x_, pos.y_, buffer);
+  DrawString(pos.x_, pos.y_, buffer, fBold);
 
   memset(buffer, CHAR(char_block_top_s), SCREEN_WIDTH);
   buffer[SCREEN_WIDTH] = 0;

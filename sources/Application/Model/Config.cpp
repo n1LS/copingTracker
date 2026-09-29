@@ -97,8 +97,6 @@ static const ConfigParam configParams[] = {
     CONFIG(Token::VarMidiDevice, {.intValue = DEFAULT_MIDIDEVICE}, midiDeviceList, 4, false),
     CONFIG(Token::VarMidiSync, {.intValue = DEFAULT_MIDISYNC}, midiSendSync, 2, false),
     CONFIG(Token::VarMirrorUI, {.intValue = DEFAULT_REMOTEUI}, mirrorUIOnOff, 2, false),
-    CONFIG(Token::VarUIFont, {.intValue = ThemeConstants::DEFAULT_UIFONT}, ThemeConstants::THEME_FONT_NAMES,
-           ThemeConstants::THEME_FONT_COUNT, false),
     CONFIG(Token::VarTextCase, {.intValue = ThemeConstants::DEFAULT_CASE}, ThemeConstants::THEME_FONT_NAMES,
            ThemeConstants::THEME_FONT_COUNT, false),
 
@@ -138,8 +136,6 @@ Config::Config()
       importResampler_(Token::VarImportResampler, importResamplerOptions, kImportResamplerOptionCount,
                        DEFAULT_IMPORT_RESAMPLER),
       commandInputMode_(Token::VarConfigCommandPicker, commandPickerOptions, 2, DEFAULT_USE_COMMAND_PICKER),
-      uiFont_(Token::VarUIFont, ThemeConstants::THEME_FONT_NAMES, ThemeConstants::THEME_FONT_COUNT,
-              ThemeConstants::DEFAULT_UIFONT),
       textCase_(Token::VarTextCase, ThemeConstants::TEXT_CASE_NAMES, TextCase::Count, ThemeConstants::DEFAULT_CASE),
       themeName_(Token::VarThemeName, ThemeConstants::DEFAULT_THEME_NAME),
       backlightLevel_(Token::VarBacklightLevel, DEFAULT_BACKLIGHT_LEVEL),
@@ -169,7 +165,6 @@ Config::Config()
   variables_.push_back(&mirrorUI_);
   variables_.push_back(&importResampler_);
   variables_.push_back(&commandInputMode_);
-  variables_.push_back(&uiFont_);
   variables_.push_back(&textCase_);
   variables_.push_back(&themeName_);
   variables_.push_back(&backlightLevel_);
@@ -405,18 +400,8 @@ bool Config::SaveTheme(tinyxml2::XMLPrinter *printer, const char *themeName) {
   // We don't need to save the theme name in the file
   // The filename itself serves as the theme name
 
-  // Save the font setting
-  Variable *fontVar = FindVariable(Token::VarUIFont);
-  if (fontVar) {
-    printer->OpenElement(XML_ELEM_FONT);
-    char buf[16];
-    npf_snprintf(buf, sizeof(buf), "%d", fontVar->GetInt());
-    printer->PushAttribute(XML_ATTR_VALUE, buf);
-    printer->CloseElement(); // Font
-  }
-
   // Save the case setting
-  Variable *caseVar = FindVariable(Token::VarUIFont);
+  Variable *caseVar = FindVariable(Token::VarTextCase);
   if (caseVar) {
     printer->OpenElement(XML_ELEM_CASE);
     char buf[16];
@@ -496,23 +481,7 @@ bool Config::LoadTheme(PersistencyDocument *doc) {
       char *elemName = doc->ElemName();
       Trace::Log("CONFIG", "Processing element: %s", elemName);
 
-      if (strcmp(elemName, XML_ELEM_FONT) == 0) {
-        // Process Font element attribute
-        while (doc->NextAttribute()) {
-          if (strcmp(doc->attrname(), XML_ATTR_VALUE) == 0) {
-            Trace::Log("CONFIG", "Found font value: %s", doc->attrval());
-            // Parse font value as decimal
-            int fontValue = atoi(doc->attrval());
-            Trace::Log("CONFIG", "Parsed font value: %d", fontValue);
-
-            Variable *fontVar = FindVariable(Token::VarUIFont);
-            if (fontVar) {
-              fontVar->SetInt(fontValue);
-              Trace::Log("CONFIG", "Set font variable to: %d", fontValue);
-            }
-          }
-        }
-      } else if (strcmp(elemName, XML_ELEM_CASE) == 0) {
+      if (strcmp(elemName, XML_ELEM_CASE) == 0) {
         // Process text case attribute
         while (doc->NextAttribute()) {
           if (strcmp(doc->attrname(), XML_ATTR_VALUE) == 0) {

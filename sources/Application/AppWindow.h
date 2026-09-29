@@ -17,6 +17,7 @@
 #include "Application/Views/ViewData.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Types/Colors.h"
+#include "Foundation/Types/GraphicTypes.h"
 #include "System/Process/SysMutex.h"
 #include "System/io/Status.h"
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
@@ -33,7 +34,7 @@
 #define BATTERY_GAUGE_WIDTH 4
 #define SCREEN_CHARS SCREEN_WIDTH *SCREEN_HEIGHT
 #define MAX_FIELD_WIDTH 32
-#define SCREEN_REDRAW_RATE PICO_CLOCK_HZ
+#define SCREEN_REDRAW_RATE etClock_HZ
 
 class View;
 struct AppWindowViews;
@@ -57,8 +58,8 @@ public:
   using GUIWindow::Clear;
   virtual void Clear();
   virtual void ClearTextRect(GUIRect rect);
-  virtual void DrawChar(int x, int y, char c, bool transparent = false);
-  virtual void DrawString(int x, int y, const char *string);
+  virtual void DrawChar(int x, int y, char c, Font font = fRegular, bool transparent = false);
+  virtual void DrawString(int x, int y, const char *string, Font font = fRegular);
   virtual void SwapColors();
   virtual void SetColor(Color color);
   virtual void SetBackgroundColor(Color color);
@@ -138,9 +139,9 @@ private:
   bool sdCardMissing_;
   bool sdCardMessageShown_;
 
-  static unsigned char _screenChar[SCREEN_CHARS];
+  static ScreenCharacter _screen[SCREEN_CHARS];
+  static ScreenCharacter _preScreen[SCREEN_CHARS];
   static color_t _screenColor[SCREEN_CHARS];
-  static unsigned char _preScreen[SCREEN_CHARS];
   static color_t _preScreenColor[SCREEN_CHARS];
 
   color_t color_ = {.fg = Theme::View::fg, .bg = Theme::View::bg};
@@ -163,7 +164,7 @@ private:
 
   uint32_t lastAutoSave = 0;
 
-  // Counter for animation frames, updated once per frame at PICO_CLOCK_HZ
+  // Counter for animation frames, updated once per frame at etClock_HZ
   static uint32_t animationFrameCounter_;
 
 public:

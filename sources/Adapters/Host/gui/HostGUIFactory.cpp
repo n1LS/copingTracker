@@ -11,6 +11,7 @@
 #include "Adapters/Host/system/input.h"
 #include "Application/AppWindow.h"
 #include "Application/Views/BaseClasses/View.h"
+#include "Foundation/Types/GraphicTypes.h"
 #include "System/System/System.h"
 #include "UIFramework/Framework/GUIColor.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
@@ -41,8 +42,8 @@ public:
   virtual void SetColor(Color color) override;
   virtual void SetBackgroundColor(Color color) override;
   virtual void ClearTextRect(GUIRect rect) override;
-  virtual void DrawString(int x, int y, const char *string) override;
-  virtual void DrawChar(int x, int y, char c, bool transparent = false) override;
+  virtual void DrawString(int x, int y, const char *string, Font font = fRegular) override;
+  virtual void DrawChar(int x, int y, char c, Font font = fRegular, bool transparent = false) override;
   virtual GUIRect GetRect() override;
   virtual const GUIRect GetFocusRect() const override;
   virtual void Invalidate() override;
@@ -51,7 +52,6 @@ public:
   virtual void Flush() override;
   virtual void PushEvent(GUIEvent &event) override;
   virtual void DrawRect(const GUIRect r) override;
-  virtual void SendFont(uint8_t uifontIndex) override;
   virtual void SendPalette() override;
   virtual void SetPalette(const GUIColor *palette, int colorCount) override;
   virtual void mirrorUIConnectionChanged(bool connected) override;
@@ -81,14 +81,6 @@ HostGUIWindowImp::HostGUIWindowImp(GUICreateWindowParams &p) : window_(nullptr),
       SDL_SetTextureScaleMode(texture_, SDL_ScaleModeNearest);
     }
   }
-
-  Config *config = Config::GetInstance();
-  auto uiFontVar = (WatchedVariable *)config->FindVariable(Token::VarUIFont);
-
-  // register to receive updates to mirrorUI setting
-  uiFontVar->AddObserver(*this);
-  auto uifontIndex = uiFontVar->GetInt();
-  chargfx_set_font_index(uifontIndex);
 }
 
 HostGUIWindowImp::~HostGUIWindowImp() {
@@ -125,10 +117,11 @@ void HostGUIWindowImp::ClearTextRect(GUIRect rect) {
   }
 }
 
-void HostGUIWindowImp::DrawString(int x, int y, const char *string) {
+void HostGUIWindowImp::DrawString(int x, int y, const char *string, Font font) {
   if (!string)
     return;
   chargfx_set_cursor(x, y);
+
   for (const char *p = string; *p; ++p) {
     chargfx_putc(*p, false);
     if (chargfx_get_cursor_x() < 31) {
@@ -137,8 +130,9 @@ void HostGUIWindowImp::DrawString(int x, int y, const char *string) {
   }
 }
 
-void HostGUIWindowImp::DrawChar(int x, int y, char c, bool transparent) {
+void HostGUIWindowImp::DrawChar(int x, int y, char c, Font font, bool transparent) {
   chargfx_set_cursor(x, y);
+  chargfx_set_font(font);
   chargfx_putc(c, transparent);
 }
 
@@ -191,10 +185,6 @@ void HostGUIWindowImp::DrawRect(const GUIRect r) {
   chargfx_fill_rect(r.Left(), r.Top(), r.Right() - r.Left(), r.Bottom() - r.Top());
 }
 
-void HostGUIWindowImp::SendFont(uint8_t uifontIndex) {
-  chargfx_set_font_index(uifontIndex);
-}
-
 void HostGUIWindowImp::SendPalette() {
 }
 
@@ -236,13 +226,6 @@ void HostGUIWindowImp::Update(Observable &o, I_ObservableData *d) {
     case Token::VarMirrorUI:
       // the host application (currently) does not support mirrorUI
       break;
-    case Token::VarUIFont:
-      {
-        auto uifont = v.GetInt();
-        chargfx_set_font_index(uifont);
-        // TODO (if supporting mirrorUI) SendFont()
-        break;
-      }
   }
 }
 

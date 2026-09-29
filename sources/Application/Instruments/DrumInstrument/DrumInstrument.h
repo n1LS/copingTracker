@@ -66,6 +66,7 @@ public:
   void setChannel(uint8_t channel);
 
   void noteDisplay(uint8_t note, char (&out)[4]) override;
+  void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) override;
 
 private:
   static drum_voice_t voices_[SONG_CHANNEL_COUNT];

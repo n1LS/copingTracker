@@ -23,8 +23,8 @@
 #include "Externals/etl/include/etl/string.h"
 #include "config/StringLimits.h"
 
-#define PICO_CLOCK_INTERVAL 33 // ~30Hz
-#define PICO_CLOCK_HZ (1000 / PICO_CLOCK_INTERVAL)
+#define etClock_INTERVAL 33 // ~30Hz
+#define etClock_HZ (1000 / etClock_INTERVAL)
 
 class EventManager {
 public:

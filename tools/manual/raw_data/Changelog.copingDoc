@@ -1,5 +1,212 @@
 F                             
 C                             
+v0.3.0a             2026-09-23
+0                             
+0                             
+                              
+F                             
+0                             
+- added project-wide phrase   
+F                             
+0                             
+  length setting with 2-16    
+F                             
+0                             
+  steps selectable            
+F                             
+0                             
+- removed unused instruments  
+F                             
+0                             
+  and samples and reported    
+F                             
+0                             
+  count in a toast message    
+F                             
+0                             
+- added new line when adding  
+F                             
+0                             
+  new copingDoc changelog     
+F                             
+0                             
+- replaced Restoring          
+F                             
+0                             
+  Allocation message with a   
+F                             
+0                             
+  clear toast message         
+F                             
+0                             
+- enabled selectProjectView to
+F                             
+0                             
+  use the global warning      
+F                             
+0                             
+  handler                     
+F                             
+0                             
+- changed modal alert views to
+F                             
+0                             
+  toast views for success     
+F                             
+0                             
+  messages                    
+F                             
+0                             
+- fixed stack corruption on   
+F                             
+0                             
+  non-override file list      
+F                             
+0                             
+  drawing                     
+F                             
+0                             
+- fixed null dereference when 
+F                             
+0                             
+  switching selection focus   
+F                             
+0                             
+  from none                   
+F                             
+0                             
+- saturated MIDI values       
+F                             
+0                             
+  instead of scaling them     
+F                             
+0                             
+- fixed flickering play time  
+F                             
+0                             
+  and indicator on the song   
+F                             
+0                             
+  view                        
+F                             
+0                             
+- fixed font change observer  
+F                             
+0                             
+  for host application so     
+F                             
+0                             
+  changes appear immediately  
+F                             
+0                             
+- fixed StackInstrument glide 
+F                             
+0                             
+  settings and persistence    
+F                             
+0                             
+- fixed persistence to use    
+F                             
+0                             
+  special strings instead of  
+F                             
+0                             
+  display strings, decoupling 
+F                             
+0                             
+  UI                          
+F                             
+0                             
+- corrected command picker    
+F                             
+0                             
+  alphabetical order          
+F                             
+0                             
+- fixed left/right icons on   
+F                             
+0                             
+  right edge in HelpView      
+F                             
+0                             
+- fixed hidden files .XYZ     
+F                             
+0                             
+  being shown in host         
+F                             
+0                             
+- improved RAM footprint      
+F                             
+0                             
+- moved playback time display 
+F                             
+0                             
+  to title bar                
+F                             
+0                             
+- added half block under title
+F                             
+0                             
+  bar globally for more       
+F                             
+0                             
+  consistent page appearance  
+F                             
+0                             
+- added text CASE Selection to
+F                             
+0                             
+  ThemeView                   
+F                             
+0                             
+- removed experimental SID and
+F                             
+0                             
+  OPL instruments             
+F                             
+0                             
+- removed USB Storage and     
+F                             
+0                             
+  Firmware update option on   
+F                             
+0                             
+  host builds                 
+F                             
+0                             
+- removed font setting and    
+F                             
+0                             
+  selection in favor of       
+F                             
+0                             
+  regular, bold and graphical 
+F                             
+0                             
+  fonts in UI                 
+F                             
+0                             
+- fixed MirrorUI support for  
+F                             
+0                             
+  multi-font rendering        
+F                             
+0                             
+- updated TabBar in           
+F                             
+0                             
+  InstrumentView to render    
+F                             
+0                             
+  selected tab as white/active
+F                             
+0                             
+  when focused                
+0                             
+0                             
+                              
+F                             
+C                             
 v0.2.0a             2026-09-15
 0                             
 0                             

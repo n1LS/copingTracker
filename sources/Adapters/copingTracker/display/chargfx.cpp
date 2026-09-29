@@ -30,7 +30,7 @@ static Color screen_fg_color = WHITE;
 static int cursor_x = 0;
 static int cursor_y = 0;
 
-static uint8_t screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};
+static ScreenCharacter screen[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 static uint8_t colors[TEXT_HEIGHT * TEXT_WIDTH] = {0};
 static uint16_t buffer1[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
 static uint16_t buffer2[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
@@ -38,7 +38,7 @@ static uint16_t buffer2[CHAR_HEIGHT * CHAR_WIDTH * BUFFER_CHARS] = {0};
 uint16_t *buffer = buffer1;
 uint16_t *buffer_dma = buffer2;
 
-static uint8_t ui_font_index = 0;
+static Font ui_font = fRegular;
 
 // Using a bit array in order to save memory, there is a slight performance
 // hit in doing so vs a bool array
@@ -80,12 +80,12 @@ void chargfx_set_cursor(uint8_t x, uint8_t y) {
   cursor_y = y;
 }
 
-void chargfx_set_font_index(uint8_t idx) {
-  ui_font_index = idx;
+void chargfx_set_font(Font idx) {
+  ui_font = idx;
 }
 
-uint8_t chargfx_get_font_index() {
-  return ui_font_index;
+Font chargfx_get_font() {
+  return ui_font;
 }
 
 uint8_t chargfx_get_cursor_x() {
@@ -108,8 +108,9 @@ void chargfx_putc(char c, bool transparent) {
     color = (screen_fg_color << 4) | screen_bg_color;
   }
 
-  if (screen[idx] != c || colors[idx] != color) {
-    screen[idx] = c;
+  if (screen[idx].character != c || screen[idx].font != ui_font || colors[idx] != color) {
+    screen[idx].font = ui_font;
+    screen[idx].character = c;
     colors[idx] = color;
     changed[idx] = true;
   }
@@ -189,8 +190,6 @@ inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width) {
   ili9341_set_command(ILI9341_RAMWR);
   ili9341_start_writing();
 
-  const font_t *font = fonts[ui_font_index];
-
   bool haveDmaInFlight = false;
 
   for (int page = x; page < x + width; page++) {
@@ -199,11 +198,11 @@ inline void chargfx_draw_region(uint8_t x, uint8_t y, uint8_t width) {
     for (int col = y; col >= y; col--) {
       int idx = col * TEXT_WIDTH + page;
 
-      uint8_t character = screen[idx];
+      uint16_t character = screen[idx].word;
       uint16_t fg = palette[colors[idx] >> 4];
       uint16_t bg = palette[colors[idx] & 0x0f];
 
-      const uint16_t *glyph = (*font)[character];
+      const uint16_t *glyph = font_bitmaps[character];
 
       for (int glyphY = 0; glyphY < CHAR_HEIGHT; glyphY++) {
         uint16_t pixels = glyph[glyphY];
@@ -304,9 +303,6 @@ inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width) {
   ili9341_set_command(ILI9341_RAMWR);
   ili9341_start_writing();
 
-  const font_t *font = fonts[ui_font_index];
-  const int8_t *font_mask_index = font_mask_indices[ui_font_index];
-
   bool haveDmaInFlight = false;
 
   const uint16_t empty_mask[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -317,7 +313,7 @@ inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width) {
     int col = y;
     int idx = col * TEXT_WIDTH + page;
 
-    uint8_t character = screen[idx];
+    uint16_t character = screen[idx].word;
 
     int fg_idx = (colors[idx] >> 4) & 0x0F;
     int bg_idx = colors[idx] & 0x0F;
@@ -328,11 +324,11 @@ inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width) {
     uint16_t bg = palette[bg_idx];
 
     // get the glyph
-    const uint16_t *glyph = (*font)[character];
+    const uint16_t *glyph = font_bitmaps[character];
 
     // get character mask
-    int mask_index = font_mask_index[character];
-    const uint16_t *mask = (mask_index == -1) ? empty_mask : font_masks[ui_font_index][mask_index];
+    int mask_index = font_mask_indices[character];
+    const uint16_t *mask = (mask_index == -1) ? empty_mask : font_masks_all[mask_index];
 
     for (int glyphY = 0; glyphY < CHAR_HEIGHT; glyphY++) {
       uint16_t pixels = glyph[glyphY];
@@ -419,7 +415,7 @@ void chargfx_init() {
   ili9341_init();
 }
 
-void chargfx_get_screen_storage(uint8_t **outScreen, uint8_t **outColors, bool **outChanged) {
+void chargfx_get_screen_storage(ScreenCharacter **outScreen, uint8_t **outColors, bool **outChanged) {
   *outScreen = screen;
   *outColors = colors;
   *outChanged = changed;

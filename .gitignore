@@ -39,3 +39,5 @@ build-host
 build-xcode
 .env
 tools/ram_usage/__pycache__
+tools/fonts/__pycache__
+.vscode

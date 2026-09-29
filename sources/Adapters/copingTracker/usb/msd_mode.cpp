@@ -138,7 +138,7 @@ static void msd_draw_screen(const char *status) {
 void msd_mode_run() {
   // Initialize display
   chargfx_init();
-  chargfx_set_font_index(2);
+  chargfx_set_font(fRegular);
   chargfx_set_palette_color(BLACK, 0x000); // black
   chargfx_set_palette_color(GREEN, 0xFF0); // green
   chargfx_set_background(BLACK);

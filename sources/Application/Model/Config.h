@@ -65,7 +65,6 @@ private:
   WatchedVariable mirrorUI_;
   WatchedVariable importResampler_;
   WatchedVariable commandInputMode_;
-  WatchedVariable uiFont_;
   WatchedVariable textCase_;
   StringVariable<MAX_VARIABLE_STRING_LENGTH> themeName_;
   WatchedVariable backlightLevel_;

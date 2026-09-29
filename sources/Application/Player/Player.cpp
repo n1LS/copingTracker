@@ -828,8 +828,22 @@ void Player::playCursorPosition(int channel) {
   Song *song = viewData_->song_;
   Phrase *phrase = &(song->phrase_);
   unsigned char note = phrase->steps_[currentPhrase][pos].note;
-  unsigned char instr = phrase->steps_[currentPhrase][pos].instrument;
   uint8_t stepVolume = phrase->steps_[currentPhrase][pos].volume;
+
+  unsigned char instrumentId = instrumentOnChannel_[channel];
+  if (pos == 0) {
+    // first note, instrument might be NO_INSTRUMNET
+    instrumentId = phrase->steps_[currentPhrase][pos].instrument;
+  } else {
+    // not the first step, we can never lose the instrument during this phrase
+    int newValue = phrase->steps_[currentPhrase][pos].instrument;
+    if (newValue != NO_INSTRUMENT) {
+      instrumentId = newValue;
+    }
+  }
+
+  // write the change back
+  instrumentOnChannel_[channel] = instrumentId;
 
   TableHolder *th = TableHolder::GetInstance();
   TablePlayback &tpb = TablePlayback::GetTablePlayback(channel);
@@ -850,15 +864,17 @@ void Player::playCursorPosition(int channel) {
 
     I_Instrument *instrument;
 
-    if (instr != 0xFF) {
-      instrument = bank->GetInstrument(instr);
+    if (instrumentId != NO_INSTRUMENT) {
+      instrument = bank->GetInstrument(instrumentId);
       newInstrument = true;
     } else {
       instrument = mixer_.GetLastInstrument(channel);
     }
 
+    // TODO nILS: why on earth do we do this?
     if (instrument == NULL) {
       instrument = bank->GetInstrument(0);
+      instrumentId = 0;
     }
 
     if (instrument != 0) {
@@ -870,14 +886,14 @@ void Player::playCursorPosition(int channel) {
         SampleInstrument *sampleInstrument = static_cast<SampleInstrument *>(instrument);
         preserveNote = sampleInstrument->HasSlicesForPlayback();
       }
+
       if (!preserveNote) {
         note += viewData_->song_->chain_.steps_[chain][chainPos].transpose;
         note += project_->GetTranspose();
       }
-      instrumentOnChannel_[channel] = instr;
 
       // Check if note is in acceptable midi range
-
+      // this is not HIGHEST_NOTE, because taht only relates to the highest note enterable in the phrase
       if (note < HIGHEST_PLAYABLE_NOTE) {
         mixer_.StartInstrument(channel, instrument, note, stepVolume, newInstrument);
         noteTriggered = true;
@@ -909,7 +925,7 @@ void Player::playCursorPosition(int channel) {
     }
   }
 
-  if ((note <= HIGHEST_NOTE) || (instr != 0xFF)) {
+  if ((note <= HIGHEST_NOTE) || (instrumentId != 0xFF)) {
     I_Instrument *instrument = mixer_.GetInstrument(channel);
     if (instrument) {
       if (instrument->GetTableAutomation()) {

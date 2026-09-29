@@ -18,6 +18,7 @@
 #include "Application/Views/CommandView.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Foundation/Constants/GraphicCharacters.h"
 #include "System/Console/Trace.h"
 #include "UIController.h"
 #include "ViewData.h"
@@ -404,11 +405,11 @@ void PhraseView::pasteLast() {
     case colCmdVal1:
       // TODO check if this is not needed
       /*			s=phrase_->param1_+(16*viewData_->currentPhrase_+row_) ;
-                              if (*s==0) {
-                                      *s=lastParam_ ;
-                                      cmdEdit_.SetInt(lastParam_) ;
-                                      isDirty_=true ;
-                              }
+      if (*s==0) {
+      *s=lastParam_ ;
+      cmdEdit_.SetInt(lastParam_) ;
+      isDirty_=true ;
+      }
       �*/
       break;
 
@@ -427,11 +428,11 @@ void PhraseView::pasteLast() {
     case colCmdVal2:
       // TODO check if this is not needed
       /*			s=phrase_->param2_+(16*viewData_->currentPhrase_+row_) ;
-                              if (*s==0) {
-                                      *s=lastParam_ ;
-                                      isDirty_=true ;
-                                      cmdEdit_.SetInt(lastParam_) ;
-                              }
+      if (*s==0) {
+      *s=lastParam_ ;
+      isDirty_=true ;
+      cmdEdit_.SetInt(lastParam_) ;
+      }
       */
       break;
   }
@@ -520,10 +521,10 @@ void PhraseView::warpToNeighbour(int offset) {
 }
 
 /*****************************************************************************
- getSelectionRect:
-        gets the normalized rectangle of the current
-        selection. Valid only while selection is drawn
- *****************************************************************************/
+getSelectionRect:
+gets the normalized rectangle of the current
+selection. Valid only while selection is drawn
+*****************************************************************************/
 
 GUIRect PhraseView::getSelectionRect() {
   GUIRect r(clipboard_.col_, clipboard_.row_, col_ - clipboard_.col_, row_ - clipboard_.row_);
@@ -531,13 +532,13 @@ GUIRect PhraseView::getSelectionRect() {
 }
 
 /*****************************************************************************
- fillClipboardData:
-        copies the necessary information from the
-        current selection to the clipboard for future
-        paste. We're copying data all across the row
-        because we"re too lazy to try to figure a better
-        procedure
- *****************************************************************************/
+fillClipboardData:
+copies the necessary information from the
+current selection to the clipboard for future
+paste. We're copying data all across the row
+because we"re too lazy to try to figure a better
+procedure
+*****************************************************************************/
 
 void PhraseView::fillClipboardData() {
 
@@ -605,10 +606,10 @@ void PhraseView::extendSelection() {
 }
 
 /*****************************************************************************
- copySelection:
-        copies data in the current selection to the
-        clipboard & end selection process
- *****************************************************************************/
+copySelection:
+copies data in the current selection to the
+clipboard & end selection process
+*****************************************************************************/
 
 void PhraseView::copySelection() {
 
@@ -626,10 +627,10 @@ void PhraseView::copySelection() {
 }
 
 /*****************************************************************************
- cut:  copies data in the current selection to the
-       clipboard, clear selection content & end selection
-       process
- *****************************************************************************/
+cut:  copies data in the current selection to the
+clipboard, clear selection content & end selection
+process
+*****************************************************************************/
 
 void PhraseView::cutSelection() {
 
@@ -683,9 +684,9 @@ void PhraseView::cutSelection() {
 }
 
 /*****************************************************************************
- pasteClipboard:
-        copies data in the clipboard to the current step
- *****************************************************************************/
+pasteClipboard:
+copies data in the clipboard to the current step
+*****************************************************************************/
 
 void PhraseView::pasteClipboard() {
 
@@ -977,15 +978,13 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
       }
     } else if (mask & BM_DOWN) {
       // Go to table view
-      {
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        Token cmd1 = Token::enum_type(step.cmd1);
-        Token cmd2 = Token::enum_type(step.cmd2);
-        if (cmd1 == Token::InstrumentCommandTable) {
-          viewData_->currentTable_ = step.param1 & (TABLE_COUNT - 1);
-        } else if (cmd2 == Token::InstrumentCommandTable) {
-          viewData_->currentTable_ = step.param2 & (TABLE_COUNT - 1);
-        }
+      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
+      Token cmd1 = Token::enum_type(step.cmd1);
+      Token cmd2 = Token::enum_type(step.cmd2);
+      if (cmd1 == Token::InstrumentCommandTable) {
+        viewData_->currentTable_ = step.param1 & (TABLE_COUNT - 1);
+      } else if (cmd2 == Token::InstrumentCommandTable) {
+        viewData_->currentTable_ = step.param2 & (TABLE_COUNT - 1);
       }
 
       Navigate(VT_TABLE, vtRevealFromBottom);
@@ -1411,6 +1410,48 @@ void PhraseView::AnimationUpdate() {
       }
     }
 
+    // Piano Rool Temp
+    char black[8];
+    char white[8];
+
+    int lowest = HIGHEST_NOTE - 4 * 12;
+
+    int notes[SONG_CHANNEL_COUNT];
+    for (int c = 0; c < SONG_CHANNEL_COUNT; c++) {
+      int note = player->GetChannelNote(c);
+      if (note != NO_NOTE) {
+        notes[c] = note;
+        if (note < lowest) {
+          lowest = note;
+        }
+      } else {
+        notes[c] = -1;
+      }
+    }
+
+    lowest -= (lowest % 12);
+
+    int firstNote = lowest; // C3
+
+    for (int octave = 0; octave < 4; ++octave) {
+      uint16_t octaveNotes = 0;
+      const int octaveStart = firstNote + octave * 12;
+
+      for (int c = 0; c < SONG_CHANNEL_COUNT; ++c) {
+        const int note = notes[c];
+
+        if (note >= octaveStart && note < octaveStart + 12)
+          octaveNotes |= 1u << (note - octaveStart);
+      }
+
+      // TODO nILS: placeholder for future use
+      // drawPiano(octaveNotes, white, black);
+
+      SetColor(Theme::View::bg);
+      SetBackgroundColor(Theme::View::fg);
+      DrawString(5 + 7 * octave, 20, black, fGraphic);
+      DrawString(5 + 7 * octave, 19, white, fGraphic);
+    }
     // Create a memory barrier to ensure proper synchronization between cores
     createMemoryBarrier();
 
