@@ -306,14 +306,24 @@ void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
       };
       break;
 
-    // TODO nILS: Support InstrumentCommandChordUp and InstrumentCommandChordBidirectional
     case Token::InstrumentCommandChordUp:
+    case Token::InstrumentCommandChordDown:
+    case Token::InstrumentCommandChordBidirectional:
       {
         // split into 4 note offsets
         for (int i = 0; i < MAX_MIDI_CHORD_NOTES; i++) {
-          uint8_t noteOffset = (value >> (i * 4)) & 0xF;
-          if (noteOffset == 0) {
+          uint8_t nibble = (value >> (i * 4)) & 0xF;
+          if (nibble == 0) {
             continue;
+          }
+
+          // ChU adds, ChD subtracts, ChB reads each nibble as a signed 4 bit
+          // value (0-7 up, F-8 down)
+          bool descending = (token == Token::InstrumentCommandChordDown);
+          uint8_t noteOffset = nibble;
+          if (token == Token::InstrumentCommandChordBidirectional && nibble > 7) {
+            descending = true;
+            noteOffset = 16 - nibble;
           }
 
           // fit the offset into nearest valid note of the currently selected scale
@@ -321,26 +331,31 @@ void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
           uint8_t rootNote = lastNotes_[channel][0];
           int scale = Player::GetInstance()->GetProject()->GetScale();
           int scaleRoot = Player::GetInstance()->GetProject()->GetScaleRoot();
-          // apply current scale to offset, taking into account the scale root
-          uint8_t scaledOffset = getSemitonesOffset(scale, noteOffset, scaleRoot);
+          // apply current scale to offset, taking into account the scale root.
+          // going down snaps to the next lower note that is on scale.
+          uint8_t scaledOffset = descending ? getSemitonesOffsetDown(scale, noteOffset, scaleRoot)
+                                            : getSemitonesOffset(scale, noteOffset, scaleRoot);
 
           // use the existing steps note to calculate each notes offset
-          uint8_t note = rootNote + scaledOffset;
+          int note = descending ? rootNote - scaledOffset : rootNote + scaledOffset;
           // Trace::Debug("MIDI SCALE note:%d root:%d offset: %d", note, rootNote,
           //              noteOffset);
+
+          // drop notes that fall outside the MIDI range rather than wrapping
+          if (note < 0 || note > 0x7F) {
+            continue;
+          }
 
           // save the chord note for sending a note off later
           lastNotes_[channel][i + 1] = note;
 
-          if (noteOffset != 0) {
-            MidiMessage msg;
-            msg.status_ = MidiMessage::MIDI_NOTE_ON + mchannel;
-            msg.data1_ = note;
-            uint8_t volume = lastVolumes_[channel];
-            msg.data2_ = (volume != NO_VOLUME) ? static_cast<uint8_t>((velocity_ * volume) / 15) : velocity_;
-            // Trace::Debug("MIDI chord note ON[%d]: %d", i, msg.data1_);
-            svc_->QueueMessage(msg);
-          }
+          MidiMessage msg;
+          msg.status_ = MidiMessage::MIDI_NOTE_ON + mchannel;
+          msg.data1_ = note;
+          uint8_t volume = lastVolumes_[channel];
+          msg.data2_ = (volume != NO_VOLUME) ? static_cast<uint8_t>((velocity_ * volume) / 15) : velocity_;
+          // Trace::Debug("MIDI chord note ON[%d]: %d", i, msg.data1_);
+          svc_->QueueMessage(msg);
         }
       };
       break;

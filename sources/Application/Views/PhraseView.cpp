@@ -1176,7 +1176,7 @@ void PhraseView::DrawEditingValue() {
           instrObj->focusedNoteDisplay(d, buf);
 
           int len = (int)strlen(buf);
-          int frame = std::min((uint32_t)4, expandFrame_);
+          int frame = std::min(4, expandFrame_);
           int visibleLen = std::min(len, 3 + frame * 2);
           int start = (len - visibleLen) / 2;
 
