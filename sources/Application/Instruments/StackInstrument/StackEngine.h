@@ -39,9 +39,9 @@ typedef struct stack_parameters_t {
   uint8_t release;
   uint8_t brightness;
 
+  int8_t transpose;
   uint8_t glide;
   uint8_t wave;
-  int8_t transpose;
   uint8_t _padding;
 } stack_parameters_t;
 
@@ -75,6 +75,7 @@ typedef struct stack_voice_t {
 
   stack_flags flags;
   uint8_t notes[5];
+  uint8_t _padding[2]; // keeps sizeof(stack_voice_t) a multiple of 4
 
   // implementation ------------------------------------------------------------
 
