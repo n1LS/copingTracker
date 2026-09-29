@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>copingTracker Manual</title>
+<style>
+  :root {
+    --bg: #0b0b0b;
+    --panel: #151515;
+    --edge: #2a2a2a;
+    --ink: #dedede;
+    --muted: #808080;
+    --accent: #40649e;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--panel);
+    border-bottom: 1px solid var(--edge);
+    padding: 10px 16px 0;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .brand h1 { font-size: 15px; margin: 0; font-weight: 600; letter-spacing: .04em; }
+  .brand span { font-size: 12px; color: var(--muted); }
+  .tabrow {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+  }
+  nav { display: flex; flex-wrap: wrap; gap: 2px; flex: 1 1 auto; }
+  nav button {
+    appearance: none;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 12px;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  nav button:hover { color: var(--ink); }
+  nav button[aria-selected="true"] {
+    background: var(--bg);
+    border-color: var(--edge);
+    color: var(--ink);
+  }
+  main { padding: 20px 16px 64px; display: flex; justify-content: center; }
+
+  /* The canvas is the visible layer; an invisible, precisely aligned text
+     layer sits on top so the page stays selectable, searchable and reachable
+     by screen readers. */
+  .screen { position: relative; }
+  .screen canvas { display: block; image-rendering: pixelated; }
+  /* Invisible but selectable: transparent ink over the canvas, with the
+     selection highlight left visible so dragging still reads naturally. */
+  .textlayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    white-space: pre;
+    color: transparent;
+    background: transparent;
+    border: 0;
+    overflow: hidden;
+    -webkit-text-fill-color: transparent;
+  }
+  .textlayer::selection { background: rgba(64, 100, 158, .55); }
+  .textlayer::-moz-selection { background: rgba(64, 100, 158, .55); }
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    padding-bottom: 7px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .toolbar label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .toolbar input[type="range"] { width: 90px; }
+  #zoomLabel { min-width: 2em; }
+  .wrap { display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>copingTracker</h1>
+    <span>manual</span>
+  </div>
+  <div class="tabrow">
+    <nav id="tabs" role="tablist"></nav>
+    <div class="toolbar">
+      <label>zoom
+        <input id="zoom" type="range" min="1" max="4" step="1" value="2">
+      </label>
+      <span id="zoomLabel">2x</span>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <div class="screen" id="screen">
+      <canvas id="canvas"></canvas>
+      <pre class="textlayer" id="textlayer" aria-label="Page text"></pre>
+    </div>
+  </div>
+</main>
+<script id="manual-data" type="application/json">/*__DATA__*/</script>
+<script>
+/*__SCRIPT__*/
+</script>
+</body>
+</html>

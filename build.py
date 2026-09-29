@@ -86,6 +86,14 @@ def prebuild(args):
             "sources/Foundation/Constants/Documentation.generated.h",
         ],
     )
+    if args.manual:
+        step(
+            "Building HTML manual",
+            [
+                sys.executable,
+                "tools/manual/webapp/build_webapp.py",
+            ],
+        )
     # TODO nILS: reenable once the wave is done and the converter is updated
     # step(
     #    "Export LSDJeque Drum Kits",
@@ -106,6 +114,11 @@ def main():
     parser.add_argument("--bootloader", action="store_true")
     parser.add_argument("--host", action="store_true")
     parser.add_argument("--minimal-gm", action="store_true")
+    parser.add_argument(
+        "--manual",
+        action="store_true",
+        help="also regenerate tools/manual/webapp/index.html",
+    )
     parser.add_argument("--build-only", action="store_true")
     parser.add_argument("-j", "--jobs", type=int, default=8)
     args = parser.parse_args()
