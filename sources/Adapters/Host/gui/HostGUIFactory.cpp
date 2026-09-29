@@ -167,7 +167,7 @@ void HostGUIWindowImp::Flush() {
   // implementation in picoTrackerGUIWindowImp::Flush().
   if (_window) {
     const GUIRect rect = _window->GetFocusRect();
-    chargfx_draw_focus_rect(rect.Left(), rect.Top(), rect.Width());
+    chargfx_draw_focus_rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
   }
 
   uint32_t *pixels = chargfx_get_pixel_buffer();

@@ -247,7 +247,7 @@ void chargfx_draw_changed() {
   memset(changed, false, sizeof(changed));
 }
 
-void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width) {
+void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   if (x >= CHARGFX_TEXT_WIDTH) {
     return;
   }
@@ -258,22 +258,24 @@ void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width) {
     width -= x + width - CHARGFX_TEXT_WIDTH;
   }
 
-  for (int i = 0; i < width; ++i) {
-    int idx = y * CHARGFX_TEXT_WIDTH + (x + i);
-    changed[idx] = true;
-  }
-  static uint8_t pulse = 0;
-  pulse++;
-
-  for (int i = 0; i < width; ++i) {
-    int idx = y * CHARGFX_TEXT_WIDTH + (x + i);
-    ScreenCharacter ch = screen[idx];
-    uint8_t color_byte = colors[idx];
-    uint8_t fg = (color_byte >> 4) & 0x0F;
-    uint8_t bg = color_byte & 0x0F;
-    int pixel_x = (x + i) * CHARGFX_CHAR_WIDTH;
-    int pixel_y = y * CHARGFX_CHAR_HEIGHT;
-    RasterizeCharWithPulse(ch, fg, bg, pixel_x, pixel_y, pulse);
+  for (int dy = 0; dy < height; dy++) {
+    for (int i = 0; i < width; ++i) {
+      int idx = (y + dy) * CHARGFX_TEXT_WIDTH + (x + i);
+      changed[idx] = true;
+    }
+    static uint8_t pulse = 0;
+    pulse++;
+  
+    for (int i = 0; i < width; ++i) {
+      int idx = (y + dy) * CHARGFX_TEXT_WIDTH + (x + i);
+      ScreenCharacter ch = screen[idx];
+      uint8_t color_byte = colors[idx];
+      uint8_t fg = (color_byte >> 4) & 0x0F;
+      uint8_t bg = color_byte & 0x0F;
+      int pixel_x = (x + i) * CHARGFX_CHAR_WIDTH;
+      int pixel_y = (y + dy) * CHARGFX_CHAR_HEIGHT;
+      RasterizeCharWithPulse(ch, fg, bg, pixel_x, pixel_y, pulse);
+    }
   }
 }
 

@@ -282,7 +282,7 @@ static uint16_t rgb565_brightness(uint16_t color, uint8_t brightness) {
   return SWAP_BYTES(adjusted);
 }
 
-inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width) {
+inline void chargfx_draw_highlight_region(uint8_t x, uint8_t y, uint8_t width, int height) {
   uint16_t screen_x = x * CHAR_WIDTH;
   uint16_t screen_y = (TEXT_HEIGHT - 1 - y) * CHAR_HEIGHT;
   uint16_t screen_width = width * CHAR_WIDTH;
@@ -421,7 +421,10 @@ void chargfx_get_screen_storage(ScreenCharacter **outScreen, uint8_t **outColors
   *outChanged = changed;
 }
 
-void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width) {
+void chargfx_draw_focus_rect(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
   width = (x + width > TEXT_WIDTH) ? TEXT_WIDTH - x : width;
-  chargfx_draw_highlight_region(x, y, width);
+  
+  for (int dy = 0; dy < height; dy++) {
+    chargfx_draw_highlight_region(x, y + dy, width);
+  }
 }
