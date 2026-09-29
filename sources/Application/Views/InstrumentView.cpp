@@ -42,10 +42,8 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
       lastSampleIndex_(-1), suppressSampleChangeWarning_(false) {
   project_ = data->project_;
 
-  static const char *tabs[] = {"-", "Smpl", "Chip", "Drum", "Stck", "MIDI"}; // TODO nILS: grab from from InstrumentType
-
   GUIPoint position = GUIPoint(0, 2);
-  typeVarField_.emplace_back("Type", position, *&instrumentType_, tabs, 6);
+  typeVarField_.emplace_back("Type", position, *&instrumentType_, CompactInstrumentNames, IT_LAST);
   fieldList_.insert(fieldList_.end(), &typeVarField_.back());
   typeVarField_.back().AddObserver(*this);
   typeVarField_.back().SetBackgroundColor(Theme::View::inactive);
@@ -304,6 +302,9 @@ void InstrumentView::refreshInstrumentFields() {
     case IT_DRUM:
       fillDrumParameters();
       break;
+    case IT_LSDJKIT:
+      fillLSDJKitParameters();
+      break;
     case IT_STACK:
       fillStackParameters();
       break;
@@ -342,6 +343,7 @@ void InstrumentView::fillNoneParameters() {
 
 #include "InstrumentView_Chiptune.ipp"
 #include "InstrumentView_Drum.ipp"
+#include "InstrumentView_LSDJKit.ipp"
 #include "InstrumentView_MIDI.ipp"
 #include "InstrumentView_Sample.ipp"
 #include "InstrumentView_Stack.ipp"
@@ -383,10 +385,10 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
       return;
     }
     if (getInstrument()->GetType() == IT_SAMPLE) {
-      UIIntVarField *field =
-          (UIIntVarField *)GetFocus(); // TODO nILS: this is bad, it's not necessarily an UIIntVarField
-      if (field->GetVariableID() == Token::SampleInstrumentEnd) {
-        Variable *var = field->GetVariable();
+      // fields without a variable (actions, labels) return nullptr here
+      UIField *focus = GetFocus();
+      Variable *var = focus ? focus->GetVariable() : nullptr;
+      if (var && var->GetID() == Token::SampleInstrumentEnd) {
         SampleInstrument *instrument = (SampleInstrument *)instr;
         var->SetInt(instrument->GetSampleSize() - 1);
         isDirty_ = true;
@@ -402,15 +404,14 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   Player *player = Player::GetInstance();
 
   if (mask == BM_ENTER) {
-    // Get the current field to check if we're on the sample field
-    UIIntVarField *currentField =
-        (UIIntVarField *)GetFocus(); // TODO nILS: this is bad, it's not necessarily an UIIntVarField
-    Variable *var = currentField->GetVariable();
+    // Get the current field to check if we're on the sample field.
+    // fields without a variable (actions, labels) return nullptr here
+    UIField *currentField = GetFocus();
+    Variable *var = currentField ? currentField->GetVariable() : nullptr;
 
     if (var) {
       // Only allow sample import when the sample field is selected
-      if (getInstrument()->GetType() == IT_SAMPLE && currentField &&
-          currentField->GetVariableID() == Token::SampleInstrumentSample) {
+      if (getInstrument()->GetType() == IT_SAMPLE && var->GetID() == Token::SampleInstrumentSample) {
 
         if (viewMode_ == VM_NEW) {
           viewMode_ = VM_NORMAL; // clear the "enter double tap" state
@@ -450,15 +451,18 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   if (viewMode_ == VM_CLONE) {
     if ((mask & BM_ENTER) && (mask & BM_ALT)) {
-      UIIntVarField *field =
-          (UIIntVarField *)GetFocus(); // TODO nILS: this is bad, it's not necessarily an UIIntVarField
+      // fields without a variable (actions, labels) return nullptr here
+      UIField *field = GetFocus();
+      Variable *v = field ? field->GetVariable() : nullptr;
       mask &= ~BM_ENTER;
-      Variable *v = field->GetVariable();
+      if (!v)
+        return;
+
       int current = v->GetInt();
       if (current == -1)
         return;
 
-      if (field->GetVariableID() == Token::InstrumentParameterTable) {
+      if (v->GetID() == Token::InstrumentParameterTable) {
         int next = TableHolder::GetInstance()->Clone(current);
         if (next != NO_MORE_TABLE) {
           v->SetInt(next);
@@ -549,6 +553,8 @@ void InstrumentView::DrawView() {
       DrawViewDrum();
     } else if (type == IT_CHIPTUNE) {
       DrawViewChiptune();
+    } else if (type == IT_LSDJKIT) {
+      DrawViewLSDJKit();
     } else if (type == IT_STACK) {
       DrawViewStack();
     } else if (type == IT_SAMPLE) {

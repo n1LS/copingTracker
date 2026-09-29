@@ -178,3 +178,28 @@ uint8_t getSemitonesOffset(uint8_t scale, uint8_t number, uint8_t root) {
 
   return i;
 }
+
+// Mirror of getSemitonesOffset walking downwards: returns how many semitones
+// *below* the root the nth scale note sits, so a caller subtracts the result.
+uint8_t getSemitonesOffsetDown(uint8_t scale, uint8_t number, uint8_t root) {
+
+  // check for valid ranges of scale, number and root
+  if (scale >= numScales || number >= 12 || root >= 12) {
+    NAssert(0);
+    return 0;
+  }
+
+  uint8_t i = 0;
+  uint8_t foundNotes = 0;
+
+  // Walk down one semitone at a time, counting the notes that are in the
+  // scale. Every scale contains its own root, so this always terminates.
+  while (foundNotes < number) {
+    i++;
+    if (scaleSteps[scale][(12 - ((i + root) % 12)) % 12]) {
+      foundNotes++;
+    }
+  }
+
+  return i;
+}

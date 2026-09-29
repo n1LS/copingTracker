@@ -30,6 +30,17 @@ public:
   void OnEditClick();
   etl::string<MaxLength> GetString();
 
+  // On screen keyboard support, see UIField::WantsTextEditor().
+  bool WantsTextEditor() override {
+    return true;
+  }
+  const char *GetEditorLabel() override;
+  const char *GetEditorValue() override;
+  uint8_t GetEditorMaxLength() override {
+    return MaxLength;
+  }
+  void ApplyEditedValue(const char *value) override;
+
   int GetFocusOffset();
   int GetFocusWidth();
 
@@ -44,6 +55,9 @@ private:
   const etl::string<MAX_UITEXTFIELD_LABEL_LENGTH> label_;
   uint8_t token_;
   etl::string<MaxLength> defaultValue_;
+  // Backing storage for GetEditorValue(): Variable::GetString() returns by
+  // value, so we need somewhere to keep the string alive for the caller.
+  etl::string<MaxLength> editorValue_;
 };
 
 #endif

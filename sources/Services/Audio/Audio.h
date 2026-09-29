@@ -17,6 +17,7 @@
 #include "Externals/etl/include/etl/string.h"
 #include "Externals/etl/include/etl/vector.h"
 #include "Foundation/T_Factory.h"
+#include "config/AudioConstants.h"
 #include "config/StringLimits.h"
 
 class Audio : public T_Factory<Audio> {
@@ -27,8 +28,9 @@ public:
   virtual ~Audio();
   virtual void Init() = 0;
   virtual void Close() = 0;
+  // The engine rate is fixed at build time; drivers only confirm it.
   virtual int GetSampleRate() {
-    return 44100;
+    return SAMPLE_RATE_HZ;
   }
   virtual int GetMixerVolume() {
     return 100;

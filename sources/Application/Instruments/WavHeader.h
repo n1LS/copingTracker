@@ -14,6 +14,7 @@
 #include "Externals/etl/include/etl/expected.h"
 #include "System/FileSystem/FileSystem.h"
 #include "WavFileErrors.h"
+#include "config/AudioConstants.h"
 #include <cstdint>
 
 struct WavHeaderInfo {
@@ -33,7 +34,7 @@ struct WavHeaderInfo {
 class WavHeaderWriter {
 public:
   // Write WAV header to I_File
-  static bool WriteHeader(I_File *file, uint32_t sampleRate = 44100, uint16_t channels = 2,
+  static bool WriteHeader(I_File *file, uint32_t sampleRate = SAMPLE_RATE_HZ, uint16_t channels = 2,
                           uint16_t bytesPerSample = 2);
 
   // Update file size in WAV header for I_File

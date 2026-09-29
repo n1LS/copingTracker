@@ -20,6 +20,7 @@ public:
 private:
   int count_;
   int focusPosition_;
+  int tabOffset_;
   Token action_;
   Variable &src_;
 

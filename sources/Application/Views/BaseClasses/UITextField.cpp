@@ -41,7 +41,9 @@ template <uint8_t MaxLength> void UITextField<MaxLength>::Draw(GUIWindow &w, int
   // borders pre and post text
   char buffer[33];
   npf_snprintf(buffer, sizeof(buffer), "%s:%-*.*s", label_.c_str(), MaxLength, MaxLength, value);
-  DrawLabeledField(w, position, buffer, currentChar_, 1);
+  // No character cursor: editing happens in the TextInputModal, so the field
+  // only ever displays the whole value.
+  DrawLabeledField(w, position, buffer, 0, 0);
   focusWidth_ = MaxLength + 2;
 }
 
@@ -122,6 +124,31 @@ template <uint8_t MaxLength> void UITextField<MaxLength>::ProcessArrow(uint16_t 
 
 template <uint8_t MaxLength> etl::string<MaxLength> UITextField<MaxLength>::GetString() {
   return src_->GetString().substr(0, MaxLength);
+}
+
+template <uint8_t MaxLength> const char *UITextField<MaxLength>::GetEditorLabel() {
+  return label_.c_str();
+}
+
+template <uint8_t MaxLength> const char *UITextField<MaxLength>::GetEditorValue() {
+  // Variable::GetString() returns by value, keep a copy alive for the caller.
+  editorValue_.assign(src_->GetString().substr(0, MaxLength));
+  return editorValue_.c_str();
+}
+
+template <uint8_t MaxLength> void UITextField<MaxLength>::ApplyEditedValue(const char *value) {
+  if (!value) {
+    return;
+  }
+  src_->SetString(value, true);
+  // Keep the in place editing cursor inside the new string.
+  auto len = strlen(value);
+  currentChar_ = (len > 0) ? (uint8_t)(len - 1) : 0;
+
+  // Same notification OnClick() sends, so the observing views (ProjectView's
+  // rename flag, ThemeView's export name) keep working unchanged.
+  SetChanged();
+  NotifyObservers(reinterpret_cast<I_ObservableData *>(static_cast<uintptr_t>(token_)));
 }
 
 template <uint8_t MaxLength> void UITextField<MaxLength>::SetVariable(Variable &v) {

@@ -9,6 +9,7 @@
 
 #include "DrumEnums.h"
 #include "Application/Utils/char.h" 
+#include "Foundation/Constants/GraphicCharacters.h"
 
 static const char *drumFormatStrings[12] = {
   Drum_Name_0 ":%4.4X",
@@ -86,11 +87,11 @@ void InstrumentView::DrawViewDrum() {
     drum_parameters_t params = std::bit_cast<drum_parameters_t>(var->GetInt());
 
     SetColor(selected ? (column == 3 ? colors[0] : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 14, p.y_ + 3 + n, char_v_bar_lookup[(params.pitch * 10 + 7) / 15]);
+    DrawChar(p.x_ + 14, p.y_ + 3 + n, char_v_bar_lookup[(params.pitch * 10 + 7) / 15], fGraphic);
     SetColor(selected ? (column == 2 ? colors[1] : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 15, p.y_ + 3 + n, char_v_bar_lookup[(params.note * 10 + 7) / 15]);
+    DrawChar(p.x_ + 15, p.y_ + 3 + n, char_v_bar_lookup[(params.note * 10 + 7) / 15], fGraphic);
     SetColor(selected ? (column == 1 ? colors[2] : Theme::View::fg) : Theme::View::inactive);
-    DrawChar(p.x_ + 16, p.y_ + 3 + n, char_v_bar_lookup[(params.decay * 10 + 7) / 15]);
+    DrawChar(p.x_ + 16, p.y_ + 3 + n, char_v_bar_lookup[(params.decay * 10 + 7) / 15], fGraphic);
     SetColor(selected ? (column == 0 ? colors[3] : Theme::View::fg) : Theme::View::inactive);
     DrawString(p.x_ + 18, p.y_ + 3 + n, chiptune_waveforms[params.wave % drumNumWaveforms]);
   }

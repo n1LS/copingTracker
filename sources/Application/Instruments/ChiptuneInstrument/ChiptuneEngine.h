@@ -37,8 +37,6 @@ typedef struct InstrumentParameters {
   // envelope attack and decay time (0-255, where 0 is instant)
   uint8_t attack;
   uint8_t decay;
-  // instrument output level
-  uint8_t level;
   // plays a burst of white noise for the given time at the beginning of a note
   uint8_t burst;
   // vibrato depth and the delay before the automatic vibrato starts
@@ -212,7 +210,7 @@ typedef struct voice_t {
 
   uint8_t stepVolume;
 
-  uint8_t alignmentSentinel[2]; // placeholder to guarantee alignment & padding
+  uint8_t alignmentSentinel[3]; // placeholder to guarantee alignment & padding
 
   // implementation ------------------------------------------------------------
 
@@ -403,11 +401,11 @@ typedef struct voice_t {
     pan.target = 128;
     pan.step = 0;
 
-    // reset volume slide
-    uint32_t calculatedVolume = ((uint32_t)parameters.level * (uint32_t)stepVolume) >> 8;
-    volume.level = calculatedVolume;
-    volume.target = calculatedVolume;
-    volume.current = calculatedVolume << 8;
+    // reset volume slide. stepVolume already has the instrument volume folded
+    // in by I_Instrument::EffectiveVolume, so no further scaling here.
+    volume.level = stepVolume;
+    volume.target = stepVolume;
+    volume.current = (uint16_t)stepVolume << 8;
     volume.step = 0;
 
     // oscillator frequency setup
@@ -596,14 +594,13 @@ typedef struct voice_t {
   }
 
   void set_instrument_parameter(uint8_t param, uint8_t value) {
-    Trace::Error("Set parameter %d to %d", param, value);
     switch (param) {
       case 0:                                                                             // waveform
         wave = static_cast<chiptune_wave_type_e>(std::min(value, (uint8_t)waveLastItem)); // clamp to valid range
         break;
       case 1:                                 // transpose
         parameters.transpose = (int8_t)value; // reinterpret as signed
-        // TODO nILS: there's more to this in the case of ARP or the likes
+        // TODO nILS: there's more to this in the case of ARP or the likes currently running
         break;
       case 2: // level
         volume.level = value;
@@ -670,12 +667,12 @@ typedef struct voice_t {
   }
 
   void set_step_volume(uint8_t inVolume) {
+    // already folded by I_Instrument::EffectiveVolume
     stepVolume = inVolume;
 
-    uint32_t calculatedVolume = ((uint32_t)parameters.level * inVolume) >> 8;
-    volume.level = calculatedVolume;
-    volume.target = calculatedVolume;
-    volume.current = calculatedVolume << 8;
+    volume.level = inVolume;
+    volume.target = inVolume;
+    volume.current = (uint16_t)inVolume << 8;
     volume.step = 0;
 
     calculate_gain();

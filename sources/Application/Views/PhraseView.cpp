@@ -29,7 +29,7 @@
 #include <nanoprintf.h>
 #include <stdlib.h>
 
-static const int16_t offsets_[2][4] = {{-1, 1, 12, -12}, {-1, 1, 16, -16}};
+static const int16_t offsets_[4] = {-1, 1, 16, -16};
 static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
 static const uint8_t columnWidths_[7] = {3, 2, 1, 3, 4, 3, 4};
 
@@ -58,9 +58,17 @@ void PhraseView::setCurrentlySelectedCommand(Token command) {
 
 void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
   unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].note;
+  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  uint8_t instrumentId = getEffectiveInstrumentForRow(row_ + yOffset);
+  I_Instrument *instrument = bank->GetInstrument(instrumentId);
+  SampleInstrument *sampleInstrument = (SampleInstrument *)instrument;
+  InstrumentType type = instrument->GetType();
 
   // Get the offset based on direction (using proper sequential indices)
-  int offset = offsets_[colNote][direction];
+  int offset = instrument->GetNoteIncrement(direction == VUD_LEFT || direction == VUD_RIGHT);
+  if (direction == VUD_DOWN || direction == VUD_LEFT) {
+    offset *= -1;
+  }
 
   // when changing notes from note off, always start from C3
   if (*c == NOTE_OFF) {
@@ -68,21 +76,13 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
     offset = 0;
   }
 
-  // Apply scale or slice range constraints
-  uint8_t instrId = 0;
-  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  SampleInstrument *sliceInstr = nullptr;
-  if (bank && getEffectiveInstrumentForRow(row_ + yOffset, instrId)) {
-    I_Instrument *instr = bank->GetInstrument(instrId);
-    if (instr && instr->GetType() == IT_SAMPLE) {
-      sliceInstr = static_cast<SampleInstrument *>(instr);
-    }
-  }
-
   uint8_t sliceFirst = 0;
   uint8_t sliceLast = 0;
-  if (sliceInstr && sliceInstr->GetSliceNoteRange(sliceFirst, sliceLast)) {
+
+  if (type == IT_SAMPLE && sampleInstrument->GetSliceNoteRange(sliceFirst, sliceLast)) {
+    // Apply scale or slice range constraints
     int newNote = *c + offset;
+
     if (newNote < sliceFirst) {
       newNote = sliceFirst;
     } else if (newNote > sliceLast) {
@@ -90,7 +90,6 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
     }
     *c = static_cast<unsigned char>(newNote);
   } else {
-    // Add/remove from offset to match selected scale
     int scale = viewData_->project_->GetScale();
     int scaleRoot = viewData_->project_->GetScaleRoot();
 
@@ -98,11 +97,15 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
     int newNote = *c + offset;
 
     // Check if the note is in the scale (adjusted for root)
-    while (newNote >= 0 && !scaleSteps[scale][(newNote + 12 - scaleRoot) % 12]) {
-      offset > 0 ? offset++ : offset--;
-      newNote = *c + offset;
+    if (instrument->SupportsScales()) {
+      // Add/remove from offset to match selected scale
+      while (newNote >= 0 && !scaleSteps[scale][(newNote + 12 - scaleRoot) % 12]) {
+        offset > 0 ? offset++ : offset--;
+        newNote = *c + offset;
+      }
     }
-    updateData(c, offset, HIGHEST_NOTE, true);
+
+    updateData(c, offset, instrument->GetHighestNote(), true);
   }
 
   lastNote_ = *c;
@@ -112,7 +115,7 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
 
 void PhraseView::updateInstrumentValue(ViewUpdateDirection direction, int yOffset) {
   unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].instrument;
-  updateData(c, offsets_[colInstrument][direction], MAX_INSTRUMENT_COUNT - 1, false);
+  updateData(c, offsets_[direction], MAX_INSTRUMENT_COUNT - 1, false);
   lastInstr_ = *c;
 }
 
@@ -241,28 +244,29 @@ void PhraseView::Reset() {
   needsLiveIndicatorUpdate_ = false;
 }
 
-bool PhraseView::getEffectiveInstrumentForRow(int row, uint8_t &instrumentId) const {
+uint8_t PhraseView::getEffectiveInstrumentForRow(int row) {
   if (!phrase_ || row < 0) {
-    return false;
+    return NO_INSTRUMENT;
   }
 
   for (int i = row; i >= 0; --i) {
     unsigned char instr = phrase_->steps_[viewData_->currentPhrase_][i].instrument;
     if (instr != 0xFF) {
-      instrumentId = instr;
-      return true;
+      return instr;
     }
   }
-  return false;
+  return NO_INSTRUMENT;
 }
 
 void PhraseView::updateCursor(int dx, int dy) {
+  int lastCol = col_;
+  int lastRow = row_;
+
   col_ += dx;
   row_ += dy;
 
   if (row_ > 15) {
     // Try to see if the current chain has a phrase after this one
-
     if ((viewMode_ != VM_SELECTION) && (viewData_->chainRow_ < 15)) {
       viewData_->chainRow_++;
       unsigned char *p = viewData_->GetCurrentChainPointer();
@@ -319,6 +323,10 @@ void PhraseView::updateCursor(int dx, int dy) {
 
   int x = 5 + columnPositions_[col_];
   focusRect_ = GUIRect(x, row_ + 3, columnWidths_[col_], 1);
+
+  if (lastCol != col_ || lastRow != row_) {
+    expandFrame_ = 0;
+  }
 
   isDirty_ = true;
 }
@@ -1119,6 +1127,82 @@ void PhraseView::setTextProps(int col, int row, Color textColor = Theme::View::f
   }
 }
 
+void PhraseView::DrawEditingValue() {
+  GUIPoint pos = GetAnchor();
+  int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
+  PhraseStep *stepsBase = phrase_->steps_[viewData_->currentPhrase_];
+  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+  I_Instrument *instrObj = bank->noneInstrument();
+
+  // highlighted / active display drawn last to make sure z-order is preserved
+  switch (col_) {
+
+    // columns need special handling to draw the cmdEditField
+    case colCmdVal1:
+    case colCmdVal2:
+      if (viewMode_ != VM_SELECTION) {
+        cmdEditField_.SetFocus();
+        cmdEditField_.Draw(w_);
+      }
+      break;
+
+    case colNote:
+      {
+        pos = GetAnchor();
+        pos.y_ += row_;
+        unsigned char lastInstr = NO_INSTRUMENT;
+
+        char buffer[4];
+
+        unsigned char d = stepsBase[row_].note;
+        unsigned char instr = stepsBase[row_].instrument;
+        if (instr != NO_INSTRUMENT) {
+          lastInstr = instr;
+          instrObj = bank->GetInstrument(lastInstr);
+        }
+
+        bool hilit = row_ % ALT_ROW_NUMBER == 0;
+        setTextProps(colNote, row_, Theme::Phrase::note(hilit), phraseLength);
+
+        int xStart = pos.x_ - 1;
+        int xEnd = pos.x_ + 3;
+
+        if (d == NO_NOTE) {
+          DrawString(pos.x_, pos.y_, "---");
+        } else if (d == NOTE_OFF) {
+          DrawString(pos.x_, pos.y_, "off");
+        } else {
+          char buf[12];
+          instrObj->focusedNoteDisplay(d, buf);
+
+          int len = (int)strlen(buf);
+          int frame = std::min(4, expandFrame_);
+          int visibleLen = std::min(len, 3 + frame * 2);
+          int start = (len - visibleLen) / 2;
+
+          if (visibleLen < len)
+            buf[start + visibleLen] = '\0';
+
+          int p = (visibleLen - 3) / 2;
+          xStart = pos.x_ - p - 1;
+          xEnd = xStart + visibleLen + 1;
+
+          DrawString(pos.x_ - p, pos.y_, buf + start);
+        }
+
+        SetColor(Theme::Phrase::note(hilit));
+        SetBackgroundColor(Theme::View::bg);
+        DrawChar(xStart, pos.y_, CHAR(char_cap_left_s));
+        DrawChar(xEnd, pos.y_, CHAR(char_cap_right_s));
+        focusRect_ = GUIRect(xStart, row_ + 3, xEnd - xStart + 1, 1);
+        break;
+      }
+    default:
+      // all other columns do not break out of their assigned rects and do hence not need to be redrawn
+      break;
+  }
+}
+
 void PhraseView::DrawView() {
   Token helpLegendCommand = Token::InstrumentCommandNone;
 
@@ -1138,43 +1222,16 @@ void PhraseView::DrawView() {
   SetBackgroundColor(Theme::View::bg);
   DrawString(pos.x_, pos.y_ - 1, "Nte In V Cmd1Val Cmd2Val");
 
-  // Display row numbers
+  // global data
 
   int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
-  drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16, phraseLength);
-
-  // Display notes
-
   PhraseStep *stepsBase = phrase_->steps_[viewData_->currentPhrase_];
-  unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instrObj = bank->noneInstrument();
 
-  for (int j = 0; j < 16; j++) {
-    char buffer[4];
+  // Display row numbers
 
-    unsigned char d = stepsBase[j].note;
-    unsigned char instr = stepsBase[j].instrument;
-    if (instr != NO_INSTRUMENT) {
-      lastInstr = instr;
-      instrObj = bank->GetInstrument(lastInstr);
-    }
-
-    setTextProps(colNote, j, Theme::Phrase::note(j % ALT_ROW_NUMBER == 0), phraseLength);
-
-    if (d == NO_NOTE) {
-      DrawString(pos.x_, pos.y_, "---");
-    } else if (d == NOTE_OFF) {
-      DrawString(pos.x_, pos.y_, "off");
-    } else {
-      bool showSlice = false;
-      bool invalidSlice = false;
-      uint8_t sliceIndex = 0;
-      instrObj->noteDisplay(d, buffer);
-      DrawString(pos.x_, pos.y_, buffer);
-    }
-    pos.y_++;
-  }
+  drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16, phraseLength);
 
   // Draw instruments
   char buffer[6];
@@ -1214,6 +1271,36 @@ void PhraseView::DrawView() {
         }
       }
     }
+    pos.y_++;
+  }
+
+  // Display notes (after instruments to allow overdrawing)
+
+  pos = GetAnchor();
+  unsigned char lastInstr = NO_INSTRUMENT;
+
+  for (int j = 0; j < 16; j++) {
+    char buffer[4];
+
+    unsigned char d = stepsBase[j].note;
+    unsigned char instr = stepsBase[j].instrument;
+    if (instr != NO_INSTRUMENT) {
+      lastInstr = instr;
+      instrObj = bank->GetInstrument(lastInstr);
+    }
+
+    bool hilit = j % ALT_ROW_NUMBER == 0;
+    setTextProps(colNote, j, Theme::Phrase::note(hilit), phraseLength);
+
+    if (d == NO_NOTE) {
+      DrawString(pos.x_, pos.y_, "---");
+    } else if (d == NOTE_OFF) {
+      DrawString(pos.x_, pos.y_, "off");
+    } else {
+      instrObj->noteDisplay(d, buffer);
+      DrawString(pos.x_, pos.y_, buffer);
+    }
+
     pos.y_++;
   }
 
@@ -1289,9 +1376,12 @@ void PhraseView::DrawView() {
     pos.y_++;
   }
 
+  // draw the map in the bottom left corner
+
   drawMap();
 
   // Set info area draw mode based on what will be drawn
+
   if (helpLegendCommand != Token::InstrumentCommandNone) {
     infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
     drawCommandLegend(5, SCREEN_HEIGHT - 4, helpLegendCommand);
@@ -1304,10 +1394,9 @@ void PhraseView::DrawView() {
     OnPlayerUpdate(PET_UPDATE);
   }
 
-  if ((viewMode_ != VM_SELECTION) && ((col_ == colCmdVal1) || (col_ == colCmdVal2))) {
-    cmdEditField_.SetFocus();
-    cmdEditField_.Draw(w_);
-  }
+  // redraw/overdraw editing value
+
+  DrawEditingValue();
 }
 
 void PhraseView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
@@ -1335,6 +1424,13 @@ void PhraseView::AnimationUpdate() {
     return;
   }
 
+  // update the editing value as it might animate
+  if (expandFrame_ != -1) {
+    expandFrame_++;
+
+    DrawEditingValue();
+  }
+
   // Get player instance safely
   Player *player = Player::GetInstance();
 
@@ -1342,9 +1438,6 @@ void PhraseView::AnimationUpdate() {
   if (!viewData_ || !player) {
     return;
   }
-
-  // Always update VU meter even if other parts of UI dont need updating
-  drawMasterVuMeter(player, false, 25);
 
   // Handle any pending updates from OnPlayerUpdate using the consolidated flag
   // This ensures all UI drawing happens on the "main" thread (core0)
@@ -1409,6 +1502,9 @@ void PhraseView::AnimationUpdate() {
         }
       }
     }
+
+    // not ideal, TODO nILS
+    DrawEditingValue();
 
     /*
     // Piano Rool Temp

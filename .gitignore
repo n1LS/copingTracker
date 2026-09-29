@@ -41,3 +41,4 @@ build-xcode
 tools/ram_usage/__pycache__
 tools/fonts/__pycache__
 .vscode
+tools/manual/webapp/index.html

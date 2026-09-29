@@ -17,6 +17,7 @@
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Foundation/Constants/GraphicCharacters.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalView.h"
 #include "System/Console/Trace.h"
@@ -242,6 +243,31 @@ void View::drawMasterVuMeter(Player *player, bool forceRedraw, uint8_t xoffset) 
   drawVUMeter(leftBars, rightBars, pos, 0, forceRedraw);
 }
 
+void View::drawTitleVuMeter(Player *player) {
+  stereosample playerLevel = player->GetMasterLevel();
+
+  // Convert amplitude to bar levels
+  int32_t leftBars, rightBars;
+  amplitudeToBars(playerLevel, &leftBars, &rightBars);
+
+  // navigation bar mini VU meter
+  int left = (leftBars + 1) >> 4;
+  int right = (rightBars + 1) >> 4;
+
+  const Color barColor[10] = {Theme::View::Title::fg, Theme::View::Title::fg, Theme::View::Title::fg,
+                              Theme::View::Title::fg, Theme::View::Title::fg, Theme::View::Title::fg,
+                              Theme::VU::warn,        Theme::VU::warn,        Theme::VU::warn,
+                              Theme::VU::clip};
+
+  SetBackgroundColor(Theme::View::Title::bg);
+
+  SetColor(barColor[left]);
+  DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, 0, char_v_bar_lookup[left], fGraphic);
+
+  SetColor(barColor[right]);
+  DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 1, 0, char_v_bar_lookup[right], fGraphic);
+}
+
 void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw) {
   SetBackgroundColor(Theme::View::bg);
 
@@ -286,7 +312,6 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 
   if (forceRedraw || leftChanged || rightChanged) {
     // If forcing redraw or level changed, redraw the entire meter
-
     // Then draw the active cells with inversion enabled
 
     for (int i = 0; i < VU_METER_HEIGHT; i++) {
@@ -301,12 +326,12 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
 
       // draw left channel if changed
       if (leftChanged) {
-        DrawChar(pos.x_, pos.y_ - i, char_v_bar(leftBars - 10 * i));
+        DrawChar(pos.x_, pos.y_ - i, char_v_bar(leftBars - 10 * i), fGraphic);
       }
 
       // draw right channel if changed
       if (rightChanged) {
-        DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(rightBars - 10 * i));
+        DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(rightBars - 10 * i), fGraphic);
       }
     }
   }
@@ -771,7 +796,7 @@ void View::drawRowNumbers(int x, int y, int start, int numRows, int limit) {
     } else {
       SetColor(Theme::View::inactive);
     }
-    byteToHexString(j, row);
+    byteToHexString(index, row);
     DrawString(x, y + j, row);
   }
 }

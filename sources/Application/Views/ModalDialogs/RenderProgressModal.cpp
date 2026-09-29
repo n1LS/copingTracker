@@ -18,31 +18,21 @@
 #include "Services/Audio/Audio.h"
 #include "UIFramework/BasicDatas/GUIPoint.h"
 #include <cstdint>
+#include <nanoprintf.h>
 #include <new>
 #include <stdio.h>
-#include <nanoprintf.h>
 
 static const char *messages[20] = {
-  "Cooking" char_indicator_ellipsis_s,
-  "Blending" char_indicator_ellipsis_s,
-  "Converting" char_indicator_ellipsis_s,
-  "Polishing" char_indicator_ellipsis_s,
-  "Fine-tuning" char_indicator_ellipsis_s,
-  "Balancing" char_indicator_ellipsis_s,
-  "Processing" char_indicator_ellipsis_s,
-  "Assembling" char_indicator_ellipsis_s,
-  "Combining" char_indicator_ellipsis_s,
-  "Mixing tracks" char_indicator_ellipsis_s,
-  "Shaping sound" char_indicator_ellipsis_s,
-  "Adding shine" char_indicator_ellipsis_s,
-  "One more pass" char_indicator_ellipsis_s,
-  "Making magic" char_indicator_ellipsis_s,
-  "Building mix" char_indicator_ellipsis_s,
-  "Exporting" char_indicator_ellipsis_s,
-  "Wrapping up" char_indicator_ellipsis_s,
-  "Finalizing" char_indicator_ellipsis_s,
-  "Almost there" char_indicator_ellipsis_s,
-  "Finishing up" char_indicator_ellipsis_s,
+    "Cooking" char_indicator_ellipsis_s,       "Blending" char_indicator_ellipsis_s,
+    "Converting" char_indicator_ellipsis_s,    "Polishing" char_indicator_ellipsis_s,
+    "Fine-tuning" char_indicator_ellipsis_s,   "Balancing" char_indicator_ellipsis_s,
+    "Processing" char_indicator_ellipsis_s,    "Assembling" char_indicator_ellipsis_s,
+    "Combining" char_indicator_ellipsis_s,     "Mixing tracks" char_indicator_ellipsis_s,
+    "Shaping sound" char_indicator_ellipsis_s, "Adding shine" char_indicator_ellipsis_s,
+    "One more pass" char_indicator_ellipsis_s, "Making magic" char_indicator_ellipsis_s,
+    "Building mix" char_indicator_ellipsis_s,  "Exporting" char_indicator_ellipsis_s,
+    "Wrapping up" char_indicator_ellipsis_s,   "Finalizing" char_indicator_ellipsis_s,
+    "Almost there" char_indicator_ellipsis_s,  "Finishing up" char_indicator_ellipsis_s,
 };
 
 bool RenderProgressModal::inUse_ = false;
@@ -95,9 +85,9 @@ void RenderProgressModal::OnFocus() {
 }
 
 void RenderProgressModal::ProcessButtonMask(uint16_t mask, bool pressed) {
-    if (!pressed) {
-        return;
-    }
+  if (!pressed) {
+    return;
+  }
 
   if (mask & BM_ENTER) {
     // If player is still running, stop it first
@@ -109,7 +99,7 @@ void RenderProgressModal::ProcessButtonMask(uint16_t mask, bool pressed) {
     EndModal(0);
     return; // Return early to prevent setting dirty flag unnecessarily
   }
-    
+
   // Only set dirty if we didn't handle the button press
   isDirty_ = true;
 }
@@ -127,26 +117,26 @@ void RenderProgressModal::AnimationUpdate() {
       totalSamples_ = player->GetPlayTime() * Audio::GetInstance()->GetSampleRate();
     }
     // calculate the percentage progress of the song we have rendered
-  bool hasActiveRow = false;
-  const int currentRow = getCurrentRenderedSongRow(&hasActiveRow);
-  if (hasActiveRow) {
-    if (!startSongRowCaptured_) {
-      startSongRow_ = currentRow;
-      startSongRowCaptured_ = true;
-      initializeSongProgressTracking();
-    }
-    if (progressChannel_ >= 0) {
-      const int renderedUnits = calculateChannelRenderedUnits(progressChannel_, startSongRow_);
-      if (renderedUnits > renderedUnits_) {
-        renderedUnits_ = renderedUnits;
+    bool hasActiveRow = false;
+    const int currentRow = getCurrentRenderedSongRow(&hasActiveRow);
+    if (hasActiveRow) {
+      if (!startSongRowCaptured_) {
+        startSongRow_ = currentRow;
+        startSongRowCaptured_ = true;
+        initializeSongProgressTracking();
       }
+      if (progressChannel_ >= 0) {
+        const int renderedUnits = calculateChannelRenderedUnits(progressChannel_, startSongRow_);
+        if (renderedUnits > renderedUnits_) {
+          renderedUnits_ = renderedUnits;
+        }
 
-    percentDone_ = calculateSongRenderPercent();
-  }
+        percentDone_ = calculateSongRenderPercent();
+      }
     }
   } else if (renderStarted_ && !renderComplete_) {
     renderComplete_ = true;
-      percentDone_ = 100;
+    percentDone_ = 100;
     message_ = "Render complete!";
   }
 
@@ -158,19 +148,19 @@ void RenderProgressModal::AnimationUpdate() {
 
   // action button
   DrawButton(x + 6, y + 10, renderComplete_ ? "  OK  " : "Cancel", true, Theme::Dialog::bg);
-    focusRect_ = GUIRect(x + 6, y + 10, 8, 1);
+  focusRect_ = GUIRect(x + 6, y + 10, 8, 1);
 
-    // Draw message
-    SetColor(Theme::Dialog::fg);
-    SetBackgroundColor(Theme::Dialog::bg);
-    char buf[16];
-    if (renderComplete_) {
-      npf_snprintf(buf, sizeof(buf), "%s", "Rendering done. ");
-    } else {
-      memset(buf, ' ', 16);
-      npf_snprintf(buf, sizeof(buf), "%-16.16s%", messages[percentDone_ / 5]);
-    }
-    DrawString(x + 2, y + 4, buf);
+  // Draw message
+  SetColor(Theme::Dialog::fg);
+  SetBackgroundColor(Theme::Dialog::bg);
+  char buf[16];
+  if (renderComplete_) {
+    npf_snprintf(buf, sizeof(buf), "%s", "Rendering done. ");
+  } else {
+    memset(buf, ' ', 16);
+    npf_snprintf(buf, sizeof(buf), "%-16.16s%", messages[percentDone_ / 5]);
+  }
+  DrawString(x + 2, y + 4, buf);
 }
 
 void RenderProgressModal::drawRenderProgress(int x, int y) {
@@ -191,7 +181,7 @@ void RenderProgressModal::drawRenderProgress(int x, int y) {
     seconds %= 60;
     sprintf(buf, " %02d:%02d", minutes, seconds);
   }
-  
+
   DrawString(x + 10, y, buf);
 }
 

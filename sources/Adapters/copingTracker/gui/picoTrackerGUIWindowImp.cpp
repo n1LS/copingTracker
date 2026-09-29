@@ -156,7 +156,7 @@ void picoTrackerGUIWindowImp::Flush() {
 
   // 2nd render pass for the focus rect
   const GUIRect rect = _window->GetFocusRect();
-  chargfx_draw_focus_rect(rect.Left(), rect.Top(), rect.Width());
+  chargfx_draw_focus_rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
 }
 
 void picoTrackerGUIWindowImp::Invalidate() {

@@ -13,6 +13,7 @@
 
 #include "Foundation/T_Singleton.h"
 #include "Services/Audio/AudioDriver.h"
+#include "config/AudioConstants.h"
 
 #define MINI_BLANK_SIZE 128 // Samples
 
@@ -28,7 +29,7 @@ public:
   virtual void StopDriver();
   virtual int GetPlayedBufferPercentage();
   virtual int GetSampleRate() {
-    return 44100;
+    return SAMPLE_RATE_HZ;
   }
   virtual bool Interlaced() {
     return true;

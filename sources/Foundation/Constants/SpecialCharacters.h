@@ -36,17 +36,13 @@
 #define char_indicator_leftRight_s "\x96"
 #define char_indicator_ellipsis_s "\xEF"
 
-#define char_v_bar_0_s " "
-#define char_v_bar_1_s "\xA0"
-#define char_v_bar_2_s "\xA1"
-#define char_v_bar_3_s "\xA2"
-#define char_v_bar_4_s "\xA3"
-#define char_v_bar_5_s "\xA4"
-#define char_v_bar_6_s "\xA5"
-#define char_v_bar_7_s "\xA6"
-#define char_v_bar_8_s "\xA7"
-#define char_v_bar_9_s "\xA8"
-#define char_v_bar_10_s char_block_full_s
+#define char_button_up_down_s "\xA9"
+#define char_button_left_right_s "\xAA"
+
+#define char_cap_left_s "\xAB"
+#define char_cap_right_s "\xAC"
+
+#define char_lsdj_s "\xB5\xB6"
 
 #define char_key_right_s "\x97"
 #define char_key_up_s "\x98"
@@ -165,6 +161,8 @@
 #define char_border_double_verticalRight_s "\xCC"
 #define char_border_double_cross_s "\xCE"
 
+#define char_upper_cursor_s "\xCF"
+
 #define char_dotted_horizontal_s "\xC6"
 #define char_back_s "\xC7"
 
@@ -212,11 +210,6 @@
 #define string_battery_0_percent char_battery_left_s char_battery_empty_s char_battery_empty_s char_battery_right_s
 
 // Array of bargraph characters for fast lookup
-static const char char_v_bar_lookup[] = {CHAR(char_v_bar_0_s), CHAR(char_v_bar_1_s), CHAR(char_v_bar_2_s),
-                                         CHAR(char_v_bar_3_s), CHAR(char_v_bar_4_s), CHAR(char_v_bar_5_s),
-                                         CHAR(char_v_bar_6_s), CHAR(char_v_bar_7_s), CHAR(char_v_bar_8_s),
-                                         CHAR(char_v_bar_9_s), CHAR(char_v_bar_10_s)};
-
 static const char char_h_bar_lookup[] = {CHAR(char_h_bar_0_s), CHAR(char_h_bar_1_s),  CHAR(char_h_bar_2_s),
                                          CHAR(char_h_bar_3_s), CHAR(char_h_bar_4_s),  CHAR(char_h_bar_5_s),
                                          CHAR(char_h_bar_6_s), CHAR(char_h_bar_7_s),  CHAR(char_h_bar_8_s),
@@ -249,7 +242,7 @@ static inline uint8_t map_100_to_bargraph10(uint8_t value) {
   if (value <= 1) {
     return value + 1;
   } else if (value >= 254) {
-    return value - 155;  // 254 → 99, 255 → 100
+    return value - 155; // 254 → 99, 255 → 100
   }
 
   return 2 + ((value - 1) * 95 + 126) / 250;
@@ -259,7 +252,7 @@ static inline uint8_t map_255_to_bargraph10(uint8_t value) {
   if (value <= 1) {
     return value + 1;
   } else if (value >= 254) {
-    return value - 155;  // 254 → 99, 255 → 100
+    return value - 155; // 254 → 99, 255 → 100
   }
 
   return 2 + ((value - 1) * 95 + 126) / 250;

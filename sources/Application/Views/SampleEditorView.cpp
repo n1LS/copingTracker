@@ -30,6 +30,7 @@
 #include "System/Profiler/Profiler.h"
 #include "UIController.h"
 #include "ViewUtils.h"
+#include "config/AudioConstants.h"
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -765,8 +766,8 @@ void SampleEditorView::AnimationUpdate() {
       uint32_t elapsedTime = currentTime - lastAnimationTime_;
       lastAnimationTime_ = currentTime;
 
-      // Get the sample duration in milliseconds, assuming 44.1kHz sample rate
-      float durationMs = (float)tempSampleSize_ / 44100.0f * 1000.0f;
+      // Get the sample duration in milliseconds at the engine sample rate
+      float durationMs = (float)tempSampleSize_ / SAMPLE_RATE_F * 1000.0f;
 
       // Calculate the normalized playback position increment
       float positionIncrement = (float)elapsedTime / durationMs;

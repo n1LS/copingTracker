@@ -3,6 +3,7 @@ add_library(application_views_modaldialogs
   FullScreenBox.cpp
   RenderProgressModal.cpp
   DeleteProjectConfirmModal.cpp
+  TextInputModal.cpp
 )
 
 target_link_libraries(application_views_modaldialogs PUBLIC

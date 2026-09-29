@@ -7,6 +7,8 @@
  */
 
 #include "HostAudioDriver.h"
+#include "System/Console/Trace.h"
+#include "config/AudioConstants.h"
 #include <algorithm>
 #include <cstring>
 
@@ -34,7 +36,7 @@ bool HostAudioDriver::InitDriver() {
 
   SDL_AudioSpec desired;
   SDL_zero(desired);
-  desired.freq = 44100;
+  desired.freq = SAMPLE_RATE_HZ;
   desired.format = AUDIO_S16;
   desired.channels = 2;
   desired.samples = 512;
@@ -43,6 +45,15 @@ bool HostAudioDriver::InitDriver() {
 
   device_id_ = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained_spec_, 0);
   if (device_id_ == 0) {
+    return false;
+  }
+
+  // opened with allowed_changes = 0, so SDL either granted the engine rate or
+  // should have failed above. Treat anything else as a hard failure rather
+  // than silently running the whole engine detuned.
+  if (obtained_spec_.freq != (int)SAMPLE_RATE_HZ) {
+    Trace::Error("Audio device rate %d != engine rate %d", obtained_spec_.freq, (int)SAMPLE_RATE_HZ);
+    CloseDriver();
     return false;
   }
 
@@ -120,7 +131,8 @@ int HostAudioDriver::GetPlayedBufferPercentage() {
 }
 
 int HostAudioDriver::GetSampleRate() {
-    return obtained_spec_.freq;
+  // InitDriver() refuses to start unless the device granted this exact rate
+  return SAMPLE_RATE_HZ;
 }
 
 double HostAudioDriver::GetStreamTime() {

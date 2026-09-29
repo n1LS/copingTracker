@@ -10,6 +10,7 @@
  */
 
 #include "FieldView.h"
+#include "Application/Views/ModalDialogs/TextInputModal.h"
 #include "ModalView.h"
 #include "System/Console/Trace.h"
 #include "UIIntVarField.h"
@@ -17,6 +18,28 @@
 FieldView::FieldView(GUIWindow &w, ViewData *data) : ScreenView(w, data) {
   focus_ = 0;
   lastMask_ = 0;
+}
+
+// Applies the on screen keyboard's result back onto the field that opened it.
+void FieldView::TextEditorCallback(View &v, ModalView &modal) {
+  auto &fieldView = static_cast<FieldView &>(v);
+  UIField *field = fieldView.editingField_;
+  fieldView.editingField_ = nullptr;
+
+  if (!field || modal.GetReturnCode() != TextInputModal::TIM_ACCEPT) {
+    return;
+  }
+
+  auto &textModal = static_cast<TextInputModal &>(modal);
+  field->ApplyEditedValue(textModal.GetValue().c_str());
+  fieldView.isDirty_ = true;
+}
+
+void FieldView::openTextEditor(UIField *field) {
+  editingField_ = field;
+  TextInputModal *modal =
+      TextInputModal::Create(*this, field->GetEditorLabel(), field->GetEditorValue(), field->GetEditorMaxLength());
+  DoModal(modal, ModalViewCallback::create<&FieldView::TextEditorCallback>());
 }
 
 void FieldView::UpdateFocusRect() {
@@ -96,7 +119,14 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
     uint16_t released = lastMask_ & ~mask;
     if (released == BM_ENTER) {
       focus_->SetPressed(false);
-      focus_->OnClick();
+      if (focus_->WantsTextEditor()) {
+        // Text fields open the on screen keyboard instead of firing OnClick().
+        // Done on release rather than press so the ENTER release event does
+        // not leak into the freshly opened modal and type a character.
+        openTextEditor(focus_);
+      } else {
+        focus_->OnClick();
+      }
       isDirty_ = true;
     } else if (released == BM_EDIT) {
       focus_->OnEditClick();

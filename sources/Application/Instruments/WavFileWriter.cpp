@@ -13,6 +13,7 @@
 #include "System/Console/Trace.h"
 #include "System/System/System.h"
 #include "WavHeader.h"
+#include "config/AudioConstants.h"
 #include <algorithm>
 #include <cstring>
 #include <limits>
@@ -42,7 +43,7 @@ bool WavFileWriter::Open(const char *path) {
     return false;
   }
   // Use WavHeaderWriter to write the header
-  if (!WavHeaderWriter::WriteHeader(file_.get(), 44100, 2, 16)) {
+  if (!WavHeaderWriter::WriteHeader(file_.get(), SAMPLE_RATE_HZ, 2, 16)) {
     Trace::Log("WAVWRITER", "Failed to write WAV header");
     file_.reset();
     return false;

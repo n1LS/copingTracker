@@ -17,6 +17,7 @@ hope it will work :D
 
 #include "Filters.h"
 #include "System/Console/Trace.h"
+#include "config/AudioConstants.h"
 #include <math.h>
 
 static filter_t filter[8];
@@ -58,7 +59,9 @@ void set_filter(int channel, filterType_t type, fixed param1, fixed param2, int 
     // adjust parm to get the most of the parameters, as the fx are more useful
     // with near-limit parameters.
     if (bassyMapping) {
-      static const fixed fpFreqDivider = fl2fp(1 / 22050.0f);
+      // maps the absolute cutoff computed below into the 0..1 normalised
+      // range flt->freq is expressed in, so it tracks the engine sample rate
+      static const fixed fpFreqDivider = fl2fp(1 / NYQUIST_HZ);
       static const fixed fpZeroSix = fl2fp(0.6f);
       static const fixed fpThreeOne = fl2fp(3.1f);
 

@@ -192,6 +192,10 @@ struct Token {
     ChiptuneInstrumentSweepAmount = 211,
     ChiptuneInstrumentArpSpeed = 212,
 
+    LSDJKitInstrumentKit1 = 193,
+    LSDJKitInstrumentKit2 = 194,
+    LSDJKitInstrumentBitDepth = 199,
+
     DrumInstrumentParamsVoice0 = 214,
     DrumInstrumentParamsVoice1 = 215,
     DrumInstrumentParamsVoice2 = 216,
@@ -230,13 +234,11 @@ struct Token {
     // 119 free      1
     // 121-122 free  2
     // 141 free      1
-    // 193-194 free  2
-    // 199 free      1
     // 203 free      1
     // 209 free      1
-    // 230-253 free 24
+    // 231-253 free 23
     // ----------------
-    //              33
+    //              29
 
     Default = 255, // "    "
   };
@@ -402,6 +404,11 @@ struct Token {
   ETL_ENUM_TYPE_16(ChiptuneInstrumentSweepTime, "SweepTime")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentSweepAmount, "SweepAmount")
   ETL_ENUM_TYPE_16(ChiptuneInstrumentArpSpeed, "ArpSpeed")
+
+  // LSDJ Kit Instrument Variables
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentKit1, "Kit1")
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentKit2, "Kit2")
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentBitDepth, "BitDepth")
 
   // Drum Instrument Variables
   ETL_ENUM_TYPE_16(DrumInstrumentParamsVoice0, "DrumInstument0")

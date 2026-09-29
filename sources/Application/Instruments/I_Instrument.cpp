@@ -23,7 +23,7 @@ void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {
   // Add firmware version information
   printer->PushAttribute(XML_ATTR_VERSION, PRODUCT_VERSION);
   // Save the instrument type
-  printer->PushAttribute(XML_ATTR_TYPE, InstrumentTypeNames[GetType()].full);
+  printer->PushAttribute(XML_ATTR_TYPE, InstrumentTypeNames[GetType()].persistence);
 
   // Save the instrument name as its not stored in the Variables
   if (!name_.empty()) {
@@ -127,6 +127,11 @@ void I_Instrument::noteDisplay(uint8_t note, char (&out)[4]) {
   } else {
     noteToString(note, out);
   }
+}
+
+void I_Instrument::focusedNoteDisplay(uint8_t note, char (&line)[12]) {
+  char (&noteOut)[4] = *reinterpret_cast<char (*)[4]>(line);
+  noteDisplay(note, noteOut);
 }
 
 void I_Instrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) {

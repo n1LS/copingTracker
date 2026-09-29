@@ -38,6 +38,11 @@ private:
   uint16_t lastMask_;
   UIField *focus_ = nullptr;
   UIField *findAdjacentField(bool vertical, int8_t direction);
+
+  // On screen keyboard: the field awaiting the modal's result.
+  UIField *editingField_ = nullptr;
+  void openTextEditor(UIField *field);
+  static void TextEditorCallback(View &v, ModalView &modal);
 };
 
 #endif

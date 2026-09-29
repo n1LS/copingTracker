@@ -19,6 +19,7 @@
 #include "ChiptuneInstrument.h"
 #include "DrumInstrument.h"
 #include "Filters.h"
+#include "LSDJKitInstrument.h"
 #include "MidiInstrument.h"
 #include "StackInstrument.h"
 #include "System/io/Status.h"
@@ -109,7 +110,7 @@ void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
       InstrumentType instrType = IT_SAMPLE; // default if no type in project XML
       if (instype[0] != '\0') {
         for (uint32_t i = 0; i < IT_LAST; i++) {
-          if (!strcasecmp(instype, InstrumentTypeNames[i].full)) {
+          if (!strcasecmp(instype, InstrumentTypeNames[i].persistence)) {
             instrType = (InstrumentType)i;
             break;
           }
@@ -151,6 +152,9 @@ InstrumentAssignResult InstrumentBank::AssignInstrumentToSlot(InstrumentType typ
     case IT_DRUM:
       current = instrumentPool_.create<DrumInstrument>();
       break;
+    case IT_LSDJKIT:
+      current = instrumentPool_.create<LSDJKitInstrument>();
+      break;
     case IT_STACK:
       current = instrumentPool_.create<StackInstrument>();
       break;
@@ -189,6 +193,9 @@ void InstrumentBank::purgeInstrument(I_Instrument *instrument) {
       break;
     case IT_DRUM:
       instrumentPool_.destroy(static_cast<DrumInstrument *>(instrument));
+      break;
+    case IT_LSDJKIT:
+      instrumentPool_.destroy(static_cast<LSDJKitInstrument *>(instrument));
       break;
     case IT_STACK:
       instrumentPool_.destroy(static_cast<StackInstrument *>(instrument));

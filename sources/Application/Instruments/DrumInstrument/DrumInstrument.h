@@ -53,15 +53,19 @@ public:
 
   virtual int GetTable() {
     return 0;
-  };
+  }
   virtual bool GetTableAutomation() {
     return false;
-  };
+  }
   virtual void GetTableState(TableSaveState &state) {};
   virtual void SetTableState(TableSaveState &state) {};
   etl::ilist<Variable *> *Variables() {
     return &variables_;
-  };
+  }
+
+  virtual bool SupportsScales() override {
+    return false;
+  }
 
   void setChannel(uint8_t channel);
 

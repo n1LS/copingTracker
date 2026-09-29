@@ -178,6 +178,7 @@ struct Theme {
   struct Dialog {
     FIXED(bg, LIGHT_GRAY)
     FIXED(fg, BLACK)
+    FIXED(inactive, DARK_GRAY)
 
     struct Icon {
       FIXED(info, LIGHT_YELLOW);
@@ -194,6 +195,11 @@ struct Theme {
     struct Button {
       SWITCHABLE(fg, BLACK, WHITE)
       SWITCHABLE(bg, LIGHT_GREEN, DARK_GRAY)
+    };
+
+    struct Selectable {
+      SWITCHABLE(fg, WHITE, BLACK)
+      SWITCHABLE(bg, BLACK, LIGHT_GRAY)
     };
   };
 
@@ -324,6 +330,7 @@ protected:
   void drawBattery();
   void drawPlaybackIndicator();
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
+  void drawTitleVuMeter(Player *player);
   void drawPlayTime(Player *player, GUIPoint pos);
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);

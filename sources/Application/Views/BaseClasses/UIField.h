@@ -53,6 +53,24 @@ public:
   virtual void OnEditClick() {}; // EDIT pressed
   virtual void ProcessEditArrow(uint16_t mask) {};
   virtual void ProcessClear() {}; // EDIT+ENTER pressed
+
+  // Text editing fields opt in to the on screen keyboard modal: FieldView
+  // opens it on ENTER instead of firing OnClick(), then hands the accepted
+  // string back through ApplyEditedValue().
+  virtual bool WantsTextEditor() {
+    return false;
+  }
+  virtual const char *GetEditorLabel() {
+    return nullptr;
+  }
+  virtual const char *GetEditorValue() {
+    return nullptr;
+  }
+  virtual uint8_t GetEditorMaxLength() {
+    return 0;
+  }
+  virtual void ApplyEditedValue(const char *value) {
+  }
   void SetFocus();
   void ClearFocus();
   void SetActive(bool active);

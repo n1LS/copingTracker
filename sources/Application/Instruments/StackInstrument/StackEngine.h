@@ -30,17 +30,19 @@
  ******************************************************************************/
 
 typedef struct stack_parameters_t {
+  uint16_t chord;
   uint8_t spread;
   uint8_t attack;
+
   uint8_t decay;
   uint8_t sustain;
   uint8_t release;
-  uint8_t volume;
   uint8_t brightness;
+
+  int8_t transpose;
   uint8_t glide;
   uint8_t wave;
-  uint16_t chord;
-  int8_t transpose;
+  uint8_t _padding;
 } stack_parameters_t;
 
 // (!) alignment has to be manually kept in this struct to allow using pack()
@@ -73,6 +75,7 @@ typedef struct stack_voice_t {
 
   stack_flags flags;
   uint8_t notes[5];
+  uint8_t _padding[2]; // keeps sizeof(stack_voice_t) a multiple of 4
 
   // implementation ------------------------------------------------------------
 
@@ -110,8 +113,10 @@ typedef struct stack_voice_t {
       stop();
     }
 
-    // recompute combined gain when envelope, pan or volume changes
-    level = (parameters.volume * volume * envelope.value) >> 24;
+    // recompute combined gain when envelope, pan or volume changes. volume
+    // already has the instrument volume folded in by
+    // I_Instrument::EffectiveVolume, so this is a single multiply.
+    level = (volume * envelope.value) >> 16;
 
     // pitch: slew the live frequency towards the target base_frequency (glide)
     for (int o = 0; o < stackNumOscillators; o++) {

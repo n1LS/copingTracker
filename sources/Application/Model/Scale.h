@@ -23,4 +23,8 @@ extern const bool scaleSteps[numScales][12];
 // and root note
 uint8_t getSemitonesOffset(uint8_t scale, uint8_t number, uint8_t root);
 
+// As above, but walking down the scale. The returned offset is the distance
+// *below* the root, so callers subtract it.
+uint8_t getSemitonesOffsetDown(uint8_t scale, uint8_t number, uint8_t root);
+
 #endif

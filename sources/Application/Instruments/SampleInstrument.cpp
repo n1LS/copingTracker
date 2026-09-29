@@ -398,8 +398,7 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
   int rootNote = (rootNote_.GetInt() - 60) + source_->GetRootNote(rp->midiNote_);
 
   // step volume
-  uint32_t stepVolume = (volume == NO_VOLUME) ? 256 : volumeLUT[volume];
-  uint32_t calculatedVolume = (volume_.GetInt() * stepVolume) >> 8;
+  uint32_t calculatedVolume = EffectiveVolume(volume);
   rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
 
   rp->pan_ = rp->basePan_ = i2fp(pan_.GetInt());
@@ -606,8 +605,7 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
 }
 
 void SampleInstrument::SetStepVolume(int channel, uint8_t volume) {
-  uint32_t stepVolume = (volume == NO_VOLUME) ? 256 : volumeLUT[volume];
-  uint32_t calculatedVolume = (volume_.GetInt() * stepVolume) >> 8;
+  uint32_t calculatedVolume = EffectiveVolume(volume);
 
   renderParams *rp = renderParams_ + channel;
   rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);

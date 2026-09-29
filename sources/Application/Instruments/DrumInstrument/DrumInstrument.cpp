@@ -54,7 +54,7 @@ void DrumInstrument::Stop(int channel) {
 bool DrumInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // get the instrument parameters from the instrument and pass them to the
   // current voice
-  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
+  uint8_t calculatedVolume = EffectiveVolume(volume);
 
   voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters(note));
 
@@ -124,7 +124,7 @@ bool DrumInstrument::SupportsCommand(Token token) {
 }
 
 void DrumInstrument::SetStepVolume(int channel, uint8_t volume) {
-  uint8_t calculatedVolume = (volume == NO_VOLUME) ? 255 : volumeLUT[volume];
+  uint8_t calculatedVolume = EffectiveVolume(volume);
   voices_[channel].set_step_volume(calculatedVolume);
 }
 
