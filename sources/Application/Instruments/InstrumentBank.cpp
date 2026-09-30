@@ -15,6 +15,7 @@
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistencyService.h"
+#include "Application/Player/PlayerMixer.h"
 #include "Application/Utils/char.h"
 #include "ChiptuneInstrument.h"
 #include "DrumInstrument.h"
@@ -210,6 +211,13 @@ void InstrumentBank::purgeInstrument(I_Instrument *instrument) {
 
 void InstrumentBank::releaseInstrument(uint16_t id) {
   auto instrument = instruments_[id];
+
+  // The player may have picked this instrument up after the caller decided to
+  // replace it (eg. while a confirmation dialog was open). Detach it from any
+  // channel first: purgeInstrument() runs the destructor and hands the memory
+  // back to the pool, so a channel still holding the pointer would render
+  // freed memory.
+  PlayerMixer::GetInstance()->ReleaseInstrument(instrument);
 
   purgeInstrument(instrument);
   instruments_[id] = &none_;

@@ -49,6 +49,17 @@ public:
 
   I_Instrument *GetLastInstrument(int channel);
 
+  // True while any channel still holds this instrument, ie. the audio thread
+  // may render it. Note this is not the same as Player::GetPlayedInstrument(),
+  // which reports NO_INSTRUMENT for muted channels even though those channels
+  // still hold (and render) the instrument.
+  bool IsInstrumentInUse(I_Instrument *instrument);
+
+  // Force every channel holding this instrument to drop it. Must be called
+  // before an instrument is destroyed or returned to the pool, otherwise the
+  // channels are left rendering freed memory.
+  void ReleaseInstrument(I_Instrument *instrument);
+
   void StartChannel(int channel);
   void StopChannel(int channel);
 
