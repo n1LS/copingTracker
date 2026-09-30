@@ -9,4 +9,4 @@
 #include "MemoryPool.h"
 
 MemoryPool::Scratch MemoryPool::scratch_;
-etl::vector_ext<int> MemoryPool::fileIndexes_(scratch_.fileIndexStorage, MAX_FILE_INDEX_SIZE);
+etl::vector<int, MAX_FILE_INDEX_SIZE> MemoryPool::fileIndexes_;

@@ -15,12 +15,11 @@
 #include <cstdint>
 
 // A single piece of RAM shared by several buffers that are never needed at
-// the same time. Only one "view" (file listing, or sample-import scratch)
-// is ever alive at once, so instead of each caller reserving its own
-// dedicated static storage, they all draw from this common backing store.
-// The buffers are overlaid via a union: the union's size is the size of its
-// largest member, not the sum of all of them, which is what actually saves
-// RAM compared to declaring separate static arrays.
+// the same time. Only one "view" (file system writes, persistency document
+// (XML) parsing, or sample-import scratch) is ever alive at once
+//
+// The file-index listing vector (FileList()) is intentionally NOT part of
+// that union and keeps its own dedicated storage
 class MemoryPool {
 public:
   // File indexes produced while browsing/listing directories (file picker
@@ -53,10 +52,7 @@ public:
   static const int persistencyStackSize = 1024;
 
   // Shared scratch buffers used by SamplePool while importing a WAV file
-  // (with optional resampling) during sample import. Import is a single,
-  // one-at-a-time operation, and by the time it runs, any filename it needs
-  // has already been copied out of the file listing above, so it is safe to
-  // overlay this scratch storage with the file listing storage.
+  // (with optional resampling) during sample import.
   static constexpr int32_t kImportChunkSize = 512;
   static constexpr int32_t kImportInputSamples = kImportChunkSize / static_cast<int32_t>(sizeof(int16_t));
   static constexpr int32_t kImportMaxOutputSamples = (kImportInputSamples * SRC_MAX_RATIO) + 8;
@@ -79,9 +75,6 @@ public:
 
 private:
   union Scratch {
-    // Backing storage for the file-index listing vector.
-    int fileIndexStorage[MAX_FILE_INDEX_SIZE];
-
     // Backing storage for file system writes
     uint8_t fileBuffer[512];
 
@@ -105,7 +98,8 @@ private:
   };
 
   static Scratch scratch_;
-  static etl::vector_ext<int> fileIndexes_;
+  // Dedicated storage for the file-index listing vector.
+  static etl::vector<int, MAX_FILE_INDEX_SIZE> fileIndexes_;
 };
 
 #endif

@@ -153,6 +153,13 @@ bool HostFileSystem::chdir(const char *path) {
   if (!fs::is_directory(absPath)) {
     return false;
   }
+
+  // re-entering the directory we are already in is a no-op
+  // and must NOT invalidate the cached listing (entries_).
+  if (absPath == currentDir_) {
+    return true;
+  }
+
   currentDir_ = absPath;
   entries_.clear();
   return true;
