@@ -10,6 +10,7 @@
  */
 
 #include "InstrumentImportView.h"
+#include "Application/Views/ToastView.h"
 #include "Application/AppWindow.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Persistency/PersistencyService.h"
@@ -267,8 +268,7 @@ void InstrumentImportView::importInstrument(const char *name) {
     Trace::Log("INSTRUMENTIMPORT", "Updated viewData_ currentInstrumentID_ to: %d", toInstrID_);
 
     // Show success message and return to instrument view
-    MessageBox *mb = MessageBox::Create(*this, "Import", "Import successful", MBBF_OK);
-    DoModal(mb, ModalViewCallback::create<InstrumentImportView, &InstrumentImportView::onImportSuccess>(*this));
+    ToastView::GetInstance()->Show("Import successful.", &ttSuccess, ToastDuration::regular);
   } else {
     MessageBox *mb = MessageBox::Create(*this, "Import", "Import failed", MBBF_OK);
     DoModal(mb);

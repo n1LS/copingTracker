@@ -17,6 +17,8 @@ struct ToastType {
 enum ToastDuration {
   quick = 500,
   regular = 1500,
+  extended = 5000,
+  forever = 65535
 };
 
 constexpr ToastType ttInfo = {gchar_icon_info, Theme::Dialog::Icon::info};

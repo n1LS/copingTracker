@@ -65,7 +65,7 @@ void SamplePool::updateStatus(uint32_t index, uint32_t total, const char *messag
   npf_snprintf(buffer, sizeof(buffer), "Copying %s" char_indicator_ellipsis_s "\n \n%s %d%%", message,
                (const char *)progressBar, percentage);
   ToastView *toast = ToastView::GetInstance();
-  toast->Show(buffer, &ttInfo, 50000);
+  toast->Show(buffer, &ttInfo, ToastDuration::extended);
 }
 
 void SamplePool::Load(const char *projectName) {
@@ -374,7 +374,7 @@ int SamplePool::ImportSample(const char *name, const char *projectName) {
   ev.type_ = SPET_INSERT;
   NotifyObservers(&ev);
 
-  t->Show(status ? "Loaded successfully." : "Loading failed.", status ? &ttSuccess : &ttError, 1500);
+  t->Show(status ? "Loaded successfully." : "Loading failed.", status ? &ttSuccess : &ttError, ToastDuration::regular);
 
   return status ? (count_ - 1) : -1;
 }
