@@ -119,6 +119,34 @@ I_Instrument *PlayerMixer::GetLastInstrument(int channel) {
   return lastInstrument_[channel];
 }
 
+bool PlayerMixer::IsInstrumentInUse(I_Instrument *instrument) {
+  if (!instrument) {
+    return false;
+  }
+  for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+    if (channel_[i]->GetInstrument() == instrument) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void PlayerMixer::ReleaseInstrument(I_Instrument *instrument) {
+  if (!instrument) {
+    return;
+  }
+  for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+    if (channel_[i]->GetInstrument() == instrument) {
+      // force, so the channel drops the pointer instead of keeping it alive
+      // for the release tail.
+      StopInstrument(i, true);
+    }
+    if (lastInstrument_[i] == instrument) {
+      lastInstrument_[i] = nullptr;
+    }
+  }
+}
+
 stereosample PlayerMixer::GetMasterOutLevel() {
   MixerService *ms = MixerService::GetInstance();
   return ms->GetMasterBus()->GetMixerLevels();

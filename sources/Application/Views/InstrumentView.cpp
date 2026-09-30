@@ -654,7 +654,20 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
         instrumentType_.SetInt(currentType, false);
 
         pendingInstrumentType_ = proposedType;
-        ConfirmStopPlayback(Token::VarInstrumentType);
+
+        // Only the instrument the player is actually rendering is unsafe to
+        // swap. If this one is idle, change it straight away instead of
+        // interrupting the user with the "not while playing" dialog.
+        //
+        // This is only a UI decision: the player may still pick the
+        // instrument up before the change is applied (the user may have to
+        // confirm losing its settings first), so the actual detaching is done
+        // by InstrumentBank::releaseInstrument().
+        if (!PlayerMixer::GetInstance()->IsInstrumentInUse(instr)) {
+          ConfirmedStop(Token::VarInstrumentType);
+        } else {
+          ConfirmStopPlayback(Token::VarInstrumentType);
+        }
         break;
       }
     case Token::ActionExport:
