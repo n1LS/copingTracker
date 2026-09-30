@@ -152,7 +152,7 @@ protected:
   uint32_t GetFileSize(size_t index) const;
   // Check if list is empty
   bool IsEmpty() const {
-    return MemoryPool::Get().empty();
+    return MemoryPool::FileList().empty();
   }
   // Get page size
   size_t GetPageSize() const {

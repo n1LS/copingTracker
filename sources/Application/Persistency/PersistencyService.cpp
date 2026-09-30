@@ -78,13 +78,13 @@ bool PersistencyService::DeleteDirectoryContents_(uint8_t depth) {
   }
 
   while (true) {
-    MemoryPool::Get().clear();
-    fs->list(&MemoryPool::Get(), "", loFiles | loFolders | loHidden);
+    MemoryPool::FileList().clear();
+    fs->list(&MemoryPool::FileList(), "", loFiles | loFolders | loHidden);
 
     bool foundEntry = false;
     bool deletedEntry = false;
-    for (size_t i = 0; i < MemoryPool::Get().size(); ++i) {
-      fs->getFileName(MemoryPool::Get()[i], deleteNameBuffer_, sizeof(deleteNameBuffer_));
+    for (size_t i = 0; i < MemoryPool::FileList().size(); ++i) {
+      fs->getFileName(MemoryPool::FileList()[i], deleteNameBuffer_, sizeof(deleteNameBuffer_));
 
       if ((strcmp(deleteNameBuffer_, ".") == 0) || (strcmp(deleteNameBuffer_, "..") == 0)) {
         continue;
@@ -92,7 +92,7 @@ bool PersistencyService::DeleteDirectoryContents_(uint8_t depth) {
 
       foundEntry = true;
 
-      const PicoFileType type = fs->getFileType(MemoryPool::Get()[i]);
+      const PicoFileType type = fs->getFileType(MemoryPool::FileList()[i]);
       if (type == PFT_FILE) {
         if (!fs->DeleteFile(deleteNameBuffer_)) {
           Trace::Error("PERSISTENCYSERVICE: Could not delete file: %s", deleteNameBuffer_);
@@ -181,10 +181,10 @@ PersistencyResult PersistencyService::Save(const char *projectName, const char *
 
     Trace::Debug("get list of samples to copy from old project: %s", oldProjectName);
 
-    fs->list(&MemoryPool::Get(), ".wav");
+    fs->list(&MemoryPool::FileList(), ".wav");
     char filenameBuffer[PFILENAME_SIZE];
-    for (size_t i = 0; i < MemoryPool::Get().size(); i++) {
-      fs->getFileName(MemoryPool::Get()[i], filenameBuffer, sizeof(filenameBuffer));
+    for (size_t i = 0; i < MemoryPool::FileList().size(); i++) {
+      fs->getFileName(MemoryPool::FileList()[i], filenameBuffer, sizeof(filenameBuffer));
 
       // ignore . and .. entries as using *.wav doesnt filter them out
       if (strcmp(filenameBuffer, ".") == 0 || strcmp(filenameBuffer, "..") == 0)

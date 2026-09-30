@@ -32,7 +32,7 @@ void FileListView::Reset() {
   currentIndex_ = 0;
   SetSelectedTab(0);
   selectedButton_ = 0;
-  MemoryPool::Get().clear();
+  MemoryPool::FileList().clear();
   dirIndexStack_.clear();
   atLocalRoot_ = true;
   enterKeyHeld_ = false;
@@ -83,14 +83,14 @@ void FileListView::OnFocus() {
 }
 
 void FileListView::RefreshFileList() {
-  MemoryPool::Get().clear();
+  MemoryPool::FileList().clear();
 
   // Get directory listing
-  fs_->list(&MemoryPool::Get(), config_.fileExtension, config_.listFlags);
+  fs_->list(&MemoryPool::FileList(), config_.fileExtension, config_.listFlags);
 
   // Filter out "." and apply directory visibility filter
   // Keep ".." when not at local root for navigation
-  for (auto it = MemoryPool::Get().begin(); it != MemoryPool::Get().end();) {
+  for (auto it = MemoryPool::FileList().begin(); it != MemoryPool::FileList().end();) {
     char name[PFILENAME_SIZE];
     fs_->getFileName(*it, name, PFILENAME_SIZE);
 
@@ -100,19 +100,19 @@ void FileListView::RefreshFileList() {
 
     // Always remove "." entry
     if (isDot) {
-      it = MemoryPool::Get().erase(it);
+      it = MemoryPool::FileList().erase(it);
       continue;
     }
 
     // Remove ".." entry if we're at local root (no parent to navigate to)
     if (isDotDot && atLocalRoot_) {
-      it = MemoryPool::Get().erase(it);
+      it = MemoryPool::FileList().erase(it);
       continue;
     }
 
     // Filter directories if configured
     if (isDirectory && !ShouldShowDirectories()) {
-      it = MemoryPool::Get().erase(it);
+      it = MemoryPool::FileList().erase(it);
       continue;
     }
 
@@ -124,8 +124,8 @@ void FileListView::RefreshFileList() {
   topIndex_ = 0;
 
   // Ensure selection is valid
-  if (!MemoryPool::Get().empty() && currentIndex_ >= MemoryPool::Get().size()) {
-    currentIndex_ = MemoryPool::Get().size() - 1;
+  if (!MemoryPool::FileList().empty() && currentIndex_ >= MemoryPool::FileList().size()) {
+    currentIndex_ = MemoryPool::FileList().size() - 1;
   }
 
   // Mark view as dirty to trigger redraw
@@ -143,9 +143,9 @@ void FileListView::ProcessButtonMask(uint16_t mask, bool pressed) {
     // Handle ENTER release for directory navigation
     if (enterKeyHeld_ && !(mask & BM_ENTER)) {
       enterKeyHeld_ = false;
-      if (pendingDirEnterOnRelease_ && !MemoryPool::Get().empty()) {
+      if (pendingDirEnterOnRelease_ && !MemoryPool::FileList().empty()) {
         auto fs = FileSystem::GetInstance();
-        unsigned fileIndex = MemoryPool::Get()[currentIndex_];
+        unsigned fileIndex = MemoryPool::FileList()[currentIndex_];
         if (fs->getFileType(fileIndex) == PFT_DIR) {
           char name[PFILENAME_SIZE];
           fs->getFileName(fileIndex, name, PFILENAME_SIZE);
@@ -271,7 +271,7 @@ void FileListView::DrawButtons(int selectedButton) {
 }
 
 void FileListView::HandleUp(bool page) {
-  if (MemoryPool::Get().empty()) {
+  if (MemoryPool::FileList().empty()) {
     return;
   }
 
@@ -286,12 +286,12 @@ void FileListView::HandleUp(bool page) {
 }
 
 void FileListView::HandleDown(bool page) {
-  if (MemoryPool::Get().empty()) {
+  if (MemoryPool::FileList().empty()) {
     return;
   }
 
   size_t delta = page ? config_.pageSize : 1;
-  size_t maxIndex = MemoryPool::Get().size() - 1;
+  size_t maxIndex = MemoryPool::FileList().size() - 1;
 
   if (currentIndex_ < maxIndex) {
     currentIndex_ = std::min(maxIndex, currentIndex_ + delta);
@@ -301,7 +301,7 @@ void FileListView::HandleDown(bool page) {
 }
 
 void FileListView::HandleEnter() {
-  if (MemoryPool::Get().empty()) {
+  if (MemoryPool::FileList().empty()) {
     return;
   }
 
@@ -364,7 +364,7 @@ const char *FileListView::GetDynamicTitle() {
 }
 
 void FileListView::SetCurrentIndex(size_t index) {
-  if (index < MemoryPool::Get().size()) {
+  if (index < MemoryPool::FileList().size()) {
     currentIndex_ = index;
     EnsureVisible();
     isDirty_ = true;
@@ -464,37 +464,37 @@ void FileListView::SetSelectedButton(int index) {
 }
 
 bool FileListView::IsDirectory(size_t index) const {
-  if (index >= MemoryPool::Get().size()) {
+  if (index >= MemoryPool::FileList().size()) {
     return false;
   }
-  return fs_->getFileType(MemoryPool::Get()[index]) == PFT_DIR;
+  return fs_->getFileType(MemoryPool::FileList()[index]) == PFT_DIR;
 }
 
 void FileListView::GetFileName(size_t index, char *buffer, size_t bufferSize) const {
-  if (index >= MemoryPool::Get().size()) {
+  if (index >= MemoryPool::FileList().size()) {
     buffer[0] = '\0';
     return;
   }
-  fs_->getFileName(MemoryPool::Get()[index], buffer, (int)bufferSize);
+  fs_->getFileName(MemoryPool::FileList()[index], buffer, (int)bufferSize);
 }
 
 FileType FileListView::GetFileType(size_t index) const {
-  if (index >= MemoryPool::Get().size()) {
+  if (index >= MemoryPool::FileList().size()) {
     return PFT_UNKNOWN;
   }
-  return static_cast<FileType>(fs_->getFileType(MemoryPool::Get()[index]));
+  return static_cast<FileType>(fs_->getFileType(MemoryPool::FileList()[index]));
 }
 
 uint32_t FileListView::GetFileSize(size_t index) const {
-  if (index >= MemoryPool::Get().size()) {
+  if (index >= MemoryPool::FileList().size()) {
     return 0;
   }
-  return static_cast<uint32_t>(fs_->getFileSize(MemoryPool::Get()[index]));
+  return static_cast<uint32_t>(fs_->getFileSize(MemoryPool::FileList()[index]));
 }
 
 // ListView::DataSource implementation
 size_t FileListView::GetItemCount() const {
-  return (int)MemoryPool::Get().size();
+  return (int)MemoryPool::FileList().size();
 }
 
 void FileListView::PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
@@ -534,7 +534,7 @@ void FileListView::DrawItemCustom(int x, int y, int index, bool isSelected, Colo
 
 // ListView::Delegate implementation
 void FileListView::OnItemSelected(int index, int selectedTab) {
-  if (index >= (int)MemoryPool::Get().size()) {
+  if (index >= (int)MemoryPool::FileList().size()) {
     return;
   }
 

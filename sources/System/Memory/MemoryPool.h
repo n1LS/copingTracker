@@ -25,7 +25,7 @@ class MemoryPool {
 public:
   // File indexes produced while browsing/listing directories (file picker
   // views, persistency scans, etc). One listing operation at a time.
-  static etl::ivector<int> &Get() {
+  static etl::ivector<int> &FileList() {
     return fileIndexes_;
   }
 

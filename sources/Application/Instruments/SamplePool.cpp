@@ -77,7 +77,7 @@ void SamplePool::Load(const char *projectName) {
   }
   // First, find all wav files
   updateStatus(0, 0, "Scanning samples");
-  etl::ivector<int> &fileIndexes = MemoryPool::Get();
+  etl::ivector<int> &fileIndexes = MemoryPool::FileList();
   fs->list(&fileIndexes, ".wav");
   char name[PFILENAME_SIZE];
   uint32_t totalSamples = (uint32_t)fileIndexes.size();
