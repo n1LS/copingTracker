@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Application/Utils/fixed.h"
+#include "Foundation/Constants/PanLawTable.h"
 #include <cstdint>
 
 #include "System/Console/Trace.h"
@@ -193,14 +194,20 @@ typedef struct voice_t {
   envelope_t envelope; // envelope, size is 9 bytes
 
   struct gain {
-    uint8_t left;     // gain setting for the left channel
-    uint8_t right;    // gain setting for the right channel
+    // panlaw values are 0..FP_ONE (0x8000), so uint16_t holds them exactly
+    // and keeps voice_t inside its 128 byte budget.
+    uint16_t left;    // constant power gain for the left channel
+    uint16_t right;   // constant power gain for the right channel
     uint8_t combined; // master gain (precomputed at tock rate)
   } gain;
 
   inline void calculate_gain() {
-    gain.left = std::min((0xFF - pan.position) * 2, 0xFF);
-    gain.right = std::min(0xFF, 2 * pan.position);
+    // Constant power pan law, same orientation as SampleInstrument's render
+    // path (low pan value = right).
+    fixed l, r;
+    panlaw_gains(pan.position, l, r);
+    gain.left = (uint16_t)l;
+    gain.right = (uint16_t)r;
     gain.combined = (volume.level * envelope.value) >> 16;
   }
 
@@ -210,7 +217,7 @@ typedef struct voice_t {
 
   uint8_t stepVolume;
 
-  uint8_t alignmentSentinel[3]; // placeholder to guarantee alignment & padding
+  uint8_t alignmentSentinel[1]; // placeholder to guarantee alignment & padding
 
   // implementation ------------------------------------------------------------
 
@@ -372,8 +379,8 @@ typedef struct voice_t {
     }
 
     // apply panning
-    *left = (sample >> 8) * gain.left;
-    *right = (sample >> 8) * gain.right;
+    *left = fp_mul_coef(sample, (fixed)gain.left);
+    *right = fp_mul_coef(sample, (fixed)gain.right);
   }
 
   inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const InstrumentParameters &parameters,

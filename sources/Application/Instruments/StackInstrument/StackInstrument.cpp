@@ -152,6 +152,7 @@ stack_parameters_t StackInstrument::getInstrumentParameters() {
   params.wave = range(0, wave_.GetInt(), (int)stackWaveNone);
   params.transpose = transpose_.GetInt();
   params.chord = chord_.GetInt();
+  params.pan = EffectivePan();
 
   return params;
 }

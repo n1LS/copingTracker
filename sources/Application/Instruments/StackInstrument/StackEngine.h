@@ -10,6 +10,7 @@
 
 #include "Application/Instruments/EnvelopeGenerators.h"
 #include "Application/Utils/fixed.h"
+#include "Foundation/Constants/PanLawTable.h"
 #include "StackWavetables.generated.h"
 #include <stdint.h>
 
@@ -42,7 +43,7 @@ typedef struct stack_parameters_t {
   int8_t transpose;
   uint8_t glide;
   uint8_t wave;
-  uint8_t _padding;
+  uint8_t pan; // takes over the former padding byte
 } stack_parameters_t;
 
 // (!) alignment has to be manually kept in this struct to allow using pack()
@@ -75,6 +76,9 @@ typedef struct stack_voice_t {
 
   stack_flags flags;
   uint8_t notes[5];
+
+  panlaw_state pan;
+
   uint8_t _padding[2]; // keeps sizeof(stack_voice_t) a multiple of 4
 
   // implementation ------------------------------------------------------------
@@ -141,6 +145,8 @@ typedef struct stack_voice_t {
       // length
       timeToLive--;
     }
+
+    pan.tick();
   }
 
   inline void sample(fixed *left, fixed *right) {
@@ -193,8 +199,8 @@ typedef struct stack_voice_t {
     }
 
     // apply panning
-    *left = sample;
-    *right = sample;
+    *left = fp_mul_coef(sample, (fixed)pan.left);
+    *right = fp_mul_coef(sample, (fixed)pan.right);
   }
 
   inline void set_oscillator_note(int osc, int note, int glide) {
@@ -250,6 +256,9 @@ typedef struct stack_voice_t {
     // store volume
     volume = inVolume;
     level = 0xff;
+
+    // pan jumps to the instrument's setting on note on
+    pan.set(inParameters.pan);
 
     bitcrush = 0; // only accessible via command
     drive = 0;
@@ -365,5 +374,5 @@ typedef struct stack_voice_t {
 
 // 128 bytes per voice max to keep the entire thing under 1kB for the 8 voices,
 // also struct needs to be aligned to 4 bytes to prevent unaligned access
-static_assert(sizeof(stack_voice_t) <= 152, "Check sizeof(stack_voice_t) in error message");
+static_assert(sizeof(stack_voice_t) <= 128, "Check sizeof(stack_voice_t) in error message");
 static_assert((sizeof(stack_voice_t) % 4) == 0, "stack_voice_t size must be multiple of 4");

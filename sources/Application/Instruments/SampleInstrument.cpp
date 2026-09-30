@@ -23,6 +23,7 @@
 #include "Application/Utils/fixed.h"
 #include "CommandList.h"
 #include "Foundation/Constants/SineTable.h"
+#include "Foundation/Constants/PanLawTable.h"
 #include "GMBank.h"
 #include "GMBank_data.generated.h"
 #include "SampleInstrument.h"

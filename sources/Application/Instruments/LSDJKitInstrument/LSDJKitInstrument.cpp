@@ -115,6 +115,7 @@ lsdjkit_parameters_t LSDJKitInstrument::getInstrumentParameters(uint8_t note) {
   params.kit1 = FindVariable(Token::LSDJKitInstrumentKit1)->GetInt();
   params.kit2 = FindVariable(Token::LSDJKitInstrumentKit2)->GetInt();
   params.bit_depth = FindVariable(Token::LSDJKitInstrumentBitDepth)->GetInt();
+  params.pan = EffectivePan();
 
   return params;
 }
