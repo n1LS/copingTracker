@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Application/Utils/fixed.h"
+#include "Foundation/Constants/PanLawTable.h"
 #include <cstdint>
 
 #include "System/Console/Trace.h"
@@ -28,7 +29,7 @@ typedef struct lsdjkit_parameters_t {
   uint8_t kit1;
   uint8_t kit2;
   uint8_t bit_depth;
-  uint8_t padding;
+  uint8_t pan;
 } lsdjkit_parameters_t;
 
 static_assert(sizeof(lsdjkit_parameters_t) == 4, "Check sizeof(lsdjkit_parameters_t) in error message");
@@ -65,6 +66,8 @@ typedef struct lsdjkit_voice_t {
   uint16_t wavetableLength[2];
   const int8_t *wavetable[2];
 
+  panlaw_state pan;
+
   // implementation ------------------------------------------------------------
 
   inline void stop() {
@@ -88,6 +91,8 @@ typedef struct lsdjkit_voice_t {
       // length
       timeToLive--;
     }
+
+    pan.tick();
   }
 
   inline void sample(fixed *left, fixed *right) {
@@ -145,8 +150,8 @@ typedef struct lsdjkit_voice_t {
     sample = (sample >> 8) * volume;
 
     // apply panning
-    *left = sample;
-    *right = sample;
+    *left = fp_mul_coef(sample, (fixed)pan.left);
+    *right = fp_mul_coef(sample, (fixed)pan.right);
   }
 
   inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const lsdjkit_parameters_t inParameters,
@@ -163,6 +168,10 @@ typedef struct lsdjkit_voice_t {
     notes[1] = note / 15;
 
     bit_depth = inParameters.bit_depth;
+
+    // pan jumps to the instrument's setting on note on; PAN commands slew
+    // from there via pan.slew_to().
+    pan.set(inParameters.pan);
 
     // setup the wavetables
     uint8_t kitIndex[2] = {parameters.kit1, parameters.kit2};

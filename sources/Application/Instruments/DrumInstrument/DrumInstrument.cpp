@@ -134,6 +134,9 @@ drum_parameters_t DrumInstrument::getInstrumentParameters(uint8_t note) {
   Variable *var = *it;
   drum_parameters_t params = std::bit_cast<drum_parameters_t>(var->GetInt());
   params.character = vCharacter_.GetInt();
+  // The bit_cast carries whatever was stored in the old padding bits, so pan
+  // has to be set explicitly rather than inherited.
+  params.pan = EffectivePan();
   return params;
 }
 

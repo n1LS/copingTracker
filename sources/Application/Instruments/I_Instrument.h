@@ -18,6 +18,7 @@
 #include "Application/Utils/fixed.h"
 #include "Application/Utils/stringutils.h"
 #include "Externals/etl/include/etl/string.h"
+#include "Foundation/Constants/PanLawTable.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
@@ -112,6 +113,21 @@ public:
     // 256 (not 255) so an unset step volume is exact unity
     uint32_t step = (stepVolume == NO_VOLUME) ? 256 : volumeLUT[stepVolume];
     return (uint8_t)(((uint32_t)volume_.GetInt() * step) >> 8);
+  }
+
+  // The instrument's pan position, clamped to the panlaw table's index range.
+  // The UI exposes 0x00..0xFF but panlaw[] only has 255 entries (0..254), so
+  // the top value has to fold down: panlaw[255] would read past the end and
+  // its mirror index (254 - 255) would underflow. SampleInstrument's PAN
+  // command already does the same 0xFF -> 0xFE fold.
+  uint8_t EffectivePan() {
+    int pan = pan_.GetInt();
+    if (pan > 0xff) {
+      pan = 0xff;
+    } else if (pan < 0) {
+      pan = 0;
+    }
+    return (uint8_t)pan;
   }
 
   virtual void noteDisplay(uint8_t note, char (&out)[4]);

@@ -61,7 +61,7 @@ void ListView::DrawListItems() {
 
   size_t itemCount = dataSource_->GetItemCount();
 
-  char buffer[LIST_VIEW_LINE_LENGTH + 1];
+  char buffer[SCREEN_WIDTH + 1];
 
   for (size_t i = topIndex_; i < topIndex_ + pageSize_ && i < itemCount; i++) {
     bool isSelected = (i == currentIndex_);

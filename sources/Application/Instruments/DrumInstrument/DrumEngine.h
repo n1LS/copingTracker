@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Application/Utils/fixed.h"
+#include "Foundation/Constants/PanLawTable.h"
 #include <cstdint>
 
 #include "System/Console/Trace.h"
@@ -31,7 +32,7 @@ typedef struct drum_parameters_t {
   uint8_t note : 4;
   uint8_t pitch : 4;
   uint8_t character : 8;
-  uint8_t padding : 8;
+  uint8_t pan : 8; // takes over the former padding byte
 } drum_parameters_t;
 
 typedef struct pitch_envelope_t {
@@ -91,6 +92,8 @@ typedef struct drum_voice_t {
   uint8_t glitch_trigger_delay;
   uint16_t glitch = 17; // shift register for the glitch randomizer
 
+  panlaw_state pan;
+
   // implementation ------------------------------------------------------------
 
   inline uint16_t get_glitch() {
@@ -133,6 +136,8 @@ typedef struct drum_voice_t {
       // length
       timeToLive--;
     }
+
+    pan.tick();
   }
 
   inline void sample(fixed *left, fixed *right) {
@@ -215,8 +220,8 @@ typedef struct drum_voice_t {
     }
 
     // apply panning
-    *left = sample;
-    *right = sample;
+    *left = fp_mul_coef(sample, (fixed)pan.left);
+    *right = fp_mul_coef(sample, (fixed)pan.right);
   }
 
   inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const drum_parameters_t inParameters,
@@ -226,6 +231,9 @@ typedef struct drum_voice_t {
 
     // store volume
     volume = inVolume;
+
+    // pan jumps to the instrument's setting on note on
+    pan.set(inParameters.pan);
 
     bitcrush = 0; // only accessible via command
     drive = 0;
