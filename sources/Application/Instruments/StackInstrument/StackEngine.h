@@ -10,7 +10,7 @@
 
 #include "Application/Instruments/EnvelopeGenerators.h"
 #include "Application/Utils/fixed.h"
-#include "Foundation/Constants/PanLawTable.h"
+#include "Application/Instruments/Panning.h"
 #include "StackWavetables.generated.h"
 #include <stdint.h>
 

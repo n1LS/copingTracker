@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Application/Utils/fixed.h"
-#include "Foundation/Constants/PanLawTable.h"
+#include "Application/Instruments/Panning.h"
 #include <cstdint>
 
 #include "System/Console/Trace.h"

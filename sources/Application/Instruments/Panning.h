@@ -39,7 +39,6 @@ const fixed panlaw[] = {
 };
 
 // Constant power gains for a pan position in 0..0xff.
-// Orientation matches SampleInstrument's existing render path:
 // left = panlaw[pan], right = panlaw[0xff - pan].
 static inline void panlaw_gains(uint8_t pan, fixed &left, fixed &right) {
   left = panlaw[pan];
@@ -54,11 +53,11 @@ static inline void panlaw_gains(uint8_t pan, fixed &left, fixed &right) {
 // Gains are uint16_t because panlaw values are 0..FP_ONE (0x8000), which keeps
 // the voice structs inside their size budgets.
 struct panlaw_state {
+  uint16_t left = 0;      // cached gain, refreshed by refresh()
+  uint16_t right = 0;
   uint8_t position = 128; // current pan position, 128 = centre
   uint8_t target = 128;   // slew target
   int8_t step = 0;        // slew step size, 0 = no slew in progress
-  uint16_t left = 0;      // cached gain, refreshed by refresh()
-  uint16_t right = 0;
 
   // Recompute the cached gains. Call whenever position changes.
   inline void refresh() {

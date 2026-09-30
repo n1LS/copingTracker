@@ -18,7 +18,7 @@
 #include "Application/Utils/fixed.h"
 #include "Application/Utils/stringutils.h"
 #include "Externals/etl/include/etl/string.h"
-#include "Foundation/Constants/PanLawTable.h"
+#include "Panning.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
