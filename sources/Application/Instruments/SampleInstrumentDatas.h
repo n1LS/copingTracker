@@ -21,5 +21,3 @@ enum FilterMode {
   FM_SCREAM,
   FM_LAST
 };
-
-

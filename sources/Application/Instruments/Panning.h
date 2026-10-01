@@ -35,8 +35,7 @@ const fixed panlaw[] = {
     0x7462, 0x74a9, 0x74f0, 0x7537, 0x757d, 0x75c3, 0x7609, 0x764f, 0x7695, 0x76da, 0x7720, 0x7765, 0x77aa, 0x77ef,
     0x7834, 0x7878, 0x78bd, 0x7901, 0x7945, 0x7989, 0x79cd, 0x7a11, 0x7a54, 0x7a98, 0x7adb, 0x7b1e, 0x7b61, 0x7ba4,
     0x7be7, 0x7c29, 0x7c6c, 0x7cae, 0x7cf0, 0x7d32, 0x7d74, 0x7db6, 0x7df7, 0x7e39, 0x7e7a, 0x7ebb, 0x7efc, 0x7f3d,
-    0x7f7e, 0x7fbf, 0x7fdf, 0x8000
-};
+    0x7f7e, 0x7fbf, 0x7fdf, 0x8000};
 
 // Constant power gains for a pan position in 0..0xff.
 // left = panlaw[pan], right = panlaw[0xff - pan].
@@ -53,7 +52,7 @@ static inline void panlaw_gains(uint8_t pan, fixed &left, fixed &right) {
 // Gains are uint16_t because panlaw values are 0..FP_ONE (0x8000), which keeps
 // the voice structs inside their size budgets.
 struct panlaw_state {
-  uint16_t left = panlaw[128];  
+  uint16_t left = panlaw[128];
   uint16_t right = panlaw[128]; // cached gain, refreshed by refresh()
   uint8_t position = 128;       // current pan position, 128 = centre
   uint8_t target = 128;         // slew target

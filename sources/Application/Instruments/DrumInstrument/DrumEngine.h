@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "Application/Utils/fixed.h"
 #include "Application/Instruments/Panning.h"
+#include "Application/Utils/fixed.h"
 #include <cstdint>
 
 #include "System/Console/Trace.h"

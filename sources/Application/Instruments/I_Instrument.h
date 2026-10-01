@@ -18,10 +18,10 @@
 #include "Application/Utils/fixed.h"
 #include "Application/Utils/stringutils.h"
 #include "Externals/etl/include/etl/string.h"
-#include "Panning.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
+#include "Panning.h"
 
 enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_CHIPTUNE, IT_DRUM, IT_STACK, IT_LSDJKIT, IT_MIDI, IT_LAST };
 

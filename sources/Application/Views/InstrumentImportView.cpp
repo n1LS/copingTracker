@@ -10,11 +10,11 @@
  */
 
 #include "InstrumentImportView.h"
-#include "Application/Views/ToastView.h"
 #include "Application/AppWindow.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
+#include "Application/Views/ToastView.h"
 #include "System/Console/Trace.h"
 #include <memory>
 #include <nanoprintf.h>

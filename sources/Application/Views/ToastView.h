@@ -14,12 +14,7 @@ struct ToastType {
   Color color;
 };
 
-enum ToastDuration {
-  quick = 500,
-  regular = 1500,
-  extended = 5000,
-  forever = 65535
-};
+enum ToastDuration { quick = 500, regular = 1500, extended = 5000, forever = 65535 };
 
 constexpr ToastType ttInfo = {gchar_icon_info, Theme::Dialog::Icon::info};
 constexpr ToastType ttError = {gchar_icon_no, Theme::Dialog::Icon::error};

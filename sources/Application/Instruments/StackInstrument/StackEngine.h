@@ -9,8 +9,8 @@
 #pragma once
 
 #include "Application/Instruments/EnvelopeGenerators.h"
-#include "Application/Utils/fixed.h"
 #include "Application/Instruments/Panning.h"
+#include "Application/Utils/fixed.h"
 #include "StackWavetables.generated.h"
 #include <stdint.h>
 
