@@ -86,6 +86,15 @@ def prebuild(args):
             "sources/Foundation/Constants/Documentation.generated.h",
         ],
     )
+    step(
+        "Generating command help",
+        [
+            sys.executable,
+            "tools/manual/raw_data/convert-commandhelp.py",
+            "tools/manual/raw_data/Commands.copingDoc",
+            "sources/Application/Utils/CommandHelp.generated.h",
+        ],
+    )
     if args.manual:
         step(
             "Building HTML manual",
