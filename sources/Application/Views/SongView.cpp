@@ -908,9 +908,9 @@ void SongView::DrawLoopMarker() {
   GUIPoint pos = GetAnchor();
 
   SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::View::fg);
+  SetColor(loopState_ == lsSelecting ? Theme::View::Button::bg(true) : Theme::View::fg);
 
-  for (int y = std::max(0, visibleStart); y < std::min(visibleEnd, SONG_ROW_COUNT); y++) {
+  for (int y = std::max(0, visibleStart); y < std::min(visibleEnd, 16); y++) {
     char c = CHAR(char_border_single_vertical_s);
 
     if (y == visibleStart) {
@@ -923,6 +923,12 @@ void SongView::DrawLoopMarker() {
     }
 
     DrawChar(pos.x_ - 4, pos.y_ + y, c);
+  }
+
+  if (visibleStart > 15) {
+    DrawChar(pos.x_ - 4, pos.y_ + 15, CHAR(char_indicator_down_s));
+  } else if (visibleEnd <= 0) {
+    DrawChar(pos.x_ - 4, pos.y_, CHAR(char_indicator_up_s));
   }
 }
 
