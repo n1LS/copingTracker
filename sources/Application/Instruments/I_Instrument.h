@@ -117,7 +117,7 @@ public:
 
   // The instrument's pan position, clamped to the panlaw table's index range.
   uint8_t EffectivePan() {
-    return std::min((0xff), std::max((pan_.GetInt()), (0xff)));
+    return std::min(0xff, std::max(pan_.GetInt(), 0x00));
   }
 
   virtual void noteDisplay(uint8_t note, char (&out)[4]);

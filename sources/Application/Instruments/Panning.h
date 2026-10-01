@@ -14,7 +14,7 @@
 #include "Application/Utils/fixed.h"
 #include <cstdint>
 
-// Constant power pan law curve, indexed by pan position 0..254.
+// Constant power pan law curve, indexed by pan position 0..255.
 // Used as a mirrored pair: see panlaw_gains() at the bottom of this file.
 const fixed panlaw[] = {
     0x0,    0x808,  0xb5b,  0xde9,  0x1010, 0x11f5, 0x13ac, 0x153f, 0x16b7, 0x1818, 0x1965, 0x1aa3, 0x1bd2, 0x1cf5,
@@ -53,11 +53,11 @@ static inline void panlaw_gains(uint8_t pan, fixed &left, fixed &right) {
 // Gains are uint16_t because panlaw values are 0..FP_ONE (0x8000), which keeps
 // the voice structs inside their size budgets.
 struct panlaw_state {
-  uint16_t left = 0;      // cached gain, refreshed by refresh()
-  uint16_t right = 0;
-  uint8_t position = 128; // current pan position, 128 = centre
-  uint8_t target = 128;   // slew target
-  int8_t step = 0;        // slew step size, 0 = no slew in progress
+  uint16_t left = panlaw[128];  
+  uint16_t right = panlaw[128]; // cached gain, refreshed by refresh()
+  uint8_t position = 128;       // current pan position, 128 = centre
+  uint8_t target = 128;         // slew target
+  int16_t step = 0;             // slew step size, 0 = no slew in progress
 
   // Recompute the cached gains. Call whenever position changes.
   inline void refresh() {
@@ -78,29 +78,30 @@ struct panlaw_state {
   // Begin slewing towards a target at the given rate.
   inline void slew_to(uint8_t newTarget, uint8_t speed) {
     target = newTarget;
-    step = (newTarget > position) ? (int8_t)speed : (int8_t)-speed;
+
+    if (newTarget == position || speed == 0) {
+      step = 0;
+      return;
+    }
+
+    step = (newTarget > position) ? speed : -speed;
   }
 
   // Advance the slew by one step. Call from the engine's 1 kHz tick.
   inline void tick() {
-    if (step == 0) {
+    if (step == 0)
       return;
-    }
-    // Step in int space: position is uint8_t, so overshooting past either end
-    // would wrap (eg. 2 + (-4) -> 254) and the target test below would never
-    // fire, leaving the pan stuck slewing at the wrong end.
+
     int next = (int)position + step;
-    if (step > 0) {
-      if (next >= (int)target) {
-        next = target;
-        step = 0;
-      }
-    } else {
-      if (next <= (int)target) {
-        next = target;
-        step = 0;
-      }
+
+    if (step > 0 && next >= target) {
+      next = target;
+      step = 0;
+    } else if (step < 0 && next <= target) {
+      next = target;
+      step = 0;
     }
+
     position = (uint8_t)next;
     refresh();
   }
