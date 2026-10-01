@@ -40,7 +40,7 @@
 
   position.y_++;
   v = instrument->FindVariable(Token::LSDJKitInstrumentBitDepth);
-  intVarField_.emplace_back(UIIntVarField(position, *v, "BitDepth:  %1d", 1, 8, 1, 7));
+  intVarField_.emplace_back(UIIntVarField(position, *v, "BitDepth:  %1d", 2, 8, 1, 7));
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());

@@ -119,24 +119,56 @@ typedef struct lsdjkit_voice_t {
     int32_t sample = 0;
 
     for (int kit = 0; kit < 2; kit++) {
-      uint32_t index = phase[kit];
+      uint32_t index = phase[kit] >> 1;
 
       if (index < wavetableLength[kit]) {
-        uint8_t wave = wavetable[kit][index];
-        /*
+        int8_t wave = wavetable[kit][index];
+        uint8_t bits = static_cast<uint8_t>(wave);
+
         switch (bit_depth) {
-          case 1: wave = (wave & 0x80) ? 0xff : 0x00; break;
-          case 2: wave = (wave & 0xc0) | (wave >> 2) | (wave >> 4) | (wave >> 6); break;
-          case 3: wave = (wave & 0xe0) | (wave >> 3) | (wave >> 6); break;
-          case 4: wave = (wave & 0xf0) | (wave >> 4); break;
-          case 5: wave = (wave & 0xf8) | (wave >> 5); break;
-          case 6: wave = (wave & 0xfc) | (wave >> 6); break;
-          case 7: wave = (wave & 0xfe) | (wave >> 7); break;
-          case 8: break;
-          default:
-            break; // 8 bit
+          case 1:
+            bits = (bits & 0x80) ? 0xff : 0x00;
+            break;
+          case 2:
+            {
+              uint8_t v = bits & 0xc0;
+              bits = v | (v >> 2) | (v >> 4) | (v >> 6);
+              break;
+            }
+          case 3:
+            {
+              uint8_t v = bits & 0xe0;
+              bits = v | (v >> 3) | (v >> 6);
+              break;
+            }
+          case 4:
+            {
+              uint8_t v = bits & 0xf0;
+              bits = v | (v >> 4);
+              break;
+            }
+          case 5:
+            {
+              uint8_t v = bits & 0xf8;
+              bits = v | (v >> 5);
+              break;
+            }
+          case 6:
+            {
+              uint8_t v = bits & 0xfc;
+              bits = v | (v >> 6);
+              break;
+            }
+          case 7:
+            {
+              uint8_t v = bits & 0xfe;
+              bits = v | (v >> 7);
+              break;
+            }
         }
-        */
+
+        wave = static_cast<int8_t>(bits);
+
         phase[kit] += 1;
         sample += wave << 21;
       }
@@ -164,8 +196,8 @@ typedef struct lsdjkit_voice_t {
 
     // store settings
     this->note = note;
-    notes[0] = note % 15;
-    notes[1] = note / 15;
+    notes[0] = note / 15;
+    notes[1] = note % 15;
 
     bit_depth = inParameters.bit_depth;
 
