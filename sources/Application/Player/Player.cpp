@@ -1207,6 +1207,22 @@ void Player::moveToNextChain(int channel, int hop) {
   // if live mode didn't queue anything, we find the next to play
 
   if (searchNext) {
+    // If a loop region is set and we just finished its last row, jump back to
+    // the top of the region instead of continuing past it.
+    if (viewData_->songPlayPos_[channel] == loopB_) {
+      int loopPos = loopA_;
+      while ((loopPos <= loopB_) && !isPlayable(loopPos, channel, 0)) {
+        loopPos++;
+      }
+      if (loopPos <= loopB_) {
+        updateSongPos(loopPos, channel, 0, hop);
+      } else {
+        // nothing playable for this channel anywhere in the loop region
+        mixer_.StopChannel(channel);
+      }
+      return;
+    }
+
     int pos = (viewData_->songPlayPos_[channel]) + 1;
     uint8_t chainId = viewData_->song_->rows_[pos].chains[channel];
     bool loopBack = (chainId == EMPTY_SONG_VALUE);
@@ -1385,4 +1401,15 @@ void Player::StopNote(uint16_t instrumentIndex, uint16_t channel) {
   if (!isRunning_) {
     SetAudioActive(false);
   }
+}
+
+void Player::SetLoopPoints(int start, int end) {
+  if (start < 0 || end < 0) {
+    loopA_ = NO_LOOP;
+    loopB_ = NO_LOOP;
+    return;
+  }
+
+  loopA_ = (start < end) ? start : end;
+  loopB_ = (start < end) ? end : start;
 }

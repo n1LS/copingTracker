@@ -14,7 +14,7 @@
 
 #include "ScreenView.h"
 
-class SongView;
+typedef enum LoopState { lsIdle, lsLooping, lsSelecting } LoopState;
 
 class SongView : public ScreenView {
 public:
@@ -25,6 +25,7 @@ public:
   // View implementation
   virtual void ProcessButtonMask(uint16_t mask, bool pressed);
   virtual void DrawView();
+  void DrawLoopMarker();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
@@ -61,6 +62,8 @@ protected:
 
   void nudgeTempo(int direction);
 
+  void toggleLoopState();
+
 private:
   unsigned char lastChain_; // Last chain clipboard
 
@@ -83,6 +86,10 @@ private:
   int saveOffset_;
   bool invertBatt_;
   bool needClear_;
+
+  LoopState loopState_ = lsIdle;
+  int loopA_;
+  int loopB_;
 
   // Flags to track which UI elements need updating
   // These prevent core1 from directly updating the UI

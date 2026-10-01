@@ -21,6 +21,8 @@
 #include "System/Timer/Timer.h"
 #include "config/StringLimits.h"
 
+#define NO_LOOP -1
+
 enum PlayerEventType { PET_START, PET_UPDATE, PET_STOP };
 
 enum SequencerMode { SM_SONG, SM_LIVE };
@@ -59,6 +61,8 @@ public:
 
   void Start(PlayMode mode, bool forceSongMode, MixerServiceMode msmMode, bool stopAtEnd = false);
   void Stop();
+
+  void SetLoopPoints(int start, int end);
 
   void SetSequencerMode(SequencerMode mode);
   SequencerMode GetSequencerMode();
@@ -151,6 +155,9 @@ private:
   PlayMode mode_;
   bool isRunning_;
   bool stopAtEnd_;
+
+  int loopA_ = NO_LOOP;
+  int loopB_ = NO_LOOP;
 
   unsigned long startClock_; // Used to time display live queued chains for blinking effect
   unsigned long now_;

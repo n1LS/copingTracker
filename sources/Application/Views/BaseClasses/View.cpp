@@ -638,7 +638,7 @@ void View::DrawWindow(int32_t x, int32_t y, int32_t width, int32_t height, const
   SetColor(Theme::Dialog::Title::fg);
   char buffer[32];
   npf_snprintf(buffer, sizeof(buffer), "%-*s", width - 2, title);
-  DrawString(x + 1, y + 1, buffer);
+  DrawString(x + 1, y + 1, buffer, fBold);
 
   SetColor(Theme::Dialog::bg);
   memset(buffer, CHAR(char_block_bottom_s), width - 2);

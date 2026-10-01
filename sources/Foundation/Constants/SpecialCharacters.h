@@ -15,6 +15,7 @@
 #define char_battery_right_s "\x86"
 
 #define char_symbol_loop_s "\x87"
+#define char_symbol_noloop_s "\xFA"
 #define char_symbol_bpm_s "\x88"
 #define char_symbol_volume_s "\x89"
 #define char_symbol_muted_s "\x8A"
@@ -126,6 +127,7 @@
 #define char_mod_2_s "\xFD"
 #define char_mod_s char_mod_1_s char_mod_2_s
 
+#define char_border_single_rightBracket_s "\xBE"
 #define char_border_single_topLeft_s "\xDA"
 #define char_border_single_topRight_s "\xBF"
 #define char_border_single_bottomLeft_s "\xC0"

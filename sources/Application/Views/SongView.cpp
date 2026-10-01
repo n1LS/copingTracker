@@ -626,7 +626,7 @@ void SongView::processNormalButtonMask(unsigned int mask) {
     }
     if (mask & BM_NAV) {
       switchSoloMode();
-    };
+    }
   } else if (mask & BM_NAV) {
     // NAV Modifier
 
@@ -657,6 +657,10 @@ void SongView::processNormalButtonMask(unsigned int mask) {
       ViewEvent ve(vetSwitchView, &ved);
       SetChanged();
       NotifyObservers(&ve);
+    }
+
+    if (mask & BM_LEFT) {
+      toggleLoopState();
     }
 
     if (mask & BM_PLAY) {
@@ -882,9 +886,44 @@ void SongView::DrawView() {
     OnPlayerUpdate(PET_UPDATE);
   }
 
+  DrawLoopMarker();
+
   needsPlayTimeUpdate_ = true;
   needsUIUpdate_ = true;
   AnimationUpdate();
+}
+
+void SongView::DrawLoopMarker() {
+  // no loop marker when idle
+  if (loopState_ == lsIdle) {
+    return;
+  }
+
+  int b = (loopState_ == lsSelecting) ? (viewData_->songY_ + viewData_->songOffset_) : loopB_;
+  int a = loopA_;
+
+  int visibleStart = std::min(a, b) - viewData_->songOffset_;
+  int visibleEnd = std::max(a, b) - viewData_->songOffset_ + 1;
+
+  GUIPoint pos = GetAnchor();
+
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::fg);
+
+  for (int y = std::max(0, visibleStart); y < std::min(visibleEnd, SONG_ROW_COUNT); y++) {
+    char c = CHAR(char_border_single_vertical_s);
+
+    if (y == visibleStart) {
+      c = CHAR(char_border_single_topLeft_s);
+    } else if (y == visibleEnd - 1) {
+      c = CHAR(char_border_single_bottomLeft_s);
+    }
+    if (visibleStart == visibleEnd - 1) {
+      c = CHAR(char_border_single_rightBracket_s);
+    }
+
+    DrawChar(pos.x_ - 4, pos.y_ + y, c);
+  }
 }
 
 void SongView::drawChainPreview() {
@@ -967,18 +1006,24 @@ void SongView::AnimationUpdate() {
   drawMasterVuMeter(player);
   drawTitleVuMeter(player);
 
+  SetBackgroundColor(Theme::View::Title::bg);
+  SetColor(Theme::View::Title::fg);
+  char c = (loopState_ == lsLooping) ? CHAR(char_symbol_loop_s) : CHAR(char_symbol_noloop_s);
+  DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 10, 0, c);
+
   // Use the consolidated flag for all UI updates
   if (needsUIUpdate_) {
     drawNotes();
 
     // Only handle play time updates if needed
     GUIPoint timePos = {SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 8, 0};
-    SetColor(Theme::View::Title::fg);
-    SetBackgroundColor(Theme::View::Title::bg);
 
+    SetColor(Theme::View::Title::fg);
     if (needsPlayTimeUpdate_ && Player::GetInstance()->IsRunning()) {
       drawPlayTime(player, timePos);
       needsPlayTimeUpdate_ = false;
+    } else {
+      DrawString(timePos.x_, timePos.y_, "--:--");
     }
 
     // Handle position updates
@@ -1059,4 +1104,29 @@ void SongView::nudgeTempo(int direction) {
       dispatcher->OnNudgeUp();
       break;
   }
+}
+
+void SongView::toggleLoopState() {
+  switch (loopState_) {
+    case lsIdle:
+      // lock in first position, have second loop point follow the cursor
+      loopA_ = viewData_->songY_ + viewData_->songOffset_;
+      loopB_ = loopA_;
+      loopState_ = lsSelecting;
+      break;
+
+    case lsSelecting:
+      // loop is fully selected
+      loopB_ = viewData_->songY_ + viewData_->songOffset_;
+      Player::GetInstance()->SetLoopPoints(loopA_, loopB_);
+      loopState_ = lsLooping;
+      break;
+
+    case lsLooping:
+      // end looping
+      Player::GetInstance()->SetLoopPoints(NO_LOOP, NO_LOOP);
+      loopState_ = lsIdle;
+  }
+
+  SetDirty(true);
 }
