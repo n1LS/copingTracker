@@ -16,14 +16,24 @@ lsdjkit_voice_t LSDJKitInstrument::voices_[SONG_CHANNEL_COUNT];
 
 LSDJKitInstrument::LSDJKitInstrument()
     : I_Instrument(&variables_),
-      vKit1_(Token::LSDJKitInstrumentKit1, lsdjKits::kitNames, lsdjKits::drum_kit_count, defaultKit1),
-      vKit2_(Token::LSDJKitInstrumentKit2, lsdjKits::kitNames, lsdjKits::drum_kit_count, defaultKit2),
-      vBitDepth_(Token::LSDJKitInstrumentBitDepth, defaultBitDepth) {
+      vKit1_(Token::LSDJKitInstrumentKit1, LSDJKits::kitNames, LSDJKits::drum_kit_count, lsdjDefaultKit1),
+      vKit2_(Token::LSDJKitInstrumentKit2, LSDJKits::kitNames, LSDJKits::drum_kit_count, lsdjDefaultKit2),
+      vBitDepth_(Token::LSDJKitInstrumentBitDepth, lsdjDefaultBitDepth),
+      vOffset_(Token::LSDJKitInstrumentOffset, lsdjDefaultOffset),
+      vLength_(Token::LSDJKitInstrumentLength, lsdjDefaultLength),
+      vLoop_(Token::LSDJKitInstrumentLoop, loopModeNames, loopModeCount, lsdjDefaultLoop),
+      vSpeed_(Token::LSDJKitInstrumentSpeed, speedModeNames, speedModeCount, lsdjDefaultSpeed),
+      vClip_(Token::LSDJKitInstrumentClip, clippingModeNames, clippingModeCount, lsdjDefaultClip) {
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
   variables_.insert(variables_.end(), &vKit1_);
   variables_.insert(variables_.end(), &vKit2_);
   variables_.insert(variables_.end(), &vBitDepth_);
+  variables_.insert(variables_.end(), &vOffset_);
+  variables_.insert(variables_.end(), &vLength_);
+  variables_.insert(variables_.end(), &vLoop_);
+  variables_.insert(variables_.end(), &vSpeed_);
+  variables_.insert(variables_.end(), &vClip_);
 
   InsertBaseVariables();
 }
@@ -116,6 +126,12 @@ lsdjkit_parameters_t LSDJKitInstrument::getInstrumentParameters(uint8_t note) {
   params.kit2 = FindVariable(Token::LSDJKitInstrumentKit2)->GetInt();
   params.bit_depth = FindVariable(Token::LSDJKitInstrumentBitDepth)->GetInt();
   params.pan = EffectivePan();
+  params.volume = FindVariable(Token::InstrumentParameterVolume)->GetInt();
+  params.speed = FindVariable(Token::LSDJKitInstrumentSpeed)->GetInt();
+  params.loop_mode = static_cast<lsdjkit_loop_mode_e>(FindVariable(Token::LSDJKitInstrumentLoop)->GetInt());
+  params.offset = FindVariable(Token::LSDJKitInstrumentOffset)->GetInt();
+  params.length = FindVariable(Token::LSDJKitInstrumentLength)->GetInt();
+  params.clip_mode = FindVariable(Token::LSDJKitInstrumentClip)->GetInt();
 
   return params;
 }
@@ -127,13 +143,18 @@ void LSDJKitInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
 
     for (int n = 0; n < 2; n++) {
       int kitId = vars[n]->GetInt();
-      const lsdjKits::Kit *kit = &lsdjKits::kits[kitId];
-      int sampleId = notes[n];
 
-      if (sampleId == 0 || sampleId > (int)kit->num_samples) {
-        out[n * 2] = '-';
+      if (kitId == NO_KIT) {
+          out[n * 2] = '-';
       } else {
-        out[n * 2] = kit->samples[sampleId - 1].name[0];
+        const LSDJKits::Kit *kit = &LSDJKits::kits[kitId];
+        int sampleId = notes[n];
+
+        if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+          out[n * 2] = '-';
+        } else {
+          out[n * 2] = kit->samples[sampleId - 1].name[0];
+        }
       }
     }
 
@@ -157,15 +178,21 @@ void LSDJKitInstrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], cha
 
     for (int n = 0; n < 2; n++) {
       int kitId = vars[n]->GetInt();
-      const lsdjKits::Kit *kit = &lsdjKits::kits[kitId];
-      int sampleId = notes[n];
 
-      if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+      if (kitId == NO_KIT) {
         lines[n][0] = '-';
         lines[n][1] = '-';
       } else {
-        lines[n][0] = kit->samples[sampleId - 1].name[0];
-        lines[n][1] = kit->samples[sampleId - 1].name[1];
+        const LSDJKits::Kit *kit = &LSDJKits::kits[kitId];
+        int sampleId = notes[n];
+
+        if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+          lines[n][0] = '-';
+          lines[n][1] = '-';
+        } else {
+          lines[n][0] = kit->samples[sampleId - 1].name[0];
+          lines[n][1] = kit->samples[sampleId - 1].name[1];
+        }
       }
     }
 
@@ -184,14 +211,18 @@ void LSDJKitInstrument::focusedNoteDisplay(uint8_t note, char (&line)[12]) {
 
   for (int n = 0; n < 2; n++) {
     int kitId = vars[n]->GetInt();
-    const lsdjKits::Kit *kit = &lsdjKits::kits[kitId];
 
-    int sampleId = notes[n];
-
-    if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+    if (kitId == NO_KIT) {
       strcpy(line + 1 + n * 4, "---");
     } else {
-      strcpy(line + 1 + n * 4, kit->samples[sampleId - 1].name);
+      const LSDJKits::Kit *kit = &LSDJKits::kits[kitId];
+      int sampleId = notes[n];
+
+      if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+        strcpy(line + 1 + n * 4, "---");
+      } else {
+        strcpy(line + 1 + n * 4, kit->samples[sampleId - 1].name);
+      }
     }
   }
 

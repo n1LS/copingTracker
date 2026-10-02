@@ -109,9 +109,9 @@ FiLTer                aabb³Flt
 7                 C  7    8   
 0                             
 Set filter cutoff aa and  ³   
-7         A B             8   
+7         A 7          B  8   
 0                             
-resonance bb.             ³   
+resonance bb instantly.   ³   
 8                             
 0                             
                           ³   
@@ -121,12 +121,12 @@ resonance bb.             ³
 F7       F7F          C A 8F  
 0                             
 Filter & ReS          aabb³FRs
-7     C 7           A     8   
+7               A 7       8   
 0                             
-speed aa, resonance bb    ³   
-8                             
+Reach resonance bb with   ³   
+7        C 7 8                
 0                             
-                          ³   
+the rate aa.              ³   
 8                             
 0                             
                           ³   
@@ -151,15 +151,15 @@ Synth only!               ³
 F 7 F7                C A 8F  
 0                             
 GRooVe                aabb³Grv
-7   A 7    C  7           8   
+7                     A 7 8   
 0                             
-set bb. If aa > 0 set this³   
+Set current groove to bb. ³   
+7  C 7                    8   
+0                             
+If aa is not 00, set this ³   
 7                         8   
 0                             
-groove on all tracks      ³   
-8                             
-0                             
-                          ³   
+groove on all tracks.     ³   
 8                             
 0                             
 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
@@ -241,15 +241,15 @@ values by aaaa            ³
 F7   F                C A 8F  
 0                             
 Midi CC               aabb³MCC
-7          C  7     A     8   
+7               C 7    A  8   
 0                             
-CC message aa value bb    ³   
-8                             
+Send CC message aa with   ³   
+7     A 8                     
 0                             
-                          ³   
-8                             
+value bb                  ³   
+C 8A 8                        
 0                             
-                          ³   
+aa,bb <= 7F               ³   
 8                             
 0                             
 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
@@ -262,9 +262,9 @@ send program change aa    ³
 8                             
 0                             
                           ³   
-8                             
+C 08                          
 0                             
-                          ³   
+aa <= 7F                  ³   
 8                             
 0                             
 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   

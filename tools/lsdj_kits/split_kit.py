@@ -6,8 +6,7 @@ import sys
 import wave
 from pathlib import Path
 
-
-SAMPLE_RATE = 44100
+SAMPLE_RATE = 22050
 CHANNELS = 1
 BITS_PER_SAMPLE = 8
 SLOTS_PER_BAR = 16
@@ -16,11 +15,10 @@ SLOTS_PER_BAR = 16
 # Each consumes two eighth-note timing slots.
 LONG_SAMPLE_INDICES = {8, 9}
 
-
 def parse_args():
     parser = argparse.ArgumentParser(
         description=(
-            "Convert a 44.1kHz/8-bit mono drum WAV into a C header. "
+            "Convert a 22.05kHz/8-bit mono drum WAV into a C header. "
             "The number of kits is determined automatically from the WAV length."
         )
     )
@@ -37,6 +35,16 @@ def parse_args():
         type=int,
         default=0,
         help="Absolute PCM amplitude treated as silence (default: 0)",
+    )
+
+    parser.add_argument(
+        "--names",
+        type=Path,
+        required=True,
+        help=(
+            "Text file with kit and hit names: unindented lines are kit "
+            "names, indented lines are the hit names of the preceding kit"
+        ),
     )
 
     parser.add_argument(
@@ -102,6 +110,109 @@ def read_wav(path):
         sample - 128
         for sample in raw
     ]
+
+
+def read_names(path):
+    """
+    Parse the kit/hit names file.
+
+    Lines without leading whitespace start a new kit, lines indented by
+    any number of spaces or tabs are hit names of the preceding kit.
+    Blank lines are ignored.
+    """
+    kits = []
+
+    with open(path, encoding="utf-8") as names_file:
+        for line_number, line in enumerate(names_file, start=1):
+            line = line.rstrip("\r\n")
+
+            if not line.strip():
+                continue
+
+            if line[0] in " \t":
+                if not kits:
+                    raise ValueError(
+                        f"{path}:{line_number}: hit name before first kit name"
+                    )
+                kits[-1]["hits"].append(line.strip())
+            else:
+                kits.append({"name": line.strip(), "hits": []})
+
+    return kits
+
+
+def warn(message):
+    print(f"warning: {message}", file=sys.stderr)
+
+
+UNUSED_NAME = "---"
+
+
+def drop_hits(kit, dropped):
+    """
+    Remove the hits with the given indices from the kit and rebuild the
+    kit data without them.
+    """
+    data = []
+    hits = []
+
+    for i, hit in enumerate(kit["hits"]):
+        if i in dropped:
+            continue
+
+        start = hit["position"]
+        hits.append({**hit, "position": len(data)})
+        data.extend(kit["data"][start:start + hit["length"]])
+
+    kit["data"] = data
+    kit["hits"] = hits
+
+
+def apply_names(kits, names):
+    """
+    Replace the generated kit and hit names with the ones from the names
+    file. The n-th hit name of a kit names the n-th sample slot, whether
+    or not a hit was detected in it. A hit name of "---" marks the slot
+    as unused, its hit is dropped from the kit. Too few kit names is an
+    error, everything else only warns.
+    """
+    if len(names) < len(kits):
+        raise ValueError(
+            f"names file has {len(names)} kits, WAV contains {len(kits)}"
+        )
+
+    if len(names) > len(kits):
+        warn(
+            f"names file has {len(names)} kits, WAV contains {len(kits)}; "
+            f"ignoring: {', '.join(n['name'] for n in names[len(kits):])}"
+        )
+
+    for kit, kit_names in zip(kits, names):
+        hit_names = kit_names["hits"]
+        kit["name"] = kit_names["name"]
+        detected = {hit["slot"] for hit in kit["hits"]}
+
+        for slot, hit_name in enumerate(hit_names):
+            if slot not in detected and hit_name != UNUSED_NAME:
+                warn(
+                    f"kit '{kit['name']}': no hit detected for "
+                    f"'{hit_name}' (slot {slot})"
+                )
+
+        dropped = set()
+
+        for i, hit in enumerate(kit["hits"]):
+            if hit["slot"] >= len(hit_names):
+                warn(
+                    f"kit '{kit['name']}': no name for slot {hit['slot']}, "
+                    f"keeping it as {hit['name']}"
+                )
+            elif hit_names[hit["slot"]] == UNUSED_NAME:
+                dropped.add(i)
+            else:
+                hit["name"] = hit_names[hit["slot"]]
+
+        drop_hits(kit, dropped)
 
 
 def samples_per_eighth(bpm):
@@ -251,6 +362,7 @@ def extract_kits(samples, bpm, threshold, num_kits):
                     hits.append(
                         {
                             "name": f"hit_{sample_index}",
+                            "slot": sample_index,
                             "position": data_position,
                             "length": len(hit_samples),
                         }
@@ -261,6 +373,7 @@ def extract_kits(samples, bpm, threshold, num_kits):
 
         kits.append(
             {
+                "id": f"kit_{kit_index}",
                 "name": f"kit_{kit_index}",
                 "data": kit_data,
                 "hits": hits,
@@ -275,6 +388,10 @@ def c_identifier(name):
         char if char.isalnum() or char == "_" else "_"
         for char in name
     )
+
+
+def c_string(text):
+    return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def format_int8_array(values, indent="    "):
@@ -296,22 +413,24 @@ def generate_header(kits, bpm, threshold, input_name):
     lines = []
 
     lines.append("/*")
-    lines.append(" * Generated by wav2h")
-    lines.append(f" * Source: {input_name}")
-    lines.append(f" * BPM: {bpm:g}")
-    lines.append(f" * Silence threshold: {threshold}")
-    lines.append(f" * Kits: {len(kits)}")
+    lines.append(" * SPDX-License-Identifier: BSD-3-Clause")
     lines.append(" *")
-    lines.append(" * Input: 8-bit unsigned PCM WAV")
-    lines.append(" * Output: signed int8_t PCM (-128..127)")
-    lines.append(" * Each kit contains 16 eighth-note timing slots.")
-    lines.append(" * hit_8 and hit_9 are quarter-note samples.")
+    lines.append(" * Copyright (c) 2026 nILS Podewski")
+    lines.append(" *")
+    lines.append(" * This file is part of the copingTracker firmware")
     lines.append(" */")
     lines.append("")
-    lines.append("#ifndef DRUM_KITS_H")
-    lines.append("#define DRUM_KITS_H")
+    lines.append("// Generated by split_kit.py -- do not edit manually")
+    lines.append(f"// BPM:               {bpm:g}")
+    lines.append(f"// Silence threshold: {threshold}")
+    lines.append(f"// Kits:              {len(kits)}")
+    lines.append("")
+    lines.append("#ifndef LSDJKITS_GENERATED_H")
+    lines.append("#define LSDJKITS_GENERATED_H")
     lines.append("")
     lines.append("#include <stdint.h>")
+    lines.append("")
+    lines.append("namespace LSDJKits {")
     lines.append("")
     lines.append("typedef struct {")
     lines.append("    const char *name;")
@@ -328,7 +447,7 @@ def generate_header(kits, bpm, threshold, input_name):
     lines.append("")
 
     for kit in kits:
-        name = c_identifier(kit["name"])
+        name = c_identifier(kit["id"])
         data_name = f"{name}_data"
         samples_name = f"{name}_samples"
 
@@ -342,7 +461,7 @@ def generate_header(kits, bpm, threshold, input_name):
         if kit["hits"]:
             for hit in kit["hits"]:
                 lines.append(
-                    f'    {{ "{hit["name"]}", '
+                    f'    {{ "{c_string(hit["name"])}", '
                     f'{hit["position"]}u, '
                     f'{hit["length"]}u }},'
                 )
@@ -352,15 +471,15 @@ def generate_header(kits, bpm, threshold, input_name):
         lines.append("};")
         lines.append("")
 
-    lines.append("static const Kit drum_kits[] = {")
+    lines.append("static const Kit kits[] = {")
 
     for kit in kits:
-        name = c_identifier(kit["name"])
+        name = c_identifier(kit["id"])
         data_name = f"{name}_data"
         samples_name = f"{name}_samples"
 
         lines.append(
-            f'    {{ "{kit["name"]}", '
+            f'    {{ "{c_string(kit["name"])}", '
             f'{len(kit["hits"])}u, '
             f'{data_name}, '
             f'{samples_name} }},'
@@ -368,10 +487,19 @@ def generate_header(kits, bpm, threshold, input_name):
 
     lines.append("};")
     lines.append("")
+    lines.append("static const char *kitNames[] = {")
+
+    for kit in kits:
+        lines.append(f'  "{c_string(kit["name"])}",')
+
+    lines.append("};")
+    lines.append("")
+
     lines.append(
         "static const uint32_t drum_kit_count = "
         f"{len(kits)}u;"
     )
+    lines.append("} // namespace")
     lines.append("")
     lines.append("#endif /* DRUM_KITS_H */")
     lines.append("")
@@ -384,6 +512,7 @@ def main():
 
     try:
         samples = read_wav(args.input)
+        names = read_names(args.names)
 
         num_kits = determine_num_kits(
             len(samples),
@@ -396,6 +525,8 @@ def main():
             args.threshold,
             num_kits,
         )
+
+        apply_names(kits, names)
 
         header = generate_header(
             kits,
@@ -421,13 +552,14 @@ def main():
         )
 
         print(f"Input:       {args.input}")
+        print(f"Names:       {args.names}")
         print(f"Output:      {args.output}")
         print(f"BPM:         {args.bpm:g}")
         print(f"Threshold:   {args.threshold}")
         print(f"Kits:        {len(kits)}")
         print(f"Max samples: 14 per kit")
         print(f"Hits:        {total_hits}")
-        print(f"PCM samples: {total_samples}")
+        print(f"PCM samples: {total_samples} / {total_samples//1024:.2f} kN / {total_samples/(1024*1024):.2f} MB")
 
     except (OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)

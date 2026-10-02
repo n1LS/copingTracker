@@ -17,6 +17,7 @@
 
 // two kits of 15 samples each, encoded as note = kit1Sample * 15 + kit2Sample
 #define LSDJKIT_HIGHEST_NOTE 225
+#define NO_KIT -1
 
 class LSDJKitInstrument : public I_Instrument {
 
@@ -87,11 +88,16 @@ public:
 private:
   static lsdjkit_voice_t voices_[SONG_CHANNEL_COUNT];
 
-  etl::list<Variable *, 7> variables_;
+  etl::list<Variable *, 13> variables_;
 
   Variable vKit1_;
   Variable vKit2_;
   Variable vBitDepth_;
+  Variable vOffset_;
+  Variable vLength_;
+  Variable vLoop_;
+  Variable vSpeed_;
+  Variable vClip_;
 
   void RunCommand(int channel);
   void CommandInitArp(int channel, uint16_t value);

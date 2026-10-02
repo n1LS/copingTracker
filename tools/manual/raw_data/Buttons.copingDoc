@@ -34,141 +34,87 @@ BUTTONS & COMBOS
 7             F               
 0                             
                               
+F                             
+91        9                   
+BSong ViewCOMBOS              
+F                           7 
+0                             
+                              
+9          F                 7
+0                             
+Navigation                    
+F                           7 
+0                             
+                              
+F       7                     
+0                             
+ž+RIGHT Go to Chain View      
+F   7                         
+0                             
+ž+UP    Go to Project View    
+F     7                       
+0                             
+ž+DOWN  Go to Mixer View      
+F     7                       
+0                             
+ž+LEFT  Toggle Loop mode      
+7                             
+0                             
+        When pressed once, the
+7                             
+0                             
+        first loop marker is  
+7                             
+0                             
+        set on the current row
+7                             
+0                             
+        Pressing again will   
+7                             
+0                             
+        set the 2nd marker at 
+7                             
+0                             
+        the current row and   
+7                             
+0                             
+        enable loop mode.     
+7                    F     7  
+0                             
+        In loop mode ž+LEFT   
+7                             
+0                             
+        removes the loop.     
 7                             
 0                             
                               
+9            7                
+0                             
+Moving around                 
 7                             
 0                             
-cillum dolore eu fugiat       
-7                             
+                              
+F   7                         
 0                             
-nulla pariatur. Excepteur     
-7                             
+š˜™—    Move the cursor       
+9                           7 
 0                             
-sint occaecat cupidatat non   
-7                             
+                              
+9                           7 
 0                             
-proident, sunt in culpa qui   
-7                             
+Changing values               
+F                            7
 0                             
-officia deserunt mollit anim  
-7                             
+                              
+F                          7  
 0                             
-id est laborum. Lorem ipsum   
-7                             
+œ+š˜™—  Change the value at   
+F                          7  
 0                             
-dolor sit amet, consectetur   
-7                             
+        the cursor position   
+F                             
 0                             
-adipiscing elit. Sed do       
-7                             
+œ       If empty, fill wit the
+F                          7  
 0                             
-eiusmod tempor incididunt ut  
-7                             
-0                             
-labore et dolore magna        
-7                             
-0                             
-aliqua. Ut enim ad minim      
-7                             
-0                             
-veniam, quis nostrud          
-7                             
-0                             
-exercitation ullamco laboris  
-7                             
-0                             
-nisi ut aliquip ex ea         
-7                             
-0                             
-commodo consequat. Duis aute  
-7                             
-0                             
-irure dolor in reprehenderit  
-7                             
-0                             
-in voluptate velit esse       
-7                             
-0                             
-cillum dolore eu fugiat       
-7                             
-0                             
-nulla pariatur. Excepteur     
-7                             
-0                             
-sint occaecat cupidatat non   
-7                             
-0                             
-proident, sunt in culpa qui   
-7                             
-0                             
-officia deserunt mollit anim  
-7                             
-0                             
-id est laborum. Lorem ipsum   
-7                             
-0                             
-dolor sit amet, consectetur   
-7                             
-0                             
-adipiscing elit. Sed do       
-7                             
-0                             
-eiusmod tempor incididunt ut  
-7                             
-0                             
-labore et dolore magna        
-7                             
-0                             
-aliqua. Ut enim ad minim      
-7                             
-0                             
-veniam, quis nostrud          
-7                             
-0                             
-exercitation ullamco laboris  
-7                             
-0                             
-nisi ut aliquip ex ea         
-7                             
-0                             
-commodo consequat. Duis aute  
-7                             
-0                             
-irure dolor in reprehenderit  
-7                             
-0                             
-in voluptate velit esse       
-7                             
-0                             
-cillum dolore eu fugiat       
-7                             
-0                             
-nulla pariatur. Excepteur     
-7                             
-0                             
-sint occaecat cupidatat non   
-7                             
-0                             
-proident, sunt in culpa qui   
-7                             
-0                             
-officia deserunt mollit anim  
-7                             
-0                             
-id est laborum. Lorem ipsum   
-7                             
-0                             
-dolor sit amet, consectetur   
-7                             
-0                             
-adipiscing elit. Sed do       
-7                             
-0                             
-eiusmod tempor incididunt ut  
-7                             
-0                             
-labore et dolore magna        
-7                             
-0                             
-aliqua. Ut enim ad minim      
+        last used chain id.   
