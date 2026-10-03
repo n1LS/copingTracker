@@ -9,14 +9,15 @@
 #pragma once
 
 #include "Foundation/Constants/SpecialCharacters.h"
+#include "Config/AudioConstants.h"
 
 enum chiptune_constants_e {
   envAttackThreshold = 65530,
   envDecayThreshold = 10,
   numWaveforms = 8,
   q16_16_1 = 0x0001'0000,
-  ticks100Hz = 441,
-  ticks1000Hz = 44,
+  ticks100Hz = SAMPLE_RATE_HZ / 100,
+  ticks1000Hz = SAMPLE_RATE_HZ / 1000,
   vibratoFrequency = 0xFFF,
 };
 

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "Config/AudioConstants.h"
+
 #define Drum_Name_0 "BassDrum"
 #define Drum_Name_1 "Rim shot"
 #define Drum_Name_2 "Snare 1 "
@@ -44,8 +46,8 @@ enum drum_constants_e {
   drumEnvDecayThreshold = 10,
   drumNumWaveforms = 8,
   drumQ16_16_1 = 0x0001'0000,
-  drumTicks100Hz = 441,
-  drumTicks1000Hz = 44,
+  drumTicks100Hz = SAMPLE_RATE_HZ / 100,
+  drumTicks1000Hz = SAMPLE_RATE_HZ / 1000,
 };
 
 enum drum_wave_type_e : uint8_t {

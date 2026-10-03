@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "Config/AudioConstants.h"
+
 enum stack_wave_type_e : uint8_t {
   stackWavePulse12_5 = 0,
   stackWavePulse25,
@@ -25,8 +27,8 @@ enum stack_constants_e {
   stackEnvDecayThreshold = 10,
   stackNumWaveforms = stackWaveLastItem + 1,
   stackQ16_16_1 = 0x0001'0000,
-  stackTicks100Hz = 441,
-  stackTicks1000Hz = 44,
+  stackTicks100Hz = SAMPLE_RATE_HZ / 100,
+  stackTicks1000Hz = SAMPLE_RATE_HZ / 1000,
   stackBrightnessMax = 12,
   stackNumOscillators = 5,
 };
