@@ -32,11 +32,11 @@ typedef struct lsdjkit_parameters_t {
   uint8_t pan;
   uint8_t volume;
   uint8_t speed;
-  uint8_t offset;
-  uint8_t length;
+  uint8_t offset[2];
+  uint8_t length[2];
+  
+  lsdjkit_loop_mode_e loop_mode[2];
   uint8_t clip_mode;
-
-  lsdjkit_loop_mode_e loop_mode;
 } lsdjkit_parameters_t;
 
 static_assert(sizeof(lsdjkit_parameters_t) % 4 == 0, "Check sizeof(lsdjkit_parameters_t) in error message");
@@ -65,11 +65,13 @@ typedef struct lsdjkit_voice_t {
   uint8_t note;
   uint8_t drive;
   uint8_t buffer;
-  
+
+  uint8_t loop_mode[2];
+
   uint16_t speed;
   lsdjkit_flags flags;
 
-  uint32_t timeToLive;
+  uint32_t timeToLive[2];
 
   char sampleName[2][4] = {{0}, {0}};
 
@@ -77,8 +79,6 @@ typedef struct lsdjkit_voice_t {
   const int8_t *wavetable[2];
 
   panlaw_state pan;
-
-  uint8_t _padding[2]; // padding to make the struct size a multiple of 4
 
   // implementation ------------------------------------------------------------
 
@@ -90,18 +90,21 @@ typedef struct lsdjkit_voice_t {
   }
 
   inline void tick_1000Hz() {
-    if (timeToLive == 0) {
-      if (flags.retrigger) {
-        flags.retrigger = 0; // clear retrigger flag
-        // retrigger without resetting clocks
-        note_on(note, volume, false, parameters, true);
+    for (int kit = 0; kit < 2; kit++) {
+      // TODO nILS: check how to handle that with 2 individual voices...
+      if (timeToLive[kit] == 0) {
+        if (flags.retrigger) {
+          flags.retrigger = 0; // clear retrigger flag
+          // retrigger without resetting clocks
+          note_on(note, volume, false, parameters, true);
+        } else {
+          // note off, kill everything
+          volume = 0;
+        }
       } else {
-        // note off, kill everything
-        volume = 0;
+        // length
+        timeToLive[kit]--;
       }
-    } else {
-      // length
-      timeToLive--;
     }
 
     pan.tick();
@@ -137,11 +140,11 @@ typedef struct lsdjkit_voice_t {
       bool safe = (index < wavetableLength[kit]);
 
       if (!safe) {
-        if (flags.loop_mode == loopModeOn) {
+        if (loop_mode[kit] == loopModeOn) {
           safe = true;
-          index = parameters.offset;
+          index = parameters.offset[kit];
           phase[kit] = index << 9; // convert back to q24.8
-        } else if (flags.loop_mode == loopModeAttack) {
+        } else if (loop_mode[kit] == loopModeAttack) {
           safe = true;
           index = 0;
           phase[kit] = 0;
@@ -264,7 +267,8 @@ typedef struct lsdjkit_voice_t {
     bit_depth = inParameters.bit_depth;
 
     // loop mode
-    flags.loop_mode = inParameters.loop_mode;
+    loop_mode[0] = inParameters.loop_mode[0];
+    loop_mode[1] = inParameters.loop_mode[1];
 
     // pan jumps to the instrument's setting on note on; PAN commands slew
     // from there via pan.slew_to().
@@ -274,20 +278,21 @@ typedef struct lsdjkit_voice_t {
     uint8_t kitIndex[2] = {parameters.kit1, parameters.kit2};
 
     for (int kit = 0; kit < 2; kit++) {
+      // reset oscillator state and timers
+      timeToLive[kit] = (parameters.length[kit] == 0) ? 0x7FFF'FFFF : (parameters.length[kit]);
+
       if (notes[kit] != 0) {
         const LSDJKits::Kit &kitData = LSDJKits::kits[kitIndex[kit]];
         const LSDJKits::Sample &sample = kitData.samples[notes[kit] - 1];
         wavetable[kit] = (int8_t *)(kitData.data + sample.position);
         wavetableLength[kit] = sample.length;
-        offset[kit] = (sample.length * inParameters.offset) >> 8; // offset is in 0-255, scale to sample length
+        offset[kit] = (sample.length * inParameters.offset[kit]) >> 8; // offset is in 0-255, scale to sample length
         phase[kit] = offset[kit] << 9; // convert to q24.8
 
         strcpy(sampleName[kit], sample.name);
       }
     }
 
-    // reset oscillator state and timers
-    timeToLive = (parameters.length == 0) ? 0x7FFF'FFFF : (parameters.length);
 
     // speed                           .25 .5   1.0  2.0 
     const int rates[speedModeCount] = {64, 128, 256, 512};

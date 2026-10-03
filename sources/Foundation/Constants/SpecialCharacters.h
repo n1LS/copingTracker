@@ -119,6 +119,7 @@
 #define char_waveform_noise2_s "\xF9"
 
 #define char_waveform_tri_s char_waveform_tri1_s char_waveform_tri2_s
+#define char_waveform_sine_s char_waveform_sine1_s char_waveform_sine2_s
 #define char_waveform_saw_s char_waveform_saw1_s char_waveform_saw2_s
 #define char_waveform_pulse_s char_waveform_pulse1_s char_waveform_pulse2_s
 #define char_waveform_noise_s char_waveform_noise1_s char_waveform_noise2_s

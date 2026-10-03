@@ -88,14 +88,17 @@ public:
 private:
   static lsdjkit_voice_t voices_[SONG_CHANNEL_COUNT];
 
-  etl::list<Variable *, 13> variables_;
+  etl::list<Variable *, 16> variables_;
 
   Variable vKit1_;
   Variable vKit2_;
   Variable vBitDepth_;
-  Variable vOffset_;
-  Variable vLength_;
-  Variable vLoop_;
+  Variable vOffset1_;
+  Variable vLength1_;
+  Variable vLoop1_;
+  Variable vOffset2_;
+  Variable vLength2_;
+  Variable vLoop2_;
   Variable vSpeed_;
   Variable vClip_;
 

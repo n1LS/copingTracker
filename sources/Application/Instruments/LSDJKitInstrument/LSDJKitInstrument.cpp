@@ -19,9 +19,12 @@ LSDJKitInstrument::LSDJKitInstrument()
       vKit1_(Token::LSDJKitInstrumentKit1, LSDJKits::kitNames, LSDJKits::drum_kit_count, lsdjDefaultKit1),
       vKit2_(Token::LSDJKitInstrumentKit2, LSDJKits::kitNames, LSDJKits::drum_kit_count, lsdjDefaultKit2),
       vBitDepth_(Token::LSDJKitInstrumentBitDepth, lsdjDefaultBitDepth),
-      vOffset_(Token::LSDJKitInstrumentOffset, lsdjDefaultOffset),
-      vLength_(Token::LSDJKitInstrumentLength, lsdjDefaultLength),
-      vLoop_(Token::LSDJKitInstrumentLoop, loopModeNames, loopModeCount, lsdjDefaultLoop),
+      vOffset1_(Token::LSDJKitInstrumentOffset1, lsdjDefaultOffset),
+      vLength1_(Token::LSDJKitInstrumentLength1, lsdjDefaultLength),
+      vLoop1_(Token::LSDJKitInstrumentLoop1, loopModeNames, loopModeCount, lsdjDefaultLoop),
+      vOffset2_(Token::LSDJKitInstrumentOffset2, lsdjDefaultOffset),
+      vLength2_(Token::LSDJKitInstrumentLength2, lsdjDefaultLength),
+      vLoop2_(Token::LSDJKitInstrumentLoop2, loopModeNames, loopModeCount, lsdjDefaultLoop),
       vSpeed_(Token::LSDJKitInstrumentSpeed, speedModeNames, speedModeCount, lsdjDefaultSpeed),
       vClip_(Token::LSDJKitInstrumentClip, clippingModeNames, clippingModeCount, lsdjDefaultClip) {
   // Initialize exported variables
@@ -29,9 +32,12 @@ LSDJKitInstrument::LSDJKitInstrument()
   variables_.insert(variables_.end(), &vKit1_);
   variables_.insert(variables_.end(), &vKit2_);
   variables_.insert(variables_.end(), &vBitDepth_);
-  variables_.insert(variables_.end(), &vOffset_);
-  variables_.insert(variables_.end(), &vLength_);
-  variables_.insert(variables_.end(), &vLoop_);
+  variables_.insert(variables_.end(), &vOffset1_);
+  variables_.insert(variables_.end(), &vLength1_);
+  variables_.insert(variables_.end(), &vLoop1_);
+  variables_.insert(variables_.end(), &vOffset2_);
+  variables_.insert(variables_.end(), &vLength2_);
+  variables_.insert(variables_.end(), &vLoop2_);
   variables_.insert(variables_.end(), &vSpeed_);
   variables_.insert(variables_.end(), &vClip_);
 
@@ -128,9 +134,12 @@ lsdjkit_parameters_t LSDJKitInstrument::getInstrumentParameters(uint8_t note) {
   params.pan = EffectivePan();
   params.volume = FindVariable(Token::InstrumentParameterVolume)->GetInt();
   params.speed = FindVariable(Token::LSDJKitInstrumentSpeed)->GetInt();
-  params.loop_mode = static_cast<lsdjkit_loop_mode_e>(FindVariable(Token::LSDJKitInstrumentLoop)->GetInt());
-  params.offset = FindVariable(Token::LSDJKitInstrumentOffset)->GetInt();
-  params.length = FindVariable(Token::LSDJKitInstrumentLength)->GetInt();
+  params.loop_mode[0] = static_cast<lsdjkit_loop_mode_e>(FindVariable(Token::LSDJKitInstrumentLoop1)->GetInt());
+  params.loop_mode[1] = static_cast<lsdjkit_loop_mode_e>(FindVariable(Token::LSDJKitInstrumentLoop2)->GetInt());
+  params.offset[0] = FindVariable(Token::LSDJKitInstrumentOffset1)->GetInt();
+  params.offset[1] = FindVariable(Token::LSDJKitInstrumentOffset2)->GetInt();
+  params.length[0] = FindVariable(Token::LSDJKitInstrumentLength1)->GetInt();
+  params.length[1] = FindVariable(Token::LSDJKitInstrumentLength2)->GetInt();
   params.clip_mode = FindVariable(Token::LSDJKitInstrumentClip)->GetInt();
 
   return params;

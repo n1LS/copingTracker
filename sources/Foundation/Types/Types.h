@@ -195,12 +195,15 @@ struct Token {
     LSDJKitInstrumentKit1 = 193,
     LSDJKitInstrumentKit2 = 194,
     LSDJKitInstrumentBitDepth = 199,
-    LSDJKitInstrumentOffset = 121,
+    LSDJKitInstrumentOffset1 = 121,
     LSDJKitInstrumentAttack = 231,
-    LSDJKitInstrumentLength = 122,
-    LSDJKitInstrumentLoop = 141,
+    LSDJKitInstrumentLength1 = 122,
+    LSDJKitInstrumentLoop1 = 141,
     LSDJKitInstrumentSpeed = 203,
     LSDJKitInstrumentClip = 209,
+    LSDJKitInstrumentLength2 = 232,
+    LSDJKitInstrumentOffset2 = 233,
+    LSDJKitInstrumentLoop2 = 234,
 
     DrumInstrumentParamsVoice0 = 214,
     DrumInstrumentParamsVoice1 = 215,
@@ -237,7 +240,7 @@ struct Token {
 
     VarPhraseLength = 254,
 
-    // 232-253 free 23
+    // 234-253 free 23
 
     Default = 255, // "    "
   };
@@ -410,9 +413,12 @@ struct Token {
   ETL_ENUM_TYPE_16(LSDJKitInstrumentBitDepth, "BitDepth")
   ETL_ENUM_TYPE_16(LSDJKitInstrumentClip, "Clip")
   ETL_ENUM_TYPE_16(LSDJKitInstrumentAttack, "Attack")
-  ETL_ENUM_TYPE_16(LSDJKitInstrumentLength, "Length")
-  ETL_ENUM_TYPE_16(LSDJKitInstrumentLoop, "Loop")
-  ETL_ENUM_TYPE_16(LSDJKitInstrumentOffset, "Offset")
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentLength1, "Length1")
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentLoop1, "Loop1")
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentOffset1, "Offset1")
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentLength2, "Length2")
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentLoop2, "Loop2")
+  ETL_ENUM_TYPE_16(LSDJKitInstrumentOffset2, "Offset2")
   ETL_ENUM_TYPE_16(LSDJKitInstrumentSpeed, "Speed")
 
   // Drum Instrument Variables
