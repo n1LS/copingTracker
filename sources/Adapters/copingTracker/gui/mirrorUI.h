@@ -21,6 +21,7 @@
 void mirrorUI_flush(ScreenCharacter *screen, uint8_t *colors, bool *changed, bool fullscreenUpdate = false);
 void mirrorUI_sendCommand(mirrorUICommand *command);
 void mirrorUI_sendPalette(uint16_t *color);
+void mirrorUI_sendInput(MIrrorUIKey key, mirrorUIKeyState down);
 void mirrorUI_sendRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, Color color);
 void mirrorUI_connected();
 void mirrorUI_processCDCInput();

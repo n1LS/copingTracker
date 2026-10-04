@@ -23,7 +23,7 @@ enum mirrorUICommandType {
   cmdRect = 0x03,
 };
 
-enum MirrorUIKey {
+enum mirrorUIKey {
   muikUp = 0x01,
   muikLeft = 0x02,
   muikDown = 0x03,
@@ -36,7 +36,10 @@ enum MirrorUIKey {
   muikLastEntry = 0x09
 };
 
-enum MirrorUIKeyState { muiksDown = 0x00, muiksUp = 0x01 };
+enum mirrorUIKeyState { 
+  muiksDown = 0x00,
+  muiksUp = 0x01
+};
 
 void mirrorUI_handleInput(uint8_t key, uint8_t state);
 
@@ -44,7 +47,5 @@ typedef struct mirrorUICommand {
   uint8_t payload[100];
   uint8_t payloadSize;
 } mirrorUICommand;
-
-void mirrorUI_command_Palette(mirrorUICommand *command, uint16_t *palette);
 
 #endif

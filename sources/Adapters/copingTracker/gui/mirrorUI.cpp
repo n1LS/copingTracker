@@ -171,7 +171,7 @@ void mirrorUI_connected() {
 }
 
 void mirrorUI_handleInput(uint8_t key, uint8_t state) {
-  // Map MirrorUIKey to ButtonMask
+  // Map mirrorUIKey to ButtonMask
   uint16_t buttonMask = 0;
 
   switch (key) {
