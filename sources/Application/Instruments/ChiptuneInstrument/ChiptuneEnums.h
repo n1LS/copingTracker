@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "Foundation/Constants/SpecialCharacters.h"
 #include "Config/AudioConstants.h"
+#include "Foundation/Constants/SpecialCharacters.h"
 
 enum chiptune_constants_e {
   envAttackThreshold = 65530,

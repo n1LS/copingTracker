@@ -34,12 +34,12 @@ typedef struct lsdjkit_parameters_t {
   uint8_t speed;
   uint8_t offset[2];
   uint8_t length[2];
-  
-  lsdjkit_loop_mode_e loop_mode[2];
+
+  lsdjkit_dual_loop_mode_t loop_mode;
   uint8_t clip_mode;
 } lsdjkit_parameters_t;
 
-static_assert(sizeof(lsdjkit_parameters_t) % 4 == 0, "Check sizeof(lsdjkit_parameters_t) in error message");
+static_assert(sizeof(lsdjkit_parameters_t) == 12, "Check sizeof(lsdjkit_parameters_t) in error message");
 
 // (!) alignment has to be manually kept in this struct to allow using pack()
 //     to keep the size as small as possible
@@ -50,35 +50,35 @@ typedef struct lsdjkit_voice_t {
   uint32_t phase[2];       // wavetable index/oscillator phases in q24.8
   uint32_t lastSample = 0; // used for both the last sample for pulse smoothing
   // and as the lcg register for the noise
-  
+
   uint32_t time; // sample counter
   uint16_t tick; // sample counter for 100Hz updates
   uint8_t tock;  // sample counter for 1000Hz updates
-  
+  uint8_t volume;
+
   uint32_t offset[2]; // start offset per sample
 
-  uint8_t volume;
   uint8_t level;
   uint8_t bit_depth;
   uint8_t notes[2];
-  
   uint8_t note;
+
   uint8_t drive;
   uint8_t buffer;
-
   uint8_t loop_mode[2];
-
-  uint16_t speed;
-  lsdjkit_flags flags;
 
   uint32_t timeToLive[2];
 
   char sampleName[2][4] = {{0}, {0}};
 
-  uint16_t wavetableLength[2];
+  uint16_t speed;
   const int8_t *wavetable[2];
 
+  uint16_t wavetableLength[2];
+
   panlaw_state pan;
+
+  lsdjkit_flags flags;
 
   // implementation ------------------------------------------------------------
 
@@ -206,7 +206,8 @@ typedef struct lsdjkit_voice_t {
 
     // sample is 2x 8bit --> 9bits, we need to get it up to 32
     // handle clip modes
-    constexpr int32_t maxSample = 127; // this clips well below the 8bit range, to get a good compromise between loudness and distortion
+    constexpr int32_t maxSample =
+        127; // this clips well below the 8bit range, to get a good compromise between loudness and distortion
     constexpr int32_t minSample = -128;
 
     if (sample > maxSample || sample < minSample) {
@@ -218,21 +219,15 @@ typedef struct lsdjkit_voice_t {
           break;
 
         case clipModeSoft:
-          sample = positive
-            ? maxSample + ((sample - maxSample) >> 1)
-            : minSample + ((sample - minSample) >> 1);
+          sample = positive ? maxSample + ((sample - maxSample) >> 1) : minSample + ((sample - minSample) >> 1);
           break;
 
         case clipModeFold:
-          sample = positive
-            ? maxSample - (sample - maxSample)
-            : minSample - (sample - minSample);
+          sample = positive ? maxSample - (sample - maxSample) : minSample - (sample - minSample);
           break;
 
         case clipModeWrap:
-          sample = positive
-            ? minSample + (sample + minSample)
-            : maxSample + (sample + maxSample);
+          sample = positive ? minSample + (sample + minSample) : maxSample + (sample + maxSample);
           break;
       }
     }
@@ -267,8 +262,8 @@ typedef struct lsdjkit_voice_t {
     bit_depth = inParameters.bit_depth;
 
     // loop mode
-    loop_mode[0] = inParameters.loop_mode[0];
-    loop_mode[1] = inParameters.loop_mode[1];
+    loop_mode[0] = inParameters.loop_mode.mode1;
+    loop_mode[1] = inParameters.loop_mode.mode2;
 
     // pan jumps to the instrument's setting on note on; PAN commands slew
     // from there via pan.slew_to().
@@ -287,14 +282,13 @@ typedef struct lsdjkit_voice_t {
         wavetable[kit] = (int8_t *)(kitData.data + sample.position);
         wavetableLength[kit] = sample.length;
         offset[kit] = (sample.length * inParameters.offset[kit]) >> 8; // offset is in 0-255, scale to sample length
-        phase[kit] = offset[kit] << 9; // convert to q24.8
+        phase[kit] = offset[kit] << 9;                                 // convert to q24.8
 
         strcpy(sampleName[kit], sample.name);
       }
     }
 
-
-    // speed                           .25 .5   1.0  2.0 
+    // speed                           .25 .5   1.0  2.0
     const int rates[speedModeCount] = {64, 128, 256, 512};
     speed = rates[inParameters.speed];
 

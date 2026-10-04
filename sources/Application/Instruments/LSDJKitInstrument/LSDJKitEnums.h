@@ -21,6 +21,11 @@ typedef enum lsdjkit_loop_mode_e {
   loopModeAttack = 2,
 } lsdjkit_loop_mode_e;
 
+typedef struct lsdjkit_dual_loop_mode_t {
+  uint8_t mode1 : 4;
+  uint8_t mode2 : 4;
+} lsdjkit_dual_loop_mode_t;
+
 typedef enum lsdjkit_clip_mode_e {
   clipModeNone = 0,
   clipModeHard,
@@ -49,10 +54,11 @@ typedef union lsdjkit_flags {
 } lsdjkit_flags;
 
 static const int clippingModeCount = 5;
-static const char *clippingModeNames[clippingModeCount] = { "No ", char_waveform_pulse_s, char_waveform_sine_s, "Fld", "Wrp" };
+static const char *clippingModeNames[clippingModeCount] = {"No ", char_waveform_pulse_s, char_waveform_sine_s, "Fld",
+                                                           "Wrp"};
 
 static const int speedModeCount = 4;
-static const char *speedModeNames[speedModeCount] = { "1/4", "1/2", "1.0", "2.0" };
+static const char *speedModeNames[speedModeCount] = {"1/4", "1/2", "1.0", "2.0"};
 
 static const int loopModeCount = 3;
-static const char *loopModeNames[loopModeCount] = { "Off", "Atk", "Lop" };
+static const char *loopModeNames[loopModeCount] = {"Off", "Atk", "Lop"};
