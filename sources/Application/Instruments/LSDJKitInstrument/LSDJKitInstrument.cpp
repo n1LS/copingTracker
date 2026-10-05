@@ -134,8 +134,8 @@ lsdjkit_parameters_t LSDJKitInstrument::getInstrumentParameters(uint8_t note) {
   params.pan = EffectivePan();
   params.volume = FindVariable(Token::InstrumentParameterVolume)->GetInt();
   params.speed = FindVariable(Token::LSDJKitInstrumentSpeed)->GetInt();
-  params.loop_mode[0] = static_cast<lsdjkit_loop_mode_e>(FindVariable(Token::LSDJKitInstrumentLoop1)->GetInt());
-  params.loop_mode[1] = static_cast<lsdjkit_loop_mode_e>(FindVariable(Token::LSDJKitInstrumentLoop2)->GetInt());
+  params.loop_mode.mode1 = static_cast<lsdjkit_loop_mode_e>(FindVariable(Token::LSDJKitInstrumentLoop1)->GetInt());
+  params.loop_mode.mode2 = static_cast<lsdjkit_loop_mode_e>(FindVariable(Token::LSDJKitInstrumentLoop2)->GetInt());
   params.offset[0] = FindVariable(Token::LSDJKitInstrumentOffset1)->GetInt();
   params.offset[1] = FindVariable(Token::LSDJKitInstrumentOffset2)->GetInt();
   params.length[0] = FindVariable(Token::LSDJKitInstrumentLength1)->GetInt();
@@ -154,7 +154,7 @@ void LSDJKitInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
       int kitId = vars[n]->GetInt();
 
       if (kitId == NO_KIT) {
-          out[n * 2] = '-';
+        out[n * 2] = '-';
       } else {
         const LSDJKits::Kit *kit = &LSDJKits::kits[kitId];
         int sampleId = notes[n];
