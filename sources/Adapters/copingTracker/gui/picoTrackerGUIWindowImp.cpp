@@ -198,10 +198,15 @@ void picoTrackerGUIWindowImp::ProcessButtonChange(uint16_t changeMask, uint16_t 
 
   for (int i = 0; i < 10; i++) {
     if (changeMask & e) {
-      GUIEventType type = (buttonMask & e) ? ET_PADBUTTONDOWN : ET_PADBUTTONUP;
+      bool down = buttonMask & e;
+      GUIEventType type = down ? ET_PADBUTTONDOWN : ET_PADBUTTONUP;
 
       GUIEvent event(eventMapping[i], type);
       instance_->_window->DispatchEvent(event);
+
+      if (mirrorUIEnabled_) {
+        mirrorUI_sendInput(i, type == ET_PADBUTTONDOWN : muiksDown);
+      }
     }
     e <<= 1;
   }

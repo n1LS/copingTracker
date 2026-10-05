@@ -171,7 +171,7 @@ void mirrorUI_connected() {
 }
 
 void mirrorUI_handleInput(uint8_t key, uint8_t state) {
-  // Map MirrorUIKey to ButtonMask
+  // Map mirrorUIKey to ButtonMask
   uint16_t buttonMask = 0;
 
   switch (key) {
@@ -231,4 +231,14 @@ void mirrorUI_processCDCInput() {
     }
     inputBufferIndex = 0;
   }
+}
+
+void mirrorUI_sendInput(mirrorUIKey key, mirrorUIKeyState down) {
+  command_.payload[0] = cmdInput;
+  command_.payload[1] = key;
+  command_.payload[2] = down;
+
+  command_.payloadSize = 3;
+
+  mirrorUI_sendCommand(&command_);
 }
