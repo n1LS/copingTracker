@@ -36,10 +36,7 @@ enum mirrorUIKey {
   muikLastEntry = 0x09
 };
 
-enum mirrorUIKeyState { 
-  muiksDown = 0x00,
-  muiksUp = 0x01
-};
+enum mirrorUIKeyState { muiksDown = 0x00, muiksUp = 0x01 };
 
 void mirrorUI_handleInput(uint8_t key, uint8_t state);
 

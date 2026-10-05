@@ -232,3 +232,13 @@ void mirrorUI_processCDCInput() {
     inputBufferIndex = 0;
   }
 }
+
+void mirrorUI_sendInput(mirrorUIKey key, mirrorUIKeyState down) {
+  command_.payload[0] = cmdInput;
+  command_.payload[1] = key;
+  command_.payload[2] = down;
+
+  command_.payloadSize = 3;
+
+  mirrorUI_sendCommand(&command_);
+}
