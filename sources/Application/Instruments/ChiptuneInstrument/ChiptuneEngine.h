@@ -64,24 +64,24 @@ static_assert(sizeof(InstrumentParameters) <= 12, "Check sizeof(InstrumentParame
 // (!) alignment has to be manually kept in this struct to allow using pack()
 //     to keep the size <=128 bytes per voice
 #pragma pack(push, 1)
-typedef struct voice_t {
+typedef struct chiptune_voice_t {
   InstrumentParameters parameters;
 
-  uint32_t phase = 0;        // oscillator phase
-  int32_t frequency = 0;     // precomp'd oscillator frequency (incl. vibrato, etc)
-  int32_t lastFrequency = 0; // for legato slides, to compute the initial factor
+  uint32_t phase;        // oscillator phase
+  int32_t frequency;     // precomp'd oscillator frequency (incl. vibrato, etc)
+  int32_t lastFrequency; // for legato slides, to compute the initial factor
 
   uint32_t timeToLive; // time before the voice is silenced
 
-  uint32_t lastSample = 0; // used for both the last sample for pulse smoothing
+  uint32_t lastSample; // used for both the last sample for pulse smoothing
                            // and as the lcg register for the noise
 
   struct arp {
-    int32_t frequencies[5] = {0, 0, 0, 0, 0}; // precomp'd frequencies
-    uint8_t clock = 0;                        // internal clock for arpeggio timing
-    uint8_t time = 250;                       // arpeggio step duration in clock ticks
-    uint8_t length = 5;                       // number of steps in the arpeggio (1-5)
-    uint8_t index = 0;                        // current index in the arpeggio sequence
+    int32_t frequencies[5]; // precomp'd frequencies
+    uint8_t clock;                        // internal clock for arpeggio timing
+    uint8_t time;                       // arpeggio step duration in clock ticks
+    uint8_t length;                       // number of steps in the arpeggio (1-5)
+    uint8_t index;                        // current index in the arpeggio sequence
 
     inline void tick() {
       clock++;
@@ -120,7 +120,7 @@ typedef struct voice_t {
   struct vibrato {
     int32_t swing;               // frequency diff between current note and next semitone
     uint16_t phase;              // sine lfo phase
-    uint16_t frequency = 0x0FFF; // vibrato frequency
+    uint16_t frequency; // vibrato frequency
     uint16_t delay;              // ticks before auto-vibrato starts
     uint8_t depth;               // vibrato depth to apply
 
@@ -165,10 +165,10 @@ typedef struct voice_t {
 
   struct legato {
     // legato (pitch slide)
-    int32_t coefficient = 0;  // q16.16 multiplier per 100Hz tick
-    int32_t factor = 0;       // q16.16 multiplier per 100Hz tick
-    int32_t steps = 0;        // remaining ticks
-    int32_t targetFactor = 0; // target multiplication factor
+    int32_t coefficient;  // q16.16 multiplier per 100Hz tick
+    int32_t factor;       // q16.16 multiplier per 100Hz tick
+    int32_t steps;        // remaining ticks
+    int32_t targetFactor; // target multiplication factor
 
     inline void tick() {
       if (steps) {
@@ -189,13 +189,13 @@ typedef struct voice_t {
   uint8_t note;              // current base note
   chiptune_wave_type_e wave; // selected waveform
 
-  uint16_t lfsr = 17; // shift register for the noise generators
+  uint16_t lfsr; // shift register for the noise generators
 
   envelope_t envelope; // envelope, size is 9 bytes
 
   struct gain {
     // panlaw values are 0..FP_ONE (0x8000), so uint16_t holds them exactly
-    // and keeps voice_t inside its 128 byte budget.
+    // and keeps chiptune_voice_t inside its 128 byte budget.
     uint16_t left;    // constant power gain for the left channel
     uint16_t right;   // constant power gain for the right channel
     uint8_t combined; // master gain (precomputed at tock rate)
@@ -684,10 +684,10 @@ typedef struct voice_t {
 
     calculate_gain();
   }
-} voice_t;
+} chiptune_voice_t;
 #pragma pack(pop)
 
 // 128 bytes per voice max to keep the entire thing under 1kB for the 8 voices,
 // also struct needs to be aligned to 4 bytes to prevent unaligned access
-static_assert(sizeof(voice_t) <= 128, "Check sizeof(voice_t) in error message");
-static_assert((sizeof(voice_t) % 4) == 0, "voice_t size must be multiple of 4");
+static_assert(sizeof(chiptune_voice_t) <= 128, "Check sizeof(chiptune_voice_t) in error message");
+static_assert((sizeof(chiptune_voice_t) % 4) == 0, "chiptune_voice_t size must be multiple of 4");

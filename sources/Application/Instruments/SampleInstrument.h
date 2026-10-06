@@ -122,17 +122,13 @@ private:
   etl::list<Variable *, 24> variables_;
 
   SoundSource *source_;
-#ifdef __PICO__
-  __attribute__((section(".DTCMRAM")))
-#endif
-  static struct renderParams renderParams_[SONG_CHANNEL_COUNT];
+
+  // Per-channel sample voice state now lives in the shared I_Instrument voice
+  // pool (see I_Instrument.h): access via voices_[channel].sample so it no
+  // longer occupies its own .DTCMRAM static array.
   bool running_;
   bool dirty_;
   TableSaveState tableState_;
-
-  static signed char lastMidiNote_[SONG_CHANNEL_COUNT];
-  static fixed lastSample_[SONG_CHANNEL_COUNT][2];
-  adsr_envelope_t envelope_[SONG_CHANNEL_COUNT];
 
   SampleVariable sample_;
   Variable interpolation_;

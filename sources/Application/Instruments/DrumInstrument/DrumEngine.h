@@ -61,10 +61,10 @@ static_assert(sizeof(drum_parameters_t) == 4, "Check sizeof(drum_parameters_t) i
 typedef struct drum_voice_t {
   drum_parameters_t parameters; // parameters passed from instrument
 
-  uint32_t phase = 0;         // oscillator phase
-  int32_t frequency = 0;      // precomp'd oscillator frequency
-  int32_t base_frequency = 0; // precomp'd oscillator frequency
-  uint32_t lastSample = 0;    // used for both the last sample for pulse smoothing
+  uint32_t phase;         // oscillator phase
+  int32_t frequency;      // precomp'd oscillator frequency
+  int32_t base_frequency; // precomp'd oscillator frequency
+  uint32_t lastSample;    // used for both the last sample for pulse smoothing
                               // and as the lcg register for the noise
 
   uint8_t drive;    // unused currently
@@ -73,7 +73,7 @@ typedef struct drum_voice_t {
   uint8_t note;          // current base note
   drum_wave_type_e wave; // selected waveform
 
-  uint16_t lfsr = 17; // shift register for the noise generators
+  uint16_t lfsr; // shift register for the noise generators
 
   drum_envelope_t envelope; // volume envelope, size is 9 bytes
   pitch_envelope_t pitch;   // pitch envelope
@@ -90,7 +90,7 @@ typedef struct drum_voice_t {
 
   // character settings
   uint8_t glitch_trigger_delay;
-  uint16_t glitch = 17; // shift register for the glitch randomizer
+  uint16_t glitch; // shift register for the glitch randomizer
 
   panlaw_state pan;
 

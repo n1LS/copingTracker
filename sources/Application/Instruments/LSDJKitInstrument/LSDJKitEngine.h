@@ -47,8 +47,8 @@ static_assert(sizeof(lsdjkit_parameters_t) == 12, "Check sizeof(lsdjkit_paramete
 typedef struct lsdjkit_voice_t {
   lsdjkit_parameters_t parameters; // parameters passed from instrument
 
-  uint32_t phase[2];       // wavetable index/oscillator phases in q24.8
-  uint32_t lastSample = 0; // used for both the last sample for pulse smoothing
+  uint32_t phase[2]; // wavetable index/oscillator phases in q24.8
+  uint32_t lastSample; // used for both the last sample for pulse smoothing
   // and as the lcg register for the noise
 
   uint32_t time; // sample counter
@@ -69,7 +69,7 @@ typedef struct lsdjkit_voice_t {
 
   uint32_t timeToLive[2];
 
-  char sampleName[2][4] = {{0}, {0}};
+  char sampleName[2][4];
 
   uint16_t speed;
   const int8_t *wavetable[2];

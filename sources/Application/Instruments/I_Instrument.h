@@ -23,6 +23,28 @@
 #include "Foundation/Variables/VariableContainer.h"
 #include "Panning.h"
 
+#include "MidiInstrumentTypes.h"
+#include "NoneInstrumentTypes.h"
+#include "ChiptuneInstrument/ChiptuneEngine.h"
+#include "DrumInstrument/DrumEngine.h"
+#include "LSDJKitInstrument/LSDJKitEngine.h"
+#include "StackInstrument/StackEngine.h"
+#include "SampleRenderingParams.h"
+
+#include "config/AudioConstants.h"
+#include "Externals/etl/include/etl/variant_pool.h"
+
+typedef struct Voice {
+  none_voice_t *none;
+  chiptune_voice_t *chiptune;
+  drum_voice_t *drum;
+  sample_voice_t *sample;
+  midi_voice_t *midi;
+  stack_voice_t *stack;
+  lsdjkit_voice_t *lsdj_kit;
+} Voice;
+
+typedef etl::variant_pool<SONG_CHANNEL_COUNT, none_voice_t, chiptune_voice_t, drum_voice_t, sample_voice_t, midi_voice_t, stack_voice_t, lsdjkit_voice_t> VoicePool;
 enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_CHIPTUNE, IT_DRUM, IT_STACK, IT_LSDJKIT, IT_MIDI, IT_LAST };
 
 // non-linear volume (4-bit) mapping to volume scaler
@@ -192,5 +214,12 @@ protected:
   Variable pan_;
   Variable table_;
   Variable tableAutomation_;
+
+  static Voice voices_[SONG_CHANNEL_COUNT];
+  static VoicePool voicesPool_;
+  static void ReleaseVoice(int channel);
+  template <typename T> static T *CreateVoice() {
+    return voicesPool_.template create<T>();
+  }
 };
 #endif

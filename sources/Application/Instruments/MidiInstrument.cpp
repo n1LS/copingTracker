@@ -25,9 +25,8 @@ MidiService *MidiInstrument::svc_ = 0;
 TimerService *MidiInstrument::timerSvc_ = 0;
 MidiInstrument::NoteOffInfo MidiInstrument::NoteOffInfo::current = {0, 0};
 
-MidiInstrument::MidiInstrument()
-    : I_Instrument(&variables_), channel_(Token::MidiInstrumentChannel, 0),
-      noteLen_(Token::MidiInstrumentNoteLength, 0), program_(Token::MidiInstrumentProgram, VAR_OFF) {
+MidiInstrument::MidiInstrument() : I_Instrument(&variables_), channel_(Token::MidiInstrumentChannel, 0),
+    noteLen_(Token::MidiInstrumentNoteLength, 0), program_(Token::MidiInstrumentProgram, VAR_OFF) {
 
   InsertBaseVariables();
 
@@ -45,7 +44,8 @@ MidiInstrument::MidiInstrument()
   variables_.insert(variables_.end(), &program_);
 }
 
-MidiInstrument::~MidiInstrument() {};
+MidiInstrument::~MidiInstrument() {
+}
 
 bool MidiInstrument::Init() {
   tableState_.Reset();
@@ -78,13 +78,19 @@ void MidiInstrument::OnStart() {
 }
 
 void MidiInstrument::SetStepVolume(int channel, uint8_t volume) {
-  lastVolumes_[channel] = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+  if (voices_[channel].midi) {
+    voices_[channel].midi->lastVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+  }
 }
 
 bool MidiInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
-  first_[channel] = true;
-  lastNotes_[channel][0] = note;
-  lastVolumes_[channel] = volume == NO_VOLUME ? 256 : volumeLUT[volume];
+  if (voices_[channel].midi == nullptr) {
+    ReleaseVoice(channel);
+    voices_[channel].midi = CreateVoice<midi_voice_t>();
+  }
+  voices_[channel].midi->first_ = true;
+  voices_[channel].midi->lastNotes_[0] = note;
+  voices_[channel].midi->lastVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
 
   Variable *v = FindVariable(Token::MidiInstrumentNoteLength);
   remainingTicks_ = v->GetInt();
@@ -103,25 +109,30 @@ bool MidiInstrument::Start(int channel, unsigned char note, uint8_t volume, bool
 }
 
 void MidiInstrument::Stop(int channel) {
-
   Trace::Debug("MIDI INSTR STOP!====");
+  if (voices_[channel].midi == nullptr) {
+    return;
+  }
 
   Variable *v = FindVariable(Token::MidiInstrumentChannel);
   int midiChannel = v->GetInt();
 
   for (int i = 0; i < MAX_MIDI_CHORD_NOTES + 1; i++) {
-    if (lastNotes_[channel][i] == 0) {
+    if (voices_[channel].midi->lastNotes_[i] == 0) {
       continue;
     }
+
     MidiMessage msg;
     msg.status_ = MidiMessage::MIDI_NOTE_OFF + midiChannel;
-    msg.data1_ = lastNotes_[channel][i];
+    msg.data1_ = voices_[channel].midi->lastNotes_[i];
     msg.data2_ = 0x00;
+
     svc_->QueueMessage(msg);
     Trace::Debug("MIDI chord note OFF[%d]:%d", i, msg.data1_);
   }
+
   // clear last notes array
-  lastNotes_[channel].fill(0);
+  voices_[channel].midi->lastNotes_.fill(0);
   playing_ = false;
 }
 
@@ -131,19 +142,22 @@ void MidiInstrument::SetChannel(int channel) {
 }
 
 bool MidiInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
+  if (voices_[channel].midi == nullptr) {
+    return false;
+  }
   // We do it here so we have the opportunity to send some command before
   Variable *v = FindVariable(Token::MidiInstrumentChannel);
   int mchannel = v->GetInt();
-  if (first_[channel]) {
+  if (voices_[channel].midi->first_) {
     // send note
     MidiMessage msg;
     msg.status_ = MidiMessage::MIDI_NOTE_ON + mchannel;
-    msg.data1_ = lastNotes_[channel][0];
-    uint8_t volume = (lastVolumes_[channel] * stepVolume_) >> 8;
+    msg.data1_ = voices_[channel].midi->lastNotes_[0];
+    uint8_t volume = (voices_[channel].midi->lastVolume_ * stepVolume_) >> 8;
     msg.data2_ = (volume != NO_VOLUME) ? static_cast<uint8_t>((velocity_ * volume) / 15) : velocity_;
     svc_->QueueMessage(msg);
 
-    first_[channel] = false;
+    voices_[channel].midi->first_ = false;
   }
 
   // Update pitch bend logic if a pitch bend is active.
@@ -209,12 +223,12 @@ bool MidiInstrument::Render(int channel, fixed *buffer, int size, bool updateTic
         MidiMessage msg;
         remainingTicks_ = retrigLoop_;
         msg.status_ = MidiMessage::MIDI_NOTE_OFF + mchannel;
-        msg.data1_ = lastNotes_[channel][0];
+        msg.data1_ = voices_[channel].midi->lastNotes_[0];
         msg.data2_ = 0x00;
         svc_->QueueMessage(msg);
         msg.status_ = MidiMessage::MIDI_NOTE_ON + mchannel;
-        msg.data1_ = lastNotes_[channel][0];
-        uint8_t volume = lastVolumes_[channel];
+        msg.data1_ = voices_[channel].midi->lastNotes_[0];
+        uint8_t volume = voices_[channel].midi->lastVolume_;
         msg.data2_ = (volume != NO_VOLUME) ? static_cast<uint8_t>((velocity_ * volume) / 15) : velocity_;
         svc_->QueueMessage(msg);
       };
@@ -228,6 +242,9 @@ bool MidiInstrument::IsInitialized() {
 }
 
 void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  if (voices_[channel].midi == nullptr) {
+    return;
+  }
 
   Variable *v = FindVariable(Token::MidiInstrumentChannel);
   int mchannel = v->GetInt();
@@ -328,7 +345,7 @@ void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 
           // fit the offset into nearest valid note of the currently selected scale
           // Add/remove from offset to match selected scale
-          uint8_t rootNote = lastNotes_[channel][0];
+          uint8_t rootNote = voices_[channel].midi->lastNotes_[0];
           int scale = Player::GetInstance()->GetProject()->GetScale();
           int scaleRoot = Player::GetInstance()->GetProject()->GetScaleRoot();
           // apply current scale to offset, taking into account the scale root.
@@ -347,12 +364,12 @@ void MidiInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
           }
 
           // save the chord note for sending a note off later
-          lastNotes_[channel][i + 1] = note;
+          voices_[channel].midi->lastNotes_[i + 1] = note;
 
           MidiMessage msg;
           msg.status_ = MidiMessage::MIDI_NOTE_ON + mchannel;
           msg.data1_ = note;
-          uint8_t volume = lastVolumes_[channel];
+          uint8_t volume = voices_[channel].midi->lastVolume_;
           msg.data2_ = (volume != NO_VOLUME) ? static_cast<uint8_t>((velocity_ * volume) / 15) : velocity_;
           // Trace::Debug("MIDI chord note ON[%d]: %d", i, msg.data1_);
           svc_->QueueMessage(msg);

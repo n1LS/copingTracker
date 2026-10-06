@@ -15,10 +15,10 @@
 #include <stdint.h>
 
 #include "Application/Persistency/Persistent.h"
+#include "config/AudioConstants.h"
 #include "Chain.h"
 #include "Phrase.h"
 
-#define SONG_CHANNEL_COUNT 8
 #define SONG_ROW_COUNT 128
 
 #define MAX_INSTRUMENT_COUNT 32

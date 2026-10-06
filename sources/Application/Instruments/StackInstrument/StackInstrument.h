@@ -76,8 +76,6 @@ public:
   }
 
 private:
-  static stack_voice_t voices_[SONG_CHANNEL_COUNT];
-
   stack_parameters_t getInstrumentParameters();
 
   etl::list<Variable *, 14> variables_;

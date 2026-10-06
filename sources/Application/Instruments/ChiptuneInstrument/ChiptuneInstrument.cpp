@@ -11,8 +11,6 @@
 #include "I_Instrument.h"
 #include <string.h>
 
-voice_t ChiptuneInstrument::voices_[SONG_CHANNEL_COUNT];
-
 ChiptuneInstrument::ChiptuneInstrument()
     : I_Instrument(&variables_), vArpSpeed_(Token::ChiptuneInstrumentArpSpeed, defaultArpSpeed),
       vAttack_(Token::ChiptuneInstrumentAttack, defaultAttack), vBurst_(Token::ChiptuneInstrumentBurst, defaultBurst),
@@ -40,7 +38,9 @@ ChiptuneInstrument::ChiptuneInstrument()
 }
 
 void ChiptuneInstrument::Stop(int channel) {
-  voices_[channel].stop();
+  if (voices_[channel].chiptune) {
+    voices_[channel].chiptune->stop();
+  }
 }
 
 bool ChiptuneInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
@@ -48,14 +48,18 @@ bool ChiptuneInstrument::Start(int channel, unsigned char note, uint8_t volume, 
   // current voice
   uint8_t calculatedVolume = EffectiveVolume(volume);
 
-  voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters());
+  if (voices_[channel].chiptune == nullptr) {
+    ReleaseVoice(channel);
+    voices_[channel].chiptune = CreateVoice<chiptune_voice_t>();
+  }
+  voices_[channel].chiptune->note_on(note, calculatedVolume, retrigger, getInstrumentParameters());
 
   return true;
 }
 
 bool ChiptuneInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   // PROFILE_SCOPE("ChiptuneInstrument::Render");
-  voice_t &v = voices_[channel];
+  chiptune_voice_t &v = *voices_[channel].chiptune;
 
   for (int s = 0; s < size; s++) {
     v.sample(buffer, buffer + 1);
@@ -68,51 +72,54 @@ bool ChiptuneInstrument::Render(int channel, fixed *buffer, int size, bool updat
 }
 
 void ChiptuneInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  if (voices_[channel].chiptune == nullptr) {
+    return;
+  }
   switch (token) {
     case Token::InstrumentCommandSetInstrumentParameter:
-      voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
+      voices_[channel].chiptune->set_instrument_parameter(value >> 8, value & 0xFF);
       break;
 
     case Token::InstrumentCommandArpeggiator:
-      voices_[channel].command_init_arp(value);
+      voices_[channel].chiptune->command_init_arp(value);
       break;
 
     case Token::InstrumentCommandKill:
     case Token::InstrumentCommandGateOff:
-      voices_[channel].stop();
+      voices_[channel].chiptune->stop();
       break;
 
     case Token::InstrumentCommandCrush:
-      voices_[channel].bitcrush = value & 0x0f;
-      voices_[channel].drive = value >> 8;
+      voices_[channel].chiptune->bitcrush = value & 0x0f;
+      voices_[channel].chiptune->drive = value >> 8;
       break;
 
     case Token::InstrumentCommandVibrato:
-      voices_[channel].command_init_vibrato(value >> 8, value & 0xFF);
+      voices_[channel].chiptune->command_init_vibrato(value >> 8, value & 0xFF);
       break;
 
     case Token::InstrumentCommandPan:
-      voices_[channel].command_init_pan(value >> 8, value & 0xFF);
+      voices_[channel].chiptune->command_init_pan(value >> 8, value & 0xFF);
       break;
 
     case Token::InstrumentCommandPitchSlide:
-      voices_[channel].command_init_pitch_shift(value >> 8, value & 0xFF);
+      voices_[channel].chiptune->command_init_pitch_shift(value >> 8, value & 0xFF);
       break;
 
     case Token::InstrumentCommandLegato:
-      voices_[channel].command_init_legato(value >> 8, (int8_t)(value & 0xFF));
+      voices_[channel].chiptune->command_init_legato(value >> 8, (int8_t)(value & 0xFF));
       break;
 
     case Token::InstrumentCommandVolume:
-      voices_[channel].command_init_volume(value >> 8, value & 0xFF);
+      voices_[channel].chiptune->command_init_volume(value >> 8, value & 0xFF);
       break;
 
     case Token::InstrumentCommandPitchFineTune:
-      voices_[channel].command_init_finetune(value >> 8, (int8_t)(value & 0xFF));
+      voices_[channel].chiptune->command_init_finetune(value >> 8, (int8_t)(value & 0xFF));
       break;
 
     case Token::InstrumentCommandInstrumentRetrigger:
-      voices_[channel].command_init_instrument_retrigger(value >> 8, (int8_t)(value & 0xff));
+      voices_[channel].chiptune->command_init_instrument_retrigger(value >> 8, (int8_t)(value & 0xff));
       break;
   }
 }
@@ -124,7 +131,9 @@ bool ChiptuneInstrument::SupportsCommand(Token token) {
 
 void ChiptuneInstrument::SetStepVolume(int channel, uint8_t volume) {
   uint8_t calculatedVolume = EffectiveVolume(volume);
-  voices_[channel].set_step_volume(calculatedVolume);
+  if (voices_[channel].chiptune) {
+    voices_[channel].chiptune->set_step_volume(calculatedVolume);
+  }
 }
 
 InstrumentParameters ChiptuneInstrument::getInstrumentParameters() {

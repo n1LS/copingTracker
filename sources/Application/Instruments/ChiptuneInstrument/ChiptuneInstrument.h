@@ -75,8 +75,6 @@ public:
   void setChannel(uint8_t channel);
 
 private:
-  static voice_t voices_[SONG_CHANNEL_COUNT];
-
   etl::list<Variable *, 15> variables_;
 
   Variable vArpSpeed_;

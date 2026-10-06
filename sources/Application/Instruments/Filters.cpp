@@ -20,7 +20,7 @@ hope it will work :D
 #include "config/AudioConstants.h"
 #include <math.h>
 
-static filter_t filter[8];
+static filter_t filter[SONG_CHANNEL_COUNT];
 
 bool filters_inited = false;
 

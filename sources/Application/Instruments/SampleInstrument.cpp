@@ -37,11 +37,7 @@
 
 bool SampleInstrument::useDirtyDownsampling_ = false;
 
-renderParams SampleInstrument::renderParams_[SONG_CHANNEL_COUNT];
-
 #define SHOULD_KILL_CLICKS false
-
-signed char SampleInstrument::lastMidiNote_[SONG_CHANNEL_COUNT];
 
 #define KRATE_SAMPLE_COUNT 100
 
@@ -59,10 +55,8 @@ SampleInstrument::SampleInstrument()
       sustain_(Token::SampleInstrumentSustain, 0xFF), release_(Token::SampleInstrumentRelease, 0),
       gmInstrument_(Token::SampleInstrumentGMInstrument, NO_GM_INSTRUMENT) {
 
-  // Initialize MIDI notes
-  for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-    SampleInstrument::lastMidiNote_[i] = -1;
-  }
+  // Per-channel lastMidiNote_ sentinel (-1 = no note yet) is seeded inside
+  // Start() when a fresh voice is acquired from the shared voice pool.
 
   // Initialize instruments settings
   source_ = 0;
@@ -374,15 +368,22 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
   if (source_ == 0)
     return false;
 
-  // Get Rendering params for current voice & fill init data
-
-  renderParams *rp = renderParams_ + channel;
+  // Get Rendering params for current voice & fill init data. The voice is
+  // acquired from the shared voice pool on first use / type change and reused
+  // across notes so lastMidiNote_ (legato/retrig base) survives between notes.
+  if (voices_[channel].sample == nullptr) {
+    ReleaseVoice(channel);
+    sample_voice_t *fresh = CreateVoice<sample_voice_t>();
+    voices_[channel].sample = fresh;
+    fresh->lastMidiNote_ = -1;
+  }
+  sample_voice_t *rp = voices_[channel].sample;
 
   rp->midiNote_ = note;
 
-  if (lastMidiNote_[channel] == -1) {
+  if (rp->lastMidiNote_ == -1) {
     // To prevent First LEGA to go bonkers
-    lastMidiNote_[channel] = note;
+    rp->lastMidiNote_ = note;
   }
 
   // Duplicate variable value to local rendering
@@ -608,19 +609,25 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
 void SampleInstrument::SetStepVolume(int channel, uint8_t volume) {
   uint32_t calculatedVolume = EffectiveVolume(volume);
 
-  renderParams *rp = renderParams_ + channel;
-  rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
+  if (voices_[channel].sample) {
+    sample_voice_t *rp = voices_[channel].sample;
+    rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
+  }
 }
 
 void SampleInstrument::Stop(int channel) {
-  renderParams *rp = renderParams_ + channel;
-  rp->envelope_.release_note();
+  if (voices_[channel].sample) {
+    voices_[channel].sample->envelope_.release_note();
+  }
 }
 
 void SampleInstrument::doTickUpdate(int channel) {
+  sample_voice_t *rp = voices_[channel].sample;
+  if (rp == nullptr) {
+    return;
+  }
 
   // Process updaters
-  renderParams *rp = renderParams_ + channel;
   for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
     I_SRPUpdater *current = *it;
     current->Trigger(true);
@@ -628,8 +635,11 @@ void SampleInstrument::doTickUpdate(int channel) {
 }
 
 void SampleInstrument::doKRateUpdate(int channel) {
+  sample_voice_t *rp = voices_[channel].sample;
+  if (rp == nullptr) {
+    return;
+  }
 
-  renderParams *rp = renderParams_ + channel;
   for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
     I_SRPUpdater *current = *it;
     current->Trigger(false);
@@ -643,8 +653,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
   bool somethingToMix = false;
 
   // Get Current render parameters
-  renderParams *rp = renderParams_ + channel;
-  lastMidiNote_[channel] = rp->midiNote_;
+  sample_voice_t *rp = voices_[channel].sample;
+  rp->lastMidiNote_ = rp->midiNote_;
   bool *rpFinished = &(rp->finished_);
 
   if (source_) {
@@ -1100,8 +1110,14 @@ int SampleInstrument::GetVolume() {
 
 int SampleInstrument::GetSampleSize(int channel) {
   if (source_) {
-    renderParams *rp = renderParams_ + channel;
-    return source_->GetSize(rp->midiNote_);
+    // UI queries with channel == -1: no specific channel, so do a plain size query.
+    if (channel < 0 || channel >= SONG_CHANNEL_COUNT) {
+      return source_->GetSize(0);
+    }
+    sample_voice_t *rp = voices_[channel].sample;
+    if (rp) {
+      return source_->GetSize(rp->midiNote_);
+    }
   };
   return 0;
 }
@@ -1240,8 +1256,8 @@ void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
 
 void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 
-  renderParams *rp = renderParams_ + channel;
-  if (!source_)
+  sample_voice_t *rp = voices_[channel].sample;
+  if (!source_ || !rp)
     return;
 
   switch (token) {
@@ -1401,7 +1417,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
 
         float targetSpeed, initSpeed;
         if (pitch == 0) {
-          pitch = lastMidiNote_[channel] - rp->midiNote_;
+          pitch = rp->lastMidiNote_ - rp->midiNote_;
           targetSpeed = 1.0;
           initSpeed = float(pow(2.0f, pitch / 12.0f));
         } else {

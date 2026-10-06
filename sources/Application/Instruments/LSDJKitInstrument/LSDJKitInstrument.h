@@ -86,8 +86,6 @@ public:
   }
 
 private:
-  static lsdjkit_voice_t voices_[SONG_CHANNEL_COUNT];
-
   etl::list<Variable *, 16> variables_;
 
   Variable vKit1_;

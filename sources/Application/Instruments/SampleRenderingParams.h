@@ -17,7 +17,8 @@
 #include "Foundation/Types/Types.h"
 #include "SRPUpdaters.h"
 
-struct renderParams {
+#pragma pack(push, 1)
+struct sample_voice_t {
   void *sampleBuffer_; // wavdata
   int channelCount_;
 
@@ -57,11 +58,21 @@ struct renderParams {
 
   unsigned char crush_; // crush
   unsigned char drive_; // crush drive
-
+  
   unsigned char downsample_; // downsampling
   bool couldClick_;
   char midiNote_; // Current midi note
+  signed char lastMidiNote_; // last midi note started on this channel, -1 = none
+  // (legato pitch base and first-trigger detection)
+  
+  bool sliceActive_;
+  uint8_t activeSliceIndex_;
+  int loopModeValue_;
 
+  // Last samples rendered on this channel (left/right), used for click
+  // suppression when a note is (re)triggered.
+  fixed lastSample_[2];
+  
   // Size of this struct same as max number of updaters
   etl::vector<I_SRPUpdater *, 10> activeUpdaters_;
 
@@ -76,9 +87,7 @@ struct renderParams {
   Vibrato vibrato_;
 
   adsr_envelope_t envelope_;
-
-  bool sliceActive_;
-  uint8_t activeSliceIndex_;
-  int loopModeValue_;
 };
+#pragma pack(pop)
+
 #endif

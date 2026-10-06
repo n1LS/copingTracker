@@ -11,8 +11,6 @@
 #include "I_Instrument.h"
 #include <string.h>
 
-drum_voice_t DrumInstrument::voices_[SONG_CHANNEL_COUNT];
-
 DrumInstrument::DrumInstrument()
     : I_Instrument(&variables_), vVoice0_(Token::DrumInstrumentParamsVoice0, defaultInstrument0),
       vVoice1_(Token::DrumInstrumentParamsVoice1, defaultInstrument1),
@@ -48,7 +46,9 @@ DrumInstrument::DrumInstrument()
 }
 
 void DrumInstrument::Stop(int channel) {
-  voices_[channel].stop();
+  if (voices_[channel].drum) {
+    voices_[channel].drum->stop();
+  }
 }
 
 bool DrumInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
@@ -56,14 +56,18 @@ bool DrumInstrument::Start(int channel, unsigned char note, uint8_t volume, bool
   // current voice
   uint8_t calculatedVolume = EffectiveVolume(volume);
 
-  voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters(note));
+  if (voices_[channel].drum == nullptr) {
+    ReleaseVoice(channel);
+    voices_[channel].drum = CreateVoice<drum_voice_t>();
+  }
+  voices_[channel].drum->note_on(note, calculatedVolume, retrigger, getInstrumentParameters(note));
 
   return true;
 }
 
 bool DrumInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   // PROFILE_SCOPE("DrumInstrument::Render");
-  drum_voice_t &v = voices_[channel];
+  drum_voice_t &v = *voices_[channel].drum;
 
   for (int s = 0; s < size; s++) {
     v.sample(buffer, buffer + 1);
@@ -76,9 +80,12 @@ bool DrumInstrument::Render(int channel, fixed *buffer, int size, bool updateTic
 }
 
 void DrumInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  if (voices_[channel].drum == nullptr) {
+    return;
+  }
   switch (token) {
     case Token::InstrumentCommandSetInstrumentParameter:
-      voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
+      voices_[channel].drum->set_instrument_parameter(value >> 8, value & 0xFF);
       break;
 
     case Token::InstrumentCommandArpeggiator:
@@ -86,12 +93,12 @@ void DrumInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 
     case Token::InstrumentCommandKill:
     case Token::InstrumentCommandGateOff:
-      voices_[channel].stop();
+      voices_[channel].drum->stop();
       break;
 
     case Token::InstrumentCommandCrush:
-      voices_[channel].bitcrush = value && 0x0f;
-      voices_[channel].drive = value >> 8;
+      voices_[channel].drum->bitcrush = value && 0x0f;
+      voices_[channel].drum->drive = value >> 8;
       break;
 
     case Token::InstrumentCommandVibrato:
@@ -107,7 +114,7 @@ void DrumInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
       break;
 
     case Token::InstrumentCommandVolume:
-      voices_[channel].volume = value & 0xff;
+      voices_[channel].drum->volume = value & 0xff;
       break;
 
     case Token::InstrumentCommandPitchFineTune:
@@ -125,7 +132,9 @@ bool DrumInstrument::SupportsCommand(Token token) {
 
 void DrumInstrument::SetStepVolume(int channel, uint8_t volume) {
   uint8_t calculatedVolume = EffectiveVolume(volume);
-  voices_[channel].set_step_volume(calculatedVolume);
+  if (voices_[channel].drum) {
+    voices_[channel].drum->set_step_volume(calculatedVolume);
+  }
 }
 
 drum_parameters_t DrumInstrument::getInstrumentParameters(uint8_t note) {

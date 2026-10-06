@@ -18,8 +18,8 @@
 #include "I_Instrument.h"
 #include "Services/Midi/MidiMessage.h"
 #include "Services/Midi/MidiService.h"
+#include "MidiInstrumentTypes.h"
 
-#define MAX_MIDI_CHORD_NOTES 4
 #define INITIAL_NOTE_VELOCITY 0x7F
 
 // Constants for MIDI pitch bend.
@@ -90,8 +90,6 @@ public:
 private:
   etl::list<Variable *, 7> variables_;
 
-  etl::array<uint8_t, MAX_MIDI_CHORD_NOTES + 1> lastNotes_[SONG_CHANNEL_COUNT];
-  uint8_t lastVolumes_[SONG_CHANNEL_COUNT];
   uint32_t stepVolume_;
   int remainingTicks_;
   bool playing_;
@@ -99,7 +97,6 @@ private:
   int retrigLoop_;
   char velocity_ = 127;
   TableSaveState tableState_;
-  bool first_[SONG_CHANNEL_COUNT];
   uint8_t pitchBendTarget_;
   uint8_t pitchBendSpeed_;
   float pitchBendCurrent_;

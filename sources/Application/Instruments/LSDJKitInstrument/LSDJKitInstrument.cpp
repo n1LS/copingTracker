@@ -12,8 +12,6 @@
 #include "LSDJKits.generated.h"
 #include <string.h>
 
-lsdjkit_voice_t LSDJKitInstrument::voices_[SONG_CHANNEL_COUNT];
-
 LSDJKitInstrument::LSDJKitInstrument()
     : I_Instrument(&variables_),
       vKit1_(Token::LSDJKitInstrumentKit1, LSDJKits::kitNames, LSDJKits::drum_kit_count, lsdjDefaultKit1),
@@ -45,7 +43,9 @@ LSDJKitInstrument::LSDJKitInstrument()
 }
 
 void LSDJKitInstrument::Stop(int channel) {
-  voices_[channel].stop();
+  if (voices_[channel].lsdj_kit) {
+    voices_[channel].lsdj_kit->stop();
+  }
 }
 
 bool LSDJKitInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
@@ -53,14 +53,18 @@ bool LSDJKitInstrument::Start(int channel, unsigned char note, uint8_t volume, b
   // current voice
   uint8_t calculatedVolume = EffectiveVolume(volume);
 
-  voices_[channel].note_on(note, calculatedVolume, retrigger, getInstrumentParameters(note));
+  if (voices_[channel].lsdj_kit == nullptr) {
+    ReleaseVoice(channel);
+    voices_[channel].lsdj_kit = CreateVoice<lsdjkit_voice_t>();
+  }
+  voices_[channel].lsdj_kit->note_on(note, calculatedVolume, retrigger, getInstrumentParameters(note));
 
   return true;
 }
 
 bool LSDJKitInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   // PROFILE_SCOPE("LSDJKitInstrument::Render");
-  lsdjkit_voice_t &v = voices_[channel];
+  lsdjkit_voice_t &v = *voices_[channel].lsdj_kit;
 
   for (int s = 0; s < size; s++) {
     v.sample(buffer, buffer + 1);
@@ -73,9 +77,12 @@ bool LSDJKitInstrument::Render(int channel, fixed *buffer, int size, bool update
 }
 
 void LSDJKitInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
+  if (voices_[channel].lsdj_kit == nullptr) {
+    return;
+  }
   switch (token) {
     case Token::InstrumentCommandSetInstrumentParameter:
-      voices_[channel].set_instrument_parameter(value >> 8, value & 0xFF);
+      voices_[channel].lsdj_kit->set_instrument_parameter(value >> 8, value & 0xFF);
       break;
 
     case Token::InstrumentCommandArpeggiator:
@@ -83,12 +90,12 @@ void LSDJKitInstrument::ProcessCommand(int channel, Token token, uint16_t value)
 
     case Token::InstrumentCommandKill:
     case Token::InstrumentCommandGateOff:
-      voices_[channel].stop();
+      voices_[channel].lsdj_kit->stop();
       break;
 
     case Token::InstrumentCommandCrush:
-      voices_[channel].bit_depth = std::min(std::max(value & 0x0f, 1), 8);
-      voices_[channel].drive = value >> 8;
+      voices_[channel].lsdj_kit->bit_depth = std::min(std::max(value & 0x0f, 1), 8);
+      voices_[channel].lsdj_kit->drive = value >> 8;
       break;
 
     case Token::InstrumentCommandVibrato:
@@ -104,7 +111,7 @@ void LSDJKitInstrument::ProcessCommand(int channel, Token token, uint16_t value)
       break;
 
     case Token::InstrumentCommandVolume:
-      voices_[channel].volume = value & 0xff;
+      voices_[channel].lsdj_kit->volume = value & 0xff;
       break;
 
     case Token::InstrumentCommandPitchFineTune:
@@ -122,7 +129,9 @@ bool LSDJKitInstrument::SupportsCommand(Token token) {
 
 void LSDJKitInstrument::SetStepVolume(int channel, uint8_t volume) {
   uint8_t calculatedVolume = EffectiveVolume(volume);
-  voices_[channel].set_step_volume(calculatedVolume);
+  if (voices_[channel].lsdj_kit) {
+    voices_[channel].lsdj_kit->set_step_volume(calculatedVolume);
+  }
 }
 
 lsdjkit_parameters_t LSDJKitInstrument::getInstrumentParameters(uint8_t note) {
