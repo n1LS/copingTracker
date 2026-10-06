@@ -95,7 +95,7 @@ void getRandomName(char *name, size_t nameSize) {
   int adjectivesCount = sizeof(adjectives) / sizeof(adjectives[0]);
   int verbsCount = sizeof(verbs) / sizeof(verbs[0]);
   int rndIndex = randNum % adjectivesCount;
-  name[0] = 0; // first make sure buffer is null termin
+  name[0] = 0; // first make sure buffer is null terminated
   strcat(name, adjectives[rndIndex]);
   strcat(name, "-");
   rndIndex = randNum % verbsCount;

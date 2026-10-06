@@ -1029,7 +1029,7 @@ void SongView::AnimationUpdate() {
       drawPlayTime(player, timePos);
       needsPlayTimeUpdate_ = false;
     } else {
-      DrawString(timePos.x_, timePos.y_, "--:--");
+      DrawString(timePos.x_, timePos.y_, "00:00");
     }
 
     // Handle position updates

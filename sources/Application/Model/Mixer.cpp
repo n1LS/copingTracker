@@ -24,7 +24,8 @@ void Mixer::Clear() {
   }
 }
 
-void Mixer::SaveContent(tinyxml2::XMLPrinter *printer) {};
+void Mixer::SaveContent(tinyxml2::XMLPrinter *printer) {
+}
 
 void Mixer::RestoreContent(PersistencyDocument *doc) {
 }

@@ -244,6 +244,20 @@ void View::drawMasterVuMeter(Player *player, bool forceRedraw, uint8_t xoffset) 
 }
 
 void View::drawTitleVuMeter(Player *player) {
+  SetBackgroundColor(Theme::View::Title::bg);
+
+  const Color barColor[10] = {Theme::View::Title::fg, Theme::View::Title::fg, Theme::View::Title::fg,
+                              Theme::View::Title::fg, Theme::View::Title::fg, Theme::View::Title::fg,
+                              Theme::VU::warn,        Theme::VU::warn,        Theme::VU::warn,
+                              Theme::VU::clip};
+
+  if (!player->IsRunning()) {
+    SetColor(barColor[0]);
+    DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 1, 0, char_v_bar_lookup[1], fGraphic);
+    DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, 0, char_v_bar_lookup[1], fGraphic);
+    return;
+  }
+
   stereosample playerLevel = player->GetMasterLevel();
 
   // Convert amplitude to bar levels
@@ -253,13 +267,6 @@ void View::drawTitleVuMeter(Player *player) {
   // navigation bar mini VU meter
   int left = (leftBars + 1) >> 4;
   int right = (rightBars + 1) >> 4;
-
-  const Color barColor[10] = {Theme::View::Title::fg, Theme::View::Title::fg, Theme::View::Title::fg,
-                              Theme::View::Title::fg, Theme::View::Title::fg, Theme::View::Title::fg,
-                              Theme::VU::warn,        Theme::VU::warn,        Theme::VU::warn,
-                              Theme::VU::clip};
-
-  SetBackgroundColor(Theme::View::Title::bg);
 
   SetColor(barColor[left]);
   DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, 0, char_v_bar_lookup[left], fGraphic);

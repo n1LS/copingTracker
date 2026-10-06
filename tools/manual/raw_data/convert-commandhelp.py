@@ -33,6 +33,7 @@ DEFAULT_OUTPUT = ROOT / "sources/Application/Utils/CommandHelp.generated.h"
 TYPES_HEADER = ROOT / "sources/Foundation/Types/Types.h"
 
 TEXTROWS = 4  # text rows per command (before the separator row)
+COMMAND_COUNT = 31
 GROUPS = TEXTROWS + 1  # 4 text rows + 1 separator
 LINEWIDTH = 30
 LEGEND_WIDTH = 26
@@ -108,11 +109,11 @@ def load_lines(source):
     lines = [ln.rstrip(b"\r") for ln in content.split(b"\n")]
     while lines and lines[-1] == b"":
         lines.pop()
-    expected = 30 * GROUPS * 3
+    expected = COMMAND_COUNT * GROUPS * 3
     if len(lines) != expected:
         raise RuntimeError(
             f"{source}: expected {expected} lines "
-            f"(30 commands x {GROUPS} rows x 3 channels), got {len(lines)}"
+            f"({COMMAND_COUNT} commands x {GROUPS} rows x 3 channels), got {len(lines)}"
         )
     for idx, ln in enumerate(lines, 1):
         if len(ln) != LINEWIDTH:
@@ -142,7 +143,7 @@ def generate(source, output):
 
     covered = set()
     breaker_mismatch = 0
-    for block in range(30):
+    for block in range(COMMAND_COUNT):
         base = block * GROUPS * 3
         groups = []
         for g in range(GROUPS):
@@ -170,6 +171,7 @@ def generate(source, output):
                 f"{source}, command {block + 1}: duplicate command '{token}'"
             )
         covered.add(token)
+        print(f"  - added {token}")
 
         for fg, bg, txt in text_rows:
             if len(txt) >= ABBR_START and txt[26] != BREAKER:

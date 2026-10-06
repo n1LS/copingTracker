@@ -53,6 +53,7 @@ struct Token {
     InstrumentCommandChordUp = 143,                // CHU
     InstrumentCommandChordDown = 98,               // CHD
     InstrumentCommandChordBidirectional = 229,     // CHB
+    InstrumentCommandMaybe = 235,                  // MAY
 
     InstrumentParameterVolume = 19,
     InstrumentParameterPan = 43,
@@ -240,7 +241,7 @@ struct Token {
 
     VarPhraseLength = 254,
 
-    // 234-253 free 23
+    // 235-253 free 23
 
     Default = 255, // "    "
   };
@@ -289,6 +290,7 @@ struct Token {
   ETL_ENUM_TYPE_16(InstrumentCommandNone, "---")
   ETL_ENUM_TYPE_16(InstrumentCommandPitchFineTune, "PFt")
   ETL_ENUM_TYPE_16(InstrumentCommandDelay, "Dly")
+  ETL_ENUM_TYPE_16(InstrumentCommandMaybe, "May")
   ETL_ENUM_TYPE_16(InstrumentCommandInstrumentRetrigger, "IRt")
   ETL_ENUM_TYPE_16(InstrumentCommandChordUp, "ChU")
   ETL_ENUM_TYPE_16(InstrumentCommandChordDown, "ChD")

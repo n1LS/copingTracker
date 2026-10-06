@@ -26,7 +26,7 @@ public:
 
   inline int GetBus(int i) {
     return channelBus_[i];
-  };
+  }
 
   virtual void SaveContent(tinyxml2::XMLPrinter *printer);
   virtual void RestoreContent(PersistencyDocument *doc);

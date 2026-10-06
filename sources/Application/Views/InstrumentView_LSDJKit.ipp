@@ -108,7 +108,7 @@
 
   position.y_++;
   v = instrument->FindVariable(Token::LSDJKitInstrumentClip);
-  intVarField_.emplace_back(UIIntVarOffField(position, *v, "Clip    :%-3.3s", 0, clippingModeCount, 1, clippingModeCount));
+  intVarField_.emplace_back(UIIntVarOffField(position, *v, "Clip    :%-3.3s", 0, clippingModeCount - 1, 1, clippingModeCount - 1));
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());

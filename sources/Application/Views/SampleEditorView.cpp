@@ -405,9 +405,8 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
       const auto &sampleFileName = activeFilename();
       isSingleCycle_ = (tempSampleSize_ <= SINGLE_CYCLE_MAX_SAMPLE_SIZE);
 
-      Trace::Debug("DEBUG: Starting playback of sample '%s' (size=%d, "
-                   "singleCycle=%s)\n",
-                   sampleFileName.c_str(), tempSampleSize_, isSingleCycle_ ? "true" : "false");
+      Trace::Debug("DEBUG: Starting playback of sample '%s' (size=%d, singleCycle=%s)\n", sampleFileName.c_str(),
+                   tempSampleSize_, isSingleCycle_ ? "true" : "false");
 
       // Reset playback state
       isPlaying_ = true;
