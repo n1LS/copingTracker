@@ -13,7 +13,7 @@
 
 // Keep command entries grouped by displayed mnemonic first letter;
 // GetNextAlpha/GetPrevAlpha depend on this ordering.
-const int CommandList::CommandCount = 31;
+const int CommandList::CommandCount = 32;
 
 const Token CommandList::AllCommands[CommandCount] = {
     Token::InstrumentCommandNone,
@@ -33,6 +33,7 @@ const Token CommandList::AllCommands[CommandCount] = {
     Token::InstrumentCommandKill,
     Token::InstrumentCommandLegato,
     Token::InstrumentCommandLoopOffset,
+    Token::InstrumentCommandMaybe,
     Token::InstrumentCommandMidiCC,
     Token::InstrumentCommandMidiPC,
     Token::InstrumentCommandPan,
@@ -50,7 +51,7 @@ const Token CommandList::AllCommands[CommandCount] = {
 };
 
 Token CommandList::GetFirst() {
-  return Token::InstrumentCommandArpeggiator;
+  return AllCommands[1]; // Skip InstrumentCommandNone
 }
 
 static char GetCommandGroupLetter(Token command) {

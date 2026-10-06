@@ -799,16 +799,27 @@ void Player::updatePhrasePos(int pos, int channel) {
 
   uint8_t phrase = viewData_->currentPlayPhrase_[channel];
 
-  // Check both param colum 1 & 2
+  // Check both param colum 1 & 2 for commands that might delay or canccel the note
 
   Token token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd1);
-  if (token == Token::InstrumentCommandDelay) {
+  if (token == Token::InstrumentCommandMaybe) {
+    uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param1;
+    if (param < (rand() & 0xff)) {
+      timeToStart_[channel] = 0xffff'ffff;
+    }
+  } else if (token == Token::InstrumentCommandDelay) {
     uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param1;
     timeToStart_[channel] = (param & 0x0F) + 1;
   }
 
+  // command 2
   token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
-  if (token == Token::InstrumentCommandDelay) {
+  if (token == Token::InstrumentCommandMaybe) {
+    uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
+    if (param < (rand() & 0xff)) {
+      timeToStart_[channel] = 0xffff'ffff;
+    }
+  } else if (token == Token::InstrumentCommandDelay) {
     uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
     timeToStart_[channel] = (param & 0x0F) + 1;
   }
