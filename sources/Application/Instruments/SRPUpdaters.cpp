@@ -166,14 +166,14 @@ void LogSpeedRamp::Trigger(bool tableTick) {
         }
       } else {
         if (current_ > target_) {
-          current_ = fp_mul(current_, speed_);
+          current_ = fp_mul_coef(current_, speed_);
           if (current_ < target_) {
             current_ = target_;
           }
         }
-      };
+      }
     }
-  };
+  }
 }
 
 void LogSpeedRamp::UpdateSRP(struct RUParams &rup) {

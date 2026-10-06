@@ -124,19 +124,21 @@ void MixerService::Update(Observable &o, I_ObservableData *d) {
 // fixed point
 fixed MixerService::ToLogVolume(int vol) {
   // Ensure vol is within valid range
-  if (vol < 0)
-    vol = 0;
+  if (vol <= 0) {
+    return 0;
+  }
+
   if (vol >= 99) { // for now treating 99 as unity gain
     // Unity gain – treat as a no-op to avoid unnecessary scaling
     return i2fp(1);
   }
 
   // Convert to fixed point (0-1 range)
-  fixed normalizedVol = fp_mul(i2fp(vol), fl2fp(0.01f));
+  fixed normalizedVol = fp_mul_coef(i2fp(vol), fl2fp(0.01f));
 
   // Apply quadratic curve for logarithmic-like scaling
   // This gives better control at lower volumes
-  return fp_mul(normalizedVol, normalizedVol);
+  return fp_mul_coef(normalizedVol, normalizedVol);
 }
 
 void MixerService::SetMasterVolume(int vol) {

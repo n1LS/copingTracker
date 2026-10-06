@@ -748,7 +748,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
     // Get volume factor and pan
 
     fixed volscale = fl2fp(0.003921568627450980392156862745098f);
-    fixed volfactor = fp_mul(rp->volume_, volscale);
+    fixed volfactor = fp_mul_coef(rp->volume_, volscale);
     fixed env = rp->envelope_.value >> 1;
     volfactor = fp_mul(volfactor, env);
     int pan = fp2i(rp->pan_);
@@ -1028,11 +1028,9 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
               *fltSpeedPtr = fp_mul(*fltSpeedPtr, fltDirt);
             }
 
-            *fltSpeedPtr = fp_mul_coef(*fltSpeedPtr, fltParm2); // mul by res, it's some kind
-                                                                // of inertia.
-            /*HOG:5*/ *fltSpeedPtr =
-                fp_add(*fltSpeedPtr, fp_mul_coef(difr, fltParm1)); // mul by cutoff, less cutoff = no
-                                                                   // sound, so it's better not be 0.
+            *fltSpeedPtr = fp_mul_coef(*fltSpeedPtr, fltParm2); // mul by res, it's some kind of inertia.
+            // mul by cutoff, less cutoff = no sound, so it's better not be 0.
+            /*HOG:5*/ *fltSpeedPtr = fp_add(*fltSpeedPtr, fp_mul_coef(difr, fltParm1));
 
             *fltHeightPtr += *fltSpeedPtr;
             *fltHeightPtr += *fltDelayPtr - hpin;
@@ -1051,11 +1049,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
         // introduce panning & vol - store result
 
-        s2 = fp_mul_coef(s2, fixedpanl);
-        t2 = fp_mul_coef(t2, fixedpanr);
-
-        *result++ = s2;
-        *result++ = t2;
+        *result++ = fp_mul_coef(s2, fixedpanl);
+        *result++ = fp_mul_coef(t2, fixedpanr);
 
         // Computes new pos for next input sample
         // fpPos is always relative to 'input' pointer
