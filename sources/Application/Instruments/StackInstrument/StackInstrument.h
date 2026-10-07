@@ -21,6 +21,7 @@ public:
   virtual ~StackInstrument();
 
   // Start & stop the instument
+  virtual void InitVoice(int channel) override;
   virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true);
   virtual void Stop(int channel);
 

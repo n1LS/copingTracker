@@ -94,6 +94,25 @@ public:
 
   virtual bool Init() = 0;
 
+  // The voices are a union shared by all instrument types, so a channel's
+  // voice holds stale data from whatever instrument used it last. The player
+  // calls AcquireVoice() before Start() so the voice gets re-initialised
+  // whenever the channel changes owner.
+  void AcquireVoice(int channel) {
+    if (voiceOwner_[channel] != this) {
+      InitVoice(channel);
+      voiceOwner_[channel] = this;
+    }
+  }
+
+  // Forget voice ownership, must be called before an instrument is destroyed
+  // so a new instrument at the same address does not inherit its voices
+  static void ReleaseVoices(I_Instrument *instrument);
+  static void ReleaseAllVoices();
+
+  // Puts the channel's voice into a clean state, called by AcquireVoice()
+  virtual void InitVoice(int channel) = 0;
+
   // Start & stop the instument
   virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true) = 0;
   virtual void Stop(int channel) = 0;
@@ -109,8 +128,8 @@ public:
 
   virtual bool IsInitialized() = 0;
 
-  virtual int GetNoteIncrement(bool small) {
-    return small ? 1 : 12;
+  virtual bool AffectNote(uint8_t *note, int sign, bool small) { 
+    return false;
   }
   virtual void SetStepVolume(int channel, uint8_t volume) = 0;
 
@@ -214,5 +233,6 @@ protected:
   Variable tableAutomation_;
 
   static Voice voices_[SONG_CHANNEL_COUNT];
+  static I_Instrument *voiceOwner_[SONG_CHANNEL_COUNT];
 };
 #endif

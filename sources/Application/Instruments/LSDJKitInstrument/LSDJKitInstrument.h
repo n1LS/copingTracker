@@ -50,6 +50,7 @@ public:
   }
 
   // Start & stop the instument
+  virtual void InitVoice(int channel) override;
   virtual bool Start(int channel, unsigned char note, uint8_t volume, bool retrigger = true);
   virtual void Stop(int channel);
 
@@ -81,8 +82,19 @@ public:
   void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) override;
   void focusedNoteDisplay(uint8_t note, char (&line)[12]);
 
-  virtual int GetNoteIncrement(bool small) override {
-    return small ? 1 : 15;
+  virtual bool AffectNote(uint8_t *note, int sign, bool small) override {
+    uint8_t n1 = *note % 15;
+    uint8_t n2 = *note / 15;
+
+    if (small) {
+      n1 = (15 + n1 + sign) % 15;
+    } else {
+      n2 = (15 + n2 + sign) % 15;
+    }
+
+    *note = n2 * 15 + n1;
+
+    return true;
   }
 
 private:

@@ -13,13 +13,13 @@
 #define _SAMPLE_RENDER_PARAMS_H_
 
 #include "Application/Instruments/EnvelopeGenerators.h"
-#include "Externals/etl/include/etl/vector.h"
 #include "Foundation/Types/Types.h"
 #include "SRPUpdaters.h"
+#include <cstring>
 
 #pragma pack(push, 1)
 struct sample_voice_t {
-  int16_t *sampleBuffer_; // wavdata
+  void *sampleBuffer_; // wavdata
   int channelCount_;
 
   int krateCount_;    // K-rate counter
@@ -74,8 +74,9 @@ struct sample_voice_t {
   fixed lastSample_[2];
 
   // Active Sample Rendering Parameter updaters, stored as tags (UpdaterKind
-  // values as uint8_t) instead of polymorphic pointers.
-  etl::vector<uint8_t, 10> activeUpdaters_;
+  // values as int16_t) in a fixed-size array. -1 marks an empty/unused slot
+  // and acts as the end-of-list sentinel.
+  int16_t activeUpdaters_[10];
 
   VolumeRamp volumeRamp_;
   Panner panner_;
@@ -90,23 +91,37 @@ struct sample_voice_t {
   adsr_envelope_t envelope_;
 
   uint8_t _padding[3];
+
+  // puts the voice into a silent, well defined state. finished_ keeps Render()
+  // from touching the (null) sample buffer before the first Start()
+  inline void init() {
+    memset(this, 0, sizeof(*this));
+    finished_ = true;
+    lastMidiNote_ = -1;
+    activeUpdaters_[0] = -1;
+    speed_ = baseSpeed_ = FP_ONE;
+    cutoff_ = baseFCut_ = FP_ONE;
+    crush_ = 16;
+    drive_ = 0xff;
+  }
 };
 #pragma pack(pop)
 
 // --- de-virtualized SRP updater helpers --------------------------------------
 // sample_voice_t tracks active updaters by a small tag (UpdaterKind stored as
-// a uint8_t in activeUpdaters_) rather than by polymorphic pointers. These
-// helpers keep that indirection in one place and are used by SampleInstrument
-// and by any code that drives per-voice rendering parameters.
+// an int16_t in the fixed-size activeUpdaters_ array; -1 = empty/unused and
+// terminates the list) rather than by polymorphic pointers. These helpers keep
+// that indirection in one place and are used by SampleInstrument and by any
+// code that drives per-voice rendering parameters.
 
-inline UpdaterKind UpdaterKindFromByte(uint8_t b) {
-  return static_cast<UpdaterKind>(b);
+inline UpdaterKind UpdaterKindFromByte(int16_t tag) {
+  return static_cast<UpdaterKind>(tag);
 }
 
 inline bool IsUpdaterActive(const sample_voice_t &v, UpdaterKind kind) {
-  const uint8_t tag = static_cast<uint8_t>(kind);
-  for (auto b : v.activeUpdaters_) {
-    if (b == tag) {
+  const int16_t tag = static_cast<int16_t>(kind);
+  for (int i = 0; v.activeUpdaters_[i] != -1; ++i) {
+    if (v.activeUpdaters_[i] == tag) {
       return true;
     }
   }
@@ -114,16 +129,28 @@ inline bool IsUpdaterActive(const sample_voice_t &v, UpdaterKind kind) {
 }
 
 inline void AddUpdater(sample_voice_t &v, UpdaterKind kind) {
-  if (!IsUpdaterActive(v, kind)) {
-    v.activeUpdaters_.push_back(static_cast<uint8_t>(kind));
+  if (IsUpdaterActive(v, kind)) {
+    return;
+  }
+  for (int i = 0; i < 10; ++i) {
+    if (v.activeUpdaters_[i] == -1) {
+      v.activeUpdaters_[i] = static_cast<int16_t>(kind);
+      if (i + 1 < 10) {
+        v.activeUpdaters_[i + 1] = -1;
+      }
+      break;
+    }
   }
 }
 
 inline void RemoveUpdater(sample_voice_t &v, UpdaterKind kind) {
-  const uint8_t tag = static_cast<uint8_t>(kind);
-  for (auto it = v.activeUpdaters_.begin(); it != v.activeUpdaters_.end(); ++it) {
-    if (*it == tag) {
-      v.activeUpdaters_.erase(it);
+  const int16_t tag = static_cast<int16_t>(kind);
+  for (int i = 0; v.activeUpdaters_[i] != -1; ++i) {
+    if (v.activeUpdaters_[i] == tag) {
+      // Shift the remaining entries (and the trailing -1 sentinel) left.
+      do {
+        v.activeUpdaters_[i] = v.activeUpdaters_[i + 1];
+      } while (v.activeUpdaters_[++i] != -1);
       break;
     }
   }
@@ -197,6 +224,7 @@ inline void UpdateUpdater(sample_voice_t &v, UpdaterKind kind, RUParams &rup) {
   }
 }
 
-static_assert(sizeof(sample_voice_t) % 4 == 0, "Check sizeof(chiptune_voice_t) in error message - it must be a multiple of 4");
+static_assert(sizeof(sample_voice_t) % 4 == 0,
+              "Check sizeof(sample_voice_t) in error message - it must be a multiple of 4");
 
 #endif

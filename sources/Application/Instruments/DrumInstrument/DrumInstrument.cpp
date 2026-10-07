@@ -49,6 +49,10 @@ void DrumInstrument::Stop(int channel) {
   voices_[channel].drum.stop();
 }
 
+void DrumInstrument::InitVoice(int channel) {
+  voices_[channel].drum.init();
+}
+
 bool DrumInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // get the instrument parameters from the instrument and pass them to the
   // current voice

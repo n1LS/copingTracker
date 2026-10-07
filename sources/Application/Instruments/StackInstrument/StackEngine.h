@@ -13,6 +13,7 @@
 #include "Application/Utils/fixed.h"
 #include "StackWavetables.generated.h"
 #include <stdint.h>
+#include <cstring>
 
 #include "System/Console/Trace.h"
 
@@ -78,10 +79,16 @@ typedef struct stack_voice_t {
   uint8_t notes[5];
 
   panlaw_state pan;
-
-  uint8_t _padding[2]; // keeps sizeof(stack_voice_t) a multiple of 4
+  uint8_t _padding[2];
 
   // implementation ------------------------------------------------------------
+
+  // puts the voice into a silent, well defined state
+  inline void init() {
+    memset(this, 0, sizeof(*this));
+    wave = stackWaveNone;
+    pan.set(128);
+  }
 
   inline uint32_t compute_cent_multiplier(int16_t cents) {
     if (cents == 0)
@@ -134,7 +141,6 @@ typedef struct stack_voice_t {
       if (flags.retrigger) {
         flags.retrigger = 0; // clear retrigger flag
         // retrigger without resetting clocks
-        note_on(note, volume, false, parameters, true);
       } else {
         // note off, kill everything
         wave = stackWaveNone;
@@ -250,6 +256,10 @@ typedef struct stack_voice_t {
 
   inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const stack_parameters_t inParameters,
                       bool keepClocks = false) {
+    // reset the flags (TODO nILS: does this break retrigger?)
+    flags.byte = 0;
+    flags.initialized = 1;
+    
     // bool retrigger is currently unused
     parameters = inParameters;
 
@@ -272,14 +282,14 @@ typedef struct stack_voice_t {
     uint16_t chord = parameters.chord;
     set_oscillator_note(0, note + parameters.transpose, 0);
 
-    for (uint8_t o = stackNumOscillators - 1; o > 1; o--) {
+    for (uint8_t o = stackNumOscillators - 1; o > 0; o--) {
       set_oscillator_note(o, note + parameters.transpose + (chord & 0xf), 0);
 
       // move the chord
       chord >>= 4;
     }
 
-    for (uint8_t o = 1; o < stackNumOscillators; o++) {
+    for (uint8_t o = 0; o < stackNumOscillators; o++) {
       // reset the phase
       phase[o] = 0;
     }

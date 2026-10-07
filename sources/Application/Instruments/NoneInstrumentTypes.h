@@ -10,4 +10,8 @@
 
 typedef struct none_voice_t {
   uint32_t placeholder; // placeholder to make the struct non-empty
+
+  inline void init() {
+    placeholder = 0;
+  }
 } none_voice_t;

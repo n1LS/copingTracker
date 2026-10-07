@@ -44,6 +44,9 @@ InstrumentBank::~InstrumentBank() {
 void InstrumentBank::Reset() {
   instrumentPool_.release_all();
 
+  // all instruments are gone, their addresses will be reused by new ones
+  I_Instrument::ReleaseAllVoices();
+
   for (size_t i = 0; i < instruments_.max_size(); i++) {
     instruments_[i] = &none_;
   }
@@ -182,6 +185,9 @@ InstrumentAssignResult InstrumentBank::AssignInstrumentToSlot(InstrumentType typ
 }
 
 void InstrumentBank::purgeInstrument(I_Instrument *instrument) {
+  // the pool reuses this address, a new instrument must not inherit the voices
+  I_Instrument::ReleaseVoices(instrument);
+
   switch (instrument->GetType()) {
     case IT_SAMPLE:
       instrumentPool_.destroy(static_cast<SampleInstrument *>(instrument));

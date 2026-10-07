@@ -47,6 +47,10 @@ void StackInstrument::Stop(int channel) {
   voices_[channel].stack.stop();
 }
 
+void StackInstrument::InitVoice(int channel) {
+  voices_[channel].stack.init();
+}
+
 bool StackInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // get the instrument parameters from the instrument and pass them to the
   // current voice
@@ -85,7 +89,7 @@ void StackInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
       break;
 
     case Token::InstrumentCommandCrush:
-      voices_[channel].stack.bitcrush = value && 0x0f;
+      voices_[channel].stack.bitcrush = value & 0x0f;
       voices_[channel].stack.drive = value >> 8;
       break;
 
@@ -113,12 +117,12 @@ void StackInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 
     case Token::InstrumentCommandChordUp:
       voices_[channel].stack.set_chord((value & 0xf000) >> 12, (value & 0x0f00) >> 8, (value & 0x00f0) >> 4,
-                                        value & 0x000f);
+                                       value & 0x000f);
       break;
 
     case Token::InstrumentCommandChordDown:
       voices_[channel].stack.set_chord(-((value & 0xf000) >> 12), -((value & 0x0f00) >> 8), -((value & 0x00f0) >> 4),
-                                        -(value & 0x000f));
+                                       -(value & 0x000f));
       break;
 
     case Token::InstrumentCommandChordBidirectional:

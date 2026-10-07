@@ -31,6 +31,9 @@ void PlayerChannel::StartInstrument(I_Instrument *instr, unsigned char note, uin
     StopInstrument(true);
   }
 
+  // make sure the shared voice doesn't carry over state from another instrument
+  instr->AcquireVoice(index_);
+
   if (instr->Start(index_, note, volume, trigger)) {
     // note could be refused because it's out of the keymap
     instr_ = instr;

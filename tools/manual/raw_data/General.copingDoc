@@ -1,30 +1,3 @@
-F       7     F 7F   7        
-0             8 0             
-   Black         Gray         
-4 7F   7      4 7F         7  
-4 0           C 0             
-   Blue          Light Blue   
-4 7F    7     4 7F   7        
-2 0           A 0             
-   Green         Lime         
-4 7F   7      4 7F   7        
-6 0           E 0             
-   Teal          Aqua         
-4 7F     7    4 7F   7        
-1 0           9 0             
-   Maroon        Red          
-4 7F     7    4 7F      7     
-5 0           D 0             
-   Purple        Magenta      
-4 7F     7    4 7F     7      
-3 0           B 0             
-   Orange        Yellow       
-F 7F     7    4 7F    7       
-7 0           F 0             
-   Silver        White        
-7                             
-0                             
-                              
 F                          C  
 C                          0  
  WELCOME                   ╡╠╟
@@ -148,30 +121,33 @@ F  7
 F   7                         
 0                             
  32 instrument:               
+7     F     7                 
+0                             
+      SAMPLE instruments      
 7                             
 0                             
-      Sample instruments      
-7                             
+       + internal GM bank     
+7     F   7                   
 0                             
       MIDI instruments        
-7                             
+7     F       7               
 0                             
-      emulated SID synth      
-7                             
+      CHIPTUNE synth          
+F 7   F        7              
 0                             
-      emulated OPL3 synth     
-7                             
+      CHIPDRUM kits           
+7     F   7                   
 0                             
-      chiptune synth          
-F 7                           
+      LSDJ-style drum kits    
+7     F    7                  
 0                             
-      chipdrum synth          
+      STACK pad/chord/supersaw
 F 7                           
 0                             
                               
 F7    F  7                    
 0                             
--Upto 15 MB of sample memory  
+-Upto 11 MB of sample memory  
 F7                            
 0                             
  per open project             
@@ -184,9 +160,9 @@ F7
 F7                            
 0                             
  16bit 44.1kHz stereo audio   
-F 7                           
+7                             
 0                             
-  output                      
+ output                       
 7                             
 0                             
                               
@@ -222,13 +198,13 @@ F7
 -16MB of Flash                
 F7                            
 0                             
--MicroSD cards upto 128GB for 
+-microSD cards up to 128GB for
 F7                            
 0                             
  project & sample library     
 F7                            
 0                             
- storage                      
+ storage (projects, samplesО) 
 F7                            
 0                             
 -USB-C for MIDI, charging,    
@@ -250,57 +226,57 @@ C                          0
 7                             
 0                             
                               
-7                F7           
+7B              7F7           
 0                             
- зд© зд©         Device       
-7 F787F7         F7           
+                 Device       
+7B              7F7           
 0                             
- ЁDЁдЁHЁ                      
-7                F7           
+                              
+7       B     7  F7           
 0                             
- юды юды         Help         
-7 87             F7           
+ зд© зд© You     Help         
+7 F787F7B     9 7F7           
+0                             
+ ЁDЁдЁHЁ are                  
+7       B     97 F7           
+0                             
+ юды юды here    Workspace    
+7 8             7F7           
 0                             
   Ё                           
 7                F7           
 0                             
- зд©     зд©     Workspace    
+ зд©     зд©     Groove       
 7 F78    7F7     F7           
 0                             
  ЁWЁдддддЁGЁ                  
-7   87           F7           
+7                F7           
 0                             
- юды     юды     Groove       
-7 87      87     F7           
+ юды     юды     Song         
+7 8             7F7           
 0                             
   Ё       Ё                   
 7                F7           
 0                             
- зд© зд© зд© зд© Song         
-7 F787F787F787F7 F7           
+ зд© зд© зд© зд© Chain        
+7 F787F787F787F7              
 0                             
  ЁSЁдЁCЁдЁPЁдЁIЁ              
 7                F7           
 0                             
- юды юды юды юды Chain        
-7 87      87  87              
+ юды юды юды юды Phrase       
+7 8             7F7           
 0                             
   Ё       Ё   Ё               
 7                F7           
 0                             
- зд©     зд© зд© Phrase       
+ зд©     зд© зд© Instrument   
 7 F78    7F787F7 F7           
 0                             
  ЁMЁдддддЁTЁдЁTЁ              
 7                F7           
 0                             
- юды     юды юды Instrument   
-7                F7           
-0                             
-                              
-7                F7           
-0                             
-                 Mixer        
+ юды     юды юды Mixer        
 7                F7           
 0                             
                               

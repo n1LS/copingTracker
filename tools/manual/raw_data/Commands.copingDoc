@@ -1,6 +1,6 @@
 F  7                  CAE98F  
 0                             
-ARPeggio              abcd³Arp
+Arpeggio              abcd³Arp
 7                         87F 
 0                             
 Cycle through the relative³   
@@ -10,57 +10,57 @@ offsets a,b,c&d. If a step³
 7                         87  
 0                             
 is 0 the arp starts over. ³   
-8                          F  
+8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F 7   F7              CAE98F  
 0                             
-CHord Up              abcd³ChU
-7                  C 7    8F  
+Chord Up              abcd³ChU
+7                         8F  
 0                             
-Set Drive level to aa and ³   
-7         A78              F  
+Play a chord with the rel.³   
+7              C7A7E797  8 F  
 0                             
-Crush to -b (0-F)         ³   
+upward offsets a,b,c&d.   ³   
 7                         87F 
 0                             
                           ³   
-8                          F  
+8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F 7   F7      F       CAE98F  
 0                             
-CHord Down            abcd³ChD
-7                  C  7   8F  
+Chord Down            abcd³ChD
+7                         8F  
 0                             
-Set Drive level to aa and ³   
-7         A 8              F  
+Play a chord with the rel.³   
+7                C7A7E797 8F  
 0                             
-Crush to -b (0-F)         ³   
+downward offsets a,b,c&d. ³   
 8                          F  
 0                             
                           ³   
-8                          F  
+8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F 7   F7            F CAE98F  
 0                             
-CHord Bidirectional   abcd³ChB
-7                  C  7   8F  
+Chord Bidirectional   abcd³ChB
+7                         8F  
 0                             
-Set Drive level to aa and ³   
-7         A 8              F  
+Play a chord with the rel.³   
+7       C7A7E797          8F  
 0                             
-Crush to -b (0-F)         ³   
-8                          F  
+offsets a,b,c&d. 0-7 is up³   
+7           8              F  
 0                             
-                          ³   
-8                          F  
+8-F is down.              ³   
+8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 7       F7 F          C 7A8F  
 0                             
-drive & CruSH         aa-b³CSH
+Drive & Crush         aa-b³CSH
 7                  C  7   8F  
 0                             
 Set Drive level to aa and ³   
@@ -70,12 +70,12 @@ Crush to -b (0-F)         ³
 8                          F  
 0                             
                           ³   
-8                          F  
+8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7F7F                 7  C8F  
 0                             
-DeLaY                 ---a³Dly
+Delay                 ---a³Dly
 7                   C 7   8F  
 0                             
 Delay this event by a + 1 ³   
@@ -87,10 +87,10 @@ steps                     ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7     F7F7           C A 8F  
 0                             
-Filter CuToff         aabb³FCt
+Filter Cutoff         aabb³FCt
 7                         8   
 0                             
 Move towards target cutoff³   
@@ -102,10 +102,10 @@ bb at rate aa.            ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7F 7                 C A 8F  
 0                             
-FiLTer                aabb³Flt
+Filter                aabb³Flt
 7                 C  7    8   
 0                             
 Set filter cutoff aa and  ³   
@@ -117,10 +117,10 @@ resonance bb instantly.   ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
-F7       F7F          C A 8F  
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
+F7     F7F7       F   C A 8F  
 0                             
-Filter & ReS          aabb³FRs
+Filter Resonance      aabb³FRs
 7               A 7       8   
 0                             
 Reach resonance bb with   ³   
@@ -132,10 +132,10 @@ the rate aa.              ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
-F7  F 7                   8F  
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
+F7  F  7                  8F  
 0                             
-GateOFf               ----³GOf
+Gate Off              ----³GOf
 7                         8   
 0                             
 Synth only!               ³   
@@ -147,10 +147,10 @@ Synth only!               ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F 7 F7                C A 8F  
 0                             
-GRooVe                aabb³Grv
+Groove                aabb³Grv
 7                     A 7 8   
 0                             
 Set current groove to bb. ³   
@@ -162,10 +162,10 @@ If aa is not 00, set this ³
 groove on all tracks.     ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F                     C A 8F  
 0                             
-HOP                   aabb³Hop
+Hop                   aabb³Hop
 7           A  7   C      8   
 0                             
 Hop to step bb for aa     ³   
@@ -177,10 +177,10 @@ times.                    ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7         F7F7         A 8F  
 0                             
-Instrument ReTrigger  --bb³IRt
+Instrument Retrigger  --bb³IRt
 7                         8   
 0                             
 retrigger & transpose by  ³   
@@ -192,10 +192,10 @@ bb semitones              ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F  7                    C 8F  
 0                             
-KILl                  --aa³Kil
+Kill                  --aa³Kil
 7                         8   
 0                             
 Stop song playback after  ³   
@@ -207,10 +207,10 @@ aa ticks.                 ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F  7                  C A 8F  
 0                             
-LEGato                aabb³Leg
+Legato                aabb³Leg
 7              A  7       8   
 0                             
 Slide to pitch bb at speed³   
@@ -222,10 +222,10 @@ aa.                       ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
-F  7                    C 8F  
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
+7        F  7           C 8F  
 0                             
-Maybe trigger         --aa³May
+Trigger, maybe?       --aa³May
 7                         8   
 0                             
 Trigger the row/note only ³   
@@ -237,10 +237,10 @@ if the random dice throw  ³
 is lower than aa          ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7   F 7              C   8F  
 0                             
-Loop OFset            aaaa³LOf
+Loop Ofset            aaaa³LOf
 7                         8   
 0                             
 Shift loop start & end    ³   
@@ -252,7 +252,7 @@ values by aaaa            ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7   F                C A 8F  
 0                             
 Midi CC               aabb³MCC
@@ -267,7 +267,7 @@ C 8A 8
 aa,bb <= 7F               ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7   F7      F7         C 8F  
 0                             
 Midi Program Change   --aa³MPC
@@ -282,10 +282,10 @@ C 08
 aa <= 7F                  ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F                     C A 8F  
 0                             
-PAN                   aabb³Pan
+Pan                   aabb³Pan
 7     C 7       A         8   
 0                             
 speed aa, value bb        ³   
@@ -297,10 +297,10 @@ speed aa, value bb        ³
 FF=left                   ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7   F7  F7           C A 8F  
 0                             
-PitchFineTune         aabb³PFt
+PitchFinetune         aabb³PFt
 7               A  7      8   
 0                             
 Reach fine tune bb with   ³   
@@ -312,10 +312,10 @@ speed aa. Max ~1 semitone.³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7    F 7             C A 8F  
 0                             
-Pitch SLide           aabb³PSl
+Pitch Slide           aabb³PSl
 7              A  7       8   
 0                             
 Slide to pitch bb at rate ³   
@@ -327,10 +327,10 @@ aa.                       ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7   F 7              C A 8F  
 0                             
-Play OFfset           aabb³POf
+Play Offset           aabb³POf
 7                C  7     8   
 0                             
 jump absolute to aa & move³   
@@ -342,10 +342,10 @@ relative signed bb        ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7F7 F7               C A 8F  
 0                             
-ReTriGger             aabb³RTG
+Retrigger             aabb³RTG
 7       A  7    C  7      8   
 0                             
 Sample: bb loop+aa offset ³   
@@ -357,7 +357,7 @@ MIDI: bb                  ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7  F7         F7     C A 8F  
 0                             
 Set Instrument Param  aabb³SIP
@@ -372,7 +372,7 @@ bb                        ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7   F7    F7             8F  
 0                             
 Stop Table Playback   ----³STP
@@ -387,10 +387,10 @@ current table.            ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7F 7                   C 8F  
 0                             
-TaBLe                 --aa³Tbl
+Table                 --aa³Tbl
 7         C 7             8   
 0                             
 Run table aa.             ³   
@@ -402,10 +402,10 @@ Run table aa.             ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F7 F                  7C  8F  
 0                             
-TemPO                 -aaa³Tpo
+Tempo                 -aaa³Tpo
 7                      C  8   
 0                             
 set tempo to hex value aaa³   
@@ -417,10 +417,10 @@ Max is 12C == 300bpm      ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F  7                    A 8F  
 0                             
-VELocity              --bb³Vel
+Velocity              --bb³Vel
 7                         8   
 0                             
 send MIDI velocity command³   
@@ -432,10 +432,10 @@ bb                        ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F  7                  C A 8F  
 0                             
-VIBrato               aabb³Vib
+Vibrato               aabb³Vib
 7                       A 8   
 0                             
 Play a vibrato of depth bb³   
@@ -447,10 +447,10 @@ at rate aa                ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ
 F  7                  C A 8F  
 0                             
-VOLume                aabb³Vol
+Volume                aabb³Vol
 7                   A  7  8   
 0                             
 Move towards volume bb at ³   
@@ -462,4 +462,4 @@ the rate aa.              ³
                           ³   
 8                             
 0                             
-ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ   
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄ

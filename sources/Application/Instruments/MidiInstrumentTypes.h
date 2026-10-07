@@ -17,6 +17,14 @@ typedef struct midi_voice_t {
   uint8_t lastVolume_;
   bool first_;
   uint8_t _padding[1];
+
+  // no notes held, so a stray note off doesn't send anything
+  inline void init() {
+    lastNotes_.fill(0);
+    lastVolume_ = 0;
+    first_ = false;
+  }
 } midi_voice_t;
 
-static_assert(sizeof(midi_voice_t) % 4 == 0, "Check sizeof(chiptune_voice_t) in error message - it must be a multiple of 4");
+static_assert(sizeof(midi_voice_t) % 4 == 0,
+              "Check sizeof(chiptune_voice_t) in error message - it must be a multiple of 4");

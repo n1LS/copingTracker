@@ -64,8 +64,17 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
   SampleInstrument *sampleInstrument = (SampleInstrument *)instrument;
   InstrumentType type = instrument->GetType();
 
+  // some instruments want to manually set the change to the note
+  bool smallChange = (direction == VUD_LEFT || direction == VUD_RIGHT);
+  int sign = (direction == VUD_LEFT || direction == VUD_DOWN) ? -1 : 1;
+  if (instrument->AffectNote(c, sign, smallChange)) {
+    lastNote_ = *c;
+    startAudition(false);
+    return;
+  }
+  
   // Get the offset based on direction (using proper sequential indices)
-  int offset = instrument->GetNoteIncrement(direction == VUD_LEFT || direction == VUD_RIGHT);
+  int offset = smallChange ? 1 : 12;
   if (direction == VUD_DOWN || direction == VUD_LEFT) {
     offset *= -1;
   }

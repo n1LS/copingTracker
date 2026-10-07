@@ -48,4 +48,7 @@ void set_filter(int channel, filterType_t type, fixed parm1, fixed parm2, int mi
 
 void init_filters(void);
 
+// clears the filter's running state (keeps the coefficients)
+void reset_filter(int channel);
+
 filter_t *get_filter(int channel);

@@ -11,6 +11,7 @@
 #include "Application/Instruments/Panning.h"
 #include "Application/Utils/fixed.h"
 #include <cstdint>
+#include <cstring>
 
 #include "System/Console/Trace.h"
 
@@ -95,6 +96,13 @@ typedef struct drum_voice_t {
   panlaw_state pan;
 
   // implementation ------------------------------------------------------------
+
+  // puts the voice into a silent, well defined state
+  inline void init() {
+    memset(this, 0, sizeof(*this));
+    wave = drumWaveNone;
+    pan.set(128);
+  }
 
   inline uint16_t get_glitch() {
     glitch = (glitch * 1664525) + 1013904223;

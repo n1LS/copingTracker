@@ -11,6 +11,7 @@
 #include "Application/Instruments/Panning.h"
 #include "Application/Utils/fixed.h"
 #include <cstdint>
+#include <cstring>
 
 #include "System/Console/Trace.h"
 
@@ -48,7 +49,6 @@ typedef struct lsdjkit_voice_t {
   lsdjkit_parameters_t parameters; // parameters passed from instrument
 
   uint32_t phase[2];   // wavetable index/oscillator phases in q24.8
-  uint32_t lastSample; // used for both the last sample for pulse smoothing
   // and as the lcg register for the noise
 
   uint32_t time; // sample counter
@@ -81,6 +81,13 @@ typedef struct lsdjkit_voice_t {
   lsdjkit_flags flags;
 
   // implementation ------------------------------------------------------------
+
+  // puts the voice into a silent, well defined state (zero wavetableLength
+  // keeps both slices silent)
+  inline void init() {
+    memset(this, 0, sizeof(*this));
+    pan.set(128);
+  }
 
   inline void stop() {
   }
@@ -134,6 +141,13 @@ typedef struct lsdjkit_voice_t {
     int32_t sample = 0;
 
     for (int kit = 0; kit < 2; kit++) {
+      // An unset slice (no sample loaded for this kit) must stay silent. The
+      // wavetable length is also what the loop modes below test against, so
+      // bail out before they can force `safe` and dereference a null wavetable.
+      if (wavetableLength[kit] == 0) {
+        continue;
+      }
+
       uint32_t index = phase[kit] >> 9; // convert from q24.8 to integer index and also downsample to 22050
 
       // handle loop modes
@@ -142,7 +156,7 @@ typedef struct lsdjkit_voice_t {
       if (!safe) {
         if (loop_mode[kit] == loopModeOn) {
           safe = true;
-          index = parameters.offset[kit];
+          index = offset[kit];
           phase[kit] = index << 9; // convert back to q24.8
         } else if (loop_mode[kit] == loopModeAttack) {
           safe = true;
@@ -247,6 +261,9 @@ typedef struct lsdjkit_voice_t {
 
   inline void note_on(unsigned char note, uint8_t inVolume, bool retrigger, const lsdjkit_parameters_t inParameters,
                       bool keepClocks = false) {
+    // reset flags
+    flags.byte = 0;
+
     // bool retrigger is currently unused
     parameters = inParameters;
 
@@ -276,21 +293,36 @@ typedef struct lsdjkit_voice_t {
       // reset oscillator state and timers
       timeToLive[kit] = (parameters.length[kit] == 0) ? 0x7FFF'FFFF : (parameters.length[kit]);
 
-      if (notes[kit] != 0) {
-        const LSDJKits::Kit &kitData = LSDJKits::kits[kitIndex[kit]];
-        const LSDJKits::Sample &sample = kitData.samples[notes[kit] - 1];
-        wavetable[kit] = (int8_t *)(kitData.data + sample.position);
-        wavetableLength[kit] = sample.length;
-        offset[kit] = (sample.length * inParameters.offset[kit]) >> 8; // offset is in 0-255, scale to sample length
-        phase[kit] = offset[kit] << 9;                                 // convert to q24.8
+      // Clear this slice's wavetable first: if the requested sample is unset
+      // (notes[kit] == 0) or beyond the kit's real sample count we must not
+      // keep the previous note's pointer/length, and must never index past
+      // the generated sample table (that reads garbage and hard faults on
+      // device). sample() treats wavetableLength == 0 as a silent slice.
+      wavetable[kit] = 0;
+      wavetableLength[kit] = 0;
+      phase[kit] = 0;
+      offset[kit] = 0;
 
-        strcpy(sampleName[kit], sample.name);
+      if (notes[kit] != 0 && kitIndex[kit] < LSDJKits::drum_kit_count) {
+        const LSDJKits::Kit &kitData = LSDJKits::kits[kitIndex[kit]];
+
+        if (notes[kit] <= kitData.num_samples) {
+          const LSDJKits::Sample &sample = kitData.samples[notes[kit] - 1];
+          wavetable[kit] = (int8_t *)(kitData.data + sample.position);
+          wavetableLength[kit] = sample.length;
+          offset[kit] = (sample.length * inParameters.offset[kit]) >> 8; // offset is in 0-255, scale to sample length
+          phase[kit] = offset[kit] << 9;                                 // convert to q24.8
+
+          strcpy(sampleName[kit], sample.name);
+        } else {
+          strcpy(sampleName[kit], "   ");
+        }
       }
     }
 
     // speed                           .25 .5   1.0  2.0
     const int rates[speedModeCount] = {64, 128, 256, 512};
-    speed = rates[inParameters.speed];
+    speed = rates[(inParameters.speed < speedModeCount) ? inParameters.speed : (speedModeCount - 1)];
 
     // don't reset timers on internal retrigger via command (IRT, ...)
     // they might be mid-execution and will underflow

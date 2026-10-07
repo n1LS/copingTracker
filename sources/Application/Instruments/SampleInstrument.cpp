@@ -59,8 +59,8 @@ SampleInstrument::SampleInstrument()
       sustain_(Token::SampleInstrumentSustain, 0xFF), release_(Token::SampleInstrumentRelease, 0),
       gmInstrument_(Token::SampleInstrumentGMInstrument, NO_GM_INSTRUMENT) {
 
-  // Per-channel lastMidiNote_ sentinel (-1 = no note yet) is seeded inside
-  // Start() when a fresh voice is acquired from the shared voice pool.
+  // Per-channel lastMidiNote_ sentinel (-1 = no note yet) is seeded by
+  // sample_voice_t::init() when a fresh voice is acquired via AcquireVoice().
 
   // Initialize instruments settings
   source_ = 0;
@@ -358,6 +358,13 @@ void SampleInstrument::OnStart() {
   tableState_.Reset();
 }
 
+void SampleInstrument::InitVoice(int channel) {
+  voices_[channel].sample.init();
+
+  // the filter state lives outside the voice but is just as stale
+  reset_filter(channel);
+}
+
 bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // Look if we're dirty & need to update this instrument's data
 
@@ -373,9 +380,9 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
     return false;
 
   // Get Rendering params for current voice & fill init data. The voice is
-  // across notes so lastMidiNote_ (legato/retrig base) survives between notes.
+  // kept across notes so lastMidiNote_ (legato/retrig base) survives between
+  // notes, AcquireVoice() seeds it with -1 when the channel changes owner.
   sample_voice_t *rp = &voices_[channel].sample;
-  rp->lastMidiNote_ = -1;
   rp->midiNote_ = note;
 
   if (rp->lastMidiNote_ == -1) {
@@ -593,8 +600,10 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
     // Init downsampling
     rp->downsample_ = downsample_.GetInt();
 
-    // Clear all active updaters for a new voice (presence in list == active)
-    rp->activeUpdaters_.clear();
+    // Clear all active updaters for a new voice (presence in list == active).
+    // Only the leading sentinel needs resetting; AddUpdater always writes over
+    // the sentinel slot and re-terminates the list.
+    rp->activeUpdaters_[0] = -1;
   }
   return true;
 }
@@ -610,8 +619,9 @@ void SampleInstrument::Stop(int channel) {
 
 void SampleInstrument::doTickUpdate(int channel) {
   // Process updaters
-  for (auto b : voices_[channel].sample.activeUpdaters_) {
-    TriggerUpdater(voices_[channel].sample, UpdaterKindFromByte(b), true);
+  sample_voice_t &rp = voices_[channel].sample;
+  for (int i = 0; rp.activeUpdaters_[i] != -1; ++i) {
+    TriggerUpdater(rp, UpdaterKindFromByte(rp.activeUpdaters_[i]), true);
   }
 }
 
@@ -621,8 +631,8 @@ void SampleInstrument::doKRateUpdate(int channel) {
     return;
   }
 
-  for (auto b : rp->activeUpdaters_) {
-    TriggerUpdater(*rp, UpdaterKindFromByte(b), false);
+  for (int i = 0; rp->activeUpdaters_[i] != -1; ++i) {
+    TriggerUpdater(*rp, UpdaterKindFromByte(rp->activeUpdaters_[i]), false);
   }
 }
 
@@ -645,7 +655,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
     // clear the fixed point buffer
     // memset(buffer, 0, size * 2 * sizeof(fixed));
 
-    bool hasUpdaters = !(rp->activeUpdaters_.empty());
+    bool hasUpdaters = rp->activeUpdaters_[0] != -1;
 
     int filterMix = filterMix_.GetInt();
     FilterMode filterMode = (FilterMode)filterMode_.GetInt();
@@ -671,8 +681,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
         rup.cutOffset_ = rup.resOffset_ = rup.volumeOffset_ = rup.panOffset_ = 0;
         rup.speedOffset_ = FP_ONE;
 
-        for (auto b : rp->activeUpdaters_) {
-          UpdateUpdater(*rp, UpdaterKindFromByte(b), rup);
+        for (int i = 0; rp->activeUpdaters_[i] != -1; ++i) {
+          UpdateUpdater(*rp, UpdaterKindFromByte(rp->activeUpdaters_[i]), rup);
         }
 
         rp->volume_ = rp->baseVolume_ + rup.volumeOffset_;
@@ -891,8 +901,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
             rup.fbTunOffset_ = 0;
             rup.speedOffset_ = FP_ONE;
 
-            for (auto b : rp->activeUpdaters_) {
-              UpdateUpdater(*rp, UpdaterKindFromByte(b), rup);
+            for (int i = 0; rp->activeUpdaters_[i] != -1; ++i) {
+              UpdateUpdater(*rp, UpdaterKindFromByte(rp->activeUpdaters_[i]), rup);
             }
 
             rp->volume_ = rp->baseVolume_ + rup.volumeOffset_;

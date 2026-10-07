@@ -81,6 +81,13 @@ void set_filter(int channel, filterType_t type, fixed param1, fixed param2, int 
   }
 }
 
+void reset_filter(int channel) {
+  filter_t *flt = &filter[channel];
+  flt->height[0] = flt->height[1] = 0;
+  flt->speed[0] = flt->speed[1] = 0;
+  flt->hipdelay[0] = flt->hipdelay[1] = 0;
+}
+
 filter_t *get_filter(int channel) {
   return &filter[channel];
 }

@@ -58,7 +58,8 @@ enum stack_instrument_defaults_e {
 typedef union stack_flags {
   struct {
     uint8_t retrigger : 1;
-    uint8_t unused : 7;
+    uint8_t initialized : 1;
+    uint8_t unused : 6;
   };
   uint8_t byte;
 } stack_flags;

@@ -15,7 +15,70 @@ instruments is very much evol-
 ving and this documentation is
 7                             
 0                             
-most likely always outdate.   
+most likely always outdated.  
+7                             
+0                             
+                              
+F                          9  
+9                          0  
+GENERAL INFORMATION        ²±°
+7                             
+0                             
+                              
+7                             
+0                             
+All instruments share a few   
+7                             
+0                             
+common parameters: Table &    
+7                             
+0                             
+Automate, Volume and Pan.     
+7                             
+0                             
+These values are always shown 
+7                             
+0                             
+at the bottom of the instrum. 
+7                             
+0                             
+screen and always have the    
+7    3  F7                    
+0                             
+same SIP command identifiers: 
+7                             
+0                             
+                              
+8     7      A7              A
+0                             
+Volume       ™               ™
+B       0F  03 B        0F  03
+0       8    0          8    0
+Volume  Ý FFÞ0 Pan      Ý 80Þ1
+8         7                  A
+0                             
+Automation                    
+7       0F  037         0F  03
+0       8    0          8    0
+Table   Ý --Þ2 Automate Ý Œ Þ3
+7            A7              A
+0                             
+             ˜               ˜
+7                             
+0                             
+                              
+7                             
+0                             
+You can always manipulate any 
+7                    3     7  
+0                             
+of the values with a SIP id   
+7                             
+0                             
+directly using commands in a  
+7                             
+0                             
+phrase or table.              
 7                             
 0                             
                               

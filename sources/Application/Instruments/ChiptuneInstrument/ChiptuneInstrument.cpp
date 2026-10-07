@@ -41,6 +41,10 @@ void ChiptuneInstrument::Stop(int channel) {
   voices_[channel].chiptune.stop();
 }
 
+void ChiptuneInstrument::InitVoice(int channel) {
+  voices_[channel].chiptune.init();
+}
+
 bool ChiptuneInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // get the instrument parameters from the instrument and pass them to the
   // current voice
@@ -53,7 +57,7 @@ bool ChiptuneInstrument::Start(int channel, unsigned char note, uint8_t volume, 
 
 bool ChiptuneInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   // PROFILE_SCOPE("ChiptuneInstrument::Render");
-  
+
   for (int s = 0; s < size; s++) {
     voices_[channel].chiptune.sample(buffer, buffer + 1);
 

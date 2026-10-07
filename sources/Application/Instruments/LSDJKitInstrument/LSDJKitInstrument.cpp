@@ -46,6 +46,10 @@ void LSDJKitInstrument::Stop(int channel) {
   voices_[channel].lsdj_kit.stop();
 }
 
+void LSDJKitInstrument::InitVoice(int channel) {
+  voices_[channel].lsdj_kit.init();
+}
+
 bool LSDJKitInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   // get the instrument parameters from the instrument and pass them to the
   // current voice
@@ -151,13 +155,15 @@ void LSDJKitInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
       int kitId = vars[n]->GetInt();
 
       if (kitId == NO_KIT) {
-        out[n * 2] = '-';
+        out[n * 2] = '?';
       } else {
         const LSDJKits::Kit *kit = &LSDJKits::kits[kitId];
         int sampleId = notes[n];
 
-        if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+        if (sampleId == 0) {
           out[n * 2] = '-';
+        } else if(sampleId > (int)kit->num_samples) {
+          out[n * 2] = CHAR(char_symbol_indicatorEmpty_s);
         } else {
           out[n * 2] = kit->samples[sampleId - 1].name[0];
         }
@@ -186,8 +192,8 @@ void LSDJKitInstrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], cha
       int kitId = vars[n]->GetInt();
 
       if (kitId == NO_KIT) {
-        lines[n][0] = '-';
-        lines[n][1] = '-';
+        lines[n][0] = '?';
+        lines[n][1] = '?';
       } else {
         const LSDJKits::Kit *kit = &LSDJKits::kits[kitId];
         int sampleId = notes[n];
@@ -219,13 +225,17 @@ void LSDJKitInstrument::focusedNoteDisplay(uint8_t note, char (&line)[12]) {
     int kitId = vars[n]->GetInt();
 
     if (kitId == NO_KIT) {
-      strcpy(line + 1 + n * 4, "---");
+      strcpy(line + 1 + n * 4, "???");
     } else {
       const LSDJKits::Kit *kit = &LSDJKits::kits[kitId];
       int sampleId = notes[n];
 
-      if (sampleId == 0 || sampleId > (int)kit->num_samples) {
+      if (sampleId == 0) {
         strcpy(line + 1 + n * 4, "---");
+      } else if (sampleId > (int)kit->num_samples) {
+        const char *hex = "0123456789ABCDEF";
+        strcpy(line + 1 + n * 4, "( )");
+        line[2 + n * 4] = hex[sampleId];
       } else {
         strcpy(line + 1 + n * 4, kit->samples[sampleId - 1].name);
       }

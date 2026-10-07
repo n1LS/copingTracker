@@ -27,6 +27,10 @@ bool NoneInstrument::Init() {
 void NoneInstrument::OnStart() {
 }
 
+void NoneInstrument::InitVoice(int channel) {
+  voices_[channel].none.init();
+}
+
 bool NoneInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   return true;
 }

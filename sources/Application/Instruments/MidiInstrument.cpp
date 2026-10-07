@@ -82,6 +82,10 @@ void MidiInstrument::SetStepVolume(int channel, uint8_t volume) {
   voices_[channel].midi.lastVolume_ = volume == NO_VOLUME ? 256 : volumeLUT[volume];
 }
 
+void MidiInstrument::InitVoice(int channel) {
+  voices_[channel].midi.init();
+}
+
 bool MidiInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
   voices_[channel].midi.first_ = true;
   voices_[channel].midi.lastNotes_[0] = note;

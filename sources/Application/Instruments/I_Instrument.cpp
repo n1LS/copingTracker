@@ -16,9 +16,24 @@
 #include "System/Console/Trace.h"
 
 Voice I_Instrument::voices_[SONG_CHANNEL_COUNT];
+I_Instrument *I_Instrument::voiceOwner_[SONG_CHANNEL_COUNT];
 
 I_Instrument::~I_Instrument() {
   // Virtual destructor implementation
+}
+
+void I_Instrument::ReleaseVoices(I_Instrument *instrument) {
+  for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+    if (voiceOwner_[i] == instrument) {
+      voiceOwner_[i] = nullptr;
+    }
+  }
+}
+
+void I_Instrument::ReleaseAllVoices() {
+  for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+    voiceOwner_[i] = nullptr;
+  }
 }
 
 void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {

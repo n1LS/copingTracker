@@ -11,6 +11,7 @@
 #include "Application/Instruments/Panning.h"
 #include "Application/Utils/fixed.h"
 #include <cstdint>
+#include <cstring>
 
 #include "System/Console/Trace.h"
 
@@ -220,6 +221,13 @@ typedef struct chiptune_voice_t {
   uint8_t alignmentSentinel[1]; // placeholder to guarantee alignment & padding
 
   // implementation ------------------------------------------------------------
+
+  // puts the voice into a silent, well defined state (zero volume and
+  // frequency keep it quiet until the next note_on)
+  inline void init() {
+    memset(this, 0, sizeof(*this));
+    pan.position = pan.target = 128;
+  }
 
   inline void stop() {
     frequency = 0;
