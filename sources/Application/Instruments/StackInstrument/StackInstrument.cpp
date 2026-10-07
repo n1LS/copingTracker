@@ -44,9 +44,7 @@ StackInstrument::~StackInstrument() {
 }
 
 void StackInstrument::Stop(int channel) {
-  if (voices_[channel].stack) {
-    voices_[channel].stack->stop();
-  }
+  voices_[channel].stack.stop();
 }
 
 bool StackInstrument::Start(int channel, unsigned char note, uint8_t volume, bool retrigger) {
@@ -54,21 +52,16 @@ bool StackInstrument::Start(int channel, unsigned char note, uint8_t volume, boo
   // current voice
   uint8_t calculatedVolume = EffectiveVolume(volume);
 
-  if (voices_[channel].stack == nullptr) {
-    ReleaseVoice(channel);
-    voices_[channel].stack = CreateVoice<stack_voice_t>();
-  }
-  voices_[channel].stack->note_on(note, calculatedVolume, retrigger, getInstrumentParameters());
+  voices_[channel].stack.note_on(note, calculatedVolume, retrigger, getInstrumentParameters());
 
   return true;
 }
 
 bool StackInstrument::Render(int channel, fixed *buffer, int size, bool updateTick) {
   // PROFILE_SCOPE("StackInstrument::Render");
-  stack_voice_t &v = *voices_[channel].stack;
 
   for (int s = 0; s < size; s++) {
-    v.sample(buffer, buffer + 1);
+    voices_[channel].stack.sample(buffer, buffer + 1);
 
     // Output to both channels
     buffer += 2;
@@ -78,12 +71,9 @@ bool StackInstrument::Render(int channel, fixed *buffer, int size, bool updateTi
 }
 
 void StackInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
-  if (voices_[channel].stack == nullptr) {
-    return;
-  }
   switch (token) {
     case Token::InstrumentCommandSetInstrumentParameter:
-      voices_[channel].stack->set_instrument_parameter(value >> 8, value & 0xFF);
+      voices_[channel].stack.set_instrument_parameter(value >> 8, value & 0xFF);
       break;
 
     case Token::InstrumentCommandArpeggiator:
@@ -91,12 +81,12 @@ void StackInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
 
     case Token::InstrumentCommandKill:
     case Token::InstrumentCommandGateOff:
-      voices_[channel].stack->stop();
+      voices_[channel].stack.stop();
       break;
 
     case Token::InstrumentCommandCrush:
-      voices_[channel].stack->bitcrush = value && 0x0f;
-      voices_[channel].stack->drive = value >> 8;
+      voices_[channel].stack.bitcrush = value && 0x0f;
+      voices_[channel].stack.drive = value >> 8;
       break;
 
     case Token::InstrumentCommandVibrato:
@@ -112,7 +102,7 @@ void StackInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
       break;
 
     case Token::InstrumentCommandVolume:
-      voices_[channel].stack->volume = value & 0xff;
+      voices_[channel].stack.volume = value & 0xff;
       break;
 
     case Token::InstrumentCommandPitchFineTune:
@@ -122,16 +112,17 @@ void StackInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
       break;
 
     case Token::InstrumentCommandChordUp:
-      voices_[channel].stack->set_chord((value & 0xf000) >> 12, (value & 0x0f00) >> 8, (value & 0x00f0) >> 4, value & 0x000f);
+      voices_[channel].stack.set_chord((value & 0xf000) >> 12, (value & 0x0f00) >> 8, (value & 0x00f0) >> 4,
+                                        value & 0x000f);
       break;
 
     case Token::InstrumentCommandChordDown:
-      voices_[channel].stack->set_chord(-((value & 0xf000) >> 12), -((value & 0x0f00) >> 8), -((value & 0x00f0) >> 4),
-                                 -(value & 0x000f));
+      voices_[channel].stack.set_chord(-((value & 0xf000) >> 12), -((value & 0x0f00) >> 8), -((value & 0x00f0) >> 4),
+                                        -(value & 0x000f));
       break;
 
     case Token::InstrumentCommandChordBidirectional:
-      voices_[channel].stack->set_chord(int4(value >> 12), int4(value >> 8), int4(value >> 4), int4(value));
+      voices_[channel].stack.set_chord(int4(value >> 12), int4(value >> 8), int4(value >> 4), int4(value));
       break;
   }
 }
@@ -143,9 +134,7 @@ bool StackInstrument::SupportsCommand(Token token) {
 
 void StackInstrument::SetStepVolume(int channel, uint8_t volume) {
   uint8_t calculatedVolume = EffectiveVolume(volume);
-  if (voices_[channel].stack) {
-    voices_[channel].stack->set_step_volume(calculatedVolume);
-  }
+  voices_[channel].stack.set_step_volume(calculatedVolume);
 }
 
 stack_parameters_t StackInstrument::getInstrumentParameters() {

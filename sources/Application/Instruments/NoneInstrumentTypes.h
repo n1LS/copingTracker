@@ -11,4 +11,3 @@
 typedef struct none_voice_t {
   uint32_t placeholder; // placeholder to make the struct non-empty
 } none_voice_t;
-

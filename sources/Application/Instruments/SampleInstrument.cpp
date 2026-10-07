@@ -39,7 +39,11 @@ bool SampleInstrument::useDirtyDownsampling_ = false;
 
 #define SHOULD_KILL_CLICKS false
 
-#define KRATE_SAMPLE_COUNT 100
+// Control-rate (k-rate) updates run every KRATE_SAMPLE_COUNT samples. Historically it was hard set to 100 leading to
+// a 441 Hz update frequency on the original hardware at 44.1Hz sampling rate. Deriving it from SAMPLE_RATE_HZ pins
+// the (rounded) absolute control rate to 441 Hz, so the envelope and vibrato timing stay sample-rate independent
+// (the ramps convert back through the same constant and are self-normalizing)
+#define KRATE_SAMPLE_COUNT (SAMPLE_RATE_HZ / 441)
 
 SampleInstrument::SampleInstrument()
     : I_Instrument(&variables_), sample_(Token::SampleInstrumentSample),
@@ -369,16 +373,9 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
     return false;
 
   // Get Rendering params for current voice & fill init data. The voice is
-  // acquired from the shared voice pool on first use / type change and reused
   // across notes so lastMidiNote_ (legato/retrig base) survives between notes.
-  if (voices_[channel].sample == nullptr) {
-    ReleaseVoice(channel);
-    sample_voice_t *fresh = CreateVoice<sample_voice_t>();
-    voices_[channel].sample = fresh;
-    fresh->lastMidiNote_ = -1;
-  }
-  sample_voice_t *rp = voices_[channel].sample;
-
+  sample_voice_t *rp = &voices_[channel].sample;
+  rp->lastMidiNote_ = -1;
   rp->midiNote_ = note;
 
   if (rp->lastMidiNote_ == -1) {
@@ -596,11 +593,7 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
     // Init downsampling
     rp->downsample_ = downsample_.GetInt();
 
-    // Disable all active updaters for new voice
-    for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
-      I_SRPUpdater *current = *it;
-      current->Disable();
-    }
+    // Clear all active updaters for a new voice (presence in list == active)
     rp->activeUpdaters_.clear();
   }
   return true;
@@ -608,41 +601,28 @@ bool SampleInstrument::Start(int channel, unsigned char note, uint8_t volume, bo
 
 void SampleInstrument::SetStepVolume(int channel, uint8_t volume) {
   uint32_t calculatedVolume = EffectiveVolume(volume);
-
-  if (voices_[channel].sample) {
-    sample_voice_t *rp = voices_[channel].sample;
-    rp->volume_ = rp->baseVolume_ = i2fp(calculatedVolume);
-  }
+  voices_[channel].sample.volume_ = voices_[channel].sample.baseVolume_ = i2fp(calculatedVolume);
 }
 
 void SampleInstrument::Stop(int channel) {
-  if (voices_[channel].sample) {
-    voices_[channel].sample->envelope_.release_note();
-  }
+  voices_[channel].sample.envelope_.release_note();
 }
 
 void SampleInstrument::doTickUpdate(int channel) {
-  sample_voice_t *rp = voices_[channel].sample;
-  if (rp == nullptr) {
-    return;
-  }
-
   // Process updaters
-  for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
-    I_SRPUpdater *current = *it;
-    current->Trigger(true);
+  for (auto b : voices_[channel].sample.activeUpdaters_) {
+    TriggerUpdater(voices_[channel].sample, UpdaterKindFromByte(b), true);
   }
 }
 
 void SampleInstrument::doKRateUpdate(int channel) {
-  sample_voice_t *rp = voices_[channel].sample;
+  sample_voice_t *rp = &voices_[channel].sample;
   if (rp == nullptr) {
     return;
   }
 
-  for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
-    I_SRPUpdater *current = *it;
-    current->Trigger(false);
+  for (auto b : rp->activeUpdaters_) {
+    TriggerUpdater(*rp, UpdaterKindFromByte(b), false);
   }
 }
 
@@ -653,7 +633,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
   bool somethingToMix = false;
 
   // Get Current render parameters
-  sample_voice_t *rp = voices_[channel].sample;
+  sample_voice_t *rp = &voices_[channel].sample;
   rp->lastMidiNote_ = rp->midiNote_;
   bool *rpFinished = &(rp->finished_);
 
@@ -691,9 +671,8 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
         rup.cutOffset_ = rup.resOffset_ = rup.volumeOffset_ = rup.panOffset_ = 0;
         rup.speedOffset_ = FP_ONE;
 
-        for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
-          I_SRPUpdater *current = *it;
-          current->UpdateSRP(rup);
+        for (auto b : rp->activeUpdaters_) {
+          UpdateUpdater(*rp, UpdaterKindFromByte(b), rup);
         }
 
         rp->volume_ = rp->baseVolume_ + rup.volumeOffset_;
@@ -793,7 +772,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
       lastSample = (int16_t *)(wavbuf + rp->rendLoopEnd_ * 2 * channelCount);
     }
 
-    fixed zerofive = fl2fp(0.5f);
+    constexpr fixed zerofive = FP_ONE / 2;
 
     // try to speed up access using pointers rather than structure access
 
@@ -816,7 +795,6 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
     int16_t *dsBasePtr = ((int16_t *)wavbuf) + rp->rendFirst_ * channelCount;
 
     while (count > 0) {
-
       // look where we are, if we need to
 
       if (!rpReverse) {
@@ -852,7 +830,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
             case SILM_LAST:
               NAssert(0);
               break;
-          };
+          }
         }
       } else {
         if (input < lastSample) {
@@ -865,11 +843,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
             case SILM_LOOPSYNC:
               input = loopPosition;
               rpReverse = (loopPosition > lastSample);
-              if (rpReverse) {
-                fpSpeed = -rp->speed_;
-              } else {
-                fpSpeed = rp->speed_;
-              }
+              fpSpeed = rpReverse ? -rp->speed_ : rp->speed_;
               break;
             case SILM_LOOP_PINGPONG:
               if ((loopPosition > lastSample)) {
@@ -887,9 +861,9 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
             case SILM_LAST:
               NAssert(0);
               break;
-          };
+          }
         }
-      };
+      }
 
       if (*rpFinished) {
         count = -1;
@@ -902,19 +876,23 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
 
           // update the envelope as well
           if (rp->envelope_.tick()) {
-            rp->finished_ = true; // Mark this channel as finished
+            // envelope.tick() -> true means egState is idle -> mark this channel as finished
+            rp->finished_ = true;
           }
 
           if (hasUpdaters) {
             doKRateUpdate(channel);
-            struct RUParams rup;
-            rup.cutOffset_ = rup.resOffset_ = rup.volumeOffset_ = rup.panOffset_ = rup.fbMixOffset_ = rup.fbTunOffset_ =
-                0;
+            RUParams rup;
+            rup.cutOffset_ = 0;
+            rup.resOffset_ = 0;
+            rup.volumeOffset_ = 0;
+            rup.panOffset_ = 0;
+            rup.fbMixOffset_ = 0;
+            rup.fbTunOffset_ = 0;
             rup.speedOffset_ = FP_ONE;
 
-            for (auto it = rp->activeUpdaters_.begin(); it != rp->activeUpdaters_.end(); it++) {
-              I_SRPUpdater *current = *it;
-              current->UpdateSRP(rup);
+            for (auto b : rp->activeUpdaters_) {
+              UpdateUpdater(*rp, UpdaterKindFromByte(b), rup);
             }
 
             rp->volume_ = rp->baseVolume_ + rup.volumeOffset_;
@@ -929,12 +907,7 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
             filtering = (rp->cutoff_ < i2fp(1)) || (rp->reso_ > i2fp(0));
 
             volfactor = fp_mul(rp->volume_, volscale);
-
-            if (rpReverse) {
-              fpSpeed = -rp->speed_;
-            } else {
-              fpSpeed = rp->speed_;
-            }
+            fpSpeed = rpReverse ? -rp->speed_ : rp->speed_;
           } else {
             // No active updaters: still need to recompute volfactor from the
             // base volume before applying the envelope, otherwise the
@@ -982,46 +955,36 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
           s2 = i2fp(*i2++);
 
           switch (interpol) {
-
             case 0: // Linear interpolation
-
               eta = fpPos;
               inveta = fp_sub(FP_ONE, eta);
 
               // interpolate
-
               s1 = fp_mul_coef(s1, inveta);
               s2 = fp_mul_coef(s2, eta);
 
               // Compute interpolated sample
-
               s1 += s2;
               break;
 
             case 1: // Nearest neighbor
-
               if (fpPos > zerofive) {
                 s1 = s2;
-              };
+              }
               break;
           }
 
           // crush predrive
-
           s2 = fp_mul_coef(s1, fpcrushvol);
 
           // store result, applying crush
-
           s2 = (s2 & mask);
 
           // apply volume
-
           s2 = fp_mul(s2, volfactor);
 
           // apply filtering if needed
-
           if (filtering) {
-
             fixed lpin = fp_mul_coef(s2, fltMixInv);
             fixed hpin = -fp_mul_coef(s2, fltMix);
 
@@ -1034,13 +997,13 @@ bool SampleInstrument::Render(int channel, fixed *buffer, int size, bool updateT
                 *fltSpeedPtr = -f_s;
               } else if (fltSpeed[i] > FP_ONE) {
                 *fltSpeedPtr = f_s;
-              };
+              }
               *fltSpeedPtr = fp_mul(*fltSpeedPtr, fltDirt);
             }
 
             *fltSpeedPtr = fp_mul_coef(*fltSpeedPtr, fltParm2); // mul by res, it's some kind of inertia.
             // mul by cutoff, less cutoff = no sound, so it's better not be 0.
-            /*HOG:5*/ *fltSpeedPtr = fp_add(*fltSpeedPtr, fp_mul_coef(difr, fltParm1));
+            *fltSpeedPtr = fp_add(*fltSpeedPtr, fp_mul_coef(difr, fltParm1));
 
             *fltHeightPtr += *fltSpeedPtr;
             *fltHeightPtr += *fltDelayPtr - hpin;
@@ -1114,10 +1077,8 @@ int SampleInstrument::GetSampleSize(int channel) {
     if (channel < 0 || channel >= SONG_CHANNEL_COUNT) {
       return source_->GetSize(0);
     }
-    sample_voice_t *rp = voices_[channel].sample;
-    if (rp) {
-      return source_->GetSize(rp->midiNote_);
-    }
+    sample_voice_t *rp = &voices_[channel].sample;
+    return source_->GetSize(rp->midiNote_);
   };
   return 0;
 }
@@ -1255,10 +1216,10 @@ void SampleInstrument::Update(Observable &o, I_ObservableData *d) {
 }
 
 void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) {
-
-  sample_voice_t *rp = voices_[channel].sample;
-  if (!source_ || !rp)
+  if (!source_)
     return;
+
+  sample_voice_t *rp = &voices_[channel].sample;
 
   switch (token) {
     case Token::InstrumentCommandLoopOffset:
@@ -1304,10 +1265,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
     case Token::InstrumentCommandArpeggiator:
       {
         rp->arp_.SetData(value);
-        if (!rp->arp_.Enabled()) {
-          rp->arp_.Enable();
-          rp->activeUpdaters_.push_back(&rp->arp_);
-        }
+        AddUpdater(*rp, UpdaterKind::Arp);
       }
       break;
 
@@ -1321,10 +1279,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
         int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
         speed = (speed == 0) ? 0 : fabs(targetVolume - startVolume) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
         rp->volumeRamp_.SetData(targetVolume - baseVolume, speed, startVolume - baseVolume);
-        if (!rp->volumeRamp_.Enabled()) {
-          rp->volumeRamp_.Enable();
-          rp->activeUpdaters_.push_back(&rp->volumeRamp_);
-        }
+        AddUpdater(*rp, UpdaterKind::Volume);
       }
       break;
 
@@ -1340,10 +1295,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
         int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
         speed = (speed == 0) ? 0 : fabs(targetPan - startPan) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
         rp->panner_.SetData(targetPan - basePan, speed, startPan - basePan);
-        if (!rp->panner_.Enabled()) {
-          rp->panner_.Enable();
-          rp->activeUpdaters_.push_back(&rp->panner_);
-        }
+        AddUpdater(*rp, UpdaterKind::Pan);
       }
       break;
 
@@ -1356,10 +1308,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
         int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
         speed = (speed == 0) ? 0 : fabs(target - start) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
         rp->cutRamp_.SetData(target - baseCut, speed, start - baseCut);
-        if (!rp->cutRamp_.Enabled()) {
-          rp->cutRamp_.Enable();
-          rp->activeUpdaters_.push_back(&rp->cutRamp_);
-        }
+        AddUpdater(*rp, UpdaterKind::Cut);
       }
       break;
 
@@ -1372,10 +1321,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
         int sampleCount = int(4 * SyncMaster::GetInstance()->GetTickSampleCount());
         speed = (speed == 0) ? 0 : fabs(target - start) * KRATE_SAMPLE_COUNT / float(speed) / sampleCount;
         rp->resRamp_.SetData(target - baseRes, speed, start - baseRes);
-        if (!rp->resRamp_.Enabled()) {
-          rp->resRamp_.Enable();
-          rp->activeUpdaters_.push_back(&rp->resRamp_);
-        }
+        AddUpdater(*rp, UpdaterKind::Res);
       }
       break;
     case Token::InstrumentCommandPitchSlide:
@@ -1397,10 +1343,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
         // Fill ramp data & enable
 
         rp->speedRamp_.SetData(targetSpeed, speed, srcSpeed);
-        if (!rp->speedRamp_.Enabled()) {
-          rp->speedRamp_.Enable();
-          rp->activeUpdaters_.push_back(&rp->speedRamp_);
-        }
+        AddUpdater(*rp, UpdaterKind::Speed);
       };
       break;
 
@@ -1432,10 +1375,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
         // Fill ramp data & enable
 
         rp->legato_.SetData(targetSpeed, speed, initSpeed);
-        if (!rp->legato_.Enabled()) {
-          rp->legato_.Enable();
-          rp->activeUpdaters_.push_back(&rp->legato_);
-        }
+        AddUpdater(*rp, UpdaterKind::Legato);
       };
       break;
 
@@ -1448,7 +1388,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
 
         float speed = float(value >> 8); // get speed parameter
 
-        float initSpeed = rp->pfin_.Enabled() ? rp->pfin_.GetCurrent() : 1;
+        float initSpeed = IsUpdaterActive(*rp, UpdaterKind::Pfin) ? rp->pfin_.GetCurrent() : 1;
         float targetSpeed = float(pow(2.0f, semi / 12.0f));
 
         // speed of ramp
@@ -1459,10 +1399,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
 
         rp->pfin_.SetData(targetSpeed, speed, initSpeed);
 
-        if (!rp->pfin_.Enabled()) {
-          rp->pfin_.Enable();
-          rp->activeUpdaters_.push_back(&rp->pfin_);
-        }
+        AddUpdater(*rp, UpdaterKind::Pfin);
       };
       break;
 
@@ -1487,30 +1424,8 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
         float res = (value & 0xFF) / 255.0f; // resonance, aka Q (0=none) so default is FF00
         rp->cutoff_ = rp->baseFCut_ = fl2fp(cut);
         rp->reso_ = rp->baseFRes_ = fl2fp(res);
-        if (rp->cutRamp_.Enabled()) {
-          rp->cutRamp_.Disable();
-          auto it = rp->activeUpdaters_.begin();
-          while (it != rp->activeUpdaters_.end()) {
-            if (*it == &rp->cutRamp_) {
-              (*it)->Disable();
-              rp->activeUpdaters_.erase(it);
-              break;
-            }
-            it++;
-          }
-        }
-        if (rp->resRamp_.Enabled()) {
-          rp->resRamp_.Disable();
-          auto it = rp->activeUpdaters_.begin();
-          while (it != rp->activeUpdaters_.end()) {
-            if (*it == &rp->resRamp_) {
-              (*it)->Disable();
-              rp->activeUpdaters_.erase(it);
-              break;
-            }
-            it++;
-          }
-        }
+        RemoveUpdater(*rp, UpdaterKind::Cut);
+        RemoveUpdater(*rp, UpdaterKind::Res);
       }
       break;
     case Token::InstrumentCommandCrush:
@@ -1530,11 +1445,7 @@ void SampleInstrument::ProcessCommand(int channel, Token token, uint16_t value) 
         uint8_t depth = value & 0xFF;
         // setup the vibrato
         rp->vibrato_.SetData(rate, depth);
-        if (!rp->vibrato_.Enabled()) {
-          // enable and add to active updaters
-          rp->vibrato_.Enable();
-          rp->activeUpdaters_.push_back(&rp->vibrato_);
-        }
+        AddUpdater(*rp, UpdaterKind::Vibrato);
       }
       break;
 

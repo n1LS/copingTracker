@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Config/AudioConstants.h"
+#include "config/AudioConstants.h"
 
 enum stack_wave_type_e : uint8_t {
   stackWavePulse12_5 = 0,

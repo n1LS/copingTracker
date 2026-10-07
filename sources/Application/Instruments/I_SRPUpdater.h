@@ -24,23 +24,11 @@ struct RUParams {
   fixed fbTunOffset_;
 };
 
-class I_SRPUpdater {
-public:
-  I_SRPUpdater() {};
-  virtual ~I_SRPUpdater() {};
-  virtual void Trigger(bool tableTick) = 0;
-  virtual void UpdateSRP(struct RUParams &rup) = 0;
-  void Enable() {
-    enabled_ = true;
-  };
-  void Disable() {
-    enabled_ = false;
-  };
-  bool Enabled() {
-    return enabled_;
-  };
+// Identities of the per-voice Sample Rendering Parameter updaters. Voices keep
+// a small tagged list of which updaters are currently active (instead of a
+// vector of polymorphic pointers), which keeps sample_voice_t free of vtable
+// overhead. The updater classes live in SRPUpdaters.h; tag-based dispatch
+// helpers are defined in SampleRenderingParams.h.
+enum class UpdaterKind : uint8_t { Volume = 0, Pan, Cut, Res, Speed, Legato, Pfin, Arp, Vibrato, Count };
 
-protected:
-  bool enabled_ = false;
-};
 #endif

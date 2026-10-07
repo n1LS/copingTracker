@@ -65,7 +65,7 @@ typedef struct drum_voice_t {
   int32_t frequency;      // precomp'd oscillator frequency
   int32_t base_frequency; // precomp'd oscillator frequency
   uint32_t lastSample;    // used for both the last sample for pulse smoothing
-                              // and as the lcg register for the noise
+                          // and as the lcg register for the noise
 
   uint8_t drive;    // unused currently
   uint8_t bitcrush; // bitcrush setting (only settable via command)

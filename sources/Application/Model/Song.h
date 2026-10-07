@@ -15,9 +15,9 @@
 #include <stdint.h>
 
 #include "Application/Persistency/Persistent.h"
-#include "config/AudioConstants.h"
 #include "Chain.h"
 #include "Phrase.h"
+#include "config/AudioConstants.h"
 
 #define SONG_ROW_COUNT 128
 

@@ -15,115 +15,91 @@
 #include "Foundation/Types/Types.h"
 #include "I_SRPUpdater.h"
 
-class VolumeRamp : public I_SRPUpdater {
-public:
-  VolumeRamp() {};
-  virtual ~VolumeRamp() {};
+// Vol#ume envelope ramp
+struct VolumeRamp {
   void SetData(float target, float speed, float start);
-  virtual void Trigger(bool tableTick);
-  virtual void UpdateSRP(struct RUParams &rup);
+  void Trigger(bool tableTick);
+  void UpdateSRP(struct RUParams &rup);
 
-private:
   fixed current_;
   fixed target_;
   fixed speed_;
 };
 
-class FCRamp : public I_SRPUpdater {
-public:
-  FCRamp() {};
-  virtual ~FCRamp() {};
+// Filter cut-off ramp
+struct FCRamp {
   void SetData(float target, float speed, float start);
-  virtual void Trigger(bool tableTick);
-  virtual void UpdateSRP(struct RUParams &rup);
+  void Trigger(bool tableTick);
+  void UpdateSRP(struct RUParams &rup);
 
-private:
   fixed current_;
   fixed target_;
   fixed speed_;
 };
 
-class FRRamp : public I_SRPUpdater {
-public:
-  FRRamp() {};
-  virtual ~FRRamp() {};
+// Filter resonance ramp
+struct FRRamp {
   void SetData(float target, float speed, float start);
-  virtual void Trigger(bool tableTick);
-  virtual void UpdateSRP(struct RUParams &rup);
+  void Trigger(bool tableTick);
+  void UpdateSRP(struct RUParams &rup);
 
-private:
   fixed current_;
   fixed target_;
   fixed speed_;
 };
 
-class LogSpeedRamp : public I_SRPUpdater {
-public:
-  LogSpeedRamp() {};
-  virtual ~LogSpeedRamp() {};
+// Logarithmic speed/frequency ramp (legato, pitch fine tune)
+struct LogSpeedRamp {
   void SetData(float target, float speed, float start);
   float GetCurrent();
-  virtual void Trigger(bool tableTick);
-  virtual void UpdateSRP(struct RUParams &rup);
+  void Trigger(bool tableTick);
+  void UpdateSRP(struct RUParams &rup);
 
-private:
   fixed current_;
   fixed target_;
   fixed speed_;
 };
 
-class LinSpeedRamp : public I_SRPUpdater {
-public:
-  LinSpeedRamp() {};
-  virtual ~LinSpeedRamp() {};
+// Linear speed/frequency ramp (pitch slide)
+struct LinSpeedRamp {
   void SetData(float target, float speed, float start);
-  virtual void Trigger(bool tableTick);
-  virtual void UpdateSRP(struct RUParams &rup);
+  void Trigger(bool tableTick);
+  void UpdateSRP(struct RUParams &rup);
 
-private:
   fixed current_;
   fixed target_;
   fixed speed_;
 };
 
-class Arp : public I_SRPUpdater {
-public:
-  Arp() {};
-  virtual ~Arp() {};
+// Arpeggiator
+struct Arp {
   void SetData(uint32_t data);
-  virtual void Trigger(bool tableTick);
-  virtual void UpdateSRP(struct RUParams &rup);
+  void Trigger(bool tableTick);
+  void UpdateSRP(struct RUParams &rup);
 
-private:
   fixed current_;
   uint8_t arp_[5];      // Arp setting
-  uint8_t arpPosition_; // Position of in the arpegiator
+  uint8_t arpPosition_; // Position in the arpegiator
   uint8_t arpLength_;   // Length of arp data
 };
 
-class Panner : public I_SRPUpdater {
-public:
-  Panner() {};
-  virtual ~Panner() {};
+// Stereo pan ramp
+struct Panner {
   void SetData(float target, float speed, float start);
-  virtual void Trigger(bool tableTick);
-  virtual void UpdateSRP(struct RUParams &rup);
+  void Trigger(bool tableTick);
+  void UpdateSRP(struct RUParams &rup);
 
-private:
   fixed current_;
   fixed target_;
   fixed speed_;
 };
 
-class Vibrato : public I_SRPUpdater {
-public:
-  Vibrato() {};
-  virtual ~Vibrato() {};
+// Vibrato LFO
+struct Vibrato {
   void SetData(uint8_t rate, uint8_t depth);
-  virtual void Trigger(bool tableTick);
-  virtual void UpdateSRP(struct RUParams &rup);
+  void Trigger(bool tableTick);
+  void UpdateSRP(struct RUParams &rup);
 
-private:
   fixed current_;
   uint16_t phase_;
   uint16_t rate_;

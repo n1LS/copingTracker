@@ -28,6 +28,5 @@ constexpr float SAMPLE_RATE_F = 44100.0f;
 // expressed relative to this.
 constexpr float NYQUIST_HZ = SAMPLE_RATE_F / 2.0f;
 
-// Number of channels in the song. 
+// Number of channels in the song.
 constexpr int SONG_CHANNEL_COUNT = 8;
-

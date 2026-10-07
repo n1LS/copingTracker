@@ -16,33 +16,6 @@
 #include "System/Console/Trace.h"
 
 Voice I_Instrument::voices_[SONG_CHANNEL_COUNT];
-VoicePool I_Instrument::voicesPool_;
-
-void I_Instrument::ReleaseVoice(int channel) {
-  Voice &slot = voices_[channel];
-  if (slot.none) {
-    voicesPool_.destroy(slot.none);
-  }
-  else if (slot.chiptune) {
-    voicesPool_.destroy(slot.chiptune);
-  }
-  else if (slot.drum) {
-    voicesPool_.destroy(slot.drum);
-  }
-  else if (slot.sample) {
-    voicesPool_.destroy(slot.sample);
-  }
-  else if (slot.midi) {
-    voicesPool_.destroy(slot.midi);
-  }
-  else if (slot.stack) {
-    voicesPool_.destroy(slot.stack);
-  }
-  else if (slot.lsdj_kit) {
-    voicesPool_.destroy(slot.lsdj_kit);
-  }
-  slot = Voice();
-}
 
 I_Instrument::~I_Instrument() {
   // Virtual destructor implementation

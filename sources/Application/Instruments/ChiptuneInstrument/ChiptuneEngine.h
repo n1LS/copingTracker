@@ -74,14 +74,14 @@ typedef struct chiptune_voice_t {
   uint32_t timeToLive; // time before the voice is silenced
 
   uint32_t lastSample; // used for both the last sample for pulse smoothing
-                           // and as the lcg register for the noise
+                       // and as the lcg register for the noise
 
   struct arp {
     int32_t frequencies[5]; // precomp'd frequencies
-    uint8_t clock;                        // internal clock for arpeggio timing
-    uint8_t time;                       // arpeggio step duration in clock ticks
-    uint8_t length;                       // number of steps in the arpeggio (1-5)
-    uint8_t index;                        // current index in the arpeggio sequence
+    uint8_t clock;          // internal clock for arpeggio timing
+    uint8_t time;           // arpeggio step duration in clock ticks
+    uint8_t length;         // number of steps in the arpeggio (1-5)
+    uint8_t index;          // current index in the arpeggio sequence
 
     inline void tick() {
       clock++;
@@ -118,11 +118,11 @@ typedef struct chiptune_voice_t {
   } volume;
 
   struct vibrato {
-    int32_t swing;               // frequency diff between current note and next semitone
-    uint16_t phase;              // sine lfo phase
+    int32_t swing;      // frequency diff between current note and next semitone
+    uint16_t phase;     // sine lfo phase
     uint16_t frequency; // vibrato frequency
-    uint16_t delay;              // ticks before auto-vibrato starts
-    uint8_t depth;               // vibrato depth to apply
+    uint16_t delay;     // ticks before auto-vibrato starts
+    uint8_t depth;      // vibrato depth to apply
 
     int tick(uint32_t time) {
       if (time > delay) {

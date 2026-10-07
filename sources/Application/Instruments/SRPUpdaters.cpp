@@ -25,8 +25,6 @@ void VolumeRamp::SetData(float target, float speed, float start) {
 }
 
 void VolumeRamp::Trigger(bool tableTick) {
-  if (!enabled_)
-    return;
   if (!tableTick) {
     if (speed_ == 0) {
       current_ = target_;
@@ -47,8 +45,6 @@ void VolumeRamp::Trigger(bool tableTick) {
 }
 
 void VolumeRamp::UpdateSRP(struct RUParams &rup) {
-  if (!enabled_)
-    return;
   rup.volumeOffset_ = fp_add(rup.volumeOffset_, current_);
 }
 
@@ -63,8 +59,6 @@ void FCRamp::SetData(float target, float speed, float start) {
 }
 
 void FCRamp::Trigger(bool tableTick) {
-  if (!enabled_)
-    return;
   if (!tableTick) {
     if (speed_ == 0) {
       current_ = target_;
@@ -85,8 +79,6 @@ void FCRamp::Trigger(bool tableTick) {
 }
 
 void FCRamp::UpdateSRP(struct RUParams &rup) {
-  if (!enabled_)
-    return;
   rup.cutOffset_ = fp_add(rup.cutOffset_, current_);
 }
 
@@ -101,8 +93,6 @@ void FRRamp::SetData(float target, float speed, float start) {
 }
 
 void FRRamp::Trigger(bool tableTick) {
-  if (!enabled_)
-    return;
   if (!tableTick) {
     if (speed_ == 0) {
       current_ = target_;
@@ -123,8 +113,6 @@ void FRRamp::Trigger(bool tableTick) {
 }
 
 void FRRamp::UpdateSRP(struct RUParams &rup) {
-  if (!enabled_)
-    return;
   rup.resOffset_ = fp_add(rup.resOffset_, current_);
 }
 
@@ -151,8 +139,6 @@ float LogSpeedRamp::GetCurrent() {
 }
 
 void LogSpeedRamp::Trigger(bool tableTick) {
-  if (!enabled_)
-    return;
   if (!tableTick) {
     if (speed_ == 0) {
       current_ = target_;
@@ -177,8 +163,6 @@ void LogSpeedRamp::Trigger(bool tableTick) {
 }
 
 void LogSpeedRamp::UpdateSRP(struct RUParams &rup) {
-  if (!enabled_)
-    return;
   rup.speedOffset_ = fp_mul(rup.speedOffset_, current_);
   //	Trace::Debug("Log: current=%f,offset
   // now=%f",fp2fl(current_),fp2fl(rup.speedOffset_)) ;
@@ -196,8 +180,6 @@ void LinSpeedRamp::SetData(float target, float speed, float start) {
 }
 
 void LinSpeedRamp::Trigger(bool tableTick) {
-  if (!enabled_)
-    return;
   if (!tableTick) {
     if (speed_ == 0) {
       current_ = target_;
@@ -220,8 +202,6 @@ void LinSpeedRamp::Trigger(bool tableTick) {
 }
 
 void LinSpeedRamp::UpdateSRP(struct RUParams &rup) {
-  if (!enabled_)
-    return;
   rup.speedOffset_ = fp_mul(rup.speedOffset_, current_);
 }
 
@@ -237,8 +217,6 @@ void Panner::SetData(float target, float speed, float start) {
 }
 
 void Panner::Trigger(bool tableTick) {
-  if (!enabled_)
-    return;
   if (!tableTick) {
     if (speed_ == 0) {
       current_ = target_;
@@ -261,8 +239,6 @@ void Panner::Trigger(bool tableTick) {
 }
 
 void Panner::UpdateSRP(struct RUParams &rup) {
-  if (!enabled_)
-    return;
   rup.panOffset_ = fp_add(rup.panOffset_, current_);
 }
 
@@ -288,7 +264,7 @@ void Arp::SetData(uint32_t value) {
 
 void Arp::Trigger(bool tableTick) {
 
-  if ((!tableTick) || (!enabled_))
+  if (!tableTick)
     return;
   if (arpLength_ > 0) {
     arpPosition_++;
@@ -300,8 +276,6 @@ void Arp::Trigger(bool tableTick) {
 }
 
 void Arp::UpdateSRP(struct RUParams &rup) {
-  if (!enabled_)
-    return;
   rup.speedOffset_ = fp_mul(rup.speedOffset_, current_);
 }
 
@@ -320,8 +294,6 @@ void Vibrato::SetData(uint8_t rate, uint8_t depth) {
 }
 
 void Vibrato::Trigger(bool tableTick) {
-  if (!enabled_)
-    return;
 
   // step the lfo phase
   phase_ += rate_;
@@ -331,7 +303,5 @@ void Vibrato::Trigger(bool tableTick) {
 }
 
 void Vibrato::UpdateSRP(struct RUParams &rup) {
-  if (!enabled_)
-    return;
   rup.speedOffset_ = fp_mul(rup.speedOffset_, current_);
 }

@@ -16,9 +16,9 @@
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Externals/etl/include/etl/string.h"
 #include "I_Instrument.h"
+#include "MidiInstrumentTypes.h"
 #include "Services/Midi/MidiMessage.h"
 #include "Services/Midi/MidiService.h"
-#include "MidiInstrumentTypes.h"
 
 #define INITIAL_NOTE_VELOCITY 0x7F
 

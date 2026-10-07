@@ -53,10 +53,10 @@ static inline void panlaw_gains(uint8_t pan, fixed &left, fixed &right) {
 // the voice structs inside their size budgets.
 struct panlaw_state {
   uint16_t left;
-  uint16_t right; // cached gain, refreshed by refresh()
-  uint8_t position;       // current pan position, 128 = centre
-  uint8_t target;         // slew target
-  int16_t step;             // slew step size, 0 = no slew in progress
+  uint16_t right;   // cached gain, refreshed by refresh()
+  uint8_t position; // current pan position, 128 = centre
+  uint8_t target;   // slew target
+  int16_t step;     // slew step size, 0 = no slew in progress
 
   // Recompute the cached gains. Call whenever position changes.
   inline void refresh() {
