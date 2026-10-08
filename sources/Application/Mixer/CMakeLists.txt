@@ -1,4 +1,5 @@
 add_library(application_mixer
+  DelayEffect.cpp
   MixBus.cpp
   MixerService.cpp
 )

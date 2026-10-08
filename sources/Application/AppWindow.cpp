@@ -94,6 +94,7 @@ struct AppWindowViews {
   MixerView mixerView;
   SampleEditorView sampleEditorView;
   SampleSlicesView sampleSlicesView;
+  ModulationView modulationView;
   BootView bootView;
 
   void Reset() {
@@ -113,6 +114,7 @@ struct AppWindowViews {
     selectProjectView.Reset();
     sampleEditorView.Reset();
     sampleSlicesView.Reset();
+    modulationView.Reset();
   };
 
   void AddObservers(I_Observer &window) {
@@ -133,6 +135,7 @@ struct AppWindowViews {
     mixerView.AddObserver(window);
     sampleEditorView.AddObserver(window);
     sampleSlicesView.AddObserver(window);
+    modulationView.AddObserver(window);
     bootView.AddObserver(window);
 
     auto config = Config::GetInstance();
@@ -145,7 +148,8 @@ struct AppWindowViews {
         helpView(w, &viewData), themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData),
         importView(w, &viewData), instrumentImportView(w, &viewData), instrumentView(w, &viewData),
         tableView(w, &viewData), grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
-        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), bootView(w, &viewData) {
+        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), modulationView(w, &viewData),
+        bootView(w, &viewData) {
   }
 };
 
@@ -840,6 +844,9 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
             break;
           case VT_SAMPLE_SLICES:
             currentView_ = &views_->sampleSlicesView;
+            break;
+          case VT_MODULATION:
+            currentView_ = &views_->modulationView;
             break;
           case VT_BOOT:
             currentView_ = &views_->bootView;

@@ -77,7 +77,7 @@ InstrumentView::InstrumentView(GUIWindow &w, ViewData *data)
   persistentActionField_.back().AddObserver(*this);
 
   position = GUIPoint(29, 4);
-  persistentActionField_.emplace_back(char_mod_s, Token::ActionModulation, position);
+  persistentActionField_.emplace_back("FX", Token::ActionModulation, position);
   persistentActionField_.back().SetBackgroundColor(Theme::View::inactive);
   persistentActionField_.back().SetFieldConfiguration(instrumentActionFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &persistentActionField_.back());
@@ -193,13 +193,7 @@ void InstrumentView::onInstrumentTypeChange(bool updateUI) {
       setCurrentInstrumentToNone();
     }
   }
-
-  // Get the new instrument after type change
-  I_Instrument *newInstr = getInstrument();
-  if (newInstr) {
-    Trace::Log("INSTRUMENTVIEW", "New instrument type: %d", newInstr->GetType());
-  }
-
+  
   // Refresh the UI fields for the new instrument type
   refreshInstrumentFields();
 
@@ -245,6 +239,7 @@ void InstrumentView::refreshInstrumentFields() {
   }
 
   fieldList_.clear();
+  clearTitleLabels();
   intVarField_.clear();
   noteVarField_.clear();
   staticField_.clear();
@@ -820,7 +815,7 @@ bool InstrumentView::checkInstrumentModified() {
 }
 
 void InstrumentView::goToModulationPage() {
-  // TODO
+  Navigate(VT_MODULATION, vtRevealFromCenter);
 }
 
 void InstrumentView::goToInstrumentPage() {

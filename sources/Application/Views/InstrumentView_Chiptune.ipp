@@ -17,12 +17,6 @@ void InstrumentView::addIndexToLine(uint8_t index, uint8_t line, bool left) {
   fieldList_.insert(fieldList_.end(), &staticField_.back());
 }
 
-void InstrumentView::addTitleLabel(const char *title, uint8_t line, bool left) {
-  staticField_.emplace_back(GUIPoint(left ? 1 : 17, line), title);
-  staticField_.back().color_ = Theme::View::inactive;
-  fieldList_.insert(fieldList_.end(), &staticField_.back());
-}
-
 void InstrumentView::fillChiptuneParameters() {
   int i = viewData_->currentInstrumentID_;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();

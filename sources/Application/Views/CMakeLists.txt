@@ -21,6 +21,7 @@ add_library(application_views
   UIController.cpp
   ViewData.cpp
   MixerView.cpp
+  ModulationView.cpp
   SampleEditorView.cpp
   SampleEditProgressDisplay.cpp
   SampleSlicesView.cpp

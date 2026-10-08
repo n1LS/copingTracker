@@ -98,7 +98,7 @@ public:
   }
 
 private:
-  etl::vector<Variable *, 16> variables_;
+  etl::vector<Variable *, 17> variables_;
 
   Variable vKit1_;
   Variable vKit2_;

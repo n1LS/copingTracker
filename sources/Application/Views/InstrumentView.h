@@ -61,7 +61,6 @@ public:
 
 protected:
   void addIndexToLine(uint8_t index, uint8_t line, bool left = false);
-  void addTitleLabel(const char *title, uint8_t line, bool left = true);
   void warpToNext(int offset);
   void onInstrumentChange();
   void fillSampleParameters();

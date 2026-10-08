@@ -40,6 +40,9 @@ public:
   Song song_;
 
   int GetMasterVolume();
+  int GetDelayTime();     // in ticks
+  int GetDelayFeedback(); // 0..FF
+  int GetDelayWet();      // 0..FF
   int GetChannelVolume(int channel);
   bool Wrap();
   void OnTempoTap();
@@ -67,7 +70,7 @@ public:
   virtual void RestoreContent(PersistencyDocument *doc);
 
 private:
-  etl::vector<Variable *, 16> variables_;
+  etl::vector<Variable *, 19> variables_;
 
   InstrumentBank instrumentBank_;
   int tempoNudge_;
@@ -93,6 +96,9 @@ private:
   Variable scale_;
   Variable scaleRoot_;
   Variable phraseLength_;
+  Variable delayTime_;
+  Variable delayFeedback_;
+  Variable delayWet_;
   StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> projectName_;
 };
 

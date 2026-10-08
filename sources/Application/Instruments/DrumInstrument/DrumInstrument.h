@@ -74,7 +74,7 @@ public:
   void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]) override;
 
 private:
-  etl::vector<Variable *, 17> variables_;
+  etl::vector<Variable *, 18> variables_;
 
   Variable vVoice0_;
   Variable vVoice1_;

@@ -89,7 +89,7 @@ public:
   };
 
 private:
-  etl::vector<Variable *, 7> variables_;
+  etl::vector<Variable *, 8> variables_;
 
   uint32_t stepVolume_;
   int remainingTicks_;

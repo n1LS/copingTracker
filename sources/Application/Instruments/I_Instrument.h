@@ -45,6 +45,12 @@ typedef union Voice {
 
 enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_CHIPTUNE, IT_DRUM, IT_STACK, IT_LSDJKIT, IT_MIDI, IT_LAST };
 
+// Where an instrument sends its output to, in addition to its channel bus.
+// Effects are single instance and shared by all instruments sending to them.
+enum OutputEffect { OE_NONE = 0, OE_DELAY, OE_LAST };
+
+static const char *OutputEffectNames[OE_LAST] = {"--", "Delay"};
+
 // non-linear volume (4-bit) mapping to volume scaler
 static const uint8_t volumeLUT[16] = {0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 160, 193, 228, 245, 255};
 
@@ -87,7 +93,8 @@ public:
       : VariableContainer(list), Persistent(nodeName, registerWithPersistence),
         volume_(Token::InstrumentParameterVolume, 0xff), pan_(Token::InstrumentParameterPan, 0x80),
         table_(Token::InstrumentParameterTable, VAR_OFF),
-        tableAutomation_(Token::InstrumentParameterTableAutomation, false) {};
+        tableAutomation_(Token::InstrumentParameterTableAutomation, false),
+        outputEffect_(Token::InstrumentParameterOutput, OutputEffectNames, OE_LAST, OE_NONE) {};
   virtual ~I_Instrument();
 
   // Initialisation routine
@@ -159,6 +166,11 @@ public:
     return std::min(0xff, std::max(pan_.GetInt(), 0x00));
   }
 
+  OutputEffect GetOutputEffect() {
+    int effect = outputEffect_.GetInt();
+    return (effect > OE_NONE && effect < OE_LAST) ? (OutputEffect)effect : OE_NONE;
+  }
+
   virtual void noteDisplay(uint8_t note, char (&out)[4]);
   virtual void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]);
   virtual void focusedNoteDisplay(uint8_t note, char (&line)[12]);
@@ -225,12 +237,14 @@ protected:
     list->push_back(&pan_);
     list->push_back(&table_);
     list->push_back(&tableAutomation_);
+    list->push_back(&outputEffect_);
   }
 
   Variable volume_;
   Variable pan_;
   Variable table_;
   Variable tableAutomation_;
+  Variable outputEffect_;
 
   static Voice voices_[SONG_CHANNEL_COUNT];
   static I_Instrument *voiceOwner_[SONG_CHANNEL_COUNT];

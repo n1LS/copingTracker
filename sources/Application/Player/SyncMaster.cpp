@@ -11,12 +11,7 @@
 
 #include "SyncMaster.h"
 #include "Services/Audio/Audio.h"
-
-#ifdef WIN32
-#define AUDIO_SLICES_PER_STEP 6 // needs to be a multiple of 6 !
-#else
-#define AUDIO_SLICES_PER_STEP 6 // needs to be a multiple of 6 !
-#endif
+#include "config/AudioConstants.h"
 
 SyncMaster::SyncMaster() {
   tableRatio_ = 1;

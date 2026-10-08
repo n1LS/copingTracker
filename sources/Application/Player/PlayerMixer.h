@@ -92,6 +92,8 @@ public:
   etl::array<stereosample, SONG_CHANNEL_COUNT> *GetMixerLevels();
 
 private:
+  void updateDelayParameters();
+
   Project *project_;
   etl::array<stereosample, SONG_CHANNEL_COUNT> mixerLevels_;
 

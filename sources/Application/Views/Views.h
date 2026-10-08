@@ -18,6 +18,7 @@
 #include "Application/Views/InstrumentImportView.h"
 #include "Application/Views/InstrumentView.h"
 #include "Application/Views/MixerView.h"
+#include "Application/Views/ModulationView.h"
 #include "Application/Views/ModalDialogs/FullScreenBox.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/PhraseView.h"

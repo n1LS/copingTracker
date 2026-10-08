@@ -13,6 +13,7 @@
 #define _FIELD_VIEW_H_
 
 #include "BaseClasses/UIField.h"
+#include "BaseClasses/UIStaticField.h"
 #include "ScreenView.h"
 
 class FieldView : public ScreenView {
@@ -34,10 +35,16 @@ public:
   // ThemeView currently biggest user: uses 64 (12 colors * 5 + font + theme
   // name + buttons)
 
+  void addTitleLabel(const char *title, uint8_t line, bool left = true);
+  // must be called together with fieldList_.clear() when a view rebuilds its
+  // fields, otherwise the labels pile up
+  void clearTitleLabels();
+
 private:
   uint16_t lastMask_;
   UIField *focus_ = nullptr;
   UIField *findAdjacentField(bool vertical, int8_t direction);
+  etl::vector<UIStaticField, 8> staticField_;
 
   // On screen keyboard: the field awaiting the modal's result.
   UIField *editingField_ = nullptr;

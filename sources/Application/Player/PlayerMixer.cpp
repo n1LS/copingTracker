@@ -73,6 +73,8 @@ void PlayerMixer::BindProject(Project *project) {
     isChannelPlaying_[i] = false;
     notes_[i] = NO_NOTE;
   }
+
+  MixerService::GetInstance()->GetDelay()->Clear();
 }
 
 void PlayerMixer::Close() {
@@ -173,6 +175,15 @@ void PlayerMixer::Update(Observable &o, I_ObservableData *d) {
 
   MixerService *ms = MixerService::GetInstance();
   ms->SetMasterVolume(project_->GetMasterVolume());
+  updateDelayParameters();
+}
+
+void PlayerMixer::updateDelayParameters() {
+  // delay time is set in ticks, the line runs at half the sample rate
+  float tickSamples = SyncMaster::GetInstance()->GetPlaySampleCount();
+  int slots = (int)(project_->GetDelayTime() * tickSamples) / 2;
+  fixed wet = project_->GetDelayWet() << (FIXED_SHIFT - 8);
+  MixerService::GetInstance()->GetDelay()->SetParameters(slots, project_->GetDelayFeedback(), wet);
 }
 
 void PlayerMixer::StartInstrument(int channel, I_Instrument *instrument, unsigned char note, uint8_t volume,

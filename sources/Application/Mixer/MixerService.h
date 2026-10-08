@@ -13,6 +13,7 @@
 #define _MIXER_SERVICE_H_
 
 #include "Application/Commands/ApplicationCommandDispatcher.h" // Would be better done externally and call an API here
+#include "DelayEffect.h"
 #include "Foundation/Observable.h"
 #include "Foundation/T_Singleton.h"
 #include "MixBus.h"
@@ -27,6 +28,8 @@ enum MixerServiceMode {
 };
 
 #define MAX_BUS_COUNT 10
+// bus 0-7 are the song channels, 8 the file streamer
+#define DELAY_MIX_BUS 9
 
 class MixerService : public T_Singleton<MixerService>, public Observable, public I_Observer, public CommandExecuter {
 
@@ -44,6 +47,10 @@ public:
 
   MixBus *GetMasterBus() {
     return &master_;
+  };
+
+  DelayEffect *GetDelay() {
+    return &delay_;
   };
 
   virtual void Update(Observable &o, I_ObservableData *d);
@@ -77,6 +84,7 @@ private:
   AudioOut *out_;
   MixBus master_;
   MixBus bus_[MAX_BUS_COUNT];
+  DelayEffect delay_;
   SysMutex *sync_;
   Project *project_; // Reference to the current project
   MixerServiceMode mode_ = MSM_AUDIO;

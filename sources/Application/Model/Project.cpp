@@ -29,6 +29,9 @@
 #define DEFAULT_CHANNEL_VOLUME 99
 #define DEFAULT_MASTER_VOLUME 60
 #define DATA_UNUSED_VALUE 0xFF
+#define DEFAULT_DELAY_TIME 0x0C
+#define DEFAULT_DELAY_FEEDBACK 0x60
+#define DEFAULT_DELAY_WET 0x80
 
 Project::Project(const char *name)
     : Persistent("Project"), VariableContainer(&variables_), song_(), tempoNudge_(0),
@@ -43,6 +46,8 @@ Project::Project(const char *name)
       channelVolume8_(Token::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME), wrap_(Token::VarWrap, false),
       transpose_(Token::VarTranspose, 0), scale_(Token::VarScale, scaleNames, numScales, 0),
       scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), phraseLength_(Token::VarPhraseLength, 16),
+      delayTime_(Token::VarDelayTime, DEFAULT_DELAY_TIME),
+      delayFeedback_(Token::VarDelayFeedback, DEFAULT_DELAY_FEEDBACK), delayWet_(Token::VarDelayWet, DEFAULT_DELAY_WET),
       projectName_(Token::VarProjectName, name) {
 
   this->variables_.push_back(&tempo_);
@@ -64,6 +69,9 @@ Project::Project(const char *name)
   scale_.SetInt(0);
   this->variables_.push_back(&scaleRoot_);
   this->variables_.push_back(&phraseLength_);
+  this->variables_.push_back(&delayTime_);
+  this->variables_.push_back(&delayFeedback_);
+  this->variables_.push_back(&delayWet_);
   scaleRoot_.SetInt(0); // Default to C (0)
   this->variables_.push_back(&projectName_);
 
@@ -111,6 +119,9 @@ void Project::Load(const char *name) {
   scale_.Reset();
   scaleRoot_.Reset();
   phraseLength_.Reset();
+  delayTime_.Reset();
+  delayFeedback_.Reset();
+  delayWet_.Reset();
 
   if (name) {
     projectName_.SetString(name, true);
@@ -144,6 +155,18 @@ int Project::GetMasterVolume() {
   Variable *v = FindVariable(Token::VarMasterVolume);
   NAssert(v);
   return v->GetInt();
+}
+
+int Project::GetDelayTime() {
+  return delayTime_.GetInt();
+}
+
+int Project::GetDelayFeedback() {
+  return delayFeedback_.GetInt();
+}
+
+int Project::GetDelayWet() {
+  return delayWet_.GetInt();
 }
 
 int Project::GetChannelVolume(int channel) {

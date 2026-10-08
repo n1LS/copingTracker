@@ -59,6 +59,7 @@ struct Token {
     InstrumentParameterPan = 43,
     InstrumentParameterTable = 117,
     InstrumentParameterTableAutomation = 60,
+    InstrumentParameterOutput = 236,
 
     SampleInstrumentCrushVolume = 3,
     SampleInstrumentCrush = 114,
@@ -240,8 +241,11 @@ struct Token {
     StackInstrumentChord = 230,
 
     VarPhraseLength = 254,
+    VarDelayTime = 237,
+    VarDelayFeedback = 238,
+    VarDelayWet = 239,
 
-    // 235-253 free 23
+    // 240-253 free 14
 
     Default = 255, // "    "
   };
@@ -301,6 +305,7 @@ struct Token {
   ETL_ENUM_TYPE_16(InstrumentParameterPan, "Pan")
   ETL_ENUM_TYPE_16(InstrumentParameterTable, "Table")
   ETL_ENUM_TYPE_16(InstrumentParameterTableAutomation, "Automate")
+  ETL_ENUM_TYPE_16(InstrumentParameterOutput, "Output")
 
   ETL_ENUM_TYPE_16(VarKeyDelay, "key-delay")
   ETL_ENUM_TYPE_16(VarKeyRepeat, "key-repeat")
@@ -313,6 +318,9 @@ struct Token {
   ETL_ENUM_TYPE_16(VarThemeName, "theme-name")
   ETL_ENUM_TYPE_16(VarScaleRoot, "scale-root")
   ETL_ENUM_TYPE_16(VarPhraseLength, "phrase-length")
+  ETL_ENUM_TYPE_16(VarDelayTime, "delay-time")
+  ETL_ENUM_TYPE_16(VarDelayFeedback, "delay-feedback")
+  ETL_ENUM_TYPE_16(VarDelayWet, "delay-wet")
   ETL_ENUM_TYPE_16(SampleInstrumentSample, "Sample")
   ETL_ENUM_TYPE_16(SampleInstrumentInterpolation, "Interpolation")
   ETL_ENUM_TYPE_16(SampleInstrumentCrush, "Crush")

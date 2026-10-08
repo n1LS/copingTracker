@@ -85,10 +85,10 @@ void UIIntVarField::ProcessArrow(uint16_t mask) {
     case BM_RIGHT:
       value += xOffset_;
       break;
-  };
+  }
   if (value < min_) {
     value = min_;
-  };
+  }
   if (value > max_) {
     value = max_;
   }

@@ -106,7 +106,7 @@ void FieldView::Redraw() {
   }
 }
 
-void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
+void FieldView::ProcessButtonMask(uint16_t mask, 	bool pressed) {
   if (focus_ == nullptr) {
     focus_ = *fieldList_.begin();
     //  Empty field view, we don't have anything to do
@@ -171,18 +171,18 @@ void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
       isDirty_ = true;
     }
   } else {
+    UIField *target = nullptr;
     if (mask == BM_DOWN) {
-      UIField *next = findAdjacentField(true, +1);
-      SetFocus(next);
+      target= findAdjacentField(true, +1);
     } else if (mask == BM_UP) {
-      UIField *prev = findAdjacentField(true, -1);
-      SetFocus(prev);
+      target = findAdjacentField(true, -1);
     } else if (mask == BM_RIGHT) {
-      UIField *next = findAdjacentField(false, +1);
-      SetFocus(next);
+      target = findAdjacentField(false, +1);
     } else if (mask == BM_LEFT) {
-      UIField *prev = findAdjacentField(false, -1);
-      SetFocus(prev);
+      target = findAdjacentField(false, -1);
+    }
+    if (target) {
+      SetFocus(target);
     }
   }
 
@@ -278,4 +278,20 @@ const GUIRect FieldView::GetFocusRect() {
   UpdateFocusRect();
 
   return focusRect_;
+}
+
+void FieldView::addTitleLabel(const char *title, uint8_t line, bool left) {
+  // etl doesn't stop at the capacity in release builds, it would write past
+  // the end of the vector
+  if (staticField_.full()) {
+    Trace::Error("FIELDVIEW", "Too many title labels");
+    return;
+  }
+  staticField_.emplace_back(GUIPoint(left ? 1 : 17, line), title);
+  staticField_.back().color_ = Theme::View::inactive;
+  fieldList_.insert(fieldList_.end(), &staticField_.back());
+}
+
+void FieldView::clearTitleLabels() {
+  staticField_.clear();
 }

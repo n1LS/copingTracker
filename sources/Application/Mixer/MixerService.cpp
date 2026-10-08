@@ -51,6 +51,11 @@ bool MixerService::Init() {
     master_.SetName("Master");
   }
 
+  // The channels feed the delay's input while their buses render, so the
+  // delay bus needs to be the last one added to the master
+  delay_.Clear();
+  bus_[DELAY_MIX_BUS].AddModule(delay_);
+
   if (out_) {
     result = out_->Init();
     if (result) {
@@ -210,6 +215,8 @@ void MixerService::OnPlayerStart(MixerServiceMode mode) {
 void MixerService::OnPlayerStop() {
   // always reset back to audio mode when stopping
   setRenderingMode(MSM_AUDIO);
+  // with feedback the delay tail could ring forever, so silence it
+  delay_.Clear();
 }
 
 bool MixerService::configureRenderPaths() {
