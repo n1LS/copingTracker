@@ -56,11 +56,11 @@ public:
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
   virtual void SetTableState(TableSaveState &state);
-  etl::ilist<Variable *> *Variables() {
+  etl::ivector<Variable *> *Variables() {
     return &variables_;
   };
 
 private:
-  etl::list<Variable *, 4> variables_;
+  etl::vector<Variable *, 4> variables_;
 };
 #endif

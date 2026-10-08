@@ -36,7 +36,7 @@ public:
     return IT_STACK;
   }
 
-  etl::ilist<Variable *> *Variables() {
+  etl::ivector<Variable *> *Variables() {
     return &variables_;
   }
 
@@ -79,7 +79,7 @@ public:
 private:
   stack_parameters_t getInstrumentParameters();
 
-  etl::list<Variable *, 14> variables_;
+  etl::vector<Variable *, 14> variables_;
 
   Variable spread_;
   Variable wave_;

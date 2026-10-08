@@ -70,7 +70,7 @@ public:
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
   virtual void SetTableState(TableSaveState &state);
-  etl::ilist<Variable *> *Variables() {
+  etl::ivector<Variable *> *Variables() {
     return &variables_;
   };
 
@@ -89,7 +89,7 @@ public:
   };
 
 private:
-  etl::list<Variable *, 7> variables_;
+  etl::vector<Variable *, 7> variables_;
 
   uint32_t stepVolume_;
   int remainingTicks_;

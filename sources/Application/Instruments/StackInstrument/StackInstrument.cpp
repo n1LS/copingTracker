@@ -28,16 +28,16 @@ StackInstrument::StackInstrument()
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
   InsertBaseVariables();
-  variables_.insert(variables_.end(), &spread_);
-  variables_.insert(variables_.end(), &wave_);
-  variables_.insert(variables_.end(), &transpose_);
-  variables_.insert(variables_.end(), &attack_);
-  variables_.insert(variables_.end(), &decay_);
-  variables_.insert(variables_.end(), &sustain_);
-  variables_.insert(variables_.end(), &release_);
-  variables_.insert(variables_.end(), &brightness_);
-  variables_.insert(variables_.end(), &glide_);
-  variables_.insert(variables_.end(), &chord_);
+  variables_.push_back(&spread_);
+  variables_.push_back(&wave_);
+  variables_.push_back(&transpose_);
+  variables_.push_back(&attack_);
+  variables_.push_back(&decay_);
+  variables_.push_back(&sustain_);
+  variables_.push_back(&release_);
+  variables_.push_back(&brightness_);
+  variables_.push_back(&glide_);
+  variables_.push_back(&chord_);
 }
 
 StackInstrument::~StackInstrument() {

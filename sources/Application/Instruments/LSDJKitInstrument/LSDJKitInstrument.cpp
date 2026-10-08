@@ -27,17 +27,17 @@ LSDJKitInstrument::LSDJKitInstrument()
       vClip_(Token::LSDJKitInstrumentClip, clippingModeNames, clippingModeCount, lsdjDefaultClip) {
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
-  variables_.insert(variables_.end(), &vKit1_);
-  variables_.insert(variables_.end(), &vKit2_);
-  variables_.insert(variables_.end(), &vBitDepth_);
-  variables_.insert(variables_.end(), &vOffset1_);
-  variables_.insert(variables_.end(), &vLength1_);
-  variables_.insert(variables_.end(), &vLoop1_);
-  variables_.insert(variables_.end(), &vOffset2_);
-  variables_.insert(variables_.end(), &vLength2_);
-  variables_.insert(variables_.end(), &vLoop2_);
-  variables_.insert(variables_.end(), &vSpeed_);
-  variables_.insert(variables_.end(), &vClip_);
+  variables_.push_back(&vKit1_);
+  variables_.push_back(&vKit2_);
+  variables_.push_back(&vBitDepth_);
+  variables_.push_back(&vOffset1_);
+  variables_.push_back(&vLength1_);
+  variables_.push_back(&vLoop1_);
+  variables_.push_back(&vOffset2_);
+  variables_.push_back(&vLength2_);
+  variables_.push_back(&vLoop2_);
+  variables_.push_back(&vSpeed_);
+  variables_.push_back(&vClip_);
 
   InsertBaseVariables();
 }
@@ -162,7 +162,7 @@ void LSDJKitInstrument::noteDisplay(uint8_t note, char (&out)[4]) {
 
         if (sampleId == 0) {
           out[n * 2] = '-';
-        } else if(sampleId > (int)kit->num_samples) {
+        } else if (sampleId > (int)kit->num_samples) {
           out[n * 2] = CHAR(char_symbol_indicatorEmpty_s);
         } else {
           out[n * 2] = kit->samples[sampleId - 1].name[0];

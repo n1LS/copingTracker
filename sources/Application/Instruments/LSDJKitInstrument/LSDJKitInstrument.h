@@ -72,7 +72,7 @@ public:
   }
   virtual void GetTableState(TableSaveState &state) {};
   virtual void SetTableState(TableSaveState &state) {};
-  etl::ilist<Variable *> *Variables() {
+  etl::ivector<Variable *> *Variables() {
     return &variables_;
   }
 
@@ -98,7 +98,7 @@ public:
   }
 
 private:
-  etl::list<Variable *, 16> variables_;
+  etl::vector<Variable *, 16> variables_;
 
   Variable vKit1_;
   Variable vKit2_;

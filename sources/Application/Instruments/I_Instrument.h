@@ -82,7 +82,7 @@ protected:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name_;
 
 public:
-  I_Instrument(etl::ilist<Variable *> *list, const char *nodeName = XML_ELEM_INSTRUMENT,
+  I_Instrument(etl::ivector<Variable *> *list, const char *nodeName = XML_ELEM_INSTRUMENT,
                bool registerWithPersistence = false)
       : VariableContainer(list), Persistent(nodeName, registerWithPersistence),
         volume_(Token::InstrumentParameterVolume, 0xff), pan_(Token::InstrumentParameterPan, 0x80),
@@ -128,7 +128,7 @@ public:
 
   virtual bool IsInitialized() = 0;
 
-  virtual bool AffectNote(uint8_t *note, int sign, bool small) { 
+  virtual bool AffectNote(uint8_t *note, int sign, bool small) {
     return false;
   }
   virtual void SetStepVolume(int channel, uint8_t volume) = 0;
@@ -208,7 +208,7 @@ public:
 
   virtual void GetTableState(TableSaveState &state) = 0;
   virtual void SetTableState(TableSaveState &state) = 0;
-  virtual etl::ilist<Variable *> *Variables() = 0;
+  virtual etl::ivector<Variable *> *Variables() = 0;
 
   // Persistent implementation
   virtual void SaveContent(tinyxml2::XMLPrinter *printer) override;
@@ -221,10 +221,10 @@ protected:
   // class is being constructed.
   void InsertBaseVariables() {
     auto list = Variables();
-    list->insert(list->end(), &volume_);
-    list->insert(list->end(), &pan_);
-    list->insert(list->end(), &table_);
-    list->insert(list->end(), &tableAutomation_);
+    list->push_back(&volume_);
+    list->push_back(&pan_);
+    list->push_back(&table_);
+    list->push_back(&tableAutomation_);
   }
 
   Variable volume_;

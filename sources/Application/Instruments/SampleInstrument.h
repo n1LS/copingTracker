@@ -63,7 +63,7 @@ public:
   virtual bool GetTableAutomation();
   virtual void GetTableState(TableSaveState &state);
   virtual void SetTableState(TableSaveState &state);
-  etl::ilist<Variable *> *Variables() {
+  etl::ivector<Variable *> *Variables() {
     return &variables_;
   };
 
@@ -120,7 +120,7 @@ protected:
   void initFromSampleEntry(const SampleEntry *entry, const void *sampleStorageBase);
 
 private:
-  etl::list<Variable *, 24> variables_;
+  etl::vector<Variable *, 24> variables_;
 
   SoundSource *source_;
 

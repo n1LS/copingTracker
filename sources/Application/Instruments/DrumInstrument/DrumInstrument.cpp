@@ -28,20 +28,20 @@ DrumInstrument::DrumInstrument()
 
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
-  variables_.insert(variables_.end(), &vVoice0_);
-  variables_.insert(variables_.end(), &vVoice1_);
-  variables_.insert(variables_.end(), &vVoice2_);
-  variables_.insert(variables_.end(), &vVoice3_);
-  variables_.insert(variables_.end(), &vVoice4_);
-  variables_.insert(variables_.end(), &vVoice5_);
-  variables_.insert(variables_.end(), &vVoice6_);
-  variables_.insert(variables_.end(), &vVoice7_);
-  variables_.insert(variables_.end(), &vVoice8_);
-  variables_.insert(variables_.end(), &vVoice9_);
-  variables_.insert(variables_.end(), &vVoice10_);
-  variables_.insert(variables_.end(), &vVoice11_);
+  variables_.push_back(&vVoice0_);
+  variables_.push_back(&vVoice1_);
+  variables_.push_back(&vVoice2_);
+  variables_.push_back(&vVoice3_);
+  variables_.push_back(&vVoice4_);
+  variables_.push_back(&vVoice5_);
+  variables_.push_back(&vVoice6_);
+  variables_.push_back(&vVoice7_);
+  variables_.push_back(&vVoice8_);
+  variables_.push_back(&vVoice9_);
+  variables_.push_back(&vVoice10_);
+  variables_.push_back(&vVoice11_);
 
-  variables_.insert(variables_.end(), &vCharacter_);
+  variables_.push_back(&vCharacter_);
   InsertBaseVariables();
 }
 

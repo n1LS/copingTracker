@@ -12,8 +12,8 @@
 #include "Application/Instruments/Panning.h"
 #include "Application/Utils/fixed.h"
 #include "StackWavetables.generated.h"
-#include <stdint.h>
 #include <cstring>
+#include <stdint.h>
 
 #include "System/Console/Trace.h"
 
@@ -259,7 +259,7 @@ typedef struct stack_voice_t {
     // reset the flags (TODO nILS: does this break retrigger?)
     flags.byte = 0;
     flags.initialized = 1;
-    
+
     // bool retrigger is currently unused
     parameters = inParameters;
 

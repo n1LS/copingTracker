@@ -24,17 +24,17 @@ ChiptuneInstrument::ChiptuneInstrument()
   // Initialize exported variables
   // name_ is now an etl::string in the base class, not a Variable
   InsertBaseVariables();
-  variables_.insert(variables_.end(), &vWaveform_);
-  variables_.insert(variables_.end(), &vTranspose_);
-  variables_.insert(variables_.end(), &vBurst_);
-  variables_.insert(variables_.end(), &vArpSpeed_);
-  variables_.insert(variables_.end(), &vLength_);
-  variables_.insert(variables_.end(), &vAttack_);
-  variables_.insert(variables_.end(), &vDecay_);
-  variables_.insert(variables_.end(), &vVibratoDelay_);
-  variables_.insert(variables_.end(), &vVibratoDepth_);
-  variables_.insert(variables_.end(), &vSweepTime_);
-  variables_.insert(variables_.end(), &vSweepAmount_);
+  variables_.push_back(&vWaveform_);
+  variables_.push_back(&vTranspose_);
+  variables_.push_back(&vBurst_);
+  variables_.push_back(&vArpSpeed_);
+  variables_.push_back(&vLength_);
+  variables_.push_back(&vAttack_);
+  variables_.push_back(&vDecay_);
+  variables_.push_back(&vVibratoDelay_);
+  variables_.push_back(&vVibratoDepth_);
+  variables_.push_back(&vSweepTime_);
+  variables_.push_back(&vSweepAmount_);
 }
 
 void ChiptuneInstrument::Stop(int channel) {

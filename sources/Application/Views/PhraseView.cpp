@@ -72,7 +72,7 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
     startAudition(false);
     return;
   }
-  
+
   // Get the offset based on direction (using proper sequential indices)
   int offset = smallChange ? 1 : 12;
   if (direction == VUD_DOWN || direction == VUD_LEFT) {

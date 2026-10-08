@@ -45,27 +45,27 @@ Project::Project(const char *name)
       scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), phraseLength_(Token::VarPhraseLength, 16),
       projectName_(Token::VarProjectName, name) {
 
-  this->variables_.insert(variables_.end(), &tempo_);
-  this->variables_.insert(variables_.end(), &masterVolume_);
+  this->variables_.push_back(&tempo_);
+  this->variables_.push_back(&masterVolume_);
 
   // Add individual channel volume variables to the container
-  this->variables_.insert(variables_.end(), &channelVolume1_);
-  this->variables_.insert(variables_.end(), &channelVolume2_);
-  this->variables_.insert(variables_.end(), &channelVolume3_);
-  this->variables_.insert(variables_.end(), &channelVolume4_);
-  this->variables_.insert(variables_.end(), &channelVolume5_);
-  this->variables_.insert(variables_.end(), &channelVolume6_);
-  this->variables_.insert(variables_.end(), &channelVolume7_);
-  this->variables_.insert(variables_.end(), &channelVolume8_);
+  this->variables_.push_back(&channelVolume1_);
+  this->variables_.push_back(&channelVolume2_);
+  this->variables_.push_back(&channelVolume3_);
+  this->variables_.push_back(&channelVolume4_);
+  this->variables_.push_back(&channelVolume5_);
+  this->variables_.push_back(&channelVolume6_);
+  this->variables_.push_back(&channelVolume7_);
+  this->variables_.push_back(&channelVolume8_);
 
-  this->variables_.insert(variables_.end(), &wrap_);
-  this->variables_.insert(variables_.end(), &transpose_);
-  this->variables_.insert(variables_.end(), &scale_);
+  this->variables_.push_back(&wrap_);
+  this->variables_.push_back(&transpose_);
+  this->variables_.push_back(&scale_);
   scale_.SetInt(0);
-  this->variables_.insert(variables_.end(), &scaleRoot_);
-  this->variables_.insert(variables_.end(), &phraseLength_);
+  this->variables_.push_back(&scaleRoot_);
+  this->variables_.push_back(&phraseLength_);
   scaleRoot_.SetInt(0); // Default to C (0)
-  this->variables_.insert(variables_.end(), &projectName_);
+  this->variables_.push_back(&projectName_);
 
   // Project name is now managed through the WatchedVariable
 

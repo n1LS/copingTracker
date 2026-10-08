@@ -40,7 +40,7 @@ public:
   bool ImportTheme(const char *themeName);
 
 private:
-  etl::list<Variable *, 30> variables_;
+  etl::vector<Variable *, 30> variables_;
   // Config variables (kept as members to avoid heap allocation)
   WatchedVariable color0_;
   WatchedVariable color1_;

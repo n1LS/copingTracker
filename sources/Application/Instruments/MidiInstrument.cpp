@@ -40,9 +40,9 @@ MidiInstrument::MidiInstrument()
   };
 
   // name_ is now an etl::string in the base class, not a Variable
-  variables_.insert(variables_.end(), &channel_);
-  variables_.insert(variables_.end(), &noteLen_);
-  variables_.insert(variables_.end(), &program_);
+  variables_.push_back(&channel_);
+  variables_.push_back(&noteLen_);
+  variables_.push_back(&program_);
 }
 
 MidiInstrument::~MidiInstrument() {

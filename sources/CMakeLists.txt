@@ -10,6 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compile_commands.json")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 
 add_compile_options(
+  -fshort-enums
   -Werror
   -Wall
   -Wno-format # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int

@@ -69,14 +69,14 @@ public:
     return 0;
   }
 
-  etl::ilist<Variable *> *Variables() {
+  etl::ivector<Variable *> *Variables() {
     return &variables_;
   }
 
   void setChannel(uint8_t channel);
 
 private:
-  etl::list<Variable *, 15> variables_;
+  etl::vector<Variable *, 15> variables_;
 
   Variable vArpSpeed_;
   Variable vAttack_;
