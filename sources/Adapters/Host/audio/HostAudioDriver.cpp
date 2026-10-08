@@ -237,6 +237,17 @@ void HostAudioDriver::FillAudioBuffer(uint8_t *stream, int len) {
 
   queuedSamples_ -= newSamples;
   samples_played_ += newSamples;
+
+  // The producer also waits for queuedSamples_ to drop below its target, which
+  // happens in the middle of a slice. Wake it on every callback, not only when
+  // a slice was fully consumed: slices get longer than the target below
+  // ~108 BPM, and waking only at slice boundaries let the queue run dry.
+  // Taking slotMutex_ makes sure the wake can't slip in between the
+  // producer's predicate check and its wait.
+  {
+    std::lock_guard<std::mutex> slotLock(slotMutex_);
+  }
+  slotCv_.notify_one();
 }
 
 void HostAudioDriver::AddBuffer(short *buffer, int samplecount) {

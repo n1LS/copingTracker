@@ -69,7 +69,8 @@ private:
   std::mutex slotMutex_;
   std::condition_variable slotCv_;
   int freeSlots_ = 0;
-  int queuedSamples_ = 0;
+  // written by both the producer (AddBuffer) and the SDL callback
+  std::atomic<int> queuedSamples_{0};
 
   static HostAudioDriver *instance_;
 };
