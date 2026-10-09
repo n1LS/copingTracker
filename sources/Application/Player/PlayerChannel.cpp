@@ -55,6 +55,9 @@ bool PlayerChannel::Render(fixed *buffer, int samplecount) {
   if (instr_) {
     bool tableSlice = SyncMaster::GetInstance()->TableSlice();
     bool status = instr_->Render(index_, buffer, samplecount, tableSlice) && !muted_;
+    if (status) {
+      instr_->ProcessEqualizer(index_, buffer, samplecount);
+    }
     // the buffer is still pre fader here, the bus applies the channel volume
     if (status && instr_->GetOutputEffect() == OE_DELAY) {
       MixerService::GetInstance()->GetDelay()->AddSend(buffer, samplecount);

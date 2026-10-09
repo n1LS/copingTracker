@@ -43,6 +43,10 @@ public:
   int GetDelayTime();     // in ticks
   int GetDelayFeedback(); // 0..FF
   int GetDelayWet();      // 0..FF
+  bool GetMasterEqOn();
+  int GetMasterEqLow();  // 0..FF, 0x80 is flat
+  int GetMasterEqMid();  // 0..FF, 0x80 is flat
+  int GetMasterEqHigh(); // 0..FF, 0x80 is flat
   int GetChannelVolume(int channel);
   bool Wrap();
   void OnTempoTap();
@@ -70,7 +74,7 @@ public:
   virtual void RestoreContent(PersistencyDocument *doc);
 
 private:
-  etl::vector<Variable *, 19> variables_;
+  etl::vector<Variable *, 23> variables_;
 
   InstrumentBank instrumentBank_;
   int tempoNudge_;
@@ -99,6 +103,10 @@ private:
   Variable delayTime_;
   Variable delayFeedback_;
   Variable delayWet_;
+  Variable masterEqOn_;
+  Variable masterEqLow_;
+  Variable masterEqMid_;
+  Variable masterEqHigh_;
   StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> projectName_;
 };
 

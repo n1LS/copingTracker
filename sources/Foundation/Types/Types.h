@@ -60,6 +60,10 @@ struct Token {
     InstrumentParameterTable = 117,
     InstrumentParameterTableAutomation = 60,
     InstrumentParameterOutput = 236,
+    InstrumentParameterEqOn = 240,
+    InstrumentParameterEqLow = 241,
+    InstrumentParameterEqMid = 242,
+    InstrumentParameterEqHigh = 243,
 
     SampleInstrumentCrushVolume = 3,
     SampleInstrumentCrush = 114,
@@ -245,7 +249,12 @@ struct Token {
     VarDelayFeedback = 238,
     VarDelayWet = 239,
 
-    // 240-253 free 14
+    VarMasterEqOn = 244,
+    VarMasterEqLow = 245,
+    VarMasterEqMid = 246,
+    VarMasterEqHigh = 247,
+
+    // 248-253 free 6
 
     Default = 255, // "    "
   };
@@ -306,6 +315,10 @@ struct Token {
   ETL_ENUM_TYPE_16(InstrumentParameterTable, "Table")
   ETL_ENUM_TYPE_16(InstrumentParameterTableAutomation, "Automate")
   ETL_ENUM_TYPE_16(InstrumentParameterOutput, "Output")
+  ETL_ENUM_TYPE_16(InstrumentParameterEqOn, "EqOn")
+  ETL_ENUM_TYPE_16(InstrumentParameterEqLow, "EqLow")
+  ETL_ENUM_TYPE_16(InstrumentParameterEqMid, "EqMid")
+  ETL_ENUM_TYPE_16(InstrumentParameterEqHigh, "EqHigh")
 
   ETL_ENUM_TYPE_16(VarKeyDelay, "key-delay")
   ETL_ENUM_TYPE_16(VarKeyRepeat, "key-repeat")
@@ -321,6 +334,10 @@ struct Token {
   ETL_ENUM_TYPE_16(VarDelayTime, "delay-time")
   ETL_ENUM_TYPE_16(VarDelayFeedback, "delay-feedback")
   ETL_ENUM_TYPE_16(VarDelayWet, "delay-wet")
+  ETL_ENUM_TYPE_16(VarMasterEqOn, "master-eq-on")
+  ETL_ENUM_TYPE_16(VarMasterEqLow, "master-eq-low")
+  ETL_ENUM_TYPE_16(VarMasterEqMid, "master-eq-mid")
+  ETL_ENUM_TYPE_16(VarMasterEqHigh, "master-eq-high")
   ETL_ENUM_TYPE_16(SampleInstrumentSample, "Sample")
   ETL_ENUM_TYPE_16(SampleInstrumentInterpolation, "Interpolation")
   ETL_ENUM_TYPE_16(SampleInstrumentCrush, "Crush")

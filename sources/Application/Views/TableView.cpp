@@ -416,7 +416,7 @@ void TableView::updateCursorValue(int offset) {
     case colCmdVal3:
       {
         switch (offset) {
-          // TODO: clean this up, it's wild.
+          // TODO nILS: clean this up, it's wild.
           case 0x01:
             cmdEditField_.ProcessArrow(BM_RIGHT);
             break;

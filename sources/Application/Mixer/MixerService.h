@@ -45,7 +45,7 @@ public:
 
   MixBus *GetMixBus(int i);
 
-  MixBus *GetMasterBus() {
+  MasterBus *GetMasterBus() {
     return &master_;
   };
 
@@ -82,7 +82,7 @@ private:
   bool configureRenderPaths();
 
   AudioOut *out_;
-  MixBus master_;
+  MasterBus master_;
   MixBus bus_[MAX_BUS_COUNT];
   DelayEffect delay_;
   SysMutex *sync_;

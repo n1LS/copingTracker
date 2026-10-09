@@ -17,6 +17,7 @@
 
 Voice I_Instrument::voices_[SONG_CHANNEL_COUNT];
 I_Instrument *I_Instrument::voiceOwner_[SONG_CHANNEL_COUNT];
+equalizer_t I_Instrument::equalizers_[SONG_CHANNEL_COUNT];
 
 I_Instrument::~I_Instrument() {
   // Virtual destructor implementation
@@ -34,6 +35,24 @@ void I_Instrument::ReleaseAllVoices() {
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     voiceOwner_[i] = nullptr;
   }
+}
+
+void I_Instrument::ProcessEqualizer(int channel, fixed *buffer, int size) {
+  equalizer_t &eq = equalizers_[channel];
+  if (!eqOn_.GetBool()) {
+    eq.active = false;
+    return;
+  }
+  // restart from silence so switching it on doesn't click on stale state
+  if (!eq.active) {
+    eq.reset();
+    eq.active = true;
+  }
+  eq.set_low(eqLow_.GetInt());
+  eq.set_mid(eqMid_.GetInt());
+  eq.set_high(eqHigh_.GetInt());
+
+  eq.process_buffer(buffer, size);
 }
 
 void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {

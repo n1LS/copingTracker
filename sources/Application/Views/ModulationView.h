@@ -32,7 +32,7 @@ private:
   I_Instrument *getInstrument();
   void buildFields();
 
-  etl::vector<UIIntVarField, 1> intVarField_;
+  etl::vector<UIIntVarField, 16> intVarField_;
 };
 
 #endif

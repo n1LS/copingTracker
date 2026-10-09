@@ -112,7 +112,7 @@ struct Theme {
     FIXED(filter, LIGHT_RED)
     FIXED(volume, LIGHT_YELLOW)
     SWITCHABLE(sample, LIGHT_CYAN, CYAN)
-    FIXED(effect, LIGHT_RED)
+    FIXED(effect, LIGHT_BLUE)
     FIXED(table, LIGHT_GRAY)
   };
 

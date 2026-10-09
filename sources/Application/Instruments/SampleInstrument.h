@@ -120,7 +120,7 @@ protected:
   void initFromSampleEntry(const SampleEntry *entry, const void *sampleStorageBase);
 
 private:
-  etl::vector<Variable *, 25> variables_;
+  etl::vector<Variable *, 29> variables_;
 
   SoundSource *source_;
 

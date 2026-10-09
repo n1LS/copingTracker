@@ -48,6 +48,8 @@ Project::Project(const char *name)
       scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), phraseLength_(Token::VarPhraseLength, 16),
       delayTime_(Token::VarDelayTime, DEFAULT_DELAY_TIME),
       delayFeedback_(Token::VarDelayFeedback, DEFAULT_DELAY_FEEDBACK), delayWet_(Token::VarDelayWet, DEFAULT_DELAY_WET),
+      masterEqOn_(Token::VarMasterEqOn, false), masterEqLow_(Token::VarMasterEqLow, EQ_UNITY_GAIN),
+      masterEqMid_(Token::VarMasterEqMid, EQ_UNITY_GAIN), masterEqHigh_(Token::VarMasterEqHigh, EQ_UNITY_GAIN),
       projectName_(Token::VarProjectName, name) {
 
   this->variables_.push_back(&tempo_);
@@ -72,6 +74,10 @@ Project::Project(const char *name)
   this->variables_.push_back(&delayTime_);
   this->variables_.push_back(&delayFeedback_);
   this->variables_.push_back(&delayWet_);
+  this->variables_.push_back(&masterEqOn_);
+  this->variables_.push_back(&masterEqLow_);
+  this->variables_.push_back(&masterEqMid_);
+  this->variables_.push_back(&masterEqHigh_);
   scaleRoot_.SetInt(0); // Default to C (0)
   this->variables_.push_back(&projectName_);
 
@@ -122,6 +128,10 @@ void Project::Load(const char *name) {
   delayTime_.Reset();
   delayFeedback_.Reset();
   delayWet_.Reset();
+  masterEqOn_.Reset();
+  masterEqLow_.Reset();
+  masterEqMid_.Reset();
+  masterEqHigh_.Reset();
 
   if (name) {
     projectName_.SetString(name, true);
@@ -167,6 +177,22 @@ int Project::GetDelayFeedback() {
 
 int Project::GetDelayWet() {
   return delayWet_.GetInt();
+}
+
+bool Project::GetMasterEqOn() {
+  return masterEqOn_.GetBool();
+}
+
+int Project::GetMasterEqLow() {
+  return masterEqLow_.GetInt();
+}
+
+int Project::GetMasterEqMid() {
+  return masterEqMid_.GetInt();
+}
+
+int Project::GetMasterEqHigh() {
+  return masterEqHigh_.GetInt();
 }
 
 int Project::GetChannelVolume(int channel) {

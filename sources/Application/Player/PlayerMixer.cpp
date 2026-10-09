@@ -176,6 +176,8 @@ void PlayerMixer::Update(Observable &o, I_ObservableData *d) {
   MixerService *ms = MixerService::GetInstance();
   ms->SetMasterVolume(project_->GetMasterVolume());
   updateDelayParameters();
+  ms->GetMasterBus()->SetEqualizer(project_->GetMasterEqOn(), project_->GetMasterEqLow(), project_->GetMasterEqMid(),
+                                   project_->GetMasterEqHigh());
 }
 
 void PlayerMixer::updateDelayParameters() {

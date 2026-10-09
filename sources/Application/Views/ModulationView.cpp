@@ -47,33 +47,94 @@ void ModulationView::buildFields() {
   GUIPoint position = GUIPoint(1, 3);
   Variable *v = instr->FindVariable(Token::InstrumentParameterOutput);
   intVarField_.emplace_back(position, *v, "Output  :%-19.19s", 0, OE_LAST - 1, 1, 1);
-  intVarField_.back().SetLabelColor(Theme::SemanticColors::effect);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
-  
-  // Delay send effect, time is in ticks. The range is what fits the delay
-  // line at the fastest tempo, at slower tempos it gets clamped further
-  addTitleLabel("Global Delay", 5);
-  
-  Project *project = viewData_->project_;
+  // 3 band equalizer of the instrument, gains are 0..2x with 0x80 being flat
+  addTitleLabel("Equalizer", 5);
 
   position.y_ += 3;
+  v = instr->FindVariable(Token::InstrumentParameterEqOn);
+  intVarField_.emplace_back(position, *v, "Enabled : %1s ", 0, 1, 1, 1);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+
+  static const struct {
+    Token token;
+    const char *format;
+  } eqBands[] = {
+      {Token::InstrumentParameterEqLow, "Low     : %2.2X"},
+      {Token::InstrumentParameterEqMid, "Mid     : %2.2X"},
+      {Token::InstrumentParameterEqHigh, "High    : %2.2X"},
+  };
+  for (const auto &band : eqBands) {
+    position.y_ += 1;
+    v = instr->FindVariable(band.token);
+    intVarField_.emplace_back(position, *v, band.format, 0, 0xFF, 1, 0x10);
+    intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
+    intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+    fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  }
+
+  // Delay send effect, time is in ticks. The range is what fits the delay
+  // line at the fastest tempo, at slower tempos it gets clamped further
+  
+  Project *project = viewData_->project_;
+  
+  position.y_ += 2;
+  addTitleLabel("Global Delay", position.y_);
+
+  position.y_ += 1;
   v = project->FindVariable(Token::VarDelayTime);
   constexpr int maxDelayTicks = DelayEffect::MaxTicks(MAX_TEMPO);
   static_assert(maxDelayTicks >= 1 && maxDelayTicks <= 0xFF, "delay time does not fit the 2 digit field");
   intVarField_.emplace_back(position, *v, "Time    : %2.2X", 1, maxDelayTicks, 1, 0x10);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::pitch);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = project->FindVariable(Token::VarDelayFeedback);
   intVarField_.emplace_back(position, *v, "Feedback: %2.2X", 0, 0xFF, 1, 0x10);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::pitch);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 1;
   v = project->FindVariable(Token::VarDelayWet);
   intVarField_.emplace_back(position, *v, "Wet mix : %2.2X", 0, 0xFF, 1, 0x10);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::pitch);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
+
+  // Equalizer on the final mix, same gain range as the instrument equalizer
+  addTitleLabel("Master Equalizer", 16);
+
+  position.y_ += 3;
+  v = project->FindVariable(Token::VarMasterEqOn);
+  intVarField_.emplace_back(position, *v, "On      : %1s ", 0, 1, 1, 1);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+
+  static const struct {
+    Token token;
+    const char *format;
+  } masterEqBands[] = {
+      {Token::VarMasterEqLow, "Low     : %2.2X"},
+      {Token::VarMasterEqMid, "Mid     : %2.2X"},
+      {Token::VarMasterEqHigh, "High    : %2.2X"},
+  };
+  for (const auto &band : masterEqBands) {
+    position.y_ += 1;
+    v = project->FindVariable(band.token);
+    intVarField_.emplace_back(position, *v, band.format, 0, 0xFF, 1, 0x10);
+  intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
+  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+    fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  }
 
   SetFocus(&intVarField_.back());
 }
@@ -109,4 +170,26 @@ void ModulationView::DrawView() {
   DrawTitle(char_back_s " Modulation %2.2X", viewData_->currentInstrumentID_);
 
   FieldView::Redraw();
+
+  GUIPoint p = GetAnchor();
+
+  // draw the equalizer visualization for good measure
+  char buffer[16];
+  I_Instrument *instrument = getInstrument();
+  Variable *var = instrument->FindVariable(Token::InstrumentParameterEqLow);
+  SetColor(GetFocus()->GetVariable()->GetID() == Token::InstrumentParameterEqLow ? Theme::View::fg : Theme::View::inactive);
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  DrawString(p.x_ + 10, p.y_ + 4, buffer);
+
+  var = instrument->FindVariable(Token::InstrumentParameterEqMid);
+  SetColor(GetFocus()->GetVariable()->GetID() == Token::InstrumentParameterEqMid ? Theme::View::fg : Theme::View::inactive);
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  DrawString(p.x_ + 10, p.y_ + 5, buffer);
+
+  var = instrument->FindVariable(Token::InstrumentParameterEqHigh);
+  SetColor(GetFocus()->GetVariable()->GetID() == Token::InstrumentParameterEqHigh ? Theme::View::fg : Theme::View::inactive);
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  DrawString(p.x_ + 10, p.y_ + 6, buffer);
+
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
 }

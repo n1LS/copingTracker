@@ -28,7 +28,7 @@
 // buses.
 class DelayEffect : public AudioModule {
 public:
-  static constexpr int LineSize = 20480;
+  static constexpr int LineSize = 16384;
 
   // Longest delay in ticks that still fits the line at the given tempo. A
   // tick is SAMPLE_RATE_HZ * 60 * 2 / (tempo * 8 * AUDIO_SLICES_PER_STEP)

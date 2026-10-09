@@ -21,6 +21,7 @@
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
+#include "Equalizer.h"
 #include "Panning.h"
 
 #include "ChiptuneInstrument/ChiptuneEngine.h"
@@ -94,7 +95,9 @@ public:
         volume_(Token::InstrumentParameterVolume, 0xff), pan_(Token::InstrumentParameterPan, 0x80),
         table_(Token::InstrumentParameterTable, VAR_OFF),
         tableAutomation_(Token::InstrumentParameterTableAutomation, false),
-        outputEffect_(Token::InstrumentParameterOutput, OutputEffectNames, OE_LAST, OE_NONE) {};
+        outputEffect_(Token::InstrumentParameterOutput, OutputEffectNames, OE_LAST, OE_NONE),
+        eqOn_(Token::InstrumentParameterEqOn, false), eqLow_(Token::InstrumentParameterEqLow, EQ_UNITY_GAIN),
+        eqMid_(Token::InstrumentParameterEqMid, EQ_UNITY_GAIN), eqHigh_(Token::InstrumentParameterEqHigh, EQ_UNITY_GAIN) {};
   virtual ~I_Instrument();
 
   // Initialisation routine
@@ -108,6 +111,7 @@ public:
   void AcquireVoice(int channel) {
     if (voiceOwner_[channel] != this) {
       InitVoice(channel);
+      equalizers_[channel].reset();
       voiceOwner_[channel] = this;
     }
   }
@@ -170,6 +174,11 @@ public:
     int effect = outputEffect_.GetInt();
     return (effect > OE_NONE && effect < OE_LAST) ? (OutputEffect)effect : OE_NONE;
   }
+
+  // Runs the instrument's equalizer over a rendered buffer (interleaved
+  // stereo, size is the number of sample pairs). Does nothing when the
+  // equalizer is off, any instrument type gets it for free.
+  void ProcessEqualizer(int channel, fixed *buffer, int size);
 
   virtual void noteDisplay(uint8_t note, char (&out)[4]);
   virtual void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]);
@@ -238,6 +247,10 @@ protected:
     list->push_back(&table_);
     list->push_back(&tableAutomation_);
     list->push_back(&outputEffect_);
+    list->push_back(&eqOn_);
+    list->push_back(&eqLow_);
+    list->push_back(&eqMid_);
+    list->push_back(&eqHigh_);
   }
 
   Variable volume_;
@@ -245,8 +258,14 @@ protected:
   Variable table_;
   Variable tableAutomation_;
   Variable outputEffect_;
+  Variable eqOn_;
+  Variable eqLow_;
+  Variable eqMid_;
+  Variable eqHigh_;
 
   static Voice voices_[SONG_CHANNEL_COUNT];
   static I_Instrument *voiceOwner_[SONG_CHANNEL_COUNT];
+  // filter state per channel, kept out of the voice union since it is shared by all instrument types
+  static equalizer_t equalizers_[SONG_CHANNEL_COUNT];
 };
 #endif

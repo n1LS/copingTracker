@@ -79,7 +79,7 @@ public:
 private:
   stack_parameters_t getInstrumentParameters();
 
-  etl::vector<Variable *, 15> variables_;
+  etl::vector<Variable *, 19> variables_;
 
   Variable spread_;
   Variable wave_;
