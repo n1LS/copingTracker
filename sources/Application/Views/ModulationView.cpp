@@ -10,7 +10,13 @@
 #include "Application/Instruments/I_Instrument.h"
 #include "Application/Model/Project.h"
 #include "Application/Player/Player.h"
+#include "Foundation/Constants/GraphicCharacters.h"
 #include "Foundation/Constants/SpecialCharacters.h"
+
+typedef struct eq_band_t {
+  Token token;
+  const char *format;
+} eq_band_t;
 
 ModulationView::ModulationView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 }
@@ -61,14 +67,12 @@ void ModulationView::buildFields() {
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
-  static const struct {
-    Token token;
-    const char *format;
-  } eqBands[] = {
+  eq_band_t eqBands[] = {
       {Token::InstrumentParameterEqLow, "Low     : %2.2X"},
       {Token::InstrumentParameterEqMid, "Mid     : %2.2X"},
       {Token::InstrumentParameterEqHigh, "High    : %2.2X"},
   };
+
   for (const auto &band : eqBands) {
     position.y_ += 1;
     v = instr->FindVariable(band.token);
@@ -80,9 +84,9 @@ void ModulationView::buildFields() {
 
   // Delay send effect, time is in ticks. The range is what fits the delay
   // line at the fastest tempo, at slower tempos it gets clamped further
-  
+
   Project *project = viewData_->project_;
-  
+
   position.y_ += 2;
   addTitleLabel("Global Delay", position.y_);
 
@@ -110,29 +114,28 @@ void ModulationView::buildFields() {
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   // Equalizer on the final mix, same gain range as the instrument equalizer
-  addTitleLabel("Master Equalizer", 16);
+  position.y_ += 4;
+  addTitleLabel("Master Equalizer", position.y_);
 
-  position.y_ += 3;
+  position.y_ += 1;
   v = project->FindVariable(Token::VarMasterEqOn);
-  intVarField_.emplace_back(position, *v, "On      : %1s ", 0, 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Enabled : %1s ", 0, 1, 1, 1);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
-  static const struct {
-    Token token;
-    const char *format;
-  } masterEqBands[] = {
+  eq_band_t masterEqBands[] = {
       {Token::VarMasterEqLow, "Low     : %2.2X"},
       {Token::VarMasterEqMid, "Mid     : %2.2X"},
       {Token::VarMasterEqHigh, "High    : %2.2X"},
   };
+
   for (const auto &band : masterEqBands) {
     position.y_ += 1;
     v = project->FindVariable(band.token);
     intVarField_.emplace_back(position, *v, band.format, 0, 0xFF, 1, 0x10);
-  intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
-  intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
+    intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
+    intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
     fieldList_.insert(fieldList_.end(), &intVarField_.back());
   }
 
@@ -172,24 +175,51 @@ void ModulationView::DrawView() {
   FieldView::Redraw();
 
   GUIPoint p = GetAnchor();
+  p.y_ += 2;
+
+#define _color(x) (focused == x) ? Theme::View::fg : Theme::View::inactive
+
+  Token focused = GetFocus()->GetVariable()->GetID();
+  char buffer[16];
+  Variable *var;
+  I_Instrument *instrument = getInstrument();
 
   // draw the equalizer visualization for good measure
-  char buffer[16];
-  I_Instrument *instrument = getInstrument();
-  Variable *var = instrument->FindVariable(Token::InstrumentParameterEqLow);
-  SetColor(GetFocus()->GetVariable()->GetID() == Token::InstrumentParameterEqLow ? Theme::View::fg : Theme::View::inactive);
+  var = instrument->FindVariable(Token::InstrumentParameterEqLow);
+  SetColor(_color(Token::InstrumentParameterEqLow));
   horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
-  DrawString(p.x_ + 10, p.y_ + 4, buffer);
+  DrawString(p.x_ + 10, p.y_ + 2, buffer, fGraphic);
 
   var = instrument->FindVariable(Token::InstrumentParameterEqMid);
-  SetColor(GetFocus()->GetVariable()->GetID() == Token::InstrumentParameterEqMid ? Theme::View::fg : Theme::View::inactive);
+  SetColor(_color(Token::InstrumentParameterEqMid));
   horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
-  DrawString(p.x_ + 10, p.y_ + 5, buffer);
+  DrawString(p.x_ + 10, p.y_ + 3, buffer, fGraphic);
 
   var = instrument->FindVariable(Token::InstrumentParameterEqHigh);
-  SetColor(GetFocus()->GetVariable()->GetID() == Token::InstrumentParameterEqHigh ? Theme::View::fg : Theme::View::inactive);
+  SetColor(_color(Token::InstrumentParameterEqHigh));
   horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
-  DrawString(p.x_ + 10, p.y_ + 6, buffer);
+  DrawString(p.x_ + 10, p.y_ + 4, buffer, fGraphic);
+  
+  // global eq
+  Project *project = viewData_->project_;
 
+  SetColor(Theme::View::inactive);
+  DrawString(0, p.y_ + 11, char_line_11_s char_line_11_s char_line_10_s);
+
+  var = project->FindVariable(Token::VarMasterEqLow);
+  if (var) {
+    SetColor(_color(Token::VarMasterEqLow));
+    horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+    DrawString(p.x_ + 10, p.y_ + 15, buffer, fGraphic);
+  }
+
+  var = project->FindVariable(Token::VarMasterEqMid);
+  SetColor(_color(Token::VarMasterEqMid));
   horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  DrawString(p.x_ + 10, p.y_ + 16, buffer, fGraphic);
+
+  var = project->FindVariable(Token::VarMasterEqHigh);
+  SetColor(_color(Token::VarMasterEqHigh));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  DrawString(p.x_ + 10, p.y_ + 17, buffer, fGraphic);
 }

@@ -193,7 +193,7 @@ void InstrumentView::onInstrumentTypeChange(bool updateUI) {
       setCurrentInstrumentToNone();
     }
   }
-  
+
   // Refresh the UI fields for the new instrument type
   refreshInstrumentFields();
 

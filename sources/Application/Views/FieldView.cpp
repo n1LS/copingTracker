@@ -106,7 +106,7 @@ void FieldView::Redraw() {
   }
 }
 
-void FieldView::ProcessButtonMask(uint16_t mask, 	bool pressed) {
+void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
   if (focus_ == nullptr) {
     focus_ = *fieldList_.begin();
     //  Empty field view, we don't have anything to do
@@ -173,7 +173,7 @@ void FieldView::ProcessButtonMask(uint16_t mask, 	bool pressed) {
   } else {
     UIField *target = nullptr;
     if (mask == BM_DOWN) {
-      target= findAdjacentField(true, +1);
+      target = findAdjacentField(true, +1);
     } else if (mask == BM_UP) {
       target = findAdjacentField(true, -1);
     } else if (mask == BM_RIGHT) {

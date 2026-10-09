@@ -17,11 +17,11 @@
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/fixed.h"
 #include "Application/Utils/stringutils.h"
+#include "Equalizer.h"
 #include "Externals/etl/include/etl/string.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "Foundation/Observable.h"
 #include "Foundation/Variables/VariableContainer.h"
-#include "Equalizer.h"
 #include "Panning.h"
 
 #include "ChiptuneInstrument/ChiptuneEngine.h"
@@ -97,7 +97,8 @@ public:
         tableAutomation_(Token::InstrumentParameterTableAutomation, false),
         outputEffect_(Token::InstrumentParameterOutput, OutputEffectNames, OE_LAST, OE_NONE),
         eqOn_(Token::InstrumentParameterEqOn, false), eqLow_(Token::InstrumentParameterEqLow, EQ_UNITY_GAIN),
-        eqMid_(Token::InstrumentParameterEqMid, EQ_UNITY_GAIN), eqHigh_(Token::InstrumentParameterEqHigh, EQ_UNITY_GAIN) {};
+        eqMid_(Token::InstrumentParameterEqMid, EQ_UNITY_GAIN),
+        eqHigh_(Token::InstrumentParameterEqHigh, EQ_UNITY_GAIN) {};
   virtual ~I_Instrument();
 
   // Initialisation routine

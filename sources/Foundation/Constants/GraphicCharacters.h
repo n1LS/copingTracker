@@ -44,6 +44,145 @@ static const char char_v_bar_lookup[] = {CHAR(char_v_bar_0_s), CHAR(char_v_bar_1
                                          CHAR(char_v_bar_6_s), CHAR(char_v_bar_7_s), CHAR(char_v_bar_8_s),
                                          CHAR(char_v_bar_9_s), CHAR(char_v_bar_10_s)};
 
+// horizontal bar indicator
+#define char_h_bar_0_s "\xC0"
+#define char_h_bar_previous_s "\xC1"
+#define char_h_bar_1_s "\xC2"
+#define char_h_bar_2_s "\xC3"
+#define char_h_bar_3_s "\xC4"
+#define char_h_bar_4_s "\xC5"
+#define char_h_bar_5_s "\xC6"
+#define char_h_bar_6_s "\xC7"
+#define char_h_bar_7_s "\xC8"
+#define char_h_bar_8_s "\xC9"
+#define char_h_bar_9_s "\xCA"
+#define char_h_bar_10_s "\xCB"
+
+// Array of bargraph characters for fast lookup
+static const char char_h_bar_lookup[] = {CHAR(char_h_bar_0_s), CHAR(char_h_bar_1_s),  CHAR(char_h_bar_2_s),
+                                         CHAR(char_h_bar_3_s), CHAR(char_h_bar_4_s),  CHAR(char_h_bar_5_s),
+                                         CHAR(char_h_bar_6_s), CHAR(char_h_bar_7_s),  CHAR(char_h_bar_8_s),
+                                         CHAR(char_h_bar_9_s), CHAR(char_h_bar_10_s), CHAR(char_h_bar_previous_s)};
+
+// horizontal ruler indicator
+#define char_h_ruler_s "\xB0"
+#define char_h_ruler_0_s "\xB1"
+#define char_h_ruler_1_s "\xB2"
+#define char_h_ruler_2_s "\xB3"
+#define char_h_ruler_3_s "\xB4"
+#define char_h_ruler_4_s "\xB5"
+#define char_h_ruler_5_s "\xB6"
+#define char_h_ruler_6_s "\xB7"
+#define char_h_ruler_7_s "\xB8"
+#define char_h_ruler_8_s "\xB9"
+#define char_h_ruler_9_s "\xB0"
+
+static const char char_ruler_lookup[] = {CHAR(char_h_ruler_0_s), CHAR(char_h_ruler_1_s), CHAR(char_h_ruler_2_s),
+                                         CHAR(char_h_ruler_3_s), CHAR(char_h_ruler_4_s), CHAR(char_h_ruler_5_s),
+                                         CHAR(char_h_ruler_6_s), CHAR(char_h_ruler_7_s), CHAR(char_h_ruler_8_s),
+                                         CHAR(char_h_ruler_9_s), CHAR(char_h_ruler_s)};
+
+#define char_v_bar(x) (char_v_bar_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
+
+static inline uint8_t map_255_to_bargraph6(uint8_t value) {
+  if (value <= 1) {
+    return value + 1;
+  } else if (value >= 254) {
+    return value - 195;
+  }
+  return 2 + ((value - 1) * 55 + 126) / 250;
+}
+
+static inline uint8_t map_100_to_bargraph10(uint8_t value) {
+  if (value <= 1) {
+    return value + 1;
+  } else if (value >= 254) {
+    return value - 155; // 254 → 99, 255 → 100
+  }
+
+  return 2 + ((value - 1) * 95 + 126) / 250;
+}
+
+static inline uint8_t map_255_to_bargraph10(uint8_t value) {
+  if (value <= 1) {
+    return value + 1;
+  } else if (value >= 254) {
+    return value - 155; // 254 → 99, 255 → 100
+  }
+
+  return 2 + ((value - 1) * 95 + 126) / 250;
+}
+
+static inline uint8_t map_12_to_bargraph(uint8_t value) {
+  const uint8_t position[13] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59};
+  return position[(value > 12) ? 12 : value];
+}
+
+static inline uint8_t map_48_to_bargraph(uint8_t value) {
+  // approximate * 1.22916... with * 1.234375
+  return (value * 79) >> 6;
+}
+
+static inline void horizontal_bar_graph_6(char *buffer, uint8_t value) {
+  int v = value;
+  bool lastWas9 = false;
+
+  for (int n = 0; n < 6; n++) {
+    if (lastWas9) {
+      buffer[n] = char_h_bar_lookup[11];
+      lastWas9 = false;
+    } else if (v >= 10) {
+      buffer[n] = char_h_bar_lookup[10];
+      lastWas9 = (v == 10);
+    } else if (v > 0) {
+      buffer[n] = char_h_bar_lookup[v];
+    } else {
+      buffer[n] = char_h_bar_lookup[0];
+    }
+
+    v -= 10;
+  }
+
+  buffer[6] = 0;
+}
+
+static inline void horizontal_bar_graph_10(char *buffer, uint8_t value) {
+  int v = value;
+  bool lastWas9 = false;
+
+  for (int n = 0; n < 10; n++) {
+    if (lastWas9) {
+      buffer[n] = char_h_bar_lookup[11];
+      lastWas9 = false;
+    } else if (v >= 10) {
+      buffer[n] = char_h_bar_lookup[10];
+      lastWas9 = (v == 10);
+    } else if (v > 0) {
+      buffer[n] = char_h_bar_lookup[v];
+    } else {
+      buffer[n] = char_h_bar_lookup[0];
+    }
+
+    v -= 10;
+  }
+
+  buffer[10] = 0;
+}
+
+static inline void horizontal_ruler_6(char *buffer, uint8_t value) {
+  for (int n = 0; n < 6; n++) {
+    if (value >= 10 || value < 0) {
+      buffer[n] = char_ruler_lookup[10];
+    } else if (value >= 0) {
+      buffer[n] = char_ruler_lookup[value];
+    }
+
+    value -= 10;
+  }
+
+  buffer[6] = 0;
+}
+
 /*
 static void drawPiano(uint16_t keys, char upper[8], char lower[8]) {
     // White keys: C D E F G A B
