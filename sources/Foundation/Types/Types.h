@@ -64,6 +64,10 @@ struct Token {
     InstrumentParameterEqLow = 241,
     InstrumentParameterEqMid = 242,
     InstrumentParameterEqHigh = 243,
+    InstrumentParameterCompOn = 123,
+    InstrumentParameterCompThreshold = 124,
+    InstrumentParameterCompRatio = 125,
+    InstrumentParameterCompRelease = 126,
 
     SampleInstrumentCrushVolume = 3,
     SampleInstrumentCrush = 114,
@@ -253,6 +257,11 @@ struct Token {
     VarMasterEqLow = 245,
     VarMasterEqMid = 246,
     VarMasterEqHigh = 247,
+    VarMasterCompOn = 127,
+    VarMasterCompThreshold = 128,
+    VarMasterCompRatio = 129,
+    VarMasterCompRelease = 130,
+    ActionMasterOut = 131,
 
     // 248-253 free 6
 
@@ -319,6 +328,10 @@ struct Token {
   ETL_ENUM_TYPE_16(InstrumentParameterEqLow, "EqLow")
   ETL_ENUM_TYPE_16(InstrumentParameterEqMid, "EqMid")
   ETL_ENUM_TYPE_16(InstrumentParameterEqHigh, "EqHigh")
+  ETL_ENUM_TYPE_16(InstrumentParameterCompOn, "CompOn")
+  ETL_ENUM_TYPE_16(InstrumentParameterCompThreshold, "CompThresh")
+  ETL_ENUM_TYPE_16(InstrumentParameterCompRatio, "CompRatio")
+  ETL_ENUM_TYPE_16(InstrumentParameterCompRelease, "CompRelease")
 
   ETL_ENUM_TYPE_16(VarKeyDelay, "key-delay")
   ETL_ENUM_TYPE_16(VarKeyRepeat, "key-repeat")
@@ -338,6 +351,10 @@ struct Token {
   ETL_ENUM_TYPE_16(VarMasterEqLow, "master-eq-low")
   ETL_ENUM_TYPE_16(VarMasterEqMid, "master-eq-mid")
   ETL_ENUM_TYPE_16(VarMasterEqHigh, "master-eq-high")
+  ETL_ENUM_TYPE_16(VarMasterCompOn, "mcomp-on")
+  ETL_ENUM_TYPE_16(VarMasterCompThreshold, "mcomp-thresh")
+  ETL_ENUM_TYPE_16(VarMasterCompRatio, "mcomp-ratio")
+  ETL_ENUM_TYPE_16(VarMasterCompRelease, "mcomp-release")
   ETL_ENUM_TYPE_16(SampleInstrumentSample, "Sample")
   ETL_ENUM_TYPE_16(SampleInstrumentInterpolation, "Interpolation")
   ETL_ENUM_TYPE_16(SampleInstrumentCrush, "Crush")

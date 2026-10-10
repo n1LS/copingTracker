@@ -61,6 +61,6 @@ public:
   };
 
 private:
-  etl::vector<Variable *, 9> variables_;
+  etl::vector<Variable *, 13> variables_;
 };
 #endif

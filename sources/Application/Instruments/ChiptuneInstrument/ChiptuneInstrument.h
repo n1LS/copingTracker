@@ -76,7 +76,7 @@ public:
   void setChannel(uint8_t channel);
 
 private:
-  etl::vector<Variable *, 20> variables_;
+  etl::vector<Variable *, 24> variables_;
 
   Variable vArpSpeed_;
   Variable vAttack_;

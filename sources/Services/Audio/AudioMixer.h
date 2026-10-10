@@ -38,6 +38,11 @@ public:
   void RemoveModule(AudioModule &module);
   void ClearModules();
 
+protected:
+  // Called with the summed input of all modules, before the mixer's volume is
+  // applied. Only called when any module delivered data.
+  virtual void PreFader(fixed *buffer, int samplecount) {};
+
 private:
   bool enableRendering_;
   etl::string<STRING_AUDIO_RENDER_PATH_MAX> renderPath_;

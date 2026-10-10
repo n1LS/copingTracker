@@ -18,6 +18,7 @@
 Voice I_Instrument::voices_[SONG_CHANNEL_COUNT];
 I_Instrument *I_Instrument::voiceOwner_[SONG_CHANNEL_COUNT];
 equalizer_t I_Instrument::equalizers_[SONG_CHANNEL_COUNT];
+compressor_t I_Instrument::compressors_[SONG_CHANNEL_COUNT];
 
 I_Instrument::~I_Instrument() {
   // Virtual destructor implementation
@@ -53,6 +54,21 @@ void I_Instrument::ProcessEqualizer(int channel, fixed *buffer, int size) {
   eq.set_high(eqHigh_.GetInt());
 
   eq.process_buffer(buffer, size);
+}
+
+void I_Instrument::ProcessCompressor(int channel, fixed *buffer, int size) {
+  compressor_t &comp = compressors_[channel];
+  if (!compOn_.GetBool()) {
+    comp.active = false;
+    return;
+  }
+  // restart from unity gain so switching it on doesn't click on stale state
+  if (!comp.active) {
+    comp.reset();
+    comp.active = true;
+  }
+  comp.set(compThreshold_.GetInt(), compRatio_.GetInt(), compRelease_.GetInt());
+  comp.process_buffer(buffer, size);
 }
 
 void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {

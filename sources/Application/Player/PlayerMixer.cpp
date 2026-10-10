@@ -178,6 +178,8 @@ void PlayerMixer::Update(Observable &o, I_ObservableData *d) {
   updateDelayParameters();
   ms->GetMasterBus()->SetEqualizer(project_->GetMasterEqOn(), project_->GetMasterEqLow(), project_->GetMasterEqMid(),
                                    project_->GetMasterEqHigh());
+  ms->GetMasterBus()->SetCompressor(project_->GetMasterCompOn(), project_->GetMasterCompThreshold(),
+                                    project_->GetMasterCompRatio(), project_->GetMasterCompRelease());
 }
 
 void PlayerMixer::updateDelayParameters() {

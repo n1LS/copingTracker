@@ -50,6 +50,10 @@ Project::Project(const char *name)
       delayFeedback_(Token::VarDelayFeedback, DEFAULT_DELAY_FEEDBACK), delayWet_(Token::VarDelayWet, DEFAULT_DELAY_WET),
       masterEqOn_(Token::VarMasterEqOn, false), masterEqLow_(Token::VarMasterEqLow, EQ_UNITY_GAIN),
       masterEqMid_(Token::VarMasterEqMid, EQ_UNITY_GAIN), masterEqHigh_(Token::VarMasterEqHigh, EQ_UNITY_GAIN),
+      masterCompOn_(Token::VarMasterCompOn, false),
+      masterCompThreshold_(Token::VarMasterCompThreshold, COMP_DEFAULT_THRESHOLD),
+      masterCompRatio_(Token::VarMasterCompRatio, COMP_DEFAULT_RATIO),
+      masterCompRelease_(Token::VarMasterCompRelease, COMP_DEFAULT_RELEASE),
       projectName_(Token::VarProjectName, name) {
 
   this->variables_.push_back(&tempo_);
@@ -78,6 +82,10 @@ Project::Project(const char *name)
   this->variables_.push_back(&masterEqLow_);
   this->variables_.push_back(&masterEqMid_);
   this->variables_.push_back(&masterEqHigh_);
+  this->variables_.push_back(&masterCompOn_);
+  this->variables_.push_back(&masterCompThreshold_);
+  this->variables_.push_back(&masterCompRatio_);
+  this->variables_.push_back(&masterCompRelease_);
   scaleRoot_.SetInt(0); // Default to C (0)
   this->variables_.push_back(&projectName_);
 
@@ -132,6 +140,10 @@ void Project::Load(const char *name) {
   masterEqLow_.Reset();
   masterEqMid_.Reset();
   masterEqHigh_.Reset();
+  masterCompOn_.Reset();
+  masterCompThreshold_.Reset();
+  masterCompRatio_.Reset();
+  masterCompRelease_.Reset();
 
   if (name) {
     projectName_.SetString(name, true);
@@ -193,6 +205,22 @@ int Project::GetMasterEqMid() {
 
 int Project::GetMasterEqHigh() {
   return masterEqHigh_.GetInt();
+}
+
+bool Project::GetMasterCompOn() {
+  return masterCompOn_.GetBool();
+}
+
+int Project::GetMasterCompThreshold() {
+  return masterCompThreshold_.GetInt();
+}
+
+int Project::GetMasterCompRatio() {
+  return masterCompRatio_.GetInt();
+}
+
+int Project::GetMasterCompRelease() {
+  return masterCompRelease_.GetInt();
 }
 
 int Project::GetChannelVolume(int channel) {

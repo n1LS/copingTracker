@@ -17,6 +17,7 @@
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/fixed.h"
 #include "Application/Utils/stringutils.h"
+#include "Compressor.h"
 #include "Equalizer.h"
 #include "Externals/etl/include/etl/string.h"
 #include "Foundation/Constants/SpecialCharacters.h"
@@ -98,7 +99,11 @@ public:
         outputEffect_(Token::InstrumentParameterOutput, OutputEffectNames, OE_LAST, OE_NONE),
         eqOn_(Token::InstrumentParameterEqOn, false), eqLow_(Token::InstrumentParameterEqLow, EQ_UNITY_GAIN),
         eqMid_(Token::InstrumentParameterEqMid, EQ_UNITY_GAIN),
-        eqHigh_(Token::InstrumentParameterEqHigh, EQ_UNITY_GAIN) {};
+        eqHigh_(Token::InstrumentParameterEqHigh, EQ_UNITY_GAIN),
+        compOn_(Token::InstrumentParameterCompOn, false),
+        compThreshold_(Token::InstrumentParameterCompThreshold, COMP_DEFAULT_THRESHOLD),
+        compRatio_(Token::InstrumentParameterCompRatio, COMP_DEFAULT_RATIO),
+        compRelease_(Token::InstrumentParameterCompRelease, COMP_DEFAULT_RELEASE) {};
   virtual ~I_Instrument();
 
   // Initialisation routine
@@ -113,6 +118,7 @@ public:
     if (voiceOwner_[channel] != this) {
       InitVoice(channel);
       equalizers_[channel].reset();
+      compressors_[channel].reset();
       voiceOwner_[channel] = this;
     }
   }
@@ -180,6 +186,9 @@ public:
   // stereo, size is the number of sample pairs). Does nothing when the
   // equalizer is off, any instrument type gets it for free.
   void ProcessEqualizer(int channel, fixed *buffer, int size);
+
+  // Same for the compressor, to be called after the equalizer
+  void ProcessCompressor(int channel, fixed *buffer, int size);
 
   virtual void noteDisplay(uint8_t note, char (&out)[4]);
   virtual void noteDisplayCondensed(uint8_t note, char (&line1)[3], char (&line2)[3]);
@@ -252,6 +261,10 @@ protected:
     list->push_back(&eqLow_);
     list->push_back(&eqMid_);
     list->push_back(&eqHigh_);
+    list->push_back(&compOn_);
+    list->push_back(&compThreshold_);
+    list->push_back(&compRatio_);
+    list->push_back(&compRelease_);
   }
 
   Variable volume_;
@@ -263,10 +276,15 @@ protected:
   Variable eqLow_;
   Variable eqMid_;
   Variable eqHigh_;
+  Variable compOn_;
+  Variable compThreshold_;
+  Variable compRatio_;
+  Variable compRelease_;
 
   static Voice voices_[SONG_CHANNEL_COUNT];
   static I_Instrument *voiceOwner_[SONG_CHANNEL_COUNT];
   // filter state per channel, kept out of the voice union since it is shared by all instrument types
   static equalizer_t equalizers_[SONG_CHANNEL_COUNT];
+  static compressor_t compressors_[SONG_CHANNEL_COUNT];
 };
 #endif

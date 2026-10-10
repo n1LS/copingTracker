@@ -20,6 +20,7 @@
 #include "Application/Views/MixerView.h"
 #include "Application/Views/ModalDialogs/FullScreenBox.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
+#include "Application/Views/MasterView.h"
 #include "Application/Views/ModulationView.h"
 #include "Application/Views/PhraseView.h"
 #include "Application/Views/ProjectView.h"

@@ -47,6 +47,10 @@ public:
   int GetMasterEqLow();  // 0..FF, 0x80 is flat
   int GetMasterEqMid();  // 0..FF, 0x80 is flat
   int GetMasterEqHigh(); // 0..FF, 0x80 is flat
+  bool GetMasterCompOn();
+  int GetMasterCompThreshold(); // 0..FF
+  int GetMasterCompRatio();     // 0..FF
+  int GetMasterCompRelease();   // 0..FF
   int GetChannelVolume(int channel);
   bool Wrap();
   void OnTempoTap();
@@ -74,7 +78,7 @@ public:
   virtual void RestoreContent(PersistencyDocument *doc);
 
 private:
-  etl::vector<Variable *, 23> variables_;
+  etl::vector<Variable *, 27> variables_;
 
   InstrumentBank instrumentBank_;
   int tempoNudge_;
@@ -107,6 +111,10 @@ private:
   Variable masterEqLow_;
   Variable masterEqMid_;
   Variable masterEqHigh_;
+  Variable masterCompOn_;
+  Variable masterCompThreshold_;
+  Variable masterCompRatio_;
+  Variable masterCompRelease_;
   StringWatchedVariable<MAX_PROJECT_NAME_LENGTH> projectName_;
 };
 

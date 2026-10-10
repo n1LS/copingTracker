@@ -174,6 +174,11 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
   position.y_ += 2;
+  actionField_.emplace_back("Master Out", Token::ActionMasterOut, position);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
+
+  position.y_ += 1;
   actionField_.emplace_back("Sample Pool", Token::ActionImport, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
@@ -317,6 +322,11 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
   Player *player = Player::GetInstance();
 
   switch (token) {
+    case Token::ActionMasterOut:
+      if (CanExit()) {
+        Navigate(VT_MASTER, vtRevealFromCenter);
+      }
+      break;
     case Token::ActionPurge:
       {
         MessageBox *mb = MessageBox::Create(*this, "Purge", "Remove unused samples?", MBBF_YES | MBBF_NO);

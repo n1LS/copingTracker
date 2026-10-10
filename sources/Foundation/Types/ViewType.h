@@ -33,6 +33,7 @@ enum ViewType {
   VT_SAMPLE_EDITOR,     // Sample Editor
   VT_SAMPLE_SLICES,     // Sample slice editor
   VT_MODULATION,        // Instrument modulation & routing
+  VT_MASTER,            // Master out effects
 };
 
 #endif

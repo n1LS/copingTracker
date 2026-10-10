@@ -103,6 +103,7 @@ bool AudioMixer::Render(fixed *buffer, int samplecount) {
   // TODO (democloid): This is wildly inefficient, doing this loop takes 4 - 5
   // times the time it takes a mix loop above. Some tests show that at least
   if (gotData) {
+    PreFader(buffer, samplecount);
     // double performance is not hard to achieve
     if (volume_ == FP_ONE) {
       // unity gain, no calculations to be done, just grab the levels
