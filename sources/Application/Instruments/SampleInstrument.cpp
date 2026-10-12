@@ -1562,7 +1562,7 @@ void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
         SetName(value.c_str());
       } else if (!strncasecmp(name.c_str(), "sl", 2)) {
         setSliceFromString(name.c_str() + 2, value.c_str());
-      } else {
+      } else if (!RestoreEffectParameter(name.c_str(), value.c_str())) {
         bool found = false;
         for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
           if (!strcasecmp((*it)->GetName(), name.c_str())) {

@@ -87,6 +87,9 @@ private:
   bool invertBatt_;
   bool needClear_;
 
+  void drawRenderLoad(bool force);
+  int lastRenderLoad_ = -1; // what is on screen, in percent. -1 = nothing drawn
+
   LoopState loopState_ = lsIdle;
   int loopA_;
   int loopB_;

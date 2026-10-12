@@ -1265,8 +1265,8 @@ void PhraseView::DrawView() {
 
         npf_snprintf(buffer, sizeof(buffer), "%2.2X:", d);
         const int x = location.x_ + 10;
-        const int maxLength = SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - x - 2;
-        etl::string<SCREEN_WIDTH - BATTERY_GAUGE_WIDTH> instrLine = buffer;
+        const int maxLength = INDICATOR_TITLE_VU_X;
+        etl::string<maxLength> instrLine = buffer;
         I_Instrument *instr = viewData_->project_->GetInstrumentBank()->GetInstrument(d);
         instrLine += instr->GetDisplayName();
 
@@ -1276,7 +1276,7 @@ void PhraseView::DrawView() {
         DrawString(x, location.y_, instrLine.c_str());
 
         if ((int)instrLine.length() >= maxLength) {
-          DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, location.y_, CHAR(char_indicator_ellipsis_s));
+          DrawChar(maxLength - 1, location.y_, CHAR(char_indicator_ellipsis_s));
         }
       }
     }

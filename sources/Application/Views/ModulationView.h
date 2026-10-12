@@ -9,6 +9,7 @@
 #ifndef _MODULATION_VIEW_H_
 #define _MODULATION_VIEW_H_
 
+#include "Application/Instruments/I_Instrument.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "FieldView.h"
 #include "ViewData.h"
@@ -31,6 +32,16 @@ public:
 private:
   I_Instrument *getInstrument();
   void buildFields();
+
+  // The equalizer and compressor settings are plain bytes in the instrument,
+  // the fields need Variables to edit. These live in the view (not per
+  // instrument) and are loaded on entering the screen and written back after
+  // every key press. Same order as I_Instrument::EffectParameterTokens.
+  Variable *effectVariable(Token token);
+  void loadEffectVariables(I_Instrument *instr);
+  void storeEffectVariables(I_Instrument *instr);
+
+  etl::vector<Variable, 8> effectVars_;
 
   etl::vector<UIIntVarField, 16> intVarField_;
 };

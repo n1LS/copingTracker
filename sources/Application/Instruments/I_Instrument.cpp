@@ -38,9 +38,68 @@ void I_Instrument::ReleaseAllVoices() {
   }
 }
 
+constexpr Token I_Instrument::EffectParameterTokens[8];
+
+uint8_t *I_Instrument::EffectParameter(Token token) {
+  switch (token) {
+    case Token::InstrumentParameterEqOn:
+      return &eq_.on;
+    case Token::InstrumentParameterEqLow:
+      return &eq_.low;
+    case Token::InstrumentParameterEqMid:
+      return &eq_.mid;
+    case Token::InstrumentParameterEqHigh:
+      return &eq_.high;
+    case Token::InstrumentParameterCompOn:
+      return &comp_.on;
+    case Token::InstrumentParameterCompThreshold:
+      return &comp_.threshold;
+    case Token::InstrumentParameterCompRatio:
+      return &comp_.ratio;
+    case Token::InstrumentParameterCompRelease:
+      return &comp_.release;
+    default:
+      return nullptr;
+  }
+}
+
+bool I_Instrument::RestoreEffectParameter(const char *name, const char *value) {
+  for (Token token : EffectParameterTokens) {
+    if (strcasecmp(token.c_str(), name) == 0) {
+      uint8_t *param = EffectParameter(token);
+      bool isOn = (token == Token::InstrumentParameterEqOn) || (token == Token::InstrumentParameterCompOn);
+      if (isOn) {
+        // saved the way a bool Variable persists
+        *param = (strcasecmp(value, "true") == 0) || (atoi(value) != 0);
+      } else {
+        int v = atoi(value);
+        *param = (v < 0) ? 0 : ((v > 0xFF) ? 0xFF : v);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+void I_Instrument::ResetEffects() {
+  eq_ = eq_params_t();
+  comp_ = comp_params_t();
+}
+
+bool I_Instrument::EffectsModified() {
+  eq_params_t eqDefault;
+  comp_params_t compDefault;
+  return memcmp(&eq_, &eqDefault, sizeof(eq_)) != 0 || memcmp(&comp_, &compDefault, sizeof(comp_)) != 0;
+}
+
+void I_Instrument::CopyEffectsFrom(I_Instrument &other) {
+  eq_ = other.eq_;
+  comp_ = other.comp_;
+}
+
 void I_Instrument::ProcessEqualizer(int channel, fixed *buffer, int size) {
   equalizer_t &eq = equalizers_[channel];
-  if (!eqOn_.GetBool()) {
+  if (!eq_.on) {
     eq.active = false;
     return;
   }
@@ -49,16 +108,16 @@ void I_Instrument::ProcessEqualizer(int channel, fixed *buffer, int size) {
     eq.reset();
     eq.active = true;
   }
-  eq.set_low(eqLow_.GetInt());
-  eq.set_mid(eqMid_.GetInt());
-  eq.set_high(eqHigh_.GetInt());
+  eq.set_low(eq_.low);
+  eq.set_mid(eq_.mid);
+  eq.set_high(eq_.high);
 
   eq.process_buffer(buffer, size);
 }
 
 void I_Instrument::ProcessCompressor(int channel, fixed *buffer, int size) {
   compressor_t &comp = compressors_[channel];
-  if (!compOn_.GetBool()) {
+  if (!comp_.on) {
     comp.active = false;
     return;
   }
@@ -67,7 +126,7 @@ void I_Instrument::ProcessCompressor(int channel, fixed *buffer, int size) {
     comp.reset();
     comp.active = true;
   }
-  comp.set(compThreshold_.GetInt(), compRatio_.GetInt(), compRelease_.GetInt());
+  comp.set(comp_.threshold, comp_.ratio, comp_.release);
   comp.process_buffer(buffer, size);
 }
 
@@ -90,6 +149,22 @@ void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {
     printer->OpenElement(XML_ELEM_PARAMETER);
     printer->PushAttribute(XML_ATTR_NAME, (*it)->GetName());
     printer->PushAttribute(XML_ATTR_VALUE, (*it)->GetPersistenceString().c_str());
+    printer->CloseElement(); // PARAM
+  }
+
+  // The equalizer and compressor settings are not Variables, they are saved
+  // the same way though so the project files stay compatible
+  for (Token token : EffectParameterTokens) {
+    bool isOn = (token == Token::InstrumentParameterEqOn) || (token == Token::InstrumentParameterCompOn);
+    char value[8];
+    if (isOn) {
+      npf_snprintf(value, sizeof(value), "%s", *EffectParameter(token) ? "true" : "false");
+    } else {
+      npf_snprintf(value, sizeof(value), "%d", *EffectParameter(token));
+    }
+    printer->OpenElement(XML_ELEM_PARAMETER);
+    printer->PushAttribute(XML_ATTR_NAME, token.c_str());
+    printer->PushAttribute(XML_ATTR_VALUE, value);
     printer->CloseElement(); // PARAM
   }
 }
@@ -131,7 +206,7 @@ void I_Instrument::RestoreContent(PersistencyDocument *doc) {
         // Set the instrument name directly
         SetName(value);
         Trace::Log("I_INSTRUMENT", "Set instrument name: %s", value);
-      } else {
+      } else if (!RestoreEffectParameter(name, value)) {
         // For other parameters, find the variable and set its value
         bool found = false;
 
@@ -169,6 +244,7 @@ void I_Instrument::Purge() {
   for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
     (*it)->Reset();
   }
+  ResetEffects();
 }
 
 void I_Instrument::noteDisplay(uint8_t note, char (&out)[4]) {

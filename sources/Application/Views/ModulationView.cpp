@@ -19,6 +19,17 @@ typedef struct eq_band_t {
 } eq_band_t;
 
 ModulationView::ModulationView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
+  // the defaults are what a field's clear button resets to
+  eq_params_t eq;
+  comp_params_t comp;
+  effectVars_.emplace_back(Token::InstrumentParameterEqOn, (bool)eq.on);
+  effectVars_.emplace_back(Token::InstrumentParameterEqLow, (int)eq.low);
+  effectVars_.emplace_back(Token::InstrumentParameterEqMid, (int)eq.mid);
+  effectVars_.emplace_back(Token::InstrumentParameterEqHigh, (int)eq.high);
+  effectVars_.emplace_back(Token::InstrumentParameterCompOn, (bool)comp.on);
+  effectVars_.emplace_back(Token::InstrumentParameterCompThreshold, (int)comp.threshold);
+  effectVars_.emplace_back(Token::InstrumentParameterCompRatio, (int)comp.ratio);
+  effectVars_.emplace_back(Token::InstrumentParameterCompRelease, (int)comp.release);
 }
 
 ModulationView::~ModulationView() {
@@ -35,6 +46,27 @@ I_Instrument *ModulationView::getInstrument() {
   return bank->GetInstrument(viewData_->currentInstrumentID_);
 }
 
+Variable *ModulationView::effectVariable(Token token) {
+  for (Variable &v : effectVars_) {
+    if (v.GetID() == token) {
+      return &v;
+    }
+  }
+  return nullptr;
+}
+
+void ModulationView::loadEffectVariables(I_Instrument *instr) {
+  for (Variable &v : effectVars_) {
+    v.SetInt(*instr->EffectParameter(v.GetID()), false);
+  }
+}
+
+void ModulationView::storeEffectVariables(I_Instrument *instr) {
+  for (Variable &v : effectVars_) {
+    *instr->EffectParameter(v.GetID()) = (uint8_t)v.GetInt();
+  }
+}
+
 void ModulationView::buildFields() {
   // the fields point to the variables of the current instrument, so they need
   // to be rebuilt whenever the screen is entered
@@ -47,6 +79,7 @@ void ModulationView::buildFields() {
   if (!instr) {
     return;
   }
+  loadEffectVariables(instr);
 
   addTitleLabel("Effects send", 2);
 
@@ -61,7 +94,7 @@ void ModulationView::buildFields() {
   addTitleLabel("Equalizer", 5);
 
   position.y_ += 3;
-  v = instr->FindVariable(Token::InstrumentParameterEqOn);
+  v = effectVariable(Token::InstrumentParameterEqOn);
   intVarField_.emplace_back(position, *v, "Enabled : %1s ", 0, 1, 1, 1);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
@@ -75,7 +108,7 @@ void ModulationView::buildFields() {
 
   for (const auto &band : eqBands) {
     position.y_ += 1;
-    v = instr->FindVariable(band.token);
+    v = effectVariable(band.token);
     intVarField_.emplace_back(position, *v, band.format, 0, 0xFF, 1, 0x10);
     intVarField_.back().SetLabelColor(Theme::SemanticColors::filter);
     intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
@@ -87,7 +120,7 @@ void ModulationView::buildFields() {
   addTitleLabel("Compressor", position.y_);
 
   position.y_ += 1;
-  v = instr->FindVariable(Token::InstrumentParameterCompOn);
+  v = effectVariable(Token::InstrumentParameterCompOn);
   intVarField_.emplace_back(position, *v, "Enabled : %1s ", 0, 1, 1, 1);
   intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
   intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
@@ -101,7 +134,7 @@ void ModulationView::buildFields() {
 
   for (const auto &param : compParams) {
     position.y_ += 1;
-    v = instr->FindVariable(param.token);
+    v = effectVariable(param.token);
     intVarField_.emplace_back(position, *v, param.format, 0, 0xFF, 1, 0x10);
     intVarField_.back().SetLabelColor(Theme::SemanticColors::volume);
     intVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
@@ -160,6 +193,10 @@ void ModulationView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   FieldView::ProcessButtonMask(mask, pressed);
 
+  if (I_Instrument *instr = getInstrument()) {
+    storeEffectVariables(instr);
+  }
+
   if (mask & BM_PLAY) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
@@ -180,38 +217,31 @@ void ModulationView::DrawView() {
 
   Token focused = GetFocus()->GetVariable()->GetID();
   char buffer[16];
-  Variable *var;
   I_Instrument *instrument = getInstrument();
 
   // draw the equalizer visualization for good measure
-  var = instrument->FindVariable(Token::InstrumentParameterEqLow);
   SetColor(_color(Token::InstrumentParameterEqLow));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterEqLow)));
   DrawString(p.x_ + 10, p.y_ + 2, buffer, fGraphic);
 
-  var = instrument->FindVariable(Token::InstrumentParameterEqMid);
   SetColor(_color(Token::InstrumentParameterEqMid));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterEqMid)));
   DrawString(p.x_ + 10, p.y_ + 3, buffer, fGraphic);
 
-  var = instrument->FindVariable(Token::InstrumentParameterEqHigh);
   SetColor(_color(Token::InstrumentParameterEqHigh));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterEqHigh)));
   DrawString(p.x_ + 10, p.y_ + 4, buffer, fGraphic);
 
   // and the compressor parameters
-  var = instrument->FindVariable(Token::InstrumentParameterCompThreshold);
   SetColor(_color(Token::InstrumentParameterCompThreshold));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompThreshold)));
   DrawString(p.x_ + 10, p.y_ + 8, buffer, fGraphic);
 
-  var = instrument->FindVariable(Token::InstrumentParameterCompRatio);
   SetColor(_color(Token::InstrumentParameterCompRatio));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompRatio)));
   DrawString(p.x_ + 10, p.y_ + 9, buffer, fGraphic);
 
-  var = instrument->FindVariable(Token::InstrumentParameterCompRelease);
   SetColor(_color(Token::InstrumentParameterCompRelease));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(var->GetInt()));
+  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompRelease)));
   DrawString(p.x_ + 10, p.y_ + 10, buffer, fGraphic);
 }

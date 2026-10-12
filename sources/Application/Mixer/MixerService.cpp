@@ -17,6 +17,7 @@
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Player/Player.h"
 #include "Application/Player/PlayerMixer.h"
+#include "Application/Player/SyncMaster.h"
 #include "Application/Utils/char.h"
 #include "Services/Audio/Audio.h"
 #include "Services/Audio/AudioDriver.h"
@@ -116,12 +117,26 @@ void MixerService::Update(Observable &o, I_ObservableData *d) {
 
   AudioDriver::Event *event = (AudioDriver::Event *)d;
   if (event->type_ == AudioDriver::Event::ADET_BUFFERNEEDED) {
+    uint32_t start = System::GetInstance()->Micros();
     Lock();
     SetChanged();
     NotifyObservers();
 
     out_->Trigger();
     Unlock();
+    updateRenderLoad(start);
+  }
+}
+
+void MixerService::updateRenderLoad(uint32_t startUs) {
+  uint32_t now = System::GetInstance()->Micros();
+  // unsigned, so it survives the micros counter wrapping
+  uint32_t load = RenderLoadPercent(now - startUs, (uint32_t)SyncMaster::GetInstance()->GetPlaySampleCount());
+
+  // peak hold: a late buffer comes from the slowest slice, not the average
+  if (load >= loadPeak_ || (now - loadPeakTime_) > RENDER_LOAD_HOLD_US) {
+    loadPeak_ = load;
+    loadPeakTime_ = now;
   }
 }
 
@@ -215,6 +230,7 @@ void MixerService::OnPlayerStart(MixerServiceMode mode) {
 void MixerService::OnPlayerStop() {
   // always reset back to audio mode when stopping
   setRenderingMode(MSM_AUDIO);
+  loadPeak_ = 0;
   // with feedback the delay tail could ring forever, so silence it
   delay_.Clear();
 }

@@ -267,6 +267,7 @@ uint16_t InstrumentBank::Clone(uint16_t i) {
       dstV->CopyFrom(**it);
     }
   }
+  dst->CopyEffectsFrom(*src);
   return nextFreeInstrumentSlotId;
 }
 

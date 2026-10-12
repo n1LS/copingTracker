@@ -31,6 +31,30 @@ enum MixerServiceMode {
 // bus 0-7 are the song channels, 8 the file streamer
 #define DELAY_MIX_BUS 9
 
+// Render load: the time core1 needs to produce one slice of audio, as per mille
+// of the time that slice takes to play. At 1000 the render is as slow as
+// playback, so the next buffer arrives late and the DMA plays silence.
+constexpr uint32_t RENDER_LOAD_WARNING = 80;  // amber from here
+constexpr uint32_t RENDER_LOAD_CRITICAL = 95; // red from here
+constexpr uint32_t RENDER_LOAD_HOLD_US = 2000000;
+
+static_assert(SAMPLE_RATE_HZ % 100 == 0, "RenderLoadPercent needs a sample rate that is a multiple of 100");
+
+// elapsed * 1000 / (samples / SAMPLE_RATE_HZ * 1000000), in integers. The
+// elapsed time is limited so the product fits 32 bits.
+constexpr uint32_t RenderLoadPercent(uint32_t elapsedUs, uint32_t samples) {
+  if (samples == 0) {
+    return 0;
+  }
+  if (elapsedUs > 90000) {
+    elapsedUs = 90000;
+  }
+  return (elapsedUs * (SAMPLE_RATE_HZ / 100)) / (samples * 100);
+}
+// some test cases
+static_assert(RenderLoadPercent(10000, 918) == 48, "10ms of a 20.8ms slice is 48%");
+static_assert(RenderLoadPercent(20816, 918) == 99, "a render as long as the slice is ~100%");
+
 class MixerService : public T_Singleton<MixerService>, public Observable, public I_Observer, public CommandExecuter {
 
 public:
@@ -71,6 +95,12 @@ public:
   void Lock();
   void Unlock();
 
+  // Highest render load of the last RENDER_LOAD_HOLD_US, in per mille (see
+  // RenderLoadPermille). Written by core1, a plain aligned read is safe.
+  uint32_t GetRenderLoad() {
+    return loadPeak_;
+  }
+
 protected:
   void setRenderingMode(MixerServiceMode mode);
 
@@ -80,6 +110,10 @@ protected:
 
 private:
   bool configureRenderPaths();
+  void updateRenderLoad(uint32_t startUs);
+
+  volatile uint32_t loadPeak_ = 0;
+  uint32_t loadPeakTime_ = 0;
 
   AudioOut *out_;
   MasterBus master_;

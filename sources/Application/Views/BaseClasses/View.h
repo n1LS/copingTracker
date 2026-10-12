@@ -331,6 +331,7 @@ protected:
   void drawPlaybackIndicator();
   void drawMasterVuMeter(Player *player, bool forceRedraw = false, uint8_t xoffset = 24);
   void drawTitleVuMeter(Player *player);
+  void drawTitleCPUMeter();
   void drawPlayTime(Player *player, GUIPoint pos);
   void drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw = false);
   void DrawBorder(int32_t x, int32_t y, int32_t width, int32_t height, bool thick);

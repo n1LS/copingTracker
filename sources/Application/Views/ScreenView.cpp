@@ -26,6 +26,7 @@ void ScreenView::AnimationUpdate() {
   drawBattery();
   drawPlaybackIndicator();
   drawTitleVuMeter(Player::GetInstance());
+  drawTitleCPUMeter();
 }
 
 void ScreenView::Navigate(ViewType target, ViewTransition transition) {

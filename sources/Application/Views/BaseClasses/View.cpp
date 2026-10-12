@@ -243,6 +243,27 @@ void View::drawMasterVuMeter(Player *player, bool forceRedraw, uint8_t xoffset) 
   drawVUMeter(leftBars, rightBars, pos, 0, forceRedraw);
 }
 
+void View::drawTitleCPUMeter() {
+  SetBackgroundColor(Theme::View::Title::bg);
+  
+  uint8_t load = 0;
+
+  if (Player::GetInstance()->IsRunning()) {
+    uint32_t percent = MixerService::GetInstance()->GetRenderLoad();
+    load = (percent > 99) ? 99 : percent;
+  }
+  
+  if (load >= RENDER_LOAD_CRITICAL) {
+    SetColor(Theme::View::error);
+  } else if (load >= RENDER_LOAD_CRITICAL) {
+    SetColor(Theme::View::warning);
+  } else {
+    SetColor(Theme::View::fg);
+  }
+
+  DrawChar(INDICATOR_CPU_X, 0, char_v_bar_lookup[load / 10 + 1], fGraphic);
+}
+
 void View::drawTitleVuMeter(Player *player) {
   SetBackgroundColor(Theme::View::Title::bg);
 
@@ -253,8 +274,8 @@ void View::drawTitleVuMeter(Player *player) {
 
   if (!player->IsRunning()) {
     SetColor(barColor[0]);
-    DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 1, 0, char_v_bar_lookup[1], fGraphic);
-    DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, 0, char_v_bar_lookup[1], fGraphic);
+    DrawChar(INDICATOR_TITLE_VU_X + 0, 0, char_v_bar_lookup[1], fGraphic);
+    DrawChar(INDICATOR_TITLE_VU_X + 1, 0, char_v_bar_lookup[1], fGraphic);
     return;
   }
 
@@ -269,10 +290,10 @@ void View::drawTitleVuMeter(Player *player) {
   int right = (rightBars + 1) >> 4;
 
   SetColor(barColor[left]);
-  DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 2, 0, char_v_bar_lookup[left], fGraphic);
+  DrawChar(INDICATOR_TITLE_VU_X + 0, 0, char_v_bar_lookup[left], fGraphic);
 
   SetColor(barColor[right]);
-  DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 1, 0, char_v_bar_lookup[right], fGraphic);
+  DrawChar(INDICATOR_TITLE_VU_X + 1, 0, char_v_bar_lookup[right], fGraphic);
 }
 
 void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw) {
@@ -763,7 +784,7 @@ void View::DrawTitle(const char *format, ...) {
   SetBackgroundColor(Theme::View::Title::bg);
   SetColor(Theme::View::Title::fg);
 
-  constexpr size_t maxLength = SCREEN_WIDTH - BATTERY_GAUGE_WIDTH;
+  constexpr size_t maxLength = INDICATOR_BATTERY_GAUGE_X;
 
   va_list val;
   va_start(val, format);
@@ -775,7 +796,7 @@ void View::DrawTitle(const char *format, ...) {
   size_t len = strlen(buffer);
 
   if (len <= maxLength) {
-    memset(buffer + len, ' ', 28 - len);
+    memset(buffer + len, ' ', INDICATOR_BATTERY_GAUGE_X - len);
     buffer[maxLength] = '\0';
   } else {
     buffer[maxLength] = '\0';

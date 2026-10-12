@@ -85,6 +85,24 @@ static const char *CompactInstrumentNames[IT_LAST] = {
     InstrumentTypeNames[IT_MIDI].compact,
 };
 
+// The equalizer and compressor settings of an instrument. Plain bytes instead
+// of Variables: every instrument slot would otherwise carry 8 more Variables
+// plus their list entries. The modulation view edits them through temporary
+// Variables, persistence goes through Get/SetEffectParameter.
+typedef struct eq_params_t {
+  uint8_t on = false;
+  uint8_t low = EQ_UNITY_GAIN;
+  uint8_t mid = EQ_UNITY_GAIN;
+  uint8_t high = EQ_UNITY_GAIN;
+} eq_params_t;
+
+typedef struct comp_params_t {
+  uint8_t on = false;
+  uint8_t threshold = COMP_DEFAULT_THRESHOLD;
+  uint8_t ratio = COMP_DEFAULT_RATIO;
+  uint8_t release = COMP_DEFAULT_RELEASE;
+} comp_params_t;
+
 class I_Instrument : public VariableContainer, public Observable, public Persistent {
 protected:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name_;
@@ -96,14 +114,7 @@ public:
         volume_(Token::InstrumentParameterVolume, 0xff), pan_(Token::InstrumentParameterPan, 0x80),
         table_(Token::InstrumentParameterTable, VAR_OFF),
         tableAutomation_(Token::InstrumentParameterTableAutomation, false),
-        outputEffect_(Token::InstrumentParameterOutput, OutputEffectNames, OE_LAST, OE_NONE),
-        eqOn_(Token::InstrumentParameterEqOn, false), eqLow_(Token::InstrumentParameterEqLow, EQ_UNITY_GAIN),
-        eqMid_(Token::InstrumentParameterEqMid, EQ_UNITY_GAIN),
-        eqHigh_(Token::InstrumentParameterEqHigh, EQ_UNITY_GAIN),
-        compOn_(Token::InstrumentParameterCompOn, false),
-        compThreshold_(Token::InstrumentParameterCompThreshold, COMP_DEFAULT_THRESHOLD),
-        compRatio_(Token::InstrumentParameterCompRatio, COMP_DEFAULT_RATIO),
-        compRelease_(Token::InstrumentParameterCompRelease, COMP_DEFAULT_RELEASE) {};
+        outputEffect_(Token::InstrumentParameterOutput, OutputEffectNames, OE_LAST, OE_NONE) {};
   virtual ~I_Instrument();
 
   // Initialisation routine
@@ -182,6 +193,31 @@ public:
     return (effect > OE_NONE && effect < OE_LAST) ? (OutputEffect)effect : OE_NONE;
   }
 
+  eq_params_t &EqParams() {
+    return eq_;
+  }
+  comp_params_t &CompParams() {
+    return comp_;
+  }
+
+  // The tokens the equalizer and compressor parameters are saved under
+  static constexpr Token EffectParameterTokens[8] = {
+      Token::InstrumentParameterEqOn,         Token::InstrumentParameterEqLow,
+      Token::InstrumentParameterEqMid,        Token::InstrumentParameterEqHigh,
+      Token::InstrumentParameterCompOn,       Token::InstrumentParameterCompThreshold,
+      Token::InstrumentParameterCompRatio,    Token::InstrumentParameterCompRelease};
+
+  // The byte behind one of the EffectParameterTokens, nullptr for any other
+  uint8_t *EffectParameter(Token token);
+
+  // Restores one parameter by its persistence name, returns false if the name
+  // is not an effect parameter
+  bool RestoreEffectParameter(const char *name, const char *value);
+
+  void ResetEffects();
+  bool EffectsModified();
+  void CopyEffectsFrom(I_Instrument &other);
+
   // Runs the instrument's equalizer over a rendered buffer (interleaved
   // stereo, size is the number of sample pairs). Does nothing when the
   // equalizer is off, any instrument type gets it for free.
@@ -257,14 +293,6 @@ protected:
     list->push_back(&table_);
     list->push_back(&tableAutomation_);
     list->push_back(&outputEffect_);
-    list->push_back(&eqOn_);
-    list->push_back(&eqLow_);
-    list->push_back(&eqMid_);
-    list->push_back(&eqHigh_);
-    list->push_back(&compOn_);
-    list->push_back(&compThreshold_);
-    list->push_back(&compRatio_);
-    list->push_back(&compRelease_);
   }
 
   Variable volume_;
@@ -272,14 +300,8 @@ protected:
   Variable table_;
   Variable tableAutomation_;
   Variable outputEffect_;
-  Variable eqOn_;
-  Variable eqLow_;
-  Variable eqMid_;
-  Variable eqHigh_;
-  Variable compOn_;
-  Variable compThreshold_;
-  Variable compRatio_;
-  Variable compRelease_;
+  eq_params_t eq_;
+  comp_params_t comp_;
 
   static Voice voices_[SONG_CHANNEL_COUNT];
   static I_Instrument *voiceOwner_[SONG_CHANNEL_COUNT];

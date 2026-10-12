@@ -11,6 +11,7 @@
 
 #include "SongView.h"
 #include "Application/AppWindow.h"
+#include "Application/Mixer/MixerService.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/BaseClasses/View.h"
@@ -19,6 +20,7 @@
 #include "System/System/System.h"
 #include "UIController.h"
 #include "ViewData.h"
+#include <nanoprintf.h>
 #include <stdlib.h>
 #include <string>
 
@@ -881,6 +883,7 @@ void SongView::DrawView() {
   drawMap();
   drawNotes();
   drawChainPreview();
+  drawRenderLoad(true);
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
@@ -994,6 +997,41 @@ void SongView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
   createMemoryBarrier();
 }
 
+// Shows how close the audio render (core1) is to missing a buffer, in the
+// bottom right corner while playing. Redrawn only when the shown value changes.
+void SongView::drawRenderLoad(bool force) {
+  constexpr int width = 3; // "72%"
+  constexpr int x = SCREEN_WIDTH - width;
+  constexpr int y = SCREEN_HEIGHT - 1;
+
+  int load = 0;
+
+  if (Player::GetInstance()->IsRunning()) {
+    load = MixerService::GetInstance()->GetRenderLoad();
+  }
+
+  if (!force && load == lastRenderLoad_) {
+    return;
+  }
+  
+  lastRenderLoad_ = load;
+
+  SetBackgroundColor(Theme::View::bg);
+  
+  if (load >= RENDER_LOAD_CRITICAL) {
+    SetColor(Theme::View::error);
+  } else if (load >= RENDER_LOAD_CRITICAL) {
+    SetColor(Theme::View::warning);
+  } else {
+    SetColor(Theme::View::fg);
+  }
+
+  char buffer[width + 1];
+  npf_snprintf(buffer, sizeof(buffer), load > 99 ? "%3d" : "%2d%%", load);
+  DrawString(x, y - 1, "CPU");
+  DrawString(x, y, buffer);
+}
+
 void SongView::AnimationUpdate() {
   // First call the parent class implementation to draw the battery gauge
   ScreenView::AnimationUpdate();
@@ -1011,20 +1049,24 @@ void SongView::AnimationUpdate() {
   // Always update VU meter even if other parts of UI dont need updating
   drawMasterVuMeter(player);
   drawTitleVuMeter(player);
+  drawTitleCPUMeter();
+  drawRenderLoad(false);
 
   SetBackgroundColor(Theme::View::Title::bg);
   SetColor(Theme::View::Title::fg);
   char c = (loopState_ == lsLooping) ? CHAR(char_symbol_loop_s) : CHAR(char_symbol_noloop_s);
-  DrawChar(SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 10, 0, c);
+  DrawChar(INDICATOR_LOOP_MODE_X, 0, c);
 
   // Use the consolidated flag for all UI updates
   if (needsUIUpdate_) {
     drawNotes();
 
     // Only handle play time updates if needed
-    GUIPoint timePos = {SCREEN_WIDTH - BATTERY_GAUGE_WIDTH - 8, 0};
+    GUIPoint timePos = {INDICATOR_PLAY_TIME_X, 0};
 
     SetColor(Theme::View::Title::fg);
+    SetBackgroundColor(Theme::View::Title::bg);
+
     if (needsPlayTimeUpdate_ && Player::GetInstance()->IsRunning()) {
       drawPlayTime(player, timePos);
       needsPlayTimeUpdate_ = false;

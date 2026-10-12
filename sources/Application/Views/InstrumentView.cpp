@@ -521,15 +521,14 @@ void InstrumentView::DrawView() {
   Clear();
 
   // Draw title
-  DrawTitle("Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_,
-            project_->GetInstrumentBank()->UsedInstrumentCount(), MAX_INSTRUMENT_COUNT);
+  const int usedInstruments = project_->GetInstrumentBank()->UsedInstrumentCount();
+  DrawTitle("Instrument %2.2X (%d/%d)", viewData_->currentInstrumentID_, usedInstruments, MAX_INSTRUMENT_COUNT);
 
   // border line up top
   SetBackgroundColor(Theme::View::inactive);
   for (int n = 0; n < SCREEN_WIDTH; n++) {
     SetColor(Theme::View::Title::bg);
     DrawChar(n, 1, CHAR(char_block_top_s));
-
     DrawChar(n, 3, ' ');
 
     SetColor(Theme::View::bg);
@@ -810,6 +809,10 @@ bool InstrumentView::checkInstrumentModified() {
     }
   }
 
+  if (instrument->EffectsModified()) {
+    return true;
+  }
+
   // No variables have been modified
   return false;
 }
@@ -842,6 +845,7 @@ void InstrumentView::resetInstrumentToDefaults() {
       var->Reset();
     }
   }
+  instrument->ResetEffects();
 }
 
 void InstrumentView::handleInstrumentExport() {
