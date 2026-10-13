@@ -55,6 +55,8 @@ protected:
 
   void drawPhrasePreview(uint8_t phrase);
 
+  static void GeneratorWizardCallback(View &v, ModalView &dialog);
+
 private:
   bool updatingPhrase_;      // Tells if we're in the middle
                              // of updating a phrase to avoid

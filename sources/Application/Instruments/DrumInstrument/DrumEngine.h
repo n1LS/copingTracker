@@ -218,12 +218,12 @@ typedef struct drum_voice_t {
     }
 
     // apply combined gain (volume * envelope) in single operation
-    sample = (sample >> 8) * level;
+    sample = (sample >> 6) * level;
 
     // apply bitcrush
     if (bitcrush) {
       sample &= (0xffff'ffff << bitcrush);
-      // drive is ignored at the moment
+      // TODO nILS: drive is ignored at the moment
       // sample *= drive;
     }
 

@@ -177,8 +177,17 @@ struct Theme {
 
   struct Dialog {
     FIXED(bg, LIGHT_GRAY)
-    FIXED(fg, BLACK)
+    FIXED(fg, WHITE)
     FIXED(inactive, DARK_GRAY)
+    
+    struct Panel {
+      FIXED(bg, BLACK);
+      
+      struct Input {
+        SWITCHABLE(fg, LIGHT_RED, WHITE)
+        SWITCHABLE(bg, WHITE, Theme::Dialog::Panel::bg)
+      };
+    };
 
     struct Icon {
       FIXED(info, LIGHT_YELLOW);
@@ -338,7 +347,7 @@ protected:
   void DrawFilledBorder(int32_t x, int32_t y, int32_t width, int32_t height, Color fill, bool half);
   void DrawWindow(int32_t x, int32_t y, int32_t width, int32_t height, const char *title);
   // returns width of the drawn button
-  int DrawButton(int x, int y, const char *title, bool selected, Color background = Theme::View::bg);
+  int DrawButton(int x, int y, const char *title, bool selected, bool down = false, Color background = Theme::View::bg);
   // returns width of the drawn tab
   int DrawTab(int x, int y, const char *title, bool selected);
 

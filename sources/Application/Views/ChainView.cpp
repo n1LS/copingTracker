@@ -11,11 +11,14 @@
 
 #include "ChainView.h"
 #include "Application/Utils/char.h"
+#include "Application/Model/Generators/PhraseGenerator.h"
+#include "Application/Views/ModalDialogs/GeneratorWizardModal.h"
 #include "Application/Views/SampleEditorView.h"
 #include "ScreenView.h"
 #include "System/Console/Trace.h"
 #include "UIController.h"
 #include "ViewData.h"
+
 #include <nanoprintf.h>
 
 const int columnPositions_[2] = {0, 3};
@@ -54,6 +57,33 @@ void ChainView::Reset() {
   saveRow_ = 0;
   saveCol_ = 0;
   needsUIUpdate_ = false;
+}
+
+// Runs the generator the wizard collected parameters for, on the current chain.
+void ChainView::GeneratorWizardCallback(View &v, ModalView &dialog) {
+  if (dialog.GetReturnCode() != GeneratorWizardModal::GWM_ACCEPT) {
+    return;
+  }
+
+  auto &view = static_cast<ChainView &>(v);
+  auto &wizard = static_cast<GeneratorWizardModal &>(dialog);
+
+  if (wizard.GetType() != GeneratorWizardModal::GT_DRUM) {
+    return; // other generators aren't implemented yet
+  }
+
+  ViewData *data = view.viewData_;
+  ChainStep *chain = data->song_->chain_.steps_[data->currentChain_];
+  uint8_t length = 0;
+  for (int y = 0; y < STEPS_PER_PHRASE; y++) {
+    if (chain[y].phrase == EMPTY_CHAIN_VALUE) {
+      break;
+    }
+    length++;
+  }
+
+  PhraseGenerator::GenerateDrumPhrases(data->project_, chain, length, wizard.GetDrumSettings());
+  view.isDirty_ = true;
 }
 
 void ChainView::setPhrase(unsigned char value) {
@@ -369,20 +399,19 @@ void ChainView::switchSoloMode() {
 }
 
 void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
       if (mask & BM_NAV) {
         toggleMute();
       }
-    };
+    }
     if (viewMode_ == VM_SOLOON) {
       if (mask & BM_NAV) {
         switchSoloMode();
       }
-    };
+    }
     return;
-  };
+  }
 
   if (viewMode_ == VM_NEW) {
     if (mask == BM_ENTER) {
@@ -402,7 +431,7 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
     } else {
       viewMode_ = VM_SELECTION;
     }
-  };
+  }
 
   // Process selection related keys
 
@@ -417,7 +446,6 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
     processSelectionButtonMask(mask);
   } else {
-
     // Switch back to normal mode
 
     viewMode_ = VM_NORMAL;
@@ -426,26 +454,25 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
 }
 
 void ChainView::processNormalButtonMask(uint16_t mask) {
-
   Player *player = Player::GetInstance();
 
   if (mask & BM_EDIT) {
     // EDIT Modifier
-    if (mask & BM_LEFT)
+    if (mask & BM_LEFT) {
       warpToNeighbour(-1);
-    if (mask & BM_RIGHT)
+    } else if (mask & BM_RIGHT) {
       warpToNeighbour(+1);
-    if (mask & BM_UP)
+    } else if (mask & BM_UP) {
       warpInColumn(-1);
-    if (mask & BM_DOWN)
+    } else if (mask & BM_DOWN) {
       warpInColumn(+1);
-    if (mask & BM_ENTER)
+    } else if (mask & BM_ENTER) {
       cutPosition();
-    if (mask & BM_ALT) {
+    } else if (mask & BM_ALT) {
       viewMode_ = VM_CLONE;
-    };
-    if (mask & BM_NAV)
+    } else if (mask & BM_NAV) {
       toggleMute();
+    } 
   } else if (mask & BM_ENTER) {
     // ENTER Modifier
     if (mask & BM_DOWN)
@@ -462,9 +489,9 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
       pasteLastPhrase();
       if (viewData_->chainCol_ == 0)
         viewMode_ = VM_NEW;
+    } else if (mask & BM_NAV) {
+        switchSoloMode();
     }
-    if (mask & BM_NAV)
-      switchSoloMode();
   } else if (mask & BM_NAV) {
     // NAV Modifier
     if (mask & BM_LEFT) {
@@ -475,16 +502,15 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
         viewData_->currentPhrase_ = *data;
         Navigate(VT_PHRASE, vtRevealFromRight);
       }
-    }
-
-    // We toggle full chain start only if we"re not in live mode
-    // or if the player ain't playing yet
-
-    if (mask & BM_PLAY) {
+    } else if (mask & BM_PLAY) {
+      // We toggle full chain start only if we"re not in live mode
+      // or if the player ain't playing yet
       player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
-    }
-    if (mask & BM_ALT)
+    } else if (mask & BM_ALT) {
       unMuteAll();
+    } else if (mask & BM_DOWN) {
+      DoModal(GeneratorWizardModal::Create(*this), ModalViewCallback::create<&ChainView::GeneratorWizardCallback>());
+    }
   } else {
     // NO modifier
     if (mask & BM_DOWN)
