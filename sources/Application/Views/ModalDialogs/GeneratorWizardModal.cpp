@@ -8,11 +8,13 @@
 
 #include "GeneratorWizardModal.h"
 #include "Application/AppWindow.h"
-#include "System/Console/nanoprintf.h"
+#include "Application/Instruments/InstrumentBank.h"
+#include "Foundation/Constants/GraphicCharacters.h"
 #include "Foundation/Constants/SpecialCharacters.h"
+#include "System/Console/nanoprintf.h"
 #include <algorithm>
-#include <string.h>
 #include <new>
+#include <string.h>
 
 #define WINDOW_W 26
 #define WINDOW_H 14
@@ -20,9 +22,11 @@
 #define VALUE_X 12
 #define ROWS_Y 4
 #define DENSITY_STEP 16
+#define VISIBLE_ROWS 4
 #define VALUE_W (WINDOW_W - VALUE_X - 4)
 
 static const char *kTypeNames[GeneratorWizardModal::GT_COUNT] = {"Drum", "Melody", "Bassline", "Chords"};
+static const char *kTargetNames[] = {"Drum Instr.", "LSDJ Kit", "Sliced Smpl", "Sample GM"};
 static const char *kStyleNames[] = {"Straight", "Sparse", "Syncopated", "Broken", "Driving", "HalfTime"};
 static const char *kFeelNames[] = {"Straight", "Triplet"};
 
@@ -33,17 +37,17 @@ bool GeneratorWizardModal::inUse_ = false;
 alignas(GeneratorWizardModal) static unsigned char GeneratorWizardModalStorage[sizeof(GeneratorWizardModal)];
 void *GeneratorWizardModal::storage_ = GeneratorWizardModalStorage;
 
-GeneratorWizardModal *GeneratorWizardModal::Create(View &view) {
+GeneratorWizardModal *GeneratorWizardModal::Create(View &view, InstrumentBank *bank) {
   if (inUse_) {
     auto *existing = reinterpret_cast<GeneratorWizardModal *>(storage_);
     existing->~GeneratorWizardModal();
     inUse_ = false;
   }
   inUse_ = true;
-  return new (storage_) GeneratorWizardModal(view);
+  return new (storage_) GeneratorWizardModal(view, bank);
 }
 
-GeneratorWizardModal::GeneratorWizardModal(View &view) : ModalView(view) {
+GeneratorWizardModal::GeneratorWizardModal(View &view, InstrumentBank *bank) : ModalView(view), bank_(bank) {
 }
 
 GeneratorWizardModal::~GeneratorWizardModal() {
@@ -52,6 +56,66 @@ GeneratorWizardModal::~GeneratorWizardModal() {
 void GeneratorWizardModal::Destroy() {
   this->~GeneratorWizardModal();
   inUse_ = false;
+}
+
+InstrumentType GeneratorWizardModal::instrumentType() const {
+  switch (static_cast<DrumGenerator::Target>(target_)) {
+    case DrumGenerator::Target::DrumInstrument:
+      return IT_DRUM;
+    case DrumGenerator::Target::LSDJKit:
+      return IT_LSDJKIT;
+    default: // sliced sample and GM set are both sample instruments
+      return IT_SAMPLE;
+  }
+}
+
+// Sample instruments are told apart by their setup: sliced ones have slices
+// to play back, GM set ones have a GM instrument selected.
+bool GeneratorWizardModal::matchesTarget(I_Instrument *instrument) const {
+  if (instrument->GetType() != instrumentType()) {
+    return false;
+  }
+
+  const auto target = static_cast<DrumGenerator::Target>(target_);
+  if (target == DrumGenerator::Target::SlicedSample) {
+    return static_cast<SampleInstrument *>(instrument)->HasSlicesForPlayback();
+  }
+  if (target == DrumGenerator::Target::SampleGMSet) {
+    Variable *gm = instrument->FindVariable(Token::SampleInstrumentGMInstrument);
+    return gm && gm->GetInt() != NO_GM_INSTRUMENT;
+  }
+  return true;
+}
+
+void GeneratorWizardModal::buildInstrumentList() {
+  entryCount_ = 0;
+  creating_ = false;
+
+  for (int i = 0; i < MAX_INSTRUMENT_COUNT; i++) {
+    if (matchesTarget(bank_->GetInstrument(i))) {
+      entries_[entryCount_++] = i;
+    }
+  }
+
+  if (entryCount_ == 0) {
+    const uint16_t slot = bank_->GetNextFreeInstrumentSlotId();
+    if (slot != NO_MORE_INSTRUMENT) {
+      entries_[entryCount_++] = slot;
+      creating_ = true;
+    }
+  }
+}
+
+// Keeps the focused entry inside the visible window of the list.
+void GeneratorWizardModal::updateScroll() {
+  if (row_ >= entryCount_) {
+    return; // button row
+  }
+  if (row_ < scroll_) {
+    scroll_ = row_;
+  } else if (row_ >= scroll_ + VISIBLE_ROWS) {
+    scroll_ = row_ - (VISIBLE_ROWS - 1);
+  }
 }
 
 bool GeneratorWizardModal::isImplemented(GeneratorType type) {
@@ -67,6 +131,8 @@ DrumGenerator::Settings GeneratorWizardModal::GetDrumSettings() const {
   s.steps = DrumGenerator::kMaxSteps;
   s.phraseCount = 1;
   s.voices = DrumGenerator::VoiceCount::Mono;
+  s.target = GetTarget();
+  s.instrument = instrumentId_;
   return s;
 }
 
@@ -91,7 +157,7 @@ void GeneratorWizardModal::drawField(int x, int y, const char *text, int width, 
   while (len < width) {
     buf[len++] = ' ';
   }
-  
+
   if (focused) {
     buf[len - 1] = indicator;
   }
@@ -122,9 +188,63 @@ void GeneratorWizardModal::DrawStep1() {
   for (int i = 0; i < GT_COUNT; i++) {
     drawField(LABEL_X, ROWS_Y + 1 + i, kTypeNames[i], WINDOW_W - 6, row_ == i, CHAR(char_button_enter_s));
   }
-  
-  btn_ = BTN_LEFT;
+
+  button_ = BTN_LEFT;
   drawButtons(" Cancel ", nullptr);
+}
+
+// Right aligned progress bar in the title bar. step is the zero based current
+// step, so the bar is full on the last one.
+void GeneratorWizardModal::drawProgress(uint8_t step, uint8_t steps) {
+  char bar[7];
+  horizontal_bar_graph_6(bar, (uint8_t)((step + 1) * 60 / steps));
+
+  SetBackgroundColor(Theme::Dialog::Title::bg);
+  SetColor(Theme::Dialog::Title::fg);
+  DrawString(WINDOW_W - 1 - 6, 1, bar, fGraphic);
+}
+
+void GeneratorWizardModal::DrawStepTarget() {
+  SetBackgroundColor(Theme::Dialog::bg);
+  SetColor(Theme::Dialog::fg);
+  DrawString(LABEL_X, 3, "Select target");
+
+  DrawFilledBorder(1, 4, WINDOW_W - 2, 6, Theme::Dialog::Panel::bg, true);
+
+  for (int i = 0; i < kTargetCount; i++) {
+    drawField(LABEL_X, ROWS_Y + 1 + i, kTargetNames[i], WINDOW_W - 6, row_ == i, CHAR(char_button_enter_s));
+  }
+
+  button_ = BTN_LEFT;
+  drawButtons(" Back ", nullptr);
+}
+
+void GeneratorWizardModal::DrawStepInstrument() {
+  SetBackgroundColor(Theme::Dialog::bg);
+  SetColor(Theme::Dialog::fg);
+  DrawString(LABEL_X, 3, creating_ ? "Create instrument" : "Select instrument");
+
+  DrawFilledBorder(1, 4, WINDOW_W - 2, 6, Theme::Dialog::Panel::bg, true);
+
+  if (entryCount_ == 0) {
+    SetBackgroundColor(Theme::Dialog::Panel::bg);
+    SetColor(Theme::Dialog::fg);
+    DrawString(LABEL_X, ROWS_Y + 1, "No free instrument");
+  }
+
+  for (int i = 0; i < VISIBLE_ROWS && scroll_ + i < entryCount_; i++) {
+    const uint8_t id = entries_[scroll_ + i];
+    char label[WINDOW_W];
+    if (creating_) {
+      npf_snprintf(label, sizeof(label), "%02X new %s", id, InstrumentTypeNames[instrumentType()].full);
+    } else {
+      npf_snprintf(label, sizeof(label), "%02X %s", id, bank_->GetInstrument(id)->GetDisplayName().c_str());
+    }
+    drawField(LABEL_X, ROWS_Y + 1 + i, label, WINDOW_W - 6, row_ == scroll_ + i, CHAR(char_button_enter_s));
+  }
+
+  button_ = BTN_LEFT;
+  drawButtons(" Back ", nullptr);
 }
 
 void GeneratorWizardModal::DrawStep2() {
@@ -137,9 +257,11 @@ void GeneratorWizardModal::DrawStep2() {
   char buf[8];
   drawRow(ROWS_Y + 1 + DR_STYLE, "Style", kStyleNames[style_], row_ == DR_STYLE);
   drawRow(ROWS_Y + 1 + DR_FEEL, "Feel", kFeelNames[feel_], row_ == DR_FEEL);
-  npf_snprintf(buf, sizeof(buf), "%d", density_);
+
+  npf_snprintf(buf, sizeof(buf), "%02X", density_);
   drawRow(ROWS_Y + 1 + DR_DENSITY, "Density", buf, row_ == DR_DENSITY);
-  npf_snprintf(buf, sizeof(buf), "%d", variation_);
+
+  npf_snprintf(buf, sizeof(buf), "%02X", variation_);
   drawRow(ROWS_Y + 1 + DR_VARIATION, "Variation", buf, row_ == DR_VARIATION);
   drawButtons(" Back ", " Generate ");
 }
@@ -150,12 +272,22 @@ void GeneratorWizardModal::DrawView() {
   left_ = (SCREEN_WIDTH - WINDOW_W) / 2;
   top_ = (SCREEN_HEIGHT - WINDOW_H) / 2;
 
-  DrawWindow(0, 0, WINDOW_W, WINDOW_H, step_ == STEP_TYPE ? "PhraseGen (1/2)" : "PhraseGen (2/2)");
+  DrawWindow(0, 0, WINDOW_W, WINDOW_H, "PhraseGen");
+  drawProgress(step_, NUM_STEPS);
 
-  if (step_ == STEP_TYPE) {
-    DrawStep1();
-  } else {
-    DrawStep2();
+  switch (step_) {
+    case STEP_TYPE:
+      DrawStep1();
+      break;
+    case STEP_TARGET:
+      DrawStepTarget();
+      break;
+    case STEP_INSTRUMENT:
+      DrawStepInstrument();
+      break;
+    default:
+      DrawStep2();
+      break;
   }
 }
 
@@ -164,20 +296,20 @@ void GeneratorWizardModal::DrawView() {
 void GeneratorWizardModal::drawButtons(const char *left, const char *right) {
   const int y = WINDOW_H - 3;
   const bool onButtons = isButtonRow();
-    const bool leftSel = onButtons && btn_ == BTN_LEFT;
-    const bool rightSel = onButtons && btn_ == BTN_RIGHT;
+  const bool leftSel = onButtons && button_ == BTN_LEFT;
+  const bool rightSel = onButtons && button_ == BTN_RIGHT;
 
-    if (left) {
-        int len = strlen(left);
-        DrawButton(LABEL_X, y, left, leftSel, leftSel && enterDown_, Theme::Dialog::bg);
-        if (leftSel) {
-            focusRect_ = GUIRect(LABEL_X + left_, y + top_, len + 2, 1);
-        }
-   }
+  if (left) {
+    int len = strlen(left);
+    DrawButton(LABEL_X, y, left, leftSel, leftSel && enterDown_, Theme::Dialog::bg);
+    if (leftSel) {
+      focusRect_ = GUIRect(LABEL_X + left_, y + top_, len + 2, 1);
+    }
+  }
 
   if (right) {
-      int len = strlen(right);
-      int x = WINDOW_W - len - 4;
+    int len = strlen(right);
+    int x = WINDOW_W - len - 4;
     DrawButton(x, y, right, rightSel, rightSel && enterDown_, Theme::Dialog::bg);
     if (rightSel) {
       focusRect_ = GUIRect(x + left_, y + top_, len + 2, 1);
@@ -190,18 +322,18 @@ void GeneratorWizardModal::changeValue(int delta) {
     return;
   }
   switch (row_) {
-  case DR_STYLE:
-    style_ = (style_ + kStyleCount + delta) % kStyleCount;
-    break;
-  case DR_FEEL:
-    feel_ = (feel_ + kFeelCount + delta) % kFeelCount;
-    break;
-  case DR_DENSITY:
-    density_ = std::clamp(density_ + delta * DENSITY_STEP, 0, 255);
-    break;
-  case DR_VARIATION:
-    variation_ = std::clamp(variation_ + delta * DENSITY_STEP, 0, 255);
-    break;
+    case DR_STYLE:
+      style_ = (style_ + kStyleCount + delta) % kStyleCount;
+      break;
+    case DR_FEEL:
+      feel_ = (feel_ + kFeelCount + delta) % kFeelCount;
+      break;
+    case DR_DENSITY:
+      density_ = std::clamp(density_ + delta, 0, 255);
+      break;
+    case DR_VARIATION:
+      variation_ = std::clamp(variation_ + delta, 0, 255);
+      break;
   }
 }
 
@@ -209,9 +341,9 @@ void GeneratorWizardModal::buttonStep1() {
   if (row_ < 4) {
     switch (row_) {
       case 0:
-        step_ = STEP_DRUM;
-        row_ = 0;
-            btn_ = BTN_RIGHT;
+        step_ = STEP_TARGET;
+        row_ = target_;
+        button_ = BTN_RIGHT;
         break;
     }
   } else {
@@ -219,11 +351,51 @@ void GeneratorWizardModal::buttonStep1() {
   }
 }
 
-void GeneratorWizardModal::buttonStep2() {
-  if (btn_ == BTN_LEFT) {
+void GeneratorWizardModal::buttonStepTarget() {
+  if (isButtonRow()) {
     step_ = STEP_TYPE;
+    row_ = type_;
+    return;
+  }
+  // ENTER on a target row continues with that target
+  target_ = row_;
+  buildInstrumentList();
+  step_ = STEP_INSTRUMENT;
+  row_ = 0;
+  scroll_ = 0;
+  button_ = BTN_LEFT;
+}
+
+void GeneratorWizardModal::buttonStepInstrument() {
+  if (isButtonRow()) {
+    step_ = STEP_TARGET;
+    row_ = target_;
+    return;
+  }
+  instrumentId_ = entries_[row_];
+  step_ = STEP_DRUM;
+  row_ = 0;
+  button_ = BTN_RIGHT;
+}
+
+void GeneratorWizardModal::buttonStep2() {
+  if (button_ == BTN_LEFT) {
+    step_ = STEP_INSTRUMENT;
     row_ = 0;
+    for (int i = 0; i < entryCount_; i++) {
+      if (entries_[i] == instrumentId_) {
+        row_ = i;
+      }
+    }
+    scroll_ = 0;
+    updateScroll();
   } else {
+    // a new instrument is set up only now, so backing out leaves the bank alone
+    if (creating_ &&
+        bank_->AssignInstrumentToSlot(instrumentType(), instrumentId_) != InstrumentAssignResult::Success) {
+      EndModal(GWM_CANCEL);
+      return;
+    }
     EndModal(GWM_ACCEPT);
   }
 }
@@ -238,9 +410,13 @@ void GeneratorWizardModal::ProcessButtonMask(uint16_t mask, bool pressed) {
     if (enterDown_ && (previous & ~mask) == BM_ENTER) {
       enterDown_ = false;
       isDirty_ = true;
-      
+
       if (step_ == STEP_TYPE) {
         buttonStep1();
+      } else if (step_ == STEP_TARGET) {
+        buttonStepTarget();
+      } else if (step_ == STEP_INSTRUMENT) {
+        buttonStepInstrument();
       } else {
         if (row_ == 4) {
           buttonStep2();
@@ -253,24 +429,32 @@ void GeneratorWizardModal::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
-  const uint8_t rowCount = (step_ == STEP_TYPE) ? GT_COUNT : DR_COUNT;
-  // rows 0..rowCount-1 are the fields, rowCount is the button row
-  const uint8_t focusCount = rowCount + 1;
+  // rows 0..rowCount()-1 are the fields, rowCount() is the button row
+  const uint8_t focusCount = rowCount() + 1;
 
   if (mask == BM_ENTER) {
     enterDown_ = true;
   }
-  
+
   if (enterDown_) {
-    if (mask & BM_LEFT || mask & BM_RIGHT) {
-      const int delta = (mask & BM_LEFT) ? -1 : 1;
-      changeValue(delta);
-    } 
+    if (mask & BM_DIRECTIONAL) {
+      if (mask & BM_RIGHT) {
+        changeValue(1);
+      } else if (mask & BM_LEFT) {
+        changeValue(-1);
+      } else {
+        changeValue((mask & BM_DOWN) ? -16 : 16);
+      }
+    }
   } else {
     if (mask == BM_UP || mask == BM_DOWN) {
       row_ = (row_ + focusCount + (mask == BM_UP ? -1 : 1)) % focusCount;
-    } else if  (mask & BM_LEFT || mask & BM_RIGHT) {
-      btn_ = (btn_ == BTN_LEFT) ? BTN_RIGHT : BTN_LEFT;
+      if (step_ == STEP_TARGET && !isButtonRow()) {
+        target_ = row_; // Next uses whatever was highlighted last
+      }
+      updateScroll();
+    } else if (isButtonRow() && (mask & BM_LEFT || mask & BM_RIGHT)) {
+      button_ = (button_ == BTN_LEFT) ? BTN_RIGHT : BTN_LEFT;
     }
   }
 

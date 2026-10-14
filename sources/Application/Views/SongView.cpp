@@ -1004,7 +1004,7 @@ void SongView::drawRenderLoad(bool force) {
   constexpr int x = SCREEN_WIDTH - width;
   constexpr int y = SCREEN_HEIGHT - 1;
 
-  int load = 0;
+  uint32_t load = 0;
 
   if (Player::GetInstance()->IsRunning()) {
     load = MixerService::GetInstance()->GetRenderLoad();
@@ -1013,11 +1013,11 @@ void SongView::drawRenderLoad(bool force) {
   if (!force && load == lastRenderLoad_) {
     return;
   }
-  
+
   lastRenderLoad_ = load;
 
   SetBackgroundColor(Theme::View::bg);
-  
+
   if (load >= RENDER_LOAD_CRITICAL) {
     SetColor(Theme::View::error);
   } else if (load >= RENDER_LOAD_CRITICAL) {

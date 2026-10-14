@@ -10,8 +10,8 @@
  */
 
 #include "ChainView.h"
-#include "Application/Utils/char.h"
 #include "Application/Model/Generators/PhraseGenerator.h"
+#include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/GeneratorWizardModal.h"
 #include "Application/Views/SampleEditorView.h"
 #include "ScreenView.h"
@@ -472,7 +472,7 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
       viewMode_ = VM_CLONE;
     } else if (mask & BM_NAV) {
       toggleMute();
-    } 
+    }
   } else if (mask & BM_ENTER) {
     // ENTER Modifier
     if (mask & BM_DOWN)
@@ -490,7 +490,7 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
       if (viewData_->chainCol_ == 0)
         viewMode_ = VM_NEW;
     } else if (mask & BM_NAV) {
-        switchSoloMode();
+      switchSoloMode();
     }
   } else if (mask & BM_NAV) {
     // NAV Modifier
@@ -509,7 +509,8 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
     } else if (mask & BM_ALT) {
       unMuteAll();
     } else if (mask & BM_DOWN) {
-      DoModal(GeneratorWizardModal::Create(*this), ModalViewCallback::create<&ChainView::GeneratorWizardCallback>());
+      DoModal(GeneratorWizardModal::Create(*this, viewData_->project_->GetInstrumentBank()),
+              ModalViewCallback::create<&ChainView::GeneratorWizardCallback>());
     }
   } else {
     // NO modifier

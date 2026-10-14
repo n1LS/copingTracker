@@ -245,14 +245,14 @@ void View::drawMasterVuMeter(Player *player, bool forceRedraw, uint8_t xoffset) 
 
 void View::drawTitleCPUMeter() {
   SetBackgroundColor(Theme::View::Title::bg);
-  
+
   uint8_t load = 0;
 
   if (Player::GetInstance()->IsRunning()) {
     uint32_t percent = MixerService::GetInstance()->GetRenderLoad();
     load = (percent > 99) ? 99 : percent;
   }
-  
+
   if (load >= RENDER_LOAD_CRITICAL) {
     SetColor(Theme::View::error);
   } else if (load >= RENDER_LOAD_CRITICAL) {

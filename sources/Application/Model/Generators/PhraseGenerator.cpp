@@ -6,6 +6,6 @@
  * This file is part of the copingTracker firmware
  */
 
- #include "PhraseGenerator.h"
+#include "PhraseGenerator.h"
 
 int PhraseGenerator::lcg_ = 13;

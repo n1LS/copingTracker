@@ -202,10 +202,10 @@ public:
 
   // The tokens the equalizer and compressor parameters are saved under
   static constexpr Token EffectParameterTokens[8] = {
-      Token::InstrumentParameterEqOn,         Token::InstrumentParameterEqLow,
-      Token::InstrumentParameterEqMid,        Token::InstrumentParameterEqHigh,
-      Token::InstrumentParameterCompOn,       Token::InstrumentParameterCompThreshold,
-      Token::InstrumentParameterCompRatio,    Token::InstrumentParameterCompRelease};
+      Token::InstrumentParameterEqOn,      Token::InstrumentParameterEqLow,
+      Token::InstrumentParameterEqMid,     Token::InstrumentParameterEqHigh,
+      Token::InstrumentParameterCompOn,    Token::InstrumentParameterCompThreshold,
+      Token::InstrumentParameterCompRatio, Token::InstrumentParameterCompRelease};
 
   // The byte behind one of the EffectParameterTokens, nullptr for any other
   uint8_t *EffectParameter(Token token);

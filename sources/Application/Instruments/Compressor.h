@@ -33,9 +33,9 @@ constexpr int COMP_BLOCK_SIZE = 16;
 constexpr int COMP_BLOCK_SHIFT = 4;
 
 // log2 values are in 8.8 fixed point, 256 = one octave = 6dB
-constexpr int COMP_FULL_SCALE_LOG = 15 * 256;  // log2(32768)
-constexpr int COMP_THRESHOLD_RANGE = 8 * 256;  // threshold setting 0 is 48dB below full scale
-constexpr int COMP_MAX_MAKEUP = 2 * 256;       // the automatic makeup is limited to 12dB
+constexpr int COMP_FULL_SCALE_LOG = 15 * 256; // log2(32768)
+constexpr int COMP_THRESHOLD_RANGE = 8 * 256; // threshold setting 0 is 48dB below full scale
+constexpr int COMP_MAX_MAKEUP = 2 * 256;      // the automatic makeup is limited to 12dB
 
 // parameter defaults: the threshold at full scale and the ratio at 1:1 make a
 // freshly enabled compressor transparent
