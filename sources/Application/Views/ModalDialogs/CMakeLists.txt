@@ -4,6 +4,7 @@ add_library(application_views_modaldialogs
   RenderProgressModal.cpp
   DeleteProjectConfirmModal.cpp
   TextInputModal.cpp
+  WizardModal.cpp
   GeneratorWizardModal.cpp
 )
 
