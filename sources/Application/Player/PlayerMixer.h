@@ -39,6 +39,9 @@ public:
   void OnPlayerStart(MixerServiceMode msmMode);
   void OnPlayerStop();
 
+  // Metronome click: primary (accent) or secondary
+  void TriggerMetronome(bool accent);
+
   void StartInstrument(int channel, I_Instrument *instrument, unsigned char note, uint8_t volume, bool newInstrument);
   void StopInstrument(int channel, bool force = false);
 

@@ -89,6 +89,7 @@ protected:
   uint8_t getEffectiveInstrumentForRow(int row);
 
 private:
+  int phraseDiv_ = 4;
   int row_;
   PhraseColumn col_;
   int lastNote_;

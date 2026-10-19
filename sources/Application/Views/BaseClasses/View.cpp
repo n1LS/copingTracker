@@ -812,7 +812,7 @@ void View::DrawTitle(const char *format, ...) {
   DrawString(0, 1, buffer);
 }
 
-void View::drawRowNumbers(int x, int y, int start, int numRows, int limit) {
+void View::drawRowNumbers(int x, int y, int start, int numRows, int limit, int altRowNumber) {
   SetBackgroundColor(Theme::View::bg);
 
   char row[3];
@@ -820,7 +820,7 @@ void View::drawRowNumbers(int x, int y, int start, int numRows, int limit) {
   for (int j = 0; j < numRows; j++) {
     int index = j + start;
     if (index < limit) {
-      SetColor(Theme::View::index((index) % ALT_ROW_NUMBER == 0));
+      SetColor(Theme::View::index((index) % altRowNumber == 0));
     } else {
       SetColor(Theme::View::inactive);
     }

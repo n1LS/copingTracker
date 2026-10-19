@@ -14,6 +14,7 @@
 #include "Application/Instruments/I_Instrument.h"
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Mixer/MixerService.h"
+#include "Application/Model/Config.h"
 #include "Application/Model/Groove.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
@@ -544,6 +545,29 @@ void Player::Update(Observable &o, I_ObservableData *d) {
       if (triggerLiveChains_) {
         triggerLiveChains();
       };
+    }
+
+    // Metronome: primary click on the first step of a phrase, secondary click
+    // on every other step that starts a quarter (step % division == 0)
+    if (firstPlayCycle_ || sync->MajorSlice()) {
+      Config *config = Config::GetInstance();
+      Variable *metronome = config ? config->FindVariable(Token::VarMetronomeEnabled) : nullptr;
+      if (metronome && metronome->GetInt()) {
+        int division = project_->FindVariable(Token::VarPhraseDivision)->GetInt();
+        if (division < 1) {
+          division = 1;
+        }
+        int phraseLength = project_->FindVariable(Token::VarPhraseLength)->GetInt();
+        if (phraseLength < 1) {
+          phraseLength = 1;
+        }
+        unsigned int step = sync->GetBeatCount();
+        if ((step % phraseLength) == 0) {
+          mixer_.TriggerMetronome(true);
+        } else if ((step % division) == 0) {
+          mixer_.TriggerMetronome(false);
+        }
+      }
     }
 
     // Track which channels just had their delay expire

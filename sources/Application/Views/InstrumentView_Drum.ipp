@@ -37,7 +37,7 @@ void InstrumentView::fillDrumParameters() {
   const uint8_t drumOrder[12] = {0, 2, 4, 1, 3, 5, 7, 9, 6, 8, 10, 11};
 
   for (int n = 0; n < 12; n++) {
-    Variable *v = instrument->FindVariable(Token(Token::DrumInstrumentParamsVoice0 + n));
+    Variable *v = instrument->FindVariable(Token(Token::DrumInstrumentParamsVoice0 + drumOrder[n]));
     hexVarField_.emplace_back(position, *v, 4, drumFormatStrings[drumOrder[n]], 0x0000, 0xffff, 16);
     hexVarField_.back().SetFieldConfiguration(instrumentFieldConfiguration);
     fieldList_.insert(fieldList_.end(), &hexVarField_.back());

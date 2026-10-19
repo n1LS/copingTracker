@@ -173,6 +173,13 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   intVarField_.emplace_back(position, *v, "Phrase len:%d", 2, 16, 1, 4);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
 
+  // Add phrase division
+  position.y_ += 1;
+  v = project_->FindVariable(Token::VarPhraseDivision);
+  intVarField_.emplace_back(position, *v, "Steps/Beat:%d", 2, 16, 1, 4);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+
+  // Add Master output
   position.y_ += 2;
   actionField_.emplace_back("Master Out", Token::ActionMasterOut, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());

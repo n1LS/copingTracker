@@ -46,6 +46,7 @@ Project::Project(const char *name)
       channelVolume8_(Token::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME), wrap_(Token::VarWrap, false),
       transpose_(Token::VarTranspose, 0), scale_(Token::VarScale, scaleNames, numScales, 0),
       scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), phraseLength_(Token::VarPhraseLength, 16),
+      phraseDivision_(Token::VarPhraseDivision, 4),
       delayTime_(Token::VarDelayTime, DEFAULT_DELAY_TIME),
       delayFeedback_(Token::VarDelayFeedback, DEFAULT_DELAY_FEEDBACK), delayWet_(Token::VarDelayWet, DEFAULT_DELAY_WET),
       masterEqOn_(Token::VarMasterEqOn, false), masterEqLow_(Token::VarMasterEqLow, EQ_UNITY_GAIN),
@@ -75,6 +76,7 @@ Project::Project(const char *name)
   scale_.SetInt(0);
   this->variables_.push_back(&scaleRoot_);
   this->variables_.push_back(&phraseLength_);
+  this->variables_.push_back(&phraseDivision_);
   this->variables_.push_back(&delayTime_);
   this->variables_.push_back(&delayFeedback_);
   this->variables_.push_back(&delayWet_);

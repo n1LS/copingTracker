@@ -56,6 +56,8 @@ bool MixerService::Init() {
   // delay bus needs to be the last one added to the master
   delay_.Clear();
   bus_[DELAY_MIX_BUS].AddModule(delay_);
+  metronome_.Clear();
+  bus_[DELAY_MIX_BUS].AddModule(metronome_);
 
   if (out_) {
     result = out_->Init();
@@ -233,6 +235,7 @@ void MixerService::OnPlayerStop() {
   loadPeak_ = 0;
   // with feedback the delay tail could ring forever, so silence it
   delay_.Clear();
+  metronome_.Clear();
 }
 
 bool MixerService::configureRenderPaths() {

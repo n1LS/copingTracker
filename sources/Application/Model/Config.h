@@ -40,7 +40,7 @@ public:
   bool ImportTheme(const char *themeName);
 
 private:
-  etl::vector<Variable *, 30> variables_;
+  etl::vector<Variable *, 32> variables_;
   // Config variables (kept as members to avoid heap allocation)
   WatchedVariable color0_;
   WatchedVariable color1_;
@@ -72,6 +72,7 @@ private:
   WatchedVariable keyDelay_;
   WatchedVariable keyRepeat_;
   WatchedVariable previewVolume_;
+  WatchedVariable metronome_;
 
   void SaveContent(tinyxml2::XMLPrinter *printer);
   void useDefaultConfig();

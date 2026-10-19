@@ -17,6 +17,7 @@
 #include "Foundation/Observable.h"
 #include "Foundation/T_Singleton.h"
 #include "MixBus.h"
+#include "Metronome.h"
 #include "Services/Audio/AudioMixer.h"
 #include "Services/Audio/AudioOut.h"
 #include "System/Process/SysMutex.h"
@@ -77,6 +78,10 @@ public:
     return &delay_;
   };
 
+  Metronome *GetMetronome() {
+    return &metronome_;
+  };
+
   virtual void Update(Observable &o, I_ObservableData *d);
 
   void OnPlayerStart(MixerServiceMode mode);
@@ -119,6 +124,7 @@ private:
   MasterBus master_;
   MixBus bus_[MAX_BUS_COUNT];
   DelayEffect delay_;
+  Metronome metronome_;
   SysMutex *sync_;
   Project *project_; // Reference to the current project
   MixerServiceMode mode_ = MSM_AUDIO;

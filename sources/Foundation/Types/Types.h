@@ -236,6 +236,7 @@ struct Token {
 
     VarKeyDelay = 139,
     VarKeyRepeat = 176,
+    VarMetronomeEnabled = 248,
 
     StackInstrumentSpread = 97,
     StackInstrumentWave = 183,
@@ -249,6 +250,7 @@ struct Token {
     StackInstrumentChord = 230,
 
     VarPhraseLength = 254,
+    VarPhraseDivision = 255,
     VarDelayTime = 237,
     VarDelayFeedback = 238,
     VarDelayWet = 239,
@@ -263,9 +265,9 @@ struct Token {
     VarMasterCompRelease = 130,
     ActionMasterOut = 131,
 
-    // 248-253 free 6
+    // 249-253 free 6
 
-    Default = 255, // "    "
+    Default = 256, // "    "
   };
 
   uint16_t raw() {
@@ -344,9 +346,11 @@ struct Token {
   ETL_ENUM_TYPE_16(VarThemeName, "theme-name")
   ETL_ENUM_TYPE_16(VarScaleRoot, "scale-root")
   ETL_ENUM_TYPE_16(VarPhraseLength, "phrase-length")
+  ETL_ENUM_TYPE_16(VarPhraseDivision, "phrase-division")
   ETL_ENUM_TYPE_16(VarDelayTime, "delay-time")
   ETL_ENUM_TYPE_16(VarDelayFeedback, "delay-feedback")
   ETL_ENUM_TYPE_16(VarDelayWet, "delay-wet")
+  ETL_ENUM_TYPE_16(VarMetronomeEnabled, "metronome")
   ETL_ENUM_TYPE_16(VarMasterEqOn, "master-eq-on")
   ETL_ENUM_TYPE_16(VarMasterEqLow, "master-eq-low")
   ETL_ENUM_TYPE_16(VarMasterEqMid, "master-eq-mid")
@@ -412,14 +416,14 @@ struct Token {
   ETL_ENUM_TYPE_16(VarColor_E, "color14")
   ETL_ENUM_TYPE_16(VarColor_F, "color15")
 
-  ETL_ENUM_TYPE_16(VarTempo, "Tempo")
-  ETL_ENUM_TYPE_16(VarMasterVolume, "Master")
-  ETL_ENUM_TYPE_16(VarPreviewVolume, "Preview")
-  ETL_ENUM_TYPE_16(VarWrap, "Wrap")
-  ETL_ENUM_TYPE_16(VarTranspose, "Transpose")
+  ETL_ENUM_TYPE_16(VarTempo, "tempo")
+  ETL_ENUM_TYPE_16(VarMasterVolume, "master-volume")
+  ETL_ENUM_TYPE_16(VarPreviewVolume, "preview-volume")
+  ETL_ENUM_TYPE_16(VarWrap, "wrap")
+  ETL_ENUM_TYPE_16(VarTranspose, "transpose")
   ETL_ENUM_TYPE_16(VarScale, "Scale")
-  ETL_ENUM_TYPE_16(VarProjectName, "ProjectName")
-  ETL_ENUM_TYPE_16(VarInstrumentType, "InstrumentType")
+  ETL_ENUM_TYPE_16(VarProjectName, "project-name")
+  ETL_ENUM_TYPE_16(VarInstrumentType, "isntrument-type")
   ETL_ENUM_TYPE_16(VarChannel1Volume, "channel1vol")
   ETL_ENUM_TYPE_16(VarChannel2Volume, "channel2vol")
   ETL_ENUM_TYPE_16(VarChannel3Volume, "channel3vol")

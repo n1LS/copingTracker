@@ -290,3 +290,7 @@ void PlayerMixer::Unlock() {
   MixerService *ms = MixerService::GetInstance();
   ms->Unlock();
 }
+
+void PlayerMixer::TriggerMetronome(bool accent) {
+  MixerService::GetInstance()->GetMetronome()->Trigger(accent);
+}

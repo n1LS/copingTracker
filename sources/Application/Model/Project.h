@@ -78,7 +78,7 @@ public:
   virtual void RestoreContent(PersistencyDocument *doc);
 
 private:
-  etl::vector<Variable *, 27> variables_;
+  etl::vector<Variable *, 28> variables_;
 
   InstrumentBank instrumentBank_;
   int tempoNudge_;
@@ -104,6 +104,7 @@ private:
   Variable scale_;
   Variable scaleRoot_;
   Variable phraseLength_;
+  Variable phraseDivision_;
   Variable delayTime_;
   Variable delayFeedback_;
   Variable delayWet_;

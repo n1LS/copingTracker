@@ -54,6 +54,7 @@ constexpr int DEFAULT_IMPORT_RESAMPLER = 0; // default for picoTracker is none (
 constexpr int DEFAULT_USE_COMMAND_PICKER = 1;
 constexpr int DEFAULT_KEY_DELAY = 500;
 constexpr int DEFAULT_KEY_REPEAT = 30;
+constexpr int DEFAULT_METRONOME = 0;
 
 // Use a struct to define parameter information
 struct ConfigParam {
@@ -108,6 +109,7 @@ static const ConfigParam configParams[] = {
     CONFIG(Token::VarConfigCommandPicker, {.intValue = DEFAULT_USE_COMMAND_PICKER}, commandPickerOptions, 2, false),
     CONFIG(Token::VarKeyDelay, {.intValue = DEFAULT_KEY_DELAY}, nullptr, 0, false),
     CONFIG(Token::VarKeyRepeat, {.intValue = DEFAULT_KEY_REPEAT}, nullptr, 0, false),
+    CONFIG(Token::VarMetronomeEnabled, {.intValue = DEFAULT_METRONOME}, mirrorUIOnOff, 2, false),
     CONFIG(Token::VarPreviewVolume, {.intValue = DEFAULT_PREVIEW_VOLUME}, nullptr, 0, false),
 };
 
@@ -141,7 +143,8 @@ Config::Config()
       backlightLevel_(Token::VarBacklightLevel, DEFAULT_BACKLIGHT_LEVEL),
       outputVolume_(Token::VarOutputVolume, DEFAULT_OUTPUT_VOLUME), keyDelay_(Token::VarKeyDelay, DEFAULT_KEY_DELAY),
       keyRepeat_(Token::VarKeyRepeat, DEFAULT_KEY_REPEAT),
-      previewVolume_(Token::VarPreviewVolume, DEFAULT_PREVIEW_VOLUME) {
+      previewVolume_(Token::VarPreviewVolume, DEFAULT_PREVIEW_VOLUME),
+      metronome_(Token::VarMetronomeEnabled, mirrorUIOnOff, 2, DEFAULT_METRONOME) {
 
   variables_.push_back(&color0_);
   variables_.push_back(&color1_);
@@ -172,6 +175,7 @@ Config::Config()
   variables_.push_back(&keyDelay_);
   variables_.push_back(&keyRepeat_);
   variables_.push_back(&previewVolume_);
+  variables_.push_back(&metronome_);
 
   PersistencyDocument doc;
 

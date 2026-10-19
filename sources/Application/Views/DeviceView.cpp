@@ -82,6 +82,12 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
+  position.y_ += 1;
+  v = config->FindVariable(Token::VarMetronomeEnabled);
+  intVarField_.emplace_back(position, *v, "Metronome    :%s", 0, 1, 1, 1);
+  fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  intVarField_.back().AddObserver(*this);
+
   position.y_ += 2;
   v = config->FindVariable(Token::VarPreviewVolume);
   intVarField_.emplace_back(position, *v, "Preview volume  :%2d", 0, 99, 1, 10);
@@ -240,6 +246,7 @@ void DeviceView::Update(Observable &, I_ObservableData *data) {
     case Token::VarMidiSync:
     case Token::VarMirrorUI:
     case Token::VarImportResampler:
+    case Token::VarMetronomeEnabled:
       configDirty_ = true;
       break;
     case Token::VarOutputVolume:

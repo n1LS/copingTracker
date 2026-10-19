@@ -333,7 +333,7 @@ protected:
   void drawRegularNote(const GUIPoint &pos, uint8_t channel);
   void drawInstrument(const GUIPoint &pos, uint8_t instrument);
   void drawNotes();
-  void drawRowNumbers(int x, int y, int start, int numRows, int limit = 256);
+  void drawRowNumbers(int x, int y, int start, int numRows, int limit = 256, int altRowNumber = ALT_ROW_NUMBER);
   void drawCommandLegend(uint8_t x, uint8_t y, Token command);
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
