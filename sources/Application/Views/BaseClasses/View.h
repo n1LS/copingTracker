@@ -179,10 +179,10 @@ struct Theme {
     FIXED(bg, LIGHT_GRAY)
     FIXED(fg, WHITE)
     FIXED(inactive, DARK_GRAY)
-    
+
     struct Panel {
       FIXED(bg, BLACK);
-      
+
       struct Input {
         SWITCHABLE(fg, LIGHT_RED, WHITE)
         SWITCHABLE(bg, WHITE, Theme::Dialog::Panel::bg)

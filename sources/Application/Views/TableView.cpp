@@ -147,8 +147,12 @@ void TableView::cutPosition() {
 }
 
 GUIRect TableView::getSelectionRect() {
-  GUIRect r(clipboard_.col_, clipboard_.row_, col_ - clipboard_.col_, row_ - clipboard_.col_);
-  return r;
+  // anchor and cursor in either order: the origin is the top left most point
+  const int left = std::min<int>(clipboard_.col_, col_);
+  const int right = std::max<int>(clipboard_.col_, col_);
+  const int top = std::min<int>(clipboard_.row_, row_);
+  const int bottom = std::max<int>(clipboard_.row_, row_);
+  return GUIRect(left, top, right - left + 1, bottom - top + 1);
 }
 
 void TableView::fillClipboardData() {
@@ -159,8 +163,8 @@ void TableView::fillClipboardData() {
 
   // Get size & store in clipboard
 
-  clipboard_.width_ = selRect.Width() + 1;
-  clipboard_.height_ = selRect.Height() + 1;
+  clipboard_.width_ = selRect.Width();
+  clipboard_.height_ = selRect.Height();
   clipboard_.row_ = selRect.Top();
   clipboard_.col_ = selRect.Left();
 
@@ -269,10 +273,7 @@ void TableView::pasteClipboard() {
   // Get number of row to paste
 
   int height = clipboard_.height_;
-  /*    if (row_+height>16) {
-          height=16-row_ ;
-      }
-    */
+
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   for (int i = 0; i < clipboard_.width_; i++) {
@@ -633,15 +634,13 @@ void TableView::processSelectionButtonMask(uint16_t mask) {
   }
 }
 
-void TableView::setTextProps(int row, int col, Color color = Theme::View::fg) {
+void TableView::setTextProps(int col, int row, Color color = Theme::View::fg) {
   bool highlighted = false;
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
-    if ((row >= selRect.Left()) && (row <= selRect.Right()) && (col >= selRect.Top()) && (col <= selRect.Bottom())) {
-      highlighted = true;
-    }
-  } else if ((col_ == row) && (row_ == col)) {
+    highlighted = selRect.Contains({col, row});
+  } else if ((col_ == col) && (row_ == row)) {
     highlighted = true;
   }
 
@@ -672,93 +671,74 @@ void TableView::DrawView() {
   // Display row numbers
   drawRowNumbers(anchor.x_ - 3, anchor.y_, 0, 16);
 
-  // Draw command 1
-  GUIPoint pos = anchor;
-
-  for (int j = 0; j < 16; j++) {
-    Token command = table.getCmd(j, 0);
-    setTextProps(0, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
-    DrawString(pos.x_, pos.y_, command.c_str());
-    pos.y_++;
-    if (j == row_ && (col_ == 0 || col_ == 1)) {
-      helpLegendCommand = command;
-    }
-  }
-
-  // Draw commands params 1
-
-  pos = anchor;
-  pos.x_ += 3;
+  // Draw all columns row by row
 
   char buffer[6];
   buffer[5] = 0;
 
-  for (int j = 0; j < 16; j++) {
-    uint16_t p = table.getParam(j, 0);
-    setTextProps(1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0));
-    wordToHexString(p, buffer);
-    DrawString(pos.x_, pos.y_, buffer);
-    pos.y_++;
-  }
-
-  // Draw commands 2
-
-  pos = anchor;
-  pos.x_ += 8;
+  GUIRect selRect = getSelectionRect();
 
   for (int j = 0; j < 16; j++) {
-    Token command = table.getCmd(j, 1);
-    setTextProps(2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
-    DrawString(pos.x_, pos.y_, command.c_str());
-    pos.y_++;
+
+    const int y = anchor.y_ + j;
+    const bool hilit = j % ALT_ROW_NUMBER == 0;
+
+    // command 1
+
+    Token command1 = table.getCmd(j, 0);
+    setTextProps(0, j, Theme::Phrase::command1(hilit));
+    DrawString(anchor.x_, y, command1.c_str());
+    if (j == row_ && (col_ == 0 || col_ == 1)) {
+      helpLegendCommand = command1;
+    }
+
+    // command 1 param
+
+    setTextProps(1, j, Theme::Phrase::command1(hilit));
+    wordToHexString(table.getParam(j, 0), buffer);
+    DrawString(anchor.x_ + 3, y, buffer);
+
+    bool selected = selRect.Contains({1, j});
+    bool nextSelected = selRect.Contains({2, j});
+    if (selected && nextSelected) {
+      DrawChar(anchor.x_ + 7, y, ' ');
+    }
+
+    // command 2
+
+    Token command2 = table.getCmd(j, 1);
+    setTextProps(2, j, Theme::Phrase::command2(hilit));
+    DrawString(anchor.x_ + 8, y, command2.c_str());
     if (j == row_ && (col_ == 2 || col_ == 3)) {
-      helpLegendCommand = command;
+      helpLegendCommand = command2;
     }
-  }
 
-  // Draw commands params
+    // command 2 param
 
-  pos = anchor;
-  pos.x_ += 11;
+    setTextProps(3, j, Theme::Phrase::command2(hilit));
+    wordToHexString(table.getParam(j, 1), buffer);
+    DrawString(anchor.x_ + 11, y, buffer);
 
-  buffer[5] = 0;
+    selected = selRect.Contains({3, j});
+    nextSelected = selRect.Contains({4, j});
+    if (selected && nextSelected) {
+      DrawChar(anchor.x_ + 15, y, ' ');
+    }
 
-  for (int j = 0; j < 16; j++) {
-    uint16_t p = table.getParam(j, 1);
-    setTextProps(3, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0));
-    wordToHexString(p, buffer);
-    DrawString(pos.x_, pos.y_, buffer);
-    pos.y_++;
-  }
+    // command 3
 
-  // Draw command 3
-
-  pos = anchor;
-  pos.x_ += 16;
-
-  for (int j = 0; j < 16; j++) {
-    Token command = table.getCmd(j, 2);
-    setTextProps(4, j, Theme::Phrase::command3(j % ALT_ROW_NUMBER == 0));
-    DrawString(pos.x_, pos.y_, command.c_str());
-    pos.y_++;
+    Token command3 = table.getCmd(j, 2);
+    setTextProps(4, j, Theme::Phrase::command3(hilit));
+    DrawString(anchor.x_ + 16, y, command3.c_str());
     if (j == row_ && (col_ == 4 || col_ == 5)) {
-      helpLegendCommand = command;
+      helpLegendCommand = command3;
     }
-  }
 
-  // Draw commands params 3
+    // command 3 param
 
-  pos = anchor;
-  pos.x_ += 19;
-
-  buffer[5] = 0;
-
-  for (int j = 0; j < 16; j++) {
-    uint16_t p = table.getParam(j, 2);
-    setTextProps(5, j, Theme::Phrase::command3(j % ALT_ROW_NUMBER == 0));
-    wordToHexString(p, buffer);
-    DrawString(pos.x_, pos.y_, buffer);
-    pos.y_++;
+    setTextProps(5, j, Theme::Phrase::command3(hilit));
+    wordToHexString(table.getParam(j, 2), buffer);
+    DrawString(anchor.x_ + 19, y, buffer);
   }
 
   if ((viewMode_ != VM_SELECTION) && ((col_ == 1) || (col_ == 3) || (col_ == 5))) {

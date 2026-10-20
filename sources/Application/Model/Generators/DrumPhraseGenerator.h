@@ -31,24 +31,15 @@ enum Sound : uint8_t {
   Crash
 };
 
-enum class Feel : uint8_t {
-  Straight,
-  Triplet
-};
+enum class Feel : uint8_t { Straight, Triplet };
 
-enum class Style : uint8_t {
-  Straight,
-  Sparse,
-  Syncopated,
-  Broken,
-  Driving,
-  HalfTime
-};
+enum class Style : uint8_t { Straight, Sparse, Syncopated, Broken, Driving, HalfTime };
 
-enum class VoiceCount : uint8_t {
-  Mono = 1,
-  Duo = 2
-};
+// Instrument the generated phrases are meant to play on. Decides how the
+// generated sounds are mapped to notes / instruments.
+enum class Target : uint8_t { DrumInstrument, LSDJKit, SlicedSample, SampleGMSet };
+
+enum class VoiceCount : uint8_t { Mono = 1, Duo = 2 };
 
 using StepMask = uint16_t;
 
@@ -72,6 +63,8 @@ struct Settings {
   uint8_t density;     // 0..255
   uint8_t variation;   // 0..255
   VoiceCount voices;
+  Target target;
+  uint8_t instrument; // instrument slot the phrases are written for
 };
 
 struct DrumChain {
@@ -81,30 +74,16 @@ struct DrumChain {
 
 class DrumPhraseGenerator {
 public:
-  static bool generate(
-      const Settings &settings,
-      DrumChain &out,
-      uint32_t seed = 1);
+  static bool generate(const Settings &settings, DrumChain &out, uint32_t seed = 1);
 
 private:
-  static const DrumTemplate *selectTemplate(
-      const Settings &settings,
-      uint32_t &rng);
+  static const DrumTemplate *selectTemplate(const Settings &settings, uint32_t &rng);
 
-  static void varyHats(
-      DrumPattern &pattern,
-      const Settings &settings,
-      uint32_t &rng);
+  static void varyHats(DrumPattern &pattern, const Settings &settings, uint32_t &rng);
 
-  static void addFill(
-      DrumPattern &pattern,
-      const Settings &settings,
-      bool stronger,
-      uint32_t &rng);
+  static void addFill(DrumPattern &pattern, const Settings &settings, bool stronger, uint32_t &rng);
 
-  static void resolve(
-      DrumPattern &pattern,
-      VoiceCount voices);
+  static void resolve(DrumPattern &pattern, VoiceCount voices);
 
   static uint8_t random8(uint32_t &rng);
   static bool chance(uint32_t &rng, uint8_t probability);

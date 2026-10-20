@@ -9,85 +9,127 @@
 #ifndef _GENERATOR_WIZARD_MODAL_H_
 #define _GENERATOR_WIZARD_MODAL_H_
 
+#include "Application/Model/Generators/BasslineGenerator.h"
 #include "Application/Model/Generators/DrumPhraseGenerator.h"
-#include "Application/Views/BaseClasses/ModalView.h"
+#include "Application/Model/Song.h"
+#include "Application/Views/ModalDialogs/WizardModal.h"
 #include <stdint.h>
 
-// Multi step wizard that collects the parameters for the phrase generators.
+class InstrumentBank;
+class I_Instrument;
+
+// Wizard that collects the parameters for the phrase generators.
 //
 //   Step 1: generator type (Drum / Melody / Bassline / Chords)
-//   Step 2: type specific settings (currently only Drum is implemented)
+//   Step 2: target instrument (Drum Instrument / LSDJ Kit / Sliced Sample / Sample GM Set)
+//   Step 3: instrument of that type, one of the allocated ones, or the first
+//           free slot set up as new when there is none
+//   Step 4: type specific settings (Drum and Bassline are implemented)
 //
-// Controls: UP/DOWN move between the rows and the button row, LEFT/RIGHT change
-// a value (or pick a button on the button row). ENTER, acted on when released,
-// triggers the primary button (Next / Generate) from a row, or the focused
-// button from the button row. The secondary button is Cancel on the first step
-// and Back on the second.
-class GeneratorWizardModal : public ModalView {
+// The bassline flow has no target step (it is played by a chiptune or sample
+// instrument) and adds a chord step: type, instrument, settings, chords.
+//
+// Layout, navigation and button handling live in WizardModal.
+class GeneratorWizardModal : public WizardModal {
 public:
-  enum ReturnCode { GWM_CANCEL = 0, GWM_ACCEPT = 1 };
+  enum ReturnCode { GWM_CANCEL = WM_CANCEL, GWM_ACCEPT = WM_ACCEPT };
   enum GeneratorType : uint8_t { GT_DRUM = 0, GT_MELODY, GT_BASSLINE, GT_CHORDS, GT_COUNT };
 
-  static GeneratorWizardModal *Create(View &view);
+  static GeneratorWizardModal *Create(View &view, InstrumentBank *bank);
   virtual ~GeneratorWizardModal();
 
   virtual void Destroy() override;
-  virtual void DrawView() override;
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int) override {
-  }
-  virtual void OnFocus() override {
-  }
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
-  virtual void AnimationUpdate() override {
-  }
 
   // Valid once the modal finished with GWM_ACCEPT.
   GeneratorType GetType() const {
     return type_;
   }
-  // style/feel/density/variation are filled in, the caller supplies the rest
+  // Target instrument picked in step 2.
+  DrumGenerator::Target GetTarget() const {
+    return static_cast<DrumGenerator::Target>(target_);
+  }
+  // Instrument slot the phrases are written for. A new instrument is only
+  // allocated when the wizard is accepted, so this is valid after GWM_ACCEPT.
+  uint8_t GetInstrumentId() const {
+    return instrumentId_;
+  }
+  // style/feel/density/variation/target/instrument are filled in, the caller supplies the rest
   // (steps, phraseCount, voices).
   DrumGenerator::Settings GetDrumSettings() const;
+  // Everything but the instrument-independent parts is filled in, phraseCount
+  // is the value given to SetPhraseCount().
+  BasslineGenerator::Settings GetBasslineSettings() const;
+
+  // Number of phrases the chain holds (1..4), sizes the chord step. Call before
+  // the wizard is shown.
+  void SetPhraseCount(uint8_t count);
+
+  // Preselects key and scale from the project's scale root and scale (index
+  // into scaleNames). Scales the generator has no equivalent for are ignored.
+  void PresetKeyAndScale(uint8_t root, int scale);
+
+protected:
+  virtual const char *GetTitle() override;
+  virtual uint8_t NumSteps() const override;
+  virtual StepInfo GetStepInfo(uint8_t step) override;
+  virtual uint8_t RowCount(uint8_t step) override;
+  virtual void DrawStep(uint8_t step) override;
+  virtual void OnEnterStep(uint8_t step, bool forward) override;
+  virtual void OnRowFocused(uint8_t step, uint8_t row) override;
+  virtual void OnValueChange(uint8_t step, uint8_t row, int delta) override;
+  virtual bool OnNext(uint8_t step, uint8_t row) override;
+  virtual bool OnAccept() override;
 
 private:
-  explicit GeneratorWizardModal(View &view);
+  GeneratorWizardModal(View &view, InstrumentBank *bank);
 
-  enum Step : uint8_t { STEP_TYPE = 0, STEP_DRUM };
+  enum Step : uint8_t { STEP_TYPE = 0, STEP_TARGET, STEP_INSTRUMENT, STEP_DRUM, STEP_BASS, STEP_CHORDS };
+  // the steps of the active flow are mapped to a Step by kind()
+  Step kind(uint8_t step) const;
+  static constexpr uint8_t kTargetCount = 4;
   enum DrumRow : uint8_t { DR_STYLE = 0, DR_FEEL, DR_DENSITY, DR_VARIATION, DR_COUNT };
+  enum BassRow : uint8_t { BR_STYLE = 0, BR_KEY, BR_SCALE, BR_DENSITY, BR_MOVEMENT, BR_VARIATION, BR_COUNT };
 
-  void DrawStep1();
-  void DrawStep2();
+  void drawInstrumentStep();
+  void drawDrumStep();
+  void drawBassStep();
+  void drawChordStep();
 
-  void buttonStep1();
-  void buttonStep2();
+  // InstrumentType the selected target is played by
+  InstrumentType instrumentType() const;
+  bool matchesTarget(I_Instrument *instrument) const;
+  void buildInstrumentList();
 
   static bool isImplemented(GeneratorType type);
-  void drawRow(int y, const char *label, const char *value, bool selected, bool enabled = true);
-  void drawField(int x, int y, const char *text, int width, bool focused, char indicator = ' ');
-  void drawButtons(const char *left, const char *right);
-  void changeValue(int delta);
-  void goBack();
-  void activatePrimary();
-  bool isButtonRow() const {
-    return row_ == ((step_ == STEP_TYPE) ? GT_COUNT : DR_COUNT);
-  }
 
   static bool inUse_;
   static void *storage_;
 
-  enum Button : uint8_t { BTN_LEFT = 0, BTN_RIGHT };
-
-  Step step_ = STEP_TYPE;
-  Button btn_ = BTN_LEFT;
-  uint16_t lastMask_ = 0;
-  bool enterDown_ = false;
-  uint8_t row_ = 0;
   GeneratorType type_ = GT_DRUM;
+  uint8_t target_ = 0; // DrumGenerator::Target
+
+  InstrumentBank *bank_;
+  uint8_t instrumentId_ = NO_INSTRUMENT;
+  // Instrument step: slot ids of the listed instruments. When creating_ is set
+  // the single entry is a free slot that gets set up on accept.
+  uint8_t entries_[MAX_INSTRUMENT_COUNT];
+  uint8_t entryCount_ = 0;
+  bool creating_ = false;
 
   uint8_t style_ = 0;
   uint8_t feel_ = 0;
   uint8_t density_ = 128;
   uint8_t variation_ = 128;
+
+  uint8_t bassStyle_ = 0;
+  uint8_t bassKey_ = 9; // A
+  uint8_t bassScale_ = 0;
+  uint8_t bassDensity_ = 150;
+  uint8_t bassMovement_ = 140;
+  uint8_t bassVariation_ = 110;
+  uint8_t phraseCount_ = 1;
+  // chord slots per phrase and quarter note, BasslineGenerator::kCarry continues the previous one
+  uint8_t chords_[BasslineGenerator::kMaxPhrases][BasslineGenerator::kChordSlots];
 };
 
 #endif // _GENERATOR_WIZARD_MODAL_H_

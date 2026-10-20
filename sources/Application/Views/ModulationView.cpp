@@ -234,14 +234,17 @@ void ModulationView::DrawView() {
 
   // and the compressor parameters
   SetColor(_color(Token::InstrumentParameterCompThreshold));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompThreshold)));
+  horizontal_bar_graph_6(buffer,
+                         map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompThreshold)));
   DrawString(p.x_ + 10, p.y_ + 8, buffer, fGraphic);
 
   SetColor(_color(Token::InstrumentParameterCompRatio));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompRatio)));
+  horizontal_bar_graph_6(buffer,
+                         map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompRatio)));
   DrawString(p.x_ + 10, p.y_ + 9, buffer, fGraphic);
 
   SetColor(_color(Token::InstrumentParameterCompRelease));
-  horizontal_bar_graph_6(buffer, map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompRelease)));
+  horizontal_bar_graph_6(buffer,
+                         map_255_to_bargraph6(*instrument->EffectParameter(Token::InstrumentParameterCompRelease)));
   DrawString(p.x_ + 10, p.y_ + 10, buffer, fGraphic);
 }
