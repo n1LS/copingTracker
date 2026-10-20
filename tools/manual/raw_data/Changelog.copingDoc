@@ -1,5 +1,245 @@
 F                             
 C                             
+v0.4.0a             2026-10-20
+0                             
+0                             
+                              
+F                             
+0                             
+- added Mixdown Progress View 
+F                             
+0                             
+  with progress bar and       
+F                             
+0                             
+  animated titles             
+F                             
+0                             
+- updated mirrorUI to support 
+F                             
+0                             
+  multiple fonts              
+F                             
+0                             
+- added global upper/lower    
+F                             
+0                             
+  case switch for UI          
+F                             
+0                             
+- cleared screen properly     
+F                             
+0                             
+  after showing sample viewer 
+F                             
+0                             
+- set fixed UI length for     
+F                             
+0                             
+  fields to ensure consistent 
+F                             
+0                             
+  background width            
+F                             
+0                             
+- added play state icon to top
+F                             
+0                             
+  bar                         
+F                             
+0                             
+- fixed left/right icons in   
+F                             
+0                             
+  help tabs                   
+F                             
+0                             
+- added bootscreen during     
+F                             
+0                             
+  project load                
+F                             
+0                             
+- fixed song index row offset 
+F                             
+0                             
+  after scrolling             
+F                             
+0                             
+- consolidated sample rate to 
+F                             
+0                             
+  single build-time constant  
+F                             
+0                             
+  SAMPLE_RATE_HZ              
+F                             
+0                             
+- moved volume handling to    
+F                             
+0                             
+  I_Instrument and applied    
+F                             
+0                             
+  volume to each instrument   
+F                             
+0                             
+  before mixing               
+F                             
+0                             
+- removed large master VU     
+F                             
+0                             
+  meter from chain and phrase 
+F                             
+0                             
+  view and added it to title  
+F                             
+0                             
+  bar                         
+F                             
+0                             
+- added mirrorUI focus        
+F                             
+0                             
+  rectangle support           
+F                             
+0                             
+- added ANSI help screen      
+F                             
+0                             
+  reader for web              
+F                             
+0                             
+- added slewed pan support to 
+F                             
+0                             
+  all instruments             
+F                             
+0                             
+- added step volume and volume
+F                             
+0                             
+  parameter support to all    
+F                             
+0                             
+  instruments                 
+F                             
+0                             
+- added modal text input      
+F                             
+0                             
+  overlay to improve text     
+F                             
+0                             
+  input UX                    
+F                             
+0                             
+- enabled changing instrument 
+F                             
+0                             
+  types during playback for   
+F                             
+0                             
+  unused instruments          
+F                             
+0                             
+- removed blocking instrument 
+F                             
+0                             
+  import success message and  
+F                             
+0                             
+  added toast notification    
+F                             
+0                             
+- fixed concurrency bug in    
+F                             
+0                             
+  file listing that produced  
+F                             
+0                             
+  empty filenames on import   
+F                             
+0                             
+- synchronized per-command    
+F                             
+0                             
+  help with documentation for 
+F                             
+0                             
+  global consistency          
+F                             
+0                             
+- added looping to song view  
+F                             
+0                             
+  via NAV + LEFT              
+F                             
+0                             
+- added loop location         
+F                             
+0                             
+  indicator when active loop  
+F                             
+0                             
+  is out of view              
+F                             
+0                             
+- enabled changing instrument 
+F                             
+0                             
+  during playback for         
+F                             
+0                             
+  currently unused instruments
+F                             
+0                             
+- added global effects chain  
+F                             
+0                             
+  with Delay as initial effect
+F                             
+0                             
+- fixed field view focus loss 
+F                             
+0                             
+  when navigating left/right  
+F                             
+0                             
+  on a single-field row       
+F                             
+0                             
+- added global and            
+F                             
+0                             
+  per-instrument equalizer    
+F                             
+0                             
+- added global and            
+F                             
+0                             
+  per-instrument compressor   
+F                             
+0                             
+- began phrase generator      
+F                             
+0                             
+  development with initial    
+F                             
+0                             
+  drum implementation         
+F                             
+0                             
+- added drum and bassline     
+F                             
+0                             
+  phrase generators           
+0                             
+0                             
+                              
+F                             
+C                             
 v0.3.0a             2026-09-23
 0                             
 0                             

@@ -68,7 +68,7 @@ void ChainView::GeneratorWizardCallback(View &v, ModalView &dialog) {
   auto &view = static_cast<ChainView &>(v);
   auto &wizard = static_cast<GeneratorWizardModal &>(dialog);
 
-  if (wizard.GetType() != GeneratorWizardModal::GT_DRUM) {
+  if (wizard.GetType() != GeneratorWizardModal::GT_DRUM && wizard.GetType() != GeneratorWizardModal::GT_BASSLINE) {
     return; // other generators aren't implemented yet
   }
 
@@ -82,7 +82,11 @@ void ChainView::GeneratorWizardCallback(View &v, ModalView &dialog) {
     length++;
   }
 
-  PhraseGenerator::GenerateDrumPhrases(data->project_, chain, length, wizard.GetDrumSettings());
+  if (wizard.GetType() == GeneratorWizardModal::GT_BASSLINE) {
+    PhraseGenerator::GenerateBasslinePhrases(data->project_, chain, length, wizard.GetBasslineSettings());
+  } else {
+    PhraseGenerator::GenerateDrumPhrases(data->project_, chain, length, wizard.GetDrumSettings());
+  }
   view.isDirty_ = true;
 }
 
@@ -221,9 +225,13 @@ void ChainView::clonePosition() {
 ******************************************************************************/
 
 GUIRect ChainView::getSelectionRect() {
-  GUIRect r(clipboard_.col_, clipboard_.row_, viewData_->chainCol_ - clipboard_.col_,
-            viewData_->chainRow_ - clipboard_.row_);
-  return r;
+  // anchor and cursor in either order: the origin is the top left most point.
+  // Width and height are the distance, callers add 1 for the covered cells.
+  const int left = std::min<int>(clipboard_.col_, viewData_->chainCol_);
+  const int right = std::max<int>(clipboard_.col_, viewData_->chainCol_);
+  const int top = std::min<int>(clipboard_.row_, viewData_->chainRow_);
+  const int bottom = std::max<int>(clipboard_.row_, viewData_->chainRow_);
+  return GUIRect(left, top, right - left, bottom - top);
 }
 
 /*******************************************************************************
@@ -247,7 +255,6 @@ void ChainView::fillClipboardData() {
   clipboard_.width_ = selRect.Width() + 1;
   clipboard_.height_ = selRect.Height() + 1;
   clipboard_.row_ = selRect.Top();
-  ;
   clipboard_.col_ = selRect.Left();
 
   // Copy the data
@@ -509,8 +516,15 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
     } else if (mask & BM_ALT) {
       unMuteAll();
     } else if (mask & BM_DOWN) {
-      DoModal(GeneratorWizardModal::Create(*this, viewData_->project_->GetInstrumentBank()),
-              ModalViewCallback::create<&ChainView::GeneratorWizardCallback>());
+      auto *wizard = GeneratorWizardModal::Create(*this, viewData_->project_->GetInstrumentBank());
+      ChainStep *chain = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+      uint8_t length = 0;
+      while (length < STEPS_PER_PHRASE && chain[length].phrase != EMPTY_CHAIN_VALUE) {
+        length++;
+      }
+      wizard->SetPhraseCount(length);
+      wizard->PresetKeyAndScale(viewData_->project_->GetScaleRoot(), viewData_->project_->GetScale());
+      DoModal(wizard, ModalViewCallback::create<&ChainView::GeneratorWizardCallback>());
     }
   } else {
     // NO modifier
@@ -629,6 +643,8 @@ void ChainView::setTextProps(int col, int row) {
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
+    selRect.w_ += 1;
+    selRect.h_ += 1;
     if (selRect.Contains(GUIPoint(col, row))) {
       highlighted = true;
     }
@@ -681,6 +697,16 @@ void ChainView::DrawView() {
     } else {
       byteToHexString(d, row);
       DrawString(pos.x_, pos.y_ + j, row);
+    }
+
+    GUIRect selRect = getSelectionRect();
+    selRect.w_ += 1;
+    selRect.h_ += 1;
+    bool highlighted = selRect.Contains(GUIPoint(0, j));
+    bool nextHighlighted = selRect.Contains(GUIPoint(1, j));
+
+    if (highlighted && nextHighlighted) {
+      DrawChar(pos.x_ + 2, pos.y_ + j, ' ');
     }
   }
 

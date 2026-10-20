@@ -544,8 +544,15 @@ selection. Valid only while selection is drawn
 *****************************************************************************/
 
 GUIRect PhraseView::getSelectionRect() {
-  GUIRect r(clipboard_.col_, clipboard_.row_, col_ - clipboard_.col_, row_ - clipboard_.row_);
-  return r;
+  if (!clipboard_.active_) {
+    return GUIRect(-1, -1, 0, 0);
+  }
+  // anchor and cursor in either order: the origin is the top left most point
+  const int left = std::min<int>(clipboard_.col_, col_);
+  const int right = std::max<int>(clipboard_.col_, col_);
+  const int top = std::min<int>(clipboard_.row_, row_);
+  const int bottom = std::max<int>(clipboard_.row_, row_);
+  return GUIRect(left, top, right - left + 1, bottom - top + 1);
 }
 
 /*****************************************************************************
@@ -576,7 +583,8 @@ void PhraseView::fillClipboardData() {
 
   for (int i = 0; i < clipboard_.height_; i++) {
     clipboard_.steps_[i] = base[clipboard_.row_ + i];
-  };
+  }
+
   updateCursor(0, 0);
 }
 
@@ -1181,29 +1189,37 @@ void PhraseView::DrawEditingValue() {
         } else if (d == NOTE_OFF) {
           DrawString(pos.x_, pos.y_, "off");
         } else {
-          char buf[12];
-          instrObj->focusedNoteDisplay(d, buf);
+          if (clipboard_.active_) {
+            // no extra wide display in selection mode
+            instrObj->noteDisplay(d, buffer);
+            DrawString(pos.x_, pos.y_, buffer);
+          } else {
+            char buf[12];
+            instrObj->focusedNoteDisplay(d, buf);
 
-          int len = (int)strlen(buf);
-          int frame = std::min(4, expandFrame_);
-          int visibleLen = std::min(len, 3 + frame * 2);
-          int start = (len - visibleLen) / 2;
+            int len = (int)strlen(buf);
+            int frame = std::min(4, expandFrame_);
+            int visibleLen = std::min(len, 3 + frame * 2);
+            int start = (len - visibleLen) / 2;
 
-          if (visibleLen < len)
-            buf[start + visibleLen] = '\0';
+            if (visibleLen < len)
+              buf[start + visibleLen] = '\0';
 
-          int p = (visibleLen - 3) / 2;
-          xStart = pos.x_ - p - 1;
-          xEnd = xStart + visibleLen + 1;
+            int p = (visibleLen - 3) / 2;
+            xStart = pos.x_ - p - 1;
+            xEnd = xStart + visibleLen + 1;
 
-          DrawString(pos.x_ - p, pos.y_, buf + start);
+            DrawString(pos.x_ - p, pos.y_, buf + start);
+          }
         }
 
-        SetColor(Theme::Phrase::note(hilit));
-        SetBackgroundColor(Theme::View::bg);
-        DrawChar(xStart, pos.y_, CHAR(char_cap_left_s));
-        DrawChar(xEnd, pos.y_, CHAR(char_cap_right_s));
-        focusRect_ = GUIRect(xStart, row_ + 3, xEnd - xStart + 1, 1);
+        if (!clipboard_.active_) {
+          SetColor(Theme::Phrase::note(hilit));
+          SetBackgroundColor(Theme::View::bg);
+          DrawChar(xStart, pos.y_, CHAR(char_cap_left_s));
+          DrawChar(xEnd, pos.y_, CHAR(char_cap_right_s));
+          focusRect_ = GUIRect(xStart, row_ + 3, xEnd - xStart + 1, 1);
+        }
         break;
       }
     default:
@@ -1242,23 +1258,62 @@ void PhraseView::DrawView() {
 
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16, phraseLength);
 
-  // Draw instruments
-  char buffer[6];
+  // Draw all columns row by row. Per row the notes are drawn after the
+  // instrument (to allow overdrawing).
 
-  pos = GetAnchor();
-  pos.x_ += 4;
+  const GUIPoint anchor = GetAnchor();
+  unsigned char lastInstr = NO_INSTRUMENT;
+  char buffer[6];
+  char noteBuffer[4];
+
+  GUIRect selRect = getSelectionRect();
 
   for (int j = 0; j < 16; j++) {
+    const int y = anchor.y_ + j;
+    const bool hilit = j % ALT_ROW_NUMBER == 0;
+
+    // note
+
+    bool selected = selRect.Contains({0, j});
+    bool nextSelected = selRect.Contains({1, j});
+
+    unsigned char note = stepsBase[j].note;
+    unsigned char instr = stepsBase[j].instrument;
+    if (instr != NO_INSTRUMENT) {
+      lastInstr = instr;
+      instrObj = bank->GetInstrument(lastInstr);
+    }
+
+    setTextProps(colNote, j, Theme::Phrase::note(hilit), phraseLength);
+
+    if (note == NO_NOTE) {
+      DrawString(anchor.x_, y, "---");
+    } else if (note == NOTE_OFF) {
+      DrawString(anchor.x_, y, "off");
+    } else {
+      instrObj->noteDisplay(note, noteBuffer);
+      DrawString(anchor.x_, y, noteBuffer);
+    }
+
+    if (selected && nextSelected) {
+      DrawChar(anchor.x_ + 3, y, ' ');
+    }
+
+    // instrument
+
+    selected = nextSelected;
+    nextSelected = selRect.Contains({2, j});
+
     SetBackgroundColor(Theme::View::bg);
-    setTextProps(colInstrument, j, Theme::Phrase::instrument(j % ALT_ROW_NUMBER == 0), phraseLength);
+    setTextProps(colInstrument, j, Theme::Phrase::instrument(hilit), phraseLength);
 
     unsigned char d = stepsBase[j].instrument;
 
     if (d == NO_INSTRUMENT) {
-      DrawString(pos.x_, pos.y_, "--");
+      DrawString(anchor.x_ + 4, y, "--");
     } else {
       byteToHexString(d, buffer);
-      DrawString(pos.x_, pos.y_, buffer);
+      DrawString(anchor.x_ + 4, y, buffer);
       // todo: move outside of the loop
       if (j == row_) {
         GUIPoint location = GetTitlePosition();
@@ -1280,109 +1335,66 @@ void PhraseView::DrawView() {
         }
       }
     }
-    pos.y_++;
-  }
 
-  // Display notes (after instruments to allow overdrawing)
-
-  pos = GetAnchor();
-  unsigned char lastInstr = NO_INSTRUMENT;
-
-  for (int j = 0; j < 16; j++) {
-    char buffer[4];
-
-    unsigned char d = stepsBase[j].note;
-    unsigned char instr = stepsBase[j].instrument;
-    if (instr != NO_INSTRUMENT) {
-      lastInstr = instr;
-      instrObj = bank->GetInstrument(lastInstr);
+    if (selected && nextSelected) {
+      DrawChar(anchor.x_ + 6, y, ' ');
     }
 
-    bool hilit = j % ALT_ROW_NUMBER == 0;
-    setTextProps(colNote, j, Theme::Phrase::note(hilit), phraseLength);
+    // volume
 
-    if (d == NO_NOTE) {
-      DrawString(pos.x_, pos.y_, "---");
-    } else if (d == NOTE_OFF) {
-      DrawString(pos.x_, pos.y_, "off");
-    } else {
-      instrObj->noteDisplay(d, buffer);
-      DrawString(pos.x_, pos.y_, buffer);
-    }
+    selected = nextSelected;
+    nextSelected = selRect.Contains({3, j});
 
-    pos.y_++;
-  }
-
-  // Draw volume
-
-  pos = GetAnchor();
-  pos.x_ += 7;
-
-  for (int j = 0; j < 16; j++) {
     uint8_t vol = stepsBase[j].volume;
-    setTextProps(colVolume, j, Theme::Phrase::volume(j % ALT_ROW_NUMBER == 0), phraseLength);
-    DrawChar(pos.x_, pos.y_, vol == 0xFF ? '-' : hexChars[vol & 0xF]);
-    pos.y_++;
-  }
+    setTextProps(colVolume, j, Theme::Phrase::volume(hilit), phraseLength);
+    DrawChar(anchor.x_ + 7, y, vol == 0xFF ? '-' : hexChars[vol & 0xF]);
 
-  // Draw command 1
+    if (selected && nextSelected) {
+      DrawChar(anchor.x_ + 8, y, ' ');
+    }
 
-  pos = GetAnchor();
-  pos.x_ += 9;
+    // command 1
 
-  for (int j = 0; j < 16; j++) {
-    Token command = Token::enum_type(stepsBase[j].cmd1);
-    setTextProps(colCmd1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0), phraseLength);
-    DrawString(pos.x_, pos.y_, command.c_str());
-    pos.y_++;
+    selected = nextSelected;
+    nextSelected = selRect.Contains({4, j});
+
+    Token command1 = Token::enum_type(stepsBase[j].cmd1);
+    setTextProps(colCmd1, j, Theme::Phrase::command1(hilit), phraseLength);
+    DrawString(anchor.x_ + 9, y, command1.c_str());
     if (j == row_ && (col_ == colCmd1 || col_ == colCmdVal1)) {
-      helpLegendCommand = command;
+      helpLegendCommand = command1;
     }
-  }
 
-  // Draw commands params 1
+    // command 1 param
 
-  pos = GetAnchor();
-  pos.x_ += 12;
+    selected = nextSelected;
+    nextSelected = selRect.Contains({5, j});
 
-  buffer[5] = 0;
+    setTextProps(colCmdVal1, j, Theme::Phrase::command1(hilit), phraseLength);
+    wordToHexString(stepsBase[j].param1, buffer);
+    DrawString(anchor.x_ + 12, y, buffer);
 
-  for (int j = 0; j < 16; j++) {
-    uint16_t p = stepsBase[j].param1;
-    setTextProps(colCmdVal1, j, Theme::Phrase::command1(j % ALT_ROW_NUMBER == 0), phraseLength);
-    wordToHexString(p, buffer);
-    DrawString(pos.x_, pos.y_, buffer);
-    pos.y_++;
-  }
+    if (selected && nextSelected) {
+      DrawChar(anchor.x_ + 16, y, ' ');
+    }
 
-  // Draw commands 2
+    // command 2
 
-  pos = GetAnchor();
-  pos.x_ += 17;
+    selected = nextSelected;
+    nextSelected = selRect.Contains({6, j});
 
-  for (int j = 0; j < 16; j++) {
-    Token command = Token::enum_type(stepsBase[j].cmd2);
-    setTextProps(colCmd2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0), phraseLength);
-    DrawString(pos.x_, pos.y_, command.c_str());
-    pos.y_++;
+    Token command2 = Token::enum_type(stepsBase[j].cmd2);
+    setTextProps(colCmd2, j, Theme::Phrase::command2(hilit), phraseLength);
+    DrawString(anchor.x_ + 17, y, command2.c_str());
     if (j == row_ && (col_ == colCmd2 || col_ == colCmdVal2)) {
-      helpLegendCommand = command;
+      helpLegendCommand = command2;
     }
-  }
 
-  // Draw commands params
+    // command 2 param
 
-  pos = GetAnchor();
-  pos.x_ += 20;
-
-  buffer[5] = 0;
-
-  for (int j = 0; j < 16; j++) {
-    uint16_t p = stepsBase[j].param2;
-    setTextProps(colCmdVal2, j, Theme::Phrase::command2(j % ALT_ROW_NUMBER == 0), phraseLength);
-    wordToHexString(p, buffer);
-    DrawString(pos.x_, pos.y_, buffer);
-    pos.y_++;
+    setTextProps(colCmdVal2, j, Theme::Phrase::command2(hilit), phraseLength);
+    wordToHexString(stepsBase[j].param2, buffer);
+    DrawString(anchor.x_ + 20, y, buffer);
   }
 
   // draw the map in the bottom left corner

@@ -9,6 +9,7 @@
 #ifndef _GENERATOR_WIZARD_MODAL_H_
 #define _GENERATOR_WIZARD_MODAL_H_
 
+#include "Application/Model/Generators/BasslineGenerator.h"
 #include "Application/Model/Generators/DrumPhraseGenerator.h"
 #include "Application/Model/Song.h"
 #include "Application/Views/ModalDialogs/WizardModal.h"
@@ -23,7 +24,10 @@ class I_Instrument;
 //   Step 2: target instrument (Drum Instrument / LSDJ Kit / Sliced Sample / Sample GM Set)
 //   Step 3: instrument of that type, one of the allocated ones, or the first
 //           free slot set up as new when there is none
-//   Step 4: type specific settings (currently only Drum is implemented)
+//   Step 4: type specific settings (Drum and Bassline are implemented)
+//
+// The bassline flow has no target step (it is played by a chiptune or sample
+// instrument) and adds a chord step: type, instrument, settings, chords.
 //
 // Layout, navigation and button handling live in WizardModal.
 class GeneratorWizardModal : public WizardModal {
@@ -52,6 +56,17 @@ public:
   // style/feel/density/variation/target/instrument are filled in, the caller supplies the rest
   // (steps, phraseCount, voices).
   DrumGenerator::Settings GetDrumSettings() const;
+  // Everything but the instrument-independent parts is filled in, phraseCount
+  // is the value given to SetPhraseCount().
+  BasslineGenerator::Settings GetBasslineSettings() const;
+
+  // Number of phrases the chain holds (1..4), sizes the chord step. Call before
+  // the wizard is shown.
+  void SetPhraseCount(uint8_t count);
+
+  // Preselects key and scale from the project's scale root and scale (index
+  // into scaleNames). Scales the generator has no equivalent for are ignored.
+  void PresetKeyAndScale(uint8_t root, int scale);
 
 protected:
   virtual const char *GetTitle() override;
@@ -68,12 +83,17 @@ protected:
 private:
   GeneratorWizardModal(View &view, InstrumentBank *bank);
 
-  enum Step : uint8_t { STEP_TYPE = 0, STEP_TARGET, STEP_INSTRUMENT, STEP_DRUM, NUM_STEPS };
+  enum Step : uint8_t { STEP_TYPE = 0, STEP_TARGET, STEP_INSTRUMENT, STEP_DRUM, STEP_BASS, STEP_CHORDS };
+  // the steps of the active flow are mapped to a Step by kind()
+  Step kind(uint8_t step) const;
   static constexpr uint8_t kTargetCount = 4;
   enum DrumRow : uint8_t { DR_STYLE = 0, DR_FEEL, DR_DENSITY, DR_VARIATION, DR_COUNT };
+  enum BassRow : uint8_t { BR_STYLE = 0, BR_KEY, BR_SCALE, BR_DENSITY, BR_MOVEMENT, BR_VARIATION, BR_COUNT };
 
   void drawInstrumentStep();
   void drawDrumStep();
+  void drawBassStep();
+  void drawChordStep();
 
   // InstrumentType the selected target is played by
   InstrumentType instrumentType() const;
@@ -100,6 +120,16 @@ private:
   uint8_t feel_ = 0;
   uint8_t density_ = 128;
   uint8_t variation_ = 128;
+
+  uint8_t bassStyle_ = 0;
+  uint8_t bassKey_ = 9; // A
+  uint8_t bassScale_ = 0;
+  uint8_t bassDensity_ = 150;
+  uint8_t bassMovement_ = 140;
+  uint8_t bassVariation_ = 110;
+  uint8_t phraseCount_ = 1;
+  // chord slots per phrase and quarter note, BasslineGenerator::kCarry continues the previous one
+  uint8_t chords_[BasslineGenerator::kMaxPhrases][BasslineGenerator::kChordSlots];
 };
 
 #endif // _GENERATOR_WIZARD_MODAL_H_

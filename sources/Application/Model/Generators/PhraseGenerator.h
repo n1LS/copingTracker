@@ -9,8 +9,9 @@
 #include <cstdint>
 
 #include "Application/Model/Project.h"
-#include "System/Console/Trace.h"
+#include "BasslineGenerator.h"
 #include "DrumPhraseGenerator.h"
+#include "System/Console/Trace.h"
 
 using namespace DrumGenerator;
 
@@ -40,6 +41,35 @@ class PhraseGenerator {
   }
 
 public:
+  // Writes one generated bassline phrase per chain step (at most 4) with the
+  // settings' instrument. Rests clear note and instrument of a step.
+  static void GenerateBasslinePhrases(Project *project, ChainStep *phraseIndexes, uint8_t length,
+                                      BasslineGenerator::Settings settings) {
+    if (length > BasslineGenerator::kMaxPhrases) {
+      length = BasslineGenerator::kMaxPhrases;
+    }
+    if (length == 0) {
+      return;
+    }
+    settings.phraseCount = length;
+    BasslineGenerator::Chain out;
+
+    lcg_ = lcg_ * 1664525 + 1013904223;
+    if (!BasslineGenerator::generate(settings, out, lcg_)) {
+      return;
+    }
+
+    for (uint8_t i = 0; i < out.phraseCount; ++i) {
+      const uint8_t phrase = phraseIndexes[i].phrase;
+      for (uint8_t step = 0; step < BasslineGenerator::kSteps; ++step) {
+        PhraseStep &s = project->song_.phrase_.steps_[phrase][step];
+        const uint8_t note = out.note[i][step];
+        s.note = note == BasslineGenerator::kNoNote ? NO_NOTE : note;
+        s.instrument = note == BasslineGenerator::kNoNote ? NO_INSTRUMENT : settings.instrument;
+      }
+    }
+  }
+
   static void GenerateDrumPhrases(Project *project, ChainStep *phraseIndexes, uint8_t length, Settings settings) {
     settings.phraseCount = length;
     settings.voices = (settings.target == Target::LSDJKit) ? VoiceCount::Duo : VoiceCount::Mono;

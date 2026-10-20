@@ -36,9 +36,9 @@ public:
 
   // What the base needs to know to lay out one step.
   struct StepInfo {
-    const char *prompt;                // line above the panel
-    const char *leftLabel = nullptr;   // nullptr: "Cancel" on the first step, "Back" otherwise
-    const char *rightLabel = nullptr;  // nullptr: no right button, ENTER on a row advances
+    const char *prompt;               // line above the panel
+    const char *leftLabel = nullptr;  // nullptr: "Cancel" on the first step, "Back" otherwise
+    const char *rightLabel = nullptr; // nullptr: no right button, ENTER on a row advances
   };
 
   virtual ~WizardModal();
@@ -97,6 +97,9 @@ protected:
   void drawListItem(int line, const char *text, bool focused);
   // "label  [value]" on a panel line.
   void drawLabeledField(int line, const char *label, const char *value, bool focused);
+  // Scrollbar on the right edge of the panel for a list of total rows, shown
+  // only when the list doesn't fit (uses scroll_).
+  void drawListScrollBar(uint8_t total);
   // Plain text on a panel line.
   void drawPanelText(int line, const char *text);
   // Instrument style field: square blocks when idle, rounded ends when focused
@@ -124,10 +127,14 @@ private:
   void drawProgress();
   void drawButtons(const StepInfo &info);
 
-  int fieldWidth() const {
-    return width_ - 6;
+  // lists longer than the visible rows give up a column for the scrollbar
+  bool scrolls() {
+    return RowCount(step_) > kVisibleRows;
   }
-  int valueWidth() const;
+  int fieldWidth() {
+    return width_ - 6 - (scrolls() ? 1 : 0);
+  }
+  int valueWidth();
 
   int width_;
   int height_;

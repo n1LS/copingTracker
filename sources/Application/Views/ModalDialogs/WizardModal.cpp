@@ -27,8 +27,8 @@ WizardModal::WizardModal(View &view, int width, int height) : ModalView(view), w
 WizardModal::~WizardModal() {
 }
 
-int WizardModal::valueWidth() const {
-  return width_ - VALUE_X - 4;
+int WizardModal::valueWidth() {
+  return width_ - VALUE_X - 4 - (scrolls() ? 1 : 0);
 }
 
 // --- drawing -----------------------------------------------------------------
@@ -111,6 +111,10 @@ void WizardModal::drawLabeledField(int line, const char *label, const char *valu
   DrawString(LABEL_X, ROWS_Y + line, label);
 
   drawField(VALUE_X, ROWS_Y + line, value, valueWidth(), focused);
+}
+
+void WizardModal::drawListScrollBar(uint8_t total) {
+  drawScrollBar(width_ - 3, ROWS_Y, kVisibleRows, scroll_, total);
 }
 
 void WizardModal::drawPanelText(int line, const char *text) {
