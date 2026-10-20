@@ -510,31 +510,34 @@ void PhraseView::warpInChain(int offset) {
 }
 
 void PhraseView::warpToNeighbour(int offset) {
-  int newPos = viewData_->songX_ + offset;
-  if ((newPos > -1) && (newPos < SONG_CHANNEL_COUNT)) {
-    // Go to neighbout song channel
-    viewData_->songX_ = newPos;
+  const int oldX = viewData_->songX_;
+  const unsigned char oldChain = viewData_->currentChain_;
+
+  // keep going in the direction of offset over empty channels (no chain, or no
+  // phrase on the current chain row) until a phrase is found, else stay put
+  for (int x = oldX + offset; x >= 0 && x < SONG_CHANNEL_COUNT; x += offset) {
+    viewData_->songX_ = x;
+
     unsigned char *c = viewData_->GetCurrentSongPointer();
-    // is there a chain ?
-    unsigned char oldChain = viewData_->currentChain_;
-    if (*c != 0xFF) {
-      // go to chain
-      viewData_->currentChain_ = *c;
-      // get phrase at location
-      unsigned char *p = viewData_->GetCurrentChainPointer();
-      // is there a phrase ?
-      if (*p != 0xFF) {
-        viewData_->currentPhrase_ = *p;
-        updateCursor(0, 0);
-        isDirty_ = true;
-      } else { // restore chain & song
-        viewData_->currentChain_ = oldChain;
-        viewData_->songX_ -= offset;
-      }
-    } else { // restore song
-      viewData_->songX_ -= offset;
+    if (*c == 0xFF) {
+      continue;
     }
+
+    viewData_->currentChain_ = *c;
+
+    unsigned char *p = viewData_->GetCurrentChainPointer();
+    if (*p == 0xFF) {
+      continue;
+    }
+
+    viewData_->currentPhrase_ = *p;
+    updateCursor(0, 0);
+    isDirty_ = true;
+    return;
   }
+
+  viewData_->songX_ = oldX;
+  viewData_->currentChain_ = oldChain;
 }
 
 /*****************************************************************************
@@ -891,8 +894,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
         if (current != -1) {
           th->Clone(current);
         }
-      }
-      if ((col_ == colCmdVal2) &&
+      } else if ((col_ == colCmdVal2) &&
           Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd2) == Token::InstrumentCommandTable) {
         TableHolder *th = TableHolder::GetInstance();
         uint16_t next = th->Clone(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
