@@ -152,8 +152,7 @@ struct AppWindowViews {
         importView(w, &viewData), instrumentImportView(w, &viewData), instrumentView(w, &viewData),
         tableView(w, &viewData), grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
         sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), modulationView(w, &viewData),
-        masterView(w, &viewData),
-        bootView(w, &viewData) {
+        masterView(w, &viewData), bootView(w, &viewData) {
   }
 };
 

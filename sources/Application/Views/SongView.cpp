@@ -232,10 +232,14 @@ void SongView::OnFocus() {
 }
 
 GUIRect SongView::getSelectionRect() {
-
-  GUIRect selRect(clipboard_.x_, clipboard_.y_ + clipboard_.offset_, viewData_->songX_ - clipboard_.x_,
-                  viewData_->songY_ + viewData_->songOffset_ - clipboard_.y_);
-  return selRect;
+  // anchor and cursor in either order: the origin is the top left most point
+  const int anchorY = clipboard_.y_ + clipboard_.offset_;
+  const int cursorY = viewData_->songY_ + viewData_->songOffset_;
+  const int left = std::min<int>(clipboard_.x_, viewData_->songX_);
+  const int right = std::max<int>(clipboard_.x_, viewData_->songX_);
+  const int top = std::min(anchorY, cursorY);
+  const int bottom = std::max(anchorY, cursorY);
+  return GUIRect(left, top, right - left + 1, bottom - top + 1);
 }
 
 /*******************************************************************************
@@ -796,9 +800,7 @@ void SongView::DrawView() {
   // Prepare selection related information
   GUIRect selRect;
   if (clipboard_.active_) {
-    int x = clipboard_.x_;
-    int y = clipboard_.y_ + clipboard_.offset_;
-    selRect = GUIRect(x, y, viewData_->songX_ - x, viewData_->songY_ + viewData_->songOffset_ - y);
+    selRect = getSelectionRect();
   }
 
   // Draw title
@@ -836,12 +838,14 @@ void SongView::DrawView() {
 
     for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
       bool highlighted;
+      bool nextHighlighted = false;
 
       // see if we need to invert current step
       // if there's a selection or we are at cursor position
 
       if (clipboard_.active_) {
         highlighted = selRect.Contains({i, j + viewData_->songOffset_});
+        nextHighlighted = highlighted && selRect.Contains({i + 1, j + viewData_->songOffset_});
       } else {
         highlighted = (i == viewData_->songX_ && j == viewData_->songY_);
       }
@@ -849,15 +853,16 @@ void SongView::DrawView() {
       // draw current step
       unsigned char d = *data++;
       // last possible value gets special color to be more visible (typically this is the empty placeholder)
+      SetBackgroundColor(Theme::View::bg);
       SetColor(d == 0xFE ? Theme::Song::placeholder : Theme::Song::fg(isAlt));
 
       if (highlighted) {
         SwapColors();
+      }
 
-        if (!clipboard_.active_) {
-          // set the focus rect
-          focusRect_ = GUIRect(pos.x_, pos.y_, 2, 1);
-        }
+      // the focus follows the cursor, also while selecting
+      if (i == viewData_->songX_ && j == viewData_->songY_) {
+        focusRect_ = GUIRect(pos.x_, pos.y_, 2, 1);
       }
 
       if (d == 0xFF) {
@@ -867,9 +872,13 @@ void SongView::DrawView() {
         DrawString(pos.x_, pos.y_, row);
       }
 
-      // Put back drawing state
-      SetColor(Theme::View::fg);
-      SetBackgroundColor(Theme::View::bg);
+      // highlight spacing also highlit if possible
+
+      if (!(highlighted && nextHighlighted)) {
+        SetBackgroundColor(Theme::View::bg);
+      }
+
+      DrawChar(pos.x_ + 2, pos.y_, ' ');
 
       // Next step
 
@@ -1004,7 +1013,7 @@ void SongView::drawRenderLoad(bool force) {
   constexpr int x = SCREEN_WIDTH - width;
   constexpr int y = SCREEN_HEIGHT - 1;
 
-  int load = 0;
+  uint32_t load = 0;
 
   if (Player::GetInstance()->IsRunning()) {
     load = MixerService::GetInstance()->GetRenderLoad();
@@ -1013,11 +1022,11 @@ void SongView::drawRenderLoad(bool force) {
   if (!force && load == lastRenderLoad_) {
     return;
   }
-  
+
   lastRenderLoad_ = load;
 
   SetBackgroundColor(Theme::View::bg);
-  
+
   if (load >= RENDER_LOAD_CRITICAL) {
     SetColor(Theme::View::error);
   } else if (load >= RENDER_LOAD_CRITICAL) {
@@ -1087,14 +1096,14 @@ void SongView::AnimationUpdate() {
       int y = lastPlayedPosition_[i] - viewData_->songOffset_;
       if (y >= 0 && y < View::songRowCount_) {
         pos.y_ = anchor.y_ + y;
-        DrawString(pos.x_, pos.y_, " ");
+        DrawChar(pos.x_, pos.y_, ' ', fRegular, true);
       }
 
       // Clear all last queued positions
       y = lastQueuedPosition_[i] - viewData_->songOffset_;
       if (y >= 0 && y < View::songRowCount_) {
         pos.y_ = anchor.y_ + y;
-        DrawString(pos.x_, pos.y_, " ");
+        DrawChar(pos.x_, pos.y_, ' ', fRegular, true);
       }
 
       // For each playing position, draw current location

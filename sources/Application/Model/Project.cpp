@@ -53,8 +53,7 @@ Project::Project(const char *name)
       masterCompOn_(Token::VarMasterCompOn, false),
       masterCompThreshold_(Token::VarMasterCompThreshold, COMP_DEFAULT_THRESHOLD),
       masterCompRatio_(Token::VarMasterCompRatio, COMP_DEFAULT_RATIO),
-      masterCompRelease_(Token::VarMasterCompRelease, COMP_DEFAULT_RELEASE),
-      projectName_(Token::VarProjectName, name) {
+      masterCompRelease_(Token::VarMasterCompRelease, COMP_DEFAULT_RELEASE), projectName_(Token::VarProjectName, name) {
 
   this->variables_.push_back(&tempo_);
   this->variables_.push_back(&masterVolume_);

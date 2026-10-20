@@ -73,7 +73,7 @@ void RenderProgressModal::DrawView() {
   DrawWindow(x, y, dialogWidth_, dialogHeight_, title_.c_str());
 
   // draw progress
-  DrawFilledBorder(x + 1, y + 6, dialogWidth_ - 2, 3, BLACK, true);
+  DrawFilledBorder(x + 1, y + 6, dialogWidth_ - 2, 3, Theme::Dialog::Panel::bg, true);
 }
 
 void RenderProgressModal::OnPlayerUpdate(PlayerEventType eventType, unsigned int currentTick) {

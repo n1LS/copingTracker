@@ -1,6 +1,9 @@
 add_library(application_model
   Chain.cpp
   Config.cpp
+  Generators/BasslineGenerator.cpp
+  Generators/DrumPhraseGenerator.cpp
+  Generators/PhraseGenerator.cpp
   Groove.cpp
   Mixer.cpp
   Phrase.cpp

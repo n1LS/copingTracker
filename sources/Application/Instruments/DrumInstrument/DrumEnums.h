@@ -66,7 +66,7 @@ enum drum_wave_type_e : uint8_t {
 enum drum_env_state_e : uint8_t { drumEnvIdle, drumEnvDecay };
 
 enum drum_instrument_defaults_e {
-  defaultInstrument0 = 0x4562,
+  defaultInstrument0 = 0x4362,
   defaultInstrument1 = 0x0845,
   defaultInstrument2 = 0x0464,
   defaultInstrument3 = 0x4F95,

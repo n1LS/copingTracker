@@ -88,7 +88,7 @@ private:
   bool needClear_;
 
   void drawRenderLoad(bool force);
-  int lastRenderLoad_ = -1; // what is on screen, in percent. -1 = nothing drawn
+  uint32_t lastRenderLoad_ = 0;
 
   LoopState loopState_ = lsIdle;
   int loopA_;

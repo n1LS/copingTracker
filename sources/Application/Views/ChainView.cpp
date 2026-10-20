@@ -10,12 +10,15 @@
  */
 
 #include "ChainView.h"
+#include "Application/Model/Generators/PhraseGenerator.h"
 #include "Application/Utils/char.h"
+#include "Application/Views/ModalDialogs/GeneratorWizardModal.h"
 #include "Application/Views/SampleEditorView.h"
 #include "ScreenView.h"
 #include "System/Console/Trace.h"
 #include "UIController.h"
 #include "ViewData.h"
+
 #include <nanoprintf.h>
 
 const int columnPositions_[2] = {0, 3};
@@ -54,6 +57,37 @@ void ChainView::Reset() {
   saveRow_ = 0;
   saveCol_ = 0;
   needsUIUpdate_ = false;
+}
+
+// Runs the generator the wizard collected parameters for, on the current chain.
+void ChainView::GeneratorWizardCallback(View &v, ModalView &dialog) {
+  if (dialog.GetReturnCode() != GeneratorWizardModal::GWM_ACCEPT) {
+    return;
+  }
+
+  auto &view = static_cast<ChainView &>(v);
+  auto &wizard = static_cast<GeneratorWizardModal &>(dialog);
+
+  if (wizard.GetType() != GeneratorWizardModal::GT_DRUM && wizard.GetType() != GeneratorWizardModal::GT_BASSLINE) {
+    return; // other generators aren't implemented yet
+  }
+
+  ViewData *data = view.viewData_;
+  ChainStep *chain = data->song_->chain_.steps_[data->currentChain_];
+  uint8_t length = 0;
+  for (int y = 0; y < STEPS_PER_PHRASE; y++) {
+    if (chain[y].phrase == EMPTY_CHAIN_VALUE) {
+      break;
+    }
+    length++;
+  }
+
+  if (wizard.GetType() == GeneratorWizardModal::GT_BASSLINE) {
+    PhraseGenerator::GenerateBasslinePhrases(data->project_, chain, length, wizard.GetBasslineSettings());
+  } else {
+    PhraseGenerator::GenerateDrumPhrases(data->project_, chain, length, wizard.GetDrumSettings());
+  }
+  view.isDirty_ = true;
 }
 
 void ChainView::setPhrase(unsigned char value) {
@@ -191,9 +225,13 @@ void ChainView::clonePosition() {
 ******************************************************************************/
 
 GUIRect ChainView::getSelectionRect() {
-  GUIRect r(clipboard_.col_, clipboard_.row_, viewData_->chainCol_ - clipboard_.col_,
-            viewData_->chainRow_ - clipboard_.row_);
-  return r;
+  // anchor and cursor in either order: the origin is the top left most point.
+  // Width and height are the distance, callers add 1 for the covered cells.
+  const int left = std::min<int>(clipboard_.col_, viewData_->chainCol_);
+  const int right = std::max<int>(clipboard_.col_, viewData_->chainCol_);
+  const int top = std::min<int>(clipboard_.row_, viewData_->chainRow_);
+  const int bottom = std::max<int>(clipboard_.row_, viewData_->chainRow_);
+  return GUIRect(left, top, right - left, bottom - top);
 }
 
 /*******************************************************************************
@@ -217,7 +255,6 @@ void ChainView::fillClipboardData() {
   clipboard_.width_ = selRect.Width() + 1;
   clipboard_.height_ = selRect.Height() + 1;
   clipboard_.row_ = selRect.Top();
-  ;
   clipboard_.col_ = selRect.Left();
 
   // Copy the data
@@ -369,20 +406,19 @@ void ChainView::switchSoloMode() {
 }
 
 void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
   if (!pressed) {
     if (viewMode_ == VM_MUTEON) {
       if (mask & BM_NAV) {
         toggleMute();
       }
-    };
+    }
     if (viewMode_ == VM_SOLOON) {
       if (mask & BM_NAV) {
         switchSoloMode();
       }
-    };
+    }
     return;
-  };
+  }
 
   if (viewMode_ == VM_NEW) {
     if (mask == BM_ENTER) {
@@ -402,7 +438,7 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
     } else {
       viewMode_ = VM_SELECTION;
     }
-  };
+  }
 
   // Process selection related keys
 
@@ -417,7 +453,6 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
     processSelectionButtonMask(mask);
   } else {
-
     // Switch back to normal mode
 
     viewMode_ = VM_NORMAL;
@@ -426,26 +461,25 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
 }
 
 void ChainView::processNormalButtonMask(uint16_t mask) {
-
   Player *player = Player::GetInstance();
 
   if (mask & BM_EDIT) {
     // EDIT Modifier
-    if (mask & BM_LEFT)
+    if (mask & BM_LEFT) {
       warpToNeighbour(-1);
-    if (mask & BM_RIGHT)
+    } else if (mask & BM_RIGHT) {
       warpToNeighbour(+1);
-    if (mask & BM_UP)
+    } else if (mask & BM_UP) {
       warpInColumn(-1);
-    if (mask & BM_DOWN)
+    } else if (mask & BM_DOWN) {
       warpInColumn(+1);
-    if (mask & BM_ENTER)
+    } else if (mask & BM_ENTER) {
       cutPosition();
-    if (mask & BM_ALT) {
+    } else if (mask & BM_ALT) {
       viewMode_ = VM_CLONE;
-    };
-    if (mask & BM_NAV)
+    } else if (mask & BM_NAV) {
       toggleMute();
+    }
   } else if (mask & BM_ENTER) {
     // ENTER Modifier
     if (mask & BM_DOWN)
@@ -462,9 +496,9 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
       pasteLastPhrase();
       if (viewData_->chainCol_ == 0)
         viewMode_ = VM_NEW;
-    }
-    if (mask & BM_NAV)
+    } else if (mask & BM_NAV) {
       switchSoloMode();
+    }
   } else if (mask & BM_NAV) {
     // NAV Modifier
     if (mask & BM_LEFT) {
@@ -475,16 +509,23 @@ void ChainView::processNormalButtonMask(uint16_t mask) {
         viewData_->currentPhrase_ = *data;
         Navigate(VT_PHRASE, vtRevealFromRight);
       }
-    }
-
-    // We toggle full chain start only if we"re not in live mode
-    // or if the player ain't playing yet
-
-    if (mask & BM_PLAY) {
+    } else if (mask & BM_PLAY) {
+      // We toggle full chain start only if we"re not in live mode
+      // or if the player ain't playing yet
       player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
-    }
-    if (mask & BM_ALT)
+    } else if (mask & BM_ALT) {
       unMuteAll();
+    } else if (mask & BM_DOWN) {
+      auto *wizard = GeneratorWizardModal::Create(*this, viewData_->project_->GetInstrumentBank());
+      ChainStep *chain = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+      uint8_t length = 0;
+      while (length < STEPS_PER_PHRASE && chain[length].phrase != EMPTY_CHAIN_VALUE) {
+        length++;
+      }
+      wizard->SetPhraseCount(length);
+      wizard->PresetKeyAndScale(viewData_->project_->GetScaleRoot(), viewData_->project_->GetScale());
+      DoModal(wizard, ModalViewCallback::create<&ChainView::GeneratorWizardCallback>());
+    }
   } else {
     // NO modifier
     if (mask & BM_DOWN)
@@ -602,6 +643,8 @@ void ChainView::setTextProps(int col, int row) {
 
   if (clipboard_.active_) {
     GUIRect selRect = getSelectionRect();
+    selRect.w_ += 1;
+    selRect.h_ += 1;
     if (selRect.Contains(GUIPoint(col, row))) {
       highlighted = true;
     }
@@ -654,6 +697,16 @@ void ChainView::DrawView() {
     } else {
       byteToHexString(d, row);
       DrawString(pos.x_, pos.y_ + j, row);
+    }
+
+    GUIRect selRect = getSelectionRect();
+    selRect.w_ += 1;
+    selRect.h_ += 1;
+    bool highlighted = selRect.Contains(GUIPoint(0, j));
+    bool nextHighlighted = selRect.Contains(GUIPoint(1, j));
+
+    if (highlighted && nextHighlighted) {
+      DrawChar(pos.x_ + 2, pos.y_ + j, ' ');
     }
   }
 
