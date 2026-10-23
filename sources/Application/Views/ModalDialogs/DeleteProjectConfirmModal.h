@@ -32,7 +32,8 @@ public:
   }
   virtual void OnFocus() override {
   }
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  virtual void ButtonUp(uint16_t button, uint16_t mask) override;
   virtual void AnimationUpdate() override;
 
 private:
@@ -47,6 +48,8 @@ private:
   unsigned long holdStartMs_ = 0;
   uint16_t holdProgressMs_ = 0;
   bool holdingCombo_ = false;
+  // ENTER was pressed while this dialog was open (cancel fires on release)
+  bool enterDown_ = false;
 };
 
 #endif // _DELETE_PROJECT_CONFIRM_MODAL_H_

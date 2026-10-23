@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Config/AudioConstants.h"
+#include "config/AudioConstants.h"
 
 enum lsdjkit_constants_e {
   lsdjkitTicks100Hz = SAMPLE_RATE_HZ / 100,

@@ -465,11 +465,26 @@ void TableView::pasteLast() {
   }
 }
 
-void TableView::ProcessButtonMask(uint16_t mask, bool pressed) {
-
-  if (!pressed) {
-    return;
+bool TableView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_UP:
+      Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT), vtRevealFromTop);
+      return true;
+    case BM_LEFT:
+      Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE, vtRevealFromLeft);
+      return true;
+    case BM_RIGHT:
+      if (viewType_ == VT_TABLE) {
+        Navigate(VT_TABLE2, vtRevealFromRight);
+        return true;
+      }
+      break;
   }
+  return false;
+}
+
+void TableView::ButtonDown(uint16_t newButton, uint16_t mask) {
+
   if (viewMode_ == VM_SELECTION) {
     if (!clipboard_.active_) {
       clipboard_.active_ = true;
@@ -478,17 +493,17 @@ void TableView::ProcessButtonMask(uint16_t mask, bool pressed) {
       saveCol_ = col_;
       saveRow_ = row_;
     }
-    processSelectionButtonMask(mask);
+    processSelectionButtonMask(newButton, mask);
   } else {
-    processNormalButtonMask(mask);
+    processNormalButtonMask(newButton, mask);
   };
 }
 
-void TableView::processNormalButtonMask(uint16_t mask) {
+void TableView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  if (mask == BM_ENTER) {
+  if (IsChord(newButton, mask, BM_ENTER)) {
     // enter only (check if picker for commands is enabled)
     bool picker = Config::GetInstance()->FindVariable(Token::VarConfigCommandPicker)->GetInt();
 
@@ -519,117 +534,109 @@ void TableView::processNormalButtonMask(uint16_t mask) {
         DoModal(cv, ModalViewCallback::create<&SetCommandCallback>());
       }
     }
+    pasteLast();
+    return;
   }
 
-  if (mask & BM_EDIT) {
-    if (mask & BM_LEFT)
-      warpToNeighbour(-1);
-    if (mask & BM_RIGHT)
-      warpToNeighbour(+1);
-    if (mask & BM_DOWN)
-      warpToNeighbour(-16);
-    if (mask & BM_UP)
-      warpToNeighbour(16);
-    if (mask & BM_ENTER)
-      cutPosition();
-    if (mask & BM_ALT)
-      viewMode_ = VM_SELECTION;
-  } else if (mask & BM_ENTER) {
+  if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
+    viewMode_ = VM_SELECTION;
+  } else if (mask == BM_EDIT) {
+    switch (newButton) {
+      case BM_LEFT:
+        warpToNeighbour(-1);
+        break;
+      case BM_RIGHT:
+        warpToNeighbour(+1);
+        break;
+      case BM_DOWN:
+        warpToNeighbour(-16);
+        break;
+      case BM_UP:
+        warpToNeighbour(16);
+        break;
+    }
+  } else if (mask == BM_ENTER) {
     // ENTER modifier
-    if (mask & BM_DOWN)
-      updateCursorValue(-0x10);
-    else if (mask & BM_UP)
-      updateCursorValue(0x10);
-    else if (mask & BM_LEFT)
-      updateCursorValue(-0x01);
-    else if (mask & BM_RIGHT)
-      updateCursorValue(0x01);
-    else if (mask == BM_ENTER)
-      pasteLast();
-    else if (mask & BM_ALT)
-      pasteClipboard();
-  } else if (mask & BM_NAV) {
+    switch (newButton) {
+      case BM_EDIT:
+        cutPosition();
+        break;
+      case BM_DOWN:
+        updateCursorValue(-0x10);
+        break;
+      case BM_UP:
+        updateCursorValue(0x10);
+        break;
+      case BM_LEFT:
+        updateCursorValue(-0x01);
+        break;
+      case BM_RIGHT:
+        updateCursorValue(0x01);
+        break;
+    }
+  } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
+    pasteClipboard();
+  } else if (mask == BM_NAV) {
     // NAV Modifier
-    if (mask & BM_UP) {
-      Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT), vtRevealFromTop);
-    } else if (mask & BM_LEFT) {
-      Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE, vtRevealFromLeft);
-    } else if (mask & BM_RIGHT) {
-      if (viewType_ == VT_TABLE) {
-        Navigate(VT_TABLE2, vtRevealFromRight);
-      }
+    switch (newButton) {
+      case BM_PLAY:
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
+        break;
     }
-    if (mask & BM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
-    }
-
-  } else {
+  } else if (mask == 0) {
     // No modifier
-    if (mask & BM_DOWN)
-      updateCursor(0, 1);
-    if (mask & BM_UP)
-      updateCursor(0, -1);
-    if (mask & BM_LEFT)
-      updateCursor(-1, 0);
-    if (mask & BM_RIGHT)
-      updateCursor(1, 0);
-    if (mask & BM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
+    switch (newButton) {
+      case BM_DOWN:
+        updateCursor(0, 1);
+        break;
+      case BM_UP:
+        updateCursor(0, -1);
+        break;
+      case BM_LEFT:
+        updateCursor(-1, 0);
+        break;
+      case BM_RIGHT:
+        updateCursor(1, 0);
+        break;
+      case BM_PLAY:
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
+        break;
     }
   }
 }
 
-void TableView::processSelectionButtonMask(uint16_t mask) {
+void TableView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  if (mask & BM_EDIT) {
-    if (mask & BM_ALT) {
-      extendSelection();
-    } else {
-      copySelection();
+  if (IsChord(newButton, mask, BM_EDIT)) {
+    copySelection();
+  } else if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
+    extendSelection();
+  } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
+    cutSelection();
+  } else if (mask == BM_NAV) {
+    if (newButton == BM_PLAY) {
+      player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
-  } else {
-
-    // A Modifer
-
-    if (mask & BM_ENTER) {
-      if (mask & BM_ALT)
-        cutSelection();
-      //		if (mask&BM_R) switchSoloMode() ;
-    } else {
-
-      // R Modifier
-
-      if (mask & BM_NAV) {
-        if (mask & BM_UP) {
-          Navigate(VT_PHRASE, vtRevealFromTop);
-        }
-        if (mask & BM_PLAY) {
-          player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
-        }
-        /*			if (mask&BM_L) unMuteAll() ;
-         */
-      } else {
-        // L Modifier
-        if (mask & BM_ALT) {
-
-        } else {
-          // No modifier
-
-          if (mask & BM_DOWN)
-            updateCursor(0, 1);
-          if (mask & BM_UP)
-            updateCursor(0, -1);
-          if (mask & BM_LEFT)
-            updateCursor(-1, 0);
-          if (mask & BM_RIGHT)
-            updateCursor(1, 0);
-          if (mask & BM_PLAY) {
-            player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
-          }
-        }
-      }
+  } else if (mask == 0) {
+    // No modifier
+    switch (newButton) {
+      case BM_DOWN:
+        updateCursor(0, 1);
+        break;
+      case BM_UP:
+        updateCursor(0, -1);
+        break;
+      case BM_LEFT:
+        updateCursor(-1, 0);
+        break;
+      case BM_RIGHT:
+        updateCursor(1, 0);
+        break;
+      case BM_PLAY:
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
+        break;
     }
   }
 }

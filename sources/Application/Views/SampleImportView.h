@@ -61,7 +61,7 @@ protected:
   void DrawButtons(int selectedButton) override;
 
   // Handle custom button actions (return true if handled)
-  bool OnButtonOverride(uint16_t mask, bool pressed) override;
+  bool OnButtonOverride(uint16_t button, uint16_t mask, bool pressed) override;
 
 private:
   // State

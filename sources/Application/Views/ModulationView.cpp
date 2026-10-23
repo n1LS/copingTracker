@@ -178,26 +178,26 @@ void ModulationView::OnFocus() {
   buildFields();
 }
 
-void ModulationView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    FieldView::ProcessButtonMask(mask, pressed);
+bool ModulationView::navigationDown(uint16_t direction) {
+  if (direction == BM_LEFT) {
+    Navigate(VT_INSTRUMENT, vtCollapse);
+    return true;
+  }
+  return false;
+}
+
+void ModulationView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  if (mask & BM_NAV || newButton == BM_NAV) {
     return;
   }
 
-  if (mask & BM_NAV) {
-    if (mask & BM_LEFT) {
-      Navigate(VT_INSTRUMENT, vtCollapse);
-    }
-    return;
-  }
-
-  FieldView::ProcessButtonMask(mask, pressed);
+  FieldView::ButtonDown(newButton, mask);
 
   if (I_Instrument *instr = getInstrument()) {
     storeEffectVariables(instr);
   }
 
-  if (mask & BM_PLAY) {
+  if (IsChord(newButton, mask, BM_PLAY)) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
   }

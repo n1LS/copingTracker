@@ -276,51 +276,49 @@ void TextInputModal::DrawView() {
   DrawString(GRID_X0 + 9, ly + 2, char_key_alt_s "+" char_key_enter_s " Backspace");
 }
 
-void TextInputModal::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    return;
-  }
-
-  // Chords first: a combo whose modifier is released a frame early would
-  // otherwise fall through to the bare key case below.
-  if ((mask & BM_ENTER) && (mask & BM_ALT)) {
+void TextInputModal::ButtonDown(uint16_t newButton, uint16_t mask) {
+  if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
     deleteChar();
     isDirty_ = true;
     return;
   }
 
-  if ((mask & BM_NAV) && (mask & BM_LEFT)) {
+  if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
     EndModal(TIM_CANCEL);
     return;
   }
 
-  if (mask & BM_PLAY) {
+  if (IsChord(newButton, mask, BM_PLAY)) {
     EndModal(TIM_ACCEPT);
     return;
   }
 
-  if (mask == BM_ENTER) {
+  if (IsChord(newButton, mask, BM_ENTER)) {
     insertChar(highlightedChar());
     isDirty_ = true;
     return;
   }
 
-  if (mask == BM_EDIT) {
+  if (IsChord(newButton, mask, BM_EDIT)) {
     upperCase_ = !upperCase_;
     isDirty_ = true;
     return;
   }
 
-  if (mask == BM_LEFT) {
+  if (mask != 0) {
+    return;
+  }
+
+  if (newButton == BM_LEFT) {
     moveGrid(-1, 0);
     isDirty_ = true;
-  } else if (mask == BM_RIGHT) {
+  } else if (newButton == BM_RIGHT) {
     moveGrid(+1, 0);
     isDirty_ = true;
-  } else if (mask == BM_UP) {
+  } else if (newButton == BM_UP) {
     moveGrid(0, -1);
     isDirty_ = true;
-  } else if (mask == BM_DOWN) {
+  } else if (newButton == BM_DOWN) {
     moveGrid(0, +1);
     isDirty_ = true;
   }

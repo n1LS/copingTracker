@@ -78,63 +78,79 @@ void GrooveView::clearCursorValue() {
   isDirty_ = true;
 }
 
-void GrooveView::ProcessButtonMask(uint16_t mask, bool pressed) {
+bool GrooveView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_DOWN:
+      Navigate(VT_PHRASE, vtRevealFromBottom);
+      return true;
+    case BM_LEFT:
+      Navigate(VT_PROJECT, vtRevealFromLeft);
+      return true;
+  }
+  return false;
+}
 
-  if (!pressed)
-    return;
+void GrooveView::ButtonDown(uint16_t newButton, uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  if (mask & BM_EDIT) {
-    if (mask & BM_LEFT) {
-      warpGroove(-1);
+  if (mask == BM_EDIT) {
+    switch (newButton) {
+      case BM_LEFT:
+        warpGroove(-1);
+        break;
+      case BM_RIGHT:
+        warpGroove(1);
+        break;
+      case BM_DOWN:
+        warpGroove(-0x10);
+        break;
+      case BM_UP:
+        warpGroove(0x10);
+        break;
+      case BM_ENTER:
+        clearCursorValue();
+        break;
     }
-    if (mask & BM_RIGHT) {
-      warpGroove(1);
-    }
-    if (mask & BM_DOWN) {
-      warpGroove(-0x10);
-    }
-    if (mask & BM_UP) {
-      warpGroove(0x10);
-    }
-    if (mask & BM_ENTER) {
-      clearCursorValue();
-    };
-  } else if (mask & BM_ENTER) {
+  } else if (IsPair(newButton, mask, BM_EDIT, BM_ENTER)) {
+    clearCursorValue();
+  } else if (mask == BM_ENTER) {
     // ENTER modifier
-    if (mask & BM_LEFT) {
-      updateCursorValue(-1);
+    switch (newButton) {
+      case BM_LEFT:
+        updateCursorValue(-1);
+        break;
+      case BM_RIGHT:
+        updateCursorValue(1);
+        break;
+      case BM_DOWN:
+        updateCursorValue(-1, true);
+        break;
+      case BM_UP:
+        updateCursorValue(1, true);
+        break;
     }
-    if (mask & BM_RIGHT) {
-      updateCursorValue(1);
-    }
-    if (mask & BM_DOWN) {
-      updateCursorValue(-1, true);
-    }
-    if (mask & BM_UP) {
-      updateCursorValue(1, true);
-    }
-    if (mask == BM_ENTER) {
-      initCursorValue();
-    };
-  } else if (mask & BM_NAV) {
+  } else if (IsChord(newButton, mask, BM_ENTER)) {
+    initCursorValue();
+  } else if (mask == BM_NAV) {
     // NAV Modifier
-    if (mask & BM_DOWN) {
-      Navigate(VT_PHRASE, vtRevealFromBottom);
-    } else if (mask & BM_LEFT) {
-      Navigate(VT_PROJECT, vtRevealFromLeft);
-    } else if (mask & BM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
+    switch (newButton) {
+      case BM_PLAY:
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
+        break;
     }
-  } else {
+  } else if (mask == 0) {
     // No modifier
-    if (mask & BM_DOWN)
-      updateCursor(1);
-    if (mask & BM_UP)
-      updateCursor(-1);
-    if (mask & BM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
+    switch (newButton) {
+      case BM_DOWN:
+        updateCursor(1);
+        break;
+      case BM_UP:
+        updateCursor(-1);
+        break;
+      case BM_PLAY:
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
+        break;
     }
   }
 }

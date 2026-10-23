@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Config/AudioConstants.h"
+#include "config/AudioConstants.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 
 enum chiptune_constants_e {

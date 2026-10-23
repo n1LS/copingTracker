@@ -17,7 +17,7 @@ class BootView : public ScreenView {
 public:
   BootView(GUIWindow &w, ViewData *data);
   void Reset();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask);
   virtual void DrawView();
   virtual void OnFocus();
   virtual void AnimationUpdate();

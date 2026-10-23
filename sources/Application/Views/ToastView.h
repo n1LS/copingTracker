@@ -50,5 +50,5 @@ private:
   virtual void DrawView() override {};
   virtual void AnimationUpdate() override {};
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick) override {};
-  virtual void ProcessButtonMask(unsigned short mask, bool pressed) override {};
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask) override {};
 };

@@ -84,12 +84,8 @@ void RenderProgressModal::OnPlayerUpdate(PlayerEventType eventType, unsigned int
 void RenderProgressModal::OnFocus() {
 }
 
-void RenderProgressModal::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    return;
-  }
-
-  if (mask & BM_ENTER) {
+void RenderProgressModal::ButtonDown(uint16_t newButton, uint16_t mask) {
+  if (newButton == BM_ENTER) {
     // If player is still running, stop it first
     Player *player = Player::GetInstance();
     if (player && player->IsRunning()) {

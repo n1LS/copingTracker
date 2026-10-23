@@ -585,13 +585,13 @@ bool AppWindow::onEvent(GUIEvent &event) {
     case ET_PADBUTTONDOWN:
       mask_ |= v;
       if (currentView_)
-        currentView_->ProcessButton(mask_, true);
+        currentView_->ProcessButton(v, mask_ & ~v, true);
       break;
 
     case ET_PADBUTTONUP:
       mask_ &= ~v;
       if (currentView_)
-        currentView_->ProcessButton(mask_, false);
+        currentView_->ProcessButton(v, mask_, false);
       break;
 
     default:

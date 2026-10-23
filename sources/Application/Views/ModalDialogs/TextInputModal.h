@@ -40,7 +40,7 @@ public:
   }
   virtual void OnFocus() override {
   }
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask) override;
   virtual void AnimationUpdate() override;
 
   // Valid once the modal finished with TIM_ACCEPT.

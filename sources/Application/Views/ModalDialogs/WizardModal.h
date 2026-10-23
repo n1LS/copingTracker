@@ -48,7 +48,8 @@ public:
   }
   virtual void OnFocus() override {
   }
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  virtual void ButtonUp(uint16_t button, uint16_t mask) override;
   virtual void AnimationUpdate() override {
   }
 
@@ -139,7 +140,6 @@ private:
   int width_;
   int height_;
   Button button_ = BTN_LEFT;
-  uint16_t lastMask_ = 0;
   bool enterDown_ = false;
   bool valueChanged_ = false; // ENTER was used to edit, don't act on its release
 };

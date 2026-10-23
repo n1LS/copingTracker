@@ -20,7 +20,8 @@ public:
   GrooveView(GUIWindow &w, ViewData *viewData);
   ~GrooveView();
   void Reset();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask);
+  bool navigationDown(uint16_t direction) override;
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();

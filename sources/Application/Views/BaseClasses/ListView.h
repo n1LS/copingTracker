@@ -70,7 +70,7 @@ public:
            int initialTab = 0);
   virtual ~ListView();
 
-  void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  void ButtonDown(uint16_t newButton, uint16_t mask) override;
   void DrawView() override;
   void OnFocus() override;
 

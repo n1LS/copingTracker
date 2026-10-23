@@ -24,7 +24,8 @@ public:
   virtual ~ModulationView();
   void Reset();
 
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  bool navigationDown(uint16_t direction) override;
   virtual void DrawView() override;
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int) override {};
   virtual void OnFocus() override;

@@ -30,7 +30,8 @@ public:
   virtual ~ProjectView();
   void Reset();
 
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask);
+  bool navigationDown(uint16_t direction) override;
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   virtual void OnFocus();
@@ -77,7 +78,7 @@ private:
   etl::vector<UITempoField, 1> tempoField_;
   etl::vector<UIIntVarField, 9> intVarField_;
   etl::vector<UIActionField, 10> actionField_;
-  etl::vector<UIStaticField, 1> staticField_;
+  etl::vector<UIStaticField, 2> staticField_;
   etl::vector<UITextField<MAX_PROJECT_NAME_LENGTH>, 1> textField_;
 
   // References to specific fields that need direct access

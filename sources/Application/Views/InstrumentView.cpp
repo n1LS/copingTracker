@@ -356,17 +356,45 @@ void InstrumentView::warpToNext(int offset) {
   isDirty_ = true;
 }
 
-void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
+void InstrumentView::ButtonUp(uint16_t button, uint16_t mask) {
+  if (AppWindow::GetInstance()->buttonDown(BM_NAV) != mapVisible_) {
+    SetDirty(true);
+  }
+  FieldView::ButtonUp(button, mask);
+}
+
+bool InstrumentView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_LEFT:
+      // remove listening when leaving this screen
+      getInstrument()->RemoveObserver(*this);
+      ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
+
+      Navigate(VT_PHRASE, vtRevealFromLeft);
+      return true;
+    case BM_DOWN:
+      {
+        // Go to table view
+        int i = viewData_->currentInstrumentID_;
+        InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+        I_Instrument *instr = bank->GetInstrument(i);
+        int table = instr->GetTable();
+        if (table != VAR_OFF) {
+          viewData_->currentTable_ = table;
+        }
+        Navigate(VT_TABLE2, vtRevealFromBottom);
+        return true;
+      }
+  }
+  return false;
+}
+
+void InstrumentView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (AppWindow::GetInstance()->buttonDown(BM_NAV) != mapVisible_) {
     SetDirty(true);
   }
 
-  if (!pressed) {
-    FieldView::ProcessButtonMask(mask, pressed);
-    return;
-  }
-
-  if (mask == (BM_EDIT | BM_ENTER)) {
+  if (IsPair(newButton, mask, BM_EDIT, BM_ENTER)) {
     int i = viewData_->currentInstrumentID_;
     InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
     I_Instrument *instr = bank->GetInstrument(i);
@@ -394,11 +422,13 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
 
   // Call the parent class's implementation first to ensure action fields like
   // Export, Import work correctly
-  FieldView::ProcessButtonMask(mask, pressed);
+  FieldView::ButtonDown(newButton, mask);
 
   Player *player = Player::GetInstance();
 
-  if (mask == BM_ENTER) {
+  const bool enterAlone = IsChord(newButton, mask, BM_ENTER);
+
+  if (enterAlone) {
     // Get the current field to check if we're on the sample field.
     // fields without a variable (actions, labels) return nullptr here
     UIField *currentField = GetFocus();
@@ -434,7 +464,6 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
         default:
           break;
       }
-      mask &= ~BM_ENTER;
     }
 
   } else {
@@ -445,11 +474,10 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   if (viewMode_ == VM_CLONE) {
-    if ((mask & BM_ENTER) && (mask & BM_ALT)) {
+    if (IsPair(newButton, mask, BM_ENTER, BM_ALT)) {
       // fields without a variable (actions, labels) return nullptr here
       UIField *field = GetFocus();
       Variable *v = field ? field->GetVariable() : nullptr;
-      mask &= ~BM_ENTER;
       if (!v)
         return;
 
@@ -464,54 +492,33 @@ void InstrumentView::ProcessButtonMask(uint16_t mask, bool pressed) {
           isDirty_ = true;
         }
       };
+      return;
     }
-    mask &= (0xFFFF - (BM_ENTER | BM_ALT));
   };
 
   // EDIT Modifier
-  if (mask & BM_EDIT) {
-    if (mask & BM_LEFT)
+  if (mask == BM_EDIT && newButton != BM_EDIT) {
+    if (newButton == BM_LEFT)
       warpToNext(-1);
-    if (mask & BM_RIGHT)
+    if (newButton == BM_RIGHT)
       warpToNext(+1);
-    if (mask & BM_DOWN)
+    if (newButton == BM_DOWN)
       warpToNext(-16);
-    if (mask & BM_UP)
+    if (newButton == BM_UP)
       warpToNext(+16);
-    if (mask & BM_ALT) {
-      viewMode_ = VM_CLONE;
-    }
-  } else if (mask & BM_NAV) {
+  }
+  if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
+    viewMode_ = VM_CLONE;
+  }
+
+  if (mask == BM_NAV) {
     // NAV Modifier
-    if (mask & BM_LEFT) {
-      // remove listening when leaving this screen
-      getInstrument()->RemoveObserver(*this);
-      ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
-
-      Navigate(VT_PHRASE, vtRevealFromLeft);
-    }
-
-    if (mask & BM_DOWN) {
-
-      // Go to table view
-      int i = viewData_->currentInstrumentID_;
-      InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-      I_Instrument *instr = bank->GetInstrument(i);
-      int table = instr->GetTable();
-      if (table != VAR_OFF) {
-        viewData_->currentTable_ = table;
-      }
-      Navigate(VT_TABLE2, vtRevealFromBottom);
-    }
-
-    if (mask & BM_PLAY) {
+    if (newButton == BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
-  } else {
+  } else if (IsChord(newButton, mask, BM_PLAY)) {
     // No modifier
-    if (mask & BM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
-    }
+    player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
   }
 
   lastFocus_ = GetFocus();

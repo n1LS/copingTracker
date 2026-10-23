@@ -33,7 +33,9 @@ public:
   virtual ~SampleEditorView();
   void Reset();
 
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
+  void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  bool navigationDown(uint16_t direction) override;
+  void ButtonUp(uint16_t button, uint16_t mask) override;
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int) {};
   virtual void OnFocus();

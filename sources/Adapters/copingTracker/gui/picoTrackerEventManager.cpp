@@ -177,7 +177,11 @@ void picoTrackerEventManager::ProcessInputEvent() {
   }
 
   // compute mask to send
-  sendMask = (newMask ^ buttonMask_) | (newMask & (BM_LEFT | BM_RIGHT | BM_UP | BM_DOWN));
+  // A change event only reports the buttons that changed, so a held direction
+  // is not re-sent when another button is pressed or released. Repeat ticks
+  // (no change) re-send the held directions.
+  sendMask = (newMask != buttonMask_) ? (newMask ^ buttonMask_) : (newMask & BM_DIRECTIONAL);
+  const bool newlyPressed = (newMask & ~buttonMask_) != 0;
 
   // see if we're repeating
   if (newMask == buttonMask_) {
@@ -192,7 +196,8 @@ void picoTrackerEventManager::ProcessInputEvent() {
   } else {
     if ((now - time_) > keyKill_) {
       gotEvent = (sendMask != 0);
-      if (gotEvent)
+      // a release alone must not interrupt the repeat of a still held direction
+      if (gotEvent && newlyPressed)
         isRepeating_ = false;
     }
   }

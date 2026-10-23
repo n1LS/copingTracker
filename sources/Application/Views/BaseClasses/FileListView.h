@@ -91,7 +91,9 @@ public:
   virtual ~FileListView();
 
   // Core view methods (implemented by base)
-  void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  bool navigationDown(uint16_t direction) override;
+  void ButtonUp(uint16_t button, uint16_t mask) override;
   void DrawView() override;
   void OnFocus() override;
 
@@ -119,7 +121,7 @@ protected:
   // Return true to allow the switch, false to cancel
   virtual bool OnDirectorySwitch(size_t newDirectoryIndex);
   // Subclass hook: override for custom button handling (return true if handled)
-  virtual bool OnButtonOverride(uint16_t mask, bool pressed);
+  virtual bool OnButtonOverride(uint16_t button, uint16_t mask, bool pressed);
   // Subclass hook: override item drawing for custom appearance
   // Default: draws filename with directory/file icon
   virtual void DrawItemCustom(int x, int y, int index, bool isSelected, Color fg, Color bg, const char *buffer);

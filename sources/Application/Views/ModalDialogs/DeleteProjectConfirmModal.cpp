@@ -14,6 +14,7 @@
 #include "Application/Utils/DrawUtils.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "System/System/System.h"
+#include <algorithm>
 #include <cstring>
 
 #define DELETE_HOLDmask_ (BM_ALT | BM_PLAY | BM_EDIT)
@@ -91,10 +92,26 @@ void DeleteProjectConfirmModal::AnimationUpdate() {
   UpdateProgress_();
 }
 
-void DeleteProjectConfirmModal::ProcessButtonMask(uint16_t mask, bool pressed) {
+void DeleteProjectConfirmModal::ButtonDown(uint16_t newButton, uint16_t mask) {
+  currentMask_ = mask | newButton;
+
+  if (newButton == BM_ENTER) {
+    // cancel is confirmed on release (see ButtonUp)
+    enterDown_ = true;
+    isDirty_ = true;
+    return;
+  }
+
+  UpdateProgress_();
+}
+
+void DeleteProjectConfirmModal::ButtonUp(uint16_t button, uint16_t mask) {
   currentMask_ = mask;
 
-  if (pressed && (mask & BM_ENTER)) {
+  // Only if the press happened inside this dialog, so the release of whatever
+  // opened it doesn't cancel it right away.
+  if (button == BM_ENTER && enterDown_) {
+    enterDown_ = false;
     EndModal(MBL_CANCEL);
     return;
   }
@@ -103,30 +120,40 @@ void DeleteProjectConfirmModal::ProcessButtonMask(uint16_t mask, bool pressed) {
 }
 
 void DeleteProjectConfirmModal::DrawView() {
-  SetWindow(26, 6);
+  // same window style as MessageBox: title bar, content starts below it (y = 3)
+  const int contentWidth = 26;
+  const int width = 4 + contentWidth;
+  const int height = 11;
 
-  SetColor(Theme::View::fg);
+  left_ = (SCREEN_WIDTH - width) / 2;
+  top_ = (SCREEN_HEIGHT - height) / 2;
+  DrawWindow(0, 0, width, height, "Delete project");
 
-  const int projectLineX = (26 - projectLine_.size()) / 2;
-  DrawString(projectLineX, 0, projectLine_.c_str());
-  DrawString(0, 1, "Press & hold ALT+PLAY+EDIT");
+  SetColor(Theme::Dialog::fg);
+
+  const int projectLineX = 2 + std::max(0, (contentWidth - (int)projectLine_.size()) / 2);
+  DrawString(projectLineX, 3, projectLine_.c_str());
+  DrawString(2, 4, "Press & hold ALT+PLAY+EDIT");
 
   if (holdingCombo_ || holdProgressMs_ > 0) {
     progressBar_t progressBar;
     fillProgressBar(holdProgressMs_, DELETE_HOLD_DURATION_MS, &progressBar);
-    DrawString((26 - 12) / 2, 3, progressBar);
+    DrawString(2 + (contentWidth - 12) / 2, 6, progressBar);
   }
 
   const char *cancelButton = "Cancel";
+  const int buttonY = 8;
   SetColor(Theme::Dialog::Button::fg(true));
   SetBackgroundColor(Theme::Dialog::Button::bg(true));
   int len = strlen(cancelButton);
-  int x = (26 - len) / 2;
-  DrawString(x, 5, cancelButton);
+  int x = 2 + (contentWidth - len) / 2;
+  DrawString(x, buttonY, cancelButton);
 
   // button ends
   SetBackgroundColor(Theme::Dialog::bg);
   SetColor(Theme::Dialog::Button::bg(true));
-  DrawString(x - 1, 5, char_button_border_left_s);
-  DrawString(x + len, 5, char_button_border_right_s);
+  DrawChar(x - 1, buttonY, char_button_left(enterDown_));
+  DrawChar(x + len, buttonY, char_button_right(enterDown_));
+
+  focusRect_ = GUIRect(x - 1 + left_, buttonY + top_, len + 2, 1);
 }

@@ -405,36 +405,64 @@ void ChainView::switchSoloMode() {
   isDirty_ = true;
 }
 
-void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    if (viewMode_ == VM_MUTEON) {
-      if (mask & BM_NAV) {
-        toggleMute();
-      }
+void ChainView::ButtonUp(uint16_t button, uint16_t mask) {
+  // mask is what remains held after the release
+  if (viewMode_ == VM_MUTEON) {
+    if (mask & BM_NAV) {
+      toggleMute();
     }
-    if (viewMode_ == VM_SOLOON) {
-      if (mask & BM_NAV) {
-        switchSoloMode();
-      }
-    }
-    return;
   }
+  if (viewMode_ == VM_SOLOON) {
+    if (mask & BM_NAV) {
+      switchSoloMode();
+    }
+  }
+  if (button == BM_ENTER) {
+    finalizePhraseUpdate();
+  }
+}
 
+void ChainView::finalizePhraseUpdate() {
+  if (updatingPhrase_) {
+    uint8_t p = viewData_->song_->chain_.steps_[viewData_->currentChain_][updateRow_].phrase;
+    viewData_->song_->phrase_.SetUsed(p);
+    updatingPhrase_ = false;
+  }
+}
+
+bool ChainView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_LEFT:
+      Navigate(VT_SONG, vtRevealFromLeft);
+      return true;
+    case BM_RIGHT:
+      enterPhraseUnderCursor();
+      return true;
+    case BM_DOWN:
+      openGeneratorWizard();
+      return true;
+  }
+  return false;
+}
+
+void ChainView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (viewMode_ == VM_NEW) {
-    if (mask == BM_ENTER) {
+    if (IsChord(newButton, mask, BM_ENTER)) {
       uint16_t next = viewData_->song_->phrase_.GetNext();
       if (next != NO_MORE_PHRASE) {
         setPhrase((unsigned char)next);
         isDirty_ = true;
       }
-      mask &= ~BM_ENTER;
+      viewMode_ = VM_NORMAL;
+      return;
     }
   }
 
   if (viewMode_ == VM_CLONE) {
-    if ((mask & BM_ENTER) && (mask & BM_ALT)) {
+    if (newButton == BM_ENTER && (mask & BM_ALT)) {
       clonePosition();
-      mask &= ~(BM_ENTER | BM_ALT);
+      viewMode_ = VM_NORMAL;
+      return;
     } else {
       viewMode_ = VM_SELECTION;
     }
@@ -451,177 +479,178 @@ void ChainView::ProcessButtonMask(uint16_t mask, bool pressed) {
       saveCol_ = viewData_->chainCol_;
       saveRow_ = viewData_->chainRow_;
     }
-    processSelectionButtonMask(mask);
+    processSelectionButtonMask(newButton, mask);
   } else {
     // Switch back to normal mode
 
     viewMode_ = VM_NORMAL;
-    processNormalButtonMask(mask);
+    processNormalButtonMask(newButton, mask);
+  }
+
+  if (!(mask & BM_ENTER) && newButton != BM_ENTER) {
+    finalizePhraseUpdate();
   }
 }
 
-void ChainView::processNormalButtonMask(uint16_t mask) {
+void ChainView::openGeneratorWizard() {
+  auto *wizard = GeneratorWizardModal::Create(*this, viewData_->project_->GetInstrumentBank());
+  ChainStep *chain = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+  uint8_t length = 0;
+  while (length < STEPS_PER_PHRASE && chain[length].phrase != EMPTY_CHAIN_VALUE) {
+    length++;
+  }
+  wizard->SetPhraseCount(length);
+  wizard->PresetKeyAndScale(viewData_->project_->GetScaleRoot(), viewData_->project_->GetScale());
+  DoModal(wizard, ModalViewCallback::create<&ChainView::GeneratorWizardCallback>());
+}
+
+void ChainView::enterPhraseUnderCursor() {
+  unsigned char *data = viewData_->GetCurrentChainPointer();
+  if (*data != 0xFF) {
+    viewData_->currentPhrase_ = *data;
+    Navigate(VT_PHRASE, vtRevealFromRight);
+  }
+}
+
+void ChainView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
   Player *player = Player::GetInstance();
 
-  if (mask & BM_EDIT) {
+  if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
+    viewMode_ = VM_CLONE;
+  } else if (IsPair(newButton, mask, BM_EDIT, BM_NAV)) {
+    toggleMute();
+  } else if (mask == BM_EDIT) {
     // EDIT Modifier
-    if (mask & BM_LEFT) {
-      warpToNeighbour(-1);
-    } else if (mask & BM_RIGHT) {
-      warpToNeighbour(+1);
-    } else if (mask & BM_UP) {
-      warpInColumn(-1);
-    } else if (mask & BM_DOWN) {
-      warpInColumn(+1);
-    } else if (mask & BM_ENTER) {
-      cutPosition();
-    } else if (mask & BM_ALT) {
-      viewMode_ = VM_CLONE;
-    } else if (mask & BM_NAV) {
-      toggleMute();
+    switch (newButton) {
+      case BM_LEFT:
+        warpToNeighbour(-1);
+        break;
+      case BM_RIGHT:
+        warpToNeighbour(+1);
+        break;
+      case BM_UP:
+        warpInColumn(-1);
+        break;
+      case BM_DOWN:
+        warpInColumn(+1);
+        break;
     }
-  } else if (mask & BM_ENTER) {
+  } else if (mask == BM_ENTER) {
     // ENTER Modifier
-    if (mask & BM_DOWN)
-      updateCursorValue(viewData_->chainCol_ == 0 ? -0x10 : -0x0C);
-    if (mask & BM_UP)
-      updateCursorValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
-    if (mask & BM_LEFT)
-      updateCursorValue(-1);
-    if (mask & BM_RIGHT)
-      updateCursorValue(+1);
-    if (mask & BM_ALT)
+    switch (newButton) {
+      case BM_EDIT:
+        cutPosition();
+        break;
+      case BM_DOWN:
+        updateCursorValue(viewData_->chainCol_ == 0 ? -0x10 : -0x0C);
+        break;
+      case BM_UP:
+        updateCursorValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
+        break;
+      case BM_LEFT:
+        updateCursorValue(-1);
+        break;
+      case BM_RIGHT:
+        updateCursorValue(+1);
+        break;
+    }
+  } else if (newButton == BM_ENTER) {
+    if (mask == BM_ALT) {
       pasteClipboard();
-    if (mask == BM_ENTER) {
+    } else if (mask == BM_NAV) {
+      switchSoloMode();
+    } else if (mask == 0) {
       pasteLastPhrase();
       if (viewData_->chainCol_ == 0)
         viewMode_ = VM_NEW;
-    } else if (mask & BM_NAV) {
-      switchSoloMode();
     }
-  } else if (mask & BM_NAV) {
+  } else if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
+    unMuteAll();
+  } else if (mask == BM_NAV) {
     // NAV Modifier
-    if (mask & BM_LEFT) {
-      Navigate(VT_SONG, vtRevealFromLeft);
-    } else if (mask & BM_RIGHT) {
-      unsigned char *data = viewData_->GetCurrentChainPointer();
-      if (*data != 0xFF) {
-        viewData_->currentPhrase_ = *data;
-        Navigate(VT_PHRASE, vtRevealFromRight);
-      }
-    } else if (mask & BM_PLAY) {
-      // We toggle full chain start only if we"re not in live mode
-      // or if the player ain't playing yet
-      player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
-    } else if (mask & BM_ALT) {
-      unMuteAll();
-    } else if (mask & BM_DOWN) {
-      auto *wizard = GeneratorWizardModal::Create(*this, viewData_->project_->GetInstrumentBank());
-      ChainStep *chain = viewData_->song_->chain_.steps_[viewData_->currentChain_];
-      uint8_t length = 0;
-      while (length < STEPS_PER_PHRASE && chain[length].phrase != EMPTY_CHAIN_VALUE) {
-        length++;
-      }
-      wizard->SetPhraseCount(length);
-      wizard->PresetKeyAndScale(viewData_->project_->GetScaleRoot(), viewData_->project_->GetScale());
-      DoModal(wizard, ModalViewCallback::create<&ChainView::GeneratorWizardCallback>());
+    switch (newButton) {
+      case BM_PLAY:
+        player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
+        break;
     }
-  } else {
+  } else if (mask == 0) {
     // NO modifier
-    if (mask & BM_DOWN)
-      updateCursor(0, 1);
-    if (mask & BM_UP)
-      updateCursor(0, -1);
-    if (mask & BM_LEFT)
-      updateCursor(-1, 0);
-    if (mask & BM_RIGHT)
-      updateCursor(1, 0);
-    if (mask & BM_PLAY) {
-      player->OnStartButton(PM_CHAIN, viewData_->songX_, false, viewData_->chainRow_);
+    switch (newButton) {
+      case BM_DOWN:
+        updateCursor(0, 1);
+        break;
+      case BM_UP:
+        updateCursor(0, -1);
+        break;
+      case BM_LEFT:
+        updateCursor(-1, 0);
+        break;
+      case BM_RIGHT:
+        updateCursor(1, 0);
+        break;
+      case BM_PLAY:
+        player->OnStartButton(PM_CHAIN, viewData_->songX_, false, viewData_->chainRow_);
+        break;
     }
-  }
-
-  if ((!(mask & BM_ENTER)) && updatingPhrase_) {
-    uint8_t p = viewData_->song_->chain_.steps_[viewData_->currentChain_][updateRow_].phrase;
-    viewData_->song_->phrase_.SetUsed(p);
-    updatingPhrase_ = false;
   }
 }
 
-void ChainView::processSelectionButtonMask(uint16_t mask) {
+void ChainView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  // Edit Modifier
-
-  if (mask & BM_EDIT) {
-    if (mask == BM_EDIT)
-      copySelection();
-    if (mask & BM_NAV)
-      toggleMute();
-    if (mask & BM_ALT)
-      extendSelection();
-  } else {
-
+  if (IsChord(newButton, mask, BM_EDIT)) {
+    copySelection();
+  } else if (IsPair(newButton, mask, BM_EDIT, BM_NAV)) {
+    toggleMute();
+  } else if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
+    extendSelection();
+  } else if (mask == BM_ENTER) {
     // Enter modifier
-
-    if (mask & BM_ENTER) {
-      if (mask & BM_DOWN)
+    switch (newButton) {
+      case BM_DOWN:
         updateSelectionValue(viewData_->chainCol_ == 0 ? -0x10 : -0x0C);
-      if (mask & BM_UP)
+        break;
+      case BM_UP:
         updateSelectionValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
-      if (mask & BM_LEFT)
+        break;
+      case BM_LEFT:
         updateSelectionValue(-0x01);
-      if (mask & BM_RIGHT)
+        break;
+      case BM_RIGHT:
         updateSelectionValue(0x01);
-
-      if (mask & BM_ALT) {
-        cutSelection();
-      }
-      if (mask & BM_NAV)
-        switchSoloMode();
-    } else {
-
-      // R Modifier
-
-      if (mask & BM_NAV) {
-
-        if (mask & BM_LEFT) {
-          Navigate(VT_SONG, vtRevealFromLeft);
-        }
-
-        if (mask & BM_RIGHT) {
-          unsigned char *data = viewData_->GetCurrentChainPointer();
-          if (*data != 0xFF) {
-            viewData_->currentPhrase_ = *data;
-            Navigate(VT_PHRASE, vtRevealFromRight);
-          }
-        }
-
-        if (mask & BM_PLAY) {
-          player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
-        }
-
-        if (mask & BM_ALT)
-          unMuteAll();
-
-      } else {
-
-        // No modifier
-
-        if (mask & BM_DOWN)
-          updateCursor(0, 1);
-        if (mask & BM_UP)
-          updateCursor(0, -1);
-        if (mask & BM_LEFT)
-          updateCursor(-1, 0);
-        if (mask & BM_RIGHT)
-          updateCursor(1, 0);
-
-        if (mask & BM_PLAY) {
-          player->OnStartButton(PM_CHAIN, viewData_->songX_, false, viewData_->chainRow_);
-        }
-      }
+        break;
+    }
+  } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
+    cutSelection();
+  } else if (IsChord(newButton, mask, BM_ENTER, BM_NAV)) {
+    switchSoloMode();
+  } else if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
+    unMuteAll();
+  } else if (mask == BM_NAV) {
+    switch (newButton) {
+      case BM_PLAY:
+        player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
+        break;
+    }
+  } else if (mask == 0) {
+    // No modifier
+    switch (newButton) {
+      case BM_DOWN:
+        updateCursor(0, 1);
+        break;
+      case BM_UP:
+        updateCursor(0, -1);
+        break;
+      case BM_LEFT:
+        updateCursor(-1, 0);
+        break;
+      case BM_RIGHT:
+        updateCursor(1, 0);
+        break;
+      case BM_PLAY:
+        player->OnStartButton(PM_CHAIN, viewData_->songX_, false, viewData_->chainRow_);
+        break;
     }
   }
 }
@@ -849,7 +878,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
   pos.x_ += 17;
 
-  SetColor(Theme::Song::preview(true));
+  SetColor(Theme::Song::preview(false));
   DrawString(pos.x_, pos.y_ - 1, "Nte In");
 
   // Display notes
