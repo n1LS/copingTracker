@@ -16,7 +16,7 @@
 // https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/PitchConstellations.svg/1280px-PitchConstellations.svg.png
 
 // todo: shorten names to 16 chars
-const char *scaleNames[numScales] = {"None (Chromatic)",
+const char *scaleNames[numScales] = {"Chromatic",
                                      "Acoustic",
                                      "Adonal malakh",
                                      "Aeolian mode (minor)",
