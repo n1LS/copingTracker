@@ -848,6 +848,39 @@ void PhraseView::ButtonUp(uint16_t button, uint16_t mask) {
   }
 }
 
+bool PhraseView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_LEFT:
+      Navigate(VT_CHAIN, vtRevealFromLeft);
+      return true;
+    case BM_RIGHT:
+      enterInstrumentUnderCursor();
+      return true;
+    case BM_DOWN:
+      {
+        // Go to table view
+        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
+        Token cmd1 = Token::enum_type(step.cmd1);
+        Token cmd2 = Token::enum_type(step.cmd2);
+        if (cmd1 == Token::InstrumentCommandTable) {
+          viewData_->currentTable_ = step.param1 & (TABLE_COUNT - 1);
+        } else if (cmd2 == Token::InstrumentCommandTable) {
+          viewData_->currentTable_ = step.param2 & (TABLE_COUNT - 1);
+        }
+
+        Navigate(VT_TABLE, vtRevealFromBottom);
+        return true;
+      }
+    case BM_UP:
+      // Go to groove view
+      stopAudition();
+
+      Navigate(VT_GROOVE, vtRevealFromTop);
+      return true;
+  }
+  return false;
+}
+
 void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
   const bool enterAlone = IsChord(newButton, mask, BM_ENTER);
 
@@ -1053,33 +1086,6 @@ void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
   } else if (mask == BM_NAV) {
     // NAV Modifier
     switch (newButton) {
-      case BM_LEFT:
-        Navigate(VT_CHAIN, vtRevealFromLeft);
-        break;
-      case BM_RIGHT:
-        enterInstrumentUnderCursor();
-        break;
-      case BM_DOWN:
-        {
-          // Go to table view
-          PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-          Token cmd1 = Token::enum_type(step.cmd1);
-          Token cmd2 = Token::enum_type(step.cmd2);
-          if (cmd1 == Token::InstrumentCommandTable) {
-            viewData_->currentTable_ = step.param1 & (TABLE_COUNT - 1);
-          } else if (cmd2 == Token::InstrumentCommandTable) {
-            viewData_->currentTable_ = step.param2 & (TABLE_COUNT - 1);
-          }
-
-          Navigate(VT_TABLE, vtRevealFromBottom);
-          break;
-        }
-      case BM_UP:
-        // Go to groove view
-        stopAudition();
-
-        Navigate(VT_GROOVE, vtRevealFromTop);
-        break;
       case BM_PLAY:
         player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
         break;
@@ -1138,20 +1144,6 @@ void PhraseView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     switchSoloMode();
   } else if (mask == BM_NAV) {
     switch (newButton) {
-      case BM_LEFT:
-        Navigate(VT_CHAIN, vtRevealFromLeft);
-        break;
-      case BM_RIGHT:
-        {
-          unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
-          if (*c != 0xFF) {
-            viewData_->currentInstrumentID_ = *c;
-          } else {
-            viewData_->currentInstrumentID_ = lastInstr_;
-          }
-          Navigate(VT_INSTRUMENT, vtRevealFromRight);
-          break;
-        }
       case BM_PLAY:
         player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
         break;

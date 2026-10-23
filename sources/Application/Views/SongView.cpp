@@ -528,6 +528,24 @@ void SongView::ButtonUp(uint16_t button, uint16_t mask) {
   };
 }
 
+bool SongView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_RIGHT:
+      enterChainUnderCursor();
+      return true;
+    case BM_UP:
+      switchTo(VT_PROJECT, vtRevealFromTop);
+      return true;
+    case BM_DOWN:
+      switchTo(VT_MIXER, vtRevealFromBottom);
+      return true;
+    case BM_LEFT:
+      toggleLoopState();
+      return true;
+  }
+  return false;
+}
+
 void SongView::ButtonDown(uint16_t newButton, uint16_t mask) {
 
   if (viewMode_ == VM_NEW) {
@@ -687,18 +705,6 @@ void SongView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
   }
   if (mask == BM_NAV) {
     switch (newButton) {
-      case BM_RIGHT:
-        enterChainUnderCursor();
-        break;
-      case BM_UP:
-        switchTo(VT_PROJECT, vtRevealFromTop);
-        break;
-      case BM_DOWN:
-        switchTo(VT_MIXER, vtRevealFromBottom);
-        break;
-      case BM_LEFT:
-        toggleLoopState();
-        break;
       case BM_PLAY:
         onStop();
         break;
@@ -772,15 +778,6 @@ void SongView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     unMuteAll();
   } else if (mask == BM_NAV) {
     switch (newButton) {
-      case BM_RIGHT:
-        enterChainUnderCursor();
-        break;
-      case BM_UP:
-        switchTo(VT_PROJECT, vtRevealFromTop);
-        break;
-      case BM_DOWN:
-        switchTo(VT_MIXER, vtRevealFromBottom);
-        break;
       case BM_PLAY:
         onStop();
         break;

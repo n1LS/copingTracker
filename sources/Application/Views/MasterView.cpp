@@ -93,11 +93,15 @@ void MasterView::OnFocus() {
   buildFields();
 }
 
-void MasterView::ButtonDown(uint16_t newButton, uint16_t mask) {
-  if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
+bool MasterView::navigationDown(uint16_t direction) {
+  if (direction == BM_LEFT) {
     Navigate(VT_PROJECT, vtCollapse);
-    return;
+    return true;
   }
+  return false;
+}
+
+void MasterView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (mask & BM_NAV || newButton == BM_NAV) {
     return;
   }

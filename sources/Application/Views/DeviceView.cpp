@@ -134,16 +134,22 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 DeviceView::~DeviceView() {
 }
 
+bool DeviceView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_DOWN:
+      Navigate(VT_PROJECT, vtRevealFromBottom);
+      return true;
+    case BM_RIGHT:
+      Navigate(VT_HELP, vtRevealFromRight);
+      return true;
+  }
+  return false;
+}
+
 void DeviceView::ButtonDown(uint16_t newButton, uint16_t mask) {
   FieldView::ButtonDown(newButton, mask);
 
-  if (mask == BM_NAV) {
-    if (newButton == BM_DOWN) {
-      Navigate(VT_PROJECT, vtRevealFromBottom);
-    } else if (newButton == BM_RIGHT) {
-      Navigate(VT_HELP, vtRevealFromRight);
-    }
-  } else if (IsChord(newButton, mask, BM_PLAY)) {
+  if (IsChord(newButton, mask, BM_PLAY)) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   };

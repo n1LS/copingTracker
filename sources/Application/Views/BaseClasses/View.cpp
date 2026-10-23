@@ -430,7 +430,9 @@ void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
     // checks if modal is done and if it is disposes of it:
     DismissModal();
   } else if (pressed) {
-    ButtonDown(button, mask);
+    if (!((button & BM_DIRECTIONAL) && mask == BM_NAV && navigationDown(button))) {
+      ButtonDown(button, mask);
+    }
   } else {
     ButtonUp(button, mask);
   }

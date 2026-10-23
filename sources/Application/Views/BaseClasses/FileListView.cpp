@@ -132,6 +132,14 @@ void FileListView::RefreshFileList() {
   isDirty_ = true;
 }
 
+bool FileListView::navigationDown(uint16_t direction) {
+  if (direction == BM_LEFT) {
+    HandleBackNavigation();
+    return true;
+  }
+  return false;
+}
+
 void FileListView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // Give subclass first chance to handle
   if (OnButtonOverride(newButton, mask, true)) {
@@ -179,8 +187,6 @@ void FileListView::ButtonDown(uint16_t newButton, uint16_t mask) {
     HandleDown(false);
   } else if (IsChord(newButton, mask, BM_DOWN, BM_EDIT)) {
     HandleDown(true); // EDIT+DOWN page down
-  } else if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
-    HandleBackNavigation();
   } else if (HasTabSelection()) {
     // Tab navigation (only when tab selection is enabled)
     if (IsChord(newButton, mask, BM_LEFT)) {

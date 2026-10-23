@@ -258,24 +258,26 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 ProjectView::~ProjectView() {
 }
 
+bool ProjectView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_DOWN:
+    case BM_UP:
+      // an unsaved rename blocks leaving up/down (CanExit shows a dialog)
+      if (CanExit()) {
+        Navigate(direction == BM_DOWN ? VT_SONG : VT_DEVICE, direction == BM_DOWN ? vtRevealFromBottom : vtRevealFromTop);
+      }
+      return true;
+    case BM_RIGHT:
+      Navigate(VT_GROOVE, vtRevealFromRight);
+      return true;
+  }
+  return false;
+}
+
 void ProjectView::ButtonDown(uint16_t newButton, uint16_t mask) {
   FieldView::ButtonDown(newButton, mask);
 
-  if (mask == BM_NAV) {
-    if (newButton == BM_DOWN || newButton == BM_UP) {
-      if (!CanExit()) {
-        return;
-      }
-    }
-
-    if (newButton == BM_DOWN) {
-      Navigate(VT_SONG, vtRevealFromBottom);
-    } else if (newButton == BM_RIGHT) {
-      Navigate(VT_GROOVE, vtRevealFromRight);
-    } else if (newButton == BM_UP) {
-      Navigate(VT_DEVICE, vtRevealFromTop);
-    }
-  } else if (IsChord(newButton, mask, BM_PLAY)) {
+  if (IsChord(newButton, mask, BM_PLAY)) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   }

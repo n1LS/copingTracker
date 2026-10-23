@@ -383,15 +383,18 @@ void SampleEditorView::ButtonUp(uint16_t button, uint16_t mask) {
   FieldView::ButtonUp(button, mask);
 }
 
+bool SampleEditorView::navigationDown(uint16_t direction) {
+  if (direction == BM_LEFT) {
+    navigateToView(SampleEditorView::sourceViewType_);
+    return true;
+  }
+  return false;
+}
+
 void SampleEditorView::ButtonDown(uint16_t newButton, uint16_t mask) {
   updateSelectedMarkerFromFocus();
 
   if (newButton == BM_NAV || (mask & BM_NAV)) {
-    if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
-      ViewType vt = SampleEditorView::sourceViewType_;
-      navigateToView(vt);
-      return;
-    }
     // For other NAV combinations, let parent handle it
     FieldView::ButtonDown(newButton, mask);
     return;

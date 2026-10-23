@@ -396,6 +396,15 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   };
 }
 
+bool ThemeView::navigationDown(uint16_t direction) {
+  if (direction == BM_LEFT) {
+    // Go back to Device view with NAV+LEFT
+    Navigate(VT_DEVICE, vtCollapse);
+    return true;
+  }
+  return false;
+}
+
 void ThemeView::ButtonDown(uint16_t newButton, uint16_t mask) {
   bool wasColorComponentFocus = isColorComponentFocus();
 
@@ -421,10 +430,7 @@ void ThemeView::ButtonDown(uint16_t newButton, uint16_t mask) {
 
   FieldView::ButtonDown(newButton, mask);
 
-  if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
-    // Go back to Device view with NAV+LEFT
-    Navigate(VT_DEVICE, vtCollapse);
-  } else if (IsChord(newButton, mask, BM_PLAY)) {
+  if (IsChord(newButton, mask, BM_PLAY)) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   }

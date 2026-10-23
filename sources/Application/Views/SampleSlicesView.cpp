@@ -123,14 +123,18 @@ void SampleSlicesView::ButtonUp(uint16_t button, uint16_t mask) {
   FieldView::ButtonUp(button, mask);
 }
 
+bool SampleSlicesView::navigationDown(uint16_t direction) {
+  if (direction == BM_LEFT) {
+    // Go back to sample browser NAV+LEFT
+    stopPreview();
+    Navigate(VT_INSTRUMENT, vtCollapse);
+    return true;
+  }
+  return false;
+}
+
 void SampleSlicesView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (newButton == BM_NAV || (mask & BM_NAV)) {
-    if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
-      // Go back to sample browser NAV+LEFT
-      stopPreview();
-      Navigate(VT_INSTRUMENT, vtCollapse);
-      return;
-    }
     // For other NAV combinations, let parent handle it
     FieldView::ButtonDown(newButton, mask);
     return;

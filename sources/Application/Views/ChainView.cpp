@@ -430,6 +430,21 @@ void ChainView::finalizePhraseUpdate() {
   }
 }
 
+bool ChainView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_LEFT:
+      Navigate(VT_SONG, vtRevealFromLeft);
+      return true;
+    case BM_RIGHT:
+      enterPhraseUnderCursor();
+      return true;
+    case BM_DOWN:
+      openGeneratorWizard();
+      return true;
+  }
+  return false;
+}
+
 void ChainView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (viewMode_ == VM_NEW) {
     if (IsChord(newButton, mask, BM_ENTER)) {
@@ -554,17 +569,8 @@ void ChainView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
   } else if (mask == BM_NAV) {
     // NAV Modifier
     switch (newButton) {
-      case BM_LEFT:
-        Navigate(VT_SONG, vtRevealFromLeft);
-        break;
-      case BM_RIGHT:
-        enterPhraseUnderCursor();
-        break;
       case BM_PLAY:
         player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
-        break;
-      case BM_DOWN:
-        openGeneratorWizard();
         break;
     }
   } else if (mask == 0) {
@@ -623,12 +629,6 @@ void ChainView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     unMuteAll();
   } else if (mask == BM_NAV) {
     switch (newButton) {
-      case BM_LEFT:
-        Navigate(VT_SONG, vtRevealFromLeft);
-        break;
-      case BM_RIGHT:
-        enterPhraseUnderCursor();
-        break;
       case BM_PLAY:
         player->OnStartButton(PM_CHAIN, viewData_->songX_, true, viewData_->chainRow_);
         break;

@@ -92,6 +92,7 @@ public:
 
   // Core view methods (implemented by base)
   void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  bool navigationDown(uint16_t direction) override;
   void ButtonUp(uint16_t button, uint16_t mask) override;
   void DrawView() override;
   void OnFocus() override;

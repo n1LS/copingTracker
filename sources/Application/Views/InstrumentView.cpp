@@ -363,6 +363,32 @@ void InstrumentView::ButtonUp(uint16_t button, uint16_t mask) {
   FieldView::ButtonUp(button, mask);
 }
 
+bool InstrumentView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_LEFT:
+      // remove listening when leaving this screen
+      getInstrument()->RemoveObserver(*this);
+      ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
+
+      Navigate(VT_PHRASE, vtRevealFromLeft);
+      return true;
+    case BM_DOWN:
+      {
+        // Go to table view
+        int i = viewData_->currentInstrumentID_;
+        InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
+        I_Instrument *instr = bank->GetInstrument(i);
+        int table = instr->GetTable();
+        if (table != VAR_OFF) {
+          viewData_->currentTable_ = table;
+        }
+        Navigate(VT_TABLE2, vtRevealFromBottom);
+        return true;
+      }
+  }
+  return false;
+}
+
 void InstrumentView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (AppWindow::GetInstance()->buttonDown(BM_NAV) != mapVisible_) {
     SetDirty(true);
@@ -487,27 +513,6 @@ void InstrumentView::ButtonDown(uint16_t newButton, uint16_t mask) {
 
   if (mask == BM_NAV) {
     // NAV Modifier
-    if (newButton == BM_LEFT) {
-      // remove listening when leaving this screen
-      getInstrument()->RemoveObserver(*this);
-      ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
-
-      Navigate(VT_PHRASE, vtRevealFromLeft);
-    }
-
-    if (newButton == BM_DOWN) {
-
-      // Go to table view
-      int i = viewData_->currentInstrumentID_;
-      InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-      I_Instrument *instr = bank->GetInstrument(i);
-      int table = instr->GetTable();
-      if (table != VAR_OFF) {
-        viewData_->currentTable_ = table;
-      }
-      Navigate(VT_TABLE2, vtRevealFromBottom);
-    }
-
     if (newButton == BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }

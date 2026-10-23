@@ -178,11 +178,15 @@ void ModulationView::OnFocus() {
   buildFields();
 }
 
-void ModulationView::ButtonDown(uint16_t newButton, uint16_t mask) {
-  if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
+bool ModulationView::navigationDown(uint16_t direction) {
+  if (direction == BM_LEFT) {
     Navigate(VT_INSTRUMENT, vtCollapse);
-    return;
+    return true;
   }
+  return false;
+}
+
+void ModulationView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (mask & BM_NAV || newButton == BM_NAV) {
     return;
   }

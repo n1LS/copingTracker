@@ -465,6 +465,24 @@ void TableView::pasteLast() {
   }
 }
 
+bool TableView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_UP:
+      Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT), vtRevealFromTop);
+      return true;
+    case BM_LEFT:
+      Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE, vtRevealFromLeft);
+      return true;
+    case BM_RIGHT:
+      if (viewType_ == VT_TABLE) {
+        Navigate(VT_TABLE2, vtRevealFromRight);
+        return true;
+      }
+      break;
+  }
+  return false;
+}
+
 void TableView::ButtonDown(uint16_t newButton, uint16_t mask) {
 
   if (viewMode_ == VM_SELECTION) {
@@ -561,17 +579,6 @@ void TableView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
   } else if (mask == BM_NAV) {
     // NAV Modifier
     switch (newButton) {
-      case BM_UP:
-        Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT), vtRevealFromTop);
-        break;
-      case BM_LEFT:
-        Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE, vtRevealFromLeft);
-        break;
-      case BM_RIGHT:
-        if (viewType_ == VT_TABLE) {
-          Navigate(VT_TABLE2, vtRevealFromRight);
-        }
-        break;
       case BM_PLAY:
         player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
         break;
@@ -609,9 +616,7 @@ void TableView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
   } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
     cutSelection();
   } else if (mask == BM_NAV) {
-    if (newButton == BM_UP) {
-      Navigate(VT_PHRASE, vtRevealFromTop);
-    } else if (newButton == BM_PLAY) {
+    if (newButton == BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
     }
   } else if (mask == 0) {

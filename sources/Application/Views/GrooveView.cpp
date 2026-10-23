@@ -78,6 +78,18 @@ void GrooveView::clearCursorValue() {
   isDirty_ = true;
 }
 
+bool GrooveView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_DOWN:
+      Navigate(VT_PHRASE, vtRevealFromBottom);
+      return true;
+    case BM_LEFT:
+      Navigate(VT_PROJECT, vtRevealFromLeft);
+      return true;
+  }
+  return false;
+}
+
 void GrooveView::ButtonDown(uint16_t newButton, uint16_t mask) {
 
   Player *player = Player::GetInstance();
@@ -123,12 +135,6 @@ void GrooveView::ButtonDown(uint16_t newButton, uint16_t mask) {
   } else if (mask == BM_NAV) {
     // NAV Modifier
     switch (newButton) {
-      case BM_DOWN:
-        Navigate(VT_PHRASE, vtRevealFromBottom);
-        break;
-      case BM_LEFT:
-        Navigate(VT_PROJECT, vtRevealFromLeft);
-        break;
       case BM_PLAY:
         player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
         break;

@@ -324,6 +324,11 @@ protected:
   virtual void ButtonDown(uint16_t newButton, uint16_t mask) = 0;
   // `button` was just released; `mask` is what is still held afterwards.
   virtual void ButtonUp(uint16_t button, uint16_t mask) {};
+  // NAV + a direction was pressed. Called before ButtonDown, independent of any
+  // view state. Return true if the press was handled (ButtonDown is skipped).
+  virtual bool navigationDown(uint16_t direction) {
+    return false;
+  }
 
   // `trigger` pressed while exactly `held` was down already (held may be 0).
   static inline bool IsChord(uint16_t newButton, uint16_t mask, uint16_t trigger, uint16_t held = 0) {

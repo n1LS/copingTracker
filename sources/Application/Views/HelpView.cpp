@@ -30,14 +30,17 @@ void HelpView::ButtonUp(uint16_t button, uint16_t mask) {
   }
 }
 
+bool HelpView::navigationDown(uint16_t direction) {
+  if (direction == BM_LEFT) {
+    Navigate(VT_DEVICE, vtRevealFromLeft);
+    return true;
+  }
+  return false;
+}
+
 void HelpView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (AppWindow::GetInstance()->buttonDown(BM_NAV) != mapShown_) {
     SetDirty(true);
-  }
-
-  if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
-    Navigate(VT_DEVICE, vtRevealFromLeft);
-    return;
   }
 
   if (newButton == BM_UP || newButton == BM_DOWN) {

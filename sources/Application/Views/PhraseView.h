@@ -45,6 +45,7 @@ public:
   ~PhraseView();
   void Reset();
   virtual void ButtonDown(uint16_t newButton, uint16_t mask);
+  bool navigationDown(uint16_t direction) override;
   virtual void ButtonUp(uint16_t button, uint16_t mask);
   virtual void DrawView();
   void DrawEditingValue();

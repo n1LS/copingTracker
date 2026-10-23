@@ -129,6 +129,18 @@ void MixerView::ButtonUp(uint16_t button, uint16_t mask) {
   SetDirty(true);
 }
 
+bool MixerView::navigationDown(uint16_t direction) {
+  switch (direction) {
+    case BM_UP:
+      Navigate(VT_SONG, vtRevealFromTop);
+      return true;
+    case BM_RIGHT:
+      Navigate(VT_TABLE, vtRevealFromRight);
+      return true;
+  }
+  return false;
+}
+
 void MixerView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // Ignore up/down arrow keys when pressed by themselves in MixerView
   // We only want left/right to navigate between channels
@@ -142,13 +154,6 @@ void MixerView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // Handle playback specific actions
   if (IsChord(newButton, mask, BM_PLAY)) {
     togglePlay();
-  }
-
-  // NAV navigation
-  if (IsChord(newButton, mask, BM_UP, BM_NAV)) {
-    Navigate(VT_SONG, vtRevealFromTop);
-  } else if (IsChord(newButton, mask, BM_RIGHT, BM_NAV)) {
-    Navigate(VT_TABLE, vtRevealFromRight);
   }
 
   if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
