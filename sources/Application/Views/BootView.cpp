@@ -31,11 +31,7 @@ void BootView::Reset() {
   wrongCount_ = animationSize_;
 }
 
-void BootView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    return;
-  }
-
+void BootView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // Don't respond to button input while a project load is in progress
   if (picoTrackerProjectLoader::IsLoadInProgress()) {
     return;

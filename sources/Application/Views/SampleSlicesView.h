@@ -32,7 +32,8 @@ public:
   ~SampleSlicesView() override;
   void Reset();
 
-  void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  void ButtonUp(uint16_t button, uint16_t mask) override;
   void DrawView() override;
   void OnPlayerUpdate(PlayerEventType, unsigned int) override {};
   void OnFocus() override;

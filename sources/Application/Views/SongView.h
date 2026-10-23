@@ -23,7 +23,8 @@ public:
   void Reset();
 
   // View implementation
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask);
+  virtual void ButtonUp(uint16_t button, uint16_t mask);
   virtual void DrawView();
   void DrawLoopMarker();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
@@ -31,8 +32,10 @@ public:
   virtual void AnimationUpdate();
 
 protected:
-  void processNormalButtonMask(unsigned int mask);
-  void processSelectionButtonMask(unsigned int mask);
+  void processNormalButtonMask(uint16_t newButton, uint16_t mask);
+  void processSelectionButtonMask(uint16_t newButton, uint16_t mask);
+  void switchTo(ViewType vt, ViewTransition transition);
+  void enterChainUnderCursor();
 
   void extendSelection();
   void updateChain(int offset);

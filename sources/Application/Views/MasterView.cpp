@@ -93,22 +93,18 @@ void MasterView::OnFocus() {
   buildFields();
 }
 
-void MasterView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    FieldView::ProcessButtonMask(mask, pressed);
+void MasterView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
+    Navigate(VT_PROJECT, vtCollapse);
+    return;
+  }
+  if (mask & BM_NAV || newButton == BM_NAV) {
     return;
   }
 
-  if (mask & BM_NAV) {
-    if (mask & BM_LEFT) {
-      Navigate(VT_PROJECT, vtCollapse);
-    }
-    return;
-  }
+  FieldView::ButtonDown(newButton, mask);
 
-  FieldView::ProcessButtonMask(mask, pressed);
-
-  if (mask & BM_PLAY) {
+  if (IsChord(newButton, mask, BM_PLAY)) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   }

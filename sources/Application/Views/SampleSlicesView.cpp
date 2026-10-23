@@ -114,41 +114,40 @@ void SampleSlicesView::OnFocus() {
   saveState();
 }
 
-void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    if (playKeyHeld_ && !(mask & BM_PLAY)) {
-      playKeyHeld_ = false;
-      stopPreview();
-      graphField_.RequestFullRedraw();
-    }
-    FieldView::ProcessButtonMask(mask, pressed);
-    return;
+void SampleSlicesView::ButtonUp(uint16_t button, uint16_t mask) {
+  if (playKeyHeld_ && button == BM_PLAY) {
+    playKeyHeld_ = false;
+    stopPreview();
+    graphField_.RequestFullRedraw();
   }
+  FieldView::ButtonUp(button, mask);
+}
 
-  if (mask & BM_NAV) {
-    if (mask & BM_LEFT) {
+void SampleSlicesView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  if (newButton == BM_NAV || (mask & BM_NAV)) {
+    if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
       // Go back to sample browser NAV+LEFT
       stopPreview();
       Navigate(VT_INSTRUMENT, vtCollapse);
       return;
     }
     // For other NAV combinations, let parent handle it
-    FieldView::ProcessButtonMask(mask, pressed);
+    FieldView::ButtonDown(newButton, mask);
     return;
   }
 
-  if (mask & BM_EDIT) {
-    if (mask & BM_UP) {
+  if (mask == BM_EDIT) {
+    if (newButton == BM_UP) {
       adjustZoom(+1);
       return;
     }
 
-    if (mask & BM_DOWN) {
+    if (newButton == BM_DOWN) {
       adjustZoom(-1);
       return;
     }
 
-    if (mask & (BM_LEFT | BM_RIGHT)) {
+    if (newButton & (BM_LEFT | BM_RIGHT)) {
       uint32_t viewStart = graphField_.ViewStart();
       uint32_t viewEnd = graphField_.ViewEnd();
       uint32_t viewSpan = (viewEnd > viewStart) ? (viewEnd - viewStart) : 0;
@@ -162,14 +161,14 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
       if (viewSpan > 0) {
         int32_t delta = 0;
 
-        if (mask & (BM_LEFT | BM_RIGHT)) {
+        {
           // We allow single sample movement at max zoom level
           if (graphField_.ZoomLevel() >= graphField_.MaxZoomLevel()) {
             delta = 1;
           } else {
             delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 64));
           }
-          if (mask & BM_LEFT) {
+          if (newButton == BM_LEFT) {
             delta = -delta;
           }
         }
@@ -194,7 +193,7 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
 
-  if (mask & BM_PLAY) {
+  if (IsChord(newButton, mask, BM_PLAY)) {
     if (!playKeyHeld_) {
       startPreview();
       playKeyHeld_ = true;
@@ -203,7 +202,7 @@ void SampleSlicesView::ProcessButtonMask(uint16_t mask, bool pressed) {
     return;
   }
 
-  FieldView::ProcessButtonMask(mask, pressed);
+  FieldView::ButtonDown(newButton, mask);
 }
 
 void SampleSlicesView::DrawView() {

@@ -25,18 +25,19 @@ ListView::~ListView() {
 void ListView::OnFocus() {
 }
 
-void ListView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
+void ListView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  if (mask != 0 && mask != BM_ALT) {
     return;
   }
+  bool page = (mask == BM_ALT);
 
-  if (mask & BM_UP) {
-    HandleUp(mask & BM_ALT);
-  } else if (mask & BM_DOWN) {
-    HandleDown(mask & BM_ALT);
-  } else if (mask & BM_ENTER) {
+  if (newButton == BM_UP) {
+    HandleUp(page);
+  } else if (newButton == BM_DOWN) {
+    HandleDown(page);
+  } else if (!page && newButton == BM_ENTER) {
     HandleEnter();
-  } else if (mask & BM_EDIT) {
+  } else if (!page && newButton == BM_EDIT) {
     HandleEdit();
   }
 }

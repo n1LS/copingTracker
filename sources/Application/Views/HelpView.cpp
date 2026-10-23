@@ -24,34 +24,37 @@ HelpView::HelpView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
 HelpView::~HelpView() {
 }
 
-void HelpView::ProcessButtonMask(uint16_t mask, bool pressed) {
+void HelpView::ButtonUp(uint16_t button, uint16_t mask) {
+  if (AppWindow::GetInstance()->buttonDown(BM_NAV) != mapShown_) {
+    SetDirty(true);
+  }
+}
+
+void HelpView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (AppWindow::GetInstance()->buttonDown(BM_NAV) != mapShown_) {
     SetDirty(true);
   }
 
-  if (!pressed) {
+  if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
+    Navigate(VT_DEVICE, vtRevealFromLeft);
     return;
   }
 
-  if (mask & BM_NAV) {
-    if (mask & BM_LEFT) {
-      Navigate(VT_DEVICE, vtRevealFromLeft);
-    }
-  } else {
-    if (mask & (BM_UP | BM_DOWN)) {
-      // scrolling
-      int delta = (mask & BM_UP) ? -1 : 1;
-      delta *= (mask & BM_ALT) ? pageSize : 1;
+  if (newButton == BM_UP || newButton == BM_DOWN) {
+    // scrolling, ALT pages
+    if (mask == 0 || mask == BM_ALT) {
+      int delta = (newButton == BM_UP) ? -1 : 1;
+      delta *= (mask == BM_ALT) ? pageSize : 1;
       scrollBy(delta);
-      return;
     }
+    return;
+  }
 
-    // no modifiers
-    if (mask == BM_LEFT) {
-      setTab(selectedTab_ - 1);
-    } else if (mask == BM_RIGHT) {
-      setTab(selectedTab_ + 1);
-    }
+  // no modifiers
+  if (IsChord(newButton, mask, BM_LEFT)) {
+    setTab(selectedTab_ - 1);
+  } else if (IsChord(newButton, mask, BM_RIGHT)) {
+    setTab(selectedTab_ + 1);
   }
 }
 

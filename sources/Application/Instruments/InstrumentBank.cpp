@@ -54,7 +54,7 @@ void InstrumentBank::Reset() {
 }
 
 I_Instrument *InstrumentBank::GetInstrument(int i) {
-  return instruments_[i];
+  return (i != NO_INSTRUMENT) ? instruments_[i] : nullptr;
 }
 
 void InstrumentBank::SaveContent(tinyxml2::XMLPrinter *printer) {

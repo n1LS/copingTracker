@@ -263,7 +263,10 @@ public:
 
   void Clear();
 
-  void ProcessButton(uint16_t mask, bool pressed);
+  // Entry point for button events. `button` is the single button that changed,
+  // `mask` holds the OTHER buttons held at that moment (it never contains
+  // `button`). On release `mask` is what remains held after the release.
+  void ProcessButton(uint16_t button, uint16_t mask, bool pressed);
 
   void Redraw();
 
@@ -316,7 +319,20 @@ public:
   virtual const GUIRect GetFocusRect();
 
 protected:
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed) = 0;
+  // `newButton` was just pressed (or auto-repeated) while exactly `mask` was
+  // already held. Views match chords as (newButton, mask) pairs, see IsChord().
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask) = 0;
+  // `button` was just released; `mask` is what is still held afterwards.
+  virtual void ButtonUp(uint16_t button, uint16_t mask) {};
+
+  // `trigger` pressed while exactly `held` was down already (held may be 0).
+  static inline bool IsChord(uint16_t newButton, uint16_t mask, uint16_t trigger, uint16_t held = 0) {
+    return newButton == trigger && mask == held;
+  }
+  // Two-button chord made of non trigger buttons (ALT/NAV/EDIT): either may be last.
+  static inline bool IsPair(uint16_t newButton, uint16_t mask, uint16_t a, uint16_t b) {
+    return (newButton == a && mask == b) || (newButton == b && mask == a);
+  }
 
   void DrawTitle(const char *format, ...);
 

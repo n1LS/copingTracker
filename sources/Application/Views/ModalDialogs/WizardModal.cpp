@@ -210,58 +210,50 @@ void WizardModal::activate() {
   }
 }
 
-void WizardModal::ProcessButtonMask(uint16_t mask, bool pressed) {
-  const uint16_t previous = lastMask_;
-  lastMask_ = mask;
+void WizardModal::ButtonUp(uint16_t button, uint16_t mask) {
+  // actions fire on ENTER release, so the release doesn't leak into
+  // whatever the modal hands control to next
+  if (enterDown_ && button == BM_ENTER) {
+    enterDown_ = false;
+    isDirty_ = true;
 
-  if (!pressed) {
-    // actions fire on ENTER release, so the release doesn't leak into
-    // whatever the modal hands control to next
-    if (enterDown_ && (previous & ~mask) == BM_ENTER) {
-      enterDown_ = false;
-      isDirty_ = true;
-
-      if (valueChanged_) {
-        valueChanged_ = false; // ENTER was only a modifier for editing
-      } else {
-        activate();
-      }
-    } else if (enterDown_ && !(mask & BM_ENTER)) {
-      enterDown_ = false;
-      valueChanged_ = false;
-      isDirty_ = true;
+    if (valueChanged_) {
+      valueChanged_ = false; // ENTER was only a modifier for editing
+    } else {
+      activate();
     }
-    return;
   }
+}
 
+void WizardModal::ButtonDown(uint16_t newButton, uint16_t mask) {
   // rows 0..RowCount()-1 are the fields, RowCount() is the button row
   const uint8_t focusCount = RowCount(step_) + 1;
 
-  if (mask == BM_ENTER) {
+  if (IsChord(newButton, mask, BM_ENTER)) {
     enterDown_ = true;
   }
 
   if (enterDown_) {
-    if ((mask & BM_DIRECTIONAL) && !isButtonRow()) {
+    if ((newButton & BM_DIRECTIONAL) && mask == BM_ENTER && !isButtonRow()) {
       int delta;
-      if (mask & BM_RIGHT) {
+      if (newButton == BM_RIGHT) {
         delta = 1;
-      } else if (mask & BM_LEFT) {
+      } else if (newButton == BM_LEFT) {
         delta = -1;
       } else {
-        delta = (mask & BM_DOWN) ? -VALUE_STEP : VALUE_STEP;
+        delta = (newButton == BM_DOWN) ? -VALUE_STEP : VALUE_STEP;
       }
       OnValueChange(step_, row_, delta);
       valueChanged_ = true;
     }
-  } else {
-    if (mask == BM_UP || mask == BM_DOWN) {
-      row_ = (row_ + focusCount + (mask == BM_UP ? -1 : 1)) % focusCount;
+  } else if (mask == 0) {
+    if (newButton == BM_UP || newButton == BM_DOWN) {
+      row_ = (row_ + focusCount + (newButton == BM_UP ? -1 : 1)) % focusCount;
       if (!isButtonRow()) {
         OnRowFocused(step_, row_);
       }
       updateScroll();
-    } else if (isButtonRow() && GetStepInfo(step_).rightLabel && (mask & (BM_LEFT | BM_RIGHT))) {
+    } else if (isButtonRow() && GetStepInfo(step_).rightLabel && (newButton == BM_LEFT || newButton == BM_RIGHT)) {
       button_ = (button_ == BTN_LEFT) ? BTN_RIGHT : BTN_LEFT;
     }
   }

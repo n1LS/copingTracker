@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Config/AudioConstants.h"
+#include "config/AudioConstants.h"
 
 #define Drum_Name_0 "BassDrum"
 #define Drum_Name_1 "Rim shot"

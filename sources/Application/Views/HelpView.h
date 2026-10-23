@@ -16,7 +16,8 @@ class HelpView : public ScreenView {
 public:
   HelpView(GUIWindow &w, ViewData *viewData);
   ~HelpView();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  virtual void ButtonUp(uint16_t button, uint16_t mask) override;
   virtual void DrawView() override;
   virtual void OnFocus();
   virtual void AnimationUpdate() override;

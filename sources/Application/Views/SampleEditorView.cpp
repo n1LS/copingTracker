@@ -360,13 +360,12 @@ void SampleEditorView::addAllFields() {
   fieldList_.insert(fieldList_.end(), &graphField_);
 }
 
-void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
+void SampleEditorView::ButtonUp(uint16_t button, uint16_t mask) {
   updateSelectedMarkerFromFocus();
 
-  // Check for key release events
-  if (!pressed) {
+  {
     // Check if play key was released (exactly like SampleImportView approach)
-    if (playKeyHeld_ && !(mask & BM_PLAY)) {
+    if (playKeyHeld_ && button == BM_PLAY) {
       // Play key no longer pressed so should stop playback
       playKeyHeld_ = false;
 
@@ -380,22 +379,23 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
 
-  // If not pressed, let parent handle it and return
-  if (!pressed) {
-    FieldView::ProcessButtonMask(mask, pressed);
-    return;
-  }
+  // let parent handle it
+  FieldView::ButtonUp(button, mask);
+}
 
-  if (mask & BM_NAV) {
-    if (mask & BM_LEFT) {
+void SampleEditorView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  updateSelectedMarkerFromFocus();
+
+  if (newButton == BM_NAV || (mask & BM_NAV)) {
+    if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
       ViewType vt = SampleEditorView::sourceViewType_;
       navigateToView(vt);
       return;
     }
     // For other NAV combinations, let parent handle it
-    FieldView::ProcessButtonMask(mask, pressed);
+    FieldView::ButtonDown(newButton, mask);
     return;
-  } else if (mask & BM_PLAY) {
+  } else if (IsChord(newButton, mask, BM_PLAY)) {
     // Set flag to track that play key is being held down (like in SampleImportView)
     playKeyHeld_ = true;
 
@@ -442,14 +442,14 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   bool graphFocused = (GetFocus() == &graphField_);
-  if (graphFocused && (mask & BM_EDIT)) {
-    if (mask & BM_LEFT) {
+  if (graphFocused && mask == BM_EDIT) {
+    if (newButton == BM_LEFT) {
       selectedMarker_ = MarkerStart;
       isDirty_ = true;
       ((AppWindow &)w_).SetDirty();
       return;
     }
-    if (mask & BM_RIGHT) {
+    if (newButton == BM_RIGHT) {
       selectedMarker_ = MarkerEnd;
       isDirty_ = true;
       ((AppWindow &)w_).SetDirty();
@@ -457,7 +457,7 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
   }
 
-  if (graphFocused && (mask & BM_ENTER)) {
+  if (graphFocused && mask == BM_ENTER && (newButton & BM_DIRECTIONAL)) {
     uint32_t viewStart = graphField_.ViewStart();
     uint32_t viewEnd = graphField_.ViewEnd();
     uint32_t viewSpan = (viewEnd > viewStart) ? (viewEnd - viewStart) : 0;
@@ -469,14 +469,14 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
     }
     if (viewSpan > 0) {
       int32_t delta = 0;
-      if (mask & (BM_LEFT | BM_RIGHT)) {
+      if (newButton & (BM_LEFT | BM_RIGHT)) {
         delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 64));
-        if (mask & BM_LEFT) {
+        if (newButton == BM_LEFT) {
           delta = -delta;
         }
-      } else if (mask & (BM_UP | BM_DOWN)) {
+      } else if (newButton & (BM_UP | BM_DOWN)) {
         delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 16));
-        if (mask & BM_DOWN) {
+        if (newButton == BM_DOWN) {
           delta = -delta;
         }
       }
@@ -521,22 +521,22 @@ void SampleEditorView::ProcessButtonMask(uint16_t mask, bool pressed) {
   }
 
   // We allow zooming from any place of the screen
-  if ((mask & BM_EDIT) && (mask & BM_UP)) {
+  if (IsChord(newButton, mask, BM_UP, BM_EDIT)) {
     adjustZoom(1);
     return;
   }
-  if ((mask & BM_EDIT) && (mask & BM_DOWN)) {
+  if (IsChord(newButton, mask, BM_DOWN, BM_EDIT)) {
     adjustZoom(-1);
     return;
   }
 
   // For all other button presses, let the parent class handle navigation
-  FieldView::ProcessButtonMask(mask, pressed);
+  FieldView::ButtonDown(newButton, mask);
   updateSelectedMarkerFromFocus();
 
   // EDIT Modifier
-  if (mask & BM_EDIT) {
-    if (mask & BM_ENTER) {
+  if (IsPair(newButton, mask, BM_EDIT, BM_ENTER)) {
+    {
       UIField *focus = GetFocus();
       for (auto &field : hexVarField_) {
         if (&field == focus && field.GetVariableID() == Token::VarSampleEditEnd) {

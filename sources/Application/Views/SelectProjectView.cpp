@@ -82,14 +82,18 @@ static void DeleteProjectCallback(View &v, ModalView &dialog) {
     PersistencyService *ps = PersistencyService::GetInstance();
     char buffer[MAX_PROJECT_NAME_LENGTH + 1];
     view.getHighlightedProjectName(buffer);
-    if (!ps->DeleteProject(buffer)) {
+    const bool deleted = ps->DeleteProject(buffer);
+
+    // DeleteProject walks into the project dir (and on failure may leave us
+    // there) and reuses the shared file list, so go back to the projects dir
+    // and rebuild the list whether or not the delete worked
+    FileSystem::GetInstance()->chdir(PROJECTS_DIR);
+    view.RefreshFileList();
+
+    if (!deleted) {
       MessageBox *mb = MessageBox::Create(view, "Delete", "Project could not be deleted", MBBF_OK);
       view.DoModal(mb);
-      return;
     }
-
-    // reload list
-    view.RefreshFileList();
   }
 }
 

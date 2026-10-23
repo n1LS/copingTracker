@@ -211,11 +211,11 @@ void SampleImportView::DrawButtons(int selectedButton) {
   }
 }
 
-bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
-  // Check for key release events
+bool SampleImportView::OnButtonOverride(uint16_t button, uint16_t mask, bool pressed) {
+  // Key release events
   if (!pressed) {
     // Open selected directory only when ENTER is released
-    if (enterKeyHeld_ && !(mask & BM_ENTER)) {
+    if (enterKeyHeld_ && button == BM_ENTER) {
       enterKeyHeld_ = false;
       if (pendingDirEnterOnRelease_ && !IsEmpty()) {
         unsigned fileIndex = MemoryPool::FileList()[GetCurrentIndex()];
@@ -234,8 +234,8 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       return true;
     }
 
-    // Check if play key was released
-    if (playKeyHeld_ && !(mask & BM_PLAY)) {
+    // Play key released
+    if (playKeyHeld_ && button == BM_PLAY) {
       playKeyHeld_ = false;
       if (Player::GetInstance()->IsPlaying()) {
         Player::GetInstance()->StopStreaming();
@@ -243,120 +243,126 @@ bool SampleImportView::OnButtonOverride(uint16_t mask, bool pressed) {
       return true;
     }
 
-    // Check if edit key was released
-    if (editKeyHeld_ && !(mask & BM_EDIT)) {
+    // Edit key released
+    if (editKeyHeld_ && button == BM_EDIT) {
       editKeyHeld_ = false;
       isDirty_ = true; // Mark view as dirty to force redraw
       return true;
     }
+    return false;
   }
 
-  // Handle key press events
-  if (pressed) {
-    auto fs = GetFileSystem();
-    const bool hasFiles = !IsEmpty();
+  // Key press events
+  auto fs = GetFileSystem();
+  const bool hasFiles = !IsEmpty();
 
-    // EDIT+LEFT: go to parent directory
-    if (mask == (BM_EDIT | BM_LEFT) && !AtLocalRoot()) {
-      NavigateToParent();
-      isDirty_ = true;
-      return true;
+  // EDIT+LEFT: go to parent directory
+  if (IsChord(button, mask, BM_LEFT, BM_EDIT) && !AtLocalRoot()) {
+    NavigateToParent();
+    isDirty_ = true;
+    return true;
+  }
+
+  if (button == BM_EDIT) {
+    editKeyHeld_ = true;
+  }
+
+  if (button == BM_PLAY) {
+    if (!hasFiles) {
+      return false;
     }
+    unsigned fileIndex = MemoryPool::FileList()[GetCurrentIndex()];
+    char name[PFILENAME_SIZE];
+    fs->getFileName(fileIndex, name, PFILENAME_SIZE);
 
-    if (mask & BM_EDIT) {
-      editKeyHeld_ = true;
-    }
-
-    if (mask & BM_PLAY) {
-      if (!hasFiles) {
-        return false;
-      }
-      unsigned fileIndex = MemoryPool::FileList()[GetCurrentIndex()];
-      char name[PFILENAME_SIZE];
-      fs->getFileName(fileIndex, name, PFILENAME_SIZE);
-
-      // Set flag to track that play key is being held
+    if (mask == BM_ALT) {
+      Trace::Log("IMPORT", "SHIFT play - import");
       playKeyHeld_ = true;
+      import();
+    } else if (mask == 0) {
+      Trace::Log("IMPORT", "play key pressed - start preview");
+      playKeyHeld_ = true;
+      preview(name);
+    }
+    return true;
+  }
 
-      if (mask & BM_ALT) {
-        Trace::Log("IMPORT", "SHIFT play - import");
-        import();
-      } else if (mask == BM_PLAY) {
-        Trace::Log("IMPORT", "play key pressed - start preview");
-        preview(name);
-      }
+  if (IsPair(button, mask, BM_NAV, BM_EDIT)) {
+    // toggle from sdcard "import sample" & project pool listing
+    if (inProjectSampleDir_) {
+      inProjectSampleDir_ = false;
+      viewData_->importViewShowProjectPool = false;
+      NavigateToDirectory(SAMPLES_LIB_DIR);
+    } else {
+      inProjectSampleDir_ = true;
+      viewData_->importViewShowProjectPool = true;
+      NavigateToDirectory(PROJECT_SAMPLES_DIR);
+    }
+    selectedButton_ = 0;
+    return true;
+  }
+
+  if (button == BM_ENTER) {
+    if (!enterKeyHeld_) {
+      enterKeyHeld_ = true;
+      pendingDirEnterOnRelease_ = true;
+    }
+    if (mask != 0) {
+      // chord: no directory enter on release, no action
+      pendingDirEnterOnRelease_ = false;
       return true;
     }
 
-    if (mask & BM_NAV && mask & BM_EDIT) {
-      // toggle from sdcard "import sample" & project pool listing
-      if (inProjectSampleDir_) {
-        inProjectSampleDir_ = false;
-        viewData_->importViewShowProjectPool = false;
-        NavigateToDirectory(SAMPLES_LIB_DIR);
-      } else {
-        inProjectSampleDir_ = true;
-        viewData_->importViewShowProjectPool = true;
-        NavigateToDirectory(PROJECT_SAMPLES_DIR);
-      }
-      selectedButton_ = 0;
-      return true;
-    }
-
-    if (mask & BM_ENTER) {
-      if (!enterKeyHeld_) {
-        enterKeyHeld_ = true;
-        pendingDirEnterOnRelease_ = true;
-      }
-      if (mask & (BM_LEFT | BM_RIGHT | BM_UP | BM_DOWN)) {
-        pendingDirEnterOnRelease_ = false;
-      }
-
-      if (inProjectSampleDir_) {
-        if (!hasFiles) {
-          pendingDirEnterOnRelease_ = false;
-          return false;
-        }
-        if (selectedButton_ == 0) { // Edit
-          unsigned fileIndex = MemoryPool::FileList()[GetCurrentIndex()];
-          char name[PFILENAME_SIZE];
-          fs->getFileName(fileIndex, name, PFILENAME_SIZE);
-          showSampleEditor(name, true);
-        } else if (selectedButton_ == 1) { // Remove
-          remove();
-        }
-        return true;
-      }
-
+    if (inProjectSampleDir_) {
       if (!hasFiles) {
         pendingDirEnterOnRelease_ = false;
         return false;
       }
-      unsigned fileIndex = MemoryPool::FileList()[GetCurrentIndex()];
-      // we can't import or edit dirs!
-      if (fs->getFileType(fileIndex) != PFT_DIR) {
-        if (selectedButton_ == 0) { // Import
-          import();
-        } else if (selectedButton_ == 1) { // Edit
-          char name[PFILENAME_SIZE];
-          fs->getFileName(fileIndex, name, PFILENAME_SIZE);
-          showSampleEditor(name, false);
-        }
+      if (selectedButton_ == 0) { // Edit
+        unsigned fileIndex = MemoryPool::FileList()[GetCurrentIndex()];
+        char name[PFILENAME_SIZE];
+        fs->getFileName(fileIndex, name, PFILENAME_SIZE);
+        showSampleEditor(name, true);
+      } else if (selectedButton_ == 1) { // Remove
+        remove();
       }
       return true;
     }
 
-    // handle changing selected "bottom button"
-    if ((mask & BM_LEFT || mask & BM_RIGHT) && !(mask & BM_NAV)) {
-      if (inProjectSampleDir_ && IsEmpty()) {
-        return false;
-      }
-      uint8_t buttonCount = (uint8_t)(inProjectSampleDir_ ? 2 : 2);
-      int direction = mask & BM_LEFT ? -1 : 1;
-      selectedButton_ = (selectedButton_ + buttonCount + direction) % buttonCount;
-      isDirty_ = true;
-      return true;
+    if (!hasFiles) {
+      pendingDirEnterOnRelease_ = false;
+      return false;
     }
+    unsigned fileIndex = MemoryPool::FileList()[GetCurrentIndex()];
+    // we can't import or edit dirs!
+    if (fs->getFileType(fileIndex) != PFT_DIR) {
+      if (selectedButton_ == 0) { // Import
+        import();
+      } else if (selectedButton_ == 1) { // Edit
+        char name[PFILENAME_SIZE];
+        fs->getFileName(fileIndex, name, PFILENAME_SIZE);
+        showSampleEditor(name, false);
+      }
+    }
+    return true;
+  }
+
+  // A button pressed while ENTER is held consumes the pending directory enter
+  if (mask == BM_ENTER) {
+    pendingDirEnterOnRelease_ = false;
+    return true;
+  }
+
+  // handle changing selected "bottom button"
+  if ((button == BM_LEFT || button == BM_RIGHT) && mask == 0) {
+    if (inProjectSampleDir_ && IsEmpty()) {
+      return false;
+    }
+    uint8_t buttonCount = (uint8_t)(inProjectSampleDir_ ? 2 : 2);
+    int direction = button == BM_LEFT ? -1 : 1;
+    selectedButton_ = (selectedButton_ + buttonCount + direction) % buttonCount;
+    isDirty_ = true;
+    return true;
   }
 
   return false;

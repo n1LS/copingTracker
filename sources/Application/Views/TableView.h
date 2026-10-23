@@ -34,7 +34,7 @@ public:
   TableView(GUIWindow &w, ViewData *viewData);
   ~TableView();
   void Reset();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask);
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
@@ -42,8 +42,8 @@ public:
   void setCurrentlySelectedCommand(Token command);
 
 protected:
-  void processNormalButtonMask(uint16_t mask);
-  void processSelectionButtonMask(uint16_t mask);
+  void processNormalButtonMask(uint16_t newButton, uint16_t mask);
+  void processSelectionButtonMask(uint16_t newButton, uint16_t mask);
 
   void cutPosition();
   void pasteLast();

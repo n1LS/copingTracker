@@ -21,7 +21,8 @@ public:
   MixerView(GUIWindow &w, ViewData *viewData);
   ~MixerView();
   void Reset();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask);
+  virtual void ButtonUp(uint16_t button, uint16_t mask);
   virtual void DrawView();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
@@ -29,8 +30,6 @@ public:
   virtual void SetFocus(UIField *field); // Override to keep songX_ in sync
 
 protected:
-  void processNormalButtonMask(unsigned int mask);
-  void processSelectionButtonMask(unsigned int mask);
   void onStart() {};
   void onStop() {};
   void updateCursor(int dx, int dy);

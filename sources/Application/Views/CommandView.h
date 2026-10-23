@@ -18,7 +18,8 @@ public:
   virtual void Destroy() override;
   virtual ~CommandView();
 
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed);
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask);
+  virtual void ButtonUp(uint16_t button, uint16_t mask);
   virtual void DrawView();
   virtual void OnFocus();
 

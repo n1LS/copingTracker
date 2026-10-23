@@ -17,7 +17,6 @@
 
 FieldView::FieldView(GUIWindow &w, ViewData *data) : ScreenView(w, data) {
   focus_ = 0;
-  lastMask_ = 0;
 }
 
 // Applies the on screen keyboard's result back onto the field that opened it.
@@ -106,87 +105,73 @@ void FieldView::Redraw() {
   }
 }
 
-void FieldView::ProcessButtonMask(uint16_t mask, bool pressed) {
+void FieldView::ensureFocus() {
   if (focus_ == nullptr) {
     focus_ = *fieldList_.begin();
-    //  Empty field view, we don't have anything to do
-    if (focus_ == nullptr)
-      return;
-    focus_->SetFocus();
-  }
-
-  if (!pressed) { // Button release: fire click/edit-click actions on release
-    uint16_t released = lastMask_ & ~mask;
-    if (released == BM_ENTER) {
-      focus_->SetPressed(false);
-      if (focus_->WantsTextEditor()) {
-        // Text fields open the on screen keyboard instead of firing OnClick().
-        // Done on release rather than press so the ENTER release event does
-        // not leak into the freshly opened modal and type a character.
-        openTextEditor(focus_);
-      } else {
-        focus_->OnClick();
-      }
-      isDirty_ = true;
-    } else if (released == BM_EDIT) {
-      focus_->OnEditClick();
-      isDirty_ = true;
+    if (focus_ != nullptr) {
+      focus_->SetFocus();
     }
-    lastMask_ = mask;
+  }
+}
+
+void FieldView::ButtonUp(uint16_t button, uint16_t mask) {
+  ensureFocus();
+  //  Empty field view, we don't have anything to do
+  if (focus_ == nullptr)
     return;
-  }
 
-  if (mask & BM_ENTER) { // ENTER or ENTER+ARROW is sent to the field
-    if (mask == BM_ENTER) {
-      focus_->SetPressed(true);
-      isDirty_ = true;
-    } else if (mask & BM_DOWN) {
-      focus_->ProcessArrow(BM_DOWN);
-      isDirty_ = true;
-    } else if (mask & BM_UP) {
-      focus_->ProcessArrow(BM_UP);
-      isDirty_ = true;
-    } else if (mask & BM_LEFT) {
-      focus_->ProcessArrow(BM_LEFT);
-      isDirty_ = true;
-    } else if (mask & BM_RIGHT) {
-      focus_->ProcessArrow(BM_RIGHT);
-      isDirty_ = true;
-    } else if (mask & BM_EDIT) {
-      focus_->ProcessClear();
-      isDirty_ = true;
+  // Button release: fire click/edit-click actions on release
+  if (button == BM_ENTER) {
+    focus_->SetPressed(false);
+    if (focus_->WantsTextEditor()) {
+      // Text fields open the on screen keyboard instead of firing OnClick().
+      // Done on release rather than press so the ENTER release event does
+      // not leak into the freshly opened modal and type a character.
+      openTextEditor(focus_);
+    } else {
+      focus_->OnClick();
     }
-  } else if (mask & BM_EDIT) { // EDIT or EDIT+ARROW is sent to the field
-    if (mask & BM_DOWN) {
-      focus_->ProcessEditArrow(BM_DOWN);
-      isDirty_ = true;
-    } else if (mask & BM_UP) {
-      focus_->ProcessEditArrow(BM_UP);
-      isDirty_ = true;
-    } else if (mask & BM_LEFT) {
-      focus_->ProcessEditArrow(BM_LEFT);
-      isDirty_ = true;
-    } else if (mask & BM_RIGHT) {
-      focus_->ProcessEditArrow(BM_RIGHT);
-      isDirty_ = true;
-    }
-  } else {
+    isDirty_ = true;
+  } else if (button == BM_EDIT) {
+    focus_->OnEditClick();
+    isDirty_ = true;
+  }
+}
+
+void FieldView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  ensureFocus();
+  if (focus_ == nullptr)
+    return;
+
+  const bool isDirection = (newButton & BM_DIRECTIONAL) != 0;
+
+  if (IsChord(newButton, mask, BM_ENTER)) {
+    focus_->SetPressed(true);
+    isDirty_ = true;
+  } else if (isDirection && mask == BM_ENTER) { // ENTER+ARROW is sent to the field
+    focus_->ProcessArrow(newButton);
+    isDirty_ = true;
+  } else if (IsPair(newButton, mask, BM_ENTER, BM_EDIT)) {
+    focus_->ProcessClear();
+    isDirty_ = true;
+  } else if (isDirection && mask == BM_EDIT) { // EDIT+ARROW is sent to the field
+    focus_->ProcessEditArrow(newButton);
+    isDirty_ = true;
+  } else if (isDirection && mask == 0) {
     UIField *target = nullptr;
-    if (mask == BM_DOWN) {
+    if (newButton == BM_DOWN) {
       target = findAdjacentField(true, +1);
-    } else if (mask == BM_UP) {
+    } else if (newButton == BM_UP) {
       target = findAdjacentField(true, -1);
-    } else if (mask == BM_RIGHT) {
+    } else if (newButton == BM_RIGHT) {
       target = findAdjacentField(false, +1);
-    } else if (mask == BM_LEFT) {
+    } else if (newButton == BM_LEFT) {
       target = findAdjacentField(false, -1);
     }
     if (target) {
       SetFocus(target);
     }
   }
-
-  lastMask_ = mask;
 }
 
 // Finds the next focusable field adjacent to the current focus.

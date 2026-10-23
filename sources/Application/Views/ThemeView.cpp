@@ -396,39 +396,35 @@ void ThemeView::Update(Observable &o, I_ObservableData *d) {
   };
 }
 
-void ThemeView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    FieldView::ProcessButtonMask(mask, pressed);
-    return;
-  }
+void ThemeView::ButtonDown(uint16_t newButton, uint16_t mask) {
   bool wasColorComponentFocus = isColorComponentFocus();
 
-  if (wasColorComponentFocus && !(mask & (BM_ENTER | BM_EDIT | BM_ALT | BM_NAV | BM_PLAY))) {
-    if (mask & BM_DOWN) {
+  if (wasColorComponentFocus && mask == 0) {
+    if (newButton == BM_DOWN) {
       if (selectedColor_ < COLOR_COUNT - 1) {
         moveColorComponentFocus(1, 0);
         return;
       }
-    } else if (mask & BM_UP) {
+    } else if (newButton == BM_UP) {
       if (selectedColor_ > 0) {
         moveColorComponentFocus(-1, 0);
         return;
       }
-    } else if (mask & BM_RIGHT) {
+    } else if (newButton == BM_RIGHT) {
       moveColorComponentFocus(0, 1);
       return;
-    } else if (mask & BM_LEFT) {
+    } else if (newButton == BM_LEFT) {
       moveColorComponentFocus(0, -1);
       return;
     }
   }
 
-  FieldView::ProcessButtonMask(mask, pressed);
+  FieldView::ButtonDown(newButton, mask);
 
-  if (mask == (BM_NAV | BM_LEFT)) {
+  if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
     // Go back to Device view with NAV+LEFT
     Navigate(VT_DEVICE, vtCollapse);
-  } else if (mask & BM_PLAY) {
+  } else if (IsChord(newButton, mask, BM_PLAY)) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   }

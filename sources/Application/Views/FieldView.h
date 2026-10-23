@@ -21,7 +21,8 @@ public:
   FieldView(GUIWindow &w, ViewData *viewData);
 
   virtual void Redraw();
-  virtual void ProcessButtonMask(uint16_t mask, bool pressed) override;
+  virtual void ButtonDown(uint16_t newButton, uint16_t mask) override;
+  virtual void ButtonUp(uint16_t button, uint16_t mask) override;
 
   virtual void SetFocus(UIField *field);
   UIField *GetFocus();
@@ -41,7 +42,7 @@ public:
   void clearTitleLabels();
 
 private:
-  uint16_t lastMask_;
+  void ensureFocus();
   UIField *focus_ = nullptr;
   UIField *findAdjacentField(bool vertical, int8_t direction);
   etl::vector<UIStaticField, 8> staticField_;

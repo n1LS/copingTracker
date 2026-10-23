@@ -181,7 +181,7 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   // Add Master output
   position.y_ += 2;
-  actionField_.emplace_back("Master Out", Token::ActionMasterOut, position);
+  actionField_.emplace_back("Master Bus FX", Token::ActionMasterOut, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
@@ -258,29 +258,24 @@ ProjectView::ProjectView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 ProjectView::~ProjectView() {
 }
 
-void ProjectView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    FieldView::ProcessButtonMask(mask, pressed);
-    return;
-  }
+void ProjectView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  FieldView::ButtonDown(newButton, mask);
 
-  FieldView::ProcessButtonMask(mask, pressed);
-
-  if (mask & BM_NAV) {
-    if (mask & BM_DOWN || mask & BM_UP) {
+  if (mask == BM_NAV) {
+    if (newButton == BM_DOWN || newButton == BM_UP) {
       if (!CanExit()) {
         return;
       }
     }
 
-    if (mask & BM_DOWN) {
+    if (newButton == BM_DOWN) {
       Navigate(VT_SONG, vtRevealFromBottom);
-    } else if (mask & BM_RIGHT) {
+    } else if (newButton == BM_RIGHT) {
       Navigate(VT_GROOVE, vtRevealFromRight);
-    } else if (mask & BM_UP) {
+    } else if (newButton == BM_UP) {
       Navigate(VT_DEVICE, vtRevealFromTop);
     }
-  } else if (mask & BM_PLAY) {
+  } else if (IsChord(newButton, mask, BM_PLAY)) {
     Player *player = Player::GetInstance();
     player->OnStartButton(PM_SONG, viewData_->songX_, false, viewData_->songX_);
   }

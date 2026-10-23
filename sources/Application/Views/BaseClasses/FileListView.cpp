@@ -132,83 +132,96 @@ void FileListView::RefreshFileList() {
   isDirty_ = true;
 }
 
-void FileListView::ProcessButtonMask(uint16_t mask, bool pressed) {
+void FileListView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // Give subclass first chance to handle
-  if (OnButtonOverride(mask, pressed)) {
+  if (OnButtonOverride(newButton, mask, true)) {
     return;
   }
 
-  // Handle key release events
-  if (!pressed) {
-    // Handle ENTER release for directory navigation
-    if (enterKeyHeld_ && !(mask & BM_ENTER)) {
-      enterKeyHeld_ = false;
-      if (pendingDirEnterOnRelease_ && !MemoryPool::FileList().empty()) {
-        auto fs = FileSystem::GetInstance();
-        unsigned fileIndex = MemoryPool::FileList()[currentIndex_];
-        if (fs->getFileType(fileIndex) == PFT_DIR) {
-          char name[PFILENAME_SIZE];
-          fs->getFileName(fileIndex, name, PFILENAME_SIZE);
-          if (strcmp(name, "..") == 0) {
-            NavigateToParent();
-          } else {
-            NavigateToDirectory(name);
-          }
-          isDirty_ = true;
-        }
-      }
-      pendingDirEnterOnRelease_ = false;
-      return;
-    }
-    return;
-  }
-
-  // Handle ENTER key press
-  if (mask & BM_ENTER) {
+  // ENTER pressed
+  if (newButton == BM_ENTER) {
     if (!enterKeyHeld_) {
       enterKeyHeld_ = true;
       if (EnterOnRelease()) {
         pendingDirEnterOnRelease_ = true;
       }
     }
+    if (mask != 0) {
+      // ENTER used as part of a chord: never enter a directory on release
+      pendingDirEnterOnRelease_ = false;
+      return;
+    }
     // If not in enter-on-release mode, handle immediately
     if (!EnterOnRelease()) {
       HandleEnter();
     }
-    // Consume arrow keys to prevent directory enter on release
-    if (mask & (BM_LEFT | BM_RIGHT | BM_UP | BM_DOWN)) {
-      pendingDirEnterOnRelease_ = false;
-    }
     return;
   }
 
-  // Handle EDIT key alone (open editor for selected item)
-  if (mask == BM_EDIT) {
+  // A button pressed while ENTER is held consumes the pending directory enter
+  if (mask == BM_ENTER) {
+    pendingDirEnterOnRelease_ = false;
+    return;
+  }
+
+  // EDIT alone (open editor for selected item)
+  if (IsChord(newButton, mask, BM_EDIT)) {
     HandleEdit();
     return;
   }
 
-  // Handle navigation
-  if (mask & BM_UP) {
-    HandleUp(mask & BM_EDIT); // SHIFT+UP for page up
-  } else if (mask & BM_DOWN) {
-    HandleDown(mask & BM_EDIT); // SHIFT+DOWN for page down
-  } else if ((mask & BM_LEFT) && (mask & BM_NAV)) {
+  // Navigation
+  if (IsChord(newButton, mask, BM_UP)) {
+    HandleUp(false);
+  } else if (IsChord(newButton, mask, BM_UP, BM_EDIT)) {
+    HandleUp(true); // EDIT+UP page up
+  } else if (IsChord(newButton, mask, BM_DOWN)) {
+    HandleDown(false);
+  } else if (IsChord(newButton, mask, BM_DOWN, BM_EDIT)) {
+    HandleDown(true); // EDIT+DOWN page down
+  } else if (IsChord(newButton, mask, BM_LEFT, BM_NAV)) {
     HandleBackNavigation();
   } else if (HasTabSelection()) {
     // Tab navigation (only when tab selection is enabled)
-    if (mask & BM_LEFT) {
+    if (IsChord(newButton, mask, BM_LEFT)) {
       HandleTabLeft();
-    } else if (mask & BM_RIGHT) {
+    } else if (IsChord(newButton, mask, BM_RIGHT)) {
       HandleTabRight();
     }
   } else if (HasButtonSystem()) {
     // Button navigation (when button system is enabled)
-    if (mask & BM_LEFT) {
+    if (IsChord(newButton, mask, BM_LEFT)) {
       SetSelectedButton(selectedButton_ - 1);
-    } else if (mask & BM_RIGHT) {
+    } else if (IsChord(newButton, mask, BM_RIGHT)) {
       SetSelectedButton(selectedButton_ + 1);
     }
+  }
+}
+
+void FileListView::ButtonUp(uint16_t button, uint16_t mask) {
+  // Give subclass first chance to handle
+  if (OnButtonOverride(button, mask, false)) {
+    return;
+  }
+
+  // ENTER release for directory navigation
+  if (enterKeyHeld_ && button == BM_ENTER) {
+    enterKeyHeld_ = false;
+    if (pendingDirEnterOnRelease_ && !MemoryPool::FileList().empty()) {
+      auto fs = FileSystem::GetInstance();
+      unsigned fileIndex = MemoryPool::FileList()[currentIndex_];
+      if (fs->getFileType(fileIndex) == PFT_DIR) {
+        char name[PFILENAME_SIZE];
+        fs->getFileName(fileIndex, name, PFILENAME_SIZE);
+        if (strcmp(name, "..") == 0) {
+          NavigateToParent();
+        } else {
+          NavigateToDirectory(name);
+        }
+        isDirty_ = true;
+      }
+    }
+    pendingDirEnterOnRelease_ = false;
   }
 }
 
@@ -344,7 +357,7 @@ void FileListView::OnTabAction(int tabIndex, const char *filename) {
   OnFileSelected(filename);
 }
 
-bool FileListView::OnButtonOverride(uint16_t mask, bool pressed) {
+bool FileListView::OnButtonOverride(uint16_t button, uint16_t mask, bool pressed) {
   return false; // Not handled by default
 }
 

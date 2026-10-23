@@ -112,62 +112,57 @@ void MixerView::toggleMute() {
   isDirty_ = true;
 }
 
-void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed) {
-    if (viewMode_ == VM_MUTEON) {
-      if (mask & BM_NAV) {
-        toggleMute();
-      }
+void MixerView::ButtonUp(uint16_t button, uint16_t mask) {
+  // mask is what remains held after the release
+  if (viewMode_ == VM_MUTEON) {
+    if (mask & BM_NAV) {
+      toggleMute();
     }
-    if (viewMode_ == VM_SOLOON) {
-      if (mask & BM_NAV) {
-        switchSoloMode();
-      }
-    }
-    FieldView::ProcessButtonMask(mask, pressed);
-    // Force a full redraw of the mixer view
-    SetDirty(true);
-    return;
   }
+  if (viewMode_ == VM_SOLOON) {
+    if (mask & BM_NAV) {
+      switchSoloMode();
+    }
+  }
+  FieldView::ButtonUp(button, mask);
+  // Force a full redraw of the mixer view
+  SetDirty(true);
+}
 
+void MixerView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // Ignore up/down arrow keys when pressed by themselves in MixerView
   // We only want left/right to navigate between channels
-  if (mask == BM_UP || mask == BM_DOWN) {
+  if (mask == 0 && (newButton == BM_UP || newButton == BM_DOWN)) {
     return;
   }
 
   // Fieldview gets first go at the button event
-  FieldView::ProcessButtonMask(mask, pressed);
+  FieldView::ButtonDown(newButton, mask);
 
   // Handle playback specific actions
-  if (mask == BM_PLAY) {
+  if (IsChord(newButton, mask, BM_PLAY)) {
     togglePlay();
   }
-  // NAV back to Song view
-  if (mask & BM_NAV) {
-    if (mask & BM_UP) {
-      Navigate(VT_SONG, vtRevealFromTop);
-    } else if (mask & BM_RIGHT) {
-      Navigate(VT_TABLE, vtRevealFromRight);
-    }
+
+  // NAV navigation
+  if (IsChord(newButton, mask, BM_UP, BM_NAV)) {
+    Navigate(VT_SONG, vtRevealFromTop);
+  } else if (IsChord(newButton, mask, BM_RIGHT, BM_NAV)) {
+    Navigate(VT_TABLE, vtRevealFromRight);
   }
 
-  if (mask == (BM_NAV & BM_ALT)) {
+  if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
     unMuteAll();
   }
 
-  // Handle mixer-specific actions for normal mode, but only if we don't have
-  // field focus or if they're specific mixer actions that should override field
-  // editing
-
   // EDIT+NAV is always for toggling mute
-  if ((mask & BM_EDIT) && (mask & BM_NAV)) {
+  if (IsPair(newButton, mask, BM_EDIT, BM_NAV)) {
     toggleMute();
     return;
   }
 
   // ENTER+NAV is always for solo mode
-  if ((mask & BM_ENTER) && (mask & BM_NAV)) {
+  if (IsChord(newButton, mask, BM_ENTER, BM_NAV)) {
     switchSoloMode();
     return;
   }
@@ -175,66 +170,6 @@ void MixerView::ProcessButtonMask(uint16_t mask, bool pressed) {
   viewMode_ = VM_NORMAL;
   // Force a full redraw of the mixer view when any button is pressed
   SetDirty(true);
-  processNormalButtonMask(mask);
-}
-
-/*******************************************************************************
- processNormalButtonMask:
-        process button mask in the case there is no
-        selection active
-******************************************************************************/
-
-// This method is no longer needed as we're using FieldView's field navigation
-void MixerView::processNormalButtonMask(unsigned int mask) {
-  // Handle mixer-specific actions
-  if (mask & BM_EDIT) {
-    if (mask & BM_NAV) {
-      toggleMute();
-    }
-  } else if (mask & BM_ENTER) {
-    if (mask & BM_NAV) {
-      switchSoloMode();
-    }
-  } else if (mask & BM_NAV) {
-    if (mask & BM_UP) {
-      Navigate(VT_SONG, vtRevealFromTop);
-    }
-    if (mask & BM_ALT) {
-      unMuteAll();
-    }
-  }
-}
-
-/*******************************************************************************
- processSelectionButtonMask:
-        process button mask in the case there is a
-        selection active
-******************************************************************************/
-void MixerView::processSelectionButtonMask(unsigned int mask) {
-
-  if (mask & BM_EDIT) {
-
-  } else {
-    if (mask & BM_ENTER) {
-      if (mask & BM_NAV) {
-        switchSoloMode();
-      }
-    } else {
-      if (mask & BM_NAV) {
-        if (mask & BM_PLAY) {
-          onStop();
-        }
-        if (mask & BM_ALT) {
-          unMuteAll();
-        }
-      } else {
-        // No modifier
-        if (mask & BM_PLAY) {
-          onStart();
-        }
-      }
-    }
-  }
 }
 
 void MixerView::initChannelVolumeFields() {

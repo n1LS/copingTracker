@@ -268,7 +268,11 @@ int HostEventManager::MainLoop() {
 
     unsigned long now = tick * 33;
 
-    uint16_t send_mask = (new_mask ^ previous_mask_) | (new_mask & (BM_LEFT | BM_RIGHT | BM_UP | BM_DOWN));
+    // A change event only reports the buttons that changed, so a held
+    // direction is not re-sent when another button is pressed or released.
+    // Repeat ticks (no change) re-send the held directions.
+    uint16_t send_mask = (new_mask != previous_mask_) ? (new_mask ^ previous_mask_) : (new_mask & BM_DIRECTIONAL);
+    bool newly_pressed = (new_mask & ~previous_mask_) != 0;
 
     bool got_event = false;
 
@@ -283,7 +287,8 @@ int HostEventManager::MainLoop() {
       }
     } else {
       got_event = (send_mask != 0);
-      if (got_event)
+      // a release alone must not interrupt the repeat of a still held direction
+      if (got_event && newly_pressed)
         is_repeating_ = false;
     }
 

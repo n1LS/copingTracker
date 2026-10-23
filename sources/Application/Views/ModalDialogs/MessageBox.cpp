@@ -124,13 +124,15 @@ void MessageBox::DrawView() {
 
   for (int i = 0; i < buttonCount_; i++) {
     bool sel = i == selected_;
+    bool down = enterDown_ && sel;
+
     const char *text = buttonText[button_[i]];
     int textLen = (int)strlen(text);
 
     // Draw left border
     SetColor(Theme::Dialog::Button::bg(sel));
     SetBackgroundColor(Theme::Dialog::bg);
-    DrawChar(buttonStartX, y, CHAR(char_button_border_left_s));
+    DrawChar(buttonStartX, y, char_button_left(down));
 
     // Draw button text
     SetColor(Theme::Dialog::Button::fg(sel));
@@ -140,7 +142,7 @@ void MessageBox::DrawView() {
     // Draw right border
     SetColor(Theme::Dialog::Button::bg(sel));
     SetBackgroundColor(Theme::Dialog::bg);
-    DrawChar(buttonStartX + 1 + textLen, y, CHAR(char_button_border_right_s));
+    DrawChar(buttonStartX + 1 + textLen, y, char_button_right(down));
 
     if (sel) {
       focusRect_ = GUIRect(buttonStartX + left_, y + top_, textLen + 2, 1);
@@ -156,19 +158,31 @@ void MessageBox::OnPlayerUpdate(PlayerEventType, unsigned int currentTick) {
 void MessageBox::OnFocus() {
 }
 
-void MessageBox::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (mask & BM_LEFT) {
+void MessageBox::ButtonDown(uint16_t newButton, uint16_t mask) {
+  // Dialogs are usually opened mid-chord, so other held buttons are ignored here
+  if (newButton == BM_LEFT) {
     selected_ = (selected_ + 1);
     if (selected_ >= buttonCount_) {
       selected_ = 0;
     }
-  } else if (mask & BM_RIGHT) {
+  } else if (newButton == BM_RIGHT) {
     selected_ = (selected_ - 1);
     if (selected_ < 0) {
       selected_ = buttonCount_ - 1;
     }
-  } else if (mask & BM_ENTER && pressed) {
-    EndModal(button_[selected_]);
+  } else if (newButton == BM_ENTER) {
+    // the choice is confirmed on release (see ButtonUp)
+    enterDown_ = true;
   }
   isDirty_ = true;
+}
+
+void MessageBox::ButtonUp(uint16_t button, uint16_t mask) {
+  // Confirm on ENTER release, and only if the press happened inside this dialog:
+  // the dialog is usually opened by an ENTER press whose release must not
+  // dismiss it right away.
+  if (button == BM_ENTER && enterDown_) {
+    enterDown_ = false;
+    EndModal(button_[selected_]);
+  }
 }

@@ -51,6 +51,12 @@ void PhraseView::setCurrentlySelectedCommand(Token command) {
   *cmd = command.raw();
   lastCmd_ = *cmd;
 
+  if (command == Token::InstrumentCommandNone) {
+    // clear the parameter as well
+    uint16_t *value = (col_ == colCmd1) ? &step.param1 : &step.param2;
+    *value = 0;
+  }
+
   SetDirty(true);
 }
 
@@ -61,16 +67,16 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   uint8_t instrumentId = getEffectiveInstrumentForRow(row_ + yOffset);
   I_Instrument *instrument = bank->GetInstrument(instrumentId);
-  SampleInstrument *sampleInstrument = (SampleInstrument *)instrument;
-  InstrumentType type = instrument->GetType();
 
-  // some instruments want to manually set the change to the note
   bool smallChange = (direction == VUD_LEFT || direction == VUD_RIGHT);
-  int sign = (direction == VUD_LEFT || direction == VUD_DOWN) ? -1 : 1;
-  if (instrument->AffectNote(c, sign, smallChange)) {
-    lastNote_ = *c;
-    startAudition(false);
-    return;
+  if (instrument) {
+    // some instruments want to manually set the change to the note
+    int sign = (direction == VUD_LEFT || direction == VUD_DOWN) ? -1 : 1;
+    if (instrument->AffectNote(c, sign, smallChange)) {
+      lastNote_ = *c;
+      startAudition(false);
+      return;
+    }
   }
 
   // Get the offset based on direction (using proper sequential indices)
@@ -88,7 +94,14 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
   uint8_t sliceFirst = 0;
   uint8_t sliceLast = 0;
 
-  if (type == IT_SAMPLE && sampleInstrument->GetSliceNoteRange(sliceFirst, sliceLast)) {
+  // attempt to get the sample instrument for slice display
+  SampleInstrument *sampleInstrument = nullptr;
+  if (instrument && instrument->GetType() == IT_SAMPLE) {
+    sampleInstrument = (SampleInstrument *)instrument;
+  }
+
+  // TODO nILS: this should also happen in SampleInstrument's AffectNote instead of getting special treatmnt here
+  if (sampleInstrument && sampleInstrument->GetSliceNoteRange(sliceFirst, sliceLast)) {
     // Apply scale or slice range constraints
     int newNote = *c + offset;
 
@@ -106,7 +119,7 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
     int newNote = *c + offset;
 
     // Check if the note is in the scale (adjusted for root)
-    if (instrument->SupportsScales()) {
+    if (instrument && instrument->SupportsScales()) {
       // Add/remove from offset to match selected scale
       while (newNote >= 0 && !scaleSteps[scale][(newNote + 12 - scaleRoot) % 12]) {
         offset > 0 ? offset++ : offset--;
@@ -114,7 +127,7 @@ void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
       }
     }
 
-    updateData(c, offset, instrument->GetHighestNote(), true);
+    updateData(c, offset, instrument ? instrument->GetHighestNote() : HIGHEST_NOTE, true);
   }
 
   lastNote_ = *c;
@@ -126,6 +139,8 @@ void PhraseView::updateInstrumentValue(ViewUpdateDirection direction, int yOffse
   unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].instrument;
   updateData(c, offsets_[direction], MAX_INSTRUMENT_COUNT - 1, false);
   lastInstr_ = *c;
+  // restart audition so it picks up the new instrument
+  startAudition(false);
 }
 
 void PhraseView::updateVolumeValue(ViewUpdateDirection direction, int yOffset) {
@@ -155,6 +170,8 @@ void PhraseView::updateVolumeValue(ViewUpdateDirection direction, int yOffset) {
       break;
   }
   lastVolume_ = vol;
+  // restart audition so it picks up the new volume
+  startAudition(false);
 }
 
 void PhraseView::updateCommandValue(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
@@ -575,8 +592,9 @@ void PhraseView::fillClipboardData() {
 
   // Get size & store in clipboard
 
-  clipboard_.width_ = selRect.Width() + 1;
-  clipboard_.height_ = selRect.Height() + 1;
+  // the selection rect already is inclusive (width/height are counts)
+  clipboard_.width_ = selRect.Width();
+  clipboard_.height_ = selRect.Height();
   clipboard_.row_ = selRect.Top();
   clipboard_.col_ = selRect.Left();
 
@@ -599,8 +617,8 @@ void PhraseView::updateSelectionValue(ViewUpdateDirection direction) {
   col_ = (PhraseColumn)r.Left();
   row_ = (PhraseColumn)r.Top();
 
-  for (int i = 0; i <= r.Width(); i++) {
-    for (int j = 0; j <= r.Height(); j++) {
+  for (int i = 0; i < r.Width(); i++) {
+    for (int j = 0; j < r.Height(); j++) {
       if (col_ + i < 2) {
         updateCursorValue(direction, i, j);
       }
@@ -612,7 +630,7 @@ void PhraseView::updateSelectionValue(ViewUpdateDirection direction) {
 
 void PhraseView::extendSelection() {
   GUIRect rect = getSelectionRect();
-  if (rect.Left() > 0 || rect.Right() < 5) {
+  if (rect.Left() > 0 || rect.Right() <= colCmdVal2) {
     if (col_ < clipboard_.col_) {
       col_ = colNote;
       clipboard_.col_ = colCmdVal2;
@@ -758,6 +776,11 @@ void PhraseView::pasteClipboard() {
 }
 
 inline void PhraseView::startAudition(bool startIfNotRunning) {
+  // no instrument -> no audition
+  if (getEffectiveInstrumentForRow(row_) == NO_INSTRUMENT) {
+    return;
+  }
+
   Player *player = Player::GetInstance();
   if (player->IsRunning()) {
     // now also update if in auditioning mode
@@ -802,34 +825,36 @@ void PhraseView::OnFocus() {
   updateCursor(0, 0);
 }
 
-void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  // Handle button release
-  if (!pressed) {
-    // Stop audition when ENTER is released
-    if (!(mask & BM_ENTER)) {
-      stopAudition();
-    }
+void PhraseView::ButtonUp(uint16_t button, uint16_t mask) {
+  // mask is what remains held after the release
 
-    // Exit mute-on mode when NAV is released
-    if (viewMode_ == VM_MUTEON) {
-      if (mask & BM_NAV) {
-        toggleMute();
-      }
-    }
-
-    // Exit solo-on mode when NAV is released
-    if (viewMode_ == VM_SOLOON) {
-      if (mask & BM_NAV) {
-        switchSoloMode();
-      }
-    }
-
-    return;
+  // Stop audition when ENTER is released
+  if (!(mask & BM_ENTER)) {
+    stopAudition();
   }
+
+  // Exit mute-on mode when NAV is released
+  if (viewMode_ == VM_MUTEON) {
+    if (mask & BM_NAV) {
+      toggleMute();
+    }
+  }
+
+  // Exit solo-on mode when NAV is released
+  if (viewMode_ == VM_SOLOON) {
+    if (mask & BM_NAV) {
+      switchSoloMode();
+    }
+  }
+}
+
+void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  const bool enterAlone = IsChord(newButton, mask, BM_ENTER);
 
   // Handle "new item" mode: create new instrument or table when ENTER is pressed
   if (viewMode_ == VM_NEW) {
-    if (mask == BM_ENTER) {
+    bool consumed = false;
+    if (enterAlone) {
       // Create new instrument for note or instrument columns
       if (col_ < colVolume) {
         InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
@@ -848,7 +873,7 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
           DoModal(mb);
           return;
         }
-        mask &= ~BM_ENTER;
+        consumed = true;
       } else {
         // Create new table for command parameter columns
         if ((col_ == 3) &&
@@ -859,22 +884,29 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
             uint16_t *c = &phrase_->steps_[viewData_->currentPhrase_][row_].param1;
             *c = next;
             isDirty_ = true;
-            mask &= ~BM_ENTER;
+            consumed = true;
             cmdEdit_.SetInt(next);
           }
         }
       };
     }
-  }
-
-  // Exit clone mode if ALT+ENTER are not both held
-  if ((viewMode_ == VM_CLONE) && !((mask & BM_ENTER) && (mask & BM_ALT))) {
-    viewMode_ = VM_SELECTION;
+    if (consumed) {
+      viewMode_ = VM_NORMAL;
+      return;
+    }
   }
 
   // Clone trigger: ALT+EDIT+ENTER or (in VM_CLONE mode) ALT+ENTER
   // Clones the current instrument or table
-  if ((mask == (BM_ALT | BM_EDIT | BM_ENTER)) || ((viewMode_ == VM_CLONE) && (mask & BM_ENTER) && (mask & BM_ALT))) {
+  const bool cloneChord = newButton == BM_ENTER && mask == (BM_ALT | BM_EDIT);
+  const bool cloneModeChord = (viewMode_ == VM_CLONE) && newButton == BM_ENTER && (mask & BM_ALT);
+
+  // Exit clone mode if ALT+ENTER are not both held
+  if ((viewMode_ == VM_CLONE) && !cloneModeChord) {
+    viewMode_ = VM_SELECTION;
+  }
+
+  if (cloneChord || cloneModeChord) {
     if (col_ < colVolume) {
       InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
       unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
@@ -920,17 +952,25 @@ void PhraseView::ProcessButtonMask(uint16_t mask, bool pressed) {
       saveCol_ = col_;
       saveRow_ = row_;
     }
-    processSelectionButtonMask(mask);
+    processSelectionButtonMask(newButton, mask);
   } else {
     viewMode_ = VM_NORMAL;
-    processNormalButtonMask(mask);
+    processNormalButtonMask(newButton, mask);
   };
 }
 
-void PhraseView::processNormalButtonMask(uint16_t mask) {
+void PhraseView::enterInstrumentUnderCursor() {
+  unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
+  viewData_->currentInstrumentID_ = (*c != 0xFF) ? *c : lastInstr_;
+  if (viewData_->currentInstrumentID_ != 0xFF) {
+    Navigate(VT_INSTRUMENT, vtRevealFromRight);
+  }
+}
+
+void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
   Player *player = Player::GetInstance();
 
-  if (mask == BM_ENTER) {
+  if (IsChord(newButton, mask, BM_ENTER)) {
     // enter only (check if picker for commands is enabled)
     bool picker = Config::GetInstance()->FindVariable(Token::VarConfigCommandPicker)->GetInt();
 
@@ -948,178 +988,192 @@ void PhraseView::processNormalButtonMask(uint16_t mask) {
         DoModal(cv, ModalViewCallback::create<&SetCommandCallback>());
       }
     }
+
+    // ENTER alone
+    pasteLast();
+    if ((col_ == colInstrument) || (col_ == colCmdVal1) || (col_ == colCmdVal2)) {
+      viewMode_ = VM_NEW;
+    }
+    if (col_ == colNote || col_ == colInstrument || col_ == colVolume) {
+      // commands don't affect the audition, so only for note, instrument and volume:
+      // Start audition, stopping the audition happens in ButtonUp
+      stopAudition();
+      startAudition(true);
+    }
+    return;
   }
 
-  if (mask & BM_EDIT) {
+  if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
+    viewMode_ = VM_CLONE;
+  } else if (IsPair(newButton, mask, BM_EDIT, BM_NAV)) {
+    toggleMute();
+  } else if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
+    unMuteAll();
+  } else if (mask == BM_EDIT) {
     // EDIT Modifier
-    if (mask & BM_LEFT)
-      warpToNeighbour(-1);
-    if (mask & BM_RIGHT)
-      warpToNeighbour(1);
-    if (mask & BM_UP)
-      warpInChain(-1);
-    if (mask & BM_DOWN)
-      warpInChain(1);
-    if (mask & BM_ENTER) {
-      cutPosition();
+    switch (newButton) {
+      case BM_LEFT:
+        warpToNeighbour(-1);
+        break;
+      case BM_RIGHT:
+        warpToNeighbour(1);
+        break;
+      case BM_UP:
+        warpInChain(-1);
+        break;
+      case BM_DOWN:
+        warpInChain(1);
+        break;
     }
-    if (mask & BM_ALT) {
-      viewMode_ = VM_CLONE;
-    }
-    if (mask & BM_NAV)
-      toggleMute();
-  } else if (mask & BM_ENTER) {
+  } else if (mask == BM_ENTER) {
     // ENTER Modifer
-    if (mask & BM_DOWN)
-      updateCursorValue(VUD_DOWN);
-    if (mask & BM_UP)
-      updateCursorValue(VUD_UP);
-    if (mask & BM_LEFT)
-      updateCursorValue(VUD_LEFT);
-    if (mask & BM_RIGHT)
-      updateCursorValue(VUD_RIGHT);
-    if (mask & BM_ALT)
+    switch (newButton) {
+      case BM_EDIT:
+        cutPosition();
+        break;
+      case BM_DOWN:
+        updateCursorValue(VUD_DOWN);
+        break;
+      case BM_UP:
+        updateCursorValue(VUD_UP);
+        break;
+      case BM_LEFT:
+        updateCursorValue(VUD_LEFT);
+        break;
+      case BM_RIGHT:
+        updateCursorValue(VUD_RIGHT);
+        break;
+    }
+  } else if (newButton == BM_ENTER) {
+    if (mask == BM_ALT) {
       pasteClipboard();
-    if (mask & BM_NAV)
+    } else if (mask == BM_NAV) {
       switchSoloMode();
-    if (mask == BM_ENTER) {
-      pasteLast();
-      if ((col_ == colInstrument) || (col_ == colCmdVal1) || (col_ == colCmdVal2)) {
-        viewMode_ = VM_NEW;
-      } else {
-        // for note, volume and instrument:
-        // Start auditionq, note stopping audition happens in
-        // processButtonMask on key up
-        stopAudition();
-        startAudition(true);
-      }
     }
-  } else if (mask & BM_NAV) {
+  } else if (mask == BM_NAV) {
     // NAV Modifier
-    if (mask & BM_LEFT) {
-      Navigate(VT_CHAIN, vtRevealFromLeft);
-    } else if (mask & BM_RIGHT) {
-      unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
-      viewData_->currentInstrumentID_ = (*c != 0xFF) ? *c : lastInstr_;
-      if (viewData_->currentInstrumentID_ != 0xFF) {
-        Navigate(VT_INSTRUMENT, vtRevealFromRight);
-      }
-    } else if (mask & BM_DOWN) {
-      // Go to table view
-      PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-      Token cmd1 = Token::enum_type(step.cmd1);
-      Token cmd2 = Token::enum_type(step.cmd2);
-      if (cmd1 == Token::InstrumentCommandTable) {
-        viewData_->currentTable_ = step.param1 & (TABLE_COUNT - 1);
-      } else if (cmd2 == Token::InstrumentCommandTable) {
-        viewData_->currentTable_ = step.param2 & (TABLE_COUNT - 1);
-      }
+    switch (newButton) {
+      case BM_LEFT:
+        Navigate(VT_CHAIN, vtRevealFromLeft);
+        break;
+      case BM_RIGHT:
+        enterInstrumentUnderCursor();
+        break;
+      case BM_DOWN:
+        {
+          // Go to table view
+          PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
+          Token cmd1 = Token::enum_type(step.cmd1);
+          Token cmd2 = Token::enum_type(step.cmd2);
+          if (cmd1 == Token::InstrumentCommandTable) {
+            viewData_->currentTable_ = step.param1 & (TABLE_COUNT - 1);
+          } else if (cmd2 == Token::InstrumentCommandTable) {
+            viewData_->currentTable_ = step.param2 & (TABLE_COUNT - 1);
+          }
 
-      Navigate(VT_TABLE, vtRevealFromBottom);
-    } else if (mask & BM_UP) {
-      // Go to groove view
-      stopAudition();
+          Navigate(VT_TABLE, vtRevealFromBottom);
+          break;
+        }
+      case BM_UP:
+        // Go to groove view
+        stopAudition();
 
-      Navigate(VT_GROOVE, vtRevealFromTop);
+        Navigate(VT_GROOVE, vtRevealFromTop);
+        break;
+      case BM_PLAY:
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
+        break;
     }
-
-    if (mask & BM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
-    }
-    if (mask & BM_ALT) {
-      unMuteAll();
-    }
-
-  } else if (mask & BM_ALT) {
-    // ALT Modifier
-  } else {
+  } else if (mask == 0) {
     // No modifier
-    if (mask & BM_DOWN)
-      updateCursor(0, 1);
-    if (mask & BM_UP)
-      updateCursor(0, -1);
-    if (mask & BM_LEFT)
-      updateCursor(-1, 0);
-    if (mask & BM_RIGHT)
-      updateCursor(1, 0);
-    if (mask & BM_PLAY) {
-      player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
+    switch (newButton) {
+      case BM_DOWN:
+        updateCursor(0, 1);
+        break;
+      case BM_UP:
+        updateCursor(0, -1);
+        break;
+      case BM_LEFT:
+        updateCursor(-1, 0);
+        break;
+      case BM_RIGHT:
+        updateCursor(1, 0);
+        break;
+      case BM_PLAY:
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
+        break;
     }
   }
 }
 
-void PhraseView::processSelectionButtonMask(uint16_t mask) {
+void PhraseView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
 
   Player *player = Player::GetInstance();
 
-  // Edit modifier
-
-  if (mask & BM_EDIT) {
-    if (mask & BM_ALT) {
-      extendSelection();
-    } else {
-      copySelection();
+  if (IsChord(newButton, mask, BM_EDIT)) {
+    copySelection();
+  } else if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
+    extendSelection();
+  } else if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
+    unMuteAll();
+  } else if (mask == BM_ENTER) {
+    // Enter Modifer
+    switch (newButton) {
+      case BM_DOWN:
+        updateSelectionValue(VUD_DOWN);
+        break;
+      case BM_UP:
+        updateSelectionValue(VUD_UP);
+        break;
+      case BM_LEFT:
+        updateSelectionValue(VUD_LEFT);
+        break;
+      case BM_RIGHT:
+        updateSelectionValue(VUD_RIGHT);
+        break;
     }
-
-    return;
-  }
-  // Enter Modifer
-
-  if (mask & BM_ENTER) {
-    if (mask & BM_DOWN)
-      updateSelectionValue(VUD_DOWN);
-    else if (mask & BM_UP)
-      updateSelectionValue(VUD_UP);
-    else if (mask & BM_LEFT)
-      updateSelectionValue(VUD_LEFT);
-    else if (mask & BM_RIGHT)
-      updateSelectionValue(VUD_RIGHT);
-    else if (mask & BM_ALT)
-      cutSelection();
-    else if (mask & BM_NAV)
-      switchSoloMode();
-  } else {
-
-    // R Modifier
-
-    if (mask & BM_NAV) {
-      if (mask & BM_LEFT) {
+  } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
+    cutSelection();
+  } else if (IsChord(newButton, mask, BM_ENTER, BM_NAV)) {
+    switchSoloMode();
+  } else if (mask == BM_NAV) {
+    switch (newButton) {
+      case BM_LEFT:
         Navigate(VT_CHAIN, vtRevealFromLeft);
-      }
-      if (mask & BM_RIGHT) {
-        unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
-        if (*c != 0xFF) {
-          viewData_->currentInstrumentID_ = *c;
-        } else {
-          viewData_->currentInstrumentID_ = lastInstr_;
+        break;
+      case BM_RIGHT:
+        {
+          unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
+          if (*c != 0xFF) {
+            viewData_->currentInstrumentID_ = *c;
+          } else {
+            viewData_->currentInstrumentID_ = lastInstr_;
+          }
+          Navigate(VT_INSTRUMENT, vtRevealFromRight);
+          break;
         }
-        Navigate(VT_INSTRUMENT, vtRevealFromRight);
-      }
-      if (mask & BM_PLAY) {
+      case BM_PLAY:
         player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
-      }
-      if (mask & BM_ALT)
-        unMuteAll();
-
-    } else {
-      // L Modifier
-      if (mask & BM_ALT) {
-
-      } else {
-        // No modifier
-
-        if (mask & BM_DOWN)
-          updateCursor(0, 1);
-        if (mask & BM_UP)
-          updateCursor(0, -1);
-        if (mask & BM_LEFT)
-          updateCursor(-1, 0);
-        if (mask & BM_RIGHT)
-          updateCursor(1, 0);
-        if (mask & BM_PLAY) {
-          player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
-        }
-      }
+        break;
+    }
+  } else if (mask == 0) {
+    // No modifier
+    switch (newButton) {
+      case BM_DOWN:
+        updateCursor(0, 1);
+        break;
+      case BM_UP:
+        updateCursor(0, -1);
+        break;
+      case BM_LEFT:
+        updateCursor(-1, 0);
+        break;
+      case BM_RIGHT:
+        updateCursor(1, 0);
+        break;
+      case BM_PLAY:
+        player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
+        break;
     }
   }
 }

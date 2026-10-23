@@ -423,14 +423,16 @@ void View::SetDirty(bool isDirty) {
   isDirty_ = isDirty;
 }
 
-void View::ProcessButton(uint16_t mask, bool pressed) {
+void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
   // Normal button processing
   if (modalView_) {
-    modalView_->ProcessButton(mask, pressed);
+    modalView_->ProcessButton(button, mask, pressed);
     // checks if modal is done and if it is disposes of it:
     DismissModal();
+  } else if (pressed) {
+    ButtonDown(button, mask);
   } else {
-    ProcessButtonMask(mask, pressed);
+    ButtonUp(button, mask);
   }
 
   if (isDirty_)

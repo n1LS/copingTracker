@@ -86,15 +86,21 @@ void CommandView::ProcessSelection(uint16_t mask) {
   SetDirty(true);
 }
 
-void CommandView::ProcessButtonMask(uint16_t mask, bool pressed) {
-  if (!pressed && mask == 0) {
+void CommandView::ButtonUp(uint16_t button, uint16_t mask) {
+  if (mask == 0) {
     // all keys up, return
     EndModal(GetCommmand().raw());
   }
+}
 
-  // directional navigation through the commands
-  if (mask & BM_DIRECTIONAL) {
-    ProcessSelection(mask);
+void CommandView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  // directional navigation through the commands. The picker is opened while
+  // ENTER is held, so other held buttons are deliberately ignored here.
+  if (newButton & BM_DIRECTIONAL) {
+    ProcessSelection(newButton);
+  } else if (newButton == BM_EDIT) {\
+    // ENTER shows the modal -> + EDIT means delete
+    EndModal(Token::InstrumentCommandNone);
   }
 }
 
