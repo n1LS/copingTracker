@@ -878,7 +878,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
   pos.x_ += 17;
 
-  SetColor(Theme::Song::preview(true));
+  SetColor(Theme::Song::preview(false));
   DrawString(pos.x_, pos.y_ - 1, "Nte In");
 
   // Display notes

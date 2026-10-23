@@ -977,7 +977,7 @@ void SongView::drawChainPreview() {
 
   GUIPoint pos = GetAnchor();
   SetBackgroundColor(Theme::View::bg);
-  SetColor(Theme::Song::preview(true));
+  SetColor(Theme::Song::preview(false));
   DrawString(pos.x_ + 24, pos.y_ - 1, "Ch");
 
   for (int i = 0; i < PHRASES_PER_CHAIN; i++) {
