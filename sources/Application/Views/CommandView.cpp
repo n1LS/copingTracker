@@ -98,8 +98,7 @@ void CommandView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // ENTER is held, so other held buttons are deliberately ignored here.
   if (newButton & BM_DIRECTIONAL) {
     ProcessSelection(newButton);
-  } else if (newButton == BM_EDIT) {\
-    // ENTER shows the modal -> + EDIT means delete
+  } else if (newButton == BM_EDIT) { // ENTER shows the modal -> + EDIT means delete
     EndModal(Token::InstrumentCommandNone);
   }
 }

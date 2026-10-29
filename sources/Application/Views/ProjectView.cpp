@@ -260,7 +260,8 @@ bool ProjectView::navigationDown(uint16_t direction) {
     case BM_UP:
       // an unsaved rename blocks leaving up/down (CanExit shows a dialog)
       if (CanExit()) {
-        Navigate(direction == BM_DOWN ? VT_SONG : VT_DEVICE, direction == BM_DOWN ? vtRevealFromBottom : vtRevealFromTop);
+        Navigate(direction == BM_DOWN ? VT_SONG : VT_DEVICE,
+                 direction == BM_DOWN ? vtRevealFromBottom : vtRevealFromTop);
       }
       return true;
     case BM_RIGHT:
