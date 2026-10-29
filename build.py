@@ -107,6 +107,20 @@ def prebuild(args):
                 "tools/manual/webapp/build_webapp.py",
             ],
         )
+    step(
+        "Generating LSDJ drum kits",
+        [
+            sys.executable,
+            "tools/lsdj_kits/split_kit.py",
+            "--bpm", "80",
+            "--threshold", "5",
+            "--names", "tools/lsdj_kits/kits.txt",
+            "tools/lsdj_kits/kits.wav",
+            "sources/Application/Instruments/LSDJKitInstrument/LSDJKits.generated.h",
+        ],
+    )
+
+
 def main():
     load_env()
     parser = argparse.ArgumentParser()
@@ -143,8 +157,6 @@ def main():
     start = time.monotonic()
     try:
         if not args.quick:
-            if not args.ci and not os.environ.get("LSDJ_GB_FILE"):
-                parser.error("LSDJ_GB_FILE is required")
             if not os.environ.get("GM_SF2_FILE"):
                 parser.error("GM_SF2_FILE is required")
             prebuild(args)
