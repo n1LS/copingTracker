@@ -103,7 +103,7 @@ void SampleSlicesView::OnFocus() {
 
   // graphfield setup
   sliceIndexVar_.SetInt(0, false);
-  sliceCountVar_.SetInt(4, false);
+  sliceCountVar_.SetInt(definedSliceCount(), false);
   updateSliceSelectionFromInstrument();
   rebuildWaveform();
   graphField_.RequestFullRedraw();
@@ -378,10 +378,10 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
 
     case Token::ActionSlicingRevert:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
-        MessageBox *mb = MessageBox::Create(*this, "Slices", "Restore slices?", MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Slices", "Reset all slices?", MBBF_YES | MBBF_NO);
         DoModal(mb, ModalViewCallback::create<&SampleSlicesView::ResetSlicesConfirmCallback>());
       } else {
-        autoSliceEvenly();
+        resetSlices();
       }
       break;
 
@@ -672,7 +672,7 @@ void SampleSlicesView::ResetSlicesConfirmCallback(View &v, ModalView &dialog) {
   self.clearAfterModal(v);
 
   if (dialog.GetReturnCode() == MBL_YES) {
-    self.restoreState();
+    self.resetSlices();
   }
 }
 
@@ -797,6 +797,38 @@ bool SampleSlicesView::hasInstrumentSample() const {
   return instrument_ && instrument_->GetSampleIndex() >= 0 && sampleSize_ > 0;
 }
 
+int32_t SampleSlicesView::definedSliceCount() const {
+  int32_t count = 0;
+  if (instrument_) {
+    for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
+      if (instrument_->IsSliceDefined(i)) {
+        count++;
+      }
+    }
+  }
+  // the count field starts at 1 (no slicing)
+  return count < 1 ? 1 : count;
+}
+
+void SampleSlicesView::resetSlices() {
+  if (!instrument_) {
+    return;
+  }
+
+  instrument_->ClearSlices();
+  sliceCountVar_.SetInt(1, false);
+  sliceIndexVar_.SetInt(0, false);
+
+  updateSliceSelectionFromInstrument();
+  if (updateZoomWindow()) {
+    graphField_.InvalidateWaveform();
+  }
+  updateSliceMarkers();
+  graphField_.RequestFullRedraw();
+  isDirty_ = true;
+  ((AppWindow &)w_).SetDirty();
+}
+
 void SampleSlicesView::saveState() {
   if (!instrument_ || sampleSize_ == 0) {
     return;
@@ -816,9 +848,22 @@ void SampleSlicesView::restoreState() {
     return;
   }
 
+  // SetSlicePoint clamps every point up to its predecessor, so it can never
+  // remove slices. Start from a clean slate and only write the saved points
+  // up to the first unused one (0 after the first slot marks the end).
+  instrument_->ClearSlices();
   for (size_t i = 0; i < SampleInstrument::MaxSlices; i++) {
+    if (i > 0 && sliceSaveState_[i] == 0) {
+      break;
+    }
     instrument_->SetSlicePoint(i, sliceSaveState_[i]);
   }
+
+  updateSliceSelectionFromInstrument();
+  if (updateZoomWindow()) {
+    graphField_.InvalidateWaveform();
+  }
+  graphField_.RequestFullRedraw();
 
   sliceStartVar_.SetInt(sliceSaveState_[sliceIndexVar_.GetInt()]);
 

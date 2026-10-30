@@ -70,6 +70,8 @@ private:
 
   void clearSliceMarkers();
   void updateSliceMarkers();
+  int32_t definedSliceCount() const;
+  void resetSlices();
   void saveState();
   void restoreState();
 
