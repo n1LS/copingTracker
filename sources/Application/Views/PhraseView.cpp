@@ -959,8 +959,8 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         if (current != -1) {
           th->Clone(current);
         }
-      } else if ((col_ == colCmdVal2) &&
-          Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd2) == Token::InstrumentCommandTable) {
+      } else if ((col_ == colCmdVal2) && Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd2) ==
+                                             Token::InstrumentCommandTable) {
         TableHolder *th = TableHolder::GetInstance();
         uint16_t next = th->Clone(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
         if (next != NO_MORE_TABLE) {
@@ -1304,7 +1304,7 @@ void PhraseView::DrawView() {
   I_Instrument *instrObj = bank->noneInstrument();
 
   // Display row numbers
-  
+
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16, phraseLength, phraseDiv_);
 
   // Draw all columns row by row. Per row the notes are drawn after the

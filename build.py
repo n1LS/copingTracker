@@ -50,16 +50,19 @@ def prebuild(args):
             stdout=f,
             check=True,
         )
-    step(
-        "Updating changelog",
-        [
-            sys.executable,
-            "tools/manual/update-changelog.py",
-            "TODO.md",
-            "tools/manual/raw_data/changelog.copingDoc",
-            "sources/Foundation/Constants/Version.h",
-        ],
-    )
+    if args.ci or not (ROOT / "TODO.md").exists():
+        print("  Updating changelog... SKIPPED (CI build or no local TODO.md)")
+    else:
+        step(
+            "Updating changelog",
+            [
+                sys.executable,
+                "tools/manual/update-changelog.py",
+                "TODO.md",
+                "tools/manual/raw_data/changelog.copingDoc",
+                "sources/Foundation/Constants/Version.h",
+            ],
+        )
     gm = [sys.executable, "-m", "ctsb_converter"]
     if args.minimal_gm:
         gm.append("--minimal-gm")
@@ -68,7 +71,8 @@ def prebuild(args):
         "../../sources/Application/Instruments",
     ]
     step("Generating GM bank", gm, ROOT / "tools/sf2converter")
-    step("Formatting source", ["bash", "format.sh"], ignore_error=True)
+    if not args.ci:
+        step("Formatting source", ["bash", "format.sh"], ignore_error=True)
     step(
         "Generating stack wavetables",
         [
@@ -103,17 +107,19 @@ def prebuild(args):
                 "tools/manual/webapp/build_webapp.py",
             ],
         )
-    # TODO nILS: reenable once the wave is done and the converter is updated
-    # step(
-    #    "Export LSDJeque Drum Kits",
-    #    [
-    #        sys.executable,
-    #        "tools/lsdj_kits/split_kit.py",
-    #        os.environ["LSDJ_GB_FILE"],
-    #        "-o",
-    #        "sources/Application/Instruments/LSDJKitInstrument/LSDJKits.generated.h",
-    #    ],
-    #)
+    step(
+        "Generating LSDJ drum kits",
+        [
+            sys.executable,
+            "tools/lsdj_kits/split_kit.py",
+            "--bpm", "80",
+            "--threshold", "5",
+            "--names", "tools/lsdj_kits/kits.txt",
+            "tools/lsdj_kits/kits.wav",
+            "sources/Application/Instruments/LSDJKitInstrument/LSDJKits.generated.h",
+        ],
+    )
+
 
 def main():
     load_env()
@@ -129,15 +135,28 @@ def main():
         help="also regenerate tools/manual/webapp/index.html",
     )
     parser.add_argument("--build-only", action="store_true")
-    parser.add_argument("-j", "--jobs", type=int, default=8)
+    parser.add_argument(
+        "--ci",
+        action="store_true",
+        help="non-interactive build: in-repo defaults, no changelog/format/upload/run, patches boot2",
+    )
+    parser.add_argument("-j", "--jobs", type=int, default=None)
     args = parser.parse_args()
+    if args.jobs is None:
+        args.jobs = (os.cpu_count() or 2) if args.ci else 8
+    if args.ci:
+        args.build_only = True
+        os.environ.setdefault(
+            "GM_SF2_FILE", str(ROOT / "tools/sf2converter/TimGM6mb.sf2")
+        )
+        os.environ.setdefault(
+            "PICO_TOOLCHAIN_FILE", str(ROOT / "sources/toolchain-rp2040.cmake")
+        )
     if args.host and args.bootloader:
         parser.error("--host and --bootloader are mutually exclusive")
     start = time.monotonic()
     try:
         if not args.quick:
-            if not os.environ.get("LSDJ_GB_FILE"):
-                parser.error("LSDJ_GB_FILE is required")
             if not os.environ.get("GM_SF2_FILE"):
                 parser.error("GM_SF2_FILE is required")
             prebuild(args)
@@ -145,16 +164,12 @@ def main():
             return 0
         if args.host:
             if not args.quick:
-                step(
-                    "Configuring host",
-                    [
-                        "cmake",
-                        "-S", "sources/Adapters/Host",
-                        "-B", "build-host",
-                        "-DCMAKE_C_FLAGS=-w",
-                        "-DCMAKE_CXX_FLAGS=-w",
-                    ],
-                )
+                host_cfg = ["cmake", "-S", "sources/Adapters/Host", "-B", "build-host"]
+                if args.ci:
+                    host_cfg += ["-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release"]
+                else:
+                    host_cfg += ["-DCMAKE_C_FLAGS=-w", "-DCMAKE_CXX_FLAGS=-w"]
+                step("Configuring host", host_cfg)
             step(
                 "Building host",
                 ["cmake", "--build", "build-host", f"-j{args.jobs}"],
@@ -169,16 +184,16 @@ def main():
             if not args.quick and not toolchain:
                 parser.error("PICO_TOOLCHAIN_FILE is required")
             if not args.quick:
-                step(
-                    "Configuring device",
-                    [
-                        "cmake",
-                        "-S", "sources",
-                        "-B", "build",
-                        f"-DPICO_SDK_PATH={SDK}",
-                        f"-DCMAKE_TOOLCHAIN_FILE={toolchain}",
-                    ],
-                )
+                device_cfg = [
+                    "cmake",
+                    "-S", "sources",
+                    "-B", "build",
+                    f"-DPICO_SDK_PATH={SDK}",
+                    f"-DCMAKE_TOOLCHAIN_FILE={toolchain}",
+                ]
+                if args.ci:
+                    device_cfg += ["-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release"]
+                step("Configuring device", device_cfg)
             target = "PatchBay" if args.bootloader else None
             build = ["cmake", "--build", "build"]
             if target:
@@ -188,11 +203,11 @@ def main():
                 "Building bootloader" if args.bootloader else "Building firmware",
                 build,
             )
-            if not args.build_only:
-                if args.bootloader:
-                    uf2 = "build/Adapters/copingTracker/bootloader/PatchBay.uf2"
-                else:
-                    uf2 = "build/Adapters/copingTracker/main/copingTracker.uf2"
+            if args.bootloader:
+                uf2 = "build/Adapters/copingTracker/bootloader/PatchBay.uf2"
+            else:
+                uf2 = "build/Adapters/copingTracker/main/copingTracker.uf2"
+                if not args.build_only or args.ci:
                     patched = ROOT / "build/Adapters/copingTracker/main/copingTracker.patched.uf2"
                     shutil.copyfile(ROOT / uf2, patched)
                     step(
@@ -204,6 +219,7 @@ def main():
                         ],
                     )
                     uf2 = str(patched.relative_to(ROOT))
+            if not args.build_only:
                 step("Uploading", ["picotool", "load", uf2])
                 step("Rebooting", ["picotool", "reboot"])
         print(f"\n✔️  Complete ({time.monotonic() - start:.1f}s)")

@@ -26,7 +26,7 @@ struct TintChar {
   uint8_t character;
 };
 
-consteval uint8_t hex_uint4(char c, uint8_t last) {
+constexpr uint8_t hex_uint4(char c, uint8_t last) {
   if (c >= '0' && c <= '9') {
     return c - '0';
   }

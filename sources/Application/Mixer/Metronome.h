@@ -56,9 +56,9 @@ public:
     fixed *dst = buffer;
     for (int i = 0; i < n; i++) {
       phase += inc;
-      int ramp = (int)(int16_t)(phase ^ 0x8000);              // -32768..32767
-      int tri = ((ramp < 0 ? -ramp : ramp) << 1) - 32768;     // folded: -32768..32768
-      int s = (tri * level) >> 15;                            // +-level
+      int ramp = (int)(int16_t)(phase ^ 0x8000);          // -32768..32767
+      int tri = ((ramp < 0 ? -ramp : ramp) << 1) - 32768; // folded: -32768..32768
+      int s = (tri * level) >> 15;                        // +-level
       uint32_t remain = left - i;
       if (remain < FadeSamples) {
         s = (int)((s * remain) / FadeSamples); // linear fade out, avoids a click at the end

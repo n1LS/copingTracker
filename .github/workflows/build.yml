@@ -1,0 +1,79 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/requirements.txt
+      - run: pip install -r tools/requirements.txt
+      - run: >
+          sudo apt-get update && sudo apt-get install -y
+          cmake ninja-build gcc-arm-none-eabi libnewlib-arm-none-eabi
+          libstdc++-arm-none-eabi-newlib
+      - run: python3 build.py --ci
+      - run: arm-none-eabi-size build/Adapters/copingTracker/main/copingTracker.elf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ github.sha }}
+          path: build/Adapters/copingTracker/main/copingTracker.patched.uf2
+          if-no-files-found: error
+          retention-days: 90
+
+  bootloader:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/requirements.txt
+      - run: pip install -r tools/requirements.txt
+      - run: >
+          sudo apt-get update && sudo apt-get install -y
+          cmake ninja-build gcc-arm-none-eabi libnewlib-arm-none-eabi
+          libstdc++-arm-none-eabi-newlib
+      - run: python3 build.py --ci --bootloader
+      - run: arm-none-eabi-size build/Adapters/copingTracker/bootloader/PatchBay.elf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bootloader-${{ github.sha }}
+          path: build/Adapters/copingTracker/bootloader/PatchBay.uf2
+          if-no-files-found: error
+          retention-days: 90
+
+  host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/requirements.txt
+      - run: pip install -r tools/requirements.txt
+      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build libsdl2-dev
+      - run: python3 build.py --ci --host
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install clang-format==20.1.6
+      - run: ./format.sh && git diff --exit-code
