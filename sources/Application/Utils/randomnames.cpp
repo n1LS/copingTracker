@@ -13,10 +13,6 @@
 #include "System/FileSystem/FileHandle.h"
 #include "System/FileSystem/FileSystem.h"
 #include "System/System/System.h"
-#ifdef __PICO__
-#include "Adapters/copingTracker/filesystem/picoTrackerFileSystem.h"
-#include "Externals/SdFat/src/SdCard/SdCard.h"
-#endif
 #include "Application/Persistency/PersistenceConstants.h"
 #include <cstdio>
 #include <stdlib.h>
