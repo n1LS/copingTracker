@@ -26,6 +26,14 @@ add_compile_options(
 
 project(copingTracker C CXX)
 
+# The static libraries depend on each other circularly. GNU ld scans each
+# archive only once, so on Linux the whole library list is wrapped in a group
+# that is rescanned until all symbols resolve. (ld64 on macOS needs nothing.)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(CMAKE_CXX_LINK_EXECUTABLE
+    "<CMAKE_CXX_COMPILER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Wl,--start-group <LINK_LIBRARIES> -Wl,--end-group")
+endif()
+
 find_package(SDL2 REQUIRED)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../")
