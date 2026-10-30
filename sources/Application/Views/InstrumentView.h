@@ -87,6 +87,7 @@ private:
   void onConfirmInstrumentTypeChange(View &view, ModalView &dialog);
   void onConfirmResetInstrument(View &view, ModalView &dialog);
   void onConfirmSampleChange(View &view, ModalView &dialog);
+  void onConfirmGMInstrumentChange(View &view, ModalView &dialog);
   void onConfirmExportOverwrite(View &view, ModalView &dialog);
 
   void AddVolumeRow(int y = SCREEN_HEIGHT - 3);
@@ -103,6 +104,8 @@ private:
   WatchedVariable instrumentType_;
   int lastSampleIndex_;
   bool suppressSampleChangeWarning_;
+  int lastGMInstrument_ = -1; // NO_GM_INSTRUMENT
+  bool suppressGMChangeWarning_ = false;
   unsigned int scrollStartTime_ = 0;
 
   bool mapVisible_ = false;
@@ -111,6 +114,8 @@ private:
   I_Instrument *pendingPurgeInstrument_ = nullptr;
   SampleInstrument *pendingSampleChangeInstrument_ = nullptr;
   int pendingSampleChangeNewIndex_ = -1;
+  SampleInstrument *pendingGMChangeInstrument_ = nullptr;
+  int pendingGMChangeNewValue_ = -1; // NO_GM_INSTRUMENT
   I_Instrument *exportInstrument_ = nullptr;
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> exportName_;
   InstrumentType pendingInstrumentType_ = IT_NONE;
