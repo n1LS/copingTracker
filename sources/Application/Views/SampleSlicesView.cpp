@@ -110,8 +110,6 @@ void SampleSlicesView::OnFocus() {
   updateZoomLimits();
   updateZoomWindow();
   isDirty_ = true;
-
-  saveState();
 }
 
 void SampleSlicesView::ButtonUp(uint16_t button, uint16_t mask) {
@@ -372,10 +370,6 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
       }
       break;
 
-    case Token::ActionSlicingSave:
-      saveState();
-      break;
-
     case Token::ActionSlicingRevert:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
         MessageBox *mb = MessageBox::Create(*this, "Slices", "Reset all slices?", MBBF_YES | MBBF_NO);
@@ -420,11 +414,6 @@ void SampleSlicesView::buildFieldLayout() {
   actionField_.back().AddObserver(*this);
 
   position.x_ += 7;
-  actionField_.emplace_back("Save", Token::ActionSlicingSave, position);
-  fieldList_.insert(fieldList_.end(), &actionField_.back());
-  actionField_.back().AddObserver(*this);
-
-  position.x_ += 6;
   actionField_.emplace_back("Auto slice", Token::ActionAutoSlice, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
@@ -827,45 +816,4 @@ void SampleSlicesView::resetSlices() {
   graphField_.RequestFullRedraw();
   isDirty_ = true;
   ((AppWindow &)w_).SetDirty();
-}
-
-void SampleSlicesView::saveState() {
-  if (!instrument_ || sampleSize_ == 0) {
-    return;
-  }
-
-  for (size_t i = 0; i < SampleInstrument::MaxSlices; i++) {
-    if (!instrument_->IsSliceDefined(i)) {
-      sliceSaveState_[i] = 0;
-    } else {
-      sliceSaveState_[i] = instrument_->GetSlicePoint(i);
-    }
-  }
-}
-
-void SampleSlicesView::restoreState() {
-  if (!instrument_ || sampleSize_ == 0) {
-    return;
-  }
-
-  // SetSlicePoint clamps every point up to its predecessor, so it can never
-  // remove slices. Start from a clean slate and only write the saved points
-  // up to the first unused one (0 after the first slot marks the end).
-  instrument_->ClearSlices();
-  for (size_t i = 0; i < SampleInstrument::MaxSlices; i++) {
-    if (i > 0 && sliceSaveState_[i] == 0) {
-      break;
-    }
-    instrument_->SetSlicePoint(i, sliceSaveState_[i]);
-  }
-
-  updateSliceSelectionFromInstrument();
-  if (updateZoomWindow()) {
-    graphField_.InvalidateWaveform();
-  }
-  graphField_.RequestFullRedraw();
-
-  sliceStartVar_.SetInt(sliceSaveState_[sliceIndexVar_.GetInt()]);
-
-  isDirty_ = true;
 }

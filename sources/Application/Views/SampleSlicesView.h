@@ -72,17 +72,13 @@ private:
   void updateSliceMarkers();
   int32_t definedSliceCount() const;
   void resetSlices();
-  void saveState();
-  void restoreState();
 
   WatchedVariable sliceIndexVar_;
   WatchedVariable sliceStartVar_;
   Variable sliceCountVar_;
 
   etl::vector<UIIntVarField, 2> intVarField_;
-  etl::vector<UIActionField, 4> actionField_;
-
-  size_t sliceSaveState_[SampleInstrument::MaxSlices];
+  etl::vector<UIActionField, 2> actionField_;
 
   SampleInstrument *instrument_;
   int32_t instrumentIndex_;

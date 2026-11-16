@@ -1336,16 +1336,16 @@ void PhraseView::DrawView() {
     setTextProps(colNote, j, Theme::Phrase::note(hilit), phraseLength);
 
     if (note == NO_NOTE) {
-      DrawString(anchor.x_, y, "---");
+      DrawString(anchor.x_ + columnPositions_[colNote], y, "---");
     } else if (note == NOTE_OFF) {
-      DrawString(anchor.x_, y, "off");
+      DrawString(anchor.x_ + columnPositions_[colNote], y, "off");
     } else {
       instrObj->noteDisplay(note, noteBuffer);
-      DrawString(anchor.x_, y, noteBuffer);
+      DrawString(anchor.x_ + columnPositions_[colNote], y, noteBuffer);
     }
 
     if (selected && nextSelected) {
-      DrawChar(anchor.x_ + 3, y, ' ');
+      DrawChar(anchor.x_ + columnPositions_[colNote] + columnWidths_[colNote], y, ' ');
     }
 
     // instrument
@@ -1359,10 +1359,10 @@ void PhraseView::DrawView() {
     unsigned char d = stepsBase[j].instrument;
 
     if (d == NO_INSTRUMENT) {
-      DrawString(anchor.x_ + 4, y, "--");
+      DrawString(anchor.x_ + columnPositions_[colInstrument], y, "--");
     } else {
       byteToHexString(d, buffer);
-      DrawString(anchor.x_ + 4, y, buffer);
+      DrawString(anchor.x_ + columnPositions_[colInstrument], y, buffer);
       // todo: move outside of the loop
       if (j == row_) {
         GUIPoint location = GetTitlePosition();
@@ -1386,7 +1386,7 @@ void PhraseView::DrawView() {
     }
 
     if (selected && nextSelected) {
-      DrawChar(anchor.x_ + 6, y, ' ');
+      DrawChar(anchor.x_ + columnPositions_[colInstrument] + columnWidths_[colInstrument], y, ' ');
     }
 
     // volume
@@ -1396,10 +1396,10 @@ void PhraseView::DrawView() {
 
     uint8_t vol = stepsBase[j].volume;
     setTextProps(colVolume, j, Theme::Phrase::volume(hilit), phraseLength);
-    DrawChar(anchor.x_ + 7, y, vol == 0xFF ? '-' : hexChars[vol & 0xF]);
+    DrawChar(anchor.x_ + columnPositions_[colVolume], y, vol == 0xFF ? '-' : hexChars[vol & 0xF]);
 
     if (selected && nextSelected) {
-      DrawChar(anchor.x_ + 8, y, ' ');
+      DrawChar(anchor.x_ + columnPositions_[colVolume] + columnWidths_[colVolume], y, ' ');
     }
 
     // command 1
@@ -1409,7 +1409,7 @@ void PhraseView::DrawView() {
 
     Token command1 = Token::enum_type(stepsBase[j].cmd1);
     setTextProps(colCmd1, j, Theme::Phrase::command1(hilit), phraseLength);
-    DrawString(anchor.x_ + 9, y, command1.c_str());
+    DrawString(anchor.x_ + columnPositions_[colCmd1], y, command1.c_str());
     if (j == row_ && (col_ == colCmd1 || col_ == colCmdVal1)) {
       helpLegendCommand = command1;
     }
@@ -1421,10 +1421,10 @@ void PhraseView::DrawView() {
 
     setTextProps(colCmdVal1, j, Theme::Phrase::command1(hilit), phraseLength);
     wordToHexString(stepsBase[j].param1, buffer);
-    DrawString(anchor.x_ + 12, y, buffer);
+    DrawString(anchor.x_ + columnPositions_[colCmdVal1], y, buffer);
 
     if (selected && nextSelected) {
-      DrawChar(anchor.x_ + 16, y, ' ');
+      DrawChar(anchor.x_ + columnPositions_[colCmdVal1] + columnWidths_[colCmdVal1], y, ' ');
     }
 
     // command 2
@@ -1434,7 +1434,7 @@ void PhraseView::DrawView() {
 
     Token command2 = Token::enum_type(stepsBase[j].cmd2);
     setTextProps(colCmd2, j, Theme::Phrase::command2(hilit), phraseLength);
-    DrawString(anchor.x_ + 17, y, command2.c_str());
+    DrawString(anchor.x_ + columnPositions_[colCmd2], y, command2.c_str());
     if (j == row_ && (col_ == colCmd2 || col_ == colCmdVal2)) {
       helpLegendCommand = command2;
     }
@@ -1443,7 +1443,7 @@ void PhraseView::DrawView() {
 
     setTextProps(colCmdVal2, j, Theme::Phrase::command2(hilit), phraseLength);
     wordToHexString(stepsBase[j].param2, buffer);
-    DrawString(anchor.x_ + 20, y, buffer);
+    DrawString(anchor.x_ + columnPositions_[colCmdVal2], y, buffer);
   }
 
   // draw the map in the bottom left corner

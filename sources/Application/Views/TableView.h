@@ -56,7 +56,7 @@ protected:
   void extendSelection();
 
   void updateCursor(int dx, int dy);
-  void updateCursorValue(int offset);
+  void updateCursorValue(uint16_t button);
   void setTextProps(int col, int row, Color color);
   void warpToNeighbour(int dir);
 
