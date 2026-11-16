@@ -734,34 +734,36 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
           break;
         }
 
-        Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
+        Variable *sampleVar = instr->FindVariable(Token::SampleInstrumentSample);
 
-        if (sampleVar->GetInt() != NO_SAMPLE) {
-          // changing the sample clears the GM Instrument
-          Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
-          if (gmVar) {
-            gmVar->SetInt(NO_GM_INSTRUMENT);
-            // find the intput field and set it inactive
-            gmInputField_->SetActive(false);
-          }
-        } else {
+        if (sampleVar->GetInt() == NO_SAMPLE) {
           break;
         }
-
-        sampleInputField_->SetActive(sampleVar->GetInt() != NO_SAMPLE);
 
         SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
         int newIndex = sampleInstr->GetSampleIndex();
 
         if (suppressSampleChangeWarning_) {
+          // the value was just reverted after the user declined
           suppressSampleChangeWarning_ = false;
           lastSampleIndex_ = newIndex;
+          sampleInputField_->SetActive(true);
           break;
         }
 
+        // nothing changed (e.g. the same sample was picked again), so leave the
+        // GM instrument alone
         if (newIndex == lastSampleIndex_) {
           break;
         }
+
+        // an actual change of sample clears the GM instrument
+        Variable *gmVar = instr->FindVariable(Token::SampleInstrumentGMInstrument);
+        if (gmVar) {
+          gmVar->SetInt(NO_GM_INSTRUMENT);
+          gmInputField_->SetActive(false);
+        }
+        sampleInputField_->SetActive(true);
 
         if (!sampleInstr->HasSlicesForWarning()) {
           sampleInstr->ClearSlices();
