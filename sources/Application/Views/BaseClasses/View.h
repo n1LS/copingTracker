@@ -400,10 +400,6 @@ public: // temp hack for modal window constructors
   ViewType viewType_;
   bool hasFocus_;
 
-  // Previous VU meter values for optimization (one pair per channel + master)
-  int32_t prevLeftVU_[SONG_CHANNEL_COUNT + 1];
-  int32_t prevRightVU_[SONG_CHANNEL_COUNT + 1];
-
   ModalView *GetModalView() {
     return modalView_;
   }
@@ -424,6 +420,32 @@ public:
   static int margin_;
   static int songRowCount_;
   static BatteryState batteryState_;
+
+protected:
+  // VU meter state is shared by all views: the meters show the same signal
+  // everywhere, so there is exactly one copy (one pair per channel + master)
+  static constexpr int VU_METER_COUNT = SONG_CHANNEL_COUNT + 1;
+  static int32_t prevLeftVU_[VU_METER_COUNT];
+  static int32_t prevRightVU_[VU_METER_COUNT];
+  // a set bit means the meter's cells are not on screen (a view cleared it),
+  // so it has to be drawn in full even if its level did not change
+  static uint16_t vuNeedsRepaint_;
+
+  // Peak hold, also shared. Peaks follow the raw level (not the smoothed bar)
+  // so short transients are not cut off.
+  struct VUPeak {
+    uint8_t level = 0;      // in bar units (0..VU_METER_MAX)
+    uint8_t holdFrames = 0; // frames left before the peak starts to fall
+    int8_t drawnCell = -1;  // cell the marker is currently drawn in, -1 for none
+  };
+  static VUPeak vuPeakLeft_[VU_METER_COUNT];
+  static VUPeak vuPeakRight_[VU_METER_COUNT];
+  static uint32_t vuPeakFrame_[VU_METER_COUNT];
+  static void updateVUPeak(VUPeak &peak, int32_t rawBars, uint32_t elapsedFrames);
+  // the cell a peak marker is drawn in for this bar height, -1 if the bar covers it
+  static int markerCell(const VUPeak &peak, int32_t bars);
+  // true while any channel peak is still on screen or moving
+  static bool anyVUPeakActive();
 
 private:
   static BatteryState latestBatteryState_;

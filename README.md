@@ -26,21 +26,21 @@ The picoTracker is powered by an RP2040 microcontroller and supports the followi
 * TRS MIDI In & Out, USB MIDI Out
 * 320x240 2.8in LCD display
 * 16MB of Flash
-* MicroSD cards upto 32GB for project & sample library storage
+* MicroSD cards upto 64 GB for project & sample library storage
 * USB-C for MIDI, charging and simple drag&drop firmware upgrades
 
 ## Limitations
 
-* The pico will probably struggle with 8 song channels playing at the same time in most cases (chiptune instruments are fine, sample might not be)
+* The processor will probably struggle with 8 song channels playing SampleInstruments at the same time while 8x Chiptune instruments are fine. The number of used Effects also affects performance.
 * Samples are copied to flash upon load and played from there. Since flash has to be shared with program code, only 8MB is available for it when using the typical 16M flash
 
 ## MANUAL
 
 tbd
 
-## Remote UI
+## mirrorUI
 
-The original picoTracker [remote UI is available here](https://ui.xiphonics.com/) and its [git repo is here](https://github.com/xiphonics/picotracker_client).
+The [mirrorUI client is available here](https://ui.props-north.com/) and its [git repo is here](https://github.com/n1LS/mirrorUI).
 
 ## Get involved or chat?
 
