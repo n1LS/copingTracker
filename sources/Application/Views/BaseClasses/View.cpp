@@ -388,7 +388,11 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
   }
 
   // Left channel: Handle level changes
-  const bool repaint = forceRedraw || (vuNeedsRepaint_ & (1u << vuIndex));
+  // after a Clear() the meter area is already blank. Only the cells that show
+  // something have to be drawn then; drawing the empty ones would wipe whatever
+  // the view put into the same columns (e.g. the chain preview in the song view)
+  const bool cleared = !forceRedraw && (vuNeedsRepaint_ & (1u << vuIndex));
+  const bool repaint = forceRedraw || cleared;
   VUPeak &peakLeft = vuPeakLeft_[vuIndex];
   VUPeak &peakRight = vuPeakRight_[vuIndex];
   const int markerLeft = markerCell(peakLeft, leftBars);
@@ -414,13 +418,17 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
       const char peak = 3;
       if (leftChanged) {
         const int level = (i == markerLeft) ? peak : leftBars - 10 * i;
-        DrawChar(pos.x_, pos.y_ - i, char_v_bar(level), fGraphic);
+        if (!cleared || level > 0) {
+          DrawChar(pos.x_, pos.y_ - i, char_v_bar(level), fGraphic);
+        }
       }
 
       // draw right channel if changed
       if (rightChanged) {
         const int level = (i == markerRight) ? peak : rightBars - 10 * i;
-        DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(level), fGraphic);
+        if (!cleared || level > 0) {
+          DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(level), fGraphic);
+        }
       }
     }
   }
