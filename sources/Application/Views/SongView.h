@@ -53,6 +53,9 @@ protected:
   void cutSelection();
   void drawChainPreview();
 
+  // the legend for the current mode (clone/selection), None in normal mode
+  ContextLegend currentContextLegend() const override;
+
   void unMuteAll();
   void toggleMute();
   void switchSoloMode();

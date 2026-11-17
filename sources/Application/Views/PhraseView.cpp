@@ -14,10 +14,12 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Model/Scale.h"
 #include "Application/Model/Table.h"
+#include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/CommandView.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Application/Views/ToastView.h"
 #include "Foundation/Constants/GraphicCharacters.h"
 #include "System/Console/Trace.h"
 #include "UIController.h"
@@ -881,6 +883,34 @@ bool PhraseView::navigationDown(uint16_t direction) {
   return false;
 }
 
+enum class TableCloneResult { NotApplicable, Cloned, NoFreeTable };
+
+// Clones the table the TABLE command in the given command value column of the step points to and
+// makes the step point to the copy (returned in clonedTable).
+static TableCloneResult cloneStepTable(PhraseStep &step, int col, uint16_t &clonedTable) {
+  uint16_t *param = nullptr;
+  if (col == colCmdVal1 && Token::enum_type(step.cmd1) == Token::InstrumentCommandTable) {
+    param = &step.param1;
+  } else if (col == colCmdVal2 && Token::enum_type(step.cmd2) == Token::InstrumentCommandTable) {
+    param = &step.param2;
+  }
+
+  if (param == nullptr) {
+    return TableCloneResult::NotApplicable;
+  }
+
+  // the parameter is 16 bit but there are only TABLE_COUNT tables, the player
+  // clamps it the same way, so this clones the table that actually plays
+  int next = TableHolder::GetInstance()->Clone(std::min<int>(*param, TABLE_COUNT - 1));
+  if (next == NO_MORE_TABLE) {
+    return TableCloneResult::NoFreeTable;
+  }
+
+  *param = static_cast<uint16_t>(next);
+  clonedTable = *param;
+  return TableCloneResult::Cloned;
+}
+
 void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
   const bool enterAlone = IsChord(newButton, mask, BM_ENTER);
 
@@ -909,7 +939,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         consumed = true;
       } else {
         // Create new table for command parameter columns
-        if ((col_ == 3) &&
+        if ((col_ == colCmdVal1) &&
             Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) == Token::InstrumentCommandTable) {
           TableHolder *th = TableHolder::GetInstance();
           uint16_t next = th->GetNext();
@@ -952,22 +982,18 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         }
       }
     } else {
-      if ((col_ == colCmdVal1) &&
-          Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) == Token::InstrumentCommandTable) {
-        TableHolder *th = TableHolder::GetInstance();
-        int current = phrase_->steps_[viewData_->currentPhrase_][row_].param1;
-        if (current != -1) {
-          th->Clone(current);
-        }
-      } else if ((col_ == colCmdVal2) && Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd2) ==
-                                             Token::InstrumentCommandTable) {
-        TableHolder *th = TableHolder::GetInstance();
-        uint16_t next = th->Clone(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
-        if (next != NO_MORE_TABLE) {
+      uint16_t clonedTable = 0;
+      switch (cloneStepTable(phrase_->steps_[viewData_->currentPhrase_][row_], col_, clonedTable)) {
+        case TableCloneResult::Cloned:
           isDirty_ = true;
-          cmdEdit_.SetInt(next);
-          Trace::Log("PHRASEVIEW", "Cloned table2 -> %04x", next);
-        }
+          cmdEdit_.SetInt(clonedTable);
+          Trace::Log("PHRASEVIEW", "Cloned table -> %04x", clonedTable);
+          break;
+        case TableCloneResult::NoFreeTable:
+          ToastView::GetInstance()->Show("No more tables available.", &ttWarning, ToastDuration::regular);
+          break;
+        case TableCloneResult::NotApplicable:
+          break;
       }
     }
     viewMode_ = VM_NORMAL;
@@ -1450,9 +1476,12 @@ void PhraseView::DrawView() {
 
   drawMap();
 
-  // Set info area draw mode based on what will be drawn
+  // Set info area draw mode based on what will be drawn. Context help trumps
+  // the command help, which trumps the notes.
 
-  if (helpLegendCommand != Token::InstrumentCommandNone) {
+  if (drawContextLegendInfoArea()) {
+    // the legend for the current mode is shown
+  } else if (helpLegendCommand != Token::InstrumentCommandNone) {
     infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
     drawCommandLegend(5, SCREEN_HEIGHT - 4, helpLegendCommand);
   } else {
@@ -1483,6 +1512,16 @@ void PhraseView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
   if (player && player->GetSequencerMode() == SM_LIVE) {
     needsLiveIndicatorUpdate_ = true;
   }
+}
+
+ContextLegend PhraseView::currentContextLegend() const {
+  if (viewMode_ == VM_CLONE) {
+    return ContextLegend::PhraseClone;
+  }
+  if (viewMode_ == VM_SELECTION || clipboard_.active_) {
+    return ContextLegend::PhraseSelection;
+  }
+  return ContextLegend::None;
 }
 
 void PhraseView::AnimationUpdate() {

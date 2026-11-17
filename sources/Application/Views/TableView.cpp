@@ -13,6 +13,7 @@
 #include "Application/AppWindow.h"
 #include "Application/Instruments/CommandList.h"
 #include "Application/Player/TablePlayback.h"
+#include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/CommandView.h"
 #include "Application/Views/SampleEditorView.h"
@@ -644,6 +645,14 @@ void TableView::setTextProps(int col, int row, Color color = Theme::View::fg) {
   SetBackgroundColor(highlighted ? color : Theme::View::bg);
 }
 
+ContextLegend TableView::currentContextLegend() const {
+  // ALT+EDIT goes straight to selection here, there is no clone mode
+  if (viewMode_ == VM_SELECTION || clipboard_.active_) {
+    return ContextLegend::TableSelection;
+  }
+  return ContextLegend::None;
+}
+
 void TableView::DrawView() {
   Token helpLegendCommand = Token::InstrumentCommandNone;
 
@@ -744,8 +753,11 @@ void TableView::DrawView() {
 
   drawMap();
 
-  // Set info area draw mode based on what will be drawn
-  if (helpLegendCommand != Token::InstrumentCommandNone) {
+  // Set info area draw mode based on what will be drawn. Context help trumps
+  // the command help, which trumps the notes.
+  if (drawContextLegendInfoArea()) {
+    // the legend for the current mode is shown
+  } else if (helpLegendCommand != Token::InstrumentCommandNone) {
     infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
     drawCommandLegend(5, SCREEN_HEIGHT - 4, helpLegendCommand);
   } else {

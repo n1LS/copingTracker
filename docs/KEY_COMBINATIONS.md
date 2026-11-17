@@ -17,6 +17,20 @@ only EDIT is held. A combination no view defines does nothing, so holding
 RIGHT and pressing UP no longer moves in two directions at once and a second
 direction is ignored.
 
+> **Audit status:** sections 3.1–3.5 (Song, Chain, Phrase, Table, Groove) were checked
+> against the code on 2026-11-17. The other sections were written before the input
+> handler rewrite and have not been re-checked since.
+>
+> **Navigation chords** (`NAV + direction`) are routed by `View::ProcessButton` to the
+> view's `navigationDown()` *before* `ButtonDown()` runs, so they work in every mode
+> (selection, clone, new, ...). Where `navigationDown()` does not handle a direction,
+> the press falls through to `ButtonDown()` as usual.
+>
+> **Context legend:** in clone and selection mode the song, chain, phrase and table
+> views replace the notes / command help in the bottom info area with a legend of the
+> available combos. The legends live in `tools/manual/raw_data/ContextLegends.copingDoc`
+> and must be kept in sync with the tables below.
+
 Chords made only of ALT / NAV / EDIT have no natural trigger, so either key may
 be the last one pressed (`IsPair(...)`): `EDIT+ALT`, `EDIT+NAV`, `NAV+ALT`,
 `NAV+EDIT`. These are
@@ -142,7 +156,20 @@ until NAV is released).
 | `PLAY` | chord | Start playback of chain (`onStart`) |
 | `DOWN / UP / LEFT / RIGHT` | chord | Move cursor |
 
-*Selection mode (`VM_SELECTION`)*(same masks as ChainView/PhraseView selection):
+*Clone mode (`VM_CLONE`)* — entered with `EDIT + ALT`, legend `SongClone`:
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `ENTER` while `ALT` is held | chord | Clone the chain at the cursor into the next free chain (`clonePosition`), back to normal mode |
+| any other button | chord | Leaves clone mode and starts a **selection**; the button is then handled as in selection mode |
+
+*New mode (`VM_NEW`)* — armed by `ENTER` alone:
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `ENTER` alone | chord | Put the next free chain into the slot |
+
+*Selection mode (`VM_SELECTION`)* — legend `SongSelection`:
 
 | Combination | Type | Action |
 |-------------|------|--------|
@@ -152,11 +179,9 @@ until NAV is released).
 | `ENTER + ALT` | chord | Cut selection (`cutSelection`) |
 | `ENTER + NAV` | chord | Toggle solo |
 | `NAV + ALT` | chord, either order | Un-mute all |
-| `NAV + RIGHT` | chord | Navigate → **Chain** |
-| `NAV + UP` | chord | Navigate → **Project** |
-| `NAV + DOWN` | chord | Navigate → **Mixer** |
 | `NAV + PLAY` | chord | Stop |
-| `PLAY` / arrows | chord | Start playback / move cursor |
+| `NAV + direction` | chord | Navigation, same as in normal mode |
+| `PLAY` / arrows | chord | Start playback / move cursor (arrows resize the selection) |
 
 > `VM_NEW`: `ENTER` alone creates the next chain. `VM_CLONE`: `ENTER+ALT` clones.
 
@@ -178,7 +203,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `ENTER + LEFT` | chord | Phrase value −`0x01` |
 | `ENTER + RIGHT` | chord | Phrase value +`0x01` |
 | `ENTER + ALT` | chord | Paste clipboard (`pasteClipboard`) |
-| `ENTER` alone | chord | Paste last phrase into slot + arm `VM_NEW` |
+| `ENTER` alone | chord | Paste last phrase into slot; in the phrase column (column 0) it also arms `VM_NEW` |
 | `ENTER + NAV` | chord | Toggle solo (hold) |
 | `NAV + LEFT` | chord | Navigate → **Song view** |
 | `NAV + RIGHT` | chord | Navigate → **Phrase view** (current phrase) |
@@ -189,19 +214,33 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `DOWN / UP / LEFT / RIGHT` | chord | Move cursor |
 | `ENTER` release (phrase-in-progress) | release | Finalize the phrase step edit (marks phrase step as used) |
 
-*Selection mode*
+*Clone mode (`VM_CLONE`)* — entered with `EDIT + ALT`, legend `ChainClone`:
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `ENTER` while `ALT` is held | chord | Clone the phrase at the cursor into the next free phrase (`clonePosition`), back to normal mode |
+| any other button | chord | Leaves clone mode and starts a **selection**; the button is then handled as in selection mode |
+
+*New mode (`VM_NEW`)* — armed by `ENTER` alone in the phrase column:
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `ENTER` alone | chord | Put the next free phrase into the slot |
+
+*Selection mode* — legend `ChainSelection`:
 
 | Combination | Type | Action |
 |-------------|------|--------|
 | `EDIT` alone | chord | Copy selection |
 | `EDIT + NAV` | chord, either order | Toggle mute |
 | `EDIT + ALT` | chord, either order | Extend selection |
-| `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust selected value (`updateSelectionValue`) |
+| `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust selected value (`updateSelectionValue`; ±`0x10` / ±`0x0C` in the phrase / other column for UP / DOWN) |
 | `ENTER + ALT` | chord | Cut selection |
 | `ENTER + NAV` | chord | Toggle solo |
-| `NAV + LEFT / RIGHT` | chord | Navigate → **Song / Phrase** |
 | `NAV + PLAY` | chord | Start chain (retrig) |
 | `NAV + ALT` | chord, either order | Un-mute all |
+| `NAV + direction` | chord | Navigation, same as in normal mode |
+| `PLAY` / arrows | chord | Start chain / move cursor |
 
 ### 3.3 `PhraseView` (`Views/PhraseView.cpp`)
 
@@ -219,7 +258,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `EDIT + NAV` | chord, either order | Toggle mute (hold) |
 | `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust cursor value (`updateCursorValue`; DOWN=−, UP=+, LEFT/RIGHT octave) |
 | `ENTER + ALT` | chord | Paste clipboard (`pasteClipboard`) |
-| `ENTER` alone | chord | Paste last value; on command-value columns a **command picker** opens (if enabled); on instrument / table-command columns arms `VM_NEW`; on note/volume starts **audition** (hold ENTER, release stops) |
+| `ENTER` alone | chord | Paste last value; on command columns a **command picker** opens (if enabled); on the instrument and command value columns arms `VM_NEW`; on the note, instrument and volume columns starts **audition** (hold ENTER, release stops) |
 | `ENTER + NAV` | chord | Toggle solo (hold) |
 | `NAV + LEFT` | chord | Navigate → **Chain view** |
 | `NAV + RIGHT` | chord | Navigate → **Instrument view** |
@@ -234,24 +273,37 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 
 | Release | Action |
 |---------|--------|
-| `ENTER` (while auditioning) | Stop note audition (`stopAudition`) |
+| any button, once `ENTER` is no longer held | Stop note audition (`stopAudition`); normally this is the release of `ENTER` itself |
 | `NAV` + `MUTEON` / `SOLOON` | Commit mute / solo toggle |
 
-*Selection mode*
+*Clone mode (`VM_CLONE`)* — entered with `EDIT + ALT`, legend `PhraseClone`:
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `ENTER` while `ALT` is held | chord | Clone the instrument (note / instrument columns) or the table (command value columns holding a `TABLE` command) under the cursor and point the step to the copy, back to normal mode. A table number of `0x20` or more clones table `0x1F`, like the player plays it. If no table is free, a warning toast "No more tables available." is shown. Does nothing in the volume and command columns |
+| any other button | chord | Leaves clone mode and starts a **selection**; the button is then handled as in selection mode |
+
+*New mode (`VM_NEW`)* — armed by `ENTER` alone on the instrument and command value columns:
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `ENTER` alone | chord | On the instrument column: assign a new, empty instrument slot. On the first command value column holding a `TABLE` command: assign a new table. The second command value column also arms this mode but creates nothing |
+
+*Selection mode* — legend `PhraseSelection`:
 
 | Combination | Type | Action |
 |-------------|------|--------|
 | `EDIT` alone | chord | Copy selection |
-| `EDIT + NAV` | chord, either order | Toggle mute |
 | `EDIT + ALT` | chord, either order | Extend selection |
 | `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust selected value |
 | `ENTER + ALT` | chord | Cut selection |
 | `ENTER + NAV` | chord | Toggle solo |
-| `NAV + LEFT` | chord | Navigate → **Chain** |
-| `NAV + RIGHT` | chord | Navigate → **Instrument** |
-| `NAV + PLAY` | chord | Start phrase (retrig) |
 | `NAV + ALT` | chord, either order | Un-mute all |
+| `NAV + PLAY` | chord | Start phrase (retrig) |
+| `NAV + direction` | chord | Navigation, same as in normal mode |
 | arrows / `PLAY` | chord | Move cursor / start playback |
+
+> There is no `EDIT + NAV` (toggle mute) in phrase selection mode, unlike song and chain.
 
 ### 3.4 `TableView` (`Views/TableView.cpp`) — Table AND Table2 views (`viewType_`)
 
@@ -263,14 +315,14 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | Combination | Type | Action |
 |-------------|------|--------|
 | `EDIT + LEFT / RIGHT` | chord | Warp to neighbouring table (prev / next) |
-| `EDIT + DOWN` | chord | Warp in column −`0x10` |
-| `EDIT + UP` | chord | Warp in column +`0x10` |
+| `EDIT + DOWN` | chord | Warp to the table 0x10 before the current one (`warpToNeighbour(-16)`) |
+| `EDIT + UP` | chord | Warp to the table 0x10 after the current one (`warpToNeighbour(+16)`) |
 | `ENTER + EDIT` | chord | Cut value at cursor (`cutPosition`) |
 | `EDIT + ALT` | chord, either order | Enter **selection mode** (`VM_SELECTION`) |
-| `ENTER + DOWN` | chord | Value −`0x10` |
-| `ENTER + UP` | chord | Value +`0x10` |
-| `ENTER + LEFT` | chord | Value −`0x01` |
-| `ENTER + RIGHT` | chord | Value +`0x01` |
+| `ENTER + DOWN` | chord | Value −`0x10`; in a command column: previous command group |
+| `ENTER + UP` | chord | Value +`0x10`; in a command column: next command group |
+| `ENTER + LEFT` | chord | Value −`0x01`; in a command column: previous command |
+| `ENTER + RIGHT` | chord | Value +`0x01`; in a command column: next command |
 | `ENTER` alone | chord | Paste last value / open command picker (cmd col) |
 | `ENTER + ALT` | chord | Paste clipboard (`pasteClipboard`) |
 | `NAV + UP` | chord | Navigate → **Phrase view** (Table) / **Instrument view** (Table2) |
@@ -280,16 +332,16 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `PLAY` | chord | Start phrase playback (`PM_PHRASE`) |
 | `DOWN / UP / LEFT / RIGHT` | chord | Move cursor |
 
-*Selection mode*
+*Selection mode* — legend `TableSelection` (there is no clone mode; `EDIT + ALT` goes straight to selection):
 
 | Combination | Type | Action |
 |-------------|------|--------|
 | `EDIT` alone | chord | Copy selection |
 | `EDIT + ALT` | chord, either order | Extend selection |
 | `ENTER + ALT` | chord | Cut selection |
-| `NAV + UP` | chord | Navigate → **Phrase** |
 | `NAV + PLAY` | chord | Start phrase (retrig) |
-| arrows / `PLAY` | chord | Move cursor / start playback |
+| `NAV + direction` | chord | Navigation, same as in normal mode |
+| arrows / `PLAY` | chord | Move cursor (resizes the selection) / start playback |
 
 ### 3.5 `GrooveView` (`Views/GrooveView.cpp`)
 
@@ -298,15 +350,17 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `EDIT + LEFT / RIGHT` | chord | Warp to neighbouring groove (`warpGroove(∓1)`) |
 | `EDIT + DOWN` | chord | Warp groove −`0x10` |
 | `EDIT + UP` | chord | Warp groove +`0x10` |
-| `EDIT + ENTER` | chord | Clear value at cursor (`clearCursorValue`) |
-| `ENTER + LEFT / RIGHT` | chord | Value −/ + `0x01` |
-| `ENTER + DOWN / UP` | chord | Value −/ + `0x01` (octave-shifted) |
+| `EDIT + ENTER` | chord, either order | Clear value at cursor (`clearCursorValue`) |
+| `ENTER + LEFT / RIGHT` | chord | Value −/ + `0x01` (clamped to `0x01`..`0x0F`) |
+| `ENTER + DOWN / UP` | chord | Value −/ + `0x01`, identical to LEFT / RIGHT (the `sync` argument of `updateCursorValue` is unused) |
 | `ENTER` alone | chord | Initialize cursor value (`initCursorValue`) |
 | `NAV + DOWN` | chord | Navigate → **Phrase view** |
 | `NAV + LEFT` | chord | Navigate → **Project view** |
 | `NAV + PLAY` | chord | Start phrase with retrig (`PM_PHRASE`) |
 | `PLAY` | chord | Start phrase playback (`PM_PHRASE`) |
 | `DOWN / UP` | chord | Move row cursor |
+
+The groove view has no clone, new or selection mode and therefore no context legend.
 
 ### 3.6 `InstrumentView` (`Views/InstrumentView.cpp`)
 

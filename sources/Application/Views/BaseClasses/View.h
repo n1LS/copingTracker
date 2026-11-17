@@ -51,8 +51,12 @@ typedef enum ButtonMask : uint16_t {
   BM_DIRECTIONAL = BM_LEFT | BM_RIGHT | BM_UP | BM_DOWN,
 } ButtonMask;
 
-// Info area draw mode - ensures drawNotes() and drawHelpLegend() are mutually exclusive
-enum class InfoAreaDrawMode { Notes, HelpLegend };
+// Info area draw mode - ensures drawNotes(), drawCommandLegend() and drawContextLegend() are mutually exclusive.
+// Context help trumps the notes, and so does everything else that wants the space.
+enum class InfoAreaDrawMode : uint8_t { Notes, HelpLegend, Context };
+
+// the legends shown by drawContextLegend (generated from ContextLegends.copingDoc)
+enum class ContextLegend : uint8_t;
 
 enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
 
@@ -356,6 +360,15 @@ protected:
   void drawNotes();
   void drawRowNumbers(int x, int y, int start, int numRows, int limit = 256, int altRowNumber = ALT_ROW_NUMBER);
   void drawCommandLegend(uint8_t x, uint8_t y, Token command);
+  // the live button/combo help for the current mode of a view, shown in the info area
+  void drawContextLegend(uint8_t x, uint8_t y, ContextLegend legend);
+  // Views that have context help override this and return the legend for their current mode
+  virtual ContextLegend currentContextLegend() const;
+  // Draws the legend of the current mode into the info area and claims it
+  // (infoAreaMode_). Returns false, and draws nothing, if the mode has none.
+  bool drawContextLegendInfoArea();
+  // Marks the view dirty when the legend that should show is not the one that is drawn
+  void updateContextLegend();
   void drawScrollBar(uint16_t x, uint16_t y, uint16_t height, uint16_t index, uint16_t total);
   void drawBattery();
   void drawPlaybackIndicator();
@@ -394,6 +407,13 @@ public: // temp hack for modal window constructors
   bool needsRedraw_;
   bool isVisible_;
 
+protected:
+  // the context legend that is currently drawn, to notice when it has to change.
+  // Declared here on purpose: it fits into the padding after isVisible_, so
+  // having it in every view costs no RAM. (value 0 is ContextLegend::None)
+  ContextLegend drawnContextLegend_ = ContextLegend();
+
+public:
   int vuMeterCount_;
   ViewMode viewMode_;
   bool isDirty_; // Do we need to redraw screeen
@@ -412,6 +432,14 @@ protected:
 private:
   uint16_t mask_;
   bool locked_;
+
+protected:
+  // what the info area at the bottom of the screen is currently used for.
+  // Declared here on purpose: it fits into the padding after locked_, so
+  // having it in every view costs no RAM.
+  InfoAreaDrawMode infoAreaMode_ = InfoAreaDrawMode::Notes;
+
+private:
   static bool initPrivate_;
   ModalView *modalView_;
   ModalViewCallback modalViewCallback_;

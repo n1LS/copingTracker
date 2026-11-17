@@ -13,6 +13,7 @@
 #include "Application/AppWindow.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/CommandHelp.h"
+#include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
@@ -855,6 +856,43 @@ void View::drawCommandLegend(uint8_t x, uint8_t y, Token command) {
   DrawTintString(x, y + 1, help.line2.data());
   DrawTintString(x, y + 2, help.line3.data());
   DrawTintString(x, y + 3, help.line4.data());
+}
+
+void View::drawContextLegend(uint8_t x, uint8_t y, ContextLegend legend) {
+  if (legend == ContextLegend::None) {
+    return;
+  }
+
+  ContextLegendText text = getContextLegend(legend);
+
+  SetBackgroundColor(Theme::View::bg);
+
+  DrawTintString(x, y + 0, text.line1.data());
+  DrawTintString(x, y + 1, text.line2.data());
+  DrawTintString(x, y + 2, text.line3.data());
+  DrawTintString(x, y + 3, text.line4.data());
+}
+
+ContextLegend View::currentContextLegend() const {
+  return ContextLegend::None;
+}
+
+bool View::drawContextLegendInfoArea() {
+  drawnContextLegend_ = currentContextLegend();
+  if (drawnContextLegend_ == ContextLegend::None) {
+    return false;
+  }
+
+  infoAreaMode_ = InfoAreaDrawMode::Context;
+  drawContextLegend(5, SCREEN_HEIGHT - 4, drawnContextLegend_);
+  return true;
+}
+
+void View::updateContextLegend() {
+  // The mode changes in button handlers that don't all redraw, so notice it here
+  if (currentContextLegend() != drawnContextLegend_) {
+    isDirty_ = true;
+  }
 }
 
 void View::DrawTitle(const char *format, ...) {

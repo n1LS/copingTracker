@@ -48,6 +48,7 @@ public:
   bool navigationDown(uint16_t direction) override;
   virtual void ButtonUp(uint16_t button, uint16_t mask);
   virtual void DrawView();
+  ContextLegend currentContextLegend() const override;
   void DrawEditingValue();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
@@ -125,9 +126,6 @@ private:
                                // meter, positions, live indicators)
 
   bool needsLiveIndicatorUpdate_ = false;
-
-  // Info area draw mode - ensures drawNotes() and drawHelpLegend() are mutually exclusive
-  InfoAreaDrawMode infoAreaMode_ = InfoAreaDrawMode::Notes;
 
 #ifdef PICO_DEOPTIMIZED_DEBUG
   // These variables are specifically for thread synchronization in debug builds
