@@ -99,6 +99,15 @@ def prebuild(args):
             "sources/Application/Utils/CommandHelp.generated.h",
         ],
     )
+    step(
+        "Generating context legends",
+        [
+            sys.executable,
+            "tools/manual/raw_data/convert-contextlegends.py",
+            "tools/manual/raw_data/ContextLegends.copingDoc",
+            "sources/Application/Utils/ContextLegend.generated.h",
+        ],
+    )
     if args.manual:
         step(
             "Building HTML manual",
