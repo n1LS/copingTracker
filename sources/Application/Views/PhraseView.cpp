@@ -31,7 +31,6 @@
 #include <nanoprintf.h>
 #include <stdlib.h>
 
-static const int16_t offsets_[4] = {-1, 1, 16, -16};
 static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
 static const uint8_t columnWidths_[7] = {3, 2, 1, 3, 4, 3, 4};
 
@@ -51,7 +50,7 @@ void PhraseView::setCurrentlySelectedCommand(Token command) {
 
   uint8_t *cmd = (col_ == colCmd1) ? &step.cmd1 : &step.cmd2;
   *cmd = command.raw();
-  lastCmd_ = *cmd;
+  viewData_->phraseLastCmd_ = *cmd;
 
   if (command == Token::InstrumentCommandNone) {
     // clear the parameter as well
@@ -65,173 +64,46 @@ void PhraseView::setCurrentlySelectedCommand(Token command) {
 // Column-specific value update handlers
 
 void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
-  unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].note;
-  InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-  uint8_t instrumentId = getEffectiveInstrumentForRow(row_ + yOffset);
-  I_Instrument *instrument = bank->GetInstrument(instrumentId);
+  // LEFT / RIGHT change the note by one step of the scale, UP / DOWN by an octave
+  const bool smallChange = (direction == VUD_LEFT || direction == VUD_RIGHT);
+  const int sign = (direction == VUD_LEFT || direction == VUD_DOWN) ? -1 : 1;
+  changeNote(row_ + yOffset, sign, smallChange);
 
-  bool smallChange = (direction == VUD_LEFT || direction == VUD_RIGHT);
-  if (instrument) {
-    // some instruments want to manually set the change to the note
-    int sign = (direction == VUD_LEFT || direction == VUD_DOWN) ? -1 : 1;
-    if (instrument->AffectNote(c, sign, smallChange)) {
-      lastNote_ = *c;
-      startAudition(false);
-      return;
-    }
-  }
-
-  // Get the offset based on direction (using proper sequential indices)
-  int offset = smallChange ? 1 : 12;
-  if (direction == VUD_DOWN || direction == VUD_LEFT) {
-    offset *= -1;
-  }
-
-  // when changing notes from note off, always start from C3
-  if (*c == NOTE_OFF) {
-    *c = NOTE_C3;
-    offset = 0;
-  }
-
-  uint8_t sliceFirst = 0;
-  uint8_t sliceLast = 0;
-
-  // attempt to get the sample instrument for slice display
-  SampleInstrument *sampleInstrument = nullptr;
-  if (instrument && instrument->GetType() == IT_SAMPLE) {
-    sampleInstrument = (SampleInstrument *)instrument;
-  }
-
-  // TODO nILS: this should also happen in SampleInstrument's AffectNote instead of getting special treatmnt here
-  if (sampleInstrument && sampleInstrument->GetSliceNoteRange(sliceFirst, sliceLast)) {
-    // Apply scale or slice range constraints
-    int newNote = *c + offset;
-
-    if (newNote < sliceFirst) {
-      newNote = sliceFirst;
-    } else if (newNote > sliceLast) {
-      newNote = sliceLast;
-    }
-    *c = static_cast<unsigned char>(newNote);
-  } else {
-    int scale = viewData_->project_->GetScale();
-    int scaleRoot = viewData_->project_->GetScaleRoot();
-
-    // Calculate the new note with the offset
-    int newNote = *c + offset;
-
-    // Check if the note is in the scale (adjusted for root)
-    if (instrument && instrument->SupportsScales()) {
-      // Add/remove from offset to match selected scale
-      while (newNote >= 0 && !scaleSteps[scale][(newNote + 12 - scaleRoot) % 12]) {
-        offset > 0 ? offset++ : offset--;
-        newNote = *c + offset;
-      }
-    }
-
-    updateData(c, offset, instrument ? instrument->GetHighestNote() : HIGHEST_NOTE, true);
-  }
-
-  lastNote_ = *c;
   // Need to restart audition to update it with the new note
   startAudition(false);
 }
 
 void PhraseView::updateInstrumentValue(ViewUpdateDirection direction, int yOffset) {
-  unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].instrument;
-  updateData(c, offsets_[direction], MAX_INSTRUMENT_COUNT - 1, false);
-  lastInstr_ = *c;
+  changeInstrument(row_ + yOffset, direction);
   // restart audition so it picks up the new instrument
   startAudition(false);
 }
 
 void PhraseView::updateVolumeValue(ViewUpdateDirection direction, int yOffset) {
-  uint8_t &vol = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset].volume;
-
-  switch (direction) {
-    case VUD_UP:
-      vol = 0x0F;
-      break;
-    case VUD_DOWN:
-      vol = 0xFF;
-      break;
-    case VUD_LEFT:
-      if (vol == 0) {
-        // below 0 is no value
-        vol = NO_VOLUME;
-      } else if (vol != NO_VOLUME) {
-        vol--;
-      }
-      break;
-    case VUD_RIGHT:
-      if (vol == NO_VOLUME) {
-        vol = 0;
-      } else {
-        vol = std::min(0x0F, vol + 1);
-      }
-      break;
-  }
-  lastVolume_ = vol;
+  changeVolume(row_ + yOffset, direction);
   // restart audition so it picks up the new volume
   startAudition(false);
 }
 
 void PhraseView::updateCommandValue(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
-  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-  Token token = (col == colCmd1) ? Token::enum_type(step.cmd1) : Token::enum_type(step.cmd2);
-
-  switch (direction) {
-    case VUD_LEFT:
-      token = CommandList::GetPrev(token);
-      break;
-    case VUD_RIGHT:
-      token = CommandList::GetNext(token);
-      break;
-    case VUD_UP:
-      token = CommandList::GetNextAlpha(token);
-      break;
-    case VUD_DOWN:
-      token = CommandList::GetPrevAlpha(token);
-      break;
-  }
-
-  if (col == colCmd1) {
-    step.cmd1 = static_cast<uint8_t>(static_cast<char>(token));
-  } else {
-    step.cmd2 = static_cast<uint8_t>(static_cast<char>(token));
-  }
-  lastCmd_ = token;
+  changeCommand(row_ + yOffset, col != colCmd1, direction);
 }
 
 void PhraseView::updateCommandParam(PhraseColumn col, ViewUpdateDirection direction, int yOffset) {
-  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_ + yOffset];
-
-  // pick correct input and output for the selected column
-  Token currentCmd = (col == colCmdVal1) ? Token::enum_type(step.cmd1) : Token::enum_type(step.cmd2);
-  uint16_t *target = (col == colCmdVal1) ? &step.param1 : &step.param2;
-
-  cmdEditField_.ProcessArrow(DirectionalButtons[direction]);
-  uint16_t paramValue = cmdEdit_.GetInt();
-  paramValue = CommandList::RangeLimitCommandParam(currentCmd, paramValue);
-  cmdEdit_.SetInt(paramValue);
-
-  *target = paramValue;
-  lastParam_ = paramValue;
+  changeCommandParam(row_ + yOffset, col != colCmdVal1, direction);
 }
 
-PhraseView::PhraseView(GUIWindow &w, ViewData *viewData)
-    : ScreenView(w, viewData), cmdEdit_(Token::ActionEdit, 0), cmdEditPos_(0, 10),
-      cmdEditField_(cmdEditPos_, cmdEdit_, 4, "%4.4X", 0, 0xFFFF, 16, true) {
+PhraseView::PhraseView(GUIWindow &w, ViewData *viewData) : PhraseEditingView(w, viewData) {
   phrase_ = &(viewData_->song_->phrase_);
   lastPlayingPos_ = 0;
   row_ = 0;
   viewData->phraseCurPos_ = 0;
   col_ = colNote;
-  lastNote_ = NOTE_C3;
-  lastInstr_ = 0;
-  lastCmd_ = Token::InstrumentCommandNone;
-  lastParam_ = 0;
-  lastVolume_ = NO_VOLUME;
+  viewData_->phraseLastNote_ = NOTE_C3;
+  viewData_->phraseLastInstrument_ = 0;
+  viewData_->phraseLastCmd_ = Token::InstrumentCommandNone;
+  viewData_->phraseLastParam_ = 0;
+  viewData_->phraseLastVolume_ = NO_VOLUME;
 
   clipboard_.active_ = false;
   clipboard_.width_ = 0;
@@ -249,11 +121,11 @@ void PhraseView::Reset() {
   lastPlayingPos_ = 0;
   row_ = 0;
   col_ = colNote;
-  lastNote_ = NOTE_C3;
-  lastInstr_ = 0;
-  lastCmd_ = Token::InstrumentCommandNone;
-  lastParam_ = 0;
-  lastVolume_ = NO_VOLUME;
+  viewData_->phraseLastNote_ = NOTE_C3;
+  viewData_->phraseLastInstrument_ = 0;
+  viewData_->phraseLastCmd_ = Token::InstrumentCommandNone;
+  viewData_->phraseLastParam_ = 0;
+  viewData_->phraseLastVolume_ = NO_VOLUME;
   viewData_->phraseCurPos_ = 0;
 
   clipboard_.active_ = false;
@@ -270,20 +142,6 @@ void PhraseView::Reset() {
   saveRow_ = 0;
   needsUIUpdate_ = false;
   needsLiveIndicatorUpdate_ = false;
-}
-
-uint8_t PhraseView::getEffectiveInstrumentForRow(int row) {
-  if (!phrase_ || row < 0) {
-    return NO_INSTRUMENT;
-  }
-
-  for (int i = row; i >= 0; --i) {
-    unsigned char instr = phrase_->steps_[viewData_->currentPhrase_][i].instrument;
-    if (instr != 0xFF) {
-      return instr;
-    }
-  }
-  return NO_INSTRUMENT;
 }
 
 void PhraseView::updateCursor(int dx, int dy) {
@@ -386,91 +244,11 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
 // otherwise we take the current phrase as last
 
 void PhraseView::pasteLast() {
+  static const StepField fields[7] = {StepField::Note,   StepField::Instrument, StepField::Volume, StepField::Command1,
+                                      StepField::Param1, StepField::Command2,   StepField::Param2};
 
-  switch (col_) {
-    case colNote:
-      {
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        if (step.note == NO_NOTE) {
-          step.note = lastNote_;
-          step.instrument = lastInstr_;
-          isDirty_ = true;
-        } else {
-          lastNote_ = step.note;
-          lastInstr_ = step.instrument;
-        }
-        break;
-      }
-    case colInstrument:
-      {
-        uint8_t &instr = phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
-        if (instr == 0xFF) {
-          instr = lastInstr_;
-          isDirty_ = true;
-        } else {
-          lastInstr_ = instr;
-        }
-        break;
-      }
-    case colVolume:
-      {
-        uint8_t &vol = phrase_->steps_[viewData_->currentPhrase_][row_].volume;
-        if (vol == 0xFF) {
-          if (lastVolume_ != 0xFF) {
-            vol = lastVolume_;
-            isDirty_ = true;
-          }
-        } else {
-          lastVolume_ = vol;
-        }
-        break;
-      }
-
-    case colCmd1:
-      {
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        Token cmd1 = Token::enum_type(step.cmd1);
-        if (cmd1 == Token::InstrumentCommandNone) {
-          step.cmd1 = static_cast<uint8_t>(static_cast<char>(lastCmd_));
-          isDirty_ = true;
-        } else {
-          lastCmd_ = cmd1;
-        }
-        break;
-      }
-    case colCmdVal1:
-      // TODO check if this is not needed
-      /*			s=phrase_->param1_+(16*viewData_->currentPhrase_+row_) ;
-      if (*s==0) {
-      *s=lastParam_ ;
-      cmdEdit_.SetInt(lastParam_) ;
-      isDirty_=true ;
-      }
-      �*/
-      break;
-
-    case colCmd2:
-      {
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        Token cmd2 = Token::enum_type(step.cmd2);
-        if (cmd2 == Token::InstrumentCommandNone) {
-          step.cmd2 = static_cast<uint8_t>(static_cast<char>(lastCmd_));
-          isDirty_ = true;
-        } else {
-          lastCmd_ = cmd2;
-        }
-        break;
-      }
-    case colCmdVal2:
-      // TODO check if this is not needed
-      /*			s=phrase_->param2_+(16*viewData_->currentPhrase_+row_) ;
-      if (*s==0) {
-      *s=lastParam_ ;
-      isDirty_=true ;
-      cmdEdit_.SetInt(lastParam_) ;
-      }
-      */
-      break;
+  if (pasteLastValue(row_, fields[col_])) {
+    isDirty_ = true;
   }
 }
 
@@ -499,64 +277,6 @@ void PhraseView::cutPosition() {
   }
 
   cutSelection();
-}
-
-void PhraseView::warpInChain(int offset) {
-
-  int currentRow = viewData_->chainRow_;
-  viewData_->chainRow_ += offset;
-  if ((viewData_->chainRow_ < 16) && (viewData_->chainRow_ >= 0)) {
-    unsigned char *p = viewData_->GetCurrentChainPointer();
-    if (*p != 0xFF) {
-      viewData_->currentPhrase_ = *p;
-      switch (col_) {
-        case colCmdVal1:
-          cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param1);
-          break;
-        case colCmdVal2:
-          cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
-          break;
-        default:
-          break;
-      }
-    } else { // rollback
-      viewData_->chainRow_ = currentRow;
-    }
-  } else { // rollback
-    viewData_->chainRow_ = currentRow;
-  }
-  isDirty_ = true;
-}
-
-void PhraseView::warpToNeighbour(int offset) {
-  const int oldX = viewData_->songX_;
-  const unsigned char oldChain = viewData_->currentChain_;
-
-  // keep going in the direction of offset over empty channels (no chain, or no
-  // phrase on the current chain row) until a phrase is found, else stay put
-  for (int x = oldX + offset; x >= 0 && x < SONG_CHANNEL_COUNT; x += offset) {
-    viewData_->songX_ = x;
-
-    unsigned char *c = viewData_->GetCurrentSongPointer();
-    if (*c == 0xFF) {
-      continue;
-    }
-
-    viewData_->currentChain_ = *c;
-
-    unsigned char *p = viewData_->GetCurrentChainPointer();
-    if (*p == 0xFF) {
-      continue;
-    }
-
-    viewData_->currentPhrase_ = *p;
-    updateCursor(0, 0);
-    isDirty_ = true;
-    return;
-  }
-
-  viewData_->songX_ = oldX;
-  viewData_->currentChain_ = oldChain;
 }
 
 /*****************************************************************************
@@ -649,6 +369,7 @@ void PhraseView::extendSelection() {
       clipboard_.row_ = 0;
       row_ = 15;
     }
+    viewData_->phraseCurPos_ = row_;
     isDirty_ = true;
   }
 }
@@ -670,6 +391,7 @@ void PhraseView::copySelection() {
   viewMode_ = VM_NORMAL;
   row_ = saveRow_;
   col_ = saveCol_;
+  viewData_->phraseCurPos_ = row_;
 
   isDirty_ = true;
 }
@@ -777,31 +499,6 @@ void PhraseView::pasteClipboard() {
   isDirty_ = true;
 }
 
-inline void PhraseView::startAudition(bool startIfNotRunning) {
-  // no instrument -> no audition
-  if (getEffectiveInstrumentForRow(row_) == NO_INSTRUMENT) {
-    return;
-  }
-
-  Player *player = Player::GetInstance();
-  if (player->IsRunning()) {
-    // now also update if in auditioning mode
-    if (viewData_->playMode_ == PM_AUDITION) {
-      player->Stop();
-      player->OnStartButton(PM_AUDITION, viewData_->songX_, false, viewData_->chainRow_);
-    }
-  } else if (startIfNotRunning) {
-    player->OnStartButton(PM_AUDITION, viewData_->songX_, false, viewData_->chainRow_);
-  }
-}
-
-inline void PhraseView::stopAudition() {
-  Player *player = Player::GetInstance();
-  if (viewData_->playMode_ == PM_AUDITION) {
-    player->Stop();
-  }
-}
-
 void PhraseView::unMuteAll() {
   UIController *controller = UIController::GetInstance();
   controller->UnMuteAll();
@@ -821,9 +518,16 @@ void PhraseView::switchSoloMode() {
 }
 
 void PhraseView::OnFocus() {
+  PhraseEditingView::OnFocus();
+  // the piano roll moves the same cursor row, the step
+  row_ = viewData_->phraseCurPos_;
   phraseDiv_ = viewData_->project_->FindVariable(Token::VarPhraseDivision)->GetInt();
   clipboard_.active_ = false;
   viewMode_ = VM_NORMAL;
+  updateCursor(0, 0);
+}
+
+void PhraseView::onPhraseSwitched() {
   updateCursor(0, 0);
 }
 
@@ -848,39 +552,6 @@ void PhraseView::ButtonUp(uint16_t button, uint16_t mask) {
       switchSoloMode();
     }
   }
-}
-
-bool PhraseView::navigationDown(uint16_t direction) {
-  switch (direction) {
-    case BM_LEFT:
-      Navigate(VT_CHAIN, vtRevealFromLeft);
-      return true;
-    case BM_RIGHT:
-      enterInstrumentUnderCursor();
-      return true;
-    case BM_DOWN:
-      {
-        // Go to table view
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        Token cmd1 = Token::enum_type(step.cmd1);
-        Token cmd2 = Token::enum_type(step.cmd2);
-        if (cmd1 == Token::InstrumentCommandTable) {
-          viewData_->currentTable_ = step.param1 & (TABLE_COUNT - 1);
-        } else if (cmd2 == Token::InstrumentCommandTable) {
-          viewData_->currentTable_ = step.param2 & (TABLE_COUNT - 1);
-        }
-
-        Navigate(VT_TABLE, vtRevealFromBottom);
-        return true;
-      }
-    case BM_UP:
-      // Go to groove view
-      stopAudition();
-
-      Navigate(VT_GROOVE, vtRevealFromTop);
-      return true;
-  }
-  return false;
 }
 
 enum class TableCloneResult { NotApplicable, Cloned, NoFreeTable };
@@ -928,7 +599,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
             bank->AssignInstrumentToSlot(IT_NONE, next) == InstrumentAssignResult::Success) {
           unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
           *c = (unsigned char)next;
-          lastInstr_ = next;
+          viewData_->phraseLastInstrument_ = next;
           isDirty_ = true;
         } else {
           // show error dialog that no more instruments are available
@@ -977,7 +648,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         uint16_t next = bank->Clone(*c);
         if (next != NO_MORE_INSTRUMENT) {
           *c = (unsigned char)next;
-          lastInstr_ = next;
+          viewData_->phraseLastInstrument_ = next;
           isDirty_ = true;
         }
       }
@@ -1018,16 +689,11 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
   };
 }
 
-void PhraseView::enterInstrumentUnderCursor() {
-  unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
-  viewData_->currentInstrumentID_ = (*c != 0xFF) ? *c : lastInstr_;
-  if (viewData_->currentInstrumentID_ != 0xFF) {
-    Navigate(VT_INSTRUMENT, vtRevealFromRight);
-  }
-}
-
 void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
-  Player *player = Player::GetInstance();
+  // PLAY, NAV + PLAY and EDIT + arrows are the same in the piano roll
+  if (processPlaybackInput(newButton, mask) || processPhraseSwitchInput(newButton, mask)) {
+    return;
+  }
 
   if (IsChord(newButton, mask, BM_ENTER)) {
     // enter only (check if picker for commands is enabled)
@@ -1040,7 +706,7 @@ void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
 
         // use lastCmd if we hit an empty command field
         if (cmd == Token::InstrumentCommandNone) {
-          cmd = lastCmd_;
+          cmd = viewData_->phraseLastCmd_;
         }
 
         CommandView *cv = CommandView::Create(*this, Token::enum_type(cmd));
@@ -1068,22 +734,6 @@ void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
     toggleMute();
   } else if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
     unMuteAll();
-  } else if (mask == BM_EDIT) {
-    // EDIT Modifier
-    switch (newButton) {
-      case BM_LEFT:
-        warpToNeighbour(-1);
-        break;
-      case BM_RIGHT:
-        warpToNeighbour(1);
-        break;
-      case BM_UP:
-        warpInChain(-1);
-        break;
-      case BM_DOWN:
-        warpInChain(1);
-        break;
-    }
   } else if (mask == BM_ENTER) {
     // ENTER Modifer
     switch (newButton) {
@@ -1109,13 +759,6 @@ void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
     } else if (mask == BM_NAV) {
       switchSoloMode();
     }
-  } else if (mask == BM_NAV) {
-    // NAV Modifier
-    switch (newButton) {
-      case BM_PLAY:
-        player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
-        break;
-    }
   } else if (mask == 0) {
     // No modifier
     switch (newButton) {
@@ -1131,16 +774,15 @@ void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
       case BM_RIGHT:
         updateCursor(1, 0);
         break;
-      case BM_PLAY:
-        player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
-        break;
     }
   }
 }
 
 void PhraseView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
-
-  Player *player = Player::GetInstance();
+  // PLAY and NAV + PLAY are the same in the piano roll
+  if (processPlaybackInput(newButton, mask)) {
+    return;
+  }
 
   if (IsChord(newButton, mask, BM_EDIT)) {
     copySelection();
@@ -1168,12 +810,6 @@ void PhraseView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     cutSelection();
   } else if (IsChord(newButton, mask, BM_ENTER, BM_NAV)) {
     switchSoloMode();
-  } else if (mask == BM_NAV) {
-    switch (newButton) {
-      case BM_PLAY:
-        player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
-        break;
-    }
   } else if (mask == 0) {
     // No modifier
     switch (newButton) {
@@ -1188,9 +824,6 @@ void PhraseView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
         break;
       case BM_RIGHT:
         updateCursor(1, 0);
-        break;
-      case BM_PLAY:
-        player->OnStartButton(PM_PHRASE, viewData_->songX_, false, viewData_->chainRow_);
         break;
     }
   }
@@ -1567,49 +1200,31 @@ void PhraseView::AnimationUpdate() {
     pos.y_ = anchor.y_ + lastPlayingPos_;
     DrawString(pos.x_, pos.y_, " ");
 
-    // Only update play position if player is running
-    if (player->IsRunning()) {
-      // Loop on all channels to see if one of them is playing current phrase
-      for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-        if (player->IsChannelPlaying(i)) {
-          if (viewData_->currentPlayPhrase_[i] == viewData_->currentPhrase_ && viewData_->playMode_ != PM_AUDITION) {
-            pos.y_ = anchor.y_ + viewData_->phrasePlayPos_[i];
+    // Only update play position if player is running, the first channel that plays this phrase gives it
+    int playingStep;
+    bool muted;
+    if (findPlayingStep(playingStep, muted)) {
+      pos.y_ = anchor.y_ + playingStep;
 
-            SetBackgroundColor(Theme::View::bg);
+      SetBackgroundColor(Theme::View::bg);
 
-            if (!player->IsChannelMuted(i)) {
-              SetColor(Theme::Song::Playback::active);
-              DrawString(pos.x_, pos.y_, char_indicator_position_s);
-            } else {
-              SetColor(Theme::Song::Playback::muted);
-              DrawString(pos.x_, pos.y_, char_indicator_positionMuted_s);
-            }
-
-            lastPlayingPos_ = viewData_->phrasePlayPos_[i];
-            break;
-          }
-        }
+      if (!muted) {
+        SetColor(Theme::Song::Playback::active);
+        DrawString(pos.x_, pos.y_, char_indicator_position_s);
+      } else {
+        SetColor(Theme::Song::Playback::muted);
+        DrawString(pos.x_, pos.y_, char_indicator_positionMuted_s);
       }
+
+      lastPlayingPos_ = playingStep;
     }
 
     // Draw live indicators if in live mode
-    if (player->GetSequencerMode() == SM_LIVE) {
+    if (const char *indicator = findLiveIndicator()) {
       pos = anchor;
       pos.x_ -= 1;
       SetColor(Theme::Song::Playback::live);
-
-      for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
-        if (player->GetQueueingMode(i) != QM_NONE) {
-          // find the chain queued in channel
-          unsigned char songPos = player->GetQueuePosition(i);
-          unsigned char *chain = viewData_->song_->rows_[songPos].chains + i;
-          if (*chain == viewData_->currentChain_) {
-            const char *indicator = player->GetLiveIndicator(i);
-            DrawString(pos.x_, pos.y_, indicator);
-            break;
-          }
-        }
-      }
+      DrawString(pos.x_, pos.y_, indicator);
     }
 
     // not ideal, TODO nILS

@@ -16,6 +16,7 @@ enum ViewType {
   VT_CHAIN,
   VT_HELP,
   VT_PHRASE,
+  VT_PIANOROLL, // alternative view for VT_PHRASE, toggled with NAV + NAV
   VT_PROJECT,
   VT_DEVICE,
   VT_INSTRUMENT,

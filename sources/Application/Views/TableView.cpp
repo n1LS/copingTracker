@@ -458,7 +458,11 @@ void TableView::pasteLast() {
 bool TableView::navigationDown(uint16_t direction) {
   switch (direction) {
     case BM_UP:
-      Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT), vtRevealFromTop);
+      if (viewType_ == VT_TABLE) {
+        NavigateToPhrase(vtRevealFromTop);
+      } else {
+        Navigate(VT_INSTRUMENT, vtRevealFromTop);
+      }
       return true;
     case BM_LEFT:
       Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE, vtRevealFromLeft);

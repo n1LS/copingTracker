@@ -509,7 +509,7 @@ void ChainView::enterPhraseUnderCursor() {
   unsigned char *data = viewData_->GetCurrentChainPointer();
   if (*data != 0xFF) {
     viewData_->currentPhrase_ = *data;
-    Navigate(VT_PHRASE, vtRevealFromRight);
+    NavigateToPhrase(vtRevealFromRight);
   }
 }
 

@@ -56,6 +56,13 @@ uint32_t View::vuPeakFrame_[View::VU_METER_COUNT] = {};
 static constexpr uint32_t VU_PEAK_HOLD_FRAMES = etClock_HZ; // hold for about a second
 static constexpr int32_t VU_PEAK_FALL_STEP = 3;             // bar units per frame once released
 
+uint32_t View::navTapTime_ = 0;
+bool View::navTapArmed_ = false;
+bool View::navHoldClean_ = false;
+
+// two NAV taps within this time count as a double tap
+static constexpr uint32_t NAV_DOUBLE_TAP_MS = 300;
+
 uint32_t View::lastBatteryDisplayFrame_ = 0;
 bool View::batteryDisplayInitialized_ = false;
 
@@ -133,12 +140,12 @@ void View::drawMap() {
     char character;
   };
 
-  const int viewCount = 11;
+  const int viewCount = 12;
 
-  MapEntry mapEntries[viewCount] = {{VT_CHAIN, 1, 3, 'C'}, {VT_PHRASE, 2, 3, 'P'},       {VT_DEVICE, 0, 1, 'D'},
-                                    {VT_HELP, 1, 1, 'H'},  {VT_PROJECT, 0, 2, 'W'},      {VT_INSTRUMENT, 3, 3, 'I'},
-                                    {VT_TABLE, 2, 4, 'T'}, {VT_TABLE2, 3, 4, 'T'},       {VT_GROOVE, 2, 2, 'G'},
-                                    {VT_MIXER, 0, 4, 'M'}, {VT_SONG, 0, 3, songViewChar}};
+  MapEntry mapEntries[viewCount] = {{VT_CHAIN, 1, 3, 'C'}, {VT_PHRASE, 2, 3, 'P'},        {VT_DEVICE, 0, 1, 'D'},
+                                    {VT_HELP, 1, 1, 'H'},  {VT_PROJECT, 0, 2, 'W'},       {VT_INSTRUMENT, 3, 3, 'I'},
+                                    {VT_TABLE, 2, 4, 'T'}, {VT_TABLE2, 3, 4, 'T'},        {VT_GROOVE, 2, 2, 'G'},
+                                    {VT_MIXER, 0, 4, 'M'}, {VT_SONG, 0, 3, songViewChar}, {VT_PIANOROLL, 2, 3, 'R'}};
 
   for (int n = 0; n < viewCount; n++) {
     if (viewType_ == mapEntries[n].viewType) {
@@ -497,6 +504,38 @@ void View::SetDirty(bool isDirty) {
   isDirty_ = isDirty;
 }
 
+bool View::trackNavDoubleTap(uint16_t button, uint16_t mask, bool pressed) {
+  const uint32_t now = System::GetInstance()->Millis();
+
+  if (pressed) {
+    if (button != BM_NAV || mask != 0) {
+      // anything but a lone NAV press ends the gesture
+      navTapArmed_ = false;
+      navHoldClean_ = false;
+      return false;
+    }
+
+    if (navTapArmed_ && (now - navTapTime_) <= NAV_DOUBLE_TAP_MS) {
+      // the second tap. It is consumed, so its release must not start a new gesture
+      navTapArmed_ = false;
+      navHoldClean_ = false;
+      return true;
+    }
+
+    navTapArmed_ = false;
+    navHoldClean_ = true;
+    return false;
+  }
+
+  // a NAV that was pressed and released without any other button is a tap
+  if (button == BM_NAV && navHoldClean_) {
+    navHoldClean_ = false;
+    navTapArmed_ = true;
+    navTapTime_ = now;
+  }
+  return false;
+}
+
 void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
   // Normal button processing
   if (modalView_) {
@@ -504,10 +543,13 @@ void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
     // checks if modal is done and if it is disposes of it:
     DismissModal();
   } else if (pressed) {
-    if (!((button & BM_DIRECTIONAL) && mask == BM_NAV && navigationDown(button))) {
+    if (trackNavDoubleTap(button, mask, true) && OnNavDoubleTap()) {
+      // handled by the view, no ButtonDown
+    } else if (!((button & BM_DIRECTIONAL) && mask == BM_NAV && navigationDown(button))) {
       ButtonDown(button, mask);
     }
   } else {
+    trackNavDoubleTap(button, mask, false);
     ButtonUp(button, mask);
   }
 

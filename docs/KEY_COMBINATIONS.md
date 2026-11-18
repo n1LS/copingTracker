@@ -26,6 +26,22 @@ direction is ignored.
 > (selection, clone, new, ...). Where `navigationDown()` does not handle a direction,
 > the press falls through to `ButtonDown()` as usual.
 >
+> **NAV double tap** (`NAV + NAV`): press, release and press `NAV` again within 300 ms,
+> with no other button used in between. `View::ProcessButton` detects it before
+> `ButtonDown()` and calls the view's `OnNavDoubleTap()`; a view that does not override it
+> gets the press as a normal `NAV` press. A `NAV` that was used as a modifier (for example
+> `NAV + LEFT`) never counts as a tap. Currently used by the phrase view and the piano roll
+> view to toggle between each other.
+>
+> **The phrase slot:** the phrase view and the piano roll share one place in the navigation
+> map. `ViewData::phraseViewType_` remembers which of the two was used last, and every
+> view that leads there (`NAV + RIGHT` in the chain view, `NAV + LEFT` in the instrument view,
+> `NAV + UP` in the table view, `NAV + DOWN` in the groove view) opens that one
+> (`ScreenView::NavigateToPhrase`). The toggle itself always goes to the other view.
+>
+> Both views derive from `PhraseEditingView`, which implements the input they share:
+> `NAV + direction`, `NAV + NAV`, `PLAY`, `NAV + PLAY` and `EDIT + direction` (switching the phrase).
+>
 > **Context legend:** in clone and selection mode the song, chain, phrase and table
 > views replace the notes / command help in the bottom info area with a legend of the
 > available combos. The legends live in `tools/manual/raw_data/ContextLegends.copingDoc`
@@ -256,7 +272,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `ENTER + EDIT` | chord | Cut value at cursor (`cutPosition`) |
 | `EDIT + ALT` | chord, either order | Enter **clone mode** (`VM_CLONE`) |
 | `EDIT + NAV` | chord, either order | Toggle mute (hold) |
-| `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust cursor value (`updateCursorValue`; DOWN=−, UP=+, LEFT/RIGHT octave) |
+| `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust cursor value (`updateCursorValue`). In the note column LEFT / RIGHT move the note one step down / up in the scale and key of the project (`changeNote`), UP / DOWN move it an octave. Other columns: DOWN / LEFT decrease, UP / RIGHT increase |
 | `ENTER + ALT` | chord | Paste clipboard (`pasteClipboard`) |
 | `ENTER` alone | chord | Paste last value; on command columns a **command picker** opens (if enabled); on the instrument and command value columns arms `VM_NEW`; on the note, instrument and volume columns starts **audition** (hold ENTER, release stops) |
 | `ENTER + NAV` | chord | Toggle solo (hold) |
@@ -266,6 +282,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `NAV + UP` | chord | Navigate → **Groove view** |
 | `NAV + PLAY` | chord | Start phrase with retrig (`PM_PHRASE`) |
 | `NAV + ALT` | chord, either order | Un-mute all |
+| `NAV + NAV` | double tap | Switch to the **piano roll view** of the same phrase |
 | `PLAY` | chord | Start phrase playback (`PM_PHRASE`) |
 | `DOWN / UP / LEFT / RIGHT` | chord | Move cursor |
 
@@ -304,6 +321,97 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | arrows / `PLAY` | chord | Move cursor / start playback |
 
 > There is no `EDIT + NAV` (toggle mute) in phrase selection mode, unlike song and chain.
+
+### 3.3.1 `PianoRollView` (`Views/PianoRollView.cpp`) — work in progress
+
+Alternative view of the current phrase (`viewData_->currentPhrase_`), reached from the phrase
+view with `NAV + NAV`. It draws a piano keyboard (column 0, `gchar_vertical_piano`, the key of the cursor
+is drawn selected), the note labels (column 4, rows 3–18, 16 notes), the step index `0`–`F` (row 2), the note
+grid (columns 8–23, one column per step), scroll indicators and, in the info area at the bottom, the notes that
+play (`drawNotes`, as in the phrase view). It has a cursor (a step and a note). To the right of the grid
+(column 25) it shows the titles and values of the step under the cursor (note, instrument, volume, command 1 and 2
+with their parameters, in the formats and colors of the phrase view). Editing is limited to notes so far.
+
+Under the fields (column 25, rows 13–14) a static help shows how to get to the part that does not have the
+focus: `ALT + RIGHT` "Fields" while the grid has it, `ALT + LEFT` "Grid" while the fields have it
+(`char_key_alt_s`, `char_key_right_s` / `char_key_left_s`).
+
+The step index is colored like the row numbers of the phrase view (the first step of every phrase division is
+highlighted). All steps at or after the global phrase length (`VarPhraseLength`) are `Theme::View::inactive`,
+in the index and in the grid (the cursor cell keeps the selection background).
+
+Grid glyphs (the cells of a step and note; notes outside the 16 visible ones are not shown).
+Everything is drawn with `Theme::View::fg` on the view background, except the note off, which is `Theme::Data::negative` (the cursor cell has the selection colors):
+
+| Glyph | Meaning |
+|-------|---------|
+| `gchar_piano_roll_note_s` | a note, the next step is a note or a note off |
+| `gchar_piano_roll_note_start_s` | a note, the next step is empty: it goes on |
+| `gchar_piano_roll_note_mid_s` | the note goes on, the next step is empty too |
+| `gchar_piano_roll_note_end_s` | the last step of a held note, the next step is not empty |
+| `gchar_piano_roll_note_off_s` | a note off, in the row of the note it ends. A note off with nothing sounding has no row and is drawn in every row of its step |
+| `gchar_piano_roll_empty_s` | empty (`Theme::View::inactive`) |
+
+The end of the phrase counts as an empty step: a note at the end goes on into the next phrase.
+
+Scroll indicators, above (row 2) and below (row 19) the note labels (column 5):
+
+| Indicator | Shown when |
+|-----------|------------|
+| `char_indicator_up_s` | the view can be scrolled up (the top is not `HIGHEST_NOTE` yet) |
+| `char_indicator_down_s` | the view can be scrolled down (the bottom is not note 0 yet) |
+| `char_symbol_bpm_s` next to the arrow (column 6) | the phrase has notes above / below the visible range (note offs do not count) |
+
+Playback indicators, drawn in the row below the grid (row 19), in the grid column of the step that plays. The phrase view draws the same indicators in the column left of the grid, in the row of the step:
+
+| Glyph | Meaning |
+|---|---|
+| `char_indicator_up_s` (`Theme::Song::Playback::active`) | a channel plays this phrase and is not muted; the phrase view shows `char_indicator_position_s` here |
+| `char_indicator_positionMuted_s` (`Theme::Song::Playback::muted`) | the same, but the channel is muted (as in the phrase view) |
+| `char_indicator_up_s` / `char_playback_pause_s` (`Theme::Song::Playback::live`), blinking | live mode: a chain that holds this phrase is queued to start / stop; shown in the first column like the phrase view shows it in the first row |
+
+The indicators are drawn from `AnimationUpdate` after a player update, and not while a modal view is open or while the phrase is auditioned.
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `UP` | chord | Move the cursor up one note. In the top row the view scrolls up instead and the cursor stays in the top row (`HIGHEST_NOTE` is the limit) |
+| `DOWN` | chord | Move the cursor down one note. In the bottom row the view scrolls down instead (note 0 is the limit) |
+| `LEFT` | chord | Previous step; stops at step 0 and does not change the phrase |
+| `RIGHT` | chord | Next step; stops at the last step and does not change the phrase |
+| `ENTER` | chord | Set the note of the cursor's step to the note of the cursor. As in the phrase view a step without a note gets the last instrument; the note and its instrument become the last note and instrument to paste. On a step with a note it moves the note and keeps its instrument, volume and commands. The note is previewed (audition of the step, as in the phrase view) while `ENTER` is held; releasing it stops the preview |
+| `ENTER + UP / DOWN` | chord | Move the note of the cursor's step one step up / down in the scale and key of the project, the same as `ENTER + RIGHT / LEFT` in the note column of the phrase view (`changeNote`). A sliced sample stays inside its slices, a note off becomes C3 (or the nearest note of the scale below), at the ends of the range the note wraps. A step without a note is left alone. The cursor follows the note and the view scrolls with it; the note becomes the last note to paste. The note is previewed again with its new pitch (as in the phrase view the audition `ENTER` started restarts) |
+| `ALT + RIGHT` | chord | Put the focus on the fields of the step on the right of the grid (note, instrument, volume, command 1 and 2). The selection in the grid is drawn inverted (the color of the glyph as the background, black text) instead of in the selection colors, the selected field has the selection colors. The focus rect is the field |
+| `ALT + LEFT` | chord | Back to the grid |
+| arrows (focus on the fields) | chord | `UP` / `DOWN`: note, instrument, volume, command 1, command 2; `LEFT` / `RIGHT`: the command or its parameter. The other chords of the grid do nothing while the fields have the focus (`PLAY`, `NAV` + arrows, `NAV + NAV` and `EDIT` + arrows work as always). The grid has the focus when the view opens |
+| `ENTER` (focus on the fields) | chord | As `ENTER` on the column in the phrase view: an empty field gets the last value used (an empty note also the last instrument), a field that has a value makes it the last one to paste. Note, instrument and volume are previewed while `ENTER` is held. A parameter has no last value; the command picker, new instruments / tables and cloning of the phrase view are not available in the roll |
+| `ENTER + arrows` (focus on the fields) | chord | Edit the selected field as in the phrase view (`updateCursorValue`): note `LEFT` / `RIGHT` one step in the scale, `UP` / `DOWN` an octave (an empty step is left alone, the cursor follows the note); instrument `LEFT` / `RIGHT` ∓1, `UP` / `DOWN` ±`0x10`; volume `LEFT` / `RIGHT` ∓1, `UP` max, `DOWN` none; command previous / next (`LEFT` / `RIGHT`) or alphabetically (`UP` / `DOWN`); parameter: `LEFT` / `RIGHT` select the digit (the edited digit is drawn inverted), `UP` / `DOWN` change it. Note, instrument and volume restart the preview |
+| `ENTER + EDIT` (focus on the fields) | chord | Clear the field: the note as `ENTER + EDIT` in the grid, no instrument, no volume, a command (with its parameter), a parameter of 0. Nothing is put on a clipboard |
+| `ENTER + LEFT / RIGHT` | chord | Move the note of the cursor's step to the previous / next step, with its instrument and volume (the commands stay in their step). A note that is already in the target step is deleted. The cursor follows; at the first / last step and on a step without a note nothing happens |
+| `ENTER + EDIT` | chord | As cutting the note column in the phrase view: removes the note of the cursor's step together with its instrument and volume; on a step without a note it sets a note off. Nothing is put on a clipboard (the roll has none) |
+| `PLAY` | chord | Play the phrase (`PM_PHRASE`), the same as in the phrase view |
+| `NAV + PLAY` | chord | Play the phrase from the previous position (retrig), as in the phrase view |
+| `EDIT + LEFT / RIGHT` | chord | Switch to the phrase of the previous / next channel (`warpToNeighbour`); the roll scrolls to the notes of that phrase |
+| `EDIT + UP / DOWN` | chord | Switch to the previous / next phrase in the chain (`warpInChain`); the roll scrolls to the notes of that phrase |
+| `NAV + LEFT` | chord | Navigate → **Chain view** |
+| `NAV + RIGHT` | chord | Navigate → **Instrument view**: the instrument of the phrase step under the cursor, or the last one used in the phrase editor if the step has none |
+| `NAV + DOWN` | chord | Navigate → **Table view**: the table of the first `TABLE` command of that step |
+| `NAV + UP` | chord | Navigate → **Groove view** |
+| `NAV + NAV` | double tap | Switch back to the **phrase view** |
+
+The `NAV + direction` chords go to the same places as in the phrase view and share their code
+(`ViewData::SelectInstrumentOfPhraseStep` / `SelectTableOfPhraseStep`). The roll has no cursor
+yet, so the step is the phrase view's cursor row (`ViewData::phraseCurPos_`). The way back from
+those views opens whichever of the phrase view and the roll was used last (see the phrase slot above).
+
+The cursor cell is drawn with the selection colors (`Theme::View::Selection`) and is the view's focus
+rect. Its step is the shared phrase cursor (`ViewData::phraseCurPos_`); the phrase view takes it over
+when it gets the focus, so the cursor keeps its step when you toggle. The note of the cursor is kept
+inside the visible range, and when the roll opens it starts on the note of its step if that is visible.
+
+Whenever the roll gets the focus it scrolls to the visible range that shows the most notes of the
+phrase (every note step counts). Among equally good ranges it takes the one with the visible notes
+in the middle; a phrase without notes gets the default range (E3 at the bottom). Scrolling is kept
+until the roll is left.
 
 ### 3.4 `TableView` (`Views/TableView.cpp`) — Table AND Table2 views (`viewType_`)
 
