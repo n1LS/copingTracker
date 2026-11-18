@@ -161,6 +161,11 @@ def main():
         os.environ.setdefault(
             "PICO_TOOLCHAIN_FILE", str(ROOT / "sources/toolchain-rp2040.cmake")
         )
+        # The SDK builds its host tool pioasm with the runner's own compiler (a recent GCC), and the pioasm
+        # sources miss <cstdint> (uint8_t). The SDK configures that build itself, CXXFLAGS reaches it.
+        cxxflags = os.environ.get("CXXFLAGS", "")
+        if "cstdint" not in cxxflags:
+            os.environ["CXXFLAGS"] = f"{cxxflags} -include cstdint".strip()
     if args.host and args.bootloader:
         parser.error("--host and --bootloader are mutually exclusive")
     start = time.monotonic()
