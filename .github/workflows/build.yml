@@ -8,6 +8,9 @@ on:
 jobs:
   firmware:
     runs-on: ubuntu-latest
+    env:
+      # pico-sdk 2.1.1 pioasm lacks <cstdint>, which newer host GCC no longer includes transitively
+      CXXFLAGS: -include cstdint
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,6 +36,9 @@ jobs:
 
   bootloader:
     runs-on: ubuntu-latest
+    env:
+      # pico-sdk 2.1.1 pioasm lacks <cstdint>, which newer host GCC no longer includes transitively
+      CXXFLAGS: -include cstdint
     steps:
       - uses: actions/checkout@v4
         with:
