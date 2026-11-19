@@ -90,26 +90,26 @@ DeviceView::DeviceView(GUIWindow &w, ViewData *data) : FieldView(w, data) {
 
   position.y_ += 2;
   v = config->FindVariable(Token::VarPreviewVolume);
-  intVarField_.emplace_back(position, *v, "Preview volume  :%2d", 0, 99, 1, 10);
+  intVarField_.emplace_back(position, *v, "Preview vol. :%2d", 0, 99, 1, 10);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarBacklightLevel);
   // MIN brightness is 0xF (15)
-  intVarField_.emplace_back(position, *v, "LCD Brightness  :%2.2X", 0xF, 0xFF, 1, 16);
+  intVarField_.emplace_back(position, *v, "Brightness   :%2.2X", 0xF, 0xFF, 1, 16);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarImportResampler);
-  intVarField_.emplace_back(position, *v, "Import resampler:%s", 0, v->GetListSize() - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "ImprtResample:%s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
   position.y_ += 1;
   v = config->FindVariable(Token::VarConfigCommandPicker);
-  intVarField_.emplace_back(position, *v, "Command input   :%s", 0, v->GetListSize() - 1, 1, 1);
+  intVarField_.emplace_back(position, *v, "Command input:%s", 0, v->GetListSize() - 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
 
