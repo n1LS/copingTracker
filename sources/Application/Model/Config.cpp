@@ -30,13 +30,13 @@
 #define MIDI_DEVICE_LEN 4
 #define CONFIG(X, A, B, D, E) {Token(X).c_str(), A, X, B, D, E}
 
-static const char *lineOutOptions[3] = {"HP Low", "HP High", "Line Level"};
-static const char *midiDeviceList[MIDI_DEVICE_LEN] = {"Off", "TRS", "USB", "TRS+USB"};
-static const char *midiSendSync[2] = {"Off", "Send"};
-static const char *midiClockSyncOptions[2] = {"Internal", "External"};
-static const char *mirrorUIOnOff[2] = {"Off", "On"};
-static const char *importResamplerOptions[] = {"None", "Linear"};
-static const char *commandPickerOptions[] = {"Inline", "Picker"};
+static const char *const lineOutOptions[3] = {"HP Low", "HP High", "Line Level"};
+static const char *const midiDeviceList[MIDI_DEVICE_LEN] = {"Off", "TRS", "USB", "TRS+USB"};
+static const char *const midiSendSync[2] = {"Off", "Send"};
+static const char *const midiClockSyncOptions[2] = {"Internal", "External"};
+static const char *const mirrorUIOnOff[2] = {"Off", "On"};
+static const char *const importResamplerOptions[] = {"None", "Linear"};
+static const char *const commandPickerOptions[] = {"Inline", "Picker"};
 static constexpr int kImportResamplerOptionCount = 2;
 
 // Param keys MUST fit in this length limit!
@@ -64,7 +64,7 @@ struct ConfigParam {
     const char *strValue;
   } defaultValue;
   Token::enum_type token;
-  const char **options;
+  const char *const *options;
   int optionCount;
   bool isString;
 };

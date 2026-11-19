@@ -51,7 +51,7 @@ enum InstrumentType { IT_NONE = 0, IT_SAMPLE, IT_CHIPTUNE, IT_DRUM, IT_STACK, IT
 // Effects are single instance and shared by all instruments sending to them.
 enum OutputEffect { OE_NONE = 0, OE_DELAY, OE_LAST };
 
-static const char *OutputEffectNames[OE_LAST] = {"--", "Delay"};
+static const char *const OutputEffectNames[OE_LAST] = {"--", "Delay"};
 
 // non-linear volume (4-bit) mapping to volume scaler
 static const uint8_t volumeLUT[16] = {0, 1, 4, 9, 16, 27, 41, 58, 79, 103, 130, 160, 193, 228, 245, 255};
@@ -72,13 +72,13 @@ static const InstrumentTypeName InstrumentTypeNames[IT_LAST] = {
     {.full = "MIDI", .compact = "MIDI", .persistence = "midi"},
 };
 
-static const char *LongInstrumentNames[IT_LAST] = {
+static const char *const LongInstrumentNames[IT_LAST] = {
     InstrumentTypeNames[IT_NONE].full, InstrumentTypeNames[IT_SAMPLE].full, InstrumentTypeNames[IT_CHIPTUNE].full,
     InstrumentTypeNames[IT_DRUM].full, InstrumentTypeNames[IT_STACK].full,  InstrumentTypeNames[IT_LSDJKIT].full,
     InstrumentTypeNames[IT_MIDI].full,
 };
 
-static const char *CompactInstrumentNames[IT_LAST] = {
+static const char *const CompactInstrumentNames[IT_LAST] = {
     InstrumentTypeNames[IT_NONE].compact,     InstrumentTypeNames[IT_SAMPLE].compact,
     InstrumentTypeNames[IT_CHIPTUNE].compact, InstrumentTypeNames[IT_DRUM].compact,
     InstrumentTypeNames[IT_STACK].compact,    InstrumentTypeNames[IT_LSDJKIT].compact,

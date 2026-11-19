@@ -33,7 +33,7 @@ enum stack_constants_e {
   stackNumOscillators = 5,
 };
 
-static const char *stackWaveNames[stackNumWaveforms] = {char_waveform_pulse_s " 12.5%",
+static const char *const stackWaveNames[stackNumWaveforms] = {char_waveform_pulse_s " 12.5%",
                                                         char_waveform_pulse_s " 25%",
                                                         char_waveform_pulse_s " 50%",
                                                         char_waveform_saw_s " Saw",

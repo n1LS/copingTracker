@@ -67,7 +67,8 @@ static const char char_v_bar_lookup[] = {CHAR(gchar_v_bar_0_s), CHAR(gchar_v_bar
 #define gchar_piano_roll_note_off_s "\x61"
 
 #define gchar_piano_quarter_s gchar_piano_roll_empty_s gchar_piano_roll_empty_s gchar_piano_roll_empty_s "\x92"
-#define gchar_piano_row_empty_row_s gchar_piano_quarter_s gchar_piano_quarter_s gchar_piano_quarter_s gchar_piano_quarter_s 
+#define gchar_piano_row_empty_row_s                                                                                    \
+  gchar_piano_quarter_s gchar_piano_quarter_s gchar_piano_quarter_s gchar_piano_quarter_s
 
 #define gchar_piano_roll_degab_s "\x20\x20\x93"
 #define gchar_piano_roll_cf_s "\x94\x94\x92"
@@ -77,12 +78,12 @@ static const char char_v_bar_lookup[] = {CHAR(gchar_v_bar_0_s), CHAR(gchar_v_bar
 #define gchar_piano_degab_selected "\x95\x96\x97"
 #define gchar_piano_cf_selected "\x9a\x9b\x9c"
 
-static const char *gchar_vertical_piano[12] = {
+static const char *const gchar_vertical_piano[12] = {
     gchar_piano_roll_cf_s,    gchar_piano_roll_black_s, gchar_piano_roll_degab_s, gchar_piano_roll_black_s,
     gchar_piano_roll_degab_s, gchar_piano_roll_cf_s,    gchar_piano_roll_black_s, gchar_piano_roll_degab_s,
     gchar_piano_roll_black_s, gchar_piano_roll_degab_s, gchar_piano_roll_black_s, gchar_piano_roll_degab_s};
 
-static const char *gchar_vertical_piano_selected[12] = {
+static const char *const gchar_vertical_piano_selected[12] = {
     gchar_piano_cf_selected,    gchar_piano_black_selected, gchar_piano_degab_selected, gchar_piano_black_selected,
     gchar_piano_degab_selected, gchar_piano_cf_selected,    gchar_piano_black_selected, gchar_piano_degab_selected,
     gchar_piano_black_selected, gchar_piano_degab_selected, gchar_piano_black_selected, gchar_piano_degab_selected};

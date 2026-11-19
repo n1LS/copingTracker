@@ -11,9 +11,9 @@
 
 #define SEMITONE_FREQ_INTERVAL 1.0594630943592952645618252949461F
 
-const char *loopTypes[SILM_LAST] = {"oneshot", "loop", "pingpong", "osciltr", "loopsnc"};
-const char *interpolationTypes[] = {"lin", "non"};
-const char *filterMode[] = {"orignal", "bassy", "screamo"};
+const char *const loopTypes[SILM_LAST] = {"oneshot", "loop", "pingpong", "osciltr", "loopsnc"};
+const char *const interpolationTypes[] = {"lin", "non"};
+const char *const filterMode[] = {"orignal", "bassy", "screamo"};
 
 enum FilterMode {
   FM_ORIGINAL = 0,
