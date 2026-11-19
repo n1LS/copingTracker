@@ -450,6 +450,15 @@ void PhraseEditingView::playPhrase(bool startFromPrevious) {
 }
 
 void PhraseEditingView::enterInstrumentUnderCursor() {
+  // A step without an instrument plays the one in effect from the steps before it (the shadow instrument), that
+  // is the one to go to. Without one the last instrument used in the phrase editor is used.
+  const uint8_t effective = getEffectiveInstrumentForStep(cursorStep());
+  if (effective != NO_INSTRUMENT) {
+    viewData_->currentInstrumentID_ = effective;
+    Navigate(VT_INSTRUMENT, vtRevealFromRight);
+    return;
+  }
+
   if (viewData_->SelectInstrumentOfPhraseStep(cursorStep())) {
     Navigate(VT_INSTRUMENT, vtRevealFromRight);
   }

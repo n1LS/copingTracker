@@ -400,7 +400,7 @@ The indicators are drawn from `AnimationUpdate` after a player update, and not w
 | `EDIT + LEFT / RIGHT` | chord | Switch to the phrase of the previous / next channel (`warpToNeighbour`); the roll scrolls to the notes of that phrase |
 | `EDIT + UP / DOWN` | chord | Switch to the previous / next phrase in the chain (`warpInChain`); the roll scrolls to the notes of that phrase |
 | `NAV + LEFT` | chord | Navigate → **Chain view** |
-| `NAV + RIGHT` | chord | Navigate → **Instrument view**: the instrument of the phrase step under the cursor, or the last one used in the phrase editor if the step has none |
+| `NAV + RIGHT` | chord | Navigate → **Instrument view**: the instrument of the phrase step under the cursor; if the step has none, the one in effect from the steps before it (the shadow instrument, as in the roll's fields and the preview), or the last one used in the phrase editor if there is none (phrase view and roll) |
 | `NAV + DOWN` | chord | Navigate → **Table view**: the table of the first `TABLE` command of that step |
 | `NAV + UP` | chord | Navigate → **Groove view** |
 | `NAV + NAV` | double tap | Switch back to the **phrase view** |
