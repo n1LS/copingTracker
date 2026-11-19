@@ -99,6 +99,15 @@ def prebuild(args):
             "sources/Application/Utils/CommandHelp.generated.h",
         ],
     )
+    step(
+        "Generating context legends",
+        [
+            sys.executable,
+            "tools/manual/raw_data/convert-contextlegends.py",
+            "tools/manual/raw_data/ContextLegends.copingDoc",
+            "sources/Application/Utils/ContextLegend.generated.h",
+        ],
+    )
     if args.manual:
         step(
             "Building HTML manual",
@@ -152,6 +161,11 @@ def main():
         os.environ.setdefault(
             "PICO_TOOLCHAIN_FILE", str(ROOT / "sources/toolchain-rp2040.cmake")
         )
+        # The SDK builds its host tool pioasm with the runner's own compiler (a recent GCC), and the pioasm
+        # sources miss <cstdint> (uint8_t). The SDK configures that build itself, CXXFLAGS reaches it.
+        cxxflags = os.environ.get("CXXFLAGS", "")
+        if "cstdint" not in cxxflags:
+            os.environ["CXXFLAGS"] = f"{cxxflags} -include cstdint".strip()
     if args.host and args.bootloader:
         parser.error("--host and --bootloader are mutually exclusive")
     start = time.monotonic()

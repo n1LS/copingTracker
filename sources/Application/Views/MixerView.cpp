@@ -354,11 +354,16 @@ void MixerView::drawChannelVUMeters(etl::array<stereosample, SONG_CHANNEL_COUNT>
       int32_t leftBars, rightBars;
       amplitudeToBars(levels->at(i), &leftBars, &rightBars);
 
-      // Check if this channel's levels have changed
-      if (leftBars != prevLeftVU_[i + 1] || rightBars != prevRightVU_[i + 1]) {
+      // Check if this channel's levels have changed or it has to be repainted
+      if (leftBars != prevLeftVU_[i + 1] || rightBars != prevRightVU_[i + 1] || (vuNeedsRepaint_ & (2u << i))) {
         anyChanges = true;
         break;
       }
+    }
+
+    // a peak marker keeps falling while the levels stay put
+    if (anyVUPeakActive()) {
+      anyChanges = true;
     }
 
     // If no changes, return early

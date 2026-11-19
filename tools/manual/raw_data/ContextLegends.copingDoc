@@ -1,0 +1,105 @@
+0                             
+3                             
+SongClone                     
+F    7                   8    
+0                             
+CLONE                    ∞∞∞∞∞
+F  7                     8    
+0                             
+ú+ù Clone chain here     ∞∞∞∞∞
+8                      7 8    
+0                             
+Any other key starts a   ∞∞∞∞∞
+8                 7      8    
+0                             
+selection instead        ∞∞∞∞∞
+0                             
+3                             
+SongSelection                 
+F        7               8    
+0                             
+SELECTION                ∞∞∞∞∞
+F7          F   7        8    
+0                             
+ü   Copy    ù+ü Extend   ∞∞∞∞∞
+F  7        F   7        8    
+0                             
+ù+ú Cut     û+ü Mute     ∞∞∞∞∞
+F  7        F   7        8    
+0                             
+û+ú Solo    ù+û Unmute   ∞∞∞∞∞
+0                             
+3                             
+ChainClone                    
+F    7                   8    
+0                             
+CLONE                    ∞∞∞∞∞
+F  7                     8    
+0                             
+ú+ù Clone phrase here    ∞∞∞∞∞
+8                     7  8    
+0                             
+Any other key starts a   ∞∞∞∞∞
+8                   7    8    
+0                             
+selection instead        ∞∞∞∞∞
+0                             
+3                             
+ChainSelection                
+F        7  F     7      8    
+0                             
+SELECTION   ú+öòôó Adjust∞∞∞∞∞
+F7          F   7        8    
+0                             
+ü   Copy    ü+ù Extend   ∞∞∞∞∞
+F  7        F   7        8    
+0                             
+ú+ù Cut     ü+û Mute     ∞∞∞∞∞
+F  7        F   7        8    
+0                             
+ú+û Solo    û+ù Unmute   ∞∞∞∞∞
+0                             
+3                             
+PhraseClone                   
+F    7                   8    
+0                             
+CLONE                    ∞∞∞∞∞
+F  7                     8    
+0                             
+ú+ù Clone instrument/tbl ∞∞∞∞∞
+8                      7 8    
+0                             
+Any other key starts a   ∞∞∞∞∞
+8                   7    8    
+0                             
+selection instead        ∞∞∞∞∞
+0                             
+3                             
+PhraseSelection               
+F        7               8    
+0                             
+SELECTION                ∞∞∞∞∞
+F7         0F      7     8    
+0                             
+ü   Copy    ú+öòôó Adjust∞∞∞∞∞
+F  7        F   7        8    
+0                             
+ú+ù Cut     ü+ù Extend   ∞∞∞∞∞
+F  7        F   7        8    
+0                             
+û+ù Unmute  ú+û Solo     ∞∞∞∞∞
+0                             
+3                             
+TableSelection                
+F        7               8    
+0                             
+SELECTION                ∞∞∞∞∞
+F7         0F   7        8    
+0                             
+ü   Copy    ü+ù Extend   ∞∞∞∞∞
+F  7       8F 87         8    
+0                             
+ú+ù Cut     òó  Resize   ∞∞∞∞∞
+8   78     7F 8 7        8    
+0                             
+            öô  selection∞∞∞∞∞

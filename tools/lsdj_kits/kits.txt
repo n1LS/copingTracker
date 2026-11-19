@@ -73,7 +73,7 @@ Boss DR220
     Clp
     --- 
     --- 
-Fricke MSB512
+Fricke MFB512
     BDr
     Snr
     CHh

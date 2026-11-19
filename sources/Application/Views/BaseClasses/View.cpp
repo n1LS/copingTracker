@@ -13,6 +13,7 @@
 #include "Application/AppWindow.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/CommandHelp.h"
+#include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
@@ -43,6 +44,18 @@ BatteryState View::latestBatteryState_ = {
     .charging = false,
 };
 
+int32_t View::prevLeftVU_[View::VU_METER_COUNT] = {};
+int32_t View::prevRightVU_[View::VU_METER_COUNT] = {};
+uint16_t View::vuNeedsRepaint_ = (1u << View::VU_METER_COUNT) - 1;
+
+View::VUPeak View::vuPeakLeft_[View::VU_METER_COUNT] = {};
+View::VUPeak View::vuPeakRight_[View::VU_METER_COUNT] = {};
+uint32_t View::vuPeakFrame_[View::VU_METER_COUNT] = {};
+
+// Peak hold timing, in animation frames (~30 per second)
+static constexpr uint32_t VU_PEAK_HOLD_FRAMES = etClock_HZ; // hold for about a second
+static constexpr int32_t VU_PEAK_FALL_STEP = 3;             // bar units per frame once released
+
 uint32_t View::lastBatteryDisplayFrame_ = 0;
 bool View::batteryDisplayInitialized_ = false;
 
@@ -58,11 +71,6 @@ View::View(GUIWindow &w, ViewData *viewData)
   locked_ = false;
   modalView_ = 0;
   modalViewCallback_ = ModalViewCallback();
-  // Initialize VU meter tracking variables
-  for (int i = 0; i < SONG_CHANNEL_COUNT + 1; i++) {
-    prevLeftVU_[i] = 0;
-    prevRightVU_[i] = 0;
-  }
 }
 
 GUIPoint View::GetAnchor() {
@@ -296,12 +304,58 @@ void View::drawTitleVuMeter(Player *player) {
   DrawChar(INDICATOR_TITLE_VU_X + 1, 0, char_v_bar_lookup[right], fGraphic);
 }
 
+void View::updateVUPeak(VUPeak &peak, int32_t rawBars, uint32_t elapsedFrames) {
+  if (rawBars >= peak.level) {
+    // a new peak, hold it
+    peak.level = static_cast<uint8_t>(rawBars);
+    peak.holdFrames = VU_PEAK_HOLD_FRAMES;
+    return;
+  }
+
+  // use up the hold time first, then let the peak fall towards the current level
+  const uint32_t held = std::min<uint32_t>(peak.holdFrames, elapsedFrames);
+  peak.holdFrames -= held;
+  const uint32_t fallFrames = elapsedFrames - held;
+
+  if (fallFrames > 0) {
+    const int32_t fallen = static_cast<int32_t>(peak.level) - static_cast<int32_t>(fallFrames) * VU_PEAK_FALL_STEP;
+    peak.level = static_cast<uint8_t>(std::max<int32_t>(fallen, rawBars));
+  }
+}
+
+int View::markerCell(const VUPeak &peak, int32_t bars) {
+  if (peak.level == 0) {
+    return -1;
+  }
+  const int cell = peak.level / 10;
+  // the bar always wins: no marker in a cell the bar reaches into
+  return (bars - 10 * cell > 0) ? -1 : cell;
+}
+
+bool View::anyVUPeakActive() {
+  for (int i = 0; i < VU_METER_COUNT; i++) {
+    if (vuPeakLeft_[i].level > 0 || vuPeakRight_[i].level > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vuIndex, bool forceRedraw) {
   SetBackgroundColor(Theme::View::bg);
 
   // Clamp the values to the maximum height
   leftBars = std::min<int32_t>(leftBars, VU_METER_MAX);
   rightBars = std::min<int32_t>(rightBars, VU_METER_MAX);
+
+  // Peaks use the raw levels, before the inertia below. Time is counted in
+  // elapsed frames, so drawing a meter twice in one frame (or after a while on
+  // a screen without meters) neither double counts nor freezes the hold.
+  const uint32_t frame = AppWindow::GetAnimationFrameCounter();
+  const uint32_t elapsed = std::min<uint32_t>(frame - vuPeakFrame_[vuIndex], 255);
+  vuPeakFrame_[vuIndex] = frame;
+  updateVUPeak(vuPeakLeft_[vuIndex], leftBars, elapsed);
+  updateVUPeak(vuPeakRight_[vuIndex], rightBars, elapsed);
 
   // Add inertia effect by limiting the rate of change
   // Maximum step change allowed per update
@@ -335,10 +389,19 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
   }
 
   // Left channel: Handle level changes
-  bool leftChanged = (leftBars != prevLeftVU_[vuIndex]);
-  bool rightChanged = (rightBars != prevRightVU_[vuIndex]);
+  // after a Clear() the meter area is already blank. Only the cells that show
+  // something have to be drawn then; drawing the empty ones would wipe whatever
+  // the view put into the same columns (e.g. the chain preview in the song view)
+  const bool cleared = !forceRedraw && (vuNeedsRepaint_ & (1u << vuIndex));
+  const bool repaint = forceRedraw || cleared;
+  VUPeak &peakLeft = vuPeakLeft_[vuIndex];
+  VUPeak &peakRight = vuPeakRight_[vuIndex];
+  const int markerLeft = markerCell(peakLeft, leftBars);
+  const int markerRight = markerCell(peakRight, rightBars);
+  bool leftChanged = repaint || (leftBars != prevLeftVU_[vuIndex]) || (markerLeft != peakLeft.drawnCell);
+  bool rightChanged = repaint || (rightBars != prevRightVU_[vuIndex]) || (markerRight != peakRight.drawnCell);
 
-  if (forceRedraw || leftChanged || rightChanged) {
+  if (leftChanged || rightChanged) {
     // If forcing redraw or level changed, redraw the entire meter
     // Then draw the active cells with inversion enabled
 
@@ -352,21 +415,32 @@ void View::drawVUMeter(int32_t leftBars, int32_t rightBars, GUIPoint pos, int vu
         SetColor(Theme::VU::normal);
       }
 
-      // draw left channel if changed
+      // draw left channel if changed; the peak marker is a full cell
+      const char peak = 3;
       if (leftChanged) {
-        DrawChar(pos.x_, pos.y_ - i, char_v_bar(leftBars - 10 * i), fGraphic);
+        const int level = (i == markerLeft) ? peak : leftBars - 10 * i;
+        if (!cleared || level > 0) {
+          DrawChar(pos.x_, pos.y_ - i, char_v_bar(level), fGraphic);
+        }
       }
 
       // draw right channel if changed
       if (rightChanged) {
-        DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(rightBars - 10 * i), fGraphic);
+        const int level = (i == markerRight) ? peak : rightBars - 10 * i;
+        if (!cleared || level > 0) {
+          DrawChar(pos.x_ + 1, pos.y_ - i, char_v_bar(level), fGraphic);
+        }
       }
     }
   }
 
+  peakLeft.drawnCell = static_cast<int8_t>(markerLeft);
+  peakRight.drawnCell = static_cast<int8_t>(markerRight);
+
   // Store the current values for next time
   prevLeftVU_[vuIndex] = leftBars;
   prevRightVU_[vuIndex] = rightBars;
+  vuNeedsRepaint_ &= ~(1u << vuIndex);
 }
 
 void View::drawPlayTime(Player *player, GUIPoint pos) {
@@ -443,6 +517,8 @@ void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
 
 void View::Clear() {
   w_.Clear();
+  // everything on screen is gone, including the VU meters
+  vuNeedsRepaint_ = (1u << VU_METER_COUNT) - 1;
 }
 
 void View::SwapColors() {
@@ -780,6 +856,43 @@ void View::drawCommandLegend(uint8_t x, uint8_t y, Token command) {
   DrawTintString(x, y + 1, help.line2.data());
   DrawTintString(x, y + 2, help.line3.data());
   DrawTintString(x, y + 3, help.line4.data());
+}
+
+void View::drawContextLegend(uint8_t x, uint8_t y, ContextLegend legend) {
+  if (legend == ContextLegend::None) {
+    return;
+  }
+
+  ContextLegendText text = getContextLegend(legend);
+
+  SetBackgroundColor(Theme::View::bg);
+
+  DrawTintString(x, y + 0, text.line1.data());
+  DrawTintString(x, y + 1, text.line2.data());
+  DrawTintString(x, y + 2, text.line3.data());
+  DrawTintString(x, y + 3, text.line4.data());
+}
+
+ContextLegend View::currentContextLegend() const {
+  return ContextLegend::None;
+}
+
+bool View::drawContextLegendInfoArea() {
+  drawnContextLegend_ = currentContextLegend();
+  if (drawnContextLegend_ == ContextLegend::None) {
+    return false;
+  }
+
+  infoAreaMode_ = InfoAreaDrawMode::Context;
+  drawContextLegend(5, SCREEN_HEIGHT - 4, drawnContextLegend_);
+  return true;
+}
+
+void View::updateContextLegend() {
+  // The mode changes in button handlers that don't all redraw, so notice it here
+  if (currentContextLegend() != drawnContextLegend_) {
+    isDirty_ = true;
+  }
 }
 
 void View::DrawTitle(const char *format, ...) {

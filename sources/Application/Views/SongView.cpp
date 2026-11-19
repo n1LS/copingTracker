@@ -13,6 +13,7 @@
 #include "Application/AppWindow.h"
 #include "Application/Mixer/MixerService.h"
 #include "Application/Player/Player.h"
+#include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/BaseClasses/View.h"
 #include "Application/Views/SampleEditorView.h"
@@ -905,9 +906,15 @@ void SongView::DrawView() {
   SetColor(Theme::View::fg);
 
   drawMap();
-  drawNotes();
+
+  // context help trumps everything else in the info area: the notes and the
+  // CPU load are less important than knowing what the buttons do right now
+  if (!drawContextLegendInfoArea()) {
+    infoAreaMode_ = InfoAreaDrawMode::Notes;
+    drawNotes();
+    drawRenderLoad(true);
+  }
   drawChainPreview();
-  drawRenderLoad(true);
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
@@ -918,6 +925,16 @@ void SongView::DrawView() {
   needsPlayTimeUpdate_ = true;
   needsUIUpdate_ = true;
   AnimationUpdate();
+}
+
+ContextLegend SongView::currentContextLegend() const {
+  if (viewMode_ == VM_CLONE) {
+    return ContextLegend::SongClone;
+  }
+  if (viewMode_ == VM_SELECTION || clipboard_.active_) {
+    return ContextLegend::SongSelection;
+  }
+  return ContextLegend::None;
 }
 
 void SongView::DrawLoopMarker() {
@@ -1074,7 +1091,9 @@ void SongView::AnimationUpdate() {
   drawMasterVuMeter(player);
   drawTitleVuMeter(player);
   drawTitleCPUMeter();
-  drawRenderLoad(false);
+  if (infoAreaMode_ == InfoAreaDrawMode::Notes) {
+    drawRenderLoad(false);
+  }
 
   SetBackgroundColor(Theme::View::Title::bg);
   SetColor(Theme::View::Title::fg);
@@ -1083,7 +1102,9 @@ void SongView::AnimationUpdate() {
 
   // Use the consolidated flag for all UI updates
   if (needsUIUpdate_) {
-    drawNotes();
+    if (infoAreaMode_ == InfoAreaDrawMode::Notes) {
+      drawNotes();
+    }
 
     // Only handle play time updates if needed
     GUIPoint timePos = {INDICATOR_PLAY_TIME_X, 0};

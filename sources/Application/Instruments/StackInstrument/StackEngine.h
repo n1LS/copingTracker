@@ -12,6 +12,7 @@
 #include "Application/Instruments/Panning.h"
 #include "Application/Utils/fixed.h"
 #include "StackWavetables.generated.h"
+#include <algorithm>
 #include <cstring>
 #include <stdint.h>
 
@@ -186,7 +187,7 @@ typedef struct stack_voice_t {
     if (wave != stackWaveNone) {
       for (int o = 0; o < stackNumOscillators; o++) {
         // render wavetable
-        sample += (StackWavetables::stack_wavetables[wave][0][phase[o] >> 21]);
+        sample += (StackWavetables::stack_wavetables[wave][lut_index[o]][phase[o] >> 21]);
       }
     }
 
@@ -235,18 +236,24 @@ typedef struct stack_voice_t {
   }
 
   inline void set_oscillator_lut_index(int osc, uint8_t note) {
+    // mip level 0 has the most harmonics (brightest), the last level the fewest
+    constexpr uint8_t maxLevel = StackWavetables::MIP_LEVELS - 1;
+
     // note must be within fLUT_MinNote..fLUT_MaxNote
     constexpr uint8_t noteRange = fLUT_MaxNote - fLUT_MinNote;
     const uint8_t notePos = note - fLUT_MinNote;
-    const uint8_t mapped = (notePos * 6) / noteRange;
-    const uint8_t brightness = parameters.brightness;
 
-    // map the note to its LUT using brightness as a scale
-    if (brightness <= 7) {
-      lut_index[osc] = (mapped * brightness) / 7;
-    } else {
-      lut_index[osc] = mapped + ((6 - mapped) * (brightness - 7)) / 5;
-    }
+    // the pitch decides how many harmonics fit without aliasing:
+    // the higher the note, the duller the table has to be
+    const uint8_t pitchLevel = (notePos * maxLevel) / noteRange;
+
+    // brightness is a ceiling on the harmonic content: the maximum setting
+    // allows every table, lower settings force a duller one
+    const uint8_t brightness = std::min<uint8_t>(parameters.brightness, stackBrightnessMax);
+    const uint8_t brightnessLevel = ((stackBrightnessMax - brightness) * maxLevel) / stackBrightnessMax;
+
+    // whichever is duller wins
+    lut_index[osc] = std::max(pitchLevel, brightnessLevel);
   }
 
   inline void set_pitch_rate(uint8_t rate) {

@@ -24,6 +24,7 @@ public:
   bool navigationDown(uint16_t direction) override;
   virtual void ButtonUp(uint16_t button, uint16_t mask);
   virtual void DrawView();
+  ContextLegend currentContextLegend() const override;
   virtual void OnFocus();
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void AnimationUpdate();

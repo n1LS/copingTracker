@@ -438,6 +438,10 @@ void SampleImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENG
   // Set the filename in viewData so SampleEditorView knows which file to load
   viewData_->sampleEditorFilename = filename;
 
+  // the editor is opened from here, so cancel/back return to this browser,
+  // which in turn returns to wherever it was opened from (instrument/project)
+  SampleEditorView::SetSourceViewType(VT_IMPORT);
+
   // Navigate to the sample editor view using ScreenView's Navigate method
   // The SampleEditorView will handle loading the sample from the current directory
   Navigate(VT_SAMPLE_EDITOR, vtRevealFromCenter);

@@ -103,15 +103,13 @@ void SampleSlicesView::OnFocus() {
 
   // graphfield setup
   sliceIndexVar_.SetInt(0, false);
-  sliceCountVar_.SetInt(4, false);
+  sliceCountVar_.SetInt(definedSliceCount(), false);
   updateSliceSelectionFromInstrument();
   rebuildWaveform();
   graphField_.RequestFullRedraw();
   updateZoomLimits();
   updateZoomWindow();
   isDirty_ = true;
-
-  saveState();
 }
 
 void SampleSlicesView::ButtonUp(uint16_t button, uint16_t mask) {
@@ -372,16 +370,12 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
       }
       break;
 
-    case Token::ActionSlicingSave:
-      saveState();
-      break;
-
     case Token::ActionSlicingRevert:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
-        MessageBox *mb = MessageBox::Create(*this, "Slices", "Restore slices?", MBBF_YES | MBBF_NO);
+        MessageBox *mb = MessageBox::Create(*this, "Slices", "Reset all slices?", MBBF_YES | MBBF_NO);
         DoModal(mb, ModalViewCallback::create<&SampleSlicesView::ResetSlicesConfirmCallback>());
       } else {
-        autoSliceEvenly();
+        resetSlices();
       }
       break;
 
@@ -420,11 +414,6 @@ void SampleSlicesView::buildFieldLayout() {
   actionField_.back().AddObserver(*this);
 
   position.x_ += 7;
-  actionField_.emplace_back("Save", Token::ActionSlicingSave, position);
-  fieldList_.insert(fieldList_.end(), &actionField_.back());
-  actionField_.back().AddObserver(*this);
-
-  position.x_ += 6;
   actionField_.emplace_back("Auto slice", Token::ActionAutoSlice, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
@@ -672,7 +661,7 @@ void SampleSlicesView::ResetSlicesConfirmCallback(View &v, ModalView &dialog) {
   self.clearAfterModal(v);
 
   if (dialog.GetReturnCode() == MBL_YES) {
-    self.restoreState();
+    self.resetSlices();
   }
 }
 
@@ -797,30 +786,34 @@ bool SampleSlicesView::hasInstrumentSample() const {
   return instrument_ && instrument_->GetSampleIndex() >= 0 && sampleSize_ > 0;
 }
 
-void SampleSlicesView::saveState() {
-  if (!instrument_ || sampleSize_ == 0) {
-    return;
-  }
-
-  for (size_t i = 0; i < SampleInstrument::MaxSlices; i++) {
-    if (!instrument_->IsSliceDefined(i)) {
-      sliceSaveState_[i] = 0;
-    } else {
-      sliceSaveState_[i] = instrument_->GetSlicePoint(i);
+int32_t SampleSlicesView::definedSliceCount() const {
+  int32_t count = 0;
+  if (instrument_) {
+    for (size_t i = 0; i < SampleInstrument::MaxSlices; ++i) {
+      if (instrument_->IsSliceDefined(i)) {
+        count++;
+      }
     }
   }
+  // the count field starts at 1 (no slicing)
+  return count < 1 ? 1 : count;
 }
 
-void SampleSlicesView::restoreState() {
-  if (!instrument_ || sampleSize_ == 0) {
+void SampleSlicesView::resetSlices() {
+  if (!instrument_) {
     return;
   }
 
-  for (size_t i = 0; i < SampleInstrument::MaxSlices; i++) {
-    instrument_->SetSlicePoint(i, sliceSaveState_[i]);
+  instrument_->ClearSlices();
+  sliceCountVar_.SetInt(1, false);
+  sliceIndexVar_.SetInt(0, false);
+
+  updateSliceSelectionFromInstrument();
+  if (updateZoomWindow()) {
+    graphField_.InvalidateWaveform();
   }
-
-  sliceStartVar_.SetInt(sliceSaveState_[sliceIndexVar_.GetInt()]);
-
+  updateSliceMarkers();
+  graphField_.RequestFullRedraw();
   isDirty_ = true;
+  ((AppWindow &)w_).SetDirty();
 }

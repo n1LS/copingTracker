@@ -14,6 +14,8 @@ void InstrumentView::fillSampleParameters() {
   I_Instrument *instr = bank->GetInstrument(i);
   SampleInstrument *instrument = (SampleInstrument *)instr;
   lastSampleIndex_ = instrument->GetSampleIndex();
+  // slices are edited on another view, so recount whenever the page is rebuilt
+  updateSliceCount(instrument);
 
   GUIPoint position = GUIPoint(1, 6);
   
@@ -27,6 +29,7 @@ void InstrumentView::fillSampleParameters() {
   intVarOffField_.back().SetLabelColors(Theme::SemanticColors::sample(true), Theme::SemanticColors::sample(false));
   gmInputField_ = &intVarOffField_.back();
   gmInputField_->SetActive(v->GetInt() != NO_GM_INSTRUMENT);
+  lastGMInstrument_ = v->GetInt();
   fieldList_.insert(fieldList_.end(), &intVarOffField_.back());
   addIndexToLine(4, position.y_);
 
@@ -245,8 +248,8 @@ void InstrumentView::DrawViewSample() {
   if (sliceCount_ <= 1) {
     DrawString(10, 8, "off");
   } else {
-    char label[3];
-    npf_snprintf(label, sizeof(label), " %2d", sliceCount_);
+    char label[4]; // 3 characters + terminator
+    npf_snprintf(label, sizeof(label), " %2d", static_cast<int>(sliceCount_));
     DrawString(10, 8, label);
   }
 

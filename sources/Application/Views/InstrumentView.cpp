@@ -90,6 +90,8 @@ InstrumentView::~InstrumentView() {
 void InstrumentView::Reset() {
   lastSampleIndex_ = -1;
   suppressSampleChangeWarning_ = false;
+  lastGMInstrument_ = NO_GM_INSTRUMENT;
+  suppressGMChangeWarning_ = false;
   exportInstrument_ = nullptr;
   exportName_.clear();
   lastFocus_ = &typeVarField_.back();
@@ -250,6 +252,7 @@ void InstrumentView::refreshInstrumentFields() {
   nameTextField_.clear();
   nameVariables_.clear();
   lastSampleIndex_ = -1;
+  lastGMInstrument_ = NO_GM_INSTRUMENT;
 
   sampleInputField_ = nullptr;
   gmInputField_ = nullptr;
@@ -683,17 +686,42 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
       break;
     case Token::SampleInstrumentGMInstrument:
       {
-        // changing the GM instrument clears the sample
-        Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
+        I_Instrument *instr = getInstrument();
+        Variable *gmVar = instr->FindVariable(Token::SampleInstrumentGMInstrument);
+        int newGM = gmVar->GetInt();
+
+        if (suppressGMChangeWarning_) {
+          // the value was just reverted after the user declined, nothing else to do
+          suppressGMChangeWarning_ = false;
+          gmInputField_->SetActive(newGM != NO_GM_INSTRUMENT);
+          isDirty_ = true;
+          break;
+        }
+
+        // changing the GM instrument clears the sample. Warn first if that
+        // sample has slices, which would be lost with it
+        Variable *sampleVar = instr->FindVariable(Token::SampleInstrumentSample);
+        if (newGM != NO_GM_INSTRUMENT && sampleVar && sampleVar->GetInt() != NO_SAMPLE &&
+            instr->GetType() == IT_SAMPLE) {
+          SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
+          if (sampleInstr->HasSlicesForWarning()) {
+            MessageBox *mb =
+                MessageBox::Create(*this, "GM Instrument", "Change instrument &", "clear slices?", MBBF_YES | MBBF_NO);
+            pendingGMChangeInstrument_ = sampleInstr;
+            pendingGMChangeNewValue_ = newGM;
+            DoModal(mb, ModalViewCallback::create<InstrumentView, &InstrumentView::onConfirmGMInstrumentChange>(*this));
+            break;
+          }
+        }
+
         if (sampleVar) {
           sampleVar->SetInt(-1);
           sampleInputField_->SetActive(false);
         }
 
-        Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
-        gmInputField_->SetActive(gmVar->GetInt() != NO_GM_INSTRUMENT);
-        // TODO nILS: warn about losing slices when changing GM instrument if sample was assigned and slices exist
-        // like below
+        lastSampleIndex_ = NO_SAMPLE;
+        lastGMInstrument_ = newGM;
+        gmInputField_->SetActive(newGM != NO_GM_INSTRUMENT);
 
         scrollStartTime_ = System::GetInstance()->Millis();
         isDirty_ = true;
@@ -706,34 +734,36 @@ void InstrumentView::Update(Observable &o, I_ObservableData *data) {
           break;
         }
 
-        Variable *sampleVar = getInstrument()->FindVariable(Token::SampleInstrumentSample);
+        Variable *sampleVar = instr->FindVariable(Token::SampleInstrumentSample);
 
-        if (sampleVar->GetInt() != NO_SAMPLE) {
-          // changing the sample clears the GM Instrument
-          Variable *gmVar = getInstrument()->FindVariable(Token::SampleInstrumentGMInstrument);
-          if (gmVar) {
-            gmVar->SetInt(NO_GM_INSTRUMENT);
-            // find the intput field and set it inactive
-            gmInputField_->SetActive(false);
-          }
-        } else {
+        if (sampleVar->GetInt() == NO_SAMPLE) {
           break;
         }
-
-        sampleInputField_->SetActive(sampleVar->GetInt() != NO_SAMPLE);
 
         SampleInstrument *sampleInstr = static_cast<SampleInstrument *>(instr);
         int newIndex = sampleInstr->GetSampleIndex();
 
         if (suppressSampleChangeWarning_) {
+          // the value was just reverted after the user declined
           suppressSampleChangeWarning_ = false;
           lastSampleIndex_ = newIndex;
+          sampleInputField_->SetActive(true);
           break;
         }
 
+        // nothing changed (e.g. the same sample was picked again), so leave the
+        // GM instrument alone
         if (newIndex == lastSampleIndex_) {
           break;
         }
+
+        // an actual change of sample clears the GM instrument
+        Variable *gmVar = instr->FindVariable(Token::SampleInstrumentGMInstrument);
+        if (gmVar) {
+          gmVar->SetInt(NO_GM_INSTRUMENT);
+          gmInputField_->SetActive(false);
+        }
+        sampleInputField_->SetActive(true);
 
         if (!sampleInstr->HasSlicesForWarning()) {
           sampleInstr->ClearSlices();
@@ -934,6 +964,40 @@ void InstrumentView::onConfirmSampleChange(View &, ModalView &dialog) {
   suppressSampleChangeWarning_ = true;
   if (Variable *sampleVar = sampleInstr->FindVariable(Token::SampleInstrumentSample)) {
     sampleVar->SetInt(lastSampleIndex_);
+  }
+  isDirty_ = true;
+}
+
+void InstrumentView::onConfirmGMInstrumentChange(View &, ModalView &dialog) {
+  SampleInstrument *sampleInstr = pendingGMChangeInstrument_;
+
+  if (!sampleInstr) {
+    return;
+  }
+
+  int newGM = pendingGMChangeNewValue_;
+  pendingGMChangeInstrument_ = nullptr;
+  pendingGMChangeNewValue_ = NO_GM_INSTRUMENT;
+
+  if (dialog.GetReturnCode() == MBL_YES) {
+    // same outcome as an unwarned change: the sample goes, and its slices with it
+    if (Variable *sampleVar = sampleInstr->FindVariable(Token::SampleInstrumentSample)) {
+      sampleVar->SetInt(-1);
+    }
+    sampleInputField_->SetActive(false);
+    sampleInstr->ClearSlices();
+    lastSampleIndex_ = NO_SAMPLE;
+    lastGMInstrument_ = newGM;
+    gmInputField_->SetActive(newGM != NO_GM_INSTRUMENT);
+    updateSliceCount(sampleInstr);
+    scrollStartTime_ = System::GetInstance()->Millis();
+    isDirty_ = true;
+    return;
+  }
+
+  suppressGMChangeWarning_ = true;
+  if (Variable *gmVar = sampleInstr->FindVariable(Token::SampleInstrumentGMInstrument)) {
+    gmVar->SetInt(lastGMInstrument_);
   }
   isDirty_ = true;
 }

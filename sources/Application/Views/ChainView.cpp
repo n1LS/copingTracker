@@ -11,6 +11,7 @@
 
 #include "ChainView.h"
 #include "Application/Model/Generators/PhraseGenerator.h"
+#include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/GeneratorWizardModal.h"
 #include "Application/Views/SampleEditorView.h"
@@ -777,11 +778,26 @@ void ChainView::DrawView() {
   }
 
   drawMap();
-  drawNotes();
+
+  // context help trumps the notes
+  if (!drawContextLegendInfoArea()) {
+    infoAreaMode_ = InfoAreaDrawMode::Notes;
+    drawNotes();
+  }
 
   if (player->IsRunning()) {
     OnPlayerUpdate(PET_UPDATE);
   };
+}
+
+ContextLegend ChainView::currentContextLegend() const {
+  if (viewMode_ == VM_CLONE) {
+    return ContextLegend::ChainClone;
+  }
+  if (viewMode_ == VM_SELECTION || clipboard_.active_) {
+    return ContextLegend::ChainSelection;
+  }
+  return ContextLegend::None;
 }
 
 void ChainView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
@@ -807,8 +823,10 @@ void ChainView::AnimationUpdate() {
   // Handle any pending updates from OnPlayerUpdate
   // This ensures all UI drawing happens on the "main" thread (core0)
   if (needsUIUpdate_) {
-    // Draw notes
-    drawNotes();
+    // Draw notes, unless the info area shows context help
+    if (infoAreaMode_ == InfoAreaDrawMode::Notes) {
+      drawNotes();
+    }
 
     // Handle position updates
     GUIPoint anchor = GetAnchor();

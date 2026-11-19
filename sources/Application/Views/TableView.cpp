@@ -13,6 +13,7 @@
 #include "Application/AppWindow.h"
 #include "Application/Instruments/CommandList.h"
 #include "Application/Player/TablePlayback.h"
+#include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/CommandView.h"
 #include "Application/Views/SampleEditorView.h"
@@ -365,7 +366,36 @@ void TableView::warpToNeighbour(int dir) {
   isDirty_ = true;
 }
 
-void TableView::updateCursorValue(int offset) {
+// next/previous command for a button: LEFT/RIGHT step through the list,
+// UP/DOWN jump to the next/previous command group. The "Table" command is
+// not available in a table, so it is skipped in either direction.
+static Token stepCommand(Token command, uint16_t button) {
+  Token (*step)(Token) = nullptr;
+  switch (button) {
+    case BM_RIGHT:
+      step = CommandList::GetNext;
+      break;
+    case BM_UP:
+      step = CommandList::GetNextAlpha;
+      break;
+    case BM_LEFT:
+      step = CommandList::GetPrev;
+      break;
+    case BM_DOWN:
+      step = CommandList::GetPrevAlpha;
+      break;
+    default:
+      return command;
+  }
+
+  command = step(command);
+  if (command == Token::InstrumentCommandTable) {
+    command = step(command);
+  }
+  return command;
+}
+
+void TableView::updateCursorValue(uint16_t button) {
   unsigned char *c = 0;
   unsigned char limit = 0;
   bool wrap = false;
@@ -380,33 +410,7 @@ void TableView::updateCursorValue(int offset) {
       {
         const int commandColumn = col_ / 2;
         Token command = table.getCmd(row_, commandColumn);
-        // TODO: clean this up, it's wild.
-        switch (offset) {
-          case 0x01:
-            command = CommandList::GetNext(command);
-            if (command == Token::InstrumentCommandTable) {
-              command = CommandList::GetNext(command);
-            }
-            break;
-          case 0x10:
-            command = CommandList::GetNextAlpha(command);
-            if (command == Token::InstrumentCommandTable) {
-              command = CommandList::GetNextAlpha(command);
-            }
-            break;
-          case -0x01:
-            command = CommandList::GetPrev(command);
-            if (command == Token::InstrumentCommandTable) {
-              command = CommandList::GetPrev(command);
-            }
-            break;
-          case -0x10:
-            command = CommandList::GetPrevAlpha(command);
-            if (command == Token::InstrumentCommandTable) {
-              command = CommandList::GetPrevAlpha(command);
-            }
-            break;
-        }
+        command = stepCommand(command, button);
         getCmdRef(table, row_, commandColumn) = Token(command).raw8();
         lastCmd_ = command;
         break;
@@ -416,21 +420,7 @@ void TableView::updateCursorValue(int offset) {
     case colCmdVal2:
     case colCmdVal3:
       {
-        switch (offset) {
-          // TODO nILS: clean this up, it's wild.
-          case 0x01:
-            cmdEditField_.ProcessArrow(BM_RIGHT);
-            break;
-          case 0x10:
-            cmdEditField_.ProcessArrow(BM_UP);
-            break;
-          case -0x01:
-            cmdEditField_.ProcessArrow(BM_LEFT);
-            break;
-          case -0x10:
-            cmdEditField_.ProcessArrow(BM_DOWN);
-            break;
-        }
+        cmdEditField_.ProcessArrow(button);
         const int commandColumn = col_ / 2;
         Token currentCmd = table.getCmd(row_, commandColumn);
         uint16_t paramValue = cmdEdit_.GetInt();
@@ -562,16 +552,16 @@ void TableView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
         cutPosition();
         break;
       case BM_DOWN:
-        updateCursorValue(-0x10);
+        updateCursorValue(BM_DOWN);
         break;
       case BM_UP:
-        updateCursorValue(0x10);
+        updateCursorValue(BM_UP);
         break;
       case BM_LEFT:
-        updateCursorValue(-0x01);
+        updateCursorValue(BM_LEFT);
         break;
       case BM_RIGHT:
-        updateCursorValue(0x01);
+        updateCursorValue(BM_RIGHT);
         break;
     }
   } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
@@ -653,6 +643,14 @@ void TableView::setTextProps(int col, int row, Color color = Theme::View::fg) {
 
   SetColor(highlighted ? Theme::View::bg : color);
   SetBackgroundColor(highlighted ? color : Theme::View::bg);
+}
+
+ContextLegend TableView::currentContextLegend() const {
+  // ALT+EDIT goes straight to selection here, there is no clone mode
+  if (viewMode_ == VM_SELECTION || clipboard_.active_) {
+    return ContextLegend::TableSelection;
+  }
+  return ContextLegend::None;
 }
 
 void TableView::DrawView() {
@@ -755,8 +753,11 @@ void TableView::DrawView() {
 
   drawMap();
 
-  // Set info area draw mode based on what will be drawn
-  if (helpLegendCommand != Token::InstrumentCommandNone) {
+  // Set info area draw mode based on what will be drawn. Context help trumps
+  // the command help, which trumps the notes.
+  if (drawContextLegendInfoArea()) {
+    // the legend for the current mode is shown
+  } else if (helpLegendCommand != Token::InstrumentCommandNone) {
     infoAreaMode_ = InfoAreaDrawMode::HelpLegend;
     drawCommandLegend(5, SCREEN_HEIGHT - 4, helpLegendCommand);
   } else {

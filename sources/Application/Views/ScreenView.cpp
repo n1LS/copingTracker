@@ -23,6 +23,7 @@ ScreenView::~ScreenView() {
 /// Updates the animation by redrawing the battery gauge and power button UI on
 /// every clock tick
 void ScreenView::AnimationUpdate() {
+  updateContextLegend();
   drawBattery();
   drawPlaybackIndicator();
   drawTitleVuMeter(Player::GetInstance());

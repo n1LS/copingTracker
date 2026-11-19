@@ -6,9 +6,10 @@
  * This file is part of the copingTracker firmware
  */
 
-#include <array>
+#include <cstddef>
 #include <cstdint>
 
+#include "Externals/etl/include/etl/array.h"
 #include "Foundation/Types/Colors.h"
 
 #ifndef _TINT_CHAR_H

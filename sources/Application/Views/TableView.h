@@ -37,6 +37,7 @@ public:
   virtual void ButtonDown(uint16_t newButton, uint16_t mask);
   bool navigationDown(uint16_t direction) override;
   virtual void DrawView();
+  ContextLegend currentContextLegend() const override;
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
@@ -56,7 +57,7 @@ protected:
   void extendSelection();
 
   void updateCursor(int dx, int dy);
-  void updateCursorValue(int offset);
+  void updateCursorValue(uint16_t button);
   void setTextProps(int col, int row, Color color);
   void warpToNeighbour(int dir);
 
@@ -94,9 +95,6 @@ private:
   // Keep these for backward compatibility
   bool needsPlayPositionUpdate_ = false;
   bool needsNotesUpdate_ = false;
-
-  // Info area draw mode - ensures drawNotes() and drawHelpLegend() are mutually exclusive
-  InfoAreaDrawMode infoAreaMode_ = InfoAreaDrawMode::Notes;
 
 #ifdef PICO_DEOPTIMIZED_DEBUG
   // These variables are specifically for thread synchronization in debug builds
