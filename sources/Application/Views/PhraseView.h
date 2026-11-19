@@ -48,10 +48,9 @@ public:
   virtual void DrawView();
   ContextLegend currentContextLegend() const override;
   void DrawEditingValue();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
-  void setCurrentlySelectedCommand(Token command);
+  void onCommandPicked(Token command) override;
 
 protected:
   void updateCursor(int dx, int dy);
@@ -112,11 +111,7 @@ private:
   int saveRow_;
   int expandFrame_ = 0;
 
-  // Flags to track which UI elements need updating
-  // These prevent core1 from directly updating the UI
-  // (needsUIUpdate_, the single flag for all UI updates, is in PhraseEditingView)
-
-  bool needsLiveIndicatorUpdate_ = false;
+  // (needsUIUpdate_, the single flag that keeps core1 from drawing, is in PhraseEditingView)
 
 #ifdef PICO_DEOPTIMIZED_DEBUG
   // These variables are specifically for thread synchronization in debug builds

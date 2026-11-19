@@ -9,6 +9,7 @@
 #include "PianoRollView.h"
 #include "Application/Instruments/I_Instrument.h"
 #include "Application/Instruments/InstrumentBank.h"
+#include "Application/Model/Scale.h"
 #include "Application/Model/Song.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/char.h"
@@ -18,8 +19,15 @@
 #include <cstdlib>
 #include <cstring>
 
-// one note per row, in the rows of the song grid (3..18)
+// one note per row, 16 rows
 static constexpr int VISIBLE_NOTES = 16;
+// row positions: the grid (the highest note in the first row) and the fields right of it, which start in
+// the row of the step index
+static constexpr int GRID_Y = 3;
+static constexpr int STEP_INDEX_Y = GRID_Y - 1;
+static constexpr int PANEL_Y = STEP_INDEX_Y;
+// the help under the fields, in the last two rows of the grid
+static constexpr int HELP_Y = GRID_Y + 16 - 2;
 // column positions
 static constexpr int PIANO_X = 0;
 static constexpr int LABEL_X = 4;
@@ -71,6 +79,21 @@ static GridCell noteGridGlyph(const PhraseStep *steps, int step, int &sounding) 
 
   sounding = note;
   return {(next == NO_NOTE) ? GLYPH_START : GLYPH_SINGLE, note, Theme::View::fg};
+}
+
+// The step a value of `step` comes from: the step itself if it has the value, otherwise (if `sticky`) the
+// closest step before it that has one. Values are valid until a new note or a note off comes in: the
+// values of the step of that note itself still count, what was set before it does not.
+template <typename Has> static int valueSource(const PhraseStep *steps, int step, bool sticky, Has has) {
+  for (int i = step; i >= 0; --i) {
+    if (has(steps[i])) {
+      return i;
+    }
+    if (!sticky || steps[i].note != NO_NOTE) {
+      return -1;
+    }
+  }
+  return -1;
 }
 
 // Whether the phrase has notes above or below the visible range
@@ -147,7 +170,7 @@ void PianoRollView::OnFocus() {
 }
 
 void PianoRollView::centerOnNotes() {
-  bottomNote_ = bestBottomNote(viewData_->song_->phrase_.steps_[viewData_->currentPhrase_]);
+  bottomNote_ = bestBottomNote(currentSteps());
 }
 
 void PianoRollView::onPhraseSwitched() {
@@ -218,23 +241,7 @@ void PianoRollView::focusPanel(bool panel) {
 }
 
 // the row of a field in the panel: note, instrument, volume, command 1, command 2
-static int panelRow(StepField field) {
-  switch (field) {
-    case StepField::Note:
-      return 0;
-    case StepField::Instrument:
-      return 1;
-    case StepField::Volume:
-      return 2;
-    case StepField::Command1:
-    case StepField::Param1:
-      return 3;
-    case StepField::Command2:
-    case StepField::Param2:
-      return 4;
-  }
-  return 0;
-}
+static const int panelRow[7] = {0, 1, 2, 3, 3, 4, 4};
 
 static bool isParam(StepField field) {
   return field == StepField::Param1 || field == StepField::Param2;
@@ -255,6 +262,11 @@ static StepField panelFieldAt(int row, bool param) {
   }
 }
 
+// one of the four arrows (the button that was just pressed is a single button)
+static bool isDirection(uint16_t button) {
+  return (button & BM_DIRECTIONAL) != 0;
+}
+
 static ViewUpdateDirection toDirection(uint16_t button) {
   switch (button) {
     case BM_LEFT:
@@ -269,7 +281,7 @@ static ViewUpdateDirection toDirection(uint16_t button) {
 }
 
 void PianoRollView::movePanelField(uint16_t direction) {
-  int row = panelRow(panelField_);
+  int row = panelRow[(int)panelField_];
   bool param = isParam(panelField_);
 
   switch (direction) {
@@ -298,7 +310,7 @@ void PianoRollView::movePanelField(uint16_t direction) {
 GUIRect PianoRollView::panelFieldRect() {
   // rows and columns of drawStepInfo: every field has a title row and a value row, the commands have their
   // parameter right of them
-  const int y = GetAnchor().y_ - 1;
+  const int y = PANEL_Y;
   switch (panelField_) {
     case StepField::Note:
       return GUIRect(STEP_INFO_X, y + 1, 3, 1);
@@ -319,30 +331,41 @@ GUIRect PianoRollView::panelFieldRect() {
 }
 
 void PianoRollView::processPanelInput(uint16_t newButton, uint16_t mask) {
-  if (IsChord(newButton, mask, BM_LEFT) || IsChord(newButton, mask, BM_RIGHT) || IsChord(newButton, mask, BM_UP) ||
-      IsChord(newButton, mask, BM_DOWN)) {
+  if (isDirection(newButton) && mask == 0) {
     movePanelField(newButton);
   } else if (IsChord(newButton, mask, BM_ENTER)) {
-    // as in the phrase view: an empty field gets the last value, the values that can be heard start the preview
+    // as in the phrase view: the command picker (if it is enabled) opens on a command, an empty field gets the
+    // last value, the values that can be heard start the preview
     const int step = viewData_->phraseCurPos_;
+    if (panelField_ == StepField::Command1 || panelField_ == StepField::Command2) {
+      openCommandPicker(step, panelField_ == StepField::Command2);
+    }
     pasteLastValue(step, panelField_);
     followNoteOfStep();
     isDirty_ = true;
-    if (panelField_ == StepField::Note || panelField_ == StepField::Instrument || panelField_ == StepField::Volume) {
+    if (isAudible(panelField_)) {
       stopAudition();
       startAudition(true);
     }
-  } else if (IsChord(newButton, mask, BM_LEFT, BM_ENTER) || IsChord(newButton, mask, BM_RIGHT, BM_ENTER) ||
-             IsChord(newButton, mask, BM_UP, BM_ENTER) || IsChord(newButton, mask, BM_DOWN, BM_ENTER)) {
+  } else if (isDirection(newButton) && mask == BM_ENTER) {
     editPanelField(toDirection(newButton));
   } else if (IsChord(newButton, mask, BM_EDIT, BM_ENTER)) {
     clearPanelField();
   }
 }
 
+void PianoRollView::onCommandPicked(Token command) {
+  if (panelField_ != StepField::Command1 && panelField_ != StepField::Command2) {
+    return;
+  }
+
+  setCommand(viewData_->phraseCurPos_, panelField_ == StepField::Command2, command);
+  isDirty_ = true;
+}
+
 void PianoRollView::editPanelField(ViewUpdateDirection direction) {
   const int step = viewData_->phraseCurPos_;
-  PhraseStep &data = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step];
+  PhraseStep &data = currentSteps()[step];
 
   switch (panelField_) {
     case StepField::Note:
@@ -375,7 +398,7 @@ void PianoRollView::editPanelField(ViewUpdateDirection direction) {
   isDirty_ = true;
 
   // the preview restarts with what changed (commands do not change what can be heard)
-  if (panelField_ == StepField::Note || panelField_ == StepField::Instrument || panelField_ == StepField::Volume) {
+  if (isAudible(panelField_)) {
     startAudition(false);
   }
 }
@@ -392,7 +415,7 @@ void PianoRollView::clearPanelField() {
 }
 
 void PianoRollView::followNoteOfStep() {
-  const uint8_t note = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][viewData_->phraseCurPos_].note;
+  const uint8_t note = currentSteps()[viewData_->phraseCurPos_].note;
   if (note < NOTE_OFF) {
     cursorNote_ = std::clamp<int>(note, 0, HIGHEST_NOTE);
     scrollToCursor();
@@ -400,7 +423,7 @@ void PianoRollView::followNoteOfStep() {
 }
 
 void PianoRollView::placeNote() {
-  PhraseStep &step = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][viewData_->phraseCurPos_];
+  PhraseStep &step = currentSteps()[viewData_->phraseCurPos_];
 
   // as in the phrase view: a step without a note gets the last instrument,
   // and the note becomes the last note and instrument to paste
@@ -419,17 +442,22 @@ void PianoRollView::placeNote() {
   startAudition(true);
 }
 
+// what a note owns goes with it: its instrument and volume (the commands stay in their step)
+static void clearNote(PhraseStep &step) {
+  step.note = NO_NOTE;
+  step.instrument = NO_INSTRUMENT;
+  step.volume = NO_VOLUME;
+}
+
 void PianoRollView::removeNote() {
-  PhraseStep &step = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][viewData_->phraseCurPos_];
+  PhraseStep &step = currentSteps()[viewData_->phraseCurPos_];
 
   if (step.note == NO_NOTE) {
     // cutting an empty note slot adds a note off, as in the phrase view
     step.note = NOTE_OFF;
   } else {
     // ... and cutting a note takes its instrument and volume with it
-    step.note = NO_NOTE;
-    step.instrument = NO_INSTRUMENT;
-    step.volume = NO_VOLUME;
+    clearNote(step);
   }
 
   isDirty_ = true;
@@ -465,7 +493,7 @@ void PianoRollView::scrollToCursor() {
 
 void PianoRollView::moveNote(int sign) {
   const int step = viewData_->phraseCurPos_;
-  PhraseStep &data = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step];
+  PhraseStep &data = currentSteps()[step];
 
   // there is no note to move in an empty step
   if (data.note == NO_NOTE) {
@@ -476,10 +504,7 @@ void PianoRollView::moveNote(int sign) {
   changeNote(step, sign, true);
 
   // the cursor follows the note
-  if (data.note < NOTE_OFF) {
-    cursorNote_ = std::clamp<int>(data.note, 0, HIGHEST_NOTE);
-    scrollToCursor();
-  }
+  followNoteOfStep();
 
   isDirty_ = true;
 
@@ -488,7 +513,7 @@ void PianoRollView::moveNote(int sign) {
 }
 
 void PianoRollView::moveNoteInTime(int delta) {
-  PhraseStep *steps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  PhraseStep *steps = currentSteps();
   const int from = viewData_->phraseCurPos_;
   const int to = from + delta;
 
@@ -502,9 +527,7 @@ void PianoRollView::moveNoteInTime(int delta) {
   steps[to].instrument = steps[from].instrument;
   steps[to].volume = steps[from].volume;
 
-  steps[from].note = NO_NOTE;
-  steps[from].instrument = NO_INSTRUMENT;
-  steps[from].volume = NO_VOLUME;
+  clearNote(steps[from]);
 
   viewData_->phraseCurPos_ = to;
   isDirty_ = true;
@@ -519,7 +542,7 @@ void PianoRollView::moveCursorStep(int delta) {
 }
 
 void PianoRollView::placeCursor() {
-  const PhraseStep *steps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  const PhraseStep *steps = currentSteps();
   const int topNote = bottomNote_ + VISIBLE_NOTES - 1;
   const uint8_t note = steps[viewData_->phraseCurPos_].note;
 
@@ -534,9 +557,7 @@ void PianoRollView::DrawView() {
   Clear();
 
   // the focus is the cell of the cursor
-  const GUIPoint anchor = GetAnchor();
-  focusRect_ =
-      panelFocus_ ? panelFieldRect() : GUIRect(GRID_X + viewData_->phraseCurPos_, anchor.y_ + cursorRow(), 1, 1);
+  focusRect_ = panelFocus_ ? panelFieldRect() : GUIRect(GRID_X + viewData_->phraseCurPos_, GRID_Y + cursorRow(), 1, 1);
 
   DrawTitle("Piano Roll %2.2X", viewData_->currentPhrase_);
 
@@ -581,8 +602,7 @@ void PianoRollView::drawPlaybackIndicators() {
     return;
   }
 
-  const GUIPoint anchor = GetAnchor();
-  const int y = anchor.y_ + VISIBLE_NOTES;
+  const int y = GRID_Y + VISIBLE_NOTES;
 
   SetBackgroundColor(Theme::View::bg);
 
@@ -622,10 +642,11 @@ void PianoRollView::drawPlaybackIndicators() {
 }
 
 void PianoRollView::drawNoteLabels() {
-  const GUIPoint anchor = GetAnchor();
   char label[4];
 
   const int cursorRow = this->cursorRow();
+  const int scale = viewData_->project_->GetScale();
+  const int scaleRoot = viewData_->project_->GetScaleRoot();
 
   // the highest note is in the top row
   for (int row = 0; row < VISIBLE_NOTES; row++) {
@@ -637,11 +658,13 @@ void PianoRollView::drawNoteLabels() {
     SetColor(Theme::View::bg);
     SetBackgroundColor(Theme::View::PianoRoll::fg);
     const char *string = selected ? gchar_vertical_piano_selected[inOctave] : gchar_vertical_piano[inOctave];
-    DrawString(PIANO_X, anchor.y_ + row, string, fGraphic);
+    DrawString(PIANO_X, GRID_Y + row, string, fGraphic);
 
     // draw note name
     noteToString(note, label);
-    const Color labelColor = Theme::View::index(inOctave == 0);
+    // the notes that are not part of the scale of the project are inactive
+    const bool inScale = scaleSteps[scale][(note + 12 - scaleRoot) % 12];
+    const Color labelColor = inScale ? Theme::View::index(inOctave == 0) : Theme::View::inactive;
     if (selected && panelFocus_) {
       // the focus is on the right: the selection is only the regular colors inverted
       SetColor(Theme::View::bg);
@@ -650,7 +673,7 @@ void PianoRollView::drawNoteLabels() {
       SetColor(selected ? Theme::View::Selection::fg(true) : labelColor);
       SetBackgroundColor(selected ? Theme::View::Selection::bg(true) : Theme::View::bg);
     }
-    DrawString(LABEL_X, anchor.y_ + row, label);
+    DrawString(LABEL_X, GRID_Y + row, label);
   }
 }
 
@@ -665,12 +688,12 @@ void PianoRollView::drawStepIndex() {
   SetBackgroundColor(Theme::View::bg);
   for (int step = 0; step < STEPS_PER_PHRASE; step++) {
     SetColor(step < phraseLength ? Theme::View::index(step % phraseDiv == 0) : Theme::View::inactive);
-    DrawChar(GRID_X + step, 2, hexChars[step]);
+    DrawChar(GRID_X + step, STEP_INDEX_Y, hexChars[step]);
   }
 }
 
 void PianoRollView::drawNoteGrid() {
-  const PhraseStep *steps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  const PhraseStep *steps = currentSteps();
 
   SetBackgroundColor(Theme::View::bg);
 
@@ -679,7 +702,7 @@ void PianoRollView::drawNoteGrid() {
   SetBackgroundColor(Theme::View::bg);
 
   for (int row = 0; row < VISIBLE_NOTES; row++) {
-    DrawString(GRID_X, 3 + row, gchar_piano_row_empty_row_s, fGraphic);
+    DrawString(GRID_X, GRID_Y + row, gchar_piano_row_empty_row_s, fGraphic);
   }
 
   // the steps after the end of the phrase are never played
@@ -703,7 +726,7 @@ void PianoRollView::drawNoteGrid() {
       SetBackgroundColor(Theme::View::Selection::bg(selected));
       SetColor(inactive ? Theme::View::inactive : (selected ? Theme::View::Selection::fg(true) : color));
     }
-    DrawChar(GRID_X + step, 3 + row, glyph, fGraphic);
+    DrawChar(GRID_X + step, GRID_Y + row, glyph, fGraphic);
     cursorDrawn = cursorDrawn || selected;
   };
 
@@ -737,17 +760,21 @@ void PianoRollView::drawNoteGrid() {
 }
 
 void PianoRollView::drawStepInfo() {
-  const GUIPoint anchor = GetAnchor();
   const int step = viewData_->phraseCurPos_;
-  const PhraseStep &data = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step];
+  const PhraseStep *steps = currentSteps();
+  const PhraseStep &data = steps[step];
+
+  // With the grid in focus the fields show what is in effect at the step: the values that were set before
+  // and are still valid are drawn inactive. In the fields themselves only the values of the step are shown.
+  const bool sticky = !panelFocus_;
 
   // the title of the first field is in the row of the step index, every field has a title row and a value row
   const int x = STEP_INFO_X;
-  const int y = anchor.y_ - 1;
+  const int y = PANEL_Y;
 
   SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::legend);
 
-  SetColor(Theme::View::inactive);
   DrawString(x, y, "Note");
   DrawString(x, y + 2, "Inst");
   DrawString(x, y + 4, "Vol");
@@ -760,15 +787,47 @@ void PianoRollView::drawStepInfo() {
   I_Instrument *instrument =
       (instrumentId == NO_INSTRUMENT) ? bank->noneInstrument() : bank->GetInstrument(instrumentId);
 
+  // the note that still sounds if the step has none (until a note off)
+  uint8_t note = data.note;
+  bool noteSticky = false;
+  if (sticky && note == NO_NOTE) {
+    for (int i = step - 1; i >= 0; --i) {
+      if (steps[i].note != NO_NOTE) {
+        if (steps[i].note < NOTE_OFF) {
+          note = steps[i].note;
+          noteSticky = true;
+        }
+        break;
+      }
+    }
+  }
+
   char noteBuffer[4];
-  instrument->noteDisplay(data.note, noteBuffer);
+  instrument->noteDisplay(note, noteBuffer);
   char buffer[6];
 
+  const int volumeSource = valueSource(steps, step, sticky, [](const PhraseStep &s) { return s.volume != NO_VOLUME; });
+  const int command1Source = valueSource(steps, step, sticky, [](const PhraseStep &s) {
+    return Token::enum_type(s.cmd1) != Token::InstrumentCommandNone;
+  });
+  const int command2Source = valueSource(steps, step, sticky, [](const PhraseStep &s) {
+    return Token::enum_type(s.cmd2) != Token::InstrumentCommandNone;
+  });
+
+  // the color of a value: inactive if it was not set in this step
+  auto colorOf = [&](int source, Color color) {
+    return (source >= 0 && source != step) ? Theme::View::inactive : color;
+  };
+  const PhraseStep &volumeData = steps[volumeSource >= 0 ? volumeSource : step];
+  const PhraseStep &command1Data = steps[command1Source >= 0 ? command1Source : step];
+  const PhraseStep &command2Data = steps[command2Source >= 0 ? command2Source : step];
+
   // the selected field of the panel has the selection colors, as the cell of the phrase view
-  auto setFieldColors = [&](StepField field, Color color) {
+  // (a dimmed value keeps its dim color on the selection background too)
+  auto setFieldColors = [&](StepField field, Color color, bool dim = false) {
     const bool selected = panelFocus_ && panelField_ == field;
     SetBackgroundColor(Theme::View::Selection::bg(selected));
-    SetColor(selected ? Theme::View::Selection::fg(true) : color);
+    SetColor(selected && !dim ? Theme::View::Selection::fg(true) : color);
   };
 
   // a parameter is edited digit by digit, the digit that is edited is drawn inverted
@@ -785,29 +844,34 @@ void PianoRollView::drawStepInfo() {
     }
   };
 
-  setFieldColors(StepField::Note, Theme::Phrase::note(true));
+  setFieldColors(StepField::Note, noteSticky ? Theme::View::inactive : Theme::Phrase::note(true));
   DrawString(x, y + 1, noteBuffer);
 
-  setFieldColors(StepField::Instrument, Theme::Phrase::instrument(true));
-  if (data.instrument == NO_INSTRUMENT) {
+  // A step without an instrument plays the last one set before it (the shadow instrument, as the phrase view
+  // and the preview have it), it is always drawn inactive, in the fields as well
+  const bool shadowInstrument = data.instrument == NO_INSTRUMENT && instrumentId != NO_INSTRUMENT;
+  setFieldColors(StepField::Instrument, shadowInstrument ? Theme::View::inactive : Theme::Phrase::instrument(true),
+                 shadowInstrument);
+  if (instrumentId == NO_INSTRUMENT) {
     DrawString(x, y + 3, "--");
   } else {
-    byteToHexString(data.instrument, buffer);
+    byteToHexString(instrumentId, buffer);
     DrawString(x, y + 3, buffer);
   }
 
-  setFieldColors(StepField::Volume, Theme::Phrase::volume(true));
-  DrawChar(x, y + 5, data.volume == NO_VOLUME ? '-' : hexChars[data.volume & 0xF]);
+  setFieldColors(StepField::Volume, colorOf(volumeSource, Theme::Phrase::volume(true)));
+  DrawChar(x, y + 5, volumeData.volume == NO_VOLUME ? '-' : hexChars[volumeData.volume & 0xF]);
 
-  Token command1 = Token::enum_type(data.cmd1);
-  setFieldColors(StepField::Command1, Theme::Phrase::command1(true));
+  // a parameter stays with its command
+  Token command1 = Token::enum_type(command1Data.cmd1);
+  setFieldColors(StepField::Command1, colorOf(command1Source, Theme::Phrase::command1(true)));
   DrawString(x, y + 7, command1.c_str());
-  drawParam(StepField::Param1, y + 7, data.param1, Theme::Phrase::command1(true));
+  drawParam(StepField::Param1, y + 7, command1Data.param1, colorOf(command1Source, Theme::Phrase::command1(true)));
 
-  Token command2 = Token::enum_type(data.cmd2);
-  setFieldColors(StepField::Command2, Theme::Phrase::command2(true));
+  Token command2 = Token::enum_type(command2Data.cmd2);
+  setFieldColors(StepField::Command2, colorOf(command2Source, Theme::Phrase::command2(true)));
   DrawString(x, y + 9, command2.c_str());
-  drawParam(StepField::Param2, y + 9, data.param2, Theme::Phrase::command2(true));
+  drawParam(StepField::Param2, y + 9, command2Data.param2, colorOf(command2Source, Theme::Phrase::command2(true)));
 
   SetBackgroundColor(Theme::View::bg);
 }
@@ -815,27 +879,26 @@ void PianoRollView::drawStepInfo() {
 void PianoRollView::drawHelpText() {
   // under the fields, it always shows how to get to the part that does not have the focus
   const int x = STEP_INFO_X;
-  const int y = GetAnchor().y_ - 1 + 11;
+  const int y = HELP_Y;
 
   SetBackgroundColor(Theme::View::bg);
   SetColor(Theme::View::help(false));
   if (panelFocus_) {
-    DrawString(x, y, char_key_alt_s "+" char_key_left_s);
+    DrawString(x, y, char_key_alt_s "+" char_key_left_s " to");
     DrawString(x, y + 1, "Grid");
   } else {
-    DrawString(x, y, char_key_alt_s "+" char_key_right_s);
+    DrawString(x, y, char_key_alt_s "+" char_key_right_s " to");
     DrawString(x, y + 1, "Fields");
   }
 }
 
 void PianoRollView::drawScrollIndicators() {
-  const GUIPoint anchor = GetAnchor();
-  const PhraseStep *steps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  const PhraseStep *steps = currentSteps();
 
   // centered above and below the note labels, above is the row of the step index
   const int x = LABEL_X + 1;
-  const int topY = anchor.y_ - 1;
-  const int bottomY = anchor.y_ + VISIBLE_NOTES;
+  const int topY = STEP_INDEX_Y;
+  const int bottomY = GRID_Y + VISIBLE_NOTES;
 
   bool notesAbove;
   bool notesBelow;

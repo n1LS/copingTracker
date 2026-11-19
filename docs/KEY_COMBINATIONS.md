@@ -326,11 +326,18 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 
 Alternative view of the current phrase (`viewData_->currentPhrase_`), reached from the phrase
 view with `NAV + NAV`. It draws a piano keyboard (column 0, `gchar_vertical_piano`, the key of the cursor
-is drawn selected), the note labels (column 4, rows 3–18, 16 notes), the step index `0`–`F` (row 2), the note
+is drawn selected), the note labels (column 4, rows 3–18, 16 notes; notes that are not part of the scale and key of the project are `Theme::View::inactive`), the step index `0`–`F` (row 2), the note
 grid (columns 8–23, one column per step), scroll indicators and, in the info area at the bottom, the notes that
 play (`drawNotes`, as in the phrase view). It has a cursor (a step and a note). To the right of the grid
 (column 25) it shows the titles and values of the step under the cursor (note, instrument, volume, command 1 and 2
-with their parameters, in the formats and colors of the phrase view). Editing is limited to notes so far.
+with their parameters, in the formats and colors of the phrase view). While the grid has the focus the
+fields show what is in effect at the step: a value the step does not have itself is the one set before it
+and is drawn `Theme::View::inactive`. Values are sticky until a new note or a note off comes in (the values of
+the step of that note still count, what was set before it does not); a note that is still sounding is shown
+as the sticky note (until a note off), a parameter stays with its command. In the fields themselves only the
+values of the step are shown. The exception is the instrument: a step without one shows the instrument that is in
+effect (the last one set at or before it, which does not end at a note, as in the phrase view and the preview, the
+"shadow instrument") drawn `Theme::View::inactive`, in the fields as well (`--` only if there is none).
 
 Under the fields (column 25, rows 13–14) a static help shows how to get to the part that does not have the
 focus: `ALT + RIGHT` "Fields" while the grid has it, `ALT + LEFT` "Grid" while the fields have it
@@ -383,7 +390,7 @@ The indicators are drawn from `AnimationUpdate` after a player update, and not w
 | `ALT + RIGHT` | chord | Put the focus on the fields of the step on the right of the grid (note, instrument, volume, command 1 and 2). The selection in the grid is drawn inverted (the color of the glyph as the background, black text) instead of in the selection colors, the selected field has the selection colors. The focus rect is the field |
 | `ALT + LEFT` | chord | Back to the grid |
 | arrows (focus on the fields) | chord | `UP` / `DOWN`: note, instrument, volume, command 1, command 2; `LEFT` / `RIGHT`: the command or its parameter. The other chords of the grid do nothing while the fields have the focus (`PLAY`, `NAV` + arrows, `NAV + NAV` and `EDIT` + arrows work as always). The grid has the focus when the view opens |
-| `ENTER` (focus on the fields) | chord | As `ENTER` on the column in the phrase view: an empty field gets the last value used (an empty note also the last instrument), a field that has a value makes it the last one to paste. Note, instrument and volume are previewed while `ENTER` is held. A parameter has no last value; the command picker, new instruments / tables and cloning of the phrase view are not available in the roll |
+| `ENTER` (focus on the fields) | chord | As `ENTER` on the column in the phrase view: an empty field gets the last value used (an empty note also the last instrument), a field that has a value makes it the last one to paste. Note, instrument and volume are previewed while `ENTER` is held. A parameter has no last value. On a command field the command picker opens first (if it is enabled in the config, as in the phrase view; it starts with the command of the step or the last one used). New instruments / tables and cloning of the phrase view are not available in the roll |
 | `ENTER + arrows` (focus on the fields) | chord | Edit the selected field as in the phrase view (`updateCursorValue`): note `LEFT` / `RIGHT` one step in the scale, `UP` / `DOWN` an octave (an empty step is left alone, the cursor follows the note); instrument `LEFT` / `RIGHT` ∓1, `UP` / `DOWN` ±`0x10`; volume `LEFT` / `RIGHT` ∓1, `UP` max, `DOWN` none; command previous / next (`LEFT` / `RIGHT`) or alphabetically (`UP` / `DOWN`); parameter: `LEFT` / `RIGHT` select the digit (the edited digit is drawn inverted), `UP` / `DOWN` change it. Note, instrument and volume restart the preview |
 | `ENTER + EDIT` (focus on the fields) | chord | Clear the field: the note as `ENTER + EDIT` in the grid, no instrument, no volume, a command (with its parameter), a parameter of 0. Nothing is put on a clipboard |
 | `ENTER + LEFT / RIGHT` | chord | Move the note of the cursor's step to the previous / next step, with its instrument and volume (the commands stay in their step). A note that is already in the target step is deleted. The cursor follows; at the first / last step and on a step without a note nothing happens |

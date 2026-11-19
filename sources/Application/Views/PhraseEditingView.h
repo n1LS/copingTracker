@@ -30,6 +30,8 @@ public:
   bool OnNavDoubleTap() override;
   // remembers this view as the one the other views open when they navigate to the phrase
   virtual void OnFocus() override;
+  // called with the command that was picked in the command picker (see openCommandPicker)
+  virtual void onCommandPicked(Token command) = 0;
   // the drawing of what plays happens in AnimationUpdate, this can run on another core
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0) override {
     needsUIUpdate_ = true;
@@ -55,6 +57,16 @@ protected:
   // EDIT + UP / DOWN: the previous / next phrase in the chain
   bool processPhraseSwitchInput(uint16_t newButton, uint16_t mask);
 
+  // the steps of the phrase that is edited
+  PhraseStep *currentSteps() const {
+    return viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  }
+
+  // the fields that change what can be heard: they restart the preview when they change
+  static bool isAudible(StepField field) {
+    return field == StepField::Note || field == StepField::Instrument || field == StepField::Volume;
+  }
+
   // the instrument that is used at a step: the last one set at or before it, or NO_INSTRUMENT
   uint8_t getEffectiveInstrumentForStep(int step);
 
@@ -74,6 +86,12 @@ protected:
   // An empty field gets the last value used, a field that has one makes it the last value to paste.
   // Returns true if the step changed.
   bool pasteLastValue(int step, StepField field);
+  // Opens the command picker (CommandView) for the command of a step, if the picker is enabled in the config.
+  // It starts with the command of the step, or the last command used if it has none. The result comes back
+  // in onCommandPicked. Returns false if the picker is disabled.
+  bool openCommandPicker(int step, bool second);
+  // Sets the command of a step (a command that is none clears the parameter as well)
+  void setCommand(int step, bool second, Token command);
   // Clears a field: no instrument, no volume, a command without parameter, a parameter of 0.
   void clearStepField(int step, StepField field);
 

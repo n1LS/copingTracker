@@ -11,11 +11,17 @@
 #include "Application/Instruments/I_Instrument.h"
 #include "Application/Instruments/InstrumentBank.h"
 #include "Application/Instruments/SampleInstrument.h"
+#include "Application/Model/Config.h"
 #include "Application/Model/Scale.h"
 #include "Application/Player/Player.h"
+#include "Application/Views/CommandView.h"
 #include <algorithm>
 
 static const int16_t stepOffsets_[4] = {-1, 1, 16, -16};
+
+static void SetCommandCallback(View &v, ModalView &dialog) {
+  static_cast<PhraseEditingView &>(v).onCommandPicked(Token::enum_type(dialog.GetReturnCode()));
+}
 
 Variable PhraseEditingView::cmdEdit_(Token::ActionEdit, 0);
 GUIPoint PhraseEditingView::cmdEditPos_(0, 10);
@@ -129,7 +135,7 @@ uint8_t PhraseEditingView::getEffectiveInstrumentForStep(int step) {
     return NO_INSTRUMENT;
   }
 
-  const PhraseStep *steps = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  const PhraseStep *steps = currentSteps();
   for (int i = step; i >= 0; --i) {
     if (steps[i].instrument != NO_INSTRUMENT) {
       return steps[i].instrument;
@@ -139,7 +145,7 @@ uint8_t PhraseEditingView::getEffectiveInstrumentForStep(int step) {
 }
 
 void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
-  unsigned char *c = &viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step].note;
+  unsigned char *c = &currentSteps()[step].note;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   uint8_t instrumentId = getEffectiveInstrumentForStep(step);
   I_Instrument *instrument = bank->GetInstrument(instrumentId);
@@ -207,13 +213,13 @@ void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
 }
 
 void PhraseEditingView::changeInstrument(int step, ViewUpdateDirection direction) {
-  unsigned char *c = &viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step].instrument;
+  unsigned char *c = &currentSteps()[step].instrument;
   updateData(c, stepOffsets_[direction], MAX_INSTRUMENT_COUNT - 1, false);
   viewData_->phraseLastInstrument_ = *c;
 }
 
 void PhraseEditingView::changeVolume(int step, ViewUpdateDirection direction) {
-  uint8_t &vol = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step].volume;
+  uint8_t &vol = currentSteps()[step].volume;
 
   switch (direction) {
     case VUD_UP:
@@ -242,7 +248,7 @@ void PhraseEditingView::changeVolume(int step, ViewUpdateDirection direction) {
 }
 
 void PhraseEditingView::changeCommand(int step, bool second, ViewUpdateDirection direction) {
-  PhraseStep &data = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step];
+  PhraseStep &data = currentSteps()[step];
   Token token = second ? Token::enum_type(data.cmd2) : Token::enum_type(data.cmd1);
 
   switch (direction) {
@@ -268,13 +274,45 @@ void PhraseEditingView::changeCommand(int step, bool second, ViewUpdateDirection
   viewData_->phraseLastCmd_ = token;
 }
 
+bool PhraseEditingView::openCommandPicker(int step, bool second) {
+  if (!Config::GetInstance()->FindVariable(Token::VarConfigCommandPicker)->GetInt()) {
+    return false;
+  }
+
+  const PhraseStep &data = currentSteps()[step];
+  uint8_t cmd = second ? data.cmd2 : data.cmd1;
+
+  // use lastCmd if we hit an empty command field
+  if (cmd == Token::InstrumentCommandNone) {
+    cmd = viewData_->phraseLastCmd_;
+  }
+
+  CommandView *cv = CommandView::Create(*this, Token::enum_type(cmd));
+  DoModal(cv, ModalViewCallback::create<&SetCommandCallback>());
+  return true;
+}
+
+void PhraseEditingView::setCommand(int step, bool second, Token command) {
+  PhraseStep &data = currentSteps()[step];
+
+  uint8_t *cmd = second ? &data.cmd2 : &data.cmd1;
+  *cmd = command.raw();
+  viewData_->phraseLastCmd_ = *cmd;
+
+  if (command == Token::InstrumentCommandNone) {
+    // clear the parameter as well
+    uint16_t *value = second ? &data.param2 : &data.param1;
+    *value = 0;
+  }
+}
+
 void PhraseEditingView::loadParamEditor(int step, bool second) {
-  const PhraseStep &data = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step];
+  const PhraseStep &data = currentSteps()[step];
   cmdEdit_.SetInt(second ? data.param2 : data.param1);
 }
 
 void PhraseEditingView::changeCommandParam(int step, bool second, ViewUpdateDirection direction) {
-  PhraseStep &data = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step];
+  PhraseStep &data = currentSteps()[step];
 
   // pick correct input and output for the selected column
   Token currentCmd = second ? Token::enum_type(data.cmd2) : Token::enum_type(data.cmd1);
@@ -290,7 +328,7 @@ void PhraseEditingView::changeCommandParam(int step, bool second, ViewUpdateDire
 }
 
 bool PhraseEditingView::pasteLastValue(int step, StepField field) {
-  PhraseStep &data = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step];
+  PhraseStep &data = currentSteps()[step];
 
   switch (field) {
     case StepField::Note:
@@ -341,7 +379,7 @@ bool PhraseEditingView::pasteLastValue(int step, StepField field) {
 
 void PhraseEditingView::clearStepField(int step, StepField field) {
   static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
-  PhraseStep &data = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_][step];
+  PhraseStep &data = currentSteps()[step];
 
   switch (field) {
     case StepField::Note:

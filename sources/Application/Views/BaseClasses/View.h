@@ -132,6 +132,7 @@ struct Theme {
   struct View {
     FIXED(bg, BLACK)
     FIXED(fg, WHITE)
+    FIXED(legend, LIGHT_GRAY)
 
     FIXED(inactive, DARK_GRAY)
     FIXED(scrollbar, LIGHT_GRAY)

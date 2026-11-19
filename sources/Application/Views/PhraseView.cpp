@@ -34,30 +34,12 @@
 static const uint8_t columnPositions_[7] = {0, 4, 7, 9, 12, 17, 20};
 static const uint8_t columnWidths_[7] = {3, 2, 1, 3, 4, 3, 4};
 
-// static callback handlers
-
-static void SetCommandCallback(View &v, ModalView &dialog) {
-  PhraseView &view = (PhraseView &)v;
-  view.setCurrentlySelectedCommand(Token::enum_type(dialog.GetReturnCode()));
-}
-
-void PhraseView::setCurrentlySelectedCommand(Token command) {
-  PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-
+void PhraseView::onCommandPicked(Token command) {
   if (col_ != colCmd1 && col_ != colCmd2) {
     return;
   }
 
-  uint8_t *cmd = (col_ == colCmd1) ? &step.cmd1 : &step.cmd2;
-  *cmd = command.raw();
-  viewData_->phraseLastCmd_ = *cmd;
-
-  if (command == Token::InstrumentCommandNone) {
-    // clear the parameter as well
-    uint16_t *value = (col_ == colCmd1) ? &step.param1 : &step.param2;
-    *value = 0;
-  }
-
+  setCommand(row_, col_ == colCmd2, command);
   SetDirty(true);
 }
 
@@ -141,7 +123,6 @@ void PhraseView::Reset() {
   saveCol_ = colNote;
   saveRow_ = 0;
   needsUIUpdate_ = false;
-  needsLiveIndicatorUpdate_ = false;
 }
 
 void PhraseView::updateCursor(int dx, int dy) {
@@ -193,13 +174,13 @@ void PhraseView::updateCursor(int dx, int dy) {
       p.x_ += columnPositions_[colCmdVal1];
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
-      cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param1);
+      cmdEdit_.SetInt(currentSteps()[row_].param1);
       break;
     case colCmdVal2:
       p.x_ += columnPositions_[colCmdVal2];
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
-      cmdEdit_.SetInt(phrase_->steps_[viewData_->currentPhrase_][row_].param2);
+      cmdEdit_.SetInt(currentSteps()[row_].param2);
       break;
     default:
       break;
@@ -243,18 +224,22 @@ void PhraseView::updateCursorValue(ViewUpdateDirection direction, int xOffset, i
 // If we're on an empty spot, we past the last element
 // otherwise we take the current phrase as last
 
-void PhraseView::pasteLast() {
+// the field of a column
+static StepField fieldOf(PhraseColumn col) {
   static const StepField fields[7] = {StepField::Note,   StepField::Instrument, StepField::Volume, StepField::Command1,
                                       StepField::Param1, StepField::Command2,   StepField::Param2};
+  return fields[col];
+}
 
-  if (pasteLastValue(row_, fields[col_])) {
+void PhraseView::pasteLast() {
+  if (pasteLastValue(row_, fieldOf(col_))) {
     isDirty_ = true;
   }
 }
 
 void PhraseView::cutPosition() {
   // cutting an empty note slot adds a note off
-  uint8_t *note = &phrase_->steps_[viewData_->currentPhrase_][row_].note;
+  uint8_t *note = &currentSteps()[row_].note;
   if (col_ == colNote && *note == NO_NOTE) {
     *note = NOTE_OFF;
     isDirty_ = true;
@@ -322,7 +307,7 @@ void PhraseView::fillClipboardData() {
 
   // Copy the data
 
-  PhraseStep *base = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  PhraseStep *base = currentSteps();
 
   for (int i = 0; i < clipboard_.height_; i++) {
     clipboard_.steps_[i] = base[clipboard_.row_ + i];
@@ -412,7 +397,7 @@ void PhraseView::cutSelection() {
   // Loop over selection col, row & clear data inside it
 
   static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
-  PhraseStep *base = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  PhraseStep *base = currentSteps();
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
@@ -464,7 +449,7 @@ void PhraseView::pasteClipboard() {
 
   int height = clipboard_.height_;
 
-  PhraseStep *base = viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  PhraseStep *base = currentSteps();
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
@@ -597,7 +582,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         // New Instruments default to type NONE!
         if (next != NO_MORE_INSTRUMENT &&
             bank->AssignInstrumentToSlot(IT_NONE, next) == InstrumentAssignResult::Success) {
-          unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
+          unsigned char *c = &currentSteps()[row_].instrument;
           *c = (unsigned char)next;
           viewData_->phraseLastInstrument_ = next;
           isDirty_ = true;
@@ -610,12 +595,11 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         consumed = true;
       } else {
         // Create new table for command parameter columns
-        if ((col_ == colCmdVal1) &&
-            Token::enum_type(phrase_->steps_[viewData_->currentPhrase_][row_].cmd1) == Token::InstrumentCommandTable) {
+        if ((col_ == colCmdVal1) && Token::enum_type(currentSteps()[row_].cmd1) == Token::InstrumentCommandTable) {
           TableHolder *th = TableHolder::GetInstance();
           uint16_t next = th->GetNext();
           if (next != NO_MORE_TABLE) {
-            uint16_t *c = &phrase_->steps_[viewData_->currentPhrase_][row_].param1;
+            uint16_t *c = &currentSteps()[row_].param1;
             *c = next;
             isDirty_ = true;
             consumed = true;
@@ -643,7 +627,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (cloneChord || cloneModeChord) {
     if (col_ < colVolume) {
       InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-      unsigned char *c = &phrase_->steps_[viewData_->currentPhrase_][row_].instrument;
+      unsigned char *c = &currentSteps()[row_].instrument;
       if (*c != 0xFF) {
         uint16_t next = bank->Clone(*c);
         if (next != NO_MORE_INSTRUMENT) {
@@ -654,7 +638,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
       }
     } else {
       uint16_t clonedTable = 0;
-      switch (cloneStepTable(phrase_->steps_[viewData_->currentPhrase_][row_], col_, clonedTable)) {
+      switch (cloneStepTable(currentSteps()[row_], col_, clonedTable)) {
         case TableCloneResult::Cloned:
           isDirty_ = true;
           cmdEdit_.SetInt(clonedTable);
@@ -696,22 +680,9 @@ void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
   }
 
   if (IsChord(newButton, mask, BM_ENTER)) {
-    // enter only (check if picker for commands is enabled)
-    bool picker = Config::GetInstance()->FindVariable(Token::VarConfigCommandPicker)->GetInt();
-
-    if (picker) {
-      if (col_ == colCmd1 || col_ == colCmd2) {
-        PhraseStep &step = phrase_->steps_[viewData_->currentPhrase_][row_];
-        uint8_t cmd = (col_ == colCmd1) ? step.cmd1 : step.cmd2;
-
-        // use lastCmd if we hit an empty command field
-        if (cmd == Token::InstrumentCommandNone) {
-          cmd = viewData_->phraseLastCmd_;
-        }
-
-        CommandView *cv = CommandView::Create(*this, Token::enum_type(cmd));
-        DoModal(cv, ModalViewCallback::create<&SetCommandCallback>());
-      }
+    // enter only: the picker for commands, if it is enabled
+    if (col_ == colCmd1 || col_ == colCmd2) {
+      openCommandPicker(row_, col_ == colCmd2);
     }
 
     // ENTER alone
@@ -719,7 +690,7 @@ void PhraseView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
     if ((col_ == colInstrument) || (col_ == colCmdVal1) || (col_ == colCmdVal2)) {
       viewMode_ = VM_NEW;
     }
-    if (col_ == colNote || col_ == colInstrument || col_ == colVolume) {
+    if (isAudible(fieldOf(col_))) {
       // commands don't affect the audition, so only for note, instrument and volume:
       // Start audition, stopping the audition happens in ButtonUp
       stopAudition();
@@ -855,7 +826,7 @@ void PhraseView::setTextProps(int col, int row, Color textColor = Theme::View::f
 void PhraseView::DrawEditingValue() {
   GUIPoint pos = GetAnchor();
   int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
-  PhraseStep *stepsBase = phrase_->steps_[viewData_->currentPhrase_];
+  PhraseStep *stepsBase = currentSteps();
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instrObj = bank->noneInstrument();
 
@@ -958,7 +929,7 @@ void PhraseView::DrawView() {
   // global data
 
   int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
-  PhraseStep *stepsBase = phrase_->steps_[viewData_->currentPhrase_];
+  PhraseStep *stepsBase = currentSteps();
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instrObj = bank->noneInstrument();
 
@@ -1131,22 +1102,6 @@ void PhraseView::DrawView() {
   DrawEditingValue();
 }
 
-void PhraseView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
-  // Since this can be called from core1 via the Observer pattern,
-  // we need to ensure we don't call any drawing functions directly
-  // Instead of drawing directly, we'll just update our state and let
-  // AnimationUpdate handle the actual drawing
-
-  // Set the consolidated flag for UI updates
-  needsUIUpdate_ = true;
-
-  // Update the play position for use in AnimationUpdate
-  Player *player = Player::GetInstance();
-  if (player && player->GetSequencerMode() == SM_LIVE) {
-    needsLiveIndicatorUpdate_ = true;
-  }
-}
-
 ContextLegend PhraseView::currentContextLegend() const {
   if (viewMode_ == VM_CLONE) {
     return ContextLegend::PhraseClone;
@@ -1277,8 +1232,6 @@ void PhraseView::AnimationUpdate() {
 
     // Create a memory barrier to ensure proper synchronization between cores
     createMemoryBarrier();
-
-    needsLiveIndicatorUpdate_ = false;
 
     // Reset the consolidated flag
     needsUIUpdate_ = false;

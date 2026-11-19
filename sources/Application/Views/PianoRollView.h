@@ -21,6 +21,7 @@ public:
   virtual void ButtonDown(uint16_t newButton, uint16_t mask) override;
   virtual void DrawView() override;
   virtual void OnFocus() override;
+  void onCommandPicked(Token command) override;
   virtual void ButtonUp(uint16_t button, uint16_t mask) override;
   virtual void AnimationUpdate() override;
 
