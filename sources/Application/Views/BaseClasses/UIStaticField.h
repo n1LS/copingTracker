@@ -33,6 +33,7 @@ public:
   }
 
   Color color_;
+  Font font_ = fRegular;
 
 protected:
   const char *string_;
