@@ -251,6 +251,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `EDIT` alone | chord | Copy selection |
 | `EDIT + NAV` | chord, either order | Toggle mute |
 | `EDIT + ALT` | chord, either order | Extend selection |
+| `ENTER + EDIT + DOWN / UP` (`ENTER` held first) | chord | **Nudge** the selection (`nudgeSelection`): the content of the selected columns (phrase, transpose) moves one row up / down, the row in the way jumps to the row that was just emptied at the other end (nothing is lost). The selection and the cursor move with it; at the first / last row nothing happens |
 | `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust selected value (`updateSelectionValue`; ±`0x10` / ±`0x0C` in the phrase / other column for UP / DOWN) |
 | `ENTER + ALT` | chord | Cut selection |
 | `ENTER + NAV` | chord | Toggle solo |
@@ -470,6 +471,7 @@ until the roll is left.
 
 | Combination | Type | Action |
 |-------------|------|--------|
+| `ENTER + EDIT + DOWN / UP` (`ENTER` held first) | chord | **Nudge** the selection (`nudgeSelection`): the content of the selected columns moves one row up / down, the row in the way jumps to the row that was just emptied at the other end (nothing is lost). The selection and the cursor move with it; at the first / last row nothing happens |
 | `EDIT` alone | chord | Copy selection |
 | `EDIT + ALT` | chord, either order | Extend selection |
 | `ENTER + ALT` | chord | Cut selection |
