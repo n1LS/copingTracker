@@ -40,6 +40,12 @@ void ViewData::Load(Project *project) {
   phraseLastCmd_ = Token::InstrumentCommandNone;
   phraseLastParam_ = 0;
   phraseLastVolume_ = NO_VOLUME;
+  clipboardCol_ = 0;
+  clipboardWidth_ = 0;
+  clipboardHeight_ = 0;
+  for (int i = 0; i < STEPS_PER_PHRASE; i++) {
+    clipboardSteps_[i] = PhraseStep{};
+  }
   phraseViewType_ = VT_PHRASE;
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {

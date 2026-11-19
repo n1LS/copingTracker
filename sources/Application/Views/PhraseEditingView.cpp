@@ -144,6 +144,12 @@ uint8_t PhraseEditingView::getEffectiveInstrumentForStep(int step) {
   return NO_INSTRUMENT;
 }
 
+void PhraseEditingView::changeNote(int step, ViewUpdateDirection direction) {
+  const bool smallChange = (direction == VUD_LEFT || direction == VUD_RIGHT);
+  const int sign = (direction == VUD_LEFT || direction == VUD_DOWN) ? -1 : 1;
+  changeNote(step, sign, smallChange);
+}
+
 void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
   unsigned char *c = &currentSteps()[step].note;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
@@ -375,6 +381,61 @@ bool PhraseEditingView::pasteLastValue(int step, StepField field) {
       break;
   }
   return false;
+}
+
+void PhraseEditingView::copyStepsToClipboard(int first, int count) {
+  const PhraseStep *steps = currentSteps();
+  for (int i = 0; i < count; i++) {
+    viewData_->clipboardSteps_[i] = steps[first + i];
+  }
+  viewData_->clipboardCol_ = static_cast<uint8_t>(StepField::Note);
+  viewData_->clipboardWidth_ = static_cast<uint8_t>(StepField::Param2) + 1;
+  viewData_->clipboardHeight_ = static_cast<uint8_t>(count);
+}
+
+int PhraseEditingView::pasteClipboardAt(int step) {
+  PhraseStep *steps = currentSteps();
+  const int height = viewData_->clipboardHeight_;
+
+  for (int i = 0; i < viewData_->clipboardWidth_; i++) {
+    const StepField field = static_cast<StepField>(i + viewData_->clipboardCol_);
+    for (int j = 0; j < height; j++) {
+      PhraseStep &target = steps[(j + step) % STEPS_PER_PHRASE];
+      const PhraseStep &source = viewData_->clipboardSteps_[j];
+      switch (field) {
+        case StepField::Note:
+          target.note = source.note;
+          break;
+        case StepField::Instrument:
+          target.instrument = source.instrument;
+          break;
+        case StepField::Volume:
+          target.volume = source.volume;
+          break;
+        case StepField::Command1:
+          target.cmd1 = source.cmd1;
+          break;
+        case StepField::Param1:
+          target.param1 = source.param1;
+          break;
+        case StepField::Command2:
+          target.cmd2 = source.cmd2;
+          break;
+        case StepField::Param2:
+          target.param2 = source.param2;
+          break;
+      }
+    }
+  }
+  return height;
+}
+
+void PhraseEditingView::clearSteps(int first, int count) {
+  for (int i = 0; i < count; i++) {
+    for (int field = static_cast<int>(StepField::Note); field <= static_cast<int>(StepField::Param2); field++) {
+      clearStepField(first + i, static_cast<StepField>(field));
+    }
+  }
 }
 
 void PhraseEditingView::clearStepField(int step, StepField field) {

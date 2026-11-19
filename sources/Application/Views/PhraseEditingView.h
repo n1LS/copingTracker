@@ -73,6 +73,8 @@ protected:
   // Changes the note of a step by one step in the scale (smallChange) or by an octave, up
   // (sign > 0) or down, with the project's scale and key. It is the note editing of the phrase view.
   void changeNote(int step, int sign, bool smallChange);
+  // The same as the phrase view does it for an arrow: LEFT / RIGHT one step in the scale, UP / DOWN an octave
+  void changeNote(int step, ViewUpdateDirection direction);
 
   // The editing of the other fields of a step, one step of a value as the phrase view does it for the cursor
   // (LEFT / RIGHT -1 / +1, UP / DOWN +16 / -16 for numbers). They remember the value as the last one to paste.
@@ -92,6 +94,13 @@ protected:
   bool openCommandPicker(int step, bool second);
   // Sets the command of a step (a command that is none clears the parameter as well)
   void setCommand(int step, bool second, Token command);
+  // The clipboard (in ViewData, shared by both views). Copies whole steps, `count` steps from `first`.
+  void copyStepsToClipboard(int first, int count);
+  // Pastes the clipboard over the steps from `step` (wrapping around at the end of the phrase), only the fields
+  // that are in it. Returns the number of steps it covers (0 if the clipboard is empty).
+  int pasteClipboardAt(int step);
+  // Clears all fields of `count` steps from `first`
+  void clearSteps(int first, int count);
   // Clears a field: no instrument, no volume, a command without parameter, a parameter of 0.
   void clearStepField(int step, StepField field);
 

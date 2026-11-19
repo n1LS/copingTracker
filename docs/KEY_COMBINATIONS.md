@@ -369,6 +369,21 @@ Scroll indicators, above (row 2) and below (row 19) the note labels (column 5):
 | `char_indicator_down_s` | the view can be scrolled down (the bottom is not note 0 yet) |
 | `char_symbol_bpm_s` next to the arrow (column 6) | the phrase has notes above / below the visible range (note offs do not count) |
 
+*Selection mode* — started with `EDIT + ALT`, legend `RollSelection` (shown in the bottom 4 rows instead of the notes, as the phrase view shows `PhraseSelection`). The selected steps are highlighted over the whole height of the grid (`Theme::View::Selection` colors, the step index too), the cursor cell in them is inverted. There is no selection while the fields have the focus (`ALT + LEFT / RIGHT` ends it), and it ends when another phrase is switched to or the view is left.
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `LEFT / RIGHT` | chord | Move the cursor step, which extends or shrinks the selection |
+| `UP / DOWN` | chord | Move the cursor note (the selection does not change) |
+| `ENTER + EDIT + LEFT / RIGHT` (`ENTER` held first) | chord | **Move** the selected steps (whole steps, all fields) one step left / right. The step they move into jumps to the other end of the selection (the step that was just emptied), so nothing is lost. The selection and the cursor move with them; at the first / last step nothing happens (no wrapping) |
+| `ENTER + arrows` | chord | **Transpose** the notes of the selected steps as the phrase view does for a selection: `LEFT` / `RIGHT` one step down / up in the scale and key of the project, `UP` / `DOWN` an octave (`changeNote`). Steps without a note and note offs are left alone, instruments are not changed. The cursor note follows the note of the cursor step |
+| `EDIT` alone | chord | **Copy** the selected steps (whole steps) to the clipboard, back to normal mode with the cursor at the step the selection started at |
+| `ENTER + ALT` (ALT held first) | chord | **Cut**: copy, then clear all fields of the selected steps, back to normal mode |
+| `EDIT + ALT` (either order) | chord | Extend the selection to the whole phrase |
+| `PLAY`, `NAV + PLAY`, `NAV` + arrows, `EDIT` + arrows | chord | As in normal mode |
+
+All other chords of the grid do nothing during a selection. The clipboard is the one of the phrase view (in `ViewData`): copy in one view and paste in the other. A roll copy always holds all fields, a phrase view selection of some columns pastes only those fields in the roll.
+
 Playback indicators, drawn in the row below the grid (row 19), in the grid column of the step that plays. The phrase view draws the same indicators in the column left of the grid, in the row of the step:
 
 | Glyph | Meaning |
@@ -387,6 +402,8 @@ The indicators are drawn from `AnimationUpdate` after a player update, and not w
 | `RIGHT` | chord | Next step; stops at the last step and does not change the phrase |
 | `ENTER` | chord | Set the note of the cursor's step to the note of the cursor. As in the phrase view a step without a note gets the last instrument; the note and its instrument become the last note and instrument to paste. On a step with a note it moves the note and keeps its instrument, volume and commands. The note is previewed (audition of the step, as in the phrase view) while `ENTER` is held; releasing it stops the preview |
 | `ENTER + UP / DOWN` | chord | Move the note of the cursor's step one step up / down in the scale and key of the project, the same as `ENTER + RIGHT / LEFT` in the note column of the phrase view (`changeNote`). A sliced sample stays inside its slices, a note off becomes C3 (or the nearest note of the scale below), at the ends of the range the note wraps. A step without a note is left alone. The cursor follows the note and the view scrolls with it; the note becomes the last note to paste. The note is previewed again with its new pitch (as in the phrase view the audition `ENTER` started restarts) |
+| `EDIT + ALT` (either order) | chord | Start a **selection** of whole steps at the cursor step (all fields: note, instrument, volume, both commands with parameters). With a selection: extend it to all steps of the phrase (towards the end the cursor is on, pressed again it flips to the other end) |
+| `ENTER + ALT` (ALT held first, no selection) | chord | **Paste** the clipboard over the steps from the cursor step, wrapping around at the end of the phrase, only the fields that are in the clipboard. The cursor goes to the step after the pasted ones. Nothing happens with an empty clipboard |
 | `ALT + RIGHT` | chord | Put the focus on the fields of the step on the right of the grid (note, instrument, volume, command 1 and 2). The selection in the grid is drawn inverted (the color of the glyph as the background, black text) instead of in the selection colors, the selected field has the selection colors. The focus rect is the field |
 | `ALT + LEFT` | chord | Back to the grid |
 | arrows (focus on the fields) | chord | `UP` / `DOWN`: note, instrument, volume, command 1, command 2; `LEFT` / `RIGHT`: the command or its parameter. The other chords of the grid do nothing while the fields have the focus (`PLAY`, `NAV` + arrows, `NAV + NAV` and `EDIT` + arrows work as always). The grid has the focus when the view opens |

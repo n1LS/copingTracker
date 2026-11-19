@@ -103,7 +103,6 @@ private:
     int row_;
     int width_;
     int height_;
-    PhraseStep steps_[16];
     bool active_;
   } clipboard_;
 

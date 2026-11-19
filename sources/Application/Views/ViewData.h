@@ -98,6 +98,12 @@ public:
   int phraseLastCmd_;                                   // last command used in the phrase editor
   int phraseLastParam_;                                 // last command parameter used in the phrase editor
   uint8_t phraseLastVolume_;                            // last volume used in the phrase editor
+  // The clipboard of the phrase view and the piano roll: the columns clipboardCol_ ... + clipboardWidth_ - 1 (in the
+  // order of the phrase view columns / StepField) of clipboardHeight_ steps. Nothing to paste if the height is 0.
+  uint8_t clipboardCol_;
+  uint8_t clipboardWidth_;
+  uint8_t clipboardHeight_;
+  PhraseStep clipboardSteps_[STEPS_PER_PHRASE];
   ViewType phraseViewType_; // the view last used in the slot of the phrase view: VT_PHRASE or VT_PIANOROLL
 
   // Sample Editor

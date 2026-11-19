@@ -22,6 +22,8 @@ public:
   virtual void DrawView() override;
   virtual void OnFocus() override;
   void onCommandPicked(Token command) override;
+  // the legend of the selection is shown in the info area while there is one
+  ContextLegend currentContextLegend() const override;
   virtual void ButtonUp(uint16_t button, uint16_t mask) override;
   virtual void AnimationUpdate() override;
 
@@ -70,6 +72,23 @@ private:
   void followNoteOfStep();
   // the field of the panel as it is drawn, for the focus rect
   GUIRect panelFieldRect();
+  // Selection of whole steps (all fields): from the step where it started (selectionAnchor_) to the cursor step.
+  // EDIT copies, ENTER + ALT cuts, ENTER + ALT without a selection pastes (the clipboard is the one of the
+  // phrase view).
+  void startSelection();
+  void endSelection();
+  void extendSelectionToPhrase();
+  void copySelection();
+  void cutSelection();
+  // ENTER + arrows: changes the notes of the selected steps as the phrase view does for a selection
+  void transposeSelection(ViewUpdateDirection direction);
+  // ENTER + EDIT + LEFT / RIGHT: moves the selected steps one step in time, the step they move into jumps
+  // to the other end of the selection. Nothing happens at the first / last step.
+  void moveSelectionInTime(int delta);
+  void pasteClipboard();
+  int selectionFirst() const;
+  int selectionLast() const;
+  bool isSelected(int step) const;
   // scrolls the view if the cursor is not inside it
   void scrollToCursor();
   // keeps the cursor inside the visible range, on the note of its step if that is visible
@@ -85,6 +104,9 @@ private:
   // the column the playback indicator was drawn in, -1 if there is none
   int8_t lastPlayingStep_ = -1;
   // the focus is in the fields on the right, the selection in the grid is drawn inverted then
+  // the step the selection started at, and whether there is a selection
+  int8_t selectionAnchor_ = 0;
+  bool selecting_ = false;
   bool panelFocus_ = false;
   StepField panelField_ = StepField::Note;
 };

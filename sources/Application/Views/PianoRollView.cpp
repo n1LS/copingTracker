@@ -12,6 +12,7 @@
 #include "Application/Model/Scale.h"
 #include "Application/Model/Song.h"
 #include "Application/Player/Player.h"
+#include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Foundation/Constants/GraphicCharacters.h"
 #include "Foundation/Constants/SpecialCharacters.h"
@@ -162,8 +163,9 @@ void PianoRollView::OnFocus() {
   // the other views that lead to the phrase view open this one next time
   PhraseEditingView::OnFocus();
 
-  // the grid has the focus when the view opens
+  // the grid has the focus when the view opens, there is no selection
   panelFocus_ = false;
+  selecting_ = false;
 
   centerOnNotes();
   placeCursor();
@@ -174,10 +176,29 @@ void PianoRollView::centerOnNotes() {
 }
 
 void PianoRollView::onPhraseSwitched() {
-  // another phrase has its notes somewhere else
+  // another phrase has its notes somewhere else, and the selection was in the old one
+  selecting_ = false;
   centerOnNotes();
   placeCursor();
   isDirty_ = true;
+}
+
+// one of the four arrows (the button that was just pressed is a single button)
+static bool isDirection(uint16_t button) {
+  return (button & BM_DIRECTIONAL) != 0;
+}
+
+static ViewUpdateDirection toDirection(uint16_t button) {
+  switch (button) {
+    case BM_LEFT:
+      return VUD_LEFT;
+    case BM_RIGHT:
+      return VUD_RIGHT;
+    case BM_UP:
+      return VUD_UP;
+    default:
+      return VUD_DOWN;
+  }
 }
 
 void PianoRollView::ButtonDown(uint16_t newButton, uint16_t mask) {
@@ -199,6 +220,43 @@ void PianoRollView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // the fields have their own input
   if (panelFocus_) {
     processPanelInput(newButton, mask);
+    return;
+  }
+
+  // selecting and the clipboard, as in the phrase view
+  if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
+    if (selecting_) {
+      extendSelectionToPhrase();
+    } else {
+      startSelection();
+    }
+    return;
+  }
+  if (selecting_) {
+    if (IsChord(newButton, mask, BM_EDIT)) {
+      copySelection();
+      return;
+    }
+    if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
+      cutSelection();
+      return;
+    }
+    // ENTER + EDIT + LEFT / RIGHT move the selected steps
+    if ((newButton == BM_LEFT || newButton == BM_RIGHT) && mask == (BM_ENTER | BM_EDIT)) {
+      moveSelectionInTime(newButton == BM_RIGHT ? +1 : -1);
+      return;
+    }
+    // ENTER + arrows change the notes of the selection
+    if (isDirection(newButton) && mask == BM_ENTER) {
+      transposeSelection(toDirection(newButton));
+      return;
+    }
+    // only the arrows are left: LEFT / RIGHT extend the selection, UP / DOWN move the cursor note
+    if (!(isDirection(newButton) && mask == 0)) {
+      return;
+    }
+  } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
+    pasteClipboard();
     return;
   }
 
@@ -232,11 +290,124 @@ void PianoRollView::ButtonUp(uint16_t button, uint16_t mask) {
   }
 }
 
+ContextLegend PianoRollView::currentContextLegend() const {
+  return selecting_ ? ContextLegend::RollSelection : ContextLegend::None;
+}
+
+int PianoRollView::selectionFirst() const {
+  return std::min<int>(selectionAnchor_, viewData_->phraseCurPos_);
+}
+
+int PianoRollView::selectionLast() const {
+  return std::max<int>(selectionAnchor_, viewData_->phraseCurPos_);
+}
+
+bool PianoRollView::isSelected(int step) const {
+  return selecting_ && step >= selectionFirst() && step <= selectionLast();
+}
+
+void PianoRollView::startSelection() {
+  selecting_ = true;
+  selectionAnchor_ = static_cast<int8_t>(viewData_->phraseCurPos_);
+  isDirty_ = true;
+}
+
+void PianoRollView::endSelection() {
+  // the cursor goes back to where the selection started, as in the phrase view
+  viewData_->phraseCurPos_ = selectionAnchor_;
+  selecting_ = false;
+  isDirty_ = true;
+}
+
+void PianoRollView::extendSelectionToPhrase() {
+  // all steps, towards the end the cursor is on (a second time it flips to the other end)
+  if (viewData_->phraseCurPos_ < selectionAnchor_) {
+    viewData_->phraseCurPos_ = 0;
+    selectionAnchor_ = STEPS_PER_PHRASE - 1;
+  } else {
+    selectionAnchor_ = 0;
+    viewData_->phraseCurPos_ = STEPS_PER_PHRASE - 1;
+  }
+  isDirty_ = true;
+}
+
+void PianoRollView::copySelection() {
+  copyStepsToClipboard(selectionFirst(), selectionLast() - selectionFirst() + 1);
+  endSelection();
+}
+
+void PianoRollView::cutSelection() {
+  const int first = selectionFirst();
+  const int count = selectionLast() - first + 1;
+  copyStepsToClipboard(first, count);
+  clearSteps(first, count);
+  endSelection();
+}
+
+void PianoRollView::transposeSelection(ViewUpdateDirection direction) {
+  PhraseStep *steps = currentSteps();
+
+  // the steps with a note, an empty step or a note off has nothing to transpose
+  for (int step = selectionFirst(); step <= selectionLast(); step++) {
+    if (steps[step].note < NOTE_OFF) {
+      changeNote(step, direction);
+    }
+  }
+
+  followNoteOfStep();
+  isDirty_ = true;
+}
+
+void PianoRollView::moveSelectionInTime(int delta) {
+  PhraseStep *steps = currentSteps();
+  const int first = selectionFirst();
+  const int last = selectionLast();
+
+  // the end of the phrase
+  if (first + delta < 0 || last + delta >= STEPS_PER_PHRASE) {
+    return;
+  }
+
+  // whole steps move, the step in the way ends up where the selection was at the other end
+  if (delta > 0) {
+    const PhraseStep jumped = steps[last + 1];
+    for (int step = last; step >= first; --step) {
+      steps[step + 1] = steps[step];
+    }
+    steps[first] = jumped;
+  } else {
+    const PhraseStep jumped = steps[first - 1];
+    for (int step = first; step <= last; ++step) {
+      steps[step - 1] = steps[step];
+    }
+    steps[last] = jumped;
+  }
+
+  // the selection and the cursor move with the steps
+  selectionAnchor_ = static_cast<int8_t>(selectionAnchor_ + delta);
+  viewData_->phraseCurPos_ += delta;
+  followNoteOfStep();
+  isDirty_ = true;
+}
+
+void PianoRollView::pasteClipboard() {
+  // overwrites the steps from the cursor, the cursor goes to the step after them
+  const int height = pasteClipboardAt(viewData_->phraseCurPos_);
+  if (height == 0) {
+    return;
+  }
+  viewData_->phraseCurPos_ = (viewData_->phraseCurPos_ + height) % STEPS_PER_PHRASE;
+  followNoteOfStep();
+  isDirty_ = true;
+}
+
 void PianoRollView::focusPanel(bool panel) {
   if (panelFocus_ == panel) {
     return;
   }
   panelFocus_ = panel;
+  // the fields edit single values, there is no selection in them
+  selecting_ = false;
   isDirty_ = true;
 }
 
@@ -259,24 +430,6 @@ static StepField panelFieldAt(int row, bool param) {
       return param ? StepField::Param1 : StepField::Command1;
     default:
       return param ? StepField::Param2 : StepField::Command2;
-  }
-}
-
-// one of the four arrows (the button that was just pressed is a single button)
-static bool isDirection(uint16_t button) {
-  return (button & BM_DIRECTIONAL) != 0;
-}
-
-static ViewUpdateDirection toDirection(uint16_t button) {
-  switch (button) {
-    case BM_LEFT:
-      return VUD_LEFT;
-    case BM_RIGHT:
-      return VUD_RIGHT;
-    case BM_UP:
-      return VUD_UP;
-    default:
-      return VUD_DOWN;
   }
 }
 
@@ -374,8 +527,7 @@ void PianoRollView::editPanelField(ViewUpdateDirection direction) {
         return;
       }
       // as in the phrase view: LEFT / RIGHT one step in the scale, UP / DOWN an octave
-      changeNote(step, (direction == VUD_LEFT || direction == VUD_DOWN) ? -1 : 1,
-                 direction == VUD_LEFT || direction == VUD_RIGHT);
+      changeNote(step, direction);
       followNoteOfStep();
       break;
     case StepField::Instrument:
@@ -569,9 +721,11 @@ void PianoRollView::DrawView() {
   drawStepInfo();
   drawHelpText();
 
-  // the notes that play, as in the phrase view (the roll has no legends yet)
-  infoAreaMode_ = InfoAreaDrawMode::Notes;
-  drawNotes();
+  // as in the phrase view: the legend of the mode (the selection) or the notes that play
+  if (!drawContextLegendInfoArea()) {
+    infoAreaMode_ = InfoAreaDrawMode::Notes;
+    drawNotes();
+  }
 
   // the clear above removed the playback indicator
   lastPlayingStep_ = -1;
@@ -687,7 +841,11 @@ void PianoRollView::drawStepIndex() {
   // after the end of the phrase are inactive
   SetBackgroundColor(Theme::View::bg);
   for (int step = 0; step < STEPS_PER_PHRASE; step++) {
-    SetColor(step < phraseLength ? Theme::View::index(step % phraseDiv == 0) : Theme::View::inactive);
+    const bool selected = isSelected(step);
+    SetBackgroundColor(Theme::View::Selection::bg(selected));
+    SetColor(selected              ? Theme::View::Selection::fg(true)
+             : step < phraseLength ? Theme::View::index(step % phraseDiv == 0)
+                                   : Theme::View::inactive);
     DrawChar(GRID_X + step, STEP_INDEX_Y, hexChars[step]);
   }
 }
@@ -722,6 +880,12 @@ void PianoRollView::drawNoteGrid() {
     if (selected && panelFocus_) {
       SetBackgroundColor(glyphColor);
       SetColor(Theme::View::bg);
+    } else if (isSelected(step)) {
+      // the selected steps are highlighted over the whole height of the grid, the cursor cell in it inverted
+      SetBackgroundColor(selected ? Theme::View::Selection::fg(true) : Theme::View::Selection::bg(true));
+      SetColor(selected               ? Theme::View::Selection::bg(true)
+               : glyph == GLYPH_EMPTY ? Theme::View::inactive
+                                      : Theme::View::Selection::fg(true));
     } else {
       SetBackgroundColor(Theme::View::Selection::bg(selected));
       SetColor(inactive ? Theme::View::inactive : (selected ? Theme::View::Selection::fg(true) : color));
@@ -729,6 +893,13 @@ void PianoRollView::drawNoteGrid() {
     DrawChar(GRID_X + step, GRID_Y + row, glyph, fGraphic);
     cursorDrawn = cursorDrawn || selected;
   };
+
+  // the selected steps over the whole height of the grid
+  for (int step = selectionFirst(); selecting_ && step <= selectionLast(); step++) {
+    for (int row = 0; row < VISIBLE_NOTES; row++) {
+      drawCell(step, row, GLYPH_EMPTY, Theme::View::inactive);
+    }
+  }
 
   // the notes
   int sounding = -1;

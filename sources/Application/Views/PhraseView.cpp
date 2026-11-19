@@ -47,9 +47,7 @@ void PhraseView::onCommandPicked(Token command) {
 
 void PhraseView::updateNoteValue(ViewUpdateDirection direction, int yOffset) {
   // LEFT / RIGHT change the note by one step of the scale, UP / DOWN by an octave
-  const bool smallChange = (direction == VUD_LEFT || direction == VUD_RIGHT);
-  const int sign = (direction == VUD_LEFT || direction == VUD_DOWN) ? -1 : 1;
-  changeNote(row_ + yOffset, sign, smallChange);
+  changeNote(row_ + yOffset, direction);
 
   // Need to restart audition to update it with the new note
   startAudition(false);
@@ -90,10 +88,6 @@ PhraseView::PhraseView(GUIWindow &w, ViewData *viewData) : PhraseEditingView(w, 
   clipboard_.active_ = false;
   clipboard_.width_ = 0;
   clipboard_.height_ = 0;
-
-  for (int i = 0; i < 16; i++) {
-    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0, NO_VOLUME};
-  };
 }
 
 PhraseView::~PhraseView() {};
@@ -116,9 +110,9 @@ void PhraseView::Reset() {
   clipboard_.col_ = 0;
   clipboard_.row_ = 0;
 
-  for (int i = 0; i < 16; i++) {
-    clipboard_.steps_[i] = {NO_NOTE, 0, 0, 0, 0, 0, NO_VOLUME};
-  }
+  // the clipboard of both views is empty
+  viewData_->clipboardWidth_ = 0;
+  viewData_->clipboardHeight_ = 0;
 
   saveCol_ = colNote;
   saveRow_ = 0;
@@ -310,8 +304,11 @@ void PhraseView::fillClipboardData() {
   PhraseStep *base = currentSteps();
 
   for (int i = 0; i < clipboard_.height_; i++) {
-    clipboard_.steps_[i] = base[clipboard_.row_ + i];
+    viewData_->clipboardSteps_[i] = base[clipboard_.row_ + i];
   }
+  viewData_->clipboardCol_ = clipboard_.col_;
+  viewData_->clipboardWidth_ = clipboard_.width_;
+  viewData_->clipboardHeight_ = clipboard_.height_;
 
   updateCursor(0, 0);
 }
@@ -444,41 +441,9 @@ copies data in the clipboard to the current step
 *****************************************************************************/
 
 void PhraseView::pasteClipboard() {
+  // the paste itself is the same in the piano roll
+  const int height = pasteClipboardAt(row_);
 
-  // Get number of row to paste
-
-  int height = clipboard_.height_;
-
-  PhraseStep *base = currentSteps();
-
-  for (int i = 0; i < clipboard_.width_; i++) {
-    for (int j = 0; j < height; j++) {
-      int r = (j + row_) % 16;
-      switch (i + clipboard_.col_) {
-        case colNote:
-          base[r].note = clipboard_.steps_[j].note;
-          break;
-        case colInstrument:
-          base[r].instrument = clipboard_.steps_[j].instrument;
-          break;
-        case colCmd1:
-          base[r].cmd1 = clipboard_.steps_[j].cmd1;
-          break;
-        case colCmdVal1:
-          base[r].param1 = clipboard_.steps_[j].param1;
-          break;
-        case colCmd2:
-          base[r].cmd2 = clipboard_.steps_[j].cmd2;
-          break;
-        case colCmdVal2:
-          base[r].param2 = clipboard_.steps_[j].param2;
-          break;
-        case colVolume:
-          base[r].volume = clipboard_.steps_[j].volume;
-          break;
-      }
-    }
-  }
   int offset = (row_ + height) % 16 - row_;
   updateCursor(0x00, offset);
   isDirty_ = true;
