@@ -99,6 +99,10 @@ protected:
   // Pastes the clipboard over the steps from `step` (wrapping around at the end of the phrase), only the fields
   // that are in it. Returns the number of steps it covers (0 if the clipboard is empty).
   int pasteClipboardAt(int step);
+  // Moves the content of the steps first..last (only the fields firstField..lastField, in the order of the
+  // enum) one step up (delta -1) or down (delta +1), the step in the way jumps to the step that was just emptied
+  // at the other end. Returns false and changes nothing at the first / last step.
+  bool nudgeSteps(int first, int last, StepField firstField, StepField lastField, int delta);
   // Clears all fields of `count` steps from `first`
   void clearSteps(int first, int count);
   // Clears a field: no instrument, no volume, a command without parameter, a parameter of 0.

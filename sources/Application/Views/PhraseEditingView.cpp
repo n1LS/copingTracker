@@ -393,6 +393,33 @@ void PhraseEditingView::copyStepsToClipboard(int first, int count) {
   viewData_->clipboardHeight_ = static_cast<uint8_t>(count);
 }
 
+// copies one field of a step
+static void copyStepField(PhraseStep &target, const PhraseStep &source, StepField field) {
+  switch (field) {
+    case StepField::Note:
+      target.note = source.note;
+      break;
+    case StepField::Instrument:
+      target.instrument = source.instrument;
+      break;
+    case StepField::Volume:
+      target.volume = source.volume;
+      break;
+    case StepField::Command1:
+      target.cmd1 = source.cmd1;
+      break;
+    case StepField::Param1:
+      target.param1 = source.param1;
+      break;
+    case StepField::Command2:
+      target.cmd2 = source.cmd2;
+      break;
+    case StepField::Param2:
+      target.param2 = source.param2;
+      break;
+  }
+}
+
 int PhraseEditingView::pasteClipboardAt(int step) {
   PhraseStep *steps = currentSteps();
   const int height = viewData_->clipboardHeight_;
@@ -400,34 +427,39 @@ int PhraseEditingView::pasteClipboardAt(int step) {
   for (int i = 0; i < viewData_->clipboardWidth_; i++) {
     const StepField field = static_cast<StepField>(i + viewData_->clipboardCol_);
     for (int j = 0; j < height; j++) {
-      PhraseStep &target = steps[(j + step) % STEPS_PER_PHRASE];
-      const PhraseStep &source = viewData_->clipboardSteps_[j];
-      switch (field) {
-        case StepField::Note:
-          target.note = source.note;
-          break;
-        case StepField::Instrument:
-          target.instrument = source.instrument;
-          break;
-        case StepField::Volume:
-          target.volume = source.volume;
-          break;
-        case StepField::Command1:
-          target.cmd1 = source.cmd1;
-          break;
-        case StepField::Param1:
-          target.param1 = source.param1;
-          break;
-        case StepField::Command2:
-          target.cmd2 = source.cmd2;
-          break;
-        case StepField::Param2:
-          target.param2 = source.param2;
-          break;
-      }
+      copyStepField(steps[(j + step) % STEPS_PER_PHRASE], viewData_->clipboardSteps_[j], field);
     }
   }
   return height;
+}
+
+bool PhraseEditingView::nudgeSteps(int first, int last, StepField firstField, StepField lastField, int delta) {
+  // the first / last step of the phrase
+  if (first + delta < 0 || last + delta >= STEPS_PER_PHRASE) {
+    return false;
+  }
+
+  PhraseStep *steps = currentSteps();
+  const PhraseStep jumped = steps[delta > 0 ? last + 1 : first - 1];
+
+  auto copyFields = [&](PhraseStep &target, const PhraseStep &source) {
+    for (int field = static_cast<int>(firstField); field <= static_cast<int>(lastField); field++) {
+      copyStepField(target, source, static_cast<StepField>(field));
+    }
+  };
+
+  if (delta > 0) {
+    for (int step = last; step >= first; --step) {
+      copyFields(steps[step + 1], steps[step]);
+    }
+    copyFields(steps[first], jumped);
+  } else {
+    for (int step = first; step <= last; ++step) {
+      copyFields(steps[step - 1], steps[step]);
+    }
+    copyFields(steps[last], jumped);
+  }
+  return true;
 }
 
 void PhraseEditingView::clearSteps(int first, int count) {

@@ -332,6 +332,23 @@ void PhraseView::updateSelectionValue(ViewUpdateDirection direction) {
   col_ = saveCol_;
 }
 
+void PhraseView::nudgeSelection(int delta) {
+  // only the columns of the selection move
+  const GUIRect r = getSelectionRect();
+  const StepField firstField = fieldOf(static_cast<PhraseColumn>(r.Left()));
+  const StepField lastField = fieldOf(static_cast<PhraseColumn>(r.Left() + r.Width() - 1));
+
+  if (!nudgeSteps(r.Top(), r.Top() + r.Height() - 1, firstField, lastField, delta)) {
+    return;
+  }
+
+  // the selection, the position it started at (the cursor goes back there after a copy) and the cursor move
+  clipboard_.row_ += delta;
+  saveRow_ += delta;
+  row_ += delta;
+  updateCursor(0, 0);
+}
+
 void PhraseView::extendSelection() {
   GUIRect rect = getSelectionRect();
   if (rect.Left() > 0 || rect.Right() <= colCmdVal2) {
@@ -726,6 +743,9 @@ void PhraseView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     extendSelection();
   } else if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
     unMuteAll();
+  } else if ((newButton == BM_UP || newButton == BM_DOWN) && mask == (BM_ENTER | BM_EDIT)) {
+    // ENTER + EDIT + UP / DOWN nudge the selection
+    nudgeSelection(newButton == BM_DOWN ? +1 : -1);
   } else if (mask == BM_ENTER) {
     // Enter Modifer
     switch (newButton) {

@@ -359,28 +359,9 @@ void PianoRollView::transposeSelection(ViewUpdateDirection direction) {
 }
 
 void PianoRollView::moveSelectionInTime(int delta) {
-  PhraseStep *steps = currentSteps();
-  const int first = selectionFirst();
-  const int last = selectionLast();
-
-  // the end of the phrase
-  if (first + delta < 0 || last + delta >= STEPS_PER_PHRASE) {
-    return;
-  }
-
   // whole steps move, the step in the way ends up where the selection was at the other end
-  if (delta > 0) {
-    const PhraseStep jumped = steps[last + 1];
-    for (int step = last; step >= first; --step) {
-      steps[step + 1] = steps[step];
-    }
-    steps[first] = jumped;
-  } else {
-    const PhraseStep jumped = steps[first - 1];
-    for (int step = first; step <= last; ++step) {
-      steps[step - 1] = steps[step];
-    }
-    steps[last] = jumped;
+  if (!nudgeSteps(selectionFirst(), selectionLast(), StepField::Note, StepField::Param2, delta)) {
+    return;
   }
 
   // the selection and the cursor move with the steps

@@ -189,6 +189,7 @@ until NAV is released).
 
 | Combination | Type | Action |
 |-------------|------|--------|
+| `ENTER + EDIT + DOWN / UP / LEFT / RIGHT` (`ENTER` held first) | chord | **Nudge** the selection (`nudgeSelection`): the content moves one row / channel in the direction, the row or channel in the way jumps to the one that was just emptied at the other end of the selection (nothing is lost). The selection, the position it started at and the cursor move with it; at the first / last row or channel nothing happens |
 | `EDIT` alone | chord | Copy selection (`copySelection`) |
 | `EDIT + NAV` | chord, either order | Toggle mute |
 | `EDIT + ALT` | chord, either order | Extend selection (`extendSelection`) |
@@ -312,6 +313,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 |-------------|------|--------|
 | `EDIT` alone | chord | Copy selection |
 | `EDIT + ALT` | chord, either order | Extend selection |
+| `ENTER + EDIT + DOWN / UP` (`ENTER` held first) | chord | **Nudge** the selection (`nudgeSelection`): the content of the selected columns moves one step up / down, the step in the way jumps to the step that was just emptied at the other end (nothing is lost). The selection and the cursor move with it; at the first / last step nothing happens. The same as `ENTER + EDIT + LEFT / RIGHT` in the piano roll |
 | `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust selected value |
 | `ENTER + ALT` | chord | Cut selection |
 | `ENTER + NAV` | chord | Toggle solo |

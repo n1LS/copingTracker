@@ -56,6 +56,8 @@ protected:
   void updateCursor(int dx, int dy);
   void updateCursorValue(ViewUpdateDirection offset, int xOffset = 0, int yOffset = 0);
   void updateSelectionValue(ViewUpdateDirection direction);
+  // ENTER + EDIT + UP / DOWN: moves the content of the selection one step, the step in the way jumps to the other end
+  void nudgeSelection(int delta);
 
   // Column-specific value update handlers
   void updateNoteValue(ViewUpdateDirection direction, int yOffset = 0);
