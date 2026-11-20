@@ -21,6 +21,12 @@ static uint8_t inputBuffer[3];
 static size_t inputBufferIndex = 0;
 
 void mirrorUI_sendCommand(mirrorUICommand *command) {
+  // the terminator has to fit in the buffer, otherwise it would overwrite the size and bytes that are not part
+  // of the command would be sent
+  if (command->payloadSize >= sizeof(command->payload)) {
+    return;
+  }
+
   command->payload[command->payloadSize] = 0x7f;
   command->payloadSize++;
 

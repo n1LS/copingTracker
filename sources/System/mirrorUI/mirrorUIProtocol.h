@@ -40,8 +40,13 @@ enum mirrorUIKeyState { muiksDown = 0x00, muiksUp = 0x01 };
 
 void mirrorUI_handleInput(uint8_t key, uint8_t state);
 
+// The largest command is a run of a whole screen row of characters: a 4 byte header (command, length, x, y)
+// and 3 bytes (color, font, character) for each of the 32 columns. mirrorUI_sendCommand appends one more byte,
+// the terminator, so that has to fit as well.
+#define MIRRORUI_MAX_RUN_PAYLOAD (4 + 3 * 32)
+
 typedef struct mirrorUICommand {
-  uint8_t payload[100];
+  uint8_t payload[MIRRORUI_MAX_RUN_PAYLOAD + 1];
   uint8_t payloadSize;
 } mirrorUICommand;
 
