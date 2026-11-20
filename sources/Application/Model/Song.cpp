@@ -28,6 +28,25 @@ Song::Song() : Persistent("Song"), chain_(), phrase_() {
 
 Song::~Song() {};
 
+ChainContent Song::GetChainContent(uint8_t chain) const {
+  bool hasPhrases = false;
+
+  for (int i = 0; i < PHRASES_PER_CHAIN; i++) {
+    const uint8_t phrase = chain_.steps_[chain][i].phrase;
+    if (phrase == EMPTY_CHAIN_VALUE) {
+      continue;
+    }
+
+    hasPhrases = true;
+    // a phrase number that does not exist has nothing in it
+    if (phrase < PHRASE_COUNT && !phrase_.IsEmpty(phrase)) {
+      return ChainContent::HasContent;
+    }
+  }
+
+  return hasPhrases ? ChainContent::OnlyEmptyPhrases : ChainContent::NoPhrases;
+}
+
 void Song::Reset() {
   for (int i = 0; i < SONG_ROW_COUNT; i++) {
     for (int j = 0; j < SONG_CHANNEL_COUNT; j++) {

@@ -60,7 +60,7 @@ protected:
   void finalizePhraseUpdate();
   void openGeneratorWizard();
   void enterPhraseUnderCursor();
-  void setTextProps(int col, int row);
+  void setTextProps(int col, int row, bool emptyPhrase = false);
 
   void drawPhrasePreview(uint8_t phrase);
 

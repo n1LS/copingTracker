@@ -36,6 +36,13 @@
 #define EMPTY_SONG_VALUE 0xFF
 #define EMPTY_CHAIN_VALUE 0xFF
 
+// What a chain holds, see Song::GetChainContent
+enum class ChainContent : uint8_t {
+  NoPhrases,        // it does not reference any phrase
+  OnlyEmptyPhrases, // it references phrases but all of them are empty
+  HasContent        // at least one of the phrases it references is not empty
+};
+
 struct SongRow {
   uint8_t chains[SONG_CHANNEL_COUNT];
 };
@@ -45,6 +52,9 @@ public:
   Song();
   ~Song();
   void Reset();
+
+  // Whether a chain is empty, the phrases it references count (it stops at the first one that has something)
+  ChainContent GetChainContent(uint8_t chain) const;
 
   virtual void SaveContent(tinyxml2::XMLPrinter *printer);
   virtual void RestoreContent(PersistencyDocument *doc);

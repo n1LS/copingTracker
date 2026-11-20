@@ -718,7 +718,7 @@ void ChainView::OnFocus() {
   updateFocusRect();
 }
 
-void ChainView::setTextProps(int col, int row) {
+void ChainView::setTextProps(int col, int row, bool emptyPhrase) {
   bool highlighted = false;
 
   if (clipboard_.active_) {
@@ -734,7 +734,7 @@ void ChainView::setTextProps(int col, int row) {
     }
   }
 
-  SetColor(Theme::Song::fg(row % ALT_ROW_NUMBER == 0));
+  SetColor(emptyPhrase ? Theme::View::empty(true) : Theme::Song::fg(row % ALT_ROW_NUMBER == 0));
   SetBackgroundColor(Theme::View::bg);
 
   if (highlighted) {
@@ -771,7 +771,8 @@ void ChainView::DrawView() {
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = base[j].phrase;
-    setTextProps(0, j);
+    // a phrase without anything in it has its own color
+    setTextProps(0, j, d < PHRASE_COUNT && viewData_->song_->phrase_.IsEmpty(d));
     if (d == EMPTY_CHAIN_VALUE) {
       DrawString(pos.x_, pos.y_ + j, "--");
     } else {

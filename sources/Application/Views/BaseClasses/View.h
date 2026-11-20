@@ -133,6 +133,7 @@ struct Theme {
     FIXED(bg, BLACK)
     FIXED(fg, WHITE)
     FIXED(legend, LIGHT_GRAY)
+    SWITCHABLE(empty, LIGHT_RED, LIGHT_BLUE)
 
     FIXED(inactive, DARK_GRAY)
     // the load of core 0 (device), next to the one of core 1

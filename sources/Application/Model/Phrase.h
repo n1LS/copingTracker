@@ -34,6 +34,9 @@ public:
   ~Phrase();
   void Reset();
   uint16_t GetNext();
+  // A phrase is empty if none of its steps has a note, an instrument, a volume or a command (the parameter of
+  // a command that is none does not count)
+  bool IsEmpty(uint8_t phrase) const;
   bool IsUsed(uint8_t i) {
     return isUsed_[i];
   };

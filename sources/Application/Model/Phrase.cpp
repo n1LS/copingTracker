@@ -39,6 +39,19 @@ void Phrase::Reset() {
   }
 }
 
+bool Phrase::IsEmpty(uint8_t phrase) const {
+  static const uint8_t NO_COMMAND = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
+
+  for (int i = 0; i < STEPS_PER_PHRASE; i++) {
+    const PhraseStep &step = steps_[phrase][i];
+    if (step.note != NO_NOTE || step.instrument != NO_INSTRUMENT || step.volume != NO_VOLUME ||
+        step.cmd1 != NO_COMMAND || step.cmd2 != NO_COMMAND) {
+      return false;
+    }
+  }
+  return true;
+}
+
 uint16_t Phrase::GetNext() {
   for (int i = 0; i < PHRASE_COUNT; i++) {
     if (!isUsed_[i]) {

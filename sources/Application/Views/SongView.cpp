@@ -954,9 +954,24 @@ void SongView::DrawView() {
 
       // draw current step
       unsigned char d = *data++;
-      // last possible value gets special color to be more visible (typically this is the empty placeholder)
+      // last possible value gets special color to be more visible (typically this is the empty placeholder),
+      // chains without content have their own colors: none for chains without phrases, the other for chains that
+      // only have empty phrases
       SetBackgroundColor(Theme::View::bg);
-      SetColor(d == 0xFE ? Theme::Song::placeholder : Theme::Song::fg(isAlt));
+      Color color = Theme::Song::fg(isAlt);
+      if (d != EMPTY_SONG_VALUE) {
+        switch (viewData_->song_->GetChainContent(d)) {
+          case ChainContent::NoPhrases:
+            color = Theme::View::empty(true);
+            break;
+          case ChainContent::OnlyEmptyPhrases:
+            color = Theme::View::empty(false);
+            break;
+          case ChainContent::HasContent:
+            break;
+        }
+      }
+      SetColor(color);
 
       if (highlighted) {
         SwapColors();
