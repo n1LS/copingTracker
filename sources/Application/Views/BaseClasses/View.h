@@ -24,7 +24,6 @@
 #include "Foundation/Types/Colors.h"
 #include "Foundation/Types/GraphicTypes.h"
 #include "Foundation/Types/ViewType.h"
-#include "I_Action.h"
 #include "UIFramework/Interfaces/I_GUIGraphics.h"
 #include "UIFramework/SimpleBaseClasses/GUIWindow.h"
 #include "ViewEvent.h"
@@ -133,6 +132,7 @@ struct Theme {
   struct View {
     FIXED(bg, BLACK)
     FIXED(fg, WHITE)
+    FIXED(legend, LIGHT_GRAY)
 
     FIXED(inactive, DARK_GRAY)
     FIXED(scrollbar, LIGHT_GRAY)
@@ -146,6 +146,10 @@ struct Theme {
     FIXED(error, LIGHT_RED)
     FIXED(info, YELLOW)
     FIXED(charging, GREEN)
+
+    struct PianoRoll {
+      FIXED(fg, WHITE)
+    };
 
     struct Map {
       SWITCHABLE(bg, LIGHT_GREEN, BLACK)
@@ -333,6 +337,12 @@ protected:
   virtual bool navigationDown(uint16_t direction) {
     return false;
   }
+  // NAV was tapped twice in a row: press, release and press again within
+  // NAV_DOUBLE_TAP_MS, with no other button used in between. Called before
+  // ButtonDown. Return true if handled (ButtonDown is skipped).
+  virtual bool OnNavDoubleTap() {
+    return false;
+  }
 
   // `trigger` pressed while exactly `held` was down already (held may be 0).
   static inline bool IsChord(uint16_t newButton, uint16_t mask, uint16_t trigger, uint16_t held = 0) {
@@ -479,6 +489,12 @@ private:
   static BatteryState latestBatteryState_;
   static uint32_t lastBatteryDisplayFrame_;
   static bool batteryDisplayInitialized_;
+
+  // NAV double tap detection. Shared, there is only one set of buttons.
+  static uint32_t navTapTime_; // when the last clean NAV tap was released
+  static bool navTapArmed_;    // a clean NAV tap was released and nothing was pressed since
+  static bool navHoldClean_;   // NAV is held and no other button was pressed meanwhile
+  bool trackNavDoubleTap(uint16_t button, uint16_t mask, bool pressed);
 };
 
 #endif

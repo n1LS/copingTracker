@@ -487,7 +487,7 @@ def generate_header(kits, bpm, threshold, input_name):
 
     lines.append("};")
     lines.append("")
-    lines.append("static const char *kitNames[] = {")
+    lines.append("static const char *const kitNames[] = {")
 
     for kit in kits:
         lines.append(f'  "{c_string(kit["name"])}",')

@@ -10,6 +10,7 @@
  */
 
 #include "ViewData.h"
+#include "Application/Model/Table.h"
 #include "BaseClasses/View.h"
 
 ViewData::ViewData(Project *project) {
@@ -34,6 +35,18 @@ void ViewData::Load(Project *project) {
   currentGroove_ = 0;
   playMode_ = PM_SONG;
   phraseCurPos_ = 0;
+  phraseLastInstrument_ = 0;
+  phraseLastNote_ = NOTE_C3;
+  phraseLastCmd_ = Token::InstrumentCommandNone;
+  phraseLastParam_ = 0;
+  phraseLastVolume_ = NO_VOLUME;
+  clipboardCol_ = 0;
+  clipboardWidth_ = 0;
+  clipboardHeight_ = 0;
+  for (int i = 0; i < STEPS_PER_PHRASE; i++) {
+    clipboardSteps_[i] = PhraseStep{};
+  }
+  phraseViewType_ = VT_PHRASE;
 
   for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
     songPlayPos_[i] = 0;
@@ -46,6 +59,21 @@ void ViewData::Load(Project *project) {
   sampleEditorFilename.clear();
   isShowingSampleEditorProjectPool = false;
   importViewStartDir = nullptr;
+}
+
+bool ViewData::SelectInstrumentOfPhraseStep(int step) {
+  const uint8_t instrument = song_->phrase_.steps_[currentPhrase_][step].instrument;
+  currentInstrumentID_ = (instrument != NO_INSTRUMENT) ? instrument : phraseLastInstrument_;
+  return currentInstrumentID_ != NO_INSTRUMENT;
+}
+
+void ViewData::SelectTableOfPhraseStep(int step) {
+  const PhraseStep &phraseStep = song_->phrase_.steps_[currentPhrase_][step];
+  if (Token::enum_type(phraseStep.cmd1) == Token::InstrumentCommandTable) {
+    currentTable_ = phraseStep.param1 & (TABLE_COUNT - 1);
+  } else if (Token::enum_type(phraseStep.cmd2) == Token::InstrumentCommandTable) {
+    currentTable_ = phraseStep.param2 & (TABLE_COUNT - 1);
+  }
 }
 
 unsigned char ViewData::UpdateSongChain(int offset) {

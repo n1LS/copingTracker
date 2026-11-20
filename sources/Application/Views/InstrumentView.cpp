@@ -373,7 +373,7 @@ bool InstrumentView::navigationDown(uint16_t direction) {
       getInstrument()->RemoveObserver(*this);
       ((WatchedVariable *)&instrumentType_)->RemoveObserver(*this);
 
-      Navigate(VT_PHRASE, vtRevealFromLeft);
+      NavigateToPhrase(vtRevealFromLeft);
       return true;
     case BM_DOWN:
       {

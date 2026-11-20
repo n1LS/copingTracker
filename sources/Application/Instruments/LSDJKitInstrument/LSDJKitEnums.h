@@ -55,11 +55,11 @@ typedef union lsdjkit_flags {
 } lsdjkit_flags;
 
 static const int clippingModeCount = 5;
-static const char *clippingModeNames[clippingModeCount] = {"No ", char_waveform_pulse_s, char_waveform_sine_s, "Fld",
-                                                           "Wrp"};
+static const char *const clippingModeNames[clippingModeCount] = {"No ", char_waveform_pulse_s, char_waveform_sine_s,
+                                                                 "Fld", "Wrp"};
 
 static const int speedModeCount = 4;
-static const char *speedModeNames[speedModeCount] = {"1/4", "1/2", "1.0", "2.0"};
+static const char *const speedModeNames[speedModeCount] = {"1/4", "1/2", "1.0", "2.0"};
 
 static const int loopModeCount = 3;
-static const char *loopModeNames[loopModeCount] = {"Off", "Atk", "Lop"};
+static const char *const loopModeNames[loopModeCount] = {"Off", "Atk", "Lop"};

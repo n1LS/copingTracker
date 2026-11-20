@@ -33,13 +33,13 @@ enum stack_constants_e {
   stackNumOscillators = 5,
 };
 
-static const char *stackWaveNames[stackNumWaveforms] = {char_waveform_pulse_s " 12.5%",
-                                                        char_waveform_pulse_s " 25%",
-                                                        char_waveform_pulse_s " 50%",
-                                                        char_waveform_saw_s " Saw",
-                                                        char_waveform_tri_s " Tri",
-                                                        "Organ",
-                                                        "Vox"};
+static const char *const stackWaveNames[stackNumWaveforms] = {char_waveform_pulse_s " 12.5%",
+                                                              char_waveform_pulse_s " 25%",
+                                                              char_waveform_pulse_s " 50%",
+                                                              char_waveform_saw_s " Saw",
+                                                              char_waveform_tri_s " Tri",
+                                                              "Organ",
+                                                              "Vox"};
 
 enum stack_instrument_defaults_e {
   stackDefaultSpread = 0,

@@ -37,6 +37,14 @@ public:
   void SetChainPhrase(unsigned char value);
   unsigned char *GetCurrentChainPointer();
 
+  // Shared by the phrase view and the piano roll view. `step` is the cursor row in the phrase.
+  // Makes the instrument of the phrase step the current instrument. A step without an
+  // instrument uses the last instrument used in the phrase editor. Returns false if there is none.
+  bool SelectInstrumentOfPhraseStep(int step);
+  // Makes the table of the first TABLE command of the phrase step the current table,
+  // the current table stays as it is if the step has none.
+  void SelectTableOfPhraseStep(int step);
+
   Project *GetProject() {
     return project_;
   }
@@ -85,6 +93,18 @@ public:
   int phrasePlayPos_[SONG_CHANNEL_COUNT];               // Play position in phrase for each
                                                         // channel
   int phraseCurPos_;                                    // current UI cursor row position
+  int phraseLastInstrument_;                            // last instrument used in the phrase editor
+  int phraseLastNote_;                                  // last note used in the phrase editor
+  int phraseLastCmd_;                                   // last command used in the phrase editor
+  int phraseLastParam_;                                 // last command parameter used in the phrase editor
+  uint8_t phraseLastVolume_;                            // last volume used in the phrase editor
+  // The clipboard of the phrase view and the piano roll: the columns clipboardCol_ ... + clipboardWidth_ - 1 (in the
+  // order of the phrase view columns / StepField) of clipboardHeight_ steps. Nothing to paste if the height is 0.
+  uint8_t clipboardCol_;
+  uint8_t clipboardWidth_;
+  uint8_t clipboardHeight_;
+  PhraseStep clipboardSteps_[STEPS_PER_PHRASE];
+  ViewType phraseViewType_; // the view last used in the slot of the phrase view: VT_PHRASE or VT_PIANOROLL
 
   // Sample Editor
   etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> sampleEditorFilename;

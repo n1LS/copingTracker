@@ -1,105 +1,120 @@
 0                             
-3                             
+B                             
 SongClone                     
-F    7                   8    
+F    7                     8  
 0                             
-CLONE                    ∞∞∞∞∞
-F  7                     8    
+CLONE                      ∞∞∞
+F  7                       8  
 0                             
-ú+ù Clone chain here     ∞∞∞∞∞
-8                      7 8    
+ù+ú Clone chain here       ∞∞∞
+8                      7   8  
 0                             
-Any other key starts a   ∞∞∞∞∞
-8                 7      8    
+Any other key starts a     ∞∞∞
+8                 7        8  
 0                             
-selection instead        ∞∞∞∞∞
+selection instead          ∞∞∞
 0                             
-3                             
+B                             
 SongSelection                 
-F        7               8    
+F        7                 8  
 0                             
-SELECTION                ∞∞∞∞∞
-F7          F   7        8    
+SELECTION                  ∞∞∞
+F7          F        7     8  
 0                             
-ü   Copy    ù+ü Extend   ∞∞∞∞∞
-F  7        F   7        8    
+ü   Copy    ú+ü+öòôó Nudge ∞∞∞
+F   7       F           7  8  
 0                             
-ù+ú Cut     û+ü Mute     ∞∞∞∞∞
-F  7        F   7        8    
+ù+ú Cut                    ∞∞∞
+F   7       F           7  8  
 0                             
-û+ú Solo    ù+û Unmute   ∞∞∞∞∞
+ù+ü Extend                 ∞∞∞
 0                             
-3                             
+B                             
 ChainClone                    
-F    7                   8    
+F    7                     8  
 0                             
-CLONE                    ∞∞∞∞∞
-F  7                     8    
+CLONE                      ∞∞∞
+F  7                       8  
 0                             
-ú+ù Clone phrase here    ∞∞∞∞∞
-8                     7  8    
+ù+ú Clone phrase here      ∞∞∞
+8                     7    8  
 0                             
-Any other key starts a   ∞∞∞∞∞
-8                   7    8    
+Any other key starts a     ∞∞∞
+8                   7      8  
 0                             
-selection instead        ∞∞∞∞∞
+selection instead          ∞∞∞
 0                             
-3                             
+B                             
 ChainSelection                
-F        7  F     7      8    
+F        7  F            7 8  
 0                             
-SELECTION   ú+öòôó Adjust∞∞∞∞∞
-F7          F   7        8    
+SELECTION                  ∞∞∞
+F7          F      7       8  
 0                             
-ü   Copy    ü+ù Extend   ∞∞∞∞∞
-F  7        F   7        8    
+ü   Copy    ú+öòôó Adjust  ∞∞∞
+F  7     F         7       8  
 0                             
-ú+ù Cut     ü+û Mute     ∞∞∞∞∞
-F  7        F   7        8    
+ù+ú Cut     ú+ü+òô Nudge   ∞∞∞
+F   7     F                8  
 0                             
-ú+û Solo    û+ù Unmute   ∞∞∞∞∞
+ù+ü Extend                 ∞∞∞
 0                             
-3                             
+B                             
 PhraseClone                   
-F    7                   8    
+F    7                     8  
 0                             
-CLONE                    ∞∞∞∞∞
-F  7                     8    
+CLONE                      ∞∞∞
+F  7                       8  
 0                             
-ú+ù Clone instrument/tbl ∞∞∞∞∞
-8                      7 8    
+ù+ú Clone instrument/table ∞∞∞
+8                      7   8  
 0                             
-Any other key starts a   ∞∞∞∞∞
-8                   7    8    
+Any other key starts a     ∞∞∞
+8                   7      8  
 0                             
-selection instead        ∞∞∞∞∞
+selection instead          ∞∞∞
 0                             
-3                             
+B                             
 PhraseSelection               
-F        7               8    
+F        7  F            7 8  
 0                             
-SELECTION                ∞∞∞∞∞
-F7         0F      7     8    
+SELECTION                  ∞∞∞
+F7         0F      7       8  
 0                             
-ü   Copy    ú+öòôó Adjust∞∞∞∞∞
-F  7        F   7        8    
+ü   Copy    ú+ü+òô Nudge   ∞∞∞
+F  7        F      7       8  
 0                             
-ú+ù Cut     ü+ù Extend   ∞∞∞∞∞
-F  7        F   7        8    
+ù+ú Cut     ú+öòôó Adjust  ∞∞∞
+F   7     F           7    8  
 0                             
-û+ù Unmute  ú+û Solo     ∞∞∞∞∞
+ù+ü Extend                 ∞∞∞
 0                             
-3                             
+B                             
 TableSelection                
-F        7               8    
+F        7                 8  
 0                             
-SELECTION                ∞∞∞∞∞
-F7         0F   7        8    
+SELECTION                  ∞∞∞
+F7         0F      7       8  
 0                             
-ü   Copy    ü+ù Extend   ∞∞∞∞∞
-F  7       8F 87         8    
+ü   Copy    ú+ü+òô Nudge   ∞∞∞
+F  7       8F      7       8  
 0                             
-ú+ù Cut     òó  Resize   ∞∞∞∞∞
-8   78     7F 8 7        8    
+ù+ú Cut     ù+ü    Extend  ∞∞∞
+7         87F   7          8  
 0                             
-            öô  selection∞∞∞∞∞
+            öôòó   Select  ∞∞∞
+0                             
+B                             
+RollSelection                 
+F        7F 7              8  
+0                             
+SELECTION                  ∞∞∞
+F7        F        7       8  
+0                             
+ü   Copy    ú+ü+öó Nudge   ∞∞∞
+F  7      F        7       8  
+0                             
+ù+ú Cut     ú+öòôó Transpse∞∞∞
+F   7     F     7          8  
+0                             
+öó  Extend  ù+ü Extend all ∞∞∞

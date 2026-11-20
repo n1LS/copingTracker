@@ -21,6 +21,8 @@
 #include "System/System/System.h"
 #include "UIController.h"
 #include "ViewData.h"
+#include <algorithm>
+#include <cstring>
 #include <nanoprintf.h>
 #include <stdlib.h>
 #include <string>
@@ -191,6 +193,81 @@ void SongView::clonePosition() {
     *dst++ = *src++;
   }
   setChain((unsigned char)next);
+  isDirty_ = true;
+}
+
+// Moves a position (a row on the screen and the scroll offset of the screen) by rows. The screen only
+// scrolls if the row would leave it, and the position stays valid.
+static void shiftSongRow(int &y, int &offset, int delta) {
+  const int row = y + offset + delta;
+  const int rows = View::songRowCount_;
+
+  if (row < offset) {
+    offset = row;
+  } else if (row > offset + rows - 1) {
+    offset = row - (rows - 1);
+  }
+  offset = std::clamp(offset, 0, SONG_ROW_COUNT - rows);
+  y = row - offset;
+}
+
+void SongView::nudgeSelection(int dx, int dy) {
+  const GUIRect r = getSelectionRect();
+  const int left = r.Left();
+  const int top = r.Top();
+  const int width = r.Width();
+  const int height = r.Height();
+  SongRow *rows = viewData_->song_->rows_;
+
+  // the first / last row or channel
+  if (left + dx < 0 || left + width - 1 + dx >= SONG_CHANNEL_COUNT || top + dy < 0 ||
+      top + height - 1 + dy >= SONG_ROW_COUNT) {
+    return;
+  }
+
+  if (dy != 0) {
+    // the row in the way jumps to the row that was just emptied, in the columns of the selection
+    unsigned char jumped[SONG_CHANNEL_COUNT];
+    memcpy(jumped, rows[dy > 0 ? top + height : top - 1].chains + left, width);
+
+    if (dy > 0) {
+      for (int row = top + height - 1; row >= top; --row) {
+        memcpy(rows[row + 1].chains + left, rows[row].chains + left, width);
+      }
+      memcpy(rows[top].chains + left, jumped, width);
+    } else {
+      for (int row = top; row < top + height; ++row) {
+        memcpy(rows[row - 1].chains + left, rows[row].chains + left, width);
+      }
+      memcpy(rows[top + height - 1].chains + left, jumped, width);
+    }
+  }
+
+  if (dx != 0) {
+    // the same for the channel in the way, in the rows of the selection
+    for (int row = top; row < top + height; ++row) {
+      unsigned char *chains = rows[row].chains;
+      if (dx > 0) {
+        const unsigned char jumped = chains[left + width];
+        memmove(chains + left + 1, chains + left, width);
+        chains[left] = jumped;
+      } else {
+        const unsigned char jumped = chains[left - 1];
+        memmove(chains + left - 1, chains + left, width);
+        chains[left + width - 1] = jumped;
+      }
+    }
+  }
+
+  // the selection, the position it started at (the cursor goes back there after a copy) and the cursor move
+  clipboard_.x_ += dx;
+  saveX_ += dx;
+  viewData_->songX_ += dx;
+  if (dy != 0) {
+    shiftSongRow(clipboard_.y_, clipboard_.offset_, dy);
+    shiftSongRow(saveY_, saveOffset_, dy);
+    shiftSongRow(viewData_->songY_, viewData_->songOffset_, dy);
+  }
   isDirty_ = true;
 }
 
@@ -769,6 +846,14 @@ void SongView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     toggleMute();
   } else if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
     extendSelection();
+  } else if ((newButton & BM_DIRECTIONAL) && mask == (BM_ENTER | BM_EDIT)) {
+    // ENTER + EDIT + arrows nudge the selection
+    nudgeSelection(newButton == BM_RIGHT  ? +1
+                   : newButton == BM_LEFT ? -1
+                                          : 0,
+                   newButton == BM_DOWN ? +1
+                   : newButton == BM_UP ? -1
+                                        : 0);
   } else if (IsChord(newButton, mask, BM_EDIT)) {
     copySelection();
   } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {

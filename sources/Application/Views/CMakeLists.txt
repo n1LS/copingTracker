@@ -5,6 +5,8 @@ add_library(application_views
   GraphField.cpp
   ChainView.cpp
   GrooveView.cpp
+  PhraseEditingView.cpp
+  PianoRollView.cpp
   HelpView.cpp
   SampleImportView.cpp
   InstrumentImportView.cpp

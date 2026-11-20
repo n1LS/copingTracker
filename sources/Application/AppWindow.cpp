@@ -80,6 +80,7 @@ struct AppWindowViews {
   SongView songView;
   ChainView chainView;
   PhraseView phraseView;
+  PianoRollView pianoRollView;
   DeviceView deviceView;
   HelpView helpView;
   ThemeView themeView;
@@ -123,6 +124,7 @@ struct AppWindowViews {
     songView.AddObserver(window);
     chainView.AddObserver(window);
     phraseView.AddObserver(window);
+    pianoRollView.AddObserver(window);
     deviceView.AddObserver(window);
     helpView.AddObserver(window);
     themeView.AddObserver(window);
@@ -147,12 +149,12 @@ struct AppWindowViews {
   };
 
   AppWindowViews(GUIWindow &w, ViewData &viewData)
-      : songView(w, &viewData), chainView(w, &viewData), phraseView(w, &viewData), deviceView(w, &viewData),
-        helpView(w, &viewData), themeView(w, &viewData), themeImportView(w, &viewData), projectView(w, &viewData),
-        importView(w, &viewData), instrumentImportView(w, &viewData), instrumentView(w, &viewData),
-        tableView(w, &viewData), grooveView(w, &viewData), selectProjectView(w, &viewData), mixerView(w, &viewData),
-        sampleEditorView(w, &viewData), sampleSlicesView(w, &viewData), modulationView(w, &viewData),
-        masterView(w, &viewData), bootView(w, &viewData) {
+      : songView(w, &viewData), chainView(w, &viewData), phraseView(w, &viewData), pianoRollView(w, &viewData),
+        deviceView(w, &viewData), helpView(w, &viewData), themeView(w, &viewData), themeImportView(w, &viewData),
+        projectView(w, &viewData), importView(w, &viewData), instrumentImportView(w, &viewData),
+        instrumentView(w, &viewData), tableView(w, &viewData), grooveView(w, &viewData),
+        selectProjectView(w, &viewData), mixerView(w, &viewData), sampleEditorView(w, &viewData),
+        sampleSlicesView(w, &viewData), modulationView(w, &viewData), masterView(w, &viewData), bootView(w, &viewData) {
   }
 };
 
@@ -799,6 +801,9 @@ void AppWindow::Update(Observable &o, I_ObservableData *d) {
             break;
           case VT_PHRASE:
             currentView_ = &views_->phraseView;
+            break;
+          case VT_PIANOROLL:
+            currentView_ = &views_->pianoRollView;
             break;
           case VT_DEVICE:
             currentView_ = &views_->deviceView;

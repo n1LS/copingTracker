@@ -30,6 +30,10 @@ void ScreenView::AnimationUpdate() {
   drawTitleCPUMeter();
 }
 
+void ScreenView::NavigateToPhrase(ViewTransition transition) {
+  Navigate(viewData_->phraseViewType_, transition);
+}
+
 void ScreenView::Navigate(ViewType target, ViewTransition transition) {
   SetChanged();
 

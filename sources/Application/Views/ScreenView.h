@@ -26,6 +26,8 @@ public:
   virtual void AnimationUpdate() override;
 
   void Navigate(ViewType target, ViewTransition transition);
+  // The phrase view and the piano roll share one place in the navigation map. This opens the one that was used last.
+  void NavigateToPhrase(ViewTransition transition);
 
 protected:
   virtual const char *emptyStateMessage() const;

@@ -36,8 +36,8 @@
 // Application/Utils/stringutils.cpp so every value stays usable as a filename.
 // Rows 0-2 are letters and punctuation (letters case swapped by EDIT), row 3
 // holds the wide SPACE cell followed by '.' and the remaining digits.
-static const char *kUpperRows[3] = {"ABCDEFGHIJK", "LMNOPQRSTUV", "WXYZ_-01234"};
-static const char *kLowerRows[3] = {"abcdefghijk", "lmnopqrstuv", "wxyz_-01234"};
+static const char *const kUpperRows[3] = {"ABCDEFGHIJK", "LMNOPQRSTUV", "WXYZ_-01234"};
+static const char *const kLowerRows[3] = {"abcdefghijk", "lmnopqrstuv", "wxyz_-01234"};
 static const char *kLastRow = ".56789";
 
 // Row 3 layout: the SPACE cell occupies columns 0..4, then kLastRow's
@@ -234,7 +234,7 @@ void TextInputModal::DrawView() {
   }
 
   // --- character grid -----------------------------------------------------
-  const char **letterRows = upperCase_ ? kUpperRows : kLowerRows;
+  const char *const *letterRows = upperCase_ ? kUpperRows : kLowerRows;
   for (uint8_t r = 0; r < ROW_LAST; r++) {
     for (uint8_t c = 0; c < GRID_COLS; c++) {
       bool active = (r == gridRow_ && c == gridCol_);

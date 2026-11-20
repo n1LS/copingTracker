@@ -39,6 +39,9 @@ protected:
   void enterChainUnderCursor();
 
   void extendSelection();
+  // ENTER + EDIT + arrows: moves the content of the selection one chain / row in the direction, the row or column
+  // in the way jumps to the other end of the selection
+  void nudgeSelection(int dx, int dy);
   void updateChain(int offset);
   void updateSongOffset(int offset);
   void updateCursor(int dx, int dy);

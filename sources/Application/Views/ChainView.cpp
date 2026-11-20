@@ -267,6 +267,53 @@ void ChainView::fillClipboardData() {
   };
 }
 
+void ChainView::nudgeSelection(int delta) {
+  // the selection rect holds distances, the selection covers one more row and column
+  const GUIRect r = getSelectionRect();
+  const int left = r.Left();
+  const int right = r.Left() + r.Width();
+  const int top = r.Top();
+  const int bottom = r.Top() + r.Height();
+
+  // the first / last row of the chain
+  if (top + delta < 0 || bottom + delta >= 16) {
+    return;
+  }
+
+  ChainStep *steps = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+  const ChainStep jumped = steps[delta > 0 ? bottom + 1 : top - 1];
+
+  // only the columns of the selection move: the phrase (0) and the transpose (1)
+  auto copyColumns = [&](ChainStep &target, const ChainStep &source) {
+    for (int col = left; col <= right; col++) {
+      if (col == 0) {
+        target.phrase = source.phrase;
+      } else {
+        target.transpose = source.transpose;
+      }
+    }
+  };
+
+  if (delta > 0) {
+    for (int row = bottom; row >= top; --row) {
+      copyColumns(steps[row + 1], steps[row]);
+    }
+    copyColumns(steps[top], jumped);
+  } else {
+    for (int row = top; row <= bottom; ++row) {
+      copyColumns(steps[row - 1], steps[row]);
+    }
+    copyColumns(steps[bottom], jumped);
+  }
+
+  // the selection, the position it started at (the cursor goes back there after a copy) and the cursor move
+  clipboard_.row_ += delta;
+  saveRow_ += delta;
+  viewData_->chainRow_ += delta;
+  updateFocusRect();
+  isDirty_ = true;
+}
+
 void ChainView::extendSelection() {
   GUIRect rect = getSelectionRect();
   if (rect.Left() > 0 || rect.Right() < 1) {
@@ -509,7 +556,7 @@ void ChainView::enterPhraseUnderCursor() {
   unsigned char *data = viewData_->GetCurrentChainPointer();
   if (*data != 0xFF) {
     viewData_->currentPhrase_ = *data;
-    Navigate(VT_PHRASE, vtRevealFromRight);
+    NavigateToPhrase(vtRevealFromRight);
   }
 }
 
@@ -606,6 +653,9 @@ void ChainView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     toggleMute();
   } else if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
     extendSelection();
+  } else if ((newButton == BM_UP || newButton == BM_DOWN) && mask == (BM_ENTER | BM_EDIT)) {
+    // ENTER + EDIT + UP / DOWN nudge the selection
+    nudgeSelection(newButton == BM_DOWN ? +1 : -1);
   } else if (mask == BM_ENTER) {
     // Enter modifier
     switch (newButton) {

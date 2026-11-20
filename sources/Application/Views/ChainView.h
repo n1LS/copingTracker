@@ -41,6 +41,9 @@ protected:
   void clonePosition();
   void pasteLastPhrase();
   void extendSelection();
+  // ENTER + EDIT + UP / DOWN: moves the content of the selection one row, the row in the way jumps to the row
+  // that was just emptied at the other end
+  void nudgeSelection(int delta);
 
   GUIRect getSelectionRect();
   void fillClipboardData();

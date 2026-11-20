@@ -13,8 +13,7 @@
 #define _PHRASE_VIEW_H_
 
 #include "Application/Model/Phrase.h"
-#include "BaseClasses/UIHexVarField.h"
-#include "ScreenView.h"
+#include "PhraseEditingView.h"
 #include "ViewData.h"
 
 typedef enum PhraseColumn {
@@ -38,27 +37,27 @@ inline PhraseColumn &operator+=(PhraseColumn &lhs, int rhs) {
   return lhs;
 }
 
-class PhraseView : public ScreenView {
+class PhraseView : public PhraseEditingView {
 
 public:
   PhraseView(GUIWindow &w, ViewData *viewData);
   ~PhraseView();
   void Reset();
   virtual void ButtonDown(uint16_t newButton, uint16_t mask);
-  bool navigationDown(uint16_t direction) override;
   virtual void ButtonUp(uint16_t button, uint16_t mask);
   virtual void DrawView();
   ContextLegend currentContextLegend() const override;
   void DrawEditingValue();
-  virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
   virtual void AnimationUpdate();
-  void setCurrentlySelectedCommand(Token command);
+  void onCommandPicked(Token command) override;
 
 protected:
   void updateCursor(int dx, int dy);
   void updateCursorValue(ViewUpdateDirection offset, int xOffset = 0, int yOffset = 0);
   void updateSelectionValue(ViewUpdateDirection direction);
+  // ENTER + EDIT + UP / DOWN: moves the content of the selection one step, the step in the way jumps to the other end
+  void nudgeSelection(int delta);
 
   // Column-specific value update handlers
   void updateNoteValue(ViewUpdateDirection direction, int yOffset = 0);
@@ -66,8 +65,6 @@ protected:
   void updateVolumeValue(ViewUpdateDirection direction, int yOffset = 0);
   void updateCommandValue(PhraseColumn col, ViewUpdateDirection direction, int yOffset = 0);
   void updateCommandParam(PhraseColumn col, ViewUpdateDirection direction, int yOffset = 0);
-  void warpToNeighbour(int offset);
-  void warpInChain(int offset);
   void cutPosition();
   void pasteLast();
 
@@ -79,40 +76,35 @@ protected:
   void cutSelection();
   void pasteClipboard();
 
-  void startAudition(bool startIfNotRunning);
-  void stopAudition();
+  // PhraseEditingView
+  ViewType otherView() const override {
+    return VT_PIANOROLL;
+  }
+  int cursorStep() const override {
+    return row_;
+  }
+  void onPhraseSwitched() override;
   void unMuteAll();
   void toggleMute();
   void switchSoloMode();
 
   void processNormalButtonMask(uint16_t newButton, uint16_t mask);
-  void enterInstrumentUnderCursor();
   void processSelectionButtonMask(uint16_t newButton, uint16_t mask);
 
   void setTextProps(int row, int col, Color textColor, int limit);
-  uint8_t getEffectiveInstrumentForRow(int row);
 
 private:
   int phraseDiv_ = 4;
   int row_;
   PhraseColumn col_;
-  int lastNote_;
-  int lastInstr_;
-  int lastCmd_;
-  int lastParam_;
-  uint8_t lastVolume_;
   Phrase *phrase_;
   int lastPlayingPos_;
-  Variable cmdEdit_;
-  GUIPoint cmdEditPos_;
-  UIHexVarField cmdEditField_;
 
   struct clipboard {
     int col_;
     int row_;
     int width_;
     int height_;
-    PhraseStep steps_[16];
     bool active_;
   } clipboard_;
 
@@ -120,12 +112,7 @@ private:
   int saveRow_;
   int expandFrame_ = 0;
 
-  // Flags to track which UI elements need updating
-  // These prevent core1 from directly updating the UI
-  bool needsUIUpdate_ = false; // Single flag for all UI updates (notes, VU
-                               // meter, positions, live indicators)
-
-  bool needsLiveIndicatorUpdate_ = false;
+  // (needsUIUpdate_, the single flag that keeps core1 from drawing, is in PhraseEditingView)
 
 #ifdef PICO_DEOPTIMIZED_DEBUG
   // These variables are specifically for thread synchronization in debug builds

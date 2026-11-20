@@ -21,7 +21,7 @@ enum chiptune_constants_e {
   vibratoFrequency = 0xFFF,
 };
 
-static const char *chiptune_waveforms[numWaveforms] = {
+static const char *const chiptune_waveforms[numWaveforms] = {
     char_waveform_pulse_s " 12.5%",   char_waveform_pulse_s " 25%",  char_waveform_pulse_s " 50%",
     char_waveform_tri_s " 4bit",      char_waveform_noise_s " GB7",  char_waveform_noise_s " NES",
     char_waveform_noise_s " SN76489", char_waveform_noise_s " White"};

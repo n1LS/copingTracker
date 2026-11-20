@@ -81,7 +81,7 @@ void GrooveView::clearCursorValue() {
 bool GrooveView::navigationDown(uint16_t direction) {
   switch (direction) {
     case BM_DOWN:
-      Navigate(VT_PHRASE, vtRevealFromBottom);
+      NavigateToPhrase(vtRevealFromBottom);
       return true;
     case BM_LEFT:
       Navigate(VT_PROJECT, vtRevealFromLeft);

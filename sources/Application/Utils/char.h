@@ -18,7 +18,7 @@
 #include <string.h>
 
 extern const char hexChars[16];
-extern const char *noteNames[12];
+extern const char *const noteNames[12];
 
 static inline unsigned char hexNibble(char c) {
   unsigned char v = c - '0';

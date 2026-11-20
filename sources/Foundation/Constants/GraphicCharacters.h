@@ -27,60 +27,90 @@
 #define gchar_icon_info "\x62"
 #define gchar_icon_warning "\x63"
 
-#define char_v_bar_0_s " "
-#define char_v_bar_1_s "\xA0"
-#define char_v_bar_2_s "\xA1"
-#define char_v_bar_3_s "\xA2"
-#define char_v_bar_4_s "\xA3"
-#define char_v_bar_5_s "\xA4"
-#define char_v_bar_6_s "\xA5"
-#define char_v_bar_7_s "\xA6"
-#define char_v_bar_8_s "\xA7"
-#define char_v_bar_9_s "\xA8"
-#define char_v_bar_10_s "\xA9"
+#define gchar_v_bar_0_s " "
+#define gchar_v_bar_1_s "\xA0"
+#define gchar_v_bar_2_s "\xA1"
+#define gchar_v_bar_3_s "\xA2"
+#define gchar_v_bar_4_s "\xA3"
+#define gchar_v_bar_5_s "\xA4"
+#define gchar_v_bar_6_s "\xA5"
+#define gchar_v_bar_7_s "\xA6"
+#define gchar_v_bar_8_s "\xA7"
+#define gchar_v_bar_9_s "\xA8"
+#define gchar_v_bar_10_s "\xA9"
 
-static const char char_v_bar_lookup[] = {CHAR(char_v_bar_0_s), CHAR(char_v_bar_1_s), CHAR(char_v_bar_2_s),
-                                         CHAR(char_v_bar_3_s), CHAR(char_v_bar_4_s), CHAR(char_v_bar_5_s),
-                                         CHAR(char_v_bar_6_s), CHAR(char_v_bar_7_s), CHAR(char_v_bar_8_s),
-                                         CHAR(char_v_bar_9_s), CHAR(char_v_bar_10_s)};
+static const char char_v_bar_lookup[] = {CHAR(gchar_v_bar_0_s), CHAR(gchar_v_bar_1_s), CHAR(gchar_v_bar_2_s),
+                                         CHAR(gchar_v_bar_3_s), CHAR(gchar_v_bar_4_s), CHAR(gchar_v_bar_5_s),
+                                         CHAR(gchar_v_bar_6_s), CHAR(gchar_v_bar_7_s), CHAR(gchar_v_bar_8_s),
+                                         CHAR(gchar_v_bar_9_s), CHAR(gchar_v_bar_10_s)};
 
 // horizontal bar indicator
-#define char_h_bar_0_s "\xC0"
-#define char_h_bar_previous_s "\xC1"
-#define char_h_bar_1_s "\xC2"
-#define char_h_bar_2_s "\xC3"
-#define char_h_bar_3_s "\xC4"
-#define char_h_bar_4_s "\xC5"
-#define char_h_bar_5_s "\xC6"
-#define char_h_bar_6_s "\xC7"
-#define char_h_bar_7_s "\xC8"
-#define char_h_bar_8_s "\xC9"
-#define char_h_bar_9_s "\xCA"
-#define char_h_bar_10_s "\xCB"
+#define gchar_h_bar_0_s "\xC0"
+#define gchar_h_bar_previous_s "\xC1"
+#define gchar_h_bar_1_s "\xC2"
+#define gchar_h_bar_2_s "\xC3"
+#define gchar_h_bar_3_s "\xC4"
+#define gchar_h_bar_4_s "\xC5"
+#define gchar_h_bar_5_s "\xC6"
+#define gchar_h_bar_6_s "\xC7"
+#define gchar_h_bar_7_s "\xC8"
+#define gchar_h_bar_8_s "\xC9"
+#define gchar_h_bar_9_s "\xCA"
+#define gchar_h_bar_10_s "\xCB"
+
+// piano roll icons
+#define gchar_piano_roll_note_s "\xaf"
+#define gchar_piano_roll_note_start_s "\x9d"
+#define gchar_piano_roll_note_mid_s "\x9e"
+#define gchar_piano_roll_note_end_s "\x9f"
+#define gchar_piano_roll_empty_s "\x94"
+#define gchar_piano_roll_note_off_s "\x61"
+
+#define gchar_piano_quarter_s gchar_piano_roll_empty_s gchar_piano_roll_empty_s gchar_piano_roll_empty_s "\x92"
+#define gchar_piano_row_empty_row_s                                                                                    \
+  gchar_piano_quarter_s gchar_piano_quarter_s gchar_piano_quarter_s gchar_piano_quarter_s
+
+#define gchar_piano_roll_degab_s "\x20\x20\x93"
+#define gchar_piano_roll_cf_s "\x94\x94\x92"
+#define gchar_piano_roll_black_s "\x90\x90\x91"
+#define gchar_piano_roll_rop_row_s "\x93\x93\x93"
+#define gchar_piano_black_selected "\x98\x99\x91"
+#define gchar_piano_degab_selected "\x95\x96\x97"
+#define gchar_piano_cf_selected "\x9a\x9b\x9c"
+
+static const char *const gchar_vertical_piano[12] = {
+    gchar_piano_roll_cf_s,    gchar_piano_roll_black_s, gchar_piano_roll_degab_s, gchar_piano_roll_black_s,
+    gchar_piano_roll_degab_s, gchar_piano_roll_cf_s,    gchar_piano_roll_black_s, gchar_piano_roll_degab_s,
+    gchar_piano_roll_black_s, gchar_piano_roll_degab_s, gchar_piano_roll_black_s, gchar_piano_roll_degab_s};
+
+static const char *const gchar_vertical_piano_selected[12] = {
+    gchar_piano_cf_selected,    gchar_piano_black_selected, gchar_piano_degab_selected, gchar_piano_black_selected,
+    gchar_piano_degab_selected, gchar_piano_cf_selected,    gchar_piano_black_selected, gchar_piano_degab_selected,
+    gchar_piano_black_selected, gchar_piano_degab_selected, gchar_piano_black_selected, gchar_piano_degab_selected};
 
 // Array of bargraph characters for fast lookup
-static const char char_h_bar_lookup[] = {CHAR(char_h_bar_0_s), CHAR(char_h_bar_1_s),  CHAR(char_h_bar_2_s),
-                                         CHAR(char_h_bar_3_s), CHAR(char_h_bar_4_s),  CHAR(char_h_bar_5_s),
-                                         CHAR(char_h_bar_6_s), CHAR(char_h_bar_7_s),  CHAR(char_h_bar_8_s),
-                                         CHAR(char_h_bar_9_s), CHAR(char_h_bar_10_s), CHAR(char_h_bar_previous_s)};
+static const char char_h_bar_lookup[] = {CHAR(gchar_h_bar_0_s), CHAR(gchar_h_bar_1_s),  CHAR(gchar_h_bar_2_s),
+                                         CHAR(gchar_h_bar_3_s), CHAR(gchar_h_bar_4_s),  CHAR(gchar_h_bar_5_s),
+                                         CHAR(gchar_h_bar_6_s), CHAR(gchar_h_bar_7_s),  CHAR(gchar_h_bar_8_s),
+                                         CHAR(gchar_h_bar_9_s), CHAR(gchar_h_bar_10_s), CHAR(gchar_h_bar_previous_s)};
 
 // horizontal ruler indicator
-#define char_h_ruler_s "\xB0"
-#define char_h_ruler_0_s "\xB1"
-#define char_h_ruler_1_s "\xB2"
-#define char_h_ruler_2_s "\xB3"
-#define char_h_ruler_3_s "\xB4"
-#define char_h_ruler_4_s "\xB5"
-#define char_h_ruler_5_s "\xB6"
-#define char_h_ruler_6_s "\xB7"
-#define char_h_ruler_7_s "\xB8"
-#define char_h_ruler_8_s "\xB9"
-#define char_h_ruler_9_s "\xB0"
+#define gchar_h_ruler_s "\xB0"
+#define gchar_h_ruler_0_s "\xB1"
+#define gchar_h_ruler_1_s "\xB2"
+#define gchar_h_ruler_2_s "\xB3"
+#define gchar_h_ruler_3_s "\xB4"
+#define gchar_h_ruler_4_s "\xB5"
+#define gchar_h_ruler_5_s "\xB6"
+#define gchar_h_ruler_6_s "\xB7"
+#define gchar_h_ruler_7_s "\xB8"
+#define gchar_h_ruler_8_s "\xB9"
+#define gchar_h_ruler_9_s "\xB0"
 
-static const char char_ruler_lookup[] = {CHAR(char_h_ruler_0_s), CHAR(char_h_ruler_1_s), CHAR(char_h_ruler_2_s),
-                                         CHAR(char_h_ruler_3_s), CHAR(char_h_ruler_4_s), CHAR(char_h_ruler_5_s),
-                                         CHAR(char_h_ruler_6_s), CHAR(char_h_ruler_7_s), CHAR(char_h_ruler_8_s),
-                                         CHAR(char_h_ruler_9_s), CHAR(char_h_ruler_s)};
+static const char char_ruler_lookup[] = {CHAR(gchar_h_ruler_0_s), CHAR(gchar_h_ruler_1_s), CHAR(gchar_h_ruler_2_s),
+                                         CHAR(gchar_h_ruler_3_s), CHAR(gchar_h_ruler_4_s), CHAR(gchar_h_ruler_5_s),
+                                         CHAR(gchar_h_ruler_6_s), CHAR(gchar_h_ruler_7_s), CHAR(gchar_h_ruler_8_s),
+                                         CHAR(gchar_h_ruler_9_s), CHAR(gchar_h_ruler_s)};
 
 #define char_v_bar(x) (char_v_bar_lookup[(x) < 0 ? 0 : ((x) > 10 ? 10 : (x))])
 

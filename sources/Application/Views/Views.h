@@ -23,6 +23,7 @@
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/ModulationView.h"
 #include "Application/Views/PhraseView.h"
+#include "Application/Views/PianoRollView.h"
 #include "Application/Views/ProjectView.h"
 #include "Application/Views/SampleEditorView.h"
 #include "Application/Views/SampleImportView.h"

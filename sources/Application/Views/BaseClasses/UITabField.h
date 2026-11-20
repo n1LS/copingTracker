@@ -13,7 +13,7 @@
 
 class UITabField : public UIIntVarField {
 public:
-  UITabField(const char *label, const GUIPoint &position, Variable &variable, const char *tabs[], int count);
+  UITabField(const char *label, const GUIPoint &position, Variable &variable, const char *const tabs[], int count);
   void Draw(GUIWindow &w, int offset = 0);
   int GetFocusOffset();
 

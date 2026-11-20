@@ -179,6 +179,66 @@ void TableView::fillClipboardData() {
   updateCursor(0, 0);
 }
 
+void TableView::nudgeSelection(int delta) {
+  const GUIRect r = getSelectionRect();
+  const int left = r.Left();
+  const int right = r.Left() + r.Width() - 1;
+  const int top = r.Top();
+  const int bottom = r.Top() + r.Height() - 1;
+
+  // the first / last row of the table
+  if (top + delta < 0 || bottom + delta >= 16) {
+    return;
+  }
+
+  TableStep *steps = TableHolder::GetInstance()->GetTable(viewData_->currentTable_).steps_;
+  const TableStep jumped = steps[delta > 0 ? bottom + 1 : top - 1];
+
+  // only the columns of the selection move
+  auto copyColumns = [&](TableStep &target, const TableStep &source) {
+    for (int col = left; col <= right; col++) {
+      switch (col) {
+        case colCmd1:
+          target.cmd1 = source.cmd1;
+          break;
+        case colCmdVal1:
+          target.param1 = source.param1;
+          break;
+        case colCmd2:
+          target.cmd2 = source.cmd2;
+          break;
+        case colCmdVal2:
+          target.param2 = source.param2;
+          break;
+        case colCmd3:
+          target.cmd3 = source.cmd3;
+          break;
+        case colCmdVal3:
+          target.param3 = source.param3;
+          break;
+      }
+    }
+  };
+
+  if (delta > 0) {
+    for (int row = bottom; row >= top; --row) {
+      copyColumns(steps[row + 1], steps[row]);
+    }
+    copyColumns(steps[top], jumped);
+  } else {
+    for (int row = top; row <= bottom; ++row) {
+      copyColumns(steps[row - 1], steps[row]);
+    }
+    copyColumns(steps[bottom], jumped);
+  }
+
+  // the selection, the position it started at (the cursor goes back there after a copy) and the cursor move
+  clipboard_.row_ += delta;
+  saveRow_ += delta;
+  row_ += delta;
+  updateCursor(0, 0);
+}
+
 void TableView::extendSelection() {
   GUIRect rect = getSelectionRect();
   if (rect.Left() > 0 || rect.Right() < 6) {
@@ -458,7 +518,11 @@ void TableView::pasteLast() {
 bool TableView::navigationDown(uint16_t direction) {
   switch (direction) {
     case BM_UP:
-      Navigate((viewType_ == VT_TABLE ? VT_PHRASE : VT_INSTRUMENT), vtRevealFromTop);
+      if (viewType_ == VT_TABLE) {
+        NavigateToPhrase(vtRevealFromTop);
+      } else {
+        Navigate(VT_INSTRUMENT, vtRevealFromTop);
+      }
       return true;
     case BM_LEFT:
       Navigate(viewType_ == VT_TABLE ? VT_MIXER : VT_TABLE, vtRevealFromLeft);
@@ -605,6 +669,9 @@ void TableView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     extendSelection();
   } else if (IsChord(newButton, mask, BM_ENTER, BM_ALT)) {
     cutSelection();
+  } else if ((newButton == BM_UP || newButton == BM_DOWN) && mask == (BM_ENTER | BM_EDIT)) {
+    // ENTER + EDIT + UP / DOWN nudge the selection
+    nudgeSelection(newButton == BM_DOWN ? +1 : -1);
   } else if (mask == BM_NAV) {
     if (newButton == BM_PLAY) {
       player->OnStartButton(PM_PHRASE, viewData_->songX_, true, viewData_->chainRow_);
