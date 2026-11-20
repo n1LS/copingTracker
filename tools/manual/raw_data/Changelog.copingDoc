@@ -1,5 +1,200 @@
 F                             
 C                             
+v0.5.0a             2026-11-19
+0                             
+0                             
+                              
+F                             
+0                             
+- Fixed various issues with   
+F                             
+0                             
+  sample slicing, sample      
+F                             
+0                             
+  editing, instrument         
+F                             
+0                             
+  selection and navigation    
+F                             
+0                             
+- Improved table editing and  
+F                             
+0                             
+  navigation throughout the   
+F                             
+0                             
+  tracker                     
+F                             
+0                             
+- Fixed several issues with   
+F                             
+0                             
+  phrase table creation and   
+F                             
+0                             
+  cloning                     
+F                             
+0                             
+- Improved VU meters with peak
+F                             
+0                             
+  hold indicators             
+F                             
+0                             
+- Improved Stack instrument   
+F                             
+0                             
+  brightness control          
+F                             
+0                             
+- Fixed various display       
+F                             
+0                             
+  glitches and playback       
+F                             
+0                             
+  indicators                  
+F                             
+0                             
+- Improved song navigation,   
+F                             
+0                             
+  including skipping empty    
+F                             
+0                             
+  song positions              
+F                             
+0                             
+- Added contextual button     
+F                             
+0                             
+  hints to Song, Chain, Phrase
+F                             
+0                             
+  and Table views             
+F                             
+0                             
+- Added helpful shortcuts and 
+F                             
+0                             
+  actions for selection and   
+F                             
+0                             
+  cloning modes               
+F                             
+0                             
+- Updated key-combination     
+F                             
+0                             
+  reference                   
+F                             
+0                             
+- Introduced a new Piano Roll 
+F                             
+0                             
+  view as an alternative to   
+F                             
+0                             
+  the classic Phrase Editor   
+F                             
+0                             
+- Added scrolling piano roll  
+F                             
+0                             
+  with note labels, step      
+F                             
+0                             
+  numbers and playback        
+F                             
+0                             
+  indicators                  
+F                             
+0                             
+- Added note placement,       
+F                             
+0                             
+  deletion, pitch editing and 
+F                             
+0                             
+  live auditioning            
+F                             
+0                             
+- Added editing of            
+F                             
+0                             
+  instruments, volume,        
+F                             
+0                             
+  commands and parameters     
+F                             
+0                             
+  directly in the Piano Roll  
+F                             
+0                             
+- Displayed effective         
+F                             
+0                             
+  instrument and parameter    
+F                             
+0                             
+  values at each step         
+F                             
+0                             
+- Added step selection, copy, 
+F                             
+0                             
+  cut and paste               
+F                             
+0                             
+- Added transposition, time   
+F                             
+0                             
+  shifting and selection      
+F                             
+0                             
+  nudging                     
+F                             
+0                             
+- Shared editing capabilities 
+F                             
+0                             
+  between the classic Phrase  
+F                             
+0                             
+  Editor and Piano Roll       
+F                             
+0                             
+- Remembered preferred phrase 
+F                             
+0                             
+  editor and restored it when 
+F                             
+0                             
+  returning to phrase editing 
+F                             
+0                             
+- Removed obsolete Save button
+F                             
+0                             
+  from the Sample Slices view 
+F                             
+0                             
+- Improved memory usage,      
+F                             
+0                             
+  freeing some RAM            
+F                             
+0                             
+- Added automated builds for  
+F                             
+0                             
+  GitHub releases             
+0                             
+0                             
+                              
+F                             
+C                             
 v0.4.0a             2026-10-20
 0                             
 0                             

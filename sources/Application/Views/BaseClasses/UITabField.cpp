@@ -28,7 +28,8 @@ void DrawStringClipped(AppWindow &w, int x, int y, const char *str, int loX, int
 }
 } // namespace
 
-UITabField::UITabField(const char *label, const GUIPoint &position, Variable &variable, const char *const tabs[], int count)
+UITabField::UITabField(const char *label, const GUIPoint &position, Variable &variable, const char *const tabs[],
+                       int count)
     : UIIntVarField(position, variable, "", 0, count - 1, 1, count - 1), src_(variable) {
   count_ = count;
   tabOffset_ = 0;
