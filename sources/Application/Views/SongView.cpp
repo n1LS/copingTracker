@@ -14,6 +14,7 @@
 #include "Application/Mixer/MixerService.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/ContextLegend.generated.h"
+#include "Application/Utils/Core0Load.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/BaseClasses/View.h"
 #include "Application/Views/SampleEditorView.h"
@@ -1124,7 +1125,8 @@ void SongView::OnPlayerUpdate(PlayerEventType eventType, unsigned int tick) {
 }
 
 // Shows how close the audio render (core1) is to missing a buffer, in the
-// bottom right corner while playing. Redrawn only when the shown value changes.
+// bottom right corner while playing. On the device the load of core 0 (the UI)
+// is shown above it in light gray. Redrawn only when a shown value changes.
 void SongView::drawRenderLoad(bool force) {
   constexpr int width = 3; // "72%"
   constexpr int x = SCREEN_WIDTH - width;
@@ -1136,9 +1138,17 @@ void SongView::drawRenderLoad(bool force) {
     load = MixerService::GetInstance()->GetRenderLoad();
   }
 
+#ifdef CORE0_LOAD_METER
+  const uint32_t uiLoad = Core0Load::Percent();
+  if (!force && load == lastRenderLoad_ && uiLoad == lastUiLoad_) {
+    return;
+  }
+  lastUiLoad_ = uiLoad;
+#else
   if (!force && load == lastRenderLoad_) {
     return;
   }
+#endif
 
   lastRenderLoad_ = load;
 
@@ -1154,8 +1164,20 @@ void SongView::drawRenderLoad(bool force) {
 
   char buffer[width + 1];
   npf_snprintf(buffer, sizeof(buffer), load > 99 ? "%3d" : "%2d%%", load);
+
+#ifdef CORE0_LOAD_METER
+  // CPU, then core 0 (UI), then core 1 (audio)
+  DrawString(x, y - 2, "CPU");
+  DrawString(x, y, buffer);
+
+  char uiBuffer[width + 1];
+  npf_snprintf(uiBuffer, sizeof(uiBuffer), "%2d%%", static_cast<int>(uiLoad));
+  SetColor(Theme::View::uiLoad);
+  DrawString(x, y - 1, uiBuffer);
+#else
   DrawString(x, y - 1, "CPU");
   DrawString(x, y, buffer);
+#endif
 }
 
 void SongView::AnimationUpdate() {

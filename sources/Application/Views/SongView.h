@@ -99,6 +99,9 @@ private:
 
   void drawRenderLoad(bool force);
   uint32_t lastRenderLoad_ = 0;
+#ifdef CORE0_LOAD_METER
+  uint32_t lastUiLoad_ = 0;
+#endif
 
   LoopState loopState_ = lsIdle;
   int loopA_;

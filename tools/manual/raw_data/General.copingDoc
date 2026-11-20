@@ -1,6 +1,6 @@
-F                          C  
-C                          0  
- WELCOME                   ²±°
+F                        0    
+C                             
+ WELCOME                      
 7                             
 0                             
                               
@@ -91,9 +91,9 @@ new features and improvements.
 7                             
 0                             
                               
-F                          C  
-C                          0  
- OVERVIEW                  ²±°
+F                      0      
+C                             
+ OVERVIEW                     
 7                             
 0                             
                               
@@ -220,9 +220,9 @@ F7
 7                             
 0                             
                               
-0F                         C  
-C                          0  
- APP NAVIGATION            ²±°
+0F                       0    
+C                             
+ APP NAVIGATION               
 7                             
 0                             
                               
@@ -283,3 +283,51 @@ C                          0
 7                F7           
 0                             
                  Table        
+7                             
+0                             
+                              
+0F                            
+C                             
+ TITLE BAR                    
+7                             
+0                             
+                              
+7                             
+0                             
+Scroll the next line after    
+7                             
+0                             
+this paragraph all the way up 
+7                             
+0                             
+to get the title bar explained
+7                             
+0                             
+                              
+7                             
+0                             
+Â ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂ ÂÄ Â Â
+7   F   7     F     7         
+0                             
+³                     ³ ³  ³ ³
+7   F               7         
+0                             
+³       screen titleÄÄÙ ³  ³ ³
+7   F               7         
+0                             
+³    level indicatorÄÄÄÄÙ  ³ ³
+7    F              7         
+0                             
+³           cpu loadÄÄÄÄÄÄÄÙ ³
+7     F             7         
+0                             
+³      battery levelÄÄÄÄÄÄÄÄÄÙ
+7                             
+0                             
+³                             
+7            F7               
+0            40               
+ÀÄif this is <, you can leave 
+7                             
+0                             
+  this screen with +š        

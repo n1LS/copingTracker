@@ -135,6 +135,8 @@ struct Theme {
     FIXED(legend, LIGHT_GRAY)
 
     FIXED(inactive, DARK_GRAY)
+    // the load of core 0 (device), next to the one of core 1
+    FIXED(uiLoad, LIGHT_GRAY)
     FIXED(scrollbar, LIGHT_GRAY)
     FIXED(separator, DARK_GRAY)
 

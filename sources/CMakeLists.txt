@@ -56,6 +56,10 @@ endif()
 message(USE_LCD="${USE_LCD}")
 add_compile_definitions(${USE_LCD})
 add_compile_definitions(__PICO__)
+
+# The device shows the load of core 0 next to the one of core 1 (see Core0Load.h), the host does not (it has its
+# own CMake project). This has to be set before the adapter is added, its main loop measures it.
+add_compile_definitions(CORE0_LOAD_METER)
 # add_compile_definitions(LCD_ST7789)
 
 set(CMAKE_CXX_FLAGS

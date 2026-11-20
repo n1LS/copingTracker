@@ -16,9 +16,11 @@
 #include "Application/AppWindow.h"
 #include "Application/Application.h"
 #include "Application/Model/Config.h"
+#include "Application/Utils/Core0Load.h"
 #include "Foundation/Types/Types.h"
 #include "Services/Midi/MidiService.h"
 #include "System/FileSystem/FileSystem.h"
+#include "System/System/System.h"
 #include "mirrorUI.h"
 #include "picoTrackerGUIWindowImp.h"
 #include "usb_utils.h"
@@ -107,6 +109,10 @@ int picoTrackerEventManager::MainLoop() {
   while (!finished_) {
     loops++;
 
+#ifdef CORE0_LOAD_METER
+    Core0Load::Update(System::GetInstance()->Micros());
+#endif
+
     // process usb interrupts, should this be done somewhere else??
     handleUSBInterrupts();
 
@@ -133,6 +139,7 @@ int picoTrackerEventManager::MainLoop() {
       picoTrackerEvent event(EventType::count);
       queue->pop_into(event);
       events++;
+      Core0Load::MarkWork();
       redrawing_ = true;
       picoTrackerGUIWindowImp::ProcessEvent(event);
       redrawing_ = false;
@@ -203,6 +210,7 @@ void picoTrackerEventManager::ProcessInputEvent() {
   }
   if (gotEvent) {
     time_ = gTime_; // Get time here so delay is independant of processing speed
+    Core0Load::MarkWork();
     picoTrackerGUIWindowImp::ProcessButtonChange(sendMask, newMask);
     buttonMask_ = newMask;
   }
