@@ -669,21 +669,21 @@ void SampleEditorView::updateGraphMarkers() {
 
 void SampleEditorView::rebuildWaveform() {
   graphField_.InvalidateWaveform();
-  graphField_.BeginRmsBuild();
+  graphField_.BeginWaveformBuild();
 
   if (!headerValid_ || tempSampleSize_ == 0) {
-    graphField_.FinalizeRmsBuild();
+    graphField_.FinalizeWaveformBuild();
     return;
   }
   if (graphField_.ViewEnd() <= graphField_.ViewStart()) {
-    graphField_.FinalizeRmsBuild();
+    graphField_.FinalizeWaveformBuild();
     return;
   }
 
   if (viewData_->isShowingSampleEditorProjectPool) {
     if (!goProjectSamplesDir(viewData_)) {
       Trace::Error("SampleEditorView: Failed to chdir for waveform rebuild");
-      graphField_.FinalizeRmsBuild();
+      graphField_.FinalizeWaveformBuild();
       return;
     }
   }
@@ -691,7 +691,7 @@ void SampleEditorView::rebuildWaveform() {
   auto file = FileSystem::GetInstance()->Open(activeFilename().c_str(), "r");
   if (!file) {
     Trace::Error("SampleEditorView: Failed to open file for waveform rebuild");
-    graphField_.FinalizeRmsBuild();
+    graphField_.FinalizeWaveformBuild();
     return;
   }
 
@@ -699,7 +699,7 @@ void SampleEditorView::rebuildWaveform() {
       static_cast<uint32_t>(headerInfo_.numChannels) * static_cast<uint32_t>(headerInfo_.bytesPerSample);
   if (bytesPerFrame == 0) {
     Trace::Error("SampleEditorView: Invalid WAV header for waveform rebuild");
-    graphField_.FinalizeRmsBuild();
+    graphField_.FinalizeWaveformBuild();
     return;
   }
 
@@ -737,7 +737,7 @@ void SampleEditorView::rebuildWaveform() {
       }
       int16_t clampedSample = std::clamp<int16_t>(sampleValue, -32768, 32767);
       uint32_t sampleIndex = viewStart + currentFrame + i;
-      graphField_.AccumulateRmsSample(sampleIndex, clampedSample);
+      graphField_.AccumulateSample(sampleIndex, clampedSample);
     }
 
     currentFrame += framesRead;
@@ -748,7 +748,7 @@ void SampleEditorView::rebuildWaveform() {
     }
   }
 
-  graphField_.FinalizeRmsBuild();
+  graphField_.FinalizeWaveformBuild();
 }
 
 void SampleEditorView::AnimationUpdate() {

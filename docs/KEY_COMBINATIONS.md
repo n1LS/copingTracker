@@ -591,7 +591,7 @@ The groove view has no clone, new or selection mode and therefore no context leg
 | `EDIT + RIGHT` (graph focus) | chord | Select the **End** marker |
 | `ENTER + LEFT / RIGHT` (graph focus) | chord | Move the selected marker by `viewSpan` |
 | `ENTER + UP / DOWN` (graph focus) | chord | Move the selected marker by `viewSpan/16` |
-| `EDIT + UP` | chord | Zoom in (`adjustZoom(+1)`) |
+| `EDIT + UP` | chord | Zoom in (`adjustZoom(+1)`), down to one sample per pixel (the last zoom level, always reachable; a sample with fewer samples than pixels does not zoom, every sample is wider than a pixel already) |
 | `EDIT + DOWN` | chord | Zoom out (`adjustZoom(-1)`) |
 | `EDIT + ENTER` | chord | On "End" field: set end to sample size−1 |
 | `PLAY` (hold) | chord | Start sample playback / streaming; **release stops** |

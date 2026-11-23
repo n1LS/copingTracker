@@ -14,6 +14,7 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "BaseClasses/UIField.h"
 #include "BaseClasses/View.h"
+#include "WaveformBuilder.h"
 #include <cstdint>
 
 class GraphField : public UIField {
@@ -22,6 +23,7 @@ public:
   static constexpr int32_t BitmapHeight = 80;
 
   static constexpr int32_t CacheSize = BitmapWidth;
+  static_assert(CacheSize == WaveformBuilder::Columns, "one column of the waveform per pixel");
   static constexpr size_t MaxMarkers = SampleInstrument::MaxSlices + 3;
 
   GraphField(GUIPoint &position, int32_t width, int32_t height);
@@ -48,17 +50,16 @@ public:
   uint8_t MaxZoomLevel() const;
   uint32_t ViewStart() const;
   uint32_t ViewEnd() const;
-  void ClearWaveformCache();
   bool WaveformValid() const;
 
   bool UpdateZoomWindow(uint32_t centerSample);
   bool AdjustZoom(int32_t delta, uint32_t centerSample);
 
-  void BeginRmsBuild();
-  void AccumulateRmsSample(uint32_t sampleIndex, int16_t sampleValue);
-  void FinalizeRmsBuild();
+  // Builds the waveform of the view window: Begin, then every sample of the window in order, then Finalize
+  void BeginWaveformBuild();
+  void AccumulateSample(uint32_t sampleIndex, int16_t sampleValue);
+  void FinalizeWaveformBuild();
 
-  uint8_t *WaveformCache();
   void InvalidateWaveform();
   void SetWaveformValid(bool valid);
   void RequestFullRedraw();
@@ -75,6 +76,12 @@ public:
 
 private:
   void redrawWaveformColumn(View &view, int32_t x);
+  // the rows of a column of the waveform, false if there is nothing to draw
+  bool columnRows(int32_t column, int32_t &top, int32_t &bottom) const;
+  void drawWaveform(View &view);
+  // the number of samples the view window shows at a zoom level
+  uint32_t spanForLevel(uint8_t level) const;
+  int32_t columns() const;
   void drawMarkersAt(View &view, int32_t x);
   void resetMarkerCache();
   bool hasValidWindow() const;
@@ -85,7 +92,7 @@ private:
   Color borderNormal_;
   Color borderFocused_;
 
-  static uint8_t waveformCache_[CacheSize];
+  static WaveformBuilder builder_;
   bool waveformValid_;
   bool needsFullRedraw_;
 
@@ -104,9 +111,6 @@ private:
   Marker markers_[MaxMarkers];
   size_t markerCount_;
   bool markerVisibleCache_[MaxMarkers];
-
-  static int32_t rmsSumSquares_[CacheSize];
-  static uint16_t rmsCounts_[CacheSize];
 };
 
 #endif

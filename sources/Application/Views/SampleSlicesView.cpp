@@ -423,10 +423,10 @@ void SampleSlicesView::buildFieldLayout() {
 
 void SampleSlicesView::rebuildWaveform() {
   graphField_.InvalidateWaveform();
-  graphField_.BeginRmsBuild();
+  graphField_.BeginWaveformBuild();
 
   if (!instrument_ || !refreshSampleSize() || sampleSize_ == 0 || graphField_.ViewEnd() <= graphField_.ViewStart()) {
-    graphField_.FinalizeRmsBuild();
+    graphField_.FinalizeWaveformBuild();
     return;
   }
 
@@ -434,14 +434,14 @@ void SampleSlicesView::rebuildWaveform() {
   int32_t sampleIndex = instrument_->GetSampleIndex();
   SoundSource *source = pool->GetSource(sampleIndex);
   if (!source || sampleIndex < 0) {
-    graphField_.FinalizeRmsBuild();
+    graphField_.FinalizeWaveformBuild();
     return;
   }
 
   int32_t channels = source->GetChannelCount(0);
   int16_t *samples = static_cast<int16_t *>(source->GetSampleBuffer(0));
   if (!samples) {
-    graphField_.FinalizeRmsBuild();
+    graphField_.FinalizeWaveformBuild();
     return;
   }
 
@@ -449,10 +449,10 @@ void SampleSlicesView::rebuildWaveform() {
   uint32_t viewEnd = graphField_.ViewEnd();
   for (uint32_t i = viewStart; i < viewEnd; ++i) {
     int16_t value = samples[i * channels];
-    graphField_.AccumulateRmsSample(i, value);
+    graphField_.AccumulateSample(i, value);
   }
 
-  graphField_.FinalizeRmsBuild();
+  graphField_.FinalizeWaveformBuild();
 }
 
 void SampleSlicesView::clearSliceMarkers() {
