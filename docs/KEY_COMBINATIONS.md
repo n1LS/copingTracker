@@ -186,6 +186,7 @@ until NAV is released).
 |-------------|------|--------|
 | `ENTER` while `ALT` is held | chord | Clone the chain at the cursor into the next free chain (`clonePosition`), back to normal mode |
 | any other button | chord | Leaves clone mode and starts a **selection**; the button is then handled as in selection mode |
+| `ALT` released | release | Leaves clone mode and starts the **selection** at the cursor right away (cloning needs `ALT` held, so there is nothing to clone any more); the selection legend is shown |
 
 *New mode (`VM_NEW`)* — armed by `ENTER` alone:
 
@@ -245,6 +246,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 |-------------|------|--------|
 | `ENTER` while `ALT` is held | chord | Clone the phrase at the cursor into the next free phrase (`clonePosition`), back to normal mode |
 | any other button | chord | Leaves clone mode and starts a **selection**; the button is then handled as in selection mode |
+| `ALT` released | release | Leaves clone mode and starts the **selection** at the cursor right away (cloning needs `ALT` held, so there is nothing to clone any more); the selection legend is shown |
 
 *New mode (`VM_NEW`)* — armed by `ENTER` alone in the phrase column:
 
@@ -311,6 +313,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 |-------------|------|--------|
 | `ENTER` while `ALT` is held | chord | Clone the instrument (note / instrument columns) or the table (command value columns holding a `TABLE` command) under the cursor and point the step to the copy, back to normal mode. A table number of `0x20` or more clones table `0x1F`, like the player plays it. If no table is free, a warning toast "No more tables available." is shown. Does nothing in the volume and command columns |
 | any other button | chord | Leaves clone mode and starts a **selection**; the button is then handled as in selection mode |
+| `ALT` released | release | Leaves clone mode and starts the **selection** at the cursor right away (cloning needs `ALT` held, so there is nothing to clone any more); the selection legend is shown |
 
 *New mode (`VM_NEW`)* — armed by `ENTER` alone on the instrument and command value columns:
 

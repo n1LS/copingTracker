@@ -273,6 +273,8 @@ void TableView::copySelection() {
   viewMode_ = VM_NORMAL;
   row_ = saveRow_;
   col_ = saveCol_;
+  // the editor of the parameter is at the cursor again
+  updateCursor(0, 0);
 
   isDirty_ = true;
 }

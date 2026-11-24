@@ -355,6 +355,8 @@ void ChainView::copySelection() {
 
   viewData_->chainRow_ = saveRow_;
   viewData_->chainCol_ = saveCol_;
+  // the focus is the cell of the cursor again
+  updateFocusRect();
 
   isDirty_ = true;
 }
@@ -397,6 +399,8 @@ void ChainView::cutSelection() {
   viewMode_ = VM_NORMAL;
   viewData_->chainRow_ = saveRow_;
   viewData_->chainCol_ = saveCol_;
+  // the focus is the cell of the cursor again
+  updateFocusRect();
   isDirty_ = true;
 }
 
@@ -453,8 +457,27 @@ void ChainView::switchSoloMode() {
   isDirty_ = true;
 }
 
+void ChainView::beginSelection() {
+  if (clipboard_.active_) {
+    return;
+  }
+  clipboard_.active_ = true;
+  clipboard_.col_ = viewData_->chainCol_;
+  clipboard_.row_ = viewData_->chainRow_;
+  saveCol_ = viewData_->chainCol_;
+  saveRow_ = viewData_->chainRow_;
+}
+
 void ChainView::ButtonUp(uint16_t button, uint16_t mask) {
   // mask is what remains held after the release
+
+  // Cloning needs ALT (ENTER while ALT is held), so there is nothing to clone once ALT is let go: the selection
+  // starts here instead of with the next key press
+  if (viewMode_ == VM_CLONE && button == BM_ALT) {
+    viewMode_ = VM_SELECTION;
+    beginSelection();
+    isDirty_ = true;
+  }
   if (viewMode_ == VM_MUTEON) {
     if (mask & BM_NAV) {
       toggleMute();
@@ -519,14 +542,7 @@ void ChainView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // Process selection related keys
 
   if (viewMode_ == VM_SELECTION) {
-
-    if (clipboard_.active_ == false) {
-      clipboard_.active_ = true;
-      clipboard_.col_ = viewData_->chainCol_;
-      clipboard_.row_ = viewData_->chainRow_;
-      saveCol_ = viewData_->chainCol_;
-      saveRow_ = viewData_->chainRow_;
-    }
+    beginSelection();
     processSelectionButtonMask(newButton, mask);
   } else {
     // Switch back to normal mode

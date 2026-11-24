@@ -69,6 +69,8 @@ protected:
   void pasteLast();
 
   void extendSelection();
+  // starts a selection at the cursor, if there is none
+  void beginSelection();
 
   GUIRect getSelectionRect();
   void fillClipboardData();

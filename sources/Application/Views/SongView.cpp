@@ -593,8 +593,29 @@ void SongView::jumpToNextSection(int direction) {
         application window
 ******************************************************************************/
 
+void SongView::beginSelection() {
+  if (clipboard_.active_) {
+    return;
+  }
+  clipboard_.active_ = true;
+  clipboard_.x_ = viewData_->songX_;
+  clipboard_.y_ = viewData_->songY_;
+  clipboard_.offset_ = viewData_->songOffset_;
+  saveX_ = clipboard_.x_;
+  saveY_ = clipboard_.y_;
+  saveOffset_ = clipboard_.offset_;
+}
+
 void SongView::ButtonUp(uint16_t button, uint16_t mask) {
   // mask is what remains held after the release
+
+  // Cloning needs ALT (ENTER while ALT is held), so there is nothing to clone once ALT is let go: the selection
+  // starts here instead of with the next key press
+  if (viewMode_ == VM_CLONE && button == BM_ALT) {
+    viewMode_ = VM_SELECTION;
+    beginSelection();
+    isDirty_ = true;
+  }
   if (viewMode_ == VM_MUTEON) {
     if (mask & BM_NAV) {
       toggleMute();
@@ -655,15 +676,7 @@ void SongView::ButtonDown(uint16_t newButton, uint16_t mask) {
   // Process selection related keys
 
   if (viewMode_ == VM_SELECTION) {
-    if (clipboard_.active_ == false) {
-      clipboard_.active_ = true;
-      clipboard_.x_ = viewData_->songX_;
-      clipboard_.y_ = viewData_->songY_;
-      clipboard_.offset_ = viewData_->songOffset_;
-      saveX_ = clipboard_.x_;
-      saveY_ = clipboard_.y_;
-      saveOffset_ = clipboard_.offset_;
-    }
+    beginSelection();
     processSelectionButtonMask(newButton, mask);
   } else {
 

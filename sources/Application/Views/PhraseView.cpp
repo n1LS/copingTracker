@@ -390,7 +390,8 @@ void PhraseView::copySelection() {
   viewMode_ = VM_NORMAL;
   row_ = saveRow_;
   col_ = saveCol_;
-  viewData_->phraseCurPos_ = row_;
+  // the focus rect and the editor of the parameter follow the cursor again (and phraseCurPos_)
+  updateCursor(0, 0);
 
   isDirty_ = true;
 }
@@ -498,8 +499,28 @@ void PhraseView::onPhraseSwitched() {
   updateCursor(0, 0);
 }
 
+void PhraseView::beginSelection() {
+  // Initialize clipboard if starting a new selection
+  if (clipboard_.active_) {
+    return;
+  }
+  clipboard_.active_ = true;
+  clipboard_.col_ = col_;
+  clipboard_.row_ = row_;
+  saveCol_ = col_;
+  saveRow_ = row_;
+}
+
 void PhraseView::ButtonUp(uint16_t button, uint16_t mask) {
   // mask is what remains held after the release
+
+  // Cloning needs ALT (ENTER while ALT is held), so there is nothing to clone once ALT is let go: the selection
+  // starts here instead of with the next key press
+  if (viewMode_ == VM_CLONE && button == BM_ALT) {
+    viewMode_ = VM_SELECTION;
+    beginSelection();
+    isDirty_ = true;
+  }
 
   // Stop audition when ENTER is released
   if (!(mask & BM_ENTER)) {
@@ -639,14 +660,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
 
   // Route to selection or normal button handling
   if (viewMode_ == VM_SELECTION) {
-    // Initialize clipboard if starting a new selection
-    if (!clipboard_.active_) {
-      clipboard_.active_ = true;
-      clipboard_.col_ = col_;
-      clipboard_.row_ = row_;
-      saveCol_ = col_;
-      saveRow_ = row_;
-    }
+    beginSelection();
     processSelectionButtonMask(newButton, mask);
   } else {
     viewMode_ = VM_NORMAL;

@@ -41,6 +41,8 @@ protected:
   void clonePosition();
   void pasteLastPhrase();
   void extendSelection();
+  // starts a selection at the cursor, if there is none
+  void beginSelection();
   // ENTER + EDIT + UP / DOWN: moves the content of the selection one row, the row in the way jumps to the row
   // that was just emptied at the other end
   void nudgeSelection(int delta);

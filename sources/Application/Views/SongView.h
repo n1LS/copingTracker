@@ -39,6 +39,8 @@ protected:
   void enterChainUnderCursor();
 
   void extendSelection();
+  // starts a selection at the cursor, if there is none
+  void beginSelection();
   // ENTER + EDIT + arrows: moves the content of the selection one chain / row in the direction, the row or column
   // in the way jumps to the other end of the selection
   void nudgeSelection(int dx, int dy);
