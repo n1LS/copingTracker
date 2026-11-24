@@ -15,9 +15,13 @@
 #include "Application/Utils/DrawUtils.h"
 #include "Application/Views/ModalDialogs/DeleteProjectConfirmModal.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
+#include "Application/Views/ModalDialogs/TextInputModal.h"
+#include "Application/Views/ToastView.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "System/FileSystem/FileSystem.h"
 #include "System/System/System.h"
+#include <cctype>
+#include <cstring>
 #include <nanoprintf.h>
 #include <new>
 
@@ -35,7 +39,7 @@ static const FileListConfig kSelectProjectConfig{
     .allowDirectoryNavigation = true, // Projects are folders
     .showDirectories = true,
     .directoriesAreSelectable = true, // Projects are directories but should be selected, not navigated into
-    .actionTabs = {{"Load", 0}, {"Delete", 0}},
+    .actionTabs = {{"Load", 0}, {"Rename", 0}, {"Delete", 0}},
     .allowTabSelection = true};
 
 // ============================================================================
@@ -72,6 +76,13 @@ static void LoadProjectCallback(View &v, ModalView &dialog) {
     Trace::Log("SELECTPROJECTVIEW", "Saved '%s' to .current, rebooting", name);
     System *sys = System::GetInstance();
     sys->SystemReboot(); // watchdog reset; does not return
+  }
+}
+
+static void RenameProjectCallback(View &v, ModalView &dialog) {
+  if (dialog.GetReturnCode() == TextInputModal::TIM_ACCEPT) {
+    SelectProjectView &view = (SelectProjectView &)v;
+    view.RenameProject(static_cast<TextInputModal &>(dialog).GetValue().c_str());
   }
 }
 
@@ -154,7 +165,10 @@ void SelectProjectView::OnTabAction(int tabIndex, const char *filename) {
     case 0: // Load tab
       ConfirmStopPlayback(Token::ActionImport);
       break;
-    case 1: // Delete tab
+    case 1: // Rename tab
+      RenameSelectedProject();
+      break;
+    case 2: // Delete tab
       ConfirmStopPlayback(Token::ActionDelete);
       break;
   }
@@ -198,6 +212,107 @@ void SelectProjectView::ConfirmedStop(Token source) {
       DeleteSelectedProject();
       break;
   }
+}
+
+void SelectProjectView::RenameSelectedProject() {
+  if (GetCurrentIndex() >= GetItemCount()) {
+    return;
+  }
+
+  char selected[MAX_PROJECT_NAME_LENGTH + 1];
+  getHighlightedProjectName(selected);
+  if (strlen(selected) == 0) {
+    return;
+  }
+
+  // the same dialog as the project name in the project view, with the name of the project in it
+  TextInputModal *modal = TextInputModal::Create(*this, "Rename project", selected, MAX_PROJECT_NAME_LENGTH);
+  DoModal(modal, ModalViewCallback::create<&RenameProjectCallback>());
+}
+
+// FAT does not tell "Song" and "song" apart
+static bool sameNameIgnoringCase(const char *a, const char *b) {
+  while (*a && *b) {
+    if (tolower(static_cast<unsigned char>(*a)) != tolower(static_cast<unsigned char>(*b))) {
+      return false;
+    }
+    ++a;
+    ++b;
+  }
+  return *a == *b;
+}
+
+// A name that is a directory on the card: not empty, not . or .., none of the characters FAT does not allow
+static bool isProjectName(const char *name) {
+  if (name[0] == '\0' || strcmp(name, ".") == 0 || strcmp(name, "..") == 0) {
+    return false;
+  }
+  return strpbrk(name, "\\/:*?\"<>|") == nullptr;
+}
+
+void SelectProjectView::RenameProject(const char *requestedName) {
+  char oldName[MAX_PROJECT_NAME_LENGTH + 1];
+  getHighlightedProjectName(oldName);
+
+  // without the spaces around it
+  char newName[MAX_PROJECT_NAME_LENGTH + 1];
+  while (*requestedName == ' ') {
+    ++requestedName;
+  }
+  strncpy(newName, requestedName, MAX_PROJECT_NAME_LENGTH);
+  newName[MAX_PROJECT_NAME_LENGTH] = '\0';
+  for (size_t length = strlen(newName); length > 0 && newName[length - 1] == ' '; --length) {
+    newName[length - 1] = '\0';
+  }
+
+  auto fs = FileSystem::GetInstance();
+
+  const char *problem = nullptr;
+  if (strlen(oldName) == 0) {
+    problem = "No project selected.";
+  } else if (SelectionIsCurrentProject()) {
+    // the project that is loaded saves to its directory, and the boot state names it
+    problem = "Cannot rename the active project.";
+  } else if (!isProjectName(newName)) {
+    problem = "That is not a project name.";
+  } else if (strcmp(newName, oldName) == 0) {
+    problem = "The name did not change.";
+  } else if (!sameNameIgnoringCase(newName, oldName) && PersistencyService::GetInstance()->Exists(newName)) {
+    problem = "A project with that name exists.";
+  } else {
+    etl::string<128> from(PROJECTS_DIR);
+    from.append("/");
+    from.append(oldName);
+    etl::string<128> to(PROJECTS_DIR);
+    to.append("/");
+    to.append(newName);
+    if (!fs->MoveFile(from.c_str(), to.c_str())) {
+      problem = "The project could not be renamed.";
+    }
+  }
+
+  // The list is built again whether or not it worked, MoveFile may have left us somewhere else, and the
+  // renamed project is at another place of the list now.
+  fs->chdir(PROJECTS_DIR);
+  RefreshFileList();
+
+  if (problem) {
+    ToastView::GetInstance()->Show(problem, &ttError, ToastDuration::regular);
+    return;
+  }
+
+  // select the project with its new name
+  for (size_t i = 0; i < GetItemCount(); ++i) {
+    char name[MAX_PROJECT_NAME_LENGTH + 1];
+    GetFileName(static_cast<int>(i), name, sizeof(name));
+    if (strcmp(name, newName) == 0) {
+      SetCurrentIndex(i);
+      break;
+    }
+  }
+  isDirty_ = true;
+
+  ToastView::GetInstance()->Show("Project renamed.", &ttSuccess, ToastDuration::regular);
 }
 
 void SelectProjectView::DeleteSelectedProject() {

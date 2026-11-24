@@ -16,8 +16,8 @@
 #include "ViewData.h"
 
 /**
- * This view allows users to browse, load, and delete projects.
- * Features two action tabs: Load and Delete.
+ * This view allows users to browse, load, rename and delete projects.
+ * Features three action tabs: Load, Rename and Delete.
  */
 class SelectProjectView : public FileListView {
 public:
@@ -33,6 +33,9 @@ public:
 
   // Public methods
   void getHighlightedProjectName(char *name);
+  // Renames the selected project to newName, if it can be: the directory of the project is moved. Shows a toast
+  // that tells how it went, rescans the projects and selects the renamed one.
+  void RenameProject(const char *newName);
 
 protected:
   virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,
@@ -41,6 +44,8 @@ protected:
 private:
   // Internal helpers
   void DeleteSelectedProject();
+  // asks for the new name of the selected project, RenameProject does it
+  void RenameSelectedProject();
   void LoadSelectedProject();
   bool SelectionIsCurrentProject();
 };

@@ -126,6 +126,14 @@ Master, Modulation, Project, Theme, Mixer, SampleEditor, SampleSlices, etc.
 
 > Subclass `SampleImportView` adds more combos — see §14.
 
+`SelectProjectView` has three tabs at the bottom: **Load**, **Rename** and **Delete** (`LEFT / RIGHT` select one, `ENTER` activates it).
+**Rename** opens the on screen keyboard (`TextInputModal`, as the project name field of the project view) with the name of the
+selected project in it. With Ok the project (its directory in the projects folder) is renamed if it can be: the name has to
+be a name (not empty, none of the characters `\ / : * ? " < > |`, spaces around it are dropped), it has to be a different one,
+no project has it already (upper and lower case are the same on the card, only the case of a name can change) and it is not the
+project that is loaded (that one is saved to its directory). A toast tells how it went (success or the reason). The projects
+are scanned again and the renamed one is selected.
+
 ### 2.4 Value fields (`UIIntField`, `UIIntVarField`, `UIHexVarField`, ...)
 Generic value editing reached through `FieldView`:
 `ENTER+arrow` = change value, `ENTER+EDIT` = reset to default (only when modified).
