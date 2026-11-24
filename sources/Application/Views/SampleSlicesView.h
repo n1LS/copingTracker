@@ -66,6 +66,10 @@ private:
   void handleSliceSelectionChange();
   uint32_t sliceEndForIndex(size_t index, uint32_t start) const;
   uint32_t selectedSliceStart();
+  // EDIT + ENTER + LEFT / RIGHT: moves the selected slice point to the next zero crossing in the direction. The
+  // slice points it passes pile up on it, to the right as well as to the left. Without another zero crossing it
+  // moves to the end of the sample on that side.
+  void moveSliceToZeroCrossing(int direction);
   bool hasInstrumentSample() const;
 
   void clearSliceMarkers();

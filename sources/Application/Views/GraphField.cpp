@@ -18,7 +18,7 @@
 WaveformBuilder GraphField::builder_;
 
 GraphField::GraphField(GUIPoint &position, int32_t width, int32_t height)
-    : UIField(position), width_(width), height_(height), showBaseline_(false), borderNormal_(Theme::View::bg),
+    : UIField(position), width_(width), height_(height), showBaseline_(true), borderNormal_(Theme::View::bg),
       borderFocused_(Theme::View::fg), waveformValid_(false), needsFullRedraw_(true), sampleSize_(0), zoomLevel_(0),
       maxZoomLevel_(0), viewStart_(0), viewEnd_(0), markerCount_(0) {
   resetMarkerCache();
@@ -32,7 +32,7 @@ Color GraphField::colorForIndex(int i) {
 }
 
 void GraphField::Reset() {
-  showBaseline_ = false;
+  showBaseline_ = true;
   borderNormal_ = Theme::View::bg;
   borderFocused_ = Theme::View::fg;
   waveformValid_ = false;

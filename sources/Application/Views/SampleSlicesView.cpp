@@ -17,6 +17,7 @@
 #include "Application/Model/Project.h"
 #include "Application/Model/Song.h"
 #include "Application/Player/Player.h"
+#include "Application/Utils/ZeroCrossing.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "System/Console/Trace.h"
@@ -39,7 +40,7 @@ SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
       previewDurationMs_(0.0f), previewPlayheadSample_(0), previewCursorVisible_(false) {
   sliceIndexVar_.AddObserver(*this);
   sliceStartVar_.AddObserver(*this);
-  graphField_.SetShowBaseline(false);
+  graphField_.SetShowBaseline(true);
 }
 
 SampleSlicesView::~SampleSlicesView() {
@@ -65,7 +66,7 @@ void SampleSlicesView::Reset() {
   sliceStartVar_.SetInt(0, false);
   sliceCountVar_.SetInt(4, false);
   graphField_.Reset();
-  graphField_.SetShowBaseline(false);
+  graphField_.SetShowBaseline(true);
   graphField_.SetMarkerCount(1 + SampleInstrument::MaxSlices);
 }
 
@@ -86,7 +87,7 @@ void SampleSlicesView::OnFocus() {
   previewCursorVisible_ = false;
   clearWaveformRegion();
   graphField_.Reset();
-  graphField_.SetShowBaseline(false);
+  graphField_.SetShowBaseline(true);
 
   if (instrument_) {
     SamplePool *pool = SamplePool::GetInstance();
@@ -135,6 +136,12 @@ void SampleSlicesView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (newButton == BM_NAV || (mask & BM_NAV)) {
     // For other NAV combinations, let parent handle it
     FieldView::ButtonDown(newButton, mask);
+    return;
+  }
+
+  // EDIT + ENTER + LEFT / RIGHT: the slice point to the next zero crossing
+  if ((newButton == BM_LEFT || newButton == BM_RIGHT) && mask == (BM_EDIT | BM_ENTER)) {
+    moveSliceToZeroCrossing(newButton == BM_RIGHT ? +1 : -1);
     return;
   }
 
@@ -299,7 +306,9 @@ void SampleSlicesView::drawHelpLegend() {
   DrawString(16, SCREEN_HEIGHT - 10, "Preview        " char_button_play_s);
   DrawString(16, SCREEN_HEIGHT - 9, "Zoom       " char_button_edit_s "+" char_button_up_s "/" char_button_down_s);
   DrawString(16, SCREEN_HEIGHT - 8, "Move slice " char_button_edit_s "+" char_button_left_s "/" char_button_right_s);
-  DrawString(16, SCREEN_HEIGHT - 7, "Exit         " char_button_nav_s "+" char_button_left_s);
+  DrawString(16, SCREEN_HEIGHT - 7,
+             "To zero  " char_button_enter_s "+" char_button_edit_s "+" char_button_left_s "/" char_button_right_s);
+  DrawString(16, SCREEN_HEIGHT - 6, "Exit         " char_button_nav_s "+" char_button_left_s);
 }
 
 void SampleSlicesView::AnimationUpdate() {
@@ -754,6 +763,49 @@ void SampleSlicesView::handleSliceSelectionChange() {
   }
 
   isDirty_ = true;
+}
+
+void SampleSlicesView::moveSliceToZeroCrossing(int direction) {
+  if (!hasInstrumentSample()) {
+    return;
+  }
+
+  SoundSource *source = SamplePool::GetInstance()->GetSource(instrument_->GetSampleIndex());
+  if (!source) {
+    return;
+  }
+  const int16_t *samples = static_cast<const int16_t *>(source->GetSampleBuffer(0));
+  if (!samples) {
+    return;
+  }
+  const uint32_t channels = static_cast<uint32_t>(std::max<int32_t>(1, source->GetChannelCount(0)));
+
+  const uint32_t current = selectedSliceStart();
+  uint32_t target = 0;
+  if (!ZeroCrossing::Find(samples, sampleSize_, channels, current, direction, target)) {
+    // no other zero crossing: the end of the sample on that side
+    target = (direction > 0) ? sampleSize_ - 1 : 0;
+  }
+  if (target == current) {
+    return;
+  }
+
+  // Moving to the right the instrument pushes the slice points behind it along (SetSlicePoint). To the left the
+  // slice points before it that it passes pile up on the new position as well. They are lowered from the first one
+  // that is passed, so every one stays behind the one before it.
+  if (direction < 0) {
+    const size_t index = static_cast<size_t>(sliceIndexVar_.GetInt());
+    size_t first = index;
+    while (first > 0 && instrument_->GetSlicePoint(first - 1) > target) {
+      first--;
+    }
+    for (size_t i = first; i < index; ++i) {
+      instrument_->SetSlicePoint(i, target);
+    }
+  }
+
+  // as every other move of the slice point: the variable applies it (applySliceStart)
+  sliceStartVar_.SetInt(static_cast<int32_t>(target));
 }
 
 uint32_t SampleSlicesView::selectedSliceStart() {

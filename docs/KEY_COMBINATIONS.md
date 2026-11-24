@@ -606,6 +606,7 @@ The groove view has no clone, new or selection mode and therefore no context leg
 | `EDIT + DOWN` | chord | Zoom out (`adjustZoom(-1)`) |
 | `EDIT + LEFT` | chord | Move slice start −`viewSpan` |
 | `EDIT + RIGHT` | chord | Move slice start +`viewSpan` |
+| `EDIT + ENTER + LEFT / RIGHT` | chord | Move the selected slice point to the next **zero crossing** to the left / right (the left channel; a zero crossing is between two neighbouring samples on different sides of zero, zero counts as positive, the one closer to zero is the position). The slice points it passes pile up on its new position, to the right as well as to the left. Without another zero crossing it moves to the start / the last sample. Pressing `ENTER + EDIT` also acts on the field that has the focus (it resets it), so use it with the graph focused |
 | `PLAY` (hold) | chord | Preview slice / sample; **release stops** |
 | bare arrows | chord | Field navigation (§2.1) |
 
