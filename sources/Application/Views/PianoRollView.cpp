@@ -563,10 +563,10 @@ void PianoRollView::placeNote() {
   const bool hadNote = step.note < NOTE_OFF;
   step.note = static_cast<uint8_t>(cursorNote_);
   if (!hadNote) {
-    step.instrument = static_cast<uint8_t>(viewData_->phraseLastInstrument_);
+    step.setInstrument(static_cast<uint8_t>(viewData_->phraseLastInstrument_));
   }
   viewData_->phraseLastNote_ = step.note;
-  viewData_->phraseLastInstrument_ = step.instrument;
+  viewData_->phraseLastInstrument_ = step.getInstrument();
 
   isDirty_ = true;
 
@@ -578,8 +578,8 @@ void PianoRollView::placeNote() {
 // what a note owns goes with it: its instrument and volume (the commands stay in their step)
 static void clearNote(PhraseStep &step) {
   step.note = NO_NOTE;
-  step.instrument = NO_INSTRUMENT;
-  step.volume = NO_VOLUME;
+  step.setInstrument(NO_INSTRUMENT);
+  step.setVolume(NO_VOLUME);
 }
 
 void PianoRollView::removeNote() {
@@ -657,8 +657,8 @@ void PianoRollView::moveNoteInTime(int delta) {
 
   // what the note owns moves, as ENTER + EDIT removes it: the commands stay in their step
   steps[to].note = steps[from].note;
-  steps[to].instrument = steps[from].instrument;
-  steps[to].volume = steps[from].volume;
+  steps[to].setInstrument(steps[from].getInstrument());
+  steps[to].setVolume(steps[from].getVolume());
 
   clearNote(steps[from]);
 
@@ -958,12 +958,13 @@ void PianoRollView::drawStepInfo() {
   instrument->noteDisplay(note, noteBuffer);
   char buffer[6];
 
-  const int volumeSource = valueSource(steps, step, sticky, [](const PhraseStep &s) { return s.volume != NO_VOLUME; });
+  const int volumeSource =
+      valueSource(steps, step, sticky, [](const PhraseStep &s) { return s.getVolume() != NO_VOLUME; });
   const int command1Source = valueSource(steps, step, sticky, [](const PhraseStep &s) {
-    return Token::enum_type(s.cmd1) != Token::InstrumentCommandNone;
+    return Token::enum_type(s.getCmd1()) != Token::InstrumentCommandNone;
   });
   const int command2Source = valueSource(steps, step, sticky, [](const PhraseStep &s) {
-    return Token::enum_type(s.cmd2) != Token::InstrumentCommandNone;
+    return Token::enum_type(s.getCmd2()) != Token::InstrumentCommandNone;
   });
 
   // the color of a value: inactive if it was not set in this step
@@ -1001,7 +1002,7 @@ void PianoRollView::drawStepInfo() {
 
   // A step without an instrument plays the last one set before it (the shadow instrument, as the phrase view
   // and the preview have it), it is always drawn inactive, in the fields as well
-  const bool shadowInstrument = data.instrument == NO_INSTRUMENT && instrumentId != NO_INSTRUMENT;
+  const bool shadowInstrument = data.getInstrument() == NO_INSTRUMENT && instrumentId != NO_INSTRUMENT;
   setFieldColors(StepField::Instrument, shadowInstrument ? Theme::View::inactive : Theme::Phrase::instrument(true),
                  shadowInstrument);
   if (instrumentId == NO_INSTRUMENT) {
@@ -1012,15 +1013,15 @@ void PianoRollView::drawStepInfo() {
   }
 
   setFieldColors(StepField::Volume, colorOf(volumeSource, Theme::Phrase::volume(true)));
-  DrawChar(x, y + 5, volumeData.volume == NO_VOLUME ? '-' : hexChars[volumeData.volume & 0xF]);
+  DrawChar(x, y + 5, volumeData.getVolume() == NO_VOLUME ? '-' : hexChars[volumeData.getVolume() & 0xF]);
 
   // a parameter stays with its command
-  Token command1 = Token::enum_type(command1Data.cmd1);
+  Token command1 = Token::enum_type(command1Data.getCmd1());
   setFieldColors(StepField::Command1, colorOf(command1Source, Theme::Phrase::command1(true)));
   DrawString(x, y + 7, command1.c_str());
   drawParam(StepField::Param1, y + 7, command1Data.param1, colorOf(command1Source, Theme::Phrase::command1(true)));
 
-  Token command2 = Token::enum_type(command2Data.cmd2);
+  Token command2 = Token::enum_type(command2Data.getCmd2());
   setFieldColors(StepField::Command2, colorOf(command2Source, Theme::Phrase::command2(true)));
   DrawString(x, y + 9, command2.c_str());
   drawParam(StepField::Param2, y + 9, command2Data.param2, colorOf(command2Source, Theme::Phrase::command2(true)));

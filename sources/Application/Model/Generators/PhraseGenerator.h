@@ -65,7 +65,7 @@ public:
         PhraseStep &s = project->song_.phrase_.steps_[phrase][step];
         const uint8_t note = out.note[i][step];
         s.note = note == BasslineGenerator::kNoNote ? NO_NOTE : note;
-        s.instrument = note == BasslineGenerator::kNoNote ? NO_INSTRUMENT : settings.instrument;
+        s.setInstrument(note == BasslineGenerator::kNoNote ? NO_INSTRUMENT : settings.instrument);
       }
     }
   }
@@ -108,13 +108,13 @@ public:
         const StepMask mask = static_cast<StepMask>(1u << step);
 
         project->song_.phrase_.steps_[phrase][step].note = NO_NOTE;
-        project->song_.phrase_.steps_[phrase][step].instrument = NO_INSTRUMENT;
+        project->song_.phrase_.steps_[phrase][step].setInstrument(NO_INSTRUMENT);
 
         int voices = 0;
 
         for (uint8_t sound = 0; sound < kSoundCount; ++sound) {
           if (pattern.sound[sound] & mask) {
-            project->song_.phrase_.steps_[phrase][step].instrument = settings.instrument;
+            project->song_.phrase_.steps_[phrase][step].setInstrument(settings.instrument);
 
             if (settings.target == Target::LSDJKit) {
               // A note holds two samples, note / 15 and note % 15, where 0 is

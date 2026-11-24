@@ -332,16 +332,15 @@ void Project::Purge() {
     }
   }
 
-  static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
       if (!song_.phrase_.IsUsed(i)) {
         PhraseStep *step = &(song_.phrase_.steps_[i][j]);
         step->note = DATA_UNUSED_VALUE;
-        step->instrument = DATA_UNUSED_VALUE;
-        step->cmd1 = kNone;
+        step->setInstrument(NO_INSTRUMENT);
+        step->setCmd1(Token::InstrumentCommandNone);
         step->param1 = 0;
-        step->cmd2 = kNone;
+        step->setCmd2(Token::InstrumentCommandNone);
         step->param2 = 0;
       }
     };
@@ -405,7 +404,7 @@ int Project::PurgeInstruments() {
 
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
-      uint8_t instr = song_.phrase_.steps_[i][j].instrument;
+      uint8_t instr = song_.phrase_.steps_[i][j].getInstrument();
       if (instr != DATA_UNUSED_VALUE) {
         NAssert(instr < MAX_INSTRUMENT_COUNT);
         used[instr] = true;

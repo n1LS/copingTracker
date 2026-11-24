@@ -262,6 +262,8 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 
 ### 3.3 `PhraseView` (`Views/PhraseView.cpp`)
 
+The **volume** is `1`–`F` or none (there is no volume `0`: `LEFT` below `1` gives none, `RIGHT` on none gives `1`, `UP` is `F`, `DOWN` is none), the **instrument** is `00`–`1F` or none and a **command** is one of the 32 commands (their token values are `0`–`31`, `0`–`63` are reserved for them). Every other token is `64` or higher. Save files made before this change do not load.
+
 Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 
 *Normal mode*

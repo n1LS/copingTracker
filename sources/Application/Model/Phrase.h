@@ -13,20 +13,71 @@
 #define _PHRASE_H_
 
 #include "Foundation/Types/Types.h"
+#include <bitset>
 
 #define PHRASE_COUNT 0x80
 #define NO_MORE_PHRASE (PHRASE_COUNT + 1)
 #define STEPS_PER_PHRASE 16
 
+// the instruments there are, and what a step has for no instrument and no volume (the values the code outside of
+// the step uses, the volume is stored as it is, the instrument in fewer bits, see PhraseStep)
+#define MAX_INSTRUMENT_COUNT 32
+#define NO_INSTRUMENT 0xFF
+#define NO_VOLUME 0
+
+// One step of a phrase in 8 bytes: the two command parameters and 32 bits for the rest. The fields that are
+// smaller than a byte are read and written through the functions, which convert from and to the values the rest
+// of the code uses:
+//  - the volume is 1..15 (0xF is the loudest) and 0 is no volume (NO_VOLUME), there is no volume 0 to play
+//  - the instrument is 0..MAX_INSTRUMENT_COUNT - 1, it is stored plus one, 0 in the step is no instrument
+//    (NO_INSTRUMENT)
+//  - a command is the value of its Token (they are all below 64), 0 is no command (InstrumentCommandNone)
+// A step that is all 0 has no volume, no instrument and no commands, only its note is 0 (not NO_NOTE).
 struct PhraseStep {
   uint16_t param1;
   uint16_t param2;
-  uint8_t note;
-  uint8_t volume;
-  uint8_t instrument;
-  uint8_t cmd1;
-  uint8_t cmd2;
+  uint32_t note : 8;
+  uint32_t volume_ : 4;
+  uint32_t instrument_ : 6;
+  uint32_t cmd1_ : 7;
+  uint32_t cmd2_ : 7;
+
+  // NO_VOLUME (0) or 1..15
+  uint8_t getVolume() const {
+    return static_cast<uint8_t>(volume_);
+  }
+  // NO_VOLUME (0) is no volume, more than 15 is the loudest
+  void setVolume(uint8_t volume) {
+    volume_ = volume > 15 ? 15 : volume;
+  }
+
+  // NO_INSTRUMENT or 0..MAX_INSTRUMENT_COUNT - 1
+  uint8_t getInstrument() const {
+    return (instrument_ == 0 || instrument_ > MAX_INSTRUMENT_COUNT) ? NO_INSTRUMENT
+                                                                    : static_cast<uint8_t>(instrument_ - 1);
+  }
+  // anything that is not an instrument is no instrument
+  void setInstrument(uint8_t instrument) {
+    instrument_ = instrument >= MAX_INSTRUMENT_COUNT ? 0 : instrument + 1;
+  }
+
+  // the Token value of the command
+  uint8_t getCmd1() const {
+    return static_cast<uint8_t>(cmd1_);
+  }
+  uint8_t getCmd2() const {
+    return static_cast<uint8_t>(cmd2_);
+  }
+  void setCmd1(uint8_t command) {
+    cmd1_ = command;
+  }
+  void setCmd2(uint8_t command) {
+    cmd2_ = command;
+  }
 };
+static_assert(sizeof(PhraseStep) == 8, "a PhraseStep is 8 bytes");
+static_assert(MAX_INSTRUMENT_COUNT < 64, "the instrument has 6 bits and is stored plus one");
+static_assert(NO_VOLUME == 0, "the volume is stored as it is, 0 is none");
 
 class Phrase {
 public:
@@ -44,22 +95,22 @@ public:
   void ClearAllocation();
 
   inline Token getCmd1(int phrase, int step) const {
-    return Token::enum_type(steps_[phrase][step].cmd1);
+    return Token::enum_type(steps_[phrase][step].getCmd1());
   }
   inline Token getCmd2(int phrase, int step) const {
-    return Token::enum_type(steps_[phrase][step].cmd2);
+    return Token::enum_type(steps_[phrase][step].getCmd2());
   }
   inline void setCmd1(int phrase, int step, Token f) {
-    steps_[phrase][step].cmd1 = f.raw();
+    steps_[phrase][step].setCmd1(static_cast<uint8_t>(f.raw()));
   }
   inline void setCmd2(int phrase, int step, Token f) {
-    steps_[phrase][step].cmd2 = f.raw();
+    steps_[phrase][step].setCmd2(static_cast<uint8_t>(f.raw()));
   }
 
   PhraseStep steps_[PHRASE_COUNT][STEPS_PER_PHRASE];
 
 private:
-  bool isUsed_[PHRASE_COUNT];
+  std::bitset<PHRASE_COUNT> isUsed_;
 };
 
 #endif

@@ -663,7 +663,7 @@ void Player::ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT]) {
         if (gs->TriggerChannel(i) || (delayExpired && delayExpired[i])) {
           int pos = viewData_->phrasePlayPos_[i];
           const PhraseStep &step = viewData_->song_->phrase_.steps_[phrase][pos];
-          Token token = Token::enum_type(step.cmd1);
+          Token token = Token::enum_type(step.getCmd1());
           uint8_t param = step.param1;
 
           // if there's any command to trigger, first pass it on the player
@@ -680,7 +680,7 @@ void Player::ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT]) {
 
           // Now process second command row
 
-          token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
+          token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd2());
           param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
 
           // if there's any command to trigger, first pass it on the player
@@ -825,7 +825,7 @@ void Player::updatePhrasePos(int pos, int channel) {
 
   // Check both param colum 1 & 2 for commands that might delay or canccel the note
 
-  Token token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd1);
+  Token token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd1());
   if (token == Token::InstrumentCommandMaybe) {
     uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param1;
     if (param < (rand() & 0xff)) {
@@ -837,7 +837,7 @@ void Player::updatePhrasePos(int pos, int channel) {
   }
 
   // command 2
-  token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
+  token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd2());
   if (token == Token::InstrumentCommandMaybe) {
     uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
     if (param < (rand() & 0xff)) {
@@ -863,15 +863,15 @@ void Player::playCursorPosition(int channel) {
   Song *song = viewData_->song_;
   Phrase *phrase = &(song->phrase_);
   unsigned char note = phrase->steps_[currentPhrase][pos].note;
-  uint8_t stepVolume = phrase->steps_[currentPhrase][pos].volume;
+  uint8_t stepVolume = phrase->steps_[currentPhrase][pos].getVolume();
 
   unsigned char instrumentId = instrumentOnChannel_[channel];
   if (pos == 0) {
     // first note, instrument might be NO_INSTRUMNET
-    instrumentId = phrase->steps_[currentPhrase][pos].instrument;
+    instrumentId = phrase->steps_[currentPhrase][pos].getInstrument();
   } else {
     // not the first step, we can never lose the instrument during this phrase
-    int newValue = phrase->steps_[currentPhrase][pos].instrument;
+    int newValue = phrase->steps_[currentPhrase][pos].getInstrument();
     if (newValue != NO_INSTRUMENT) {
       instrumentId = newValue;
     }
@@ -1044,11 +1044,11 @@ void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool st
 int Player::getChannelHop(int channel, int pos) {
 
   int phrase = viewData_->currentPlayPhrase_[channel];
-  Token token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd1);
+  Token token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd1());
   if (token == Token::InstrumentCommandHop) {
     return (viewData_->song_->phrase_.steps_[phrase][pos].param1) & 0xF;
   }
-  token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].cmd2);
+  token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd2());
   if (token == Token::InstrumentCommandHop) {
     return (viewData_->song_->phrase_.steps_[phrase][pos].param2) & 0xF;
   }

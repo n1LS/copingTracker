@@ -233,9 +233,9 @@ void PhraseView::pasteLast() {
 
 void PhraseView::cutPosition() {
   // cutting an empty note slot adds a note off
-  uint8_t *note = &currentSteps()[row_].note;
-  if (col_ == colNote && *note == NO_NOTE) {
-    *note = NOTE_OFF;
+  PhraseStep &current = currentSteps()[row_];
+  if (col_ == colNote && current.note == NO_NOTE) {
+    current.note = NOTE_OFF;
     isDirty_ = true;
     return;
   }
@@ -421,22 +421,22 @@ void PhraseView::cutSelection() {
           base[r].note = NO_NOTE;
           break;
         case colInstrument:
-          base[r].instrument = NO_INSTRUMENT;
+          base[r].setInstrument(NO_INSTRUMENT);
           break;
         case colCmd1:
-          base[r].cmd1 = kNone;
+          base[r].setCmd1(kNone);
           break;
         case colCmdVal1:
           base[r].param1 = 0x0000;
           break;
         case colCmd2:
-          base[r].cmd2 = kNone;
+          base[r].setCmd2(kNone);
           break;
         case colCmdVal2:
           base[r].param2 = 0x0000;
           break;
         case colVolume:
-          base[r].volume = NO_VOLUME;
+          base[r].setVolume(NO_VOLUME);
           break;
       }
     }
@@ -527,9 +527,9 @@ enum class TableCloneResult { NotApplicable, Cloned, NoFreeTable };
 // makes the step point to the copy (returned in clonedTable).
 static TableCloneResult cloneStepTable(PhraseStep &step, int col, uint16_t &clonedTable) {
   uint16_t *param = nullptr;
-  if (col == colCmdVal1 && Token::enum_type(step.cmd1) == Token::InstrumentCommandTable) {
+  if (col == colCmdVal1 && Token::enum_type(step.getCmd1()) == Token::InstrumentCommandTable) {
     param = &step.param1;
-  } else if (col == colCmdVal2 && Token::enum_type(step.cmd2) == Token::InstrumentCommandTable) {
+  } else if (col == colCmdVal2 && Token::enum_type(step.getCmd2()) == Token::InstrumentCommandTable) {
     param = &step.param2;
   }
 
@@ -564,8 +564,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         // New Instruments default to type NONE!
         if (next != NO_MORE_INSTRUMENT &&
             bank->AssignInstrumentToSlot(IT_NONE, next) == InstrumentAssignResult::Success) {
-          unsigned char *c = &currentSteps()[row_].instrument;
-          *c = (unsigned char)next;
+          currentSteps()[row_].setInstrument(static_cast<uint8_t>(next));
           viewData_->phraseLastInstrument_ = next;
           isDirty_ = true;
         } else {
@@ -577,7 +576,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         consumed = true;
       } else {
         // Create new table for command parameter columns
-        if ((col_ == colCmdVal1) && Token::enum_type(currentSteps()[row_].cmd1) == Token::InstrumentCommandTable) {
+        if ((col_ == colCmdVal1) && Token::enum_type(currentSteps()[row_].getCmd1()) == Token::InstrumentCommandTable) {
           TableHolder *th = TableHolder::GetInstance();
           uint16_t next = th->GetNext();
           if (next != NO_MORE_TABLE) {
@@ -609,11 +608,11 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (cloneChord || cloneModeChord) {
     if (col_ < colVolume) {
       InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-      unsigned char *c = &currentSteps()[row_].instrument;
-      if (*c != 0xFF) {
-        uint16_t next = bank->Clone(*c);
+      PhraseStep &current = currentSteps()[row_];
+      if (current.getInstrument() != NO_INSTRUMENT) {
+        uint16_t next = bank->Clone(current.getInstrument());
         if (next != NO_MORE_INSTRUMENT) {
-          *c = (unsigned char)next;
+          current.setInstrument(static_cast<uint8_t>(next));
           viewData_->phraseLastInstrument_ = next;
           isDirty_ = true;
         }
@@ -836,7 +835,7 @@ void PhraseView::DrawEditingValue() {
         char buffer[4];
 
         unsigned char d = stepsBase[row_].note;
-        unsigned char instr = stepsBase[row_].instrument;
+        unsigned char instr = stepsBase[row_].getInstrument();
         if (instr != NO_INSTRUMENT) {
           lastInstr = instr;
           instrObj = bank->GetInstrument(lastInstr);
@@ -942,7 +941,7 @@ void PhraseView::DrawView() {
     bool nextSelected = selRect.Contains({1, j});
 
     unsigned char note = stepsBase[j].note;
-    unsigned char instr = stepsBase[j].instrument;
+    unsigned char instr = stepsBase[j].getInstrument();
     if (instr != NO_INSTRUMENT) {
       lastInstr = instr;
       instrObj = bank->GetInstrument(lastInstr);
@@ -971,7 +970,7 @@ void PhraseView::DrawView() {
     SetBackgroundColor(Theme::View::bg);
     setTextProps(colInstrument, j, Theme::Phrase::instrument(j % phraseDiv_ == 0), phraseLength);
 
-    unsigned char d = stepsBase[j].instrument;
+    unsigned char d = stepsBase[j].getInstrument();
 
     if (d == NO_INSTRUMENT) {
       DrawString(anchor.x_ + columnPositions_[colInstrument], y, "--");
@@ -1009,9 +1008,9 @@ void PhraseView::DrawView() {
     selected = nextSelected;
     nextSelected = selRect.Contains({3, j});
 
-    uint8_t vol = stepsBase[j].volume;
+    uint8_t vol = stepsBase[j].getVolume();
     setTextProps(colVolume, j, Theme::Phrase::volume(hilit), phraseLength);
-    DrawChar(anchor.x_ + columnPositions_[colVolume], y, vol == 0xFF ? '-' : hexChars[vol & 0xF]);
+    DrawChar(anchor.x_ + columnPositions_[colVolume], y, vol == NO_VOLUME ? '-' : hexChars[vol & 0xF]);
 
     if (selected && nextSelected) {
       DrawChar(anchor.x_ + columnPositions_[colVolume] + columnWidths_[colVolume], y, ' ');
@@ -1022,7 +1021,7 @@ void PhraseView::DrawView() {
     selected = nextSelected;
     nextSelected = selRect.Contains({4, j});
 
-    Token command1 = Token::enum_type(stepsBase[j].cmd1);
+    Token command1 = Token::enum_type(stepsBase[j].getCmd1());
     setTextProps(colCmd1, j, Theme::Phrase::command1(hilit), phraseLength);
     DrawString(anchor.x_ + columnPositions_[colCmd1], y, command1.c_str());
     if (j == row_ && (col_ == colCmd1 || col_ == colCmdVal1)) {
@@ -1047,7 +1046,7 @@ void PhraseView::DrawView() {
     selected = nextSelected;
     nextSelected = selRect.Contains({6, j});
 
-    Token command2 = Token::enum_type(stepsBase[j].cmd2);
+    Token command2 = Token::enum_type(stepsBase[j].getCmd2());
     setTextProps(colCmd2, j, Theme::Phrase::command2(hilit), phraseLength);
     DrawString(anchor.x_ + columnPositions_[colCmd2], y, command2.c_str());
     if (j == row_ && (col_ == colCmd2 || col_ == colCmdVal2)) {

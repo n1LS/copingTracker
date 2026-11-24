@@ -23,29 +23,25 @@ Phrase::~Phrase() {
 }
 
 void Phrase::Reset() {
-  static const uint8_t NO_COMMAND = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
-
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < STEPS_PER_PHRASE; j++) {
       steps_[i][j].note = NO_NOTE;
-      steps_[i][j].instrument = NO_INSTRUMENT;
-      steps_[i][j].cmd1 = NO_COMMAND;
+      steps_[i][j].setInstrument(NO_INSTRUMENT);
+      steps_[i][j].setCmd1(Token::InstrumentCommandNone);
       steps_[i][j].param1 = 0x00;
-      steps_[i][j].cmd2 = NO_COMMAND;
+      steps_[i][j].setCmd2(Token::InstrumentCommandNone);
       steps_[i][j].param2 = 0x00;
-      steps_[i][j].volume = NO_VOLUME;
+      steps_[i][j].setVolume(NO_VOLUME);
     }
     isUsed_[i] = false;
   }
 }
 
 bool Phrase::IsEmpty(uint8_t phrase) const {
-  static const uint8_t NO_COMMAND = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
-
   for (int i = 0; i < STEPS_PER_PHRASE; i++) {
     const PhraseStep &step = steps_[phrase][i];
-    if (step.note != NO_NOTE || step.instrument != NO_INSTRUMENT || step.volume != NO_VOLUME ||
-        step.cmd1 != NO_COMMAND || step.cmd2 != NO_COMMAND) {
+    if (step.note != NO_NOTE || step.getInstrument() != NO_INSTRUMENT || step.getVolume() != NO_VOLUME ||
+        step.getCmd1() != Token::InstrumentCommandNone || step.getCmd2() != Token::InstrumentCommandNone) {
       return false;
     }
   }

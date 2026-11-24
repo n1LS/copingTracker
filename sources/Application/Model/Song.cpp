@@ -110,11 +110,11 @@ void Song::RestoreContent(PersistencyDocument *doc) {
       if (step.note != 0xFF) {
         phrase_.SetUsed(i);
       }
-      if (Token::enum_type(step.cmd1) == Token::InstrumentCommandTable) {
+      if (Token::enum_type(step.getCmd1()) == Token::InstrumentCommandTable) {
         step.param1 &= 0x7F;
         th->SetUsed(step.param1);
       }
-      if (Token::enum_type(step.cmd2) == Token::InstrumentCommandTable) {
+      if (Token::enum_type(step.getCmd2()) == Token::InstrumentCommandTable) {
         step.param2 &= 0x7F;
         th->SetUsed(step.param2);
       }

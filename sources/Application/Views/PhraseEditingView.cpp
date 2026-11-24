@@ -137,8 +137,8 @@ uint8_t PhraseEditingView::getEffectiveInstrumentForStep(int step) {
 
   const PhraseStep *steps = currentSteps();
   for (int i = step; i >= 0; --i) {
-    if (steps[i].instrument != NO_INSTRUMENT) {
-      return steps[i].instrument;
+    if (steps[i].getInstrument() != NO_INSTRUMENT) {
+      return steps[i].getInstrument();
     }
   }
   return NO_INSTRUMENT;
@@ -151,7 +151,10 @@ void PhraseEditingView::changeNote(int step, ViewUpdateDirection direction) {
 }
 
 void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
-  unsigned char *c = &currentSteps()[step].note;
+  // the note is a bit-field of the step, so it is changed here and written back
+  PhraseStep &data = currentSteps()[step];
+  unsigned char note = data.note;
+  unsigned char *c = &note;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   uint8_t instrumentId = getEffectiveInstrumentForStep(step);
   I_Instrument *instrument = bank->GetInstrument(instrumentId);
@@ -159,6 +162,7 @@ void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
   if (instrument) {
     // some instruments want to manually set the change to the note
     if (instrument->AffectNote(c, sign, smallChange)) {
+      data.note = note;
       viewData_->phraseLastNote_ = *c;
       return;
     }
@@ -215,47 +219,48 @@ void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
     updateData(c, offset, instrument ? instrument->GetHighestNote() : HIGHEST_NOTE, true);
   }
 
+  data.note = note;
   viewData_->phraseLastNote_ = *c;
 }
 
 void PhraseEditingView::changeInstrument(int step, ViewUpdateDirection direction) {
-  unsigned char *c = &currentSteps()[step].instrument;
-  updateData(c, stepOffsets_[direction], MAX_INSTRUMENT_COUNT - 1, false);
-  viewData_->phraseLastInstrument_ = *c;
+  PhraseStep &data = currentSteps()[step];
+  unsigned char instrument = data.getInstrument();
+  updateData(&instrument, stepOffsets_[direction], MAX_INSTRUMENT_COUNT - 1, false);
+  data.setInstrument(instrument);
+  viewData_->phraseLastInstrument_ = data.getInstrument();
 }
 
 void PhraseEditingView::changeVolume(int step, ViewUpdateDirection direction) {
-  uint8_t &vol = currentSteps()[step].volume;
+  PhraseStep &data = currentSteps()[step];
+  // the volume is 1..15, or NO_VOLUME
+  uint8_t vol = data.getVolume();
 
   switch (direction) {
     case VUD_UP:
       vol = 0x0F;
       break;
     case VUD_DOWN:
-      vol = 0xFF;
+      vol = NO_VOLUME;
       break;
     case VUD_LEFT:
-      if (vol == 0) {
-        // below 0 is no value
-        vol = NO_VOLUME;
-      } else if (vol != NO_VOLUME) {
+      // NO_VOLUME is 0: below the quietest is no value, and no value stays
+      if (vol > NO_VOLUME) {
         vol--;
       }
       break;
     case VUD_RIGHT:
-      if (vol == NO_VOLUME) {
-        vol = 0;
-      } else {
-        vol = std::min(0x0F, vol + 1);
-      }
+      // ... and one up from no value is the quietest
+      vol = std::min(0x0F, vol + 1);
       break;
   }
+  data.setVolume(vol);
   viewData_->phraseLastVolume_ = vol;
 }
 
 void PhraseEditingView::changeCommand(int step, bool second, ViewUpdateDirection direction) {
   PhraseStep &data = currentSteps()[step];
-  Token token = second ? Token::enum_type(data.cmd2) : Token::enum_type(data.cmd1);
+  Token token = second ? Token::enum_type(data.getCmd2()) : Token::enum_type(data.getCmd1());
 
   switch (direction) {
     case VUD_LEFT:
@@ -273,9 +278,9 @@ void PhraseEditingView::changeCommand(int step, bool second, ViewUpdateDirection
   }
 
   if (second) {
-    data.cmd2 = static_cast<uint8_t>(static_cast<char>(token));
+    data.setCmd2(static_cast<uint8_t>(static_cast<char>(token)));
   } else {
-    data.cmd1 = static_cast<uint8_t>(static_cast<char>(token));
+    data.setCmd1(static_cast<uint8_t>(static_cast<char>(token)));
   }
   viewData_->phraseLastCmd_ = token;
 }
@@ -286,7 +291,7 @@ bool PhraseEditingView::openCommandPicker(int step, bool second) {
   }
 
   const PhraseStep &data = currentSteps()[step];
-  uint8_t cmd = second ? data.cmd2 : data.cmd1;
+  uint8_t cmd = second ? data.getCmd2() : data.getCmd1();
 
   // use lastCmd if we hit an empty command field
   if (cmd == Token::InstrumentCommandNone) {
@@ -301,9 +306,13 @@ bool PhraseEditingView::openCommandPicker(int step, bool second) {
 void PhraseEditingView::setCommand(int step, bool second, Token command) {
   PhraseStep &data = currentSteps()[step];
 
-  uint8_t *cmd = second ? &data.cmd2 : &data.cmd1;
-  *cmd = command.raw();
-  viewData_->phraseLastCmd_ = *cmd;
+  const uint8_t raw = static_cast<uint8_t>(command.raw());
+  if (second) {
+    data.setCmd2(raw);
+  } else {
+    data.setCmd1(raw);
+  }
+  viewData_->phraseLastCmd_ = raw;
 
   if (command == Token::InstrumentCommandNone) {
     // clear the parameter as well
@@ -321,7 +330,7 @@ void PhraseEditingView::changeCommandParam(int step, bool second, ViewUpdateDire
   PhraseStep &data = currentSteps()[step];
 
   // pick correct input and output for the selected column
-  Token currentCmd = second ? Token::enum_type(data.cmd2) : Token::enum_type(data.cmd1);
+  Token currentCmd = second ? Token::enum_type(data.getCmd2()) : Token::enum_type(data.getCmd1());
   uint16_t *target = second ? &data.param2 : &data.param1;
 
   cmdEditField_.ProcessArrow(DirectionalButtons[direction]);
@@ -340,36 +349,41 @@ bool PhraseEditingView::pasteLastValue(int step, StepField field) {
     case StepField::Note:
       if (data.note == NO_NOTE) {
         data.note = viewData_->phraseLastNote_;
-        data.instrument = viewData_->phraseLastInstrument_;
+        data.setInstrument(viewData_->phraseLastInstrument_);
         return true;
       }
       viewData_->phraseLastNote_ = data.note;
-      viewData_->phraseLastInstrument_ = data.instrument;
+      viewData_->phraseLastInstrument_ = data.getInstrument();
       break;
     case StepField::Instrument:
-      if (data.instrument == 0xFF) {
-        data.instrument = viewData_->phraseLastInstrument_;
+      if (data.getInstrument() == NO_INSTRUMENT) {
+        data.setInstrument(viewData_->phraseLastInstrument_);
         return true;
       }
-      viewData_->phraseLastInstrument_ = data.instrument;
+      viewData_->phraseLastInstrument_ = data.getInstrument();
       break;
     case StepField::Volume:
-      if (data.volume == 0xFF) {
-        if (viewData_->phraseLastVolume_ != 0xFF) {
-          data.volume = viewData_->phraseLastVolume_;
+      if (data.getVolume() == NO_VOLUME) {
+        if (viewData_->phraseLastVolume_ != NO_VOLUME) {
+          data.setVolume(viewData_->phraseLastVolume_);
           return true;
         }
       } else {
-        viewData_->phraseLastVolume_ = data.volume;
+        viewData_->phraseLastVolume_ = data.getVolume();
       }
       break;
     case StepField::Command1:
     case StepField::Command2:
       {
-        uint8_t &cmd = (field == StepField::Command1) ? data.cmd1 : data.cmd2;
-        Token token = Token::enum_type(cmd);
+        const bool second = (field == StepField::Command2);
+        Token token = Token::enum_type(second ? data.getCmd2() : data.getCmd1());
         if (token == Token::InstrumentCommandNone) {
-          cmd = static_cast<uint8_t>(static_cast<char>(viewData_->phraseLastCmd_));
+          const uint8_t last = static_cast<uint8_t>(static_cast<char>(viewData_->phraseLastCmd_));
+          if (second) {
+            data.setCmd2(last);
+          } else {
+            data.setCmd1(last);
+          }
           return true;
         }
         viewData_->phraseLastCmd_ = token;
@@ -400,19 +414,19 @@ static void copyStepField(PhraseStep &target, const PhraseStep &source, StepFiel
       target.note = source.note;
       break;
     case StepField::Instrument:
-      target.instrument = source.instrument;
+      target.setInstrument(source.getInstrument());
       break;
     case StepField::Volume:
-      target.volume = source.volume;
+      target.setVolume(source.getVolume());
       break;
     case StepField::Command1:
-      target.cmd1 = source.cmd1;
+      target.setCmd1(source.getCmd1());
       break;
     case StepField::Param1:
       target.param1 = source.param1;
       break;
     case StepField::Command2:
-      target.cmd2 = source.cmd2;
+      target.setCmd2(source.getCmd2());
       break;
     case StepField::Param2:
       target.param2 = source.param2;
@@ -479,21 +493,21 @@ void PhraseEditingView::clearStepField(int step, StepField field) {
       data.note = NO_NOTE;
       break;
     case StepField::Instrument:
-      data.instrument = NO_INSTRUMENT;
+      data.setInstrument(NO_INSTRUMENT);
       break;
     case StepField::Volume:
-      data.volume = NO_VOLUME;
+      data.setVolume(NO_VOLUME);
       break;
     case StepField::Command1:
       // the parameter goes with its command
-      data.cmd1 = kNone;
+      data.setCmd1(kNone);
       data.param1 = 0;
       break;
     case StepField::Param1:
       data.param1 = 0;
       break;
     case StepField::Command2:
-      data.cmd2 = kNone;
+      data.setCmd2(kNone);
       data.param2 = 0;
       break;
     case StepField::Param2:

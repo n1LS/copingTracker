@@ -18,47 +18,47 @@
 enum TextCase { tcRegular, tcUpper, tcLower, Count };
 
 struct Token {
-  // While the names of the Token codes can be changed, their values CANNOT.
-  // Values are used as is in save files, so any changes would cause save files
-  // to break.
+  // The values are used as is in save files. The instrument commands come first, 0..63 are reserved for them,
+  // because a command is stored in 7 bits in a PhraseStep (and in 8 in a TableStep). Every other token is 64 or
+  // higher, and every value has to be unique.
   enum enum_type {
-    InstrumentCommandArpeggiator = 0,              // ARP
-    InstrumentCommandCrush = 2,                    // CSH
-    InstrumentCommandDelay = 4,                    // DLY
-    InstrumentCommandFilterCut = 20,               // FCT
-    InstrumentCommandLowPassFilter = 22,           // FLT
-    InstrumentCommandFilterResonance = 25,         // FRS
-    InstrumentCommandGateOff = 92,                 // GOF
-    InstrumentCommandGroove = 26,                  // GRV
-    InstrumentCommandHop = 27,                     // HOP
-    InstrumentCommandRetrigger = 52,               // RTR
-    InstrumentCommandInstrumentRetrigger = 29,     // IRT
-    InstrumentCommandKill = 30,                    // KIL
-    InstrumentCommandLegato = 31,                  // LEG
-    InstrumentCommandLoopOffset = 36,              // LOF
-    InstrumentCommandMidiCC = 38,                  // MCC
-    InstrumentCommandMidiPC = 39,                  // MPG
-    InstrumentCommandPan = 42,                     // PAN
-    InstrumentCommandPitchFineTune = 44,           // PFT
-    InstrumentCommandPlayOfset = 46,               // POF
-    InstrumentCommandPitchSlide = 48,              // PSL
-    InstrumentCommandSetInstrumentParameter = 188, // SIP
-    InstrumentCommandStop = 55,                    // STP
-    InstrumentCommandTable = 58,                   // TBL
-    InstrumentCommandTempo = 62,                   // TPO
-    InstrumentCommandVelocity = 66,                // VEL
-    InstrumentCommandVolume = 69,                  // VOL
-    InstrumentCommandVibrato = 73,                 // VIB
-    InstrumentCommandNone = 45,                    // ---
-    InstrumentCommandChordUp = 143,                // CHU
-    InstrumentCommandChordDown = 98,               // CHD
-    InstrumentCommandChordBidirectional = 229,     // CHB
-    InstrumentCommandMaybe = 235,                  // MAY
+    InstrumentCommandNone = 0,                    // ---
+    InstrumentCommandArpeggiator = 1,             // ARP
+    InstrumentCommandCrush = 2,                   // CSH
+    InstrumentCommandDelay = 3,                   // DLY
+    InstrumentCommandFilterCut = 4,               // FCT
+    InstrumentCommandLowPassFilter = 5,           // FLT
+    InstrumentCommandFilterResonance = 6,         // FRS
+    InstrumentCommandGateOff = 7,                 // GOF
+    InstrumentCommandGroove = 8,                  // GRV
+    InstrumentCommandHop = 9,                     // HOP
+    InstrumentCommandRetrigger = 10,              // RTR
+    InstrumentCommandInstrumentRetrigger = 11,    // IRT
+    InstrumentCommandKill = 12,                   // KIL
+    InstrumentCommandLegato = 13,                 // LEG
+    InstrumentCommandLoopOffset = 14,             // LOF
+    InstrumentCommandMidiCC = 15,                 // MCC
+    InstrumentCommandMidiPC = 16,                 // MPG
+    InstrumentCommandPan = 17,                    // PAN
+    InstrumentCommandPitchFineTune = 18,          // PFT
+    InstrumentCommandPlayOfset = 19,              // POF
+    InstrumentCommandPitchSlide = 20,             // PSL
+    InstrumentCommandSetInstrumentParameter = 21, // SIP
+    InstrumentCommandStop = 22,                   // STP
+    InstrumentCommandTable = 23,                  // TBL
+    InstrumentCommandTempo = 24,                  // TPO
+    InstrumentCommandVelocity = 25,               // VEL
+    InstrumentCommandVolume = 26,                 // VOL
+    InstrumentCommandVibrato = 27,                // VIB
+    InstrumentCommandChordUp = 28,                // CHU
+    InstrumentCommandChordDown = 29,              // CHD
+    InstrumentCommandChordBidirectional = 30,     // CHB
+    InstrumentCommandMaybe = 31,                  // MAY
 
-    InstrumentParameterVolume = 19,
-    InstrumentParameterPan = 43,
+    InstrumentParameterVolume = 66,
+    InstrumentParameterPan = 69,
     InstrumentParameterTable = 117,
-    InstrumentParameterTableAutomation = 60,
+    InstrumentParameterTableAutomation = 71,
     InstrumentParameterOutput = 236,
     InstrumentParameterEqOn = 240,
     InstrumentParameterEqLow = 241,
@@ -69,59 +69,59 @@ struct Token {
     InstrumentParameterCompRatio = 125,
     InstrumentParameterCompRelease = 126,
 
-    SampleInstrumentCrushVolume = 3,
+    SampleInstrumentCrushVolume = 72,
     SampleInstrumentCrush = 114,
-    SampleInstrumentSample = 54,
-    SampleInstrumentInterpolation = 28,
-    SampleInstrumentDownsample = 5,
-    SampleInstrumentRootNote = 51,
-    SampleInstrumentFineTune = 24,
+    SampleInstrumentSample = 73,
+    SampleInstrumentInterpolation = 75,
+    SampleInstrumentDownsample = 76,
+    SampleInstrumentRootNote = 77,
+    SampleInstrumentFineTune = 78,
     SampleInstrumentFilterCutOff = 115,
     SampleInstrumentFilterResonance = 116,
-    SampleInstrumentFilterType = 23,
-    SampleInstrumentFilterMode = 21,
-    SampleInstrumentStart = 56,
-    SampleInstrumentLoopMode = 34,
-    SampleInstrumentLoopStart = 37,
-    SampleInstrumentEnd = 6,
+    SampleInstrumentFilterType = 79,
+    SampleInstrumentFilterMode = 80,
+    SampleInstrumentStart = 81,
+    SampleInstrumentLoopMode = 82,
+    SampleInstrumentLoopStart = 83,
+    SampleInstrumentEnd = 84,
     SampleInstrumentGMInstrument = 191, // GM bank instrument index (0..kGMInstrumentCount-1), -1 = off
     SampleInstrumentAttack = 93,
     SampleInstrumentDecay = 94,
     SampleInstrumentSustain = 95,
     SampleInstrumentRelease = 96,
 
-    MidiInstrumentChannel = 1,
-    MidiInstrumentNoteLength = 32,
+    MidiInstrumentChannel = 85,
+    MidiInstrumentNoteLength = 86,
     MidiInstrumentTableAutomation = 120,
     MidiInstrumentName = 144,
     MidiInstrumentProgram = 160,
 
-    ServicePersistency = 57,
+    ServicePersistency = 87,
 
     TrigTempoTap = 65,
     TrigSeqQueueRow = 64,
     TrigVolumeIncrease = 68,
     TrigVolumeDecrease = 67,
-    TrigEventEnter = 7,
-    TrigEventEdit = 8,
-    TrigEventLeft = 10,
-    TrigEventRight = 13,
-    TrigEventUp = 15,
-    TrigEventDown = 9,
-    TrigEventAlt = 11,
-    TrigEventNav = 12,
-    TrigEventPlay = 14,
+    TrigEventEnter = 88,
+    TrigEventEdit = 89,
+    TrigEventLeft = 90,
+    TrigEventRight = 91,
+    TrigEventUp = 92,
+    TrigEventDown = 98,
+    TrigEventAlt = 119,
+    TrigEventNav = 132,
+    TrigEventPlay = 133,
 
-    VarTempo = 33,
-    VarMasterVolume = 41,
+    VarTempo = 134,
+    VarMasterVolume = 135,
     VarPreviewVolume = 161,
     VarWrap = 70,
-    VarTranspose = 63,
-    VarScale = 16,
+    VarTranspose = 136,
+    VarScale = 137,
     VarScaleRoot = 162,
     VarProjectName = 99,
-    VarMidiDevice = 40,
-    VarLineOut = 17,
+    VarMidiDevice = 138,
+    VarLineOut = 142,
     // colors
     VarColor_0 = 104,
     VarColor_1 = 105,
@@ -156,18 +156,18 @@ struct Token {
     VarThemeName = 173, // Variable for storing the current theme name
 
     VarInstrumentType = 113,
-    ActionBPMChanged = 61,
-    ActionPurge = 49,
-    ActionPurgeInstrument = 47,
+    ActionBPMChanged = 143,
+    ActionPurge = 188,
+    ActionPurgeInstrument = 229,
     ActionProjectRename = 102,
-    ActionBrowse = 35,
-    ActionSave = 53,
+    ActionBrowse = 235,
+    ActionSave = 250,
     ActionLoadAndSave = 179,
     ActionCancel = 180,
     ActionNewProject = 101,
     ActionRandomName = 100,
-    ActionBootSelect = 18,
-    ActionEdit = 59,
+    ActionBootSelect = 251,
+    ActionEdit = 252,
     ActionExport = 145,
     ActionImport = 146,
     ActionOK = 147,
@@ -230,7 +230,7 @@ struct Token {
     DrumInstrumentParamsVoice11 = 225,
     DrumInstrumentParamsCharacter = 226,
 
-    ActionMassStorage = 50,
+    ActionMassStorage = 253,
     VarOutputVolume = 74,
     ActionModulation = 213,
     ActionDelete = 182,

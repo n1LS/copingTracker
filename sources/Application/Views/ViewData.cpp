@@ -44,7 +44,9 @@ void ViewData::Load(Project *project) {
   clipboardWidth_ = 0;
   clipboardHeight_ = 0;
   for (int i = 0; i < STEPS_PER_PHRASE; i++) {
+    // an empty step (all zero is the note 0)
     clipboardSteps_[i] = PhraseStep{};
+    clipboardSteps_[i].note = NO_NOTE;
   }
   phraseViewType_ = VT_PHRASE;
 
@@ -62,16 +64,16 @@ void ViewData::Load(Project *project) {
 }
 
 bool ViewData::SelectInstrumentOfPhraseStep(int step) {
-  const uint8_t instrument = song_->phrase_.steps_[currentPhrase_][step].instrument;
+  const uint8_t instrument = song_->phrase_.steps_[currentPhrase_][step].getInstrument();
   currentInstrumentID_ = (instrument != NO_INSTRUMENT) ? instrument : phraseLastInstrument_;
   return currentInstrumentID_ != NO_INSTRUMENT;
 }
 
 void ViewData::SelectTableOfPhraseStep(int step) {
   const PhraseStep &phraseStep = song_->phrase_.steps_[currentPhrase_][step];
-  if (Token::enum_type(phraseStep.cmd1) == Token::InstrumentCommandTable) {
+  if (Token::enum_type(phraseStep.getCmd1()) == Token::InstrumentCommandTable) {
     currentTable_ = phraseStep.param1 & (TABLE_COUNT - 1);
-  } else if (Token::enum_type(phraseStep.cmd2) == Token::InstrumentCommandTable) {
+  } else if (Token::enum_type(phraseStep.getCmd2()) == Token::InstrumentCommandTable) {
     currentTable_ = phraseStep.param2 & (TABLE_COUNT - 1);
   }
 }

@@ -962,7 +962,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
     unsigned char note = steps[j].note;
-    unsigned char instr = steps[j].instrument;
+    unsigned char instr = steps[j].getInstrument();
 
     if (instr != NO_INSTRUMENT) {
       instrument = bank->GetInstrument(instr);
@@ -983,7 +983,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
 
-    unsigned char d = instrSteps[j].instrument;
+    unsigned char d = instrSteps[j].getInstrument();
 
     if (d == NO_INSTRUMENT) {
       DrawString(pos.x_, pos.y_, "--");
