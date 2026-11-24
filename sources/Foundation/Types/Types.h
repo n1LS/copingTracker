@@ -184,6 +184,9 @@ struct Token {
     VarSampleEditStart = 177,
     VarSampleEditEnd = 178,
     VarSampleEditOperation = 181,
+    VarSampleEditMarker = 257,
+    ActionSampleTrim = 258,
+    ActionSampleNormalize = 259,
     VarImportResampler = 185,
     VarConfigCommandPicker = 190,
 

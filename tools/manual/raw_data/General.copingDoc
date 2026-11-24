@@ -220,76 +220,10 @@ F7
 7                             
 0                             
                               
-0F                       0    
-C                             
- APP NAVIGATION               
-7                             
-0                             
-                              
-7B              7F7           
-0                             
-                 Device       
-7B              7F7           
-0                             
-                              
-7       B     7  F7           
-0                             
- зд© зд© You     Help         
-7 F787F7B     9 7F7           
-0                             
- ЁDЁдЁHЁ are                  
-7       B     97 F7           
-0                             
- юды юды here    Workspace    
-7 8             7F7           
-0                             
-  Ё                           
-7                F7           
-0                             
- зд©     зд©     Groove       
-7 F78    7F7     F7           
-0                             
- ЁWЁдддддЁGЁ                  
-7                F7           
-0                             
- юды     юды     Song         
-7 8             7F7           
-0                             
-  Ё       Ё                   
-7                F7           
-0                             
- зд© зд© зд© зд© Chain        
-7 F787F787F787F7              
-0                             
- ЁSЁдЁCЁдЁPЁдЁIЁ              
-7                F7           
-0                             
- юды юды юды юды Phrase       
-7 8             7F7           
-0                             
-  Ё       Ё   Ё               
-7                F7           
-0                             
- зд©     зд© зд© Instrument   
-7 F78    7F787F7 F7           
-0                             
- ЁMЁдддддЁTЁдЁTЁ              
-7                F7           
-0                             
- юды     юды юды Mixer        
-7                F7           
-0                             
-                              
-7                F7           
-0                             
-                 Table        
-7                             
-0                             
-                              
 0F                            
 C                             
  TITLE BAR                    
-7                             
+F                             
 0                             
                               
 7                             
@@ -307,19 +241,19 @@ to get the title bar explained
 7                             
 0                             
 б ддддддддддддддддддддб бд б б
-7   F   7     F     7         
+7                             
 0                             
 Ё                     Ё Ё  Ё Ё
-7   F               7         
+7       F           7         
 0                             
 Ё       screen titleдды Ё  Ё Ё
-7   F               7         
-0                             
-Ё    level indicatorдддды  Ё Ё
 7    F              7         
 0                             
+Ё    level indicatorдддды  Ё Ё
+7           F       7         
+0                             
 Ё           cpu loadддддддды Ё
-7     F             7         
+7      F            7         
 0                             
 Ё      battery levelддддддддды
 7                             
@@ -331,3 +265,69 @@ to get the title bar explained
 7                             
 0                             
   this screen with ²+         
+7                             
+0                             
+                              
+7F                            
+C                             
+ APP NAVIGATION               
+F                             
+0                             
+                              
+F                 7           
+0                             
+                 Device       
+7                             
+0                             
+                              
+7        B       F7           
+0                             
+ зд© зд© You     Help         
+7 F787F7B                     
+0                             
+ ЁDЁдЁHЁ are                  
+B7       B       F7           
+0                             
+ юды юды here    Workspace    
+7 8                           
+0                             
+  Ё                           
+87               F7           
+0                             
+ зд©     зд©     Groove       
+7 F78    7F7                  
+0                             
+ ЁWЁдддддЁGЁ                  
+7                F7           
+0                             
+ юды     юды     Song         
+7 8                           
+0                             
+  Ё       Ё                   
+87               F7           
+0                             
+ зд© зд© зд© зд© Chain        
+7 F787F787F787F7              
+0                             
+ ЁSЁдЁCЁдЁPЁдЁIЁ              
+7                F7           
+0                             
+ юды юды юды юды Phrase       
+7 8                           
+0                             
+  Ё       Ё   Ё               
+87               F7           
+0                             
+ зд©     зд© зд© Instrument   
+7 F78    7F787F7              
+0                             
+ ЁMЁдддддЁTЁдЁTЁ              
+7                F7           
+0                             
+ юды     юды юды Mixer        
+7                             
+0                             
+                              
+7                F7           
+0                             
+                 Table        

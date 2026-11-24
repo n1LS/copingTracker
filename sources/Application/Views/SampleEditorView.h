@@ -17,7 +17,6 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/WavHeader.h"
 #include "BaseClasses/UIActionField.h"
-#include "BaseClasses/UIHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
 #include "BaseClasses/UIStaticField.h"
 #include "BaseClasses/UITextField.h"
@@ -29,6 +28,8 @@
 
 class SampleEditorView : public FieldView, public I_Observer {
 public:
+  enum SampleEditOperation { Trim = 0, Normalize };
+
   SampleEditorView(GUIWindow &w, ViewData *data);
   virtual ~SampleEditorView();
   void Reset();
@@ -63,6 +64,7 @@ private:
   void addNameTextField(I_Instrument *instr, GUIPoint &position);
   void updateSampleParameters();
   uint32_t selectionCenterSample() const;
+  // the marker of the field below the graph is the current one
   void updateSelectedMarkerFromFocus();
   const etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> &activeFilename() const;
   bool ensureWorkingCopy();
@@ -91,11 +93,21 @@ private:
   void updateGraphMarkers();
   void updateZoomWindow();
   void adjustZoom(int32_t delta);
+  // asks to apply an operation to the selection, the buttons of the operations call it
+  void confirmOperation(SampleEditOperation operation);
+  // EDIT + LEFT / RIGHT: moves the current marker (start or end), one sample at the last zoom level
+  void moveMarker(int direction);
+  // EDIT + ENTER + LEFT / RIGHT: the current marker moves to the next zero crossing of the left channel, the end of
+  // the sample if there is none. It does not pass the other marker.
+  void moveMarkerToZeroCrossing(int direction);
+  bool findZeroCrossing(uint32_t from, int direction, uint32_t &found);
+  // the labels and the legend around the graph, as in the sample slicer
+  void drawStatusLabels();
+  void drawHelpLegend();
 
   // UI fields
   etl::vector<UIIntVarField, 1> intVarField_;
-  etl::vector<UIHexVarField, 2> hexVarField_;
-  etl::vector<UIActionField, 4> actionField_;
+  etl::vector<UIActionField, 5> actionField_;
   etl::vector<UIStaticField, 4> staticField_;
   etl::vector<UITextField<MAX_INSTRUMENT_NAME_LENGTH>, 1> nameTextField_;
 
@@ -133,8 +145,12 @@ private:
   Variable startVar_;
   Variable endVar_;
   StringVariable<MAX_INSTRUMENT_FILENAME_LENGTH> filenameVar_;
-  enum SampleEditOperation { Trim = 0, Normalize };
   Variable operationVar_;
+  // the marker that is moved, start or end
+  Variable markerVar_;
+  UIIntVarField *markerField_ = nullptr;
+  // the ENTER that opened the view is released in it, that is not a click
+  bool ignoreEnterRelease_ = false;
 
   GUIWindow &win;
 

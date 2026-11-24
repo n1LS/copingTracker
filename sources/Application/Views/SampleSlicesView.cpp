@@ -32,8 +32,8 @@ constexpr int32_t SliceYOffset = 2 * CHAR_HEIGHT;
 
 SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
     : FieldView(w, data), sliceIndexVar_(Token::SampleInstrumentSlices, 0),
-      sliceStartVar_(Token::SampleInstrumentStart, 0), sliceCountVar_(Token::SampleInstrumentMaxSlices, 4), instrument_(nullptr),
-      instrumentIndex_(0), sampleSize_(0), graphFieldPos_(SliceXOffset, SliceYOffset),
+      sliceStartVar_(Token::SampleInstrumentStart, 0), sliceCountVar_(Token::SampleInstrumentMaxSlices, 4),
+      instrument_(nullptr), instrumentIndex_(0), sampleSize_(0), graphFieldPos_(SliceXOffset, SliceYOffset),
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight), hadModal_(false),
       playKeyHeld_(false), previewActive_(false), previewNote_(SampleInstrument::SliceNoteBase),
       sys_(System::GetInstance()), previewStartMs_(0), previewStartSample_(0), previewEndSample_(0),
@@ -403,6 +403,7 @@ void SampleSlicesView::buildFieldLayout() {
     f.RemoveObserver(*this);
   }
 
+  ForgetFocus();
   fieldList_.clear();
   intVarField_.clear();
   actionField_.clear();

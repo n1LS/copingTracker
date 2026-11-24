@@ -586,18 +586,27 @@ The groove view has no clone, new or selection mode and therefore no context leg
 
 ### 5.1 `SampleEditorView` (`Views/SampleEditorView.cpp`)
 
+The start and the end of the sample are markers on the graph, as the slice points of the sample slicer (§5.2). The
+**Marker** field below the graph selects the current one, **Start** or **End** (`ENTER + LEFT / RIGHT` on the field);
+the start, the end and the zoom (`Zoom 02x/05x`, the zoom level of the maximum) are shown below it, and a legend on the
+right. The Marker field has the focus when the view opens; the graph is not a field to focus. The start stays before the end. Below the zoom
+the title **Operations** is followed by the buttons of the operations in a row (**Trim**, **Peak Normalize**, `ENTER` asks to apply it to the selection), the buttons of the file are in the bottom
+row (**Save**, **Save & Load** unless a sample of the pool is edited, **Discard**); the first one starts at column 1,
+the cap of a button is left of it. Selecting the other marker, or moving the current one, scrolls the waveform so that the marker is visible. The markers are always on the screen, also at the very first and last sample.
+
 | Combination | Type | Action |
 |-------------|------|--------|
 | `NAV + LEFT` | chord | Navigate → back to source view (`vtCollapse`) |
-| `EDIT + LEFT` (graph focus) | chord | Select the **Start** marker |
-| `EDIT + RIGHT` (graph focus) | chord | Select the **End** marker |
-| `ENTER + LEFT / RIGHT` (graph focus) | chord | Move the selected marker by `viewSpan` |
-| `ENTER + UP / DOWN` (graph focus) | chord | Move the selected marker by `viewSpan/16` |
+| `EDIT + LEFT / RIGHT` | chord | Move the current marker (`moveMarker`) by `viewSpan/64`, by a single sample at the last zoom level (one sample per pixel). From any field |
+| `EDIT + ENTER + LEFT / RIGHT` | chord | Move the current marker to the next **zero crossing** to the left / right (the left channel, read from the file, see §5.2 for what a zero crossing is). Without another zero crossing it moves to the start / the last sample. It does not pass the other marker |
 | `EDIT + UP` | chord | Zoom in (`adjustZoom(+1)`), down to one sample per pixel (the last zoom level, always reachable; a sample with fewer samples than pixels does not zoom, every sample is wider than a pixel already) |
 | `EDIT + DOWN` | chord | Zoom out (`adjustZoom(-1)`) |
-| `EDIT + ENTER` | chord | On "End" field: set end to sample size−1 |
+| `ENTER + EDIT` | chord | On the Marker field: it selects Start again, the markers stay where they are. On the other fields it resets them |
 | `PLAY` (hold) | chord | Start sample playback / streaming; **release stops** |
 | bare arrows | chord | Field navigation (§2.1) |
+
+The sample browser opens the editor when `ENTER` is pressed. The release of that `ENTER` is ignored by the editor, it
+does not click the field that has the focus.
 
 ### 5.2 `SampleSlicesView` (`Views/SampleSlicesView.cpp`)
 

@@ -26,6 +26,12 @@ public:
 
   virtual void SetFocus(UIField *field);
   UIField *GetFocus();
+  // Must be called together with fieldList_.clear() when a view rebuilds its fields: the focus points to a
+  // field that is gone otherwise, and the fields of the next layout are built in the same places, so the next
+  // release of ENTER clicks whatever is there now (for the sample editor that was the Discard button).
+  void ForgetFocus() {
+    focus_ = nullptr;
+  }
   void ClearFocus();
   void UpdateFocusRect();
   int GetFocusIndex();

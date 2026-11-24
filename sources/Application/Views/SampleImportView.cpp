@@ -437,6 +437,8 @@ void SampleImportView::showSampleEditor(etl::string<MAX_INSTRUMENT_FILENAME_LENG
 
   // Set the filename in viewData so SampleEditorView knows which file to load
   viewData_->sampleEditorFilename = filename;
+  // the editor shows the project pool: no "Save & Load" there, and coming back opens the pool again
+  viewData_->isShowingSampleEditorProjectPool = isProjectSample;
 
   // the editor is opened from here, so cancel/back return to this browser,
   // which in turn returns to wherever it was opened from (instrument/project)

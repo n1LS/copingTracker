@@ -229,7 +229,8 @@ int32_t GraphField::SampleToPixel(uint32_t sample) const {
   uint32_t rel = clamped - viewStart_;
   int32_t local = static_cast<int32_t>((static_cast<uint64_t>(rel) * width_) / viewSpan);
 
-  return x_ + 1 + local;
+  // the columns are x_ .. x_ + width_ - 1, so the last one (and a marker on the last sample) is on the screen
+  return x_ + local;
 }
 
 void GraphField::DrawGraph(View &view) {
@@ -270,7 +271,7 @@ void GraphField::DrawGraph(View &view) {
 void GraphField::DrawMarker(View &view, int index) {
   int32_t x = SampleToPixel(markers_[index].sample);
 
-  if (x >= 0 && x <= BitmapWidth) {
+  if (x >= x_ && x < x_ + width_) {
     GUIRect marker(x, y_, 1, height_);
     view.DrawRect(marker, colorForIndex(index));
   }
@@ -294,9 +295,7 @@ void GraphField::DrawMarkers(View &view) {
 }
 
 void GraphField::redrawWaveformColumn(View &view, int32_t x) {
-  int32_t left = x_;
-  int32_t right = x_ + width_;
-  if (x <= left || x > right) {
+  if (x < x_ || x >= x_ + width_) {
     return;
   }
   GUIRect clearRect(x, y_, 1, height_);
@@ -310,7 +309,7 @@ void GraphField::redrawWaveformColumn(View &view, int32_t x) {
 
   int32_t top;
   int32_t bottom;
-  if (columnRows(x - x_ - 1, top, bottom)) {
+  if (columnRows(x - x_, top, bottom)) {
     view.DrawRect(GUIRect(x, top, 1, bottom - top + 1), Theme::View::fg);
   }
 }
@@ -353,7 +352,7 @@ void GraphField::drawWaveform(View &view) {
       ++run;
     }
 
-    view.DrawRect(GUIRect(x_ + 1 + column, top, run, bottom - top + 1), Theme::View::fg);
+    view.DrawRect(GUIRect(x_ + column, top, run, bottom - top + 1), Theme::View::fg);
     column += run;
   }
 }

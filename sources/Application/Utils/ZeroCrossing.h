@@ -68,6 +68,73 @@ inline bool Find(const int16_t *samples, uint32_t count, uint32_t channels, uint
   return false;
 }
 
+// The same search as Find for samples that are not all in memory (the sample editor reads them from the file).
+// `read(first, count, buffer)` puts `count` samples of the left channel from the frame `first` in the buffer and
+// returns how many it could read. At most `bufferSize` (2 or more) samples are read at a time.
+template <typename Reader>
+inline bool FindStreaming(uint32_t total, uint32_t from, int direction, uint32_t &found, int16_t *buffer,
+                          uint32_t bufferSize, Reader read) {
+  if (total < 2 || bufferSize < 2) {
+    return false;
+  }
+
+  if (direction > 0) {
+    if (from >= total - 1) {
+      return false;
+    }
+    int16_t before = 0;
+    uint32_t position = from;
+    while (position < total) {
+      const uint32_t wanted = (total - position < bufferSize) ? total - position : bufferSize;
+      const uint32_t count = read(position, wanted, buffer);
+      if (count == 0) {
+        return false;
+      }
+      for (uint32_t k = 0; k < count; ++k) {
+        const uint32_t index = position + k;
+        if (index > from && Crosses(before, buffer[k])) {
+          const uint32_t crossing = LaterIsPosition(before, buffer[k]) ? index : index - 1;
+          if (crossing > from) {
+            found = crossing;
+            return true;
+          }
+        }
+        before = buffer[k];
+      }
+      position += count;
+    }
+    return false;
+  }
+
+  if (from == 0) {
+    return false;
+  }
+  // backwards in blocks that overlap by one frame, so the pair that spans two blocks is seen
+  uint32_t end = (from + 1 < total) ? from + 1 : total;
+  while (end > 1) {
+    const uint32_t start = (end > bufferSize) ? end - bufferSize : 0;
+    if (read(start, end - start, buffer) != end - start) {
+      return false;
+    }
+    for (uint32_t index = end - 1; index > start; --index) {
+      const int16_t before = buffer[index - 1 - start];
+      const int16_t after = buffer[index - start];
+      if (Crosses(before, after)) {
+        const uint32_t crossing = LaterIsPosition(before, after) ? index : index - 1;
+        if (crossing < from) {
+          found = crossing;
+          return true;
+        }
+      }
+    }
+    if (start == 0) {
+      break;
+    }
+    end = start + 1;
+  }
+  return false;
+}
+
 } // namespace ZeroCrossing
 
 #endif

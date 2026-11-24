@@ -17,6 +17,7 @@
 #include "Application/Model/Config.h"
 #include "Application/Persistency/PersistenceConstants.h"
 #include "Application/Player/Player.h"
+#include "Application/Utils/ZeroCrossing.h"
 #include "Application/Utils/char.h"
 #include "BaseClasses/UIHexVarField.h"
 #include "BaseClasses/UIIntVarField.h"
@@ -34,6 +35,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <nanoprintf.h>
 
 SampleEditProgressDisplay *sampleEditProgressDisplay = nullptr;
 
@@ -47,6 +49,7 @@ void wavProgressCallback(uint8_t percent) {
 ViewType SampleEditorView::sourceViewType_ = VT_SONG;
 
 constexpr const char *const sampleEditOperationNames[] = {"Trim", "Peak Normalize"};
+constexpr const char *const sampleEditMarkerNames[] = {"Start", "End"};
 constexpr uint32_t sampleEditOperationCount = sizeof(sampleEditOperationNames) / sizeof(sampleEditOperationNames[0]);
 constexpr etl::string_view kSampleEditTempLeafName = ".sampledit_tmp.wav";
 constexpr etl::string_view kSampleEditBackupLeafName = ".sampledit_bak.wav";
@@ -63,10 +66,13 @@ SampleEditorView::SampleEditorView(GUIWindow &w, ViewData *data)
       filenameVar_(Token::InstrumentName, ""),
       operationVar_(Token::VarSampleEditOperation, sampleEditOperationNames, sampleEditOperationCount,
                     static_cast<int>(SampleEditOperation::Trim)),
-      win(w), graphFieldPos_(GraphXOffset, GraphYOffset),
+      markerVar_(Token::VarSampleEditMarker, sampleEditMarkerNames, 2, 0), win(w),
+      graphFieldPos_(GraphXOffset, GraphYOffset),
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight) {
   assignWorkingFilename();
   graphField_.SetShowBaseline(true);
+  // the start, the end and the playhead
+  graphField_.SetMarkerCount(3);
 }
 
 SampleEditorView::~SampleEditorView() {
@@ -91,10 +97,12 @@ void SampleEditorView::Reset() {
   hasWorkingCopy_ = false;
   graphField_.Reset();
   graphField_.SetShowBaseline(true);
+  graphField_.SetMarkerCount(3);
   selectedMarker_ = MarkerStart;
+  markerVar_.SetInt(0, false);
 
+  ForgetFocus();
   fieldList_.clear();
-  hexVarField_.clear();
   intVarField_.clear();
   actionField_.clear();
   nameTextField_.clear();
@@ -284,11 +292,15 @@ void SampleEditorView::OnFocus() {
 
   // Update cached sample parameters
   updateSampleParameters();
-  updateZoomWindow();
   selectedMarker_ = MarkerStart;
+  markerVar_.SetInt(0, false);
+  updateZoomWindow();
 
   // Force redraw of waveform
   fullWaveformRedraw_ = true;
+
+  // the ENTER that opened this view is released here
+  ignoreEnterRelease_ = true;
 
   addAllFields();
 }
@@ -297,8 +309,8 @@ void SampleEditorView::addAllFields() {
   // We currently have no way to update fields with the variable they are
   // assigned so instead we need to first clear out all the previous fields
   // and then re-add them just like we do on the InstrumentView
+  ForgetFocus();
   fieldList_.clear();
-  hexVarField_.clear();
   intVarField_.clear();
   actionField_.clear();
   nameTextField_.clear();
@@ -311,45 +323,44 @@ void SampleEditorView::addAllFields() {
 
   const uint16_t baseX = position.x_;
 
+  // The marker that is moved with EDIT + LEFT / RIGHT. The start, the end and the zoom are shown below it
+  // (drawStatusLabels), as in the sample slicer.
   position.y_ += 1;
-  hexVarField_.emplace_back(position, startVar_, 7, "Start     :%7.7X", 0, tempSampleSize_ - 1, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
-  hexVarField_.back().AddObserver(*this);
-
-  // Add end position control
-  position.y_ += 1;
-  hexVarField_.emplace_back(position, endVar_, 7, "End       :%7.7X", 0, tempSampleSize_ - 1, 16);
-  fieldList_.insert(fieldList_.end(), &hexVarField_.back());
-  hexVarField_.back().AddObserver(*this);
-
-  // Operation selector
-  position.y_ += 1;
-  position.x_ = baseX;
-  uint8_t maxOperationIndex = operationVar_.GetListSize() > 0 ? operationVar_.GetListSize() - 1 : 0;
-  intVarField_.emplace_back(position, operationVar_, "Op        :%s", 0, maxOperationIndex, 1, 1);
+  intVarField_.emplace_back(position, markerVar_, "Marker    :%s", 0, 1, 1, 1);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
   intVarField_.back().AddObserver(*this);
+  markerField_ = &intVarField_.back();
 
-  // Apply button
-  position.x_ = baseX + 20;
-  actionField_.emplace_back("Apply", Token::ActionOK, position);
+  // the start, the end and the zoom take the next three rows, then the title of the operations (drawStatusLabels)
+  // one row below the zoom, and the buttons of the operations below it
+  position.y_ += 6;
+
+  // The operations are buttons in a row, pressing one asks to apply it. The buttons start at x = 1, the cap of a
+  // button is left of it.
+  position.x_ = baseX + 1;
+  actionField_.emplace_back(sampleEditOperationNames[Trim], Token::ActionSampleTrim, position);
+  fieldList_.insert(fieldList_.end(), &actionField_.back());
+  actionField_.back().AddObserver(*this);
+  position.x_ += static_cast<int>(strlen(sampleEditOperationNames[Trim])) + 2;
+
+  actionField_.emplace_back(sampleEditOperationNames[Normalize], Token::ActionSampleNormalize, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
-  // Save button row
-  position.y_ += 2; // want extra empty row between these buttons & prev Apply
-  position.x_ = baseX;
+  // the buttons of the file are in the bottom row
+  position.y_ = SCREEN_HEIGHT - 1;
+  position.x_ = baseX + 1;
   actionField_.emplace_back("Save", Token::ActionSave, position);
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
-  position.x_ += 5;
+  position.x_ += 4 + 2;
 
   // load & save button
   if (!viewData_->isShowingSampleEditorProjectPool) {
     actionField_.emplace_back("Save & Load", Token::ActionLoadAndSave, position);
     fieldList_.insert(fieldList_.end(), &actionField_.back());
     actionField_.back().AddObserver(*this);
-    position.x_ += 12;
+    position.x_ += 11 + 2;
   }
 
   // discard button
@@ -357,10 +368,19 @@ void SampleEditorView::addAllFields() {
   fieldList_.insert(fieldList_.end(), &actionField_.back());
   actionField_.back().AddObserver(*this);
 
-  fieldList_.insert(fieldList_.end(), &graphField_);
+  // The graph is drawn by the view and is not in the list of fields: its position is in pixels, the navigation
+  // would take it for a field in row 20, between the buttons, and focus something that has nothing to show.
+  SetFocus(markerField_);
 }
 
 void SampleEditorView::ButtonUp(uint16_t button, uint16_t mask) {
+  // The sample browser opens this view when ENTER is pressed, so its release comes here. It must not click the
+  // field that has the focus.
+  if (button == BM_ENTER && ignoreEnterRelease_) {
+    ignoreEnterRelease_ = false;
+    return;
+  }
+
   updateSelectedMarkerFromFocus();
 
   {
@@ -392,6 +412,10 @@ bool SampleEditorView::navigationDown(uint16_t direction) {
 }
 
 void SampleEditorView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  if (newButton == BM_ENTER) {
+    // a press in this view: its release is a click
+    ignoreEnterRelease_ = false;
+  }
   updateSelectedMarkerFromFocus();
 
   if (newButton == BM_NAV || (mask & BM_NAV)) {
@@ -444,83 +468,16 @@ void SampleEditorView::ButtonDown(uint16_t newButton, uint16_t mask) {
     return;
   }
 
-  bool graphFocused = (GetFocus() == &graphField_);
-  if (graphFocused && mask == BM_EDIT) {
-    if (newButton == BM_LEFT) {
-      selectedMarker_ = MarkerStart;
-      isDirty_ = true;
-      ((AppWindow &)w_).SetDirty();
-      return;
-    }
-    if (newButton == BM_RIGHT) {
-      selectedMarker_ = MarkerEnd;
-      isDirty_ = true;
-      ((AppWindow &)w_).SetDirty();
-      return;
-    }
+  // EDIT + ENTER + LEFT / RIGHT move the current marker to the next zero crossing
+  if ((newButton == BM_LEFT || newButton == BM_RIGHT) && mask == (BM_EDIT | BM_ENTER)) {
+    moveMarkerToZeroCrossing(newButton == BM_RIGHT ? +1 : -1);
+    return;
   }
 
-  if (graphFocused && mask == BM_ENTER && (newButton & BM_DIRECTIONAL)) {
-    uint32_t viewStart = graphField_.ViewStart();
-    uint32_t viewEnd = graphField_.ViewEnd();
-    uint32_t viewSpan = (viewEnd > viewStart) ? (viewEnd - viewStart) : 0;
-    if (viewSpan == 0) {
-      updateZoomWindow();
-      viewStart = graphField_.ViewStart();
-      viewEnd = graphField_.ViewEnd();
-      viewSpan = (viewEnd > viewStart) ? (viewEnd - viewStart) : 0;
-    }
-    if (viewSpan > 0) {
-      int32_t delta = 0;
-      if (newButton & (BM_LEFT | BM_RIGHT)) {
-        delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 64));
-        if (newButton == BM_LEFT) {
-          delta = -delta;
-        }
-      } else if (newButton & (BM_UP | BM_DOWN)) {
-        delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 16));
-        if (newButton == BM_DOWN) {
-          delta = -delta;
-        }
-      }
-      if (delta != 0) {
-        if (selectedMarker_ == MarkerStart) {
-          int32_t start = startVar_.GetInt();
-          int32_t newStart = start + delta;
-          if (newStart < 0) {
-            newStart = 0;
-          }
-          int32_t maxStart = (tempSampleSize_ > 0) ? static_cast<int32_t>(tempSampleSize_ - 1) : 0;
-          if (newStart > maxStart) {
-            newStart = maxStart;
-          }
-          int32_t end = endVar_.GetInt();
-          if (newStart > end) {
-            newStart = end;
-          }
-          startVar_.SetInt(newStart);
-        } else {
-          int32_t end = endVar_.GetInt();
-          int32_t newEnd = end + delta;
-          if (newEnd < 0) {
-            newEnd = 0;
-          }
-          int32_t maxEnd = (tempSampleSize_ > 0) ? static_cast<int32_t>(tempSampleSize_ - 1) : 0;
-          if (newEnd > maxEnd) {
-            newEnd = maxEnd;
-          }
-          int32_t start = startVar_.GetInt();
-          if (newEnd < start) {
-            newEnd = start;
-          }
-          endVar_.SetInt(newEnd);
-        }
-        updateSampleParameters();
-        isDirty_ = true;
-        ((AppWindow &)w_).SetDirty();
-        return;
-      }
-    }
+  // EDIT + LEFT / RIGHT move the current marker, from any place of the screen
+  if (mask == BM_EDIT && (newButton == BM_LEFT || newButton == BM_RIGHT)) {
+    moveMarker(newButton == BM_RIGHT ? +1 : -1);
+    return;
   }
 
   // We allow zooming from any place of the screen
@@ -534,23 +491,124 @@ void SampleEditorView::ButtonDown(uint16_t newButton, uint16_t mask) {
   }
 
   // For all other button presses, let the parent class handle navigation
+  const SelectedMarker markerBefore = selectedMarker_;
   FieldView::ButtonDown(newButton, mask);
   updateSelectedMarkerFromFocus();
+  if (selectedMarker_ != markerBefore) {
+    // the other marker is current: the waveform jumps so that it is visible
+    updateZoomWindow();
+    isDirty_ = true;
+    ((AppWindow &)w_).SetDirty();
+  }
+}
 
-  // EDIT Modifier
-  if (IsPair(newButton, mask, BM_EDIT, BM_ENTER)) {
-    {
-      UIField *focus = GetFocus();
-      for (auto &field : hexVarField_) {
-        if (&field == focus && field.GetVariableID() == Token::VarSampleEditEnd) {
-          Variable *var = field.GetVariable();
-          var->SetInt(tempSampleSize_ - 1);
-          isDirty_ = true;
-          break;
-        }
-      };
+void SampleEditorView::moveMarker(int direction) {
+  uint32_t viewStart = graphField_.ViewStart();
+  uint32_t viewEnd = graphField_.ViewEnd();
+  uint32_t viewSpan = (viewEnd > viewStart) ? (viewEnd - viewStart) : 0;
+  if (viewSpan == 0) {
+    updateZoomWindow();
+    viewStart = graphField_.ViewStart();
+    viewEnd = graphField_.ViewEnd();
+    viewSpan = (viewEnd > viewStart) ? (viewEnd - viewStart) : 0;
+  }
+  if (viewSpan == 0 || tempSampleSize_ == 0) {
+    return;
+  }
+
+  // a single sample at the last zoom level (one sample per pixel), as in the sample slicer
+  int32_t delta;
+  if (graphField_.ZoomLevel() >= graphField_.MaxZoomLevel()) {
+    delta = 1;
+  } else {
+    delta = static_cast<int32_t>(std::max<uint32_t>(1, viewSpan / 64));
+  }
+  if (direction < 0) {
+    delta = -delta;
+  }
+
+  const int32_t last = static_cast<int32_t>(tempSampleSize_ - 1);
+  if (selectedMarker_ == MarkerStart) {
+    // the start stays before the end
+    startVar_.SetInt(std::clamp<int32_t>(startVar_.GetInt() + delta, 0, std::min<int32_t>(last, endVar_.GetInt())));
+  } else {
+    // ... and the end behind the start
+    endVar_.SetInt(std::clamp<int32_t>(endVar_.GetInt() + delta, std::min<int32_t>(last, startVar_.GetInt()), last));
+  }
+
+  updateSampleParameters();
+  isDirty_ = true;
+  ((AppWindow &)w_).SetDirty();
+}
+
+void SampleEditorView::moveMarkerToZeroCrossing(int direction) {
+  if (!headerValid_ || tempSampleSize_ == 0) {
+    return;
+  }
+
+  const uint32_t current = (selectedMarker_ == MarkerStart) ? start_ : end_;
+  uint32_t target = 0;
+  if (!findZeroCrossing(current, direction, target)) {
+    // no other zero crossing: the end of the sample on that side
+    target = (direction > 0) ? tempSampleSize_ - 1 : 0;
+  }
+
+  // the start stays before the end, and the end behind the start
+  if (selectedMarker_ == MarkerStart) {
+    startVar_.SetInt(static_cast<int32_t>(std::min<uint32_t>(target, end_)));
+  } else {
+    endVar_.SetInt(static_cast<int32_t>(std::max<uint32_t>(target, start_)));
+  }
+
+  updateSampleParameters();
+  isDirty_ = true;
+  ((AppWindow &)w_).SetDirty();
+}
+
+bool SampleEditorView::findZeroCrossing(uint32_t from, int direction, uint32_t &found) {
+  if (viewData_->isShowingSampleEditorProjectPool) {
+    if (!goProjectSamplesDir(viewData_)) {
+      return false;
     }
   }
+  auto file = FileSystem::GetInstance()->Open(activeFilename().c_str(), "r");
+  if (!file) {
+    return false;
+  }
+
+  const uint32_t channels = headerInfo_.numChannels;
+  const uint32_t bytesPerFrame = channels * static_cast<uint32_t>(headerInfo_.bytesPerSample);
+  if (bytesPerFrame == 0) {
+    return false;
+  }
+  const bool eightBit = (headerInfo_.bitsPerSample == 8);
+  static constexpr uint32_t ChunkFrames = 512;
+
+  // Reads the left channel of frames from the file as 16 bit samples, in the chunk buffer, which also is where
+  // the samples go: 16 bit is converted in place (a sample is never written before it is read), 8 bit is read
+  // into the second half.
+  auto read = [&](uint32_t first, uint32_t count, int16_t *out) -> uint32_t {
+    const uint32_t frames = std::min(count, ChunkFrames);
+    uint8_t *raw = reinterpret_cast<uint8_t *>(chunkBuffer_);
+    if (eightBit) {
+      raw += sizeof(chunkBuffer_) / 2;
+    }
+    file->Seek(static_cast<uint32_t>(headerInfo_.dataOffset + static_cast<uint64_t>(first) * bytesPerFrame), SEEK_SET);
+    const uint32_t framesRead = file->Read(raw, frames * bytesPerFrame) / bytesPerFrame;
+    if (eightBit) {
+      for (uint32_t k = 0; k < framesRead; ++k) {
+        out[k] = static_cast<int16_t>((static_cast<int>(raw[k * bytesPerFrame]) - 128) << 8);
+      }
+    } else {
+      const int16_t *source = reinterpret_cast<const int16_t *>(raw);
+      for (uint32_t k = 0; k < framesRead; ++k) {
+        out[k] = source[k * channels];
+      }
+    }
+    return framesRead;
+  };
+
+  return ZeroCrossing::FindStreaming(tempSampleSize_, from, direction, found, chunkBuffer_, ChunkFrames, read);
 }
 
 void SampleEditorView::DrawView() {
@@ -559,6 +617,9 @@ void SampleEditorView::DrawView() {
   // Draw title
 
   DrawTitle("Sample Editor");
+
+  drawStatusLabels();
+  drawHelpLegend();
 
   if (HasModalView()) {
     // Modal rendering only clears text cells. Avoid redrawing the graph field
@@ -577,6 +638,40 @@ void SampleEditorView::DrawView() {
     FieldView::Redraw();
   }
   isDirty_ = true;
+}
+
+void SampleEditorView::drawStatusLabels() {
+  char buffer[32];
+
+  SetColor(Theme::View::fg);
+  SetBackgroundColor(Theme::View::bg);
+
+  // the markers, in the rows between the marker field and the operation
+  npf_snprintf(buffer, sizeof(buffer), "Start     %7.7X", static_cast<unsigned>(start_));
+  DrawString(0, 12, buffer);
+  npf_snprintf(buffer, sizeof(buffer), "End       %7.7X", static_cast<unsigned>(end_));
+  DrawString(0, 13, buffer);
+
+  npf_snprintf(buffer, sizeof(buffer), "Zoom      %02dx/%02dx", graphField_.ZoomLevel() + 1,
+               graphField_.MaxZoomLevel() + 1);
+  DrawString(0, 14, buffer);
+
+  // the title of the buttons below it
+  SetColor(Theme::View::legend);
+  DrawString(0, 16, "Operations");
+}
+
+void SampleEditorView::drawHelpLegend() {
+  SetBackgroundColor(Theme::View::bg);
+  SetColor(Theme::View::inactive);
+
+  // right of the markers and the zoom
+  DrawString(18, 10, "Play         " char_button_play_s);
+  DrawString(18, 11, "Zoom     " char_button_edit_s "+" char_button_up_s "/" char_button_down_s);
+  DrawString(18, 12, "Move     " char_button_edit_s "+" char_button_left_s "/" char_button_right_s);
+  DrawString(18, 13,
+             "Zero   " char_button_enter_s "+" char_button_edit_s "+" char_button_left_s "/" char_button_right_s);
+  DrawString(18, 14, "Exit       " char_button_nav_s "+" char_button_left_s);
 }
 
 void SampleEditorView::DrawWaveForm() {
@@ -598,18 +693,7 @@ void SampleEditorView::DrawWaveForm() {
 }
 
 void SampleEditorView::updateSelectedMarkerFromFocus() {
-  UIField *focus = GetFocus();
-  for (auto &field : hexVarField_) {
-    if (&field != focus) {
-      continue;
-    }
-    if (field.GetVariableID() == Token::VarSampleEditStart) {
-      selectedMarker_ = MarkerStart;
-    } else if (field.GetVariableID() == Token::VarSampleEditEnd) {
-      selectedMarker_ = MarkerEnd;
-    }
-    break;
-  }
+  selectedMarker_ = (markerVar_.GetInt() == MarkerEnd) ? MarkerEnd : MarkerStart;
 }
 
 uint32_t SampleEditorView::selectionCenterSample() const {
@@ -826,31 +910,19 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
   uintptr_t token = (uintptr_t)d;
 
   switch (token) {
-    case Token::ActionOK:
-      {
-        // Stop playback if active before applying any destructive operation
-        if (Player::GetInstance()->IsPlaying()) {
-          Player::GetInstance()->StopStreaming();
-        }
-        isPlaying_ = false;
-        playKeyHeld_ = false;
-
-        auto opName = operationVar_.GetString();
-        etl::string<SCREEN_WIDTH - 2> confirmLine("Apply ");
-        confirmLine.append(opName.c_str());
-        confirmLine.append("?");
-
-        MessageBox *mb =
-            MessageBox::Create(*this, "Edit", confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
-
-        // Modal cannot properly draw over the waveform gfx area because text
-        // drawing doesn't know the area because ClearTextRect() is not yet
-        // implemented so we need to manually clear the waveform drawing
-        clearWaveformRegion();
-
-        DoModal(mb, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onConfirmApplyOperation>(*this));
-        return;
-      }
+    case Token::VarSampleEditMarker:
+      // another marker: the zoom is centered on it
+      updateSelectedMarkerFromFocus();
+      updateZoomWindow();
+      isDirty_ = true;
+      ((AppWindow &)w_).SetDirty();
+      return;
+    case Token::ActionSampleTrim:
+      confirmOperation(Trim);
+      return;
+    case Token::ActionSampleNormalize:
+      confirmOperation(Normalize);
+      return;
     case Token::ActionSave:
       {
         attemptSave(false);
@@ -869,6 +941,32 @@ void SampleEditorView::Update(Observable &o, I_ObservableData *d) {
         return;
       }
   }
+}
+
+void SampleEditorView::confirmOperation(SampleEditOperation operation) {
+  // the operation that is applied when the dialog is confirmed (applySelectedOperation)
+  operationVar_.SetInt(static_cast<int>(operation), false);
+
+  // Stop playback if active before applying any destructive operation
+  if (Player::GetInstance()->IsPlaying()) {
+    Player::GetInstance()->StopStreaming();
+  }
+  isPlaying_ = false;
+  playKeyHeld_ = false;
+
+  auto opName = operationVar_.GetString();
+  etl::string<SCREEN_WIDTH - 2> confirmLine("Apply ");
+  confirmLine.append(opName.c_str());
+  confirmLine.append("?");
+
+  MessageBox *mb = MessageBox::Create(*this, "Edit", confirmLine.c_str(), "Saved only after Save", MBBF_YES | MBBF_NO);
+
+  // Modal cannot properly draw over the waveform gfx area because text
+  // drawing doesn't know the area because ClearTextRect() is not yet
+  // implemented so we need to manually clear the waveform drawing
+  clearWaveformRegion();
+
+  DoModal(mb, ModalViewCallback::create<SampleEditorView, &SampleEditorView::onConfirmApplyOperation>(*this));
 }
 
 void SampleEditorView::onConfirmApplyOperation(View &, ModalView &dialog) {
