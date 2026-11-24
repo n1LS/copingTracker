@@ -29,6 +29,8 @@ public:
 protected:
   void updateCursorValue(int val, bool sync = false);
   void updateCursor(int dir);
+  // the focus is the cell of the cursor
+  void updateFocusRect();
   void initCursorValue();
   void clearCursorValue();
   void warpGroove(int dir);

@@ -36,7 +36,14 @@ void GrooveView::updateCursor(int dir) {
     position_ += 16;
   if (position_ > 15)
     position_ -= 16;
+  updateFocusRect();
   isDirty_ = true;
+}
+
+void GrooveView::updateFocusRect() {
+  // the value of a step is 2 characters
+  const GUIPoint anchor = GetAnchor();
+  focusRect_ = GUIRect(anchor.x_, anchor.y_ + position_, 2, 1);
 }
 
 void GrooveView::updateCursorValue(int val, bool sync) {
@@ -166,6 +173,7 @@ void GrooveView::DrawView() {
 
   GUIPoint anchor = GetAnchor();
   GUIPoint pos = anchor;
+  updateFocusRect();
 
   // Draw section header
 
@@ -250,4 +258,5 @@ void GrooveView::OnPlayerUpdate(PlayerEventType, unsigned int tick) {
 }
 
 void GrooveView::OnFocus() {
+  updateFocusRect();
 }
