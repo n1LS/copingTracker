@@ -18,8 +18,8 @@ command help in Commands.copingDoc:
                (e.g. "SongSelection"). Its fg/bg rows are not used.
   groups 2-5   the four rows of the legend (fg colours / bg colours / text)
 
-Every line is 30 bytes wide. Only the first 26 columns fit the legend on
-screen; the last 4 columns are ignored.
+Every line is 30 bytes wide. The legend is drawn from column 5 of the screen, so
+the first 27 columns fit on screen; the last 3 columns are ignored.
 
 Usage:
   python3 convert-contextlegends.py [ContextLegends.copingDoc] [output.generated.h]
@@ -36,7 +36,7 @@ DEFAULT_OUTPUT = ROOT / "sources/Application/Utils/ContextLegend.generated.h"
 TEXTROWS = 4  # legend rows per block
 GROUPS = 1 + TEXTROWS  # label group + legend rows
 LINEWIDTH = 30
-LEGEND_WIDTH = 26
+LEGEND_WIDTH = 27  # the legend starts at column 5 of the 32 column screen
 RESERVED = {"None"}
 
 LABEL_RE = re.compile(r"^[A-Za-z][A-Za-z0-9]*$")
@@ -57,7 +57,7 @@ HEADER_BANNER = """/*
  *   python3 tools/manual/raw_data/convert-contextlegends.py
  * or simply run ./build.py (generation is part of the prebuild steps).
  *
- * Every line is trimmed from 30 columns to the 26 that fit the legend area
+ * Every line is trimmed from 30 columns to the 27 that fit the legend area
  * on screen.
  *
  * Include this header wherever context legends are needed.
