@@ -177,6 +177,7 @@ struct Token {
     ActionShowTheme = 159,
     ActionThemeName = 172,
     SampleInstrumentSlices = 171,
+    SampleInstrumentMaxSlices = 249,
     VarBacklightLevel = 174,
     ActionShowSampleEditor = 175,
     ActionShowSampleSlices = 184,
@@ -265,7 +266,7 @@ struct Token {
     VarMasterCompRelease = 130,
     ActionMasterOut = 131,
 
-    // 249-253 free 6
+    // 250-253 free 4
 
     Default = 256, // "    "
   };

@@ -166,6 +166,20 @@ void SampleInstrument::ClearSlices() {
   }
 }
 
+void SampleInstrument::ClearSlicesFrom(size_t index) {
+  bool changed = false;
+  for (size_t i = index; i < MaxSlices; ++i) {
+    if (slicePoints_[i] != 0) {
+      slicePoints_[i] = 0;
+      changed = true;
+    }
+  }
+  if (changed) {
+    SetChanged();
+    NotifyObservers();
+  }
+}
+
 bool SampleInstrument::HasSlicesForPlayback() const {
   return hasAnySliceValue();
 }

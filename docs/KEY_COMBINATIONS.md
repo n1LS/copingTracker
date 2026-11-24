@@ -610,6 +610,8 @@ The groove view has no clone, new or selection mode and therefore no context leg
 | `PLAY` (hold) | chord | Preview slice / sample; **release stops** |
 | bare arrows | chord | Field navigation (§2.1) |
 
+Changing the **Max. slices** field (`ENTER + arrows`, `ENTER + EDIT` resets it) clears the slice points from that number on (they are 0, undefined, again), so the slices after the last one that is kept are gone; the markers are redrawn and the selected slice is refreshed. The slice points before stay as they are, raising the value does not bring anything back.
+
 ### 5.3 `SampleImportView` (`Views/SampleImportView.cpp`)
 
 Extends `FileListView` (see §2.3) with its own buttons:

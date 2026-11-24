@@ -70,6 +70,8 @@ private:
   // slice points it passes pile up on it, to the right as well as to the left. Without another zero crossing it
   // moves to the end of the sample on that side.
   void moveSliceToZeroCrossing(int direction);
+  // The slice points from the maximum number of slices on (the field below the graph) are undefined, 0
+  void limitSliceCount();
   bool hasInstrumentSample() const;
 
   void clearSliceMarkers();

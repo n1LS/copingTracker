@@ -32,7 +32,7 @@ constexpr int32_t SliceYOffset = 2 * CHAR_HEIGHT;
 
 SampleSlicesView::SampleSlicesView(GUIWindow &w, ViewData *data)
     : FieldView(w, data), sliceIndexVar_(Token::SampleInstrumentSlices, 0),
-      sliceStartVar_(Token::SampleInstrumentStart, 0), sliceCountVar_(Token::Default, 4), instrument_(nullptr),
+      sliceStartVar_(Token::SampleInstrumentStart, 0), sliceCountVar_(Token::SampleInstrumentMaxSlices, 4), instrument_(nullptr),
       instrumentIndex_(0), sampleSize_(0), graphFieldPos_(SliceXOffset, SliceYOffset),
       graphField_(graphFieldPos_, GraphField::BitmapWidth, GraphField::BitmapHeight), hadModal_(false),
       playKeyHeld_(false), previewActive_(false), previewNote_(SampleInstrument::SliceNoteBase),
@@ -87,7 +87,7 @@ void SampleSlicesView::OnFocus() {
   previewCursorVisible_ = false;
   clearWaveformRegion();
   graphField_.Reset();
-  graphField_.SetShowBaseline(true);
+  graphField_.SetShowBaseline(ETL_USING_BUILTIN_IS_TRIVIALLY_CONSTRUCTIBLE);
 
   if (instrument_) {
     SamplePool *pool = SamplePool::GetInstance();
@@ -307,7 +307,8 @@ void SampleSlicesView::drawHelpLegend() {
   DrawString(16, SCREEN_HEIGHT - 9, "Zoom       " char_button_edit_s "+" char_button_up_s "/" char_button_down_s);
   DrawString(16, SCREEN_HEIGHT - 8, "Move slice " char_button_edit_s "+" char_button_left_s "/" char_button_right_s);
   DrawString(16, SCREEN_HEIGHT - 7,
-             "To zero  " char_button_enter_s "+" char_button_edit_s "+" char_button_left_s "/" char_button_right_s);
+             char_indicator_ellipsis_s "to zero " char_button_enter_s "+" char_button_edit_s "+" char_button_left_s
+                                       "/" char_button_right_s);
   DrawString(16, SCREEN_HEIGHT - 6, "Exit         " char_button_nav_s "+" char_button_left_s);
 }
 
@@ -370,6 +371,10 @@ void SampleSlicesView::Update(Observable &o, I_ObservableData *d) {
       ((AppWindow &)w_).SetDirty();
       break;
 
+    case Token::SampleInstrumentMaxSlices:
+      limitSliceCount();
+      break;
+
     case Token::ActionAutoSlice:
       if (instrument_ && instrument_->HasSlicesForPlayback()) {
         MessageBox *mb = MessageBox::Create(*this, "Slices", "Replace current slices?", MBBF_YES | MBBF_NO);
@@ -415,6 +420,8 @@ void SampleSlicesView::buildFieldLayout() {
   intVarField_.emplace_back(position, sliceCountVar_, ":%2d", 1, static_cast<int32_t>(SampleInstrument::MaxSlices), 1,
                             4);
   fieldList_.insert(fieldList_.end(), &intVarField_.back());
+  // the maximum number of slices is a plain variable, the field tells when it is changed
+  intVarField_.back().AddObserver(*this);
 
   position.x_ = 1;
   position.y_ = 23;
@@ -762,7 +769,31 @@ void SampleSlicesView::handleSliceSelectionChange() {
     graphField_.RequestFullRedraw();
   }
 
+  int count = sliceIndexVar_.GetInt();
+  if (count > sliceCountVar_.GetInt() - 1) {
+    sliceCountVar_.SetInt(sliceIndexVar_.GetInt(), false);
+  }
+
   isDirty_ = true;
+}
+
+void SampleSlicesView::limitSliceCount() {
+  if (!instrument_) {
+    return;
+  }
+
+  const int32_t count =
+      std::clamp<int32_t>(sliceCountVar_.GetInt(), 1, static_cast<int32_t>(SampleInstrument::MaxSlices));
+  instrument_->ClearSlicesFrom(static_cast<size_t>(count));
+
+  // the selected slice may be one of them, and the markers of the others are gone
+  updateSliceSelectionFromInstrument();
+  if (updateZoomWindow()) {
+    graphField_.InvalidateWaveform();
+  }
+  graphField_.RequestFullRedraw();
+  isDirty_ = true;
+  ((AppWindow &)w_).SetDirty();
 }
 
 void SampleSlicesView::moveSliceToZeroCrossing(int direction) {

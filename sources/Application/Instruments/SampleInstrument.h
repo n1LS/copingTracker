@@ -81,6 +81,8 @@ public:
   uint32_t GetSlicePoint(size_t index) const;
   void SetSlicePoint(size_t index, uint32_t start);
   void ClearSlices();
+  // Clears the slice points from an index on, they are undefined (0) again, the ones before stay
+  void ClearSlicesFrom(size_t index);
   bool HasSlicesForPlayback() const;
   bool HasSlicesForWarning() const;
   bool IsSliceDefined(size_t index) const;
