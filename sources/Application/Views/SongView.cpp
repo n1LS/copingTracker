@@ -539,8 +539,7 @@ void SongView::toggleMute() {
     from = r.Left();
     to = r.Right() - 1;
   };
-  controller->ToggleMute(from, to);
-  viewMode_ = (viewMode_ != VM_MUTEON) ? VM_MUTEON : VM_NORMAL;
+  controller->BeginMute(from, to);
 }
 
 void SongView::switchSoloMode() {
@@ -553,8 +552,7 @@ void SongView::switchSoloMode() {
     from = r.Left();
     to = r.Right() - 1;
   };
-  controller->SwitchSoloMode(from, to, (viewMode_ != VM_SOLOON));
-  viewMode_ = (viewMode_ != VM_SOLOON) ? VM_SOLOON : VM_NORMAL;
+  controller->BeginSolo(from, to);
   isDirty_ = true;
 }
 
@@ -671,16 +669,6 @@ void SongView::ButtonUp(uint16_t button, uint16_t mask) {
     beginSelection();
     isDirty_ = true;
   }
-  if (viewMode_ == VM_MUTEON) {
-    if (mask & BM_NAV) {
-      toggleMute();
-    }
-  };
-  if (viewMode_ == VM_SOLOON) {
-    if (mask & BM_NAV) {
-      switchSoloMode();
-    }
-  };
 }
 
 bool SongView::navigationDown(uint16_t direction) {
@@ -1101,6 +1089,9 @@ ContextLegend SongView::currentContextLegend() const {
   }
   if (viewMode_ == VM_SELECTION || clipboard_.active_) {
     return ContextLegend::SongSelection;
+  }
+  if (loopState_ == lsSelecting) {
+    return ContextLegend::SongLoop;
   }
   return ContextLegend::None;
 }

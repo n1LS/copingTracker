@@ -42,7 +42,8 @@ direction is ignored.
 > Both views derive from `PhraseEditingView`, which implements the input they share:
 > `NAV + direction`, `NAV + NAV`, `PLAY`, `NAV + PLAY` and `EDIT + direction` (switching the phrase).
 >
-> **Context legend:** in clone and selection mode the song, chain, phrase and table
+> **Context legend:** in clone and selection mode (and in the song view while the loop is
+> being selected, legend `SongLoop`) the song, chain, phrase and table
 > views replace the notes / command help in the bottom info area with a legend of the
 > available combos. The legends live in `tools/manual/raw_data/ContextLegends.copingDoc`
 > and must be kept in sync with the tables below.
@@ -145,8 +146,8 @@ Generic value editing reached through `FieldView`:
 ### 3.1 `SongView` (`Views/SongView.cpp`)
 
 Modes: `VM_NEW` (chain-to-create armed), `VM_CLONE` (clone armed),
-`VM_SELECTION` (range selected), `VM_MUTEON` / `VM_SOLOON` (mute / solo armed
-until NAV is released).
+`VM_SELECTION` (range selected). Mute and solo are not view modes, see the
+*Mute and solo* note in the appendix.
 
 *Normal mode*
 
@@ -157,7 +158,7 @@ until NAV is released).
 | `EDIT + LEFT / RIGHT` | chord | Toggle play mode **SONG ↔ LIVE** (sequencer mode) |
 | `ENTER + EDIT` | chord | Cut chain at cursor (`cutPosition`) |
 | `EDIT + ALT` | chord, either order | Enter **clone mode** (`VM_CLONE`) |
-| `EDIT + NAV` | chord, either order | Toggle mute for current chain (hold) |
+| `EDIT + NAV` | chord, either order | Toggle mute for current chain, taken back when `EDIT` is let go while `NAV` is held (see appendix) |
 | `EDIT + PLAY` | chord | Live mode: start immediate (`startImmediate`) |
 | `ENTER + DOWN` | chord | Chain value −`0x10` |
 | `ENTER + UP` | chord | Chain value +`0x10` |
@@ -165,12 +166,12 @@ until NAV is released).
 | `ENTER + RIGHT` | chord | Chain value +`0x01` |
 | `ENTER + ALT` | chord | Paste clipboard chain (`pasteClipboard`) |
 | `ENTER` alone | chord | Paste last / create next chain (`pasteLast` + `VM_NEW`) |
-| `ENTER + NAV` | chord | Toggle **solo** for current chain (hold) |
+| `ENTER + NAV` | chord | Toggle **solo** for current chain, taken back when `ENTER` is let go while `NAV` is held; a kept solo ends with the next `ENTER + NAV` (see appendix) |
 | `NAV + ALT` | chord, either order | Un-mute all chains (`unMuteAll`) |
 | `NAV + RIGHT` | chord | Navigate → **Chain view** |
 | `NAV + UP` | chord | Navigate → **Project view** |
 | `NAV + DOWN` | chord | Navigate → **Mixer view** |
-| `NAV + LEFT` | chord | Toggle song loop (`toggleLoopState`) |
+| `NAV + LEFT` | chord | Toggle song loop (`toggleLoopState`); while the end of the loop is being selected (`lsSelecting`) the `SongLoop` legend is shown, unless the clone / selection legend is active |
 | `NAV + PLAY` | chord | Stop (`onStop`) |
 | `ALT + DOWN` | chord | Jump to next section (`jumpToNextSection(+1)`) |
 | `ALT + UP` | chord | Jump to previous section (`jumpToNextSection(-1)`) |
@@ -213,7 +214,7 @@ until NAV is released).
 
 ### 3.2 `ChainView` (`Views/ChainView.cpp`)
 
-Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
+Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`.
 
 *Normal mode*
 
@@ -223,14 +224,14 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `EDIT + UP / DOWN` | chord | Warp within current chain column (`warpInColumn`; UP=−1, DOWN=+1) |
 | `ENTER + EDIT` | chord | Cut phrase at cursor (`cutPosition`) |
 | `EDIT + ALT` | chord, either order | Enter **clone mode** |
-| `EDIT + NAV` | chord, either order | Toggle mute (hold) |
+| `EDIT + NAV` | chord, either order | Toggle mute, taken back when `EDIT` is let go while `NAV` is held (see appendix) |
 | `ENTER + DOWN` | chord | Phrase value −`0x10` (row col) / −`0x0C` (other col) |
 | `ENTER + UP` | chord | Phrase value +`0x10` / +`0x0C` |
 | `ENTER + LEFT` | chord | Phrase value −`0x01` |
 | `ENTER + RIGHT` | chord | Phrase value +`0x01` |
 | `ENTER + ALT` | chord | Paste clipboard (`pasteClipboard`) |
 | `ENTER` alone | chord | Paste last phrase into slot; in the phrase column (column 0) it also arms `VM_NEW` |
-| `ENTER + NAV` | chord | Toggle solo (hold) |
+| `ENTER + NAV` | chord | Toggle solo, taken back when `ENTER` is let go while `NAV` is held; a kept solo ends with the next `ENTER + NAV` (see appendix) |
 | `NAV + LEFT` | chord | Navigate → **Song view** |
 | `NAV + RIGHT` | chord | Navigate → **Phrase view** (current phrase) |
 | `NAV + PLAY` | chord | Start chain with retrig (`startImmediate`-style, `PM_CHAIN`) |
@@ -274,7 +275,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 
 The **volume** is `1`–`F` or none (there is no volume `0`: `LEFT` below `1` gives none, `RIGHT` on none gives `1`, `UP` is `F`, `DOWN` is none), the **instrument** is `00`–`1F` or none and a **command** is one of the 32 commands (their token values are `0`–`31`, `0`–`63` are reserved for them). Every other token is `64` or higher. Save files made before this change do not load.
 
-Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
+Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`.
 
 *Normal mode*
 
@@ -285,11 +286,11 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | `EDIT + UP / DOWN` | chord | Warp to previous / next instrument (`warpInChain`) |
 | `ENTER + EDIT` | chord | Cut value at cursor (`cutPosition`) |
 | `EDIT + ALT` | chord, either order | Enter **clone mode** (`VM_CLONE`) |
-| `EDIT + NAV` | chord, either order | Toggle mute (hold) |
+| `EDIT + NAV` | chord, either order | Toggle mute, taken back when `EDIT` is let go while `NAV` is held (see appendix) |
 | `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust cursor value (`updateCursorValue`). In the note column LEFT / RIGHT move the note one step down / up in the scale and key of the project (`changeNote`), UP / DOWN move it an octave. Other columns: DOWN / LEFT decrease, UP / RIGHT increase |
 | `ENTER + ALT` | chord | Paste clipboard (`pasteClipboard`) |
 | `ENTER` alone | chord | Paste last value; on command columns a **command picker** opens (if enabled); on the instrument and command value columns arms `VM_NEW`; on the note, instrument and volume columns starts **audition** (hold ENTER, release stops) |
-| `ENTER + NAV` | chord | Toggle solo (hold) |
+| `ENTER + NAV` | chord | Toggle solo, taken back when `ENTER` is let go while `NAV` is held; a kept solo ends with the next `ENTER + NAV` (see appendix) |
 | `NAV + LEFT` | chord | Navigate → **Chain view** |
 | `NAV + RIGHT` | chord | Navigate → **Instrument view** |
 | `NAV + DOWN` | chord | Navigate → **Table view** (of `TABLE` command) |
@@ -305,7 +306,6 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`, `VM_MUTEON`, `VM_SOLOON`.
 | Release | Action |
 |---------|--------|
 | any button, once `ENTER` is no longer held | Stop note audition (`stopAudition`); normally this is the release of `ENTER` itself |
-| `NAV` + `MUTEON` / `SOLOON` | Commit mute / solo toggle |
 
 *Clone mode (`VM_CLONE`)* — entered with `EDIT + ALT`, legend `PhraseClone`:
 
@@ -549,8 +549,8 @@ The groove view has no clone, new or selection mode and therefore no context leg
 | `NAV + UP` | chord | Navigate → **Song view** |
 | `NAV + RIGHT` | chord | Navigate → **Table view** |
 | `PLAY` | chord | Toggle play / stop |
-| `EDIT + NAV` | chord, either order | Toggle mute (armed; committed when NAV released) |
-| `ENTER + NAV` | chord | Toggle solo (armed; committed when NAV released) |
+| `EDIT + NAV` | chord, either order | Toggle mute, taken back when `EDIT` is let go while `NAV` is held (see appendix) |
+| `ENTER + NAV` | chord | Toggle solo, taken back when `ENTER` is let go while `NAV` is held; a kept solo ends with the next `ENTER + NAV` (see appendix) |
 | `NAV + ALT` | chord, either order | Un-mute all (`unMuteAll`) |
 | `DOWN / UP` (bare) | chord | Ignored (dead zone between fields) |
 | bare arrows | chord | Field navigation (§2.1) |
@@ -738,9 +738,15 @@ Extends `FileListView` (see §2.3) with its own buttons:
 ## 8. Appendix
 
 - **View-mode semantics** (`ViewMode` in `View.h`): `VM_NEW`, `VM_CLONE` and
-  `VM_SELECTION` arm an action for the *next* press; `VM_MUTEON` / `VM_SOLOON`
-  are "hold"-type arms resolved when `NAV` is released (so `EDIT+NAV` /
-  `ENTER+NAV` are effectively *hold NAV* to mute / solo).
+  `VM_SELECTION` arm an action for the *next* press.
+- **Mute and solo** (`UIController::BeginMute` / `BeginSolo` / `OnButtonUp`, the
+  same in the song, chain, phrase and mixer view): `EDIT + NAV` toggles the mute of the
+  channel (the selected channels in the song view), `ENTER + NAV` solos it. Both
+  work while held: letting go of `EDIT` / `ENTER` while `NAV` is still held takes it back
+  (the mutes from before the solo are restored), letting go of `NAV` first keeps it.
+  Other buttons pressed or released in between change nothing. A kept solo ends with
+  the next `ENTER + NAV` (which restores the mutes from before it) or with `NAV + ALT`
+  (un-mute all).
 - **Exact chords**: a chord only fires for its exact held set, so extra held
   buttons (including a second direction) suppress it. Modal dialogs opened
   mid-chord (`MessageBox`, `CommandView`) deliberately ignore other held buttons.

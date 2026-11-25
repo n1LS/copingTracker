@@ -57,7 +57,7 @@ enum class InfoAreaDrawMode : uint8_t { Notes, HelpLegend, Context };
 // the legends shown by drawContextLegend (generated from ContextLegends.copingDoc)
 enum class ContextLegend : uint8_t;
 
-enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION, VM_MUTEON, VM_SOLOON };
+enum ViewMode { VM_NORMAL, VM_NEW, VM_CLONE, VM_SELECTION };
 
 #define SWITCHABLE(Y, A, B)                                                                                            \
   static constexpr Color Y(bool selected) {                                                                            \

@@ -18,6 +18,7 @@
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Application/Views/UIController.h"
 #include "Foundation/Constants/GraphicCharacters.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalView.h"
@@ -537,6 +538,10 @@ bool View::trackNavDoubleTap(uint16_t button, uint16_t mask, bool pressed) {
 }
 
 void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
+  if (!pressed) {
+    // a mute / solo chord that is held ends here, whichever view or modal gets the release
+    UIController::GetInstance()->OnButtonUp(button, mask);
+  }
   // Normal button processing
   if (modalView_) {
     modalView_->ProcessButton(button, mask, pressed);

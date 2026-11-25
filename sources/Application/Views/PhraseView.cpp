@@ -474,14 +474,12 @@ void PhraseView::unMuteAll() {
 
 void PhraseView::toggleMute() {
   UIController *controller = UIController::GetInstance();
-  controller->ToggleMute(viewData_->songX_, viewData_->songX_);
-  viewMode_ = (viewMode_ != VM_MUTEON) ? VM_MUTEON : VM_NORMAL;
+  controller->BeginMute(viewData_->songX_, viewData_->songX_);
 }
 
 void PhraseView::switchSoloMode() {
   UIController *controller = UIController::GetInstance();
-  controller->SwitchSoloMode(viewData_->songX_, viewData_->songX_, (viewMode_ == VM_NORMAL));
-  viewMode_ = (viewMode_ != VM_SOLOON) ? VM_SOLOON : VM_NORMAL;
+  controller->BeginSolo(viewData_->songX_, viewData_->songX_);
   isDirty_ = true;
 }
 
@@ -525,20 +523,6 @@ void PhraseView::ButtonUp(uint16_t button, uint16_t mask) {
   // Stop audition when ENTER is released
   if (!(mask & BM_ENTER)) {
     stopAudition();
-  }
-
-  // Exit mute-on mode when NAV is released
-  if (viewMode_ == VM_MUTEON) {
-    if (mask & BM_NAV) {
-      toggleMute();
-    }
-  }
-
-  // Exit solo-on mode when NAV is released
-  if (viewMode_ == VM_SOLOON) {
-    if (mask & BM_NAV) {
-      switchSoloMode();
-    }
   }
 }
 
@@ -995,7 +979,7 @@ void PhraseView::DrawView() {
       if (j == row_) {
         const GUIPoint location = GetTitlePosition();
         const int x = location.x_ + 10;
-        const int maxLength = INDICATOR_PLAY_STATUS_X -  x;
+        const int maxLength = INDICATOR_PLAY_STATUS_X - x;
 
         npf_snprintf(buffer, (size_t)maxLength, "%2.2X:%s", d, instrObj->GetDisplayName().c_str());
 

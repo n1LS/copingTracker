@@ -92,8 +92,7 @@ void MixerView::updateCursor(int dx, int dy) {
 void MixerView::switchSoloMode() {
   UIController *controller = UIController::GetInstance();
   int currentChannel = viewData_->songX_;
-  controller->SwitchSoloMode(currentChannel, currentChannel, (viewMode_ == VM_NORMAL));
-  viewMode_ = (viewMode_ != VM_SOLOON) ? VM_SOLOON : VM_NORMAL;
+  controller->BeginSolo(currentChannel, currentChannel);
   isDirty_ = true;
 }
 
@@ -107,23 +106,12 @@ void MixerView::toggleMute() {
 
   UIController *controller = UIController::GetInstance();
   int currentChannel = viewData_->songX_;
-  controller->ToggleMute(currentChannel, currentChannel);
-  viewMode_ = (viewMode_ != VM_MUTEON) ? VM_MUTEON : VM_NORMAL;
+  controller->BeginMute(currentChannel, currentChannel);
   isDirty_ = true;
 }
 
 void MixerView::ButtonUp(uint16_t button, uint16_t mask) {
   // mask is what remains held after the release
-  if (viewMode_ == VM_MUTEON) {
-    if (mask & BM_NAV) {
-      toggleMute();
-    }
-  }
-  if (viewMode_ == VM_SOLOON) {
-    if (mask & BM_NAV) {
-      switchSoloMode();
-    }
-  }
   FieldView::ButtonUp(button, mask);
   // Force a full redraw of the mixer view
   SetDirty(true);

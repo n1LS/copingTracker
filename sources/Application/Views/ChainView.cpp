@@ -445,15 +445,13 @@ void ChainView::unMuteAll() {
 void ChainView::toggleMute() {
 
   UIController *controller = UIController::GetInstance();
-  controller->ToggleMute(viewData_->songX_, viewData_->songX_);
-  viewMode_ = (viewMode_ != VM_MUTEON) ? VM_MUTEON : VM_NORMAL;
+  controller->BeginMute(viewData_->songX_, viewData_->songX_);
 }
 
 void ChainView::switchSoloMode() {
 
   UIController *controller = UIController::GetInstance();
-  controller->SwitchSoloMode(viewData_->songX_, viewData_->songX_, (viewMode_ == VM_NORMAL));
-  viewMode_ = (viewMode_ != VM_SOLOON) ? VM_SOLOON : VM_NORMAL;
+  controller->BeginSolo(viewData_->songX_, viewData_->songX_);
   isDirty_ = true;
 }
 
@@ -477,16 +475,6 @@ void ChainView::ButtonUp(uint16_t button, uint16_t mask) {
     viewMode_ = VM_SELECTION;
     beginSelection();
     isDirty_ = true;
-  }
-  if (viewMode_ == VM_MUTEON) {
-    if (mask & BM_NAV) {
-      toggleMute();
-    }
-  }
-  if (viewMode_ == VM_SOLOON) {
-    if (mask & BM_NAV) {
-      switchSoloMode();
-    }
   }
   if (button == BM_ENTER) {
     finalizePhraseUpdate();
