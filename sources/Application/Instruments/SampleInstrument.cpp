@@ -1503,6 +1503,17 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SampleInstrument::GetDisplayName() {
   // No user-set name, use the sample file name without file extension
   auto sampleFileName = GetSampleFileName();
 
+  // No sample but a GM bank instrument: its name (a sample takes precedence, as when choosing the source)
+  const int gmInstrument = gmInstrument_.GetInt();
+  if (sampleFileName.empty() && gmInstrument >= 0 && gmInstrument < kGMInstrumentCount) {
+    const char *gmName = GMBank::nameForPreset(gmInstrument);
+    etl::string<MAX_INSTRUMENT_NAME_LENGTH> name;
+    for (size_t i = 0; gmName[i] != '\0' && i < name.capacity(); i++) {
+      name.push_back(gmName[i]);
+    }
+    return name;
+  }
+
   // If no sample is set (empty filename), return "NONE"
   if (sampleFileName.empty()) {
     return etl::string<MAX_INSTRUMENT_NAME_LENGTH>("No Sample");

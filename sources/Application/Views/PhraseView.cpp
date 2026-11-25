@@ -940,7 +940,7 @@ void PhraseView::DrawView() {
 
   const GUIPoint anchor = GetAnchor();
   unsigned char lastInstr = NO_INSTRUMENT;
-  char buffer[6];
+  char buffer[SCREEN_WIDTH + 1];
   char noteBuffer[4];
 
   GUIRect selRect = getSelectionRect();
@@ -993,23 +993,16 @@ void PhraseView::DrawView() {
       DrawString(anchor.x_ + columnPositions_[colInstrument], y, buffer);
       // todo: move outside of the loop
       if (j == row_) {
-        GUIPoint location = GetTitlePosition();
-
-        npf_snprintf(buffer, sizeof(buffer), "%2.2X:", d);
+        const GUIPoint location = GetTitlePosition();
         const int x = location.x_ + 10;
-        const int maxLength = INDICATOR_TITLE_VU_X;
-        etl::string<maxLength> instrLine = buffer;
-        I_Instrument *instr = viewData_->project_->GetInstrumentBank()->GetInstrument(d);
-        instrLine += instr->GetDisplayName();
+        const int maxLength = INDICATOR_PLAY_STATUS_X -  x;
+
+        npf_snprintf(buffer, (size_t)maxLength, "%2.2X:%s", d, instrObj->GetDisplayName().c_str());
 
         SetBackgroundColor(Theme::View::Title::bg);
         SetColor(Theme::View::Title::fg);
 
-        DrawString(x, location.y_, instrLine.c_str());
-
-        if ((int)instrLine.length() >= maxLength) {
-          DrawChar(maxLength - 1, location.y_, CHAR(char_indicator_ellipsis_s));
-        }
+        DrawString(x, location.y_, buffer);
       }
     }
 
