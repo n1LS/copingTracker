@@ -22,7 +22,7 @@ Groove::~Groove() {};
 
 void Groove::Clear() {
   // Init all grooves with basic datas
-  memset(data_, NO_GROOVE_DATA, MAX_GROOVES * 0xF);
+  memset(data_, NO_GROOVE_DATA, sizeof(data_));
   for (int i = 0; i < MAX_GROOVES; i++) {
     data_[i][0] = 6;
     data_[i][1] = 6;
@@ -52,13 +52,63 @@ void Groove::GetChannelData(int channel, int *groove, int *position) {
   *position = c.position_;
 }
 
-void Groove::SaveContent(tinyxml2::XMLPrinter *printer) {
-  saveHexBuffer(printer, XML_ELEM_DATA, (unsigned char *)data_, STEPS_PER_GROOVE * MAX_GROOVES);
+// Grooves that are as Clear() leaves them are not saved, of the others the steps up to the last one that is set:
+//   "grooves": [{"id": 3, "steps": [7, 5]}]
+// a step of 0 would be a division by zero, it is the end of the groove like 255
+void Groove::SaveContent(JsonWriter &writer) {
+  writer.BeginArray("grooves");
+  for (int i = 0; i < MAX_GROOVES; i++) {
+    int count = 0;
+    for (int j = 0; j < STEPS_PER_GROOVE; j++) {
+      if (data_[i][j] != NO_GROOVE_DATA) {
+        count = j + 1;
+      }
+    }
+    if (count == 2 && data_[i][0] == 6 && data_[i][1] == 6) {
+      continue;
+    }
+    writer.BeginObject();
+    writer.Int("id", i);
+    writer.IntArray("steps", data_[i], count);
+    writer.EndObject();
+  }
+  writer.EndArray();
 }
 
-void Groove::RestoreContent(PersistencyDocument *doc) {
-  if (doc->FirstChild()) {
-    restoreHexBuffer(doc, (unsigned char *)data_);
+void Groove::RestoreContent(JsonReader &reader) {
+  // grooves that are not in the file are the default ones
+  Clear();
+
+  while (reader.NextKey()) {
+    if (!reader.KeyIs("grooves")) {
+      reader.Skip();
+      continue;
+    }
+    if (!reader.BeginArray()) {
+      return;
+    }
+    while (reader.NextElement()) {
+      if (!reader.BeginObject()) {
+        return;
+      }
+      int id = -1;
+      while (reader.NextKey()) {
+        if (reader.KeyIs("id")) {
+          id = reader.ReadInt();
+        } else if (reader.KeyIs("steps") && id >= 0 && id < MAX_GROOVES) {
+          // the id comes first, the steps that are not in the file are cleared
+          memset(data_[id], NO_GROOVE_DATA, STEPS_PER_GROOVE);
+          reader.ReadIntArray(data_[id], STEPS_PER_GROOVE);
+          for (int j = 0; j < STEPS_PER_GROOVE; j++) {
+            if (data_[id][j] == 0) {
+              data_[id][j] = NO_GROOVE_DATA;
+            }
+          }
+        } else {
+          reader.Skip();
+        }
+      }
+    }
   }
 }
 
@@ -84,7 +134,7 @@ bool Groove::UpdateGroove(ChannelGroove &c, bool reverse) {
     } else {
       if (c.ticks_ == data_[c.groove_][c.position_]) {
         c.position_ = (c.position_ + 1) % STEPS_PER_GROOVE;
-        if (data_[c.groove_][c.position_] == 0xFF) {
+        if (data_[c.groove_][c.position_] == 0xFF || data_[c.groove_][c.position_] == 0) {
           c.position_ = 0;
         };
         c.ticks_ = 0;
@@ -94,7 +144,7 @@ bool Groove::UpdateGroove(ChannelGroove &c, bool reverse) {
   } else { // Note
     if (c.ticks_ == 0) {
       c.position_ = (c.position_ + 1) % STEPS_PER_GROOVE;
-      if (data_[c.groove_][c.position_] == 0xFF) {
+      if (data_[c.groove_][c.position_] == 0xFF || data_[c.groove_][c.position_] == 0) {
         c.position_ = 0;
       };
       c.ticks_ = data_[c.groove_][c.position_];
@@ -118,7 +168,9 @@ void Groove::SetGroove(int channel, int groove) {
 
 bool Groove::TriggerChannel(int i) {
   ChannelGroove &c = channelGroove_[i];
-  return ((c.ticks_) % (data_[c.groove_][c.position_]) == 0);
+  const unsigned char length = data_[c.groove_][c.position_];
+  // a step of 0 ticks cannot be, it plays on every tick instead of dividing by zero
+  return length == 0 || (c.ticks_ % length) == 0;
 }
 
 unsigned char *Groove::GetGrooveData(int groove) {

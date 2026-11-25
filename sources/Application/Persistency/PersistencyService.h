@@ -13,11 +13,12 @@
 #define _PERSISTENCY_SERVICE_H_
 
 #include "Application/Instruments/I_Instrument.h"
-#include "Externals/TinyXML2/tinyxml2.h"
 #include "Externals/etl/include/etl/string.h"
-#include "Externals/yxml/yxml.h"
 
+#include "Application/Persistency/JsonReader.h"
+#include "Application/Persistency/JsonWriter.h"
 #include "Foundation/Services/Service.h"
+#include "System/FileSystem/FileSystem.h"
 #include "Foundation/T_Singleton.h"
 #include "PersistenceConstants.h"
 
@@ -51,6 +52,7 @@ public:
   InstrumentType DetectInstrumentType(const char *name);
 
 private:
+  bool ReplaceFile(const char *from, const char *to);
   PersistencyResult CreateProjectDirs_(const char *projectName);
   void CreatePath(etl::istring &path, const etl::ivector<const char *> &segments);
   PersistencyResult SaveProjectData(const char *projectName, bool autosave);

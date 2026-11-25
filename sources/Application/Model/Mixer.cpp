@@ -24,8 +24,11 @@ void Mixer::Clear() {
   }
 }
 
-void Mixer::SaveContent(tinyxml2::XMLPrinter *printer) {
+void Mixer::SaveContent(JsonWriter &) {
 }
 
-void Mixer::RestoreContent(PersistencyDocument *doc) {
+void Mixer::RestoreContent(JsonReader &reader) {
+  while (reader.NextKey()) {
+    reader.Skip();
+  }
 }

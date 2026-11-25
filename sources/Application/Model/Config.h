@@ -12,7 +12,8 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#include "Application/Persistency/Persistent.h"
+#include "Application/Persistency/JsonReader.h"
+#include "Application/Persistency/JsonWriter.h"
 #include "Foundation/T_Singleton.h"
 #include "Foundation/Variables/StringVariable.h"
 #include "Foundation/Variables/VariableContainer.h"
@@ -29,13 +30,9 @@ public:
   void ProcessArguments(int argc, char **argv);
   bool Save();
 
-  // Methods for handling color variables and themes
-  void WriteColorVariables(tinyxml2::XMLPrinter *printer);
-  void ReadColorVariable(PersistencyDocument *doc);
-
   // Theme-related methods (replacing Theme class)
-  bool SaveTheme(tinyxml2::XMLPrinter *printer, const char *themeName);
-  bool LoadTheme(PersistencyDocument *doc);
+  void SaveTheme(JsonWriter &writer);
+  bool LoadTheme(JsonReader &reader);
   bool ExportTheme(const char *themeName, bool overwrite);
   bool ImportTheme(const char *themeName);
 
@@ -74,7 +71,11 @@ private:
   WatchedVariable previewVolume_;
   WatchedVariable metronome_;
 
-  void SaveContent(tinyxml2::XMLPrinter *printer);
+  void SaveContent(JsonWriter &writer);
+  bool LoadContent(JsonReader &reader);
+  void writeColors(JsonWriter &writer);
+  void readColors(JsonReader &reader);
+  Variable *findVariableByName(const char *name, bool colors);
   void useDefaultConfig();
 };
 

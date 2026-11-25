@@ -12,7 +12,6 @@
 #include "Table.h"
 #include "Application/Instruments/CommandList.h"
 #include "Application/Persistency/PersistenceConstants.h"
-#include "Application/Utils/HexBuffers.h"
 #include "Application/Utils/char.h"
 #include "Song.h"
 #include "System/System/System.h"
@@ -56,7 +55,7 @@ TableHolder::TableHolder() : Persistent("Tables") {
 }
 
 void TableHolder::Reset() {
-  for (int i = 0; i < SONG_CHANNEL_COUNT; i++) {
+  for (int i = 0; i < TABLE_COUNT; i++) {
     table_[i].Reset();
   }
   for (int i = 0; i < TABLE_COUNT; i++) {
@@ -69,98 +68,82 @@ Table &TableHolder::GetTable(int table) {
   return table_[table];
 }
 
-void TableHolder::SaveContent(tinyxml2::XMLPrinter *printer) {
-
-  char hex[3];
+// only the tables that are not empty, and of those only the steps that are not empty:
+//   "tables": [{"id": 3, "steps": [[step, command 1, value 1, command 2, value 2, command 3, value 3], ...]}]
+void TableHolder::SaveContent(JsonWriter &writer) {
+  writer.BeginArray("tables");
   for (int i = 0; i < TABLE_COUNT; i++) {
-    printer->OpenElement(XML_ELEM_TABLE);
-    byteToHexString(i, hex);
-    printer->PushAttribute(XML_ATTR_ID, hex);
-
     Table &table = table_[i];
-    if (!table.IsEmpty()) {
-      uint8_t cmd1[TABLE_STEPS], cmd2[TABLE_STEPS], cmd3[TABLE_STEPS];
-      uint16_t param1[TABLE_STEPS], param2[TABLE_STEPS], param3[TABLE_STEPS];
-      for (int j = 0; j < TABLE_STEPS; j++) {
-        cmd1[j] = table.steps_[j].cmd1;
-        cmd2[j] = table.steps_[j].cmd2;
-        cmd3[j] = table.steps_[j].cmd3;
-        param1[j] = table.steps_[j].param1;
-        param2[j] = table.steps_[j].param2;
-        param3[j] = table.steps_[j].param3;
-      }
-      saveHexBuffer(printer, XML_ELEM_COMMAND1, cmd1, TABLE_STEPS);
-      saveHexBuffer(printer, XML_ELEM_VALUE1, param1, TABLE_STEPS);
-      saveHexBuffer(printer, XML_ELEM_COMMAND2, cmd2, TABLE_STEPS);
-      saveHexBuffer(printer, XML_ELEM_VALUE2, param2, TABLE_STEPS);
-      saveHexBuffer(printer, XML_ELEM_COMMAND3, cmd3, TABLE_STEPS);
-      saveHexBuffer(printer, XML_ELEM_VALUE3, param3, TABLE_STEPS);
+    if (table.IsEmpty()) {
+      continue;
     }
-    printer->CloseElement();
+    const uint8_t none = static_cast<uint8_t>(Token::InstrumentCommandNone);
+    writer.BeginObject();
+    writer.Int("id", i);
+    writer.BeginArray("steps");
+    for (int j = 0; j < TABLE_STEPS; j++) {
+      const TableStep &s = table.steps_[j];
+      if (s.cmd1 == none && s.cmd2 == none && s.cmd3 == none && s.param1 == 0 && s.param2 == 0 && s.param3 == 0) {
+        continue;
+      }
+      const int step[7] = {j, s.cmd1, s.param1, s.cmd2, s.param2, s.cmd3, s.param3};
+      writer.IntArray(nullptr, step, 7);
+    }
+    writer.EndArray();
+    writer.EndObject();
   }
+  writer.EndArray();
 }
 
-void TableHolder::RestoreContent(PersistencyDocument *doc) {
-
-  bool elem = doc->FirstChild();
-  while (elem) {
-    // Check it is a table
-    if (!strcmp(doc->ElemName(), XML_ELEM_TABLE)) {
-      // Get the table ID
-      unsigned char id = '\0';
-      bool attr = doc->NextAttribute();
-      while (attr) {
-        if (!strcmp(doc->attrname(), XML_ATTR_ID)) {
-          unsigned char b1 = (hexNibble(doc->attrval()[0])) << 4;
-          unsigned char b2 = hexNibble(doc->attrval()[1]);
-          id = b1 + b2;
-          // found what we wanted
-          break;
-        }
-        attr = doc->NextAttribute();
-      }
-
-      Table &table = table_[id];
-
-      bool subelem = doc->FirstChild();
-      while (subelem) {
-        uint8_t cbuf[TABLE_STEPS];
-        uint16_t pbuf[TABLE_STEPS];
-        if (!strcmp(XML_ELEM_COMMAND1, doc->ElemName())) {
-          restoreHexBuffer(doc, cbuf);
-          for (int j = 0; j < TABLE_STEPS; j++)
-            table.steps_[j].cmd1 = cbuf[j];
-        };
-        if (!strcmp(XML_ELEM_VALUE1, doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)pbuf);
-          for (int j = 0; j < TABLE_STEPS; j++)
-            table.steps_[j].param1 = pbuf[j];
-        };
-        if (!strcmp(XML_ELEM_COMMAND2, doc->ElemName())) {
-          restoreHexBuffer(doc, cbuf);
-          for (int j = 0; j < TABLE_STEPS; j++)
-            table.steps_[j].cmd2 = cbuf[j];
-        };
-        if (!strcmp(XML_ELEM_VALUE2, doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)pbuf);
-          for (int j = 0; j < TABLE_STEPS; j++)
-            table.steps_[j].param2 = pbuf[j];
-        };
-        if (!strcmp(XML_ELEM_COMMAND3, doc->ElemName())) {
-          restoreHexBuffer(doc, cbuf);
-          for (int j = 0; j < TABLE_STEPS; j++)
-            table.steps_[j].cmd3 = cbuf[j];
-        };
-        if (!strcmp(XML_ELEM_VALUE3, doc->ElemName())) {
-          restoreHexBuffer(doc, (unsigned char *)pbuf);
-          for (int j = 0; j < TABLE_STEPS; j++)
-            table.steps_[j].param3 = pbuf[j];
-        };
-        subelem = doc->NextSibling();
-      }
-      allocation_[id] = !table.IsEmpty();
+void TableHolder::RestoreContent(JsonReader &reader) {
+  // what is not in the file is empty (the allocation is left alone: the song has marked the tables it uses, when it
+  // was restored before)
+  for (int i = 0; i < TABLE_COUNT; i++) {
+    table_[i].Reset();
+  }
+  while (reader.NextKey()) {
+    if (!reader.KeyIs("tables")) {
+      reader.Skip();
+      continue;
     }
-    elem = doc->NextSibling();
+    if (!reader.BeginArray()) {
+      return;
+    }
+    while (reader.NextElement()) {
+      if (!reader.BeginObject()) {
+        return;
+      }
+      int id = -1;
+      while (reader.NextKey()) {
+        if (reader.KeyIs("id")) {
+          id = reader.ReadInt();
+        } else if (reader.KeyIs("steps") && id >= 0 && id < TABLE_COUNT) {
+          // the id comes first
+          Table &table = table_[id];
+          if (!reader.BeginArray()) {
+            return;
+          }
+          while (reader.NextElement()) {
+            int v[7] = {0};
+            const size_t count = reader.ReadIntArray(v, 7);
+            if (count >= 7 && v[0] >= 0 && v[0] < TABLE_STEPS) {
+              TableStep &s = table.steps_[v[0]];
+              s.cmd1 = static_cast<uint8_t>(v[1]);
+              s.param1 = static_cast<uint16_t>(v[2]);
+              s.cmd2 = static_cast<uint8_t>(v[3]);
+              s.param2 = static_cast<uint16_t>(v[4]);
+              s.cmd3 = static_cast<uint8_t>(v[5]);
+              s.param3 = static_cast<uint16_t>(v[6]);
+            }
+          }
+        } else {
+          reader.Skip();
+        }
+      }
+      if (id >= 0 && id < TABLE_COUNT) {
+        allocation_[id] = !table_[id].IsEmpty();
+      }
+    }
   }
 }
 

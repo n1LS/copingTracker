@@ -74,8 +74,8 @@ public:
   InstrumentBank *GetInstrumentBank();
 
   // Persistent
-  virtual void SaveContent(tinyxml2::XMLPrinter *printer);
-  virtual void RestoreContent(PersistencyDocument *doc);
+  virtual void SaveContent(JsonWriter &writer);
+  virtual void RestoreContent(JsonReader &reader);
 
 private:
   etl::vector<Variable *, 28> variables_;

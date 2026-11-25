@@ -108,7 +108,7 @@ protected:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name_;
 
 public:
-  I_Instrument(etl::ivector<Variable *> *list, const char *nodeName = XML_ELEM_INSTRUMENT,
+  I_Instrument(etl::ivector<Variable *> *list, const char *nodeName = "instrument",
                bool registerWithPersistence = false)
       : VariableContainer(list), Persistent(nodeName, registerWithPersistence),
         volume_(Token::InstrumentParameterVolume, 0xff), pan_(Token::InstrumentParameterPan, 0x80),
@@ -210,9 +210,8 @@ public:
   // The byte behind one of the EffectParameterTokens, nullptr for any other
   uint8_t *EffectParameter(Token token);
 
-  // Restores one parameter by its persistence name, returns false if the name
-  // is not an effect parameter
-  bool RestoreEffectParameter(const char *name, const char *value);
+  // The byte behind the effect parameter of this persistence name, nullptr if there is none
+  uint8_t *EffectParameterByName(const char *name, bool &isSwitch);
 
   void ResetEffects();
   bool EffectsModified();
@@ -278,8 +277,13 @@ public:
   virtual etl::ivector<Variable *> *Variables() = 0;
 
   // Persistent implementation
-  virtual void SaveContent(tinyxml2::XMLPrinter *printer) override;
-  virtual void RestoreContent(PersistencyDocument *doc) override;
+  virtual void SaveContent(JsonWriter &writer) override;
+  virtual void RestoreContent(JsonReader &reader) override;
+  // reads the value of the member the reader is at (type, version, name, variables, effects), false when the key is
+  // not one of an instrument: the value is not consumed then. Instrument types with more content extend it.
+  virtual bool RestoreKey(JsonReader &reader);
+  // after the members of the instrument have been read, RestoreContent does it itself
+  void RestoreFinished();
 
 protected:
   // Adds the variables owned by this base class to the instrument's variable

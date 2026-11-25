@@ -1,5 +1,4 @@
 add_library(application_utils
-  HexBuffers.cpp
   char.cpp
   fixed.cpp
   randomnames.cpp

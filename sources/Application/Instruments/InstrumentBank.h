@@ -39,8 +39,8 @@ public:
   void Reset();
   void AssignDefaults();
   I_Instrument *GetInstrument(int i);
-  virtual void SaveContent(tinyxml2::XMLPrinter *printer);
-  virtual void RestoreContent(PersistencyDocument *doc);
+  virtual void SaveContent(JsonWriter &writer);
+  virtual void RestoreContent(JsonReader &reader);
   void Init();
   void OnStart();
   InstrumentAssignResult AssignInstrumentToSlot(InstrumentType type, unsigned char id);

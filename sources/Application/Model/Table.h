@@ -74,8 +74,8 @@ public:
   void SetUsed(int table);
   int GetNext();
   int Clone(int table);
-  virtual void SaveContent(tinyxml2::XMLPrinter *printer);
-  virtual void RestoreContent(PersistencyDocument *doc);
+  virtual void SaveContent(JsonWriter &writer);
+  virtual void RestoreContent(JsonReader &reader);
 
 private:
   Table table_[TABLE_COUNT];

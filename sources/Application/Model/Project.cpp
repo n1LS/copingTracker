@@ -14,6 +14,7 @@
 #include "Application/Instruments/SampleInstrument.h"
 #include "Application/Instruments/SamplePool.h"
 #include "Application/Persistency/PersistencyService.h"
+#include "Application/Persistency/VariableJson.h"
 #include "Application/Player/SyncMaster.h"
 #include "Foundation/Constants/Version.h"
 #include "Foundation/Variables/WatchedVariable.h"
@@ -431,75 +432,47 @@ int Project::PurgeInstruments() {
   return purged;
 }
 
-void Project::RestoreContent(PersistencyDocument *doc) {
-  bool attr = doc->NextAttribute();
-  doc->version_ = 32;
-  int tableRatio = 0;
-  while (attr) {
-    if (!strcmp(doc->attrname(), XML_ATTR_VERSION)) {
-      doc->version_ = int(atof(doc->attrval()) * 100);
+// "tableRatio": 2, "variables": {"VarTempo": 138, ...}
+void Project::RestoreContent(JsonReader &reader) {
+  int tableRatio = 1;
+  while (reader.NextKey()) {
+    if (reader.KeyIs("tableRatio")) {
+      tableRatio = reader.ReadInt();
+    } else if (reader.KeyIs("variables")) {
+      if (!reader.BeginObject()) {
+        return;
+      }
+      while (reader.NextKey()) {
+        Variable *v = FindVariable(reader.Key());
+        // Project name now comes from the directory, so ignore any persisted value.
+        if (v && v->GetID() != Token::VarProjectName) {
+          ReadVariableJson(reader, *v);
+        } else {
+          reader.Skip();
+        }
+      }
+    } else {
+      reader.Skip();
     }
-    if (!strcmp(doc->attrname(), XML_ATTR_TABLE_RATIO)) {
-      tableRatio = atoi(doc->attrval());
-    }
-    attr = doc->NextAttribute();
   }
-  if (!tableRatio)
-    tableRatio = (doc->version_ <= 32) ? 2 : 1;
+  if (tableRatio < 1) {
+    tableRatio = 1;
+  }
   SyncMaster::GetInstance()->SetTableRatio(tableRatio);
-
-  // Now loop on all variables
-  bool elem = doc->FirstChild();
-  while (elem) {
-    bool attr = doc->NextAttribute();
-    char name[MAX_VARIABLE_STRING_LENGTH + 1];
-    char value[MAX_VARIABLE_STRING_LENGTH + 1];
-    while (attr) {
-      if (!strcmp(doc->attrname(), XML_ATTR_NAME)) {
-        strcpy(name, doc->attrval());
-      }
-      if (!strcmp(doc->attrname(), XML_ATTR_VALUE)) {
-        strcpy(value, doc->attrval());
-      }
-      attr = doc->NextAttribute();
-    }
-    Variable *v = FindVariable(name);
-    // Project name now comes from the directory, so ignore any persisted value.
-    if (v && v->GetID() != Token::VarProjectName) {
-      v->SetString(value);
-    }
-    elem = doc->NextSibling();
-  }
 }
 
-void Project::SaveContent(tinyxml2::XMLPrinter *printer) {
+void Project::SaveContent(JsonWriter &writer) {
+  writer.Int("tableRatio", SyncMaster::GetInstance()->GetTableRatio());
 
-  // store project version
-  printer->PushAttribute(XML_ATTR_VERSION, PRODUCT_VERSION);
-
-  // store table ratio if not one
-  int tableRatio = SyncMaster::GetInstance()->GetTableRatio();
-  if (tableRatio != 1) {
-    printer->PushAttribute(XML_ATTR_TABLE_RATIO, tableRatio);
-  }
-
-  // save all of the project's parameters
-  auto it = variables_.begin();
-  for (size_t i = 0; i < variables_.size(); i++) {
-    Variable *currentVar = *it;
-    // Persist everything except the project name, which is derived from the
-    // projects directory name
-    if (currentVar->GetID() == Token::VarProjectName) {
-      it++;
-      continue;
+  // save all of the project's parameters, except the project name, which is derived from the projects directory
+  // name
+  writer.BeginObject("variables");
+  for (Variable *variable : variables_) {
+    if (variable->GetID() != Token::VarProjectName) {
+      WriteVariableJson(writer, *variable);
     }
-
-    printer->OpenElement(XML_ELEM_PARAMETER);
-    printer->PushAttribute(XML_ATTR_NAME, currentVar->GetName());
-    printer->PushAttribute(XML_ATTR_VALUE, currentVar->GetPersistenceString().c_str());
-    printer->CloseElement();
-    it++;
   }
+  writer.EndObject();
 }
 
 void Project::OnTempoTap() {

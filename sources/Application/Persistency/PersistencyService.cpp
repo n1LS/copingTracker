@@ -13,6 +13,7 @@
 #include "../Instruments/SamplePool.h"
 #include "PersistenceConstants.h"
 
+#include "Foundation/Constants/Version.h"
 #include "Foundation/Types/Types.h"
 #include "Persistent.h"
 #include "System/Console/Trace.h"
@@ -207,30 +208,49 @@ PersistencyResult PersistencyService::AutoSaveProjectData(const char *projectNam
   return SaveProjectData(projectName, true);
 }
 
+// the project is written to a file next to the real one and only replaces it when all of it was written, a card
+// that is full or removed in the middle of a save leaves the old file as it was
 PersistencyResult PersistencyService::SaveProjectData(const char *projectName, bool autosave) {
   const char *filename = autosave ? AUTO_SAVE_FILENAME : PROJECT_FILENAME;
 
   etl::vector<const char *, 3> segments = {PROJECTS_DIR, projectName, filename};
   CreatePath(pathBufferA, segments);
 
+  etl::string<MAX_PROJECT_SAMPLE_PATH_LENGTH> tempPath(pathBufferA);
+  tempPath.append(".tmp");
+
   auto fs = FileSystem::GetInstance();
-  auto fp = fs->Open(pathBufferA.c_str(), "w");
-  if (!fp) {
-    Trace::Error("PERSISTENCYSERVICE: Could not open file for writing: %s", pathBufferA.c_str());
+  {
+    auto fp = fs->Open(tempPath.c_str(), "w");
+    if (!fp) {
+      Trace::Error("PERSISTENCYSERVICE: Could not open file for writing: %s", tempPath.c_str());
+      return PERSIST_ERROR;
+    }
+    Trace::Log("PERSISTENCYSERVICE", "Opened Proj File: %s", tempPath.c_str());
+
+    JsonWriter writer(*fp);
+    writer.BeginObject();
+    writer.String("version", PRODUCT_VERSION);
+
+    // Loop on all registered persistable subservices
+    for (auto *sub : SubServices()) {
+      auto *currentItem = static_cast<Persistent *>(static_cast<void *>(sub));
+      currentItem->Save(writer);
+    }
+    writer.EndObject();
+
+    if (!writer.Finish() || !fp->Sync()) {
+      Trace::Error("PERSISTENCYSERVICE: Could not write the project to %s", tempPath.c_str());
+      fp.reset();
+      fs->DeleteFile(tempPath.c_str());
+      return PERSIST_ERROR;
+    }
+  } // the file is closed
+
+  if (!ReplaceFile(tempPath.c_str(), pathBufferA.c_str())) {
+    fs->DeleteFile(tempPath.c_str());
     return PERSIST_ERROR;
   }
-  Trace::Log("PERSISTENCYSERVICE", "Opened Proj File: %s", pathBufferA.c_str());
-  tinyxml2::XMLPrinter printer(fp.get());
-
-  printer.OpenElement(XML_ELEM_BASE);
-
-  // Loop on all registered persistable subservices
-  for (auto *sub : SubServices()) {
-    auto *currentItem = static_cast<Persistent *>(static_cast<void *>(sub));
-    currentItem->Save(&printer);
-  }
-
-  printer.CloseElement();
 
   // if we are doing an explicit save (ie nto a autosave), then we need to
   // delete the existing autosave file so that this explicit save will be loaded
@@ -245,6 +265,33 @@ PersistencyResult PersistencyService::SaveProjectData(const char *projectName, b
   }
 
   return PERSIST_SAVED;
+}
+
+// moves a finished file over the one it replaces, the old one is kept until the new one is in place
+bool PersistencyService::ReplaceFile(const char *from, const char *to) {
+  auto fs = FileSystem::GetInstance();
+  etl::string<MAX_PROJECT_SAMPLE_PATH_LENGTH> backupPath(to);
+  backupPath.append(".bak");
+
+  bool hadOld = fs->exists(to);
+  if (hadOld) {
+    fs->DeleteFile(backupPath.c_str());
+    if (!fs->MoveFile(to, backupPath.c_str())) {
+      Trace::Error("PERSISTENCYSERVICE: Could not move the old file out of the way: %s", to);
+      return false;
+    }
+  }
+  if (!fs->MoveFile(from, to)) {
+    Trace::Error("PERSISTENCYSERVICE: Could not move %s to %s", from, to);
+    if (hadOld && !fs->MoveFile(backupPath.c_str(), to)) {
+      Trace::Error("PERSISTENCYSERVICE: Could not put the old file back: %s", to);
+    }
+    return false;
+  }
+  if (hadOld) {
+    fs->DeleteFile(backupPath.c_str());
+  }
+  return true;
 }
 
 // return true if existing proj with the given name already exists
@@ -278,28 +325,32 @@ PersistencyResult PersistencyService::Load(const char *projectName) {
   projectFilePath.append("/");
   projectFilePath.append(filename);
 
-  PersistencyDocument doc;
-  if (!doc.Load(projectFilePath.c_str()))
-    return PERSIST_LOAD_FAILED;
-
-  bool elem = doc.FirstChild(); // advance to first child
-  if (!elem || strcmp(doc.ElemName(), XML_ELEM_BASE)) {
-    Trace::Error("could not find master node");
+  auto fp = fs->Open(projectFilePath.c_str(), "r");
+  if (!fp) {
     return PERSIST_LOAD_FAILED;
   }
 
-  elem = doc.FirstChild();
-  while (elem) {
+  JsonReader reader(*fp);
+  if (!reader.BeginObject()) {
+    Trace::Error("could not find the master object");
+    return PERSIST_LOAD_FAILED;
+  }
+  while (reader.NextKey()) {
+    Persistent *target = nullptr;
     for (auto *sub : SubServices()) {
       auto *currentItem = static_cast<Persistent *>(static_cast<void *>(sub));
-      if (currentItem->Restore(&doc)) {
+      if (!strcmp(reader.Key(), currentItem->NodeName())) {
+        target = currentItem;
         break;
       }
     }
-    elem = doc.NextSibling();
+    // the version of the file and what this firmware does not know are skipped
+    if (!target || !target->Restore(reader)) {
+      reader.Skip();
+    }
   }
-  if (doc.HadError()) {
-    Trace::Error("XML errors detected while loading project '%s'", projectName);
+  if (reader.HadError()) {
+    Trace::Error("JSON errors detected while loading project '%s'", projectName);
     return PERSIST_LOAD_FAILED;
   }
   return PERSIST_LOADED;
@@ -390,12 +441,24 @@ PersistencyResult PersistencyService::ExportInstrument(I_Instrument *instrument,
     return PERSIST_ERROR;
   }
 
-  tinyxml2::XMLPrinter printer(fp.get());
-
+  JsonWriter writer(*fp);
   // Use the instrument's Persistent interface to save its data
-  instrument->Save(&printer);
+  instrument->SaveDocument(writer);
+  if (!writer.Finish() || !fp->Sync()) {
+    Trace::Error("PERSISTENCYSERVICE: Could not write the instrument: %s", pathBufferA.c_str());
+    return PERSIST_ERROR;
+  }
 
   return PERSIST_SAVED;
+}
+
+static InstrumentType instrumentTypeFromName(const char *name) {
+  for (int i = 0; i < IT_LAST; i++) {
+    if (!strcasecmp(name, InstrumentTypeNames[i].persistence)) {
+      return static_cast<InstrumentType>(i);
+    }
+  }
+  return IT_NONE;
 }
 
 InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
@@ -406,37 +469,30 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
     return IT_NONE;
   }
 
-  // Load the XML document
-  PersistencyDocument doc;
-  if (!doc.Load(name)) {
-    Trace::Error("PERSISTENCYSERVICE: Could not parse XML from file: %s", name);
+  auto fp = fs->Open(name, "r");
+  if (!fp) {
+    Trace::Error("PERSISTENCYSERVICE: Could not open instrument file: %s", name);
     return IT_NONE;
   }
 
-  // Find the INSTRUMENT element
-  bool elem = doc.FirstChild();
-  if (!elem || strcmp(doc.ElemName(), XML_ELEM_INSTRUMENT)) {
-    Trace::Error("PERSISTENCYSERVICE: Could not find INSTRUMENT node in file: %s", name);
+  JsonReader reader(*fp);
+  if (!reader.BeginObject()) {
+    Trace::Error("PERSISTENCYSERVICE: Could not find the instrument object in file: %s", name);
     return IT_NONE;
   }
 
-  // Check for TYPE attribute in the INSTRUMENT element
+  // the type is the first member, nothing after it is read
   InstrumentType importedType = IT_NONE;
-  bool hasAttr = doc.NextAttribute();
-  while (hasAttr) {
-    if (!strcasecmp(doc.attrname(), XML_ATTR_TYPE)) {
-      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval());
-
-      // Map the type string to InstrumentType enum
-      for (int i = 0; i < IT_LAST; i++) {
-        if (!strcasecmp(doc.attrval(), InstrumentTypeNames[i].persistence)) {
-          importedType = static_cast<InstrumentType>(i);
-          Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
-          break;
-        }
-      }
+  while (reader.NextKey()) {
+    if (reader.KeyIs("type")) {
+      char type[16];
+      reader.ReadString(type, sizeof(type));
+      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in file: %s", type);
+      importedType = instrumentTypeFromName(type);
+      Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
+      break;
     }
-    hasAttr = doc.NextAttribute();
+    reader.Skip();
   }
   return importedType;
 }
@@ -449,63 +505,15 @@ PersistencyResult PersistencyService::ImportInstrument(I_Instrument *instrument,
     return PERSIST_ERROR;
   }
 
-  // Load the XML document
-  PersistencyDocument doc;
-  if (!doc.Load(name)) {
-    Trace::Error("PERSISTENCYSERVICE: Could not parse XML from file: %s", name);
+  auto fp = fs->Open(name, "r");
+  if (!fp) {
+    Trace::Error("PERSISTENCYSERVICE: Could not open instrument file: %s", name);
     return PERSIST_ERROR;
   }
 
-  // Find the INSTRUMENT element
-  bool elem = doc.FirstChild();
-  if (!elem || strcmp(doc.ElemName(), XML_ELEM_INSTRUMENT)) {
-    Trace::Error("PERSISTENCYSERVICE: Could not find INSTRUMENT node in file: %s", name);
-    return PERSIST_ERROR;
-  }
-
-  // Check for VERSION and TYPE attributes in the INSTRUMENT element
-  InstrumentType importedType = IT_NONE;
-  bool hasAttr = doc.NextAttribute();
-  etl::string<32> versionInfo;
-
-  while (hasAttr) {
-    if (!strcasecmp(doc.attrname(), XML_ATTR_VERSION)) {
-      // Store version information for logging
-      versionInfo = doc.attrval();
-      Trace::Log("PERSISTENCYSERVICE", "Instrument file version: %s", doc.attrval());
-    } else if (!strcasecmp(doc.attrname(), XML_ATTR_TYPE)) {
-      Trace::Log("PERSISTENCYSERVICE", "Found instrument type in XML: %s", doc.attrval());
-
-      // Map the type string to InstrumentType enum
-      for (int i = 0; i < IT_LAST; i++) {
-        if (!strcasecmp(doc.attrval(), InstrumentTypeNames[i].persistence)) {
-          importedType = static_cast<InstrumentType>(i);
-          Trace::Log("PERSISTENCYSERVICE", "Mapped to instrument type: %d", importedType);
-          break;
-        }
-      }
-    }
-    hasAttr = doc.NextAttribute();
-  }
-
-  // Log the complete version info if available
-  if (versionInfo.length() > 0) {
-    Trace::Log("PERSISTENCYSERVICE", "Instrument created with firmware version: %s", versionInfo.c_str());
-  }
-
-  // If we found a valid instrument type and it doesn't match the current
-  // instrument
-  if (importedType != IT_NONE && importedType != instrument->GetType()) {
-    Trace::Log("PERSISTENCYSERVICE", "Current instrument type: %d, imported type: %d", instrument->GetType(),
-               importedType);
-
-    // We can't directly change the instrument type, so we'll need to
-    // create a new instrument of the correct type and copy parameters later
-    Trace::Log("PERSISTENCYSERVICE", "Instrument type mismatch, will convert after loading");
-  }
-
-  // Restore the instrument content
-  if (!instrument->Restore(&doc)) {
+  // Restore the instrument content: the type and version of the file are read (and logged) with the rest of it
+  JsonReader reader(*fp);
+  if (!instrument->Restore(reader)) {
     Trace::Error("PERSISTENCYSERVICE: Failed to restore instrument from file: %s", name);
     return PERSIST_ERROR;
   }

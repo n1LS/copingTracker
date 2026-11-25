@@ -104,8 +104,8 @@ public:
   virtual etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> GetSampleFileName();
 
   static void EnableDownsamplingLegacy();
-  virtual void SaveContent(tinyxml2::XMLPrinter *printer) override;
-  virtual void RestoreContent(PersistencyDocument *doc) override;
+  virtual void SaveContent(JsonWriter &writer) override;
+  virtual bool RestoreKey(JsonReader &reader) override;
   void Purge();
 
 protected:

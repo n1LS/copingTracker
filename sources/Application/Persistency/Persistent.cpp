@@ -26,16 +26,22 @@ Persistent::~Persistent() {
   }
 }
 
-void Persistent::Save(tinyxml2::XMLPrinter *printer) {
-  printer->OpenElement(nodeName_);
-  SaveContent(printer);
-  printer->CloseElement();
+void Persistent::Save(JsonWriter &writer) {
+  writer.BeginObject(nodeName_);
+  SaveContent(writer);
+  writer.EndObject();
 }
 
-bool Persistent::Restore(PersistencyDocument *doc) {
-  if (!strcmp(doc->ElemName(), nodeName_)) {
-    RestoreContent(doc);
-    return true;
+void Persistent::SaveDocument(JsonWriter &writer) {
+  writer.BeginObject();
+  SaveContent(writer);
+  writer.EndObject();
+}
+
+bool Persistent::Restore(JsonReader &reader) {
+  if (!reader.BeginObject()) {
+    return false;
   }
-  return false;
+  RestoreContent(reader);
+  return !reader.HadError();
 }

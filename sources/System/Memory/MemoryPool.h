@@ -33,24 +33,6 @@ public:
     return scratch_.fileBuffer;
   }
 
-  // PersistencyDocument buffer
-  static char *persistencyStack() {
-    return scratch_.Persistency.stack;
-  }
-  static char *persistencyAttrName() {
-    return scratch_.Persistency.attrname;
-  }
-  static char *persistencyAttrVal() {
-    return scratch_.Persistency.attrval;
-  }
-  static char *persistencyAttrContent() {
-    return scratch_.Persistency.content;
-  }
-  static const int persistencyAttrContentSize = 129;
-  static const int persistencyAttrNameSize = 64;
-  static const int persistencyAttrSize = 64;
-  static const int persistencyStackSize = 1024;
-
   // Shared scratch buffers used by SamplePool while importing a WAV file
   // (with optional resampling) during sample import.
   static constexpr int32_t kImportChunkSize = 512;
@@ -77,14 +59,6 @@ private:
   union Scratch {
     // Backing storage for file system writes
     uint8_t fileBuffer[512];
-
-    // Backing storage for the persistency document
-    struct Persistency {
-      char stack[persistencyStackSize];
-      char attrname[persistencyAttrNameSize];
-      char attrval[persistencyAttrSize];
-      char content[persistencyAttrContentSize]; // 128 + \0
-    } Persistency;
 
     // Backing storage for sample-import scratch buffers.
     union Import {

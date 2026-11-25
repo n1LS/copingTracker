@@ -1,13 +1,12 @@
 add_library(application_persistency
   Persistent.cpp
   PersistencyService.cpp
-  PersistencyDocument.cpp
+  JsonReader.cpp
+  JsonWriter.cpp
 )
 
 target_link_libraries(application_persistency PUBLIC
   foundation_services
-  yxml
-  tinyxml2
   etl
   application_model
 )

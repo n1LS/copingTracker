@@ -11,6 +11,7 @@
 
 #include "I_Instrument.h"
 #include "Application/Persistency/PersistenceConstants.h"
+#include "Application/Persistency/VariableJson.h"
 #include "Application/Utils/char.h"
 #include "Foundation/Constants/Version.h"
 #include "System/Console/Trace.h"
@@ -63,22 +64,14 @@ uint8_t *I_Instrument::EffectParameter(Token token) {
   }
 }
 
-bool I_Instrument::RestoreEffectParameter(const char *name, const char *value) {
+uint8_t *I_Instrument::EffectParameterByName(const char *name, bool &isSwitch) {
   for (Token token : EffectParameterTokens) {
     if (strcasecmp(token.c_str(), name) == 0) {
-      uint8_t *param = EffectParameter(token);
-      bool isOn = (token == Token::InstrumentParameterEqOn) || (token == Token::InstrumentParameterCompOn);
-      if (isOn) {
-        // saved the way a bool Variable persists
-        *param = (strcasecmp(value, "true") == 0) || (atoi(value) != 0);
-      } else {
-        int v = atoi(value);
-        *param = (v < 0) ? 0 : ((v > 0xFF) ? 0xFF : v);
-      }
-      return true;
+      isSwitch = (token == Token::InstrumentParameterEqOn) || (token == Token::InstrumentParameterCompOn);
+      return EffectParameter(token);
     }
   }
-  return false;
+  return nullptr;
 }
 
 void I_Instrument::ResetEffects() {
@@ -130,110 +123,113 @@ void I_Instrument::ProcessCompressor(int channel, fixed *buffer, int size) {
   comp.process_buffer(buffer, size);
 }
 
-void I_Instrument::SaveContent(tinyxml2::XMLPrinter *printer) {
-  // Add firmware version information
-  printer->PushAttribute(XML_ATTR_VERSION, PRODUCT_VERSION);
-  // Save the instrument type
-  printer->PushAttribute(XML_ATTR_TYPE, InstrumentTypeNames[GetType()].persistence);
+// {"type": "sample", "version": "0.5.0", "name": "kick", "variables": {"InstrumentParameterVolume": 255, ...},
+//  "effects": {"InstrumentParameterEqOn": true, ...}}
+// the type comes first, it is needed to create the instrument before the rest is read
+void I_Instrument::SaveContent(JsonWriter &writer) {
+  writer.String("type", InstrumentTypeNames[GetType()].persistence);
+  writer.String("version", PRODUCT_VERSION);
 
   // Save the instrument name as its not stored in the Variables
   if (!name_.empty()) {
-    printer->OpenElement(XML_ELEM_PARAMETER);
-    printer->PushAttribute(XML_ATTR_NAME, XML_ATTR_INSTRUMENT_NAME);
-    printer->PushAttribute(XML_ATTR_VALUE, name_.c_str());
-    printer->CloseElement(); // PARAM
+    writer.String("name", name_.c_str());
   }
 
-  // Save all the instrument's parameters
+  writer.BeginObject("variables");
   for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
-    printer->OpenElement(XML_ELEM_PARAMETER);
-    printer->PushAttribute(XML_ATTR_NAME, (*it)->GetName());
-    printer->PushAttribute(XML_ATTR_VALUE, (*it)->GetPersistenceString().c_str());
-    printer->CloseElement(); // PARAM
+    WriteVariableJson(writer, **it);
   }
+  writer.EndObject();
 
-  // The equalizer and compressor settings are not Variables, they are saved
-  // the same way though so the project files stay compatible
+  // The equalizer and compressor settings are not Variables, they are saved the same way though
+  writer.BeginObject("effects");
   for (Token token : EffectParameterTokens) {
-    bool isOn = (token == Token::InstrumentParameterEqOn) || (token == Token::InstrumentParameterCompOn);
-    char value[8];
+    const bool isOn = (token == Token::InstrumentParameterEqOn) || (token == Token::InstrumentParameterCompOn);
     if (isOn) {
-      npf_snprintf(value, sizeof(value), "%s", *EffectParameter(token) ? "true" : "false");
+      writer.Bool(token.c_str(), *EffectParameter(token) != 0);
     } else {
-      npf_snprintf(value, sizeof(value), "%d", *EffectParameter(token));
+      writer.Int(token.c_str(), *EffectParameter(token));
     }
-    printer->OpenElement(XML_ELEM_PARAMETER);
-    printer->PushAttribute(XML_ATTR_NAME, token.c_str());
-    printer->PushAttribute(XML_ATTR_VALUE, value);
-    printer->CloseElement(); // PARAM
   }
+  writer.EndObject();
 }
 
-void I_Instrument::RestoreContent(PersistencyDocument *doc) {
-  // First, check for TYPE attribute in the INSTRUMENT element
-  bool hasAttr = doc->NextAttribute();
-  while (hasAttr) {
-    if (!strcasecmp(doc->attrname(), XML_ATTR_TYPE)) {
-      Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval());
-      // TODO: We already know the instrument type so need to validate it
-      // matches the imported one here
-    }
-    hasAttr = doc->NextAttribute();
+bool I_Instrument::RestoreKey(JsonReader &reader) {
+  if (reader.KeyIs("type") || reader.KeyIs("version")) {
+    char text[32];
+    reader.ReadString(text, sizeof(text));
+    // TODO: We already know the instrument type so need to validate it matches the imported one here
+    Trace::Log("I_INSTRUMENT", "Instrument %s from file: %s", reader.Key(), text);
+    return true;
   }
 
-  // Navigate to the first child of the INSTRUMENT element (which should be a
-  // PARAM element)
-  bool subelem = doc->FirstChild();
-
-  while (subelem) {
-    // Process the PARAM element attributes
-    bool hasAttr = doc->NextAttribute();
-    char name[MAX_VARIABLE_STRING_LENGTH + 1] = "";
-    char value[MAX_VARIABLE_STRING_LENGTH + 1] = "";
-    while (hasAttr) {
-      if (!strcasecmp(doc->attrname(), XML_ATTR_NAME)) {
-        strcpy(name, doc->attrval());
-      }
-      if (!strcasecmp(doc->attrname(), XML_ATTR_VALUE)) {
-        strcpy(value, doc->attrval());
-      }
-      hasAttr = doc->NextAttribute();
+  if (reader.KeyIs("name")) {
+    char text[MAX_VARIABLE_STRING_LENGTH + 1];
+    reader.ReadString(text, sizeof(text));
+    if (!reader.HadError()) {
+      SetName(text);
+      Trace::Log("I_INSTRUMENT", "Set instrument name: %s", text);
     }
-
-    if (name[0] != '\0' && value[0] != '\0') {
-      // Special handling for InstrumentName parameter
-      if (!strcasecmp(name, XML_ATTR_INSTRUMENT_NAME)) {
-        // Set the instrument name directly
-        SetName(value);
-        Trace::Log("I_INSTRUMENT", "Set instrument name: %s", value);
-      } else if (!RestoreEffectParameter(name, value)) {
-        // For other parameters, find the variable and set its value
-        bool found = false;
-
-        // Find the variable with this name and set its value
-        for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
-          if (!strcasecmp((*it)->GetName(), name)) {
-            (*it)->SetString(value);
-            // Trace::Log("I_INSTRUMENT", "Set parameter: %s = %s", name,
-            // value);
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          Trace::Error("Parameter '%s' not found in instrument", name);
-        }
-      }
-    }
-
-    // Move to the next PARAM element
-    subelem = doc->NextSibling();
+    return true;
   }
-  // Trace::Log("I_INSTRUMENT", "RestoreContent: Restored %d parameters",
-  //            paramCount);
 
-  // Update any UI variables that represent the instrument name
+  if (reader.KeyIs("variables")) {
+    if (!reader.BeginObject()) {
+      return true;
+    }
+    while (reader.NextKey()) {
+      // Find the variable with this name and set its value
+      Variable *found = nullptr;
+      for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
+        if (!strcasecmp((*it)->GetName(), reader.Key())) {
+          found = *it;
+          break;
+        }
+      }
+      if (found) {
+        ReadVariableJson(reader, *found);
+      } else {
+        Trace::Error("Parameter '%s' not found in instrument", reader.Key());
+        reader.Skip();
+      }
+    }
+    return true;
+  }
+
+  if (reader.KeyIs("effects")) {
+    if (!reader.BeginObject()) {
+      return true;
+    }
+    while (reader.NextKey()) {
+      bool isSwitch = false;
+      uint8_t *param = EffectParameterByName(reader.Key(), isSwitch);
+      if (!param) {
+        reader.Skip();
+      } else if (isSwitch) {
+        const bool on = reader.ReadBool();
+        *param = on ? 1 : 0;
+      } else {
+        const int value = reader.ReadInt();
+        *param = (value < 0) ? 0 : ((value > 0xFF) ? 0xFF : value);
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+void I_Instrument::RestoreContent(JsonReader &reader) {
+  while (reader.NextKey()) {
+    if (!RestoreKey(reader)) {
+      reader.Skip();
+    }
+  }
+
+  RestoreFinished();
+}
+
+// Update any UI variables that represent the instrument name
+void I_Instrument::RestoreFinished() {
   Variable *nameVar = FindVariable(Token::InstrumentName);
   if (nameVar && !name_.empty()) {
     nameVar->SetString(name_.c_str());

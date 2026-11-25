@@ -1529,86 +1529,37 @@ etl::string<MAX_INSTRUMENT_NAME_LENGTH> SampleInstrument::GetDisplayName() {
   return sampleFileName;
 }
 
-void SampleInstrument::SaveContent(tinyxml2::XMLPrinter *printer) {
-  I_Instrument::SaveContent(printer);
+// the slice points that are set: "slices": [start of slice 0, start of slice 1, ...] up to the last one that is set
+void SampleInstrument::SaveContent(JsonWriter &writer) {
+  I_Instrument::SaveContent(writer);
 
+  size_t count = 0;
   for (size_t i = 0; i < slicePoints_.size(); ++i) {
-    if (slicePoints_[i] == 0) {
-      continue;
+    if (slicePoints_[i] != 0) {
+      count = i + 1;
     }
-    printer->OpenElement(XML_ELEM_PARAMETER);
-    char sliceName[6];
-    npf_snprintf(sliceName, sizeof(sliceName), "sl%02u", static_cast<unsigned>(i));
-    printer->PushAttribute(XML_ATTR_NAME, sliceName);
-    printer->PushAttribute(XML_ATTR_VALUE, static_cast<unsigned int>(slicePoints_[i]));
-    printer->CloseElement();
+  }
+  if (count > 0) {
+    writer.IntArray("slices", slicePoints_.data(), count);
   }
 }
 
-void SampleInstrument::RestoreContent(PersistencyDocument *doc) {
-  auto setSliceFromString = [this](const char *indexStr, const char *valueStr) {
-    int idx = atoi(indexStr);
-    if (idx < 0 || idx >= static_cast<int>(MaxSlices)) {
-      return;
-    }
-    uint32_t value = static_cast<uint32_t>(strtoul(valueStr, nullptr, 10));
-    slicePoints_[static_cast<size_t>(idx)] = value;
-  };
-
-  bool hasAttr = doc->NextAttribute();
-  while (hasAttr) {
-    if (!strcasecmp(doc->attrname(), XML_ATTR_TYPE)) {
-      Trace::Log("I_INSTRUMENT", "Instrument type from XML: %s", doc->attrval());
-    } else if (!strncasecmp(doc->attrname(), XML_ATTR_SLICE_PREFIX, 2)) {
-      setSliceFromString(doc->attrname() + 2, doc->attrval());
-    }
-    hasAttr = doc->NextAttribute();
+bool SampleInstrument::RestoreKey(JsonReader &reader) {
+  if (!reader.KeyIs("slices")) {
+    return I_Instrument::RestoreKey(reader);
   }
-
-  bool subelem = doc->FirstChild();
-
-  while (subelem) {
-    bool attr = doc->NextAttribute();
-    etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> name;
-    etl::string<MAX_INSTRUMENT_FILENAME_LENGTH> value;
-
-    while (attr) {
-      if (!strcasecmp(doc->attrname(), XML_ATTR_NAME)) {
-        name = doc->attrval();
-      }
-      if (!strcasecmp(doc->attrname(), XML_ATTR_VALUE)) {
-        value = doc->attrval();
-      }
-      attr = doc->NextAttribute();
-    }
-
-    if (!name.empty() && !value.empty()) {
-      if (!strcasecmp(name.c_str(), "InstrumentName")) {
-        SetName(value.c_str());
-      } else if (!strncasecmp(name.c_str(), "sl", 2)) {
-        setSliceFromString(name.c_str() + 2, value.c_str());
-      } else if (!RestoreEffectParameter(name.c_str(), value.c_str())) {
-        bool found = false;
-        for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
-          if (!strcasecmp((*it)->GetName(), name.c_str())) {
-            (*it)->SetString(value.c_str());
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          Trace::Error("Parameter '%s' not found in instrument", name.c_str());
-        }
-      }
-    }
-
-    subelem = doc->NextSibling();
+  if (!reader.BeginArray()) {
+    return true;
   }
-
-  Variable *nameVar = FindVariable(Token::InstrumentName);
-  if (nameVar && !name_.empty()) {
-    nameVar->SetString(name_.c_str());
+  size_t index = 0;
+  while (reader.NextElement()) {
+    const uint32_t value = reader.ReadUInt();
+    if (index < MaxSlices) {
+      slicePoints_[index] = value;
+    }
+    index++;
   }
+  return true;
 }
 
 void SampleInstrument::Purge() {

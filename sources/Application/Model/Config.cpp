@@ -10,8 +10,9 @@
  */
 
 #include "Config.h"
+#include "Application/Persistency/JsonReader.h"
+#include "Application/Persistency/JsonWriter.h"
 #include "Application/Persistency/PersistenceConstants.h"
-#include "Application/Persistency/PersistencyDocument.h"
 #include "Externals/etl/include/etl/flat_map.h"
 #include "Externals/etl/include/etl/string.h"
 #include "Externals/etl/include/etl/string_utilities.h"
@@ -25,7 +26,8 @@
 #include "Variable.h"
 #include <stdlib.h>
 
-#define CONFIG_VERSION_NUMBER 2
+#define CONFIG_VERSION_NUMBER 1
+#define THEME_VERSION_NUMBER 1
 
 #define MIDI_DEVICE_LEN 4
 #define CONFIG(X, A, B, D, E) {Token(X).c_str(), A, X, B, D, E}
@@ -177,67 +179,19 @@ Config::Config()
   variables_.push_back(&previewVolume_);
   variables_.push_back(&metronome_);
 
-  PersistencyDocument doc;
-
-  if (!doc.Load(CONFIG_FILE_PATH)) {
+  auto fp = FileSystem::GetInstance()->Open(CONFIG_FILE_PATH, "r");
+  if (!fp) {
     Trace::Error("CONFIG Could not open file for reading: %s", CONFIG_FILE_PATH);
     Save(); // and write the defaults to SDCard
     return;
   }
 
-  bool elem = doc.FirstChild();
-  if (!elem || strcmp(doc.ElemName(), XML_ELEM_CONFIGURATION)) {
+  JsonReader reader(*fp);
+  if (!LoadContent(reader)) {
     Trace::Log("CONFIG", "Bad " CONFIG_FILE_PATH " format!");
     // TODO: need show user some UI that config file is invalid
     Save(); // and write the defaults to SDCard
     return;
-  }
-  elem = doc.FirstChild(); // now get first child element of CONFIG
-  while (elem) {
-    // Check if the parameter exists in our parameters list
-    bool paramFound = false;
-    for (const auto &param : configParams) {
-      if (strcmp(doc.ElemName(), param.name) == 0) {
-        paramFound = true;
-        break;
-      }
-    }
-
-    // Special handling for Color elements
-    if (strcmp(doc.ElemName(), XML_ELEM_COLOR) == 0) {
-      // Process Color element
-      ReadColorVariable(&doc);
-      elem = doc.NextSibling();
-      continue;
-    }
-
-    if (!paramFound) {
-      Trace::Log("CONFIG", "Found unknown config parameter \"%s\", skipping...", doc.ElemName());
-      elem = doc.NextSibling();
-      continue;
-    }
-    while (doc.NextAttribute()) {
-      // Special handling for Theme Name sadly because it is a string and no
-      // easy way to look that that up in configParams data above
-      if (!strcmp(doc.ElemName(), XML_ELEM_THEME_NAME)) {
-        if (Variable *themeVar = FindVariable(Token::VarThemeName)) {
-          themeVar->SetString(doc.attrval());
-          Trace::Log("CONFIG", "Read Theme Name:%s", doc.attrval());
-        }
-      } else {
-        // Find the variable by name in configParams
-        for (const auto &param : configParams) {
-          if (!strcmp(doc.ElemName(), param.name)) {
-            if (Variable *var = FindVariable(param.token)) {
-              var->SetInt(atoi(doc.attrval()));
-              Trace::Log("CONFIG", "Set %s = %s", param.name, doc.attrval());
-            }
-            break;
-          }
-        }
-      }
-    }
-    elem = doc.NextSibling();
   }
   Trace::Log("CONFIG", "Loaded successfully");
 }
@@ -253,263 +207,165 @@ bool Config::Save() {
     return false;
   }
   Trace::Log("PERSISTENCYSERVICE", "Opened Proj File: %s", CONFIG_FILE_PATH);
-  tinyxml2::XMLPrinter printer(fp.get());
 
-  SaveContent(&printer);
-
+  JsonWriter writer(*fp);
+  SaveContent(writer);
+  if (!writer.Finish()) {
+    Trace::Error("Could not write config file: %s", CONFIG_FILE_PATH);
+    return false;
+  }
   return fp->Sync();
 }
 
-// Write color variables to an XMLPrinter using the same format as in
-// SaveContent
-void Config::WriteColorVariables(tinyxml2::XMLPrinter *printer) {
-  auto it = variables_.begin();
-  for (size_t i = 0; i < variables_.size(); i++) {
-    Variable *var = *it;
-    Token id = var->GetID();
-
-    // Check if this is a color variable
-    if (id == Token::VarColor_0 || id == Token::VarColor_1 || id == Token::VarColor_2 || id == Token::VarColor_3 ||
-        id == Token::VarColor_4 || id == Token::VarColor_5 || id == Token::VarColor_6 || id == Token::VarColor_7 ||
-        id == Token::VarColor_8 || id == Token::VarColor_9 || id == Token::VarColor_A || id == Token::VarColor_B ||
-        id == Token::VarColor_C || id == Token::VarColor_D || id == Token::VarColor_E || id == Token::VarColor_F) {
-
-      // Open a Color element
-      printer->OpenElement(XML_ELEM_COLOR);
-
-      // Add name attribute
-      printer->PushAttribute(XML_ATTR_NAME, var->GetName());
-
-      // Format color value in hex format with # prefix
-      char hexValue[16];
-      npf_snprintf(hexValue, sizeof(hexValue), "#%06X", var->GetInt());
-
-      // Add value attribute in hex format
-      printer->PushAttribute(XML_ATTR_VALUE, hexValue);
-
-      // Close the Color element
-      printer->CloseElement();
-    }
-    it++;
-  }
-}
-
-void Config::ReadColorVariable(PersistencyDocument *doc) {
-  // Process the current element if it's a Color element
-  if (strcmp(doc->ElemName(), XML_ELEM_COLOR) == 0) {
-    // Process Color element
-    char colorName[64] = {0};
-    char colorValue[64] = {0};
-
-    // Get the name and value attributes
-    while (doc->NextAttribute()) {
-      if (strcmp(doc->attrname(), XML_ATTR_NAME) == 0) {
-        // Use safer string copy to ensure null-termination
-        size_t len = strlen(doc->attrval());
-        if (len >= sizeof(colorName)) {
-          len = sizeof(colorName) - 1; // Truncate if too long
-        }
-        memcpy(colorName, doc->attrval(), len);
-        colorName[len] = '\0'; // Ensure null-termination
-      } else if (strcmp(doc->attrname(), XML_ATTR_VALUE) == 0) {
-        // Use safer string copy to ensure null-termination
-        size_t len = strlen(doc->attrval());
-        if (len >= sizeof(colorValue)) {
-          len = sizeof(colorValue) - 1; // Truncate if too long
-        }
-        memcpy(colorValue, doc->attrval(), len);
-        colorValue[len] = '\0'; // Ensure null-termination
-      }
-    }
-
-    // If we have both name and value, set the variable
-    if (colorName[0] != '\0' && colorValue[0] != '\0') {
-      // Parse the color value (hex string)
-      int value = 0;
-      bool parsedSuccessfully = false;
-
-      // Handle both formats: with # prefix and without
-      if (colorValue[0] == '#' && sscanf(colorValue + 1, "%x", &value) == 1) {
-        // Successfully parsed hex value with # prefix
-        parsedSuccessfully = true;
-      } else if (sscanf(colorValue, "%x", &value) == 1) {
-        // Successfully parsed hex value without prefix
-        parsedSuccessfully = true;
-      } else {
-        // Try decimal parsing for backward compatibility
-        value = atoi(colorValue);
-        if (value > 0) {
-          parsedSuccessfully = true;
-        }
-      }
-
-      if (parsedSuccessfully) {
-        // Find the variable by name and set its value
-        Token token = Token::Default; // Use Default as invalid marker
-
-        if (strcmp(colorName, Token(Token::VarColor_0).c_str()) == 0) {
-          token = Token::VarColor_0;
-        } else if (strcmp(colorName, Token(Token::VarColor_1).c_str()) == 0) {
-          token = Token::VarColor_1;
-        } else if (strcmp(colorName, Token(Token::VarColor_2).c_str()) == 0) {
-          token = Token::VarColor_2;
-        } else if (strcmp(colorName, Token(Token::VarColor_3).c_str()) == 0) {
-          token = Token::VarColor_3;
-        } else if (strcmp(colorName, Token(Token::VarColor_4).c_str()) == 0) {
-          token = Token::VarColor_4;
-        } else if (strcmp(colorName, Token(Token::VarColor_5).c_str()) == 0) {
-          token = Token::VarColor_5;
-        } else if (strcmp(colorName, Token(Token::VarColor_6).c_str()) == 0) {
-          token = Token::VarColor_6;
-        } else if (strcmp(colorName, Token(Token::VarColor_7).c_str()) == 0) {
-          token = Token::VarColor_7;
-        } else if (strcmp(colorName, Token(Token::VarColor_8).c_str()) == 0) {
-          token = Token::VarColor_8;
-        } else if (strcmp(colorName, Token(Token::VarColor_9).c_str()) == 0) {
-          token = Token::VarColor_9;
-        } else if (strcmp(colorName, Token(Token::VarColor_A).c_str()) == 0) {
-          token = Token::VarColor_A;
-        } else if (strcmp(colorName, Token(Token::VarColor_B).c_str()) == 0) {
-          token = Token::VarColor_B;
-        } else if (strcmp(colorName, Token(Token::VarColor_C).c_str()) == 0) {
-          token = Token::VarColor_C;
-        } else if (strcmp(colorName, Token(Token::VarColor_D).c_str()) == 0) {
-          token = Token::VarColor_D;
-        } else if (strcmp(colorName, Token(Token::VarColor_E).c_str()) == 0) {
-          token = Token::VarColor_E;
-        } else if (strcmp(colorName, Token(Token::VarColor_F).c_str()) == 0) {
-          token = Token::VarColor_F;
-        }
-
-        if (token != Token::Default) { // If we found a valid color
-          Variable *var = FindVariable(token);
-          if (var) {
-            var->SetInt(value);
-            Trace::Log("CONFIG", "Read Color: %s = %d", colorName, value);
-          }
-        } else {
-          Trace::Log("CONFIG", "Failed to read Color: %s = %d", colorName, value);
-        }
-      }
+static bool isColorToken(Token id) {
+  static const Token::enum_type colorTokens[] = {
+      Token::VarColor_0, Token::VarColor_1, Token::VarColor_2, Token::VarColor_3, Token::VarColor_4, Token::VarColor_5,
+      Token::VarColor_6, Token::VarColor_7, Token::VarColor_8, Token::VarColor_9, Token::VarColor_A, Token::VarColor_B,
+      Token::VarColor_C, Token::VarColor_D, Token::VarColor_E, Token::VarColor_F};
+  for (Token::enum_type color : colorTokens) {
+    if (id == color) {
+      return true;
     }
   }
+  return false;
 }
 
-bool Config::SaveTheme(tinyxml2::XMLPrinter *printer, const char *themeName) {
-  Trace::Log("CONFIG", "Saving theme content to XML");
-
-  // Open the THEME root element
-  printer->OpenElement(XML_ELEM_THEME);
-
-  // We don't need to save the theme name in the file
-  // The filename itself serves as the theme name
-
-  // Save the case setting
-  Variable *caseVar = FindVariable(Token::VarTextCase);
-  if (caseVar) {
-    printer->OpenElement(XML_ELEM_CASE);
-    char buf[16];
-    npf_snprintf(buf, sizeof(buf), "%d", caseVar->GetInt());
-    printer->PushAttribute(XML_ATTR_VALUE, buf);
-    printer->CloseElement(); // case
+Variable *Config::findVariableByName(const char *name, bool colors) {
+  for (Variable *var : variables_) {
+    if (isColorToken(var->GetID()) == colors && strcmp(var->GetName(), name) == 0) {
+      return var;
+    }
   }
-
-  // Write color variables
-  WriteColorVariables(printer);
-
-  // Close the THEME root element
-  printer->CloseElement(); // THEME
-
-  return true;
+  return nullptr;
 }
 
-void Config::SaveContent(tinyxml2::XMLPrinter *printer) {
-  // Log the number of variables in the list before saving
-  Trace::Log("CONFIG", "Saving %d variables to config file", variables_.size());
+// "colors": {"VarColor_0": 1052688, ...}, the colors as decimal numbers
+void Config::writeColors(JsonWriter &writer) {
+  writer.BeginObject("colors");
+  for (Variable *var : variables_) {
+    if (isColorToken(var->GetID())) {
+      writer.Int(var->GetName(), var->GetInt());
+    }
+  }
+  writer.EndObject();
+}
 
-  // store config version
-  printer->OpenElement(XML_ELEM_CONFIGURATION);
-  printer->PushAttribute(XML_ATTR_VERSION, CONFIG_VERSION_NUMBER);
-  // save all of the config parameters
-  auto it = variables_.begin();
-  for (size_t i = 0; i < variables_.size(); i++) {
-    Variable *var = *it;
-    Token id = var->GetID();
-
-    // Skip color variables as they will be handled by WriteColorVariables
-    if (id == Token::VarColor_0 || id == Token::VarColor_1 || id == Token::VarColor_2 || id == Token::VarColor_3 ||
-        id == Token::VarColor_4 || id == Token::VarColor_5 || id == Token::VarColor_6 || id == Token::VarColor_7 ||
-        id == Token::VarColor_8 || id == Token::VarColor_9 || id == Token::VarColor_A || id == Token::VarColor_B ||
-        id == Token::VarColor_C || id == Token::VarColor_D || id == Token::VarColor_E || id == Token::VarColor_F) {
-      it++;
+// the members of the "colors" object, unknown names are skipped
+void Config::readColors(JsonReader &reader) {
+  if (!reader.BeginObject()) {
+    return;
+  }
+  while (reader.NextKey()) {
+    Variable *var = findVariableByName(reader.Key(), true);
+    if (!var) {
+      Trace::Log("CONFIG", "Found unknown color \"%s\", skipping...", reader.Key());
+      reader.Skip();
       continue;
     }
-
-    etl::string<16> elemName = var->GetName();
-
-    printer->OpenElement(elemName.c_str());
-    // these settings need to be saved as the Int values not as String
-    // values hence we *dont* use GetString() !
-    if (var->GetType() == Variable::CHAR_LIST) {
-      char buf[16];
-      npf_snprintf(buf, sizeof(buf), "%d", var->GetInt());
-      printer->PushAttribute(XML_ATTR_VALUE, buf);
-    } else {
-      // all other settings need to be saved as thier String values
-      printer->PushAttribute(XML_ATTR_VALUE, var->GetPersistenceString().c_str());
+    const int value = reader.ReadInt();
+    if (!reader.HadError()) {
+      var->SetInt(value);
+      Trace::Log("CONFIG", "Read Color: %s = %d", var->GetName(), value);
     }
-    printer->CloseElement();
-    it++;
   }
+}
 
-  // Write color variables using the dedicated method
-  WriteColorVariables(printer);
+// {"version": 1, "VarLineOut": 2, ..., "colors": {...}}
+void Config::SaveContent(JsonWriter &writer) {
+  Trace::Log("CONFIG", "Saving %d variables to config file", variables_.size());
 
-  printer->CloseElement();
+  writer.BeginObject();
+  writer.Int("version", CONFIG_VERSION_NUMBER);
+  for (Variable *var : variables_) {
+    if (isColorToken(var->GetID())) {
+      continue;
+    }
+    // the lists are saved as their index, not as the text of the option
+    if (var->GetType() == Variable::STRING) {
+      writer.String(var->GetName(), var->GetString().c_str());
+    } else {
+      writer.Int(var->GetName(), var->GetInt());
+    }
+  }
+  writeColors(writer);
+  writer.EndObject();
   Trace::Log("CONFIG", "Saved config");
 }
 
-bool Config::LoadTheme(PersistencyDocument *doc) {
-  Trace::Log("CONFIG", "Loading theme content from XML");
-
-  // Find the THEME root element
-  if (!doc->FirstChild() || strcmp(XML_ELEM_THEME, doc->ElemName()) != 0) {
-    Trace::Error("Could not find <Theme> element in document");
+// reads the config object, false when the file is not one
+bool Config::LoadContent(JsonReader &reader) {
+  if (!reader.BeginObject()) {
     return false;
   }
-
-  // Enter the THEME element to find its children
-  if (doc->FirstChild()) {
-    // Process all child elements of THEME
-    do {
-      char *elemName = doc->ElemName();
-      Trace::Log("CONFIG", "Processing element: %s", elemName);
-
-      if (strcmp(elemName, XML_ELEM_CASE) == 0) {
-        // Process text case attribute
-        while (doc->NextAttribute()) {
-          if (strcmp(doc->attrname(), XML_ATTR_VALUE) == 0) {
-            Trace::Log("CONFIG", "Found text-case value: %s", doc->attrval());
-            // Parse font value as decimal
-            int fontValue = atoi(doc->attrval());
-            Trace::Log("CONFIG", "Parsed text-case  value: %d", fontValue);
-
-            Variable *caseVar = FindVariable(Token::VarTextCase);
-            if (caseVar) {
-              caseVar->SetInt(fontValue);
-              Trace::Log("CONFIG", "Set text-case variable to: %d", fontValue);
-            }
-          }
-        }
-      } else if (strcmp(elemName, XML_ELEM_COLOR) == 0) {
-        Trace::Log("CONFIG", "Found Color element");
-
-        // Process this color element directly
-        ReadColorVariable(doc);
+  while (reader.NextKey()) {
+    if (reader.KeyIs("colors")) {
+      readColors(reader);
+      continue;
+    }
+    if (reader.KeyIs("version")) {
+      Trace::Log("CONFIG", "Config version %d", reader.ReadInt());
+      continue;
+    }
+    Variable *var = findVariableByName(reader.Key(), false);
+    if (!var) {
+      Trace::Log("CONFIG", "Found unknown config parameter \"%s\", skipping...", reader.Key());
+      reader.Skip();
+      continue;
+    }
+    if (var->GetType() == Variable::STRING) {
+      char text[MAX_VARIABLE_STRING_LENGTH + 1];
+      reader.ReadString(text, sizeof(text));
+      if (!reader.HadError()) {
+        var->SetString(text);
+        Trace::Log("CONFIG", "Set %s = %s", var->GetName(), text);
       }
-    } while (doc->NextSibling());
+    } else {
+      const int value = reader.ReadInt();
+      if (!reader.HadError()) {
+        var->SetInt(value);
+        Trace::Log("CONFIG", "Set %s = %d", var->GetName(), value);
+      }
+    }
   }
-  return true;
+  return !reader.HadError();
+}
+
+// {"version": 1, "VarTextCase": 0, "colors": {...}}, the name of the file is the name of the theme
+void Config::SaveTheme(JsonWriter &writer) {
+  Trace::Log("CONFIG", "Saving theme content");
+
+  writer.BeginObject();
+  writer.Int("version", THEME_VERSION_NUMBER);
+  if (Variable *caseVar = FindVariable(Token::VarTextCase)) {
+    writer.Int(caseVar->GetName(), caseVar->GetInt());
+  }
+  writeColors(writer);
+  writer.EndObject();
+}
+
+bool Config::LoadTheme(JsonReader &reader) {
+  Trace::Log("CONFIG", "Loading theme content");
+
+  if (!reader.BeginObject()) {
+    Trace::Error("Could not find the theme object in document");
+    return false;
+  }
+  while (reader.NextKey()) {
+    if (reader.KeyIs("colors")) {
+      readColors(reader);
+    } else if (reader.KeyIs(Token(Token::VarTextCase).c_str())) {
+      const int fontValue = reader.ReadInt();
+      if (!reader.HadError()) {
+        if (Variable *caseVar = FindVariable(Token::VarTextCase)) {
+          caseVar->SetInt(fontValue);
+          Trace::Log("CONFIG", "Set text-case variable to: %d", fontValue);
+        }
+      }
+    } else {
+      reader.Skip();
+    }
+  }
+  return !reader.HadError();
 }
 
 int Config::GetValue(Token token) {
@@ -553,10 +409,12 @@ bool Config::ExportTheme(const char *themeName, bool overwrite) {
     return false;
   }
 
-  tinyxml2::XMLPrinter printer(fp.get());
-
-  // Use the SaveTheme method to save the theme data
-  SaveTheme(&printer, themeName);
+  JsonWriter writer(*fp);
+  SaveTheme(writer);
+  if (!writer.Finish()) {
+    Trace::Error("Failed to write theme file: %s", path.c_str());
+    return false;
+  }
 
   Trace::Log("CONFIG", "Successfully exported theme to: %s", path.c_str());
   return true;
@@ -592,19 +450,19 @@ bool Config::ImportTheme(const char *themeName) {
     return false;
   }
 
-  // Create a persistency document from the file
-  PersistencyDocument doc;
-  if (!doc.Load(path.c_str())) {
+  auto fp = fs->Open(path.c_str(), "r");
+  if (!fp) {
     Trace::Error("Failed to load theme document: %s", path.c_str());
     return false;
   }
+  JsonReader reader(*fp);
 
   // Store the theme name in the config
   Variable *themeVar = FindVariable(Token::VarThemeName);
   themeVar->SetString(baseThemeName.c_str());
 
   // Use the LoadTheme method to load the theme data
-  bool result = LoadTheme(&doc);
+  bool result = LoadTheme(reader);
 
   // Save the config to persist the theme name
   if (result) {

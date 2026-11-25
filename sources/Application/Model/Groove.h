@@ -14,7 +14,6 @@
 
 #include "Application/Model/Song.h"
 #include "Application/Persistency/Persistent.h"
-#include "Application/Utils/HexBuffers.h"
 #include "Foundation/T_Singleton.h"
 
 #define MAX_GROOVES 0x20
@@ -39,8 +38,8 @@ public:
   bool UpdateGroove(ChannelGroove &g, bool reverse);
   void GetChannelData(int channel, int *groove, int *position);
   unsigned char *GetGrooveData(int groove);
-  virtual void SaveContent(tinyxml2::XMLPrinter *printer);
-  virtual void RestoreContent(PersistencyDocument *doc);
+  virtual void SaveContent(JsonWriter &writer);
+  virtual void RestoreContent(JsonReader &reader);
 
 private:
   ChannelGroove channelGroove_[SONG_CHANNEL_COUNT];

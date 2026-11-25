@@ -28,8 +28,8 @@ public:
     return channelBus_[i];
   }
 
-  virtual void SaveContent(tinyxml2::XMLPrinter *printer);
-  virtual void RestoreContent(PersistencyDocument *doc);
+  virtual void SaveContent(JsonWriter &writer);
+  virtual void RestoreContent(JsonReader &reader);
 
 private:
   char channelBus_[SONG_CHANNEL_COUNT];

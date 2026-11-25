@@ -57,81 +57,78 @@ I_Instrument *InstrumentBank::GetInstrument(int i) {
   return (i != NO_INSTRUMENT) ? instruments_[i] : nullptr;
 }
 
-void InstrumentBank::SaveContent(tinyxml2::XMLPrinter *printer) {
-  char hex[3];
+// "instruments": [{"id": 3, "type": "sample", ...}] of the instruments that are not empty, the id and the type come
+// first: the instrument is created from them before the rest is read
+void InstrumentBank::SaveContent(JsonWriter &writer) {
+  writer.BeginArray("instruments");
   int i = 0;
   for (auto &instr : instruments_) {
     if (!instr->IsEmpty()) {
-      byteToHexString(i, hex);
-      printer->OpenElement(XML_ELEM_INSTRUMENT);
-      printer->PushAttribute(XML_ATTR_ID, hex);
-
+      writer.BeginObject();
+      writer.Int("id", i);
       // Let the instrument save its own content
-      instr->SaveContent(printer);
-
-      printer->CloseElement(); // INSTRUMENT
+      instr->SaveContent(writer);
+      writer.EndObject();
     }
     i++;
   }
+  writer.EndArray();
 }
 
-void InstrumentBank::RestoreContent(PersistencyDocument *doc) {
-  bool elem = doc->FirstChild();
-  while (elem) {
-    // Check it is an instrument
-    if (!strcasecmp(XML_ELEM_INSTRUMENT, doc->ElemName())) {
-      // Get the instrument ID
-      unsigned char id = '\0';
-      char instype[16];
-      instype[0] = '\0';
-      bool hasId = false;
-      bool hasType = false;
-      bool hasAttr = doc->NextAttribute();
-      while (hasAttr) {
-        if (!strcasecmp(doc->attrname(), XML_ATTR_ID)) {
-          unsigned char b1 = (hexNibble(doc->attrval()[0])) << 4;
-          unsigned char b2 = hexNibble(doc->attrval()[1]);
-          id = b1 + b2;
-          hasId = true;
-#if XML_DEBUG_LOGGING
-          Trace::Log("InstrumentBank", "instrument ID from xml:%d", id);
-#endif
-        }
-        if (!strcasecmp(doc->attrname(), XML_ATTR_TYPE)) {
-          strncpy(instype, doc->attrval(), sizeof(instype) - 1);
-          instype[sizeof(instype) - 1] = '\0';
-          hasType = true;
-#if XML_DEBUG_LOGGING
-          Trace::Log("InstrumentBank", "instrument type from xml:%s", instype);
-#endif
-        }
-        if (hasId && hasType) {
-          break;
-        }
-        hasAttr = doc->NextAttribute();
+void InstrumentBank::RestoreContent(JsonReader &reader) {
+  while (reader.NextKey()) {
+    if (!reader.KeyIs("instruments")) {
+      reader.Skip();
+      continue;
+    }
+    if (!reader.BeginArray()) {
+      return;
+    }
+    while (reader.NextElement()) {
+      if (!reader.BeginObject()) {
+        return;
       }
+      int id = -1;
+      InstrumentType instrType = IT_SAMPLE; // default if no type in the file
+      I_Instrument *instr = nullptr;
 
-      InstrumentType instrType = IT_SAMPLE; // default if no type in project XML
-      if (instype[0] != '\0') {
-        for (uint32_t i = 0; i < IT_LAST; i++) {
-          if (!strcasecmp(instype, InstrumentTypeNames[i].persistence)) {
-            instrType = (InstrumentType)i;
-            break;
-          }
+      // the instrument is created when the first member that is not its id or type shows up
+      auto createInstrument = [&]() {
+        if (instr || id < 0 || id >= MAX_INSTRUMENT_COUNT) {
+          return;
         }
-      }
-      if (id < MAX_INSTRUMENT_COUNT) {
         if (AssignInstrumentToSlot(instrType, id) != InstrumentAssignResult::Success) {
           Trace::Error("Failed to allocate instrument type:%d", instrType);
           // TODO: need to show user error message that proj file is invalid
+          return;
         }
-        I_Instrument *instr = instruments_[id];
+        instr = instruments_[id];
+      };
 
-        // Let the instrument restore its own content
-        instr->RestoreContent(doc);
+      while (reader.NextKey()) {
+        if (reader.KeyIs("id")) {
+          id = reader.ReadInt();
+        } else if (reader.KeyIs("type")) {
+          char type[16];
+          reader.ReadString(type, sizeof(type));
+          for (uint32_t t = 0; t < IT_LAST; t++) {
+            if (!strcasecmp(type, InstrumentTypeNames[t].persistence)) {
+              instrType = (InstrumentType)t;
+              break;
+            }
+          }
+        } else {
+          createInstrument();
+          if (!instr || !instr->RestoreKey(reader)) {
+            reader.Skip();
+          }
+        }
+      }
+      createInstrument();
+      if (instr) {
+        instr->RestoreFinished();
       }
     }
-    elem = doc->NextSibling();
   }
 }
 

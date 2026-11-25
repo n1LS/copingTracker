@@ -51,8 +51,8 @@ public:
   // Whether a chain is empty, the phrases it references count (it stops at the first one that has something)
   ChainContent GetChainContent(uint8_t chain) const;
 
-  virtual void SaveContent(tinyxml2::XMLPrinter *printer);
-  virtual void RestoreContent(PersistencyDocument *doc);
+  virtual void SaveContent(JsonWriter &writer);
+  virtual void RestoreContent(JsonReader &reader);
 
   SongRow rows_[SONG_ROW_COUNT];
   Chain chain_;
