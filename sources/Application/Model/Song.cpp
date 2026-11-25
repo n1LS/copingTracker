@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-Song::Song() : Persistent("Song"), chain_(), phrase_() {
+Song::Song() : Persistent(JSON_NODE_SONG), chain_(), phrase_() {
   Reset();
 };
 
@@ -81,13 +81,13 @@ void Song::SaveContent(JsonWriter &writer) {
       }
     }
   }
-  writer.BeginArray("rows");
+  writer.BeginArray(JSON_KEY_ROWS);
   for (int i = 0; i < rowCount; i++) {
     writer.IntArray(nullptr, rows_[i].chains, SONG_CHANNEL_COUNT);
   }
   writer.EndArray();
 
-  writer.BeginArray("chains");
+  writer.BeginArray(JSON_KEY_CHAINS);
   for (int i = 0; i < CHAIN_COUNT; i++) {
     bool empty = true;
     for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
@@ -97,8 +97,8 @@ void Song::SaveContent(JsonWriter &writer) {
       continue;
     }
     writer.BeginObject();
-    writer.Int("id", i);
-    writer.BeginArray("steps");
+    writer.Int(JSON_KEY_ID, i);
+    writer.BeginArray(JSON_KEY_STEPS);
     for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
       if (!isDefaultStep(chain_.steps_[i][j])) {
         const int step[3] = {j, chain_.steps_[i][j].phrase, chain_.steps_[i][j].transpose};
@@ -110,7 +110,7 @@ void Song::SaveContent(JsonWriter &writer) {
   }
   writer.EndArray();
 
-  writer.BeginArray("phrases");
+  writer.BeginArray(JSON_KEY_PHRASES);
   for (int i = 0; i < PHRASE_COUNT; i++) {
     bool empty = true;
     for (int j = 0; j < STEPS_PER_PHRASE; j++) {
@@ -120,8 +120,8 @@ void Song::SaveContent(JsonWriter &writer) {
       continue;
     }
     writer.BeginObject();
-    writer.Int("id", i);
-    writer.BeginArray("steps");
+    writer.Int(JSON_KEY_ID, i);
+    writer.BeginArray(JSON_KEY_STEPS);
     for (int j = 0; j < STEPS_PER_PHRASE; j++) {
       const PhraseStep &s = phrase_.steps_[i][j];
       if (isDefaultStep(s)) {
@@ -158,7 +158,7 @@ void Song::RestoreContent(JsonReader &reader) {
   Reset();
 
   while (reader.NextKey()) {
-    if (reader.KeyIs("rows")) {
+    if (reader.KeyIs(JSON_KEY_ROWS)) {
       if (!reader.BeginArray()) {
         return;
       }
@@ -173,8 +173,8 @@ void Song::RestoreContent(JsonReader &reader) {
         }
         row++;
       }
-    } else if (reader.KeyIs("chains") || reader.KeyIs("phrases")) {
-      const bool isChain = reader.KeyIs("chains");
+    } else if (reader.KeyIs(JSON_KEY_CHAINS) || reader.KeyIs(JSON_KEY_PHRASES)) {
+      const bool isChain = reader.KeyIs(JSON_KEY_CHAINS);
       if (!reader.BeginArray()) {
         return;
       }
@@ -184,9 +184,9 @@ void Song::RestoreContent(JsonReader &reader) {
         }
         int id = -1;
         while (reader.NextKey()) {
-          if (reader.KeyIs("id")) {
+          if (reader.KeyIs(JSON_KEY_ID)) {
             id = reader.ReadInt();
-          } else if (reader.KeyIs("steps")) {
+          } else if (reader.KeyIs(JSON_KEY_STEPS)) {
             // the id comes first
             if (isChain) {
               readStepList(reader, id, CHAIN_COUNT, PHRASES_PER_CHAIN, 2, [this](int chain, int step, const int *v) {

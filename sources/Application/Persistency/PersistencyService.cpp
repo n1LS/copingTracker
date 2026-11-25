@@ -230,7 +230,7 @@ PersistencyResult PersistencyService::SaveProjectData(const char *projectName, b
 
     JsonWriter writer(*fp);
     writer.BeginObject();
-    writer.String("version", PRODUCT_VERSION);
+    writer.String(JSON_KEY_VERSION, PRODUCT_VERSION);
 
     // Loop on all registered persistable subservices
     for (auto *sub : SubServices()) {
@@ -484,7 +484,7 @@ InstrumentType PersistencyService::DetectInstrumentType(const char *name) {
   // the type is the first member, nothing after it is read
   InstrumentType importedType = IT_NONE;
   while (reader.NextKey()) {
-    if (reader.KeyIs("type")) {
+    if (reader.KeyIs(JSON_KEY_TYPE)) {
       char type[16];
       reader.ReadString(type, sizeof(type));
       Trace::Log("PERSISTENCYSERVICE", "Found instrument type in file: %s", type);

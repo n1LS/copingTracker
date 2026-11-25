@@ -241,7 +241,7 @@ Variable *Config::findVariableByName(const char *name, bool colors) {
 
 // "colors": {"VarColor_0": 1052688, ...}, the colors as decimal numbers
 void Config::writeColors(JsonWriter &writer) {
-  writer.BeginObject("colors");
+  writer.BeginObject(JSON_KEY_COLORS);
   for (Variable *var : variables_) {
     if (isColorToken(var->GetID())) {
       writer.Int(var->GetName(), var->GetInt());
@@ -275,7 +275,7 @@ void Config::SaveContent(JsonWriter &writer) {
   Trace::Log("CONFIG", "Saving %d variables to config file", variables_.size());
 
   writer.BeginObject();
-  writer.Int("version", CONFIG_VERSION_NUMBER);
+  writer.Int(JSON_KEY_VERSION, CONFIG_VERSION_NUMBER);
   for (Variable *var : variables_) {
     if (isColorToken(var->GetID())) {
       continue;
@@ -298,11 +298,11 @@ bool Config::LoadContent(JsonReader &reader) {
     return false;
   }
   while (reader.NextKey()) {
-    if (reader.KeyIs("colors")) {
+    if (reader.KeyIs(JSON_KEY_COLORS)) {
       readColors(reader);
       continue;
     }
-    if (reader.KeyIs("version")) {
+    if (reader.KeyIs(JSON_KEY_VERSION)) {
       Trace::Log("CONFIG", "Config version %d", reader.ReadInt());
       continue;
     }
@@ -335,7 +335,7 @@ void Config::SaveTheme(JsonWriter &writer) {
   Trace::Log("CONFIG", "Saving theme content");
 
   writer.BeginObject();
-  writer.Int("version", THEME_VERSION_NUMBER);
+  writer.Int(JSON_KEY_VERSION, THEME_VERSION_NUMBER);
   if (Variable *caseVar = FindVariable(Token::VarTextCase)) {
     writer.Int(caseVar->GetName(), caseVar->GetInt());
   }
@@ -351,7 +351,7 @@ bool Config::LoadTheme(JsonReader &reader) {
     return false;
   }
   while (reader.NextKey()) {
-    if (reader.KeyIs("colors")) {
+    if (reader.KeyIs(JSON_KEY_COLORS)) {
       readColors(reader);
     } else if (reader.KeyIs(Token(Token::VarTextCase).c_str())) {
       const int fontValue = reader.ReadInt();

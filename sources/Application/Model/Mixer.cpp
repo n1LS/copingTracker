@@ -11,7 +11,7 @@
 
 #include "Mixer.h"
 
-Mixer::Mixer() : Persistent("Mixer") {
+Mixer::Mixer() : Persistent(JSON_NODE_MIXER) {
   Clear();
 };
 

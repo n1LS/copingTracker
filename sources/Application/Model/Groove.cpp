@@ -14,7 +14,7 @@
 
 unsigned char Groove::data_[MAX_GROOVES][STEPS_PER_GROOVE];
 
-Groove::Groove() : Persistent("Grooves") {
+Groove::Groove() : Persistent(JSON_NODE_GROOVES) {
   Clear();
 };
 
@@ -56,7 +56,7 @@ void Groove::GetChannelData(int channel, int *groove, int *position) {
 //   "grooves": [{"id": 3, "steps": [7, 5]}]
 // a step of 0 would be a division by zero, it is the end of the groove like 255
 void Groove::SaveContent(JsonWriter &writer) {
-  writer.BeginArray("grooves");
+  writer.BeginArray(JSON_KEY_GROOVES);
   for (int i = 0; i < MAX_GROOVES; i++) {
     int count = 0;
     for (int j = 0; j < STEPS_PER_GROOVE; j++) {
@@ -68,8 +68,8 @@ void Groove::SaveContent(JsonWriter &writer) {
       continue;
     }
     writer.BeginObject();
-    writer.Int("id", i);
-    writer.IntArray("steps", data_[i], count);
+    writer.Int(JSON_KEY_ID, i);
+    writer.IntArray(JSON_KEY_STEPS, data_[i], count);
     writer.EndObject();
   }
   writer.EndArray();
@@ -80,7 +80,7 @@ void Groove::RestoreContent(JsonReader &reader) {
   Clear();
 
   while (reader.NextKey()) {
-    if (!reader.KeyIs("grooves")) {
+    if (!reader.KeyIs(JSON_KEY_GROOVES)) {
       reader.Skip();
       continue;
     }
@@ -93,9 +93,9 @@ void Groove::RestoreContent(JsonReader &reader) {
       }
       int id = -1;
       while (reader.NextKey()) {
-        if (reader.KeyIs("id")) {
+        if (reader.KeyIs(JSON_KEY_ID)) {
           id = reader.ReadInt();
-        } else if (reader.KeyIs("steps") && id >= 0 && id < MAX_GROOVES) {
+        } else if (reader.KeyIs(JSON_KEY_STEPS) && id >= 0 && id < MAX_GROOVES) {
           // the id comes first, the steps that are not in the file are cleared
           memset(data_[id], NO_GROOVE_DATA, STEPS_PER_GROOVE);
           reader.ReadIntArray(data_[id], STEPS_PER_GROOVE);

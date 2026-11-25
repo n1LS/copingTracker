@@ -50,7 +50,7 @@ bool Table::IsEmpty() {
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 
-TableHolder::TableHolder() : Persistent("Tables") {
+TableHolder::TableHolder() : Persistent(JSON_NODE_TABLES) {
   Reset();
 }
 
@@ -71,7 +71,7 @@ Table &TableHolder::GetTable(int table) {
 // only the tables that are not empty, and of those only the steps that are not empty:
 //   "tables": [{"id": 3, "steps": [[step, command 1, value 1, command 2, value 2, command 3, value 3], ...]}]
 void TableHolder::SaveContent(JsonWriter &writer) {
-  writer.BeginArray("tables");
+  writer.BeginArray(JSON_KEY_TABLES);
   for (int i = 0; i < TABLE_COUNT; i++) {
     Table &table = table_[i];
     if (table.IsEmpty()) {
@@ -79,8 +79,8 @@ void TableHolder::SaveContent(JsonWriter &writer) {
     }
     const uint8_t none = static_cast<uint8_t>(Token::InstrumentCommandNone);
     writer.BeginObject();
-    writer.Int("id", i);
-    writer.BeginArray("steps");
+    writer.Int(JSON_KEY_ID, i);
+    writer.BeginArray(JSON_KEY_STEPS);
     for (int j = 0; j < TABLE_STEPS; j++) {
       const TableStep &s = table.steps_[j];
       if (s.cmd1 == none && s.cmd2 == none && s.cmd3 == none && s.param1 == 0 && s.param2 == 0 && s.param3 == 0) {
@@ -102,7 +102,7 @@ void TableHolder::RestoreContent(JsonReader &reader) {
     table_[i].Reset();
   }
   while (reader.NextKey()) {
-    if (!reader.KeyIs("tables")) {
+    if (!reader.KeyIs(JSON_KEY_TABLES)) {
       reader.Skip();
       continue;
     }
@@ -115,9 +115,9 @@ void TableHolder::RestoreContent(JsonReader &reader) {
       }
       int id = -1;
       while (reader.NextKey()) {
-        if (reader.KeyIs("id")) {
+        if (reader.KeyIs(JSON_KEY_ID)) {
           id = reader.ReadInt();
-        } else if (reader.KeyIs("steps") && id >= 0 && id < TABLE_COUNT) {
+        } else if (reader.KeyIs(JSON_KEY_STEPS) && id >= 0 && id < TABLE_COUNT) {
           // the id comes first
           Table &table = table_[id];
           if (!reader.BeginArray()) {

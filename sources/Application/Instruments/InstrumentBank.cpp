@@ -28,7 +28,7 @@
 #define XML_DEBUG_LOGGING 1
 
 // Contain all instrument definition
-InstrumentBank::InstrumentBank() : Persistent("InstrumentBank"), instrumentPool_() {
+InstrumentBank::InstrumentBank() : Persistent(JSON_NODE_INSTRUMENT_BANK), instrumentPool_() {
 
   for (size_t i = 0; i < instruments_.max_size(); i++) {
     instruments_[i] = &none_;
@@ -60,12 +60,12 @@ I_Instrument *InstrumentBank::GetInstrument(int i) {
 // "instruments": [{"id": 3, "type": "sample", ...}] of the instruments that are not empty, the id and the type come
 // first: the instrument is created from them before the rest is read
 void InstrumentBank::SaveContent(JsonWriter &writer) {
-  writer.BeginArray("instruments");
+  writer.BeginArray(JSON_KEY_INSTRUMENTS);
   int i = 0;
   for (auto &instr : instruments_) {
     if (!instr->IsEmpty()) {
       writer.BeginObject();
-      writer.Int("id", i);
+      writer.Int(JSON_KEY_ID, i);
       // Let the instrument save its own content
       instr->SaveContent(writer);
       writer.EndObject();
@@ -77,7 +77,7 @@ void InstrumentBank::SaveContent(JsonWriter &writer) {
 
 void InstrumentBank::RestoreContent(JsonReader &reader) {
   while (reader.NextKey()) {
-    if (!reader.KeyIs("instruments")) {
+    if (!reader.KeyIs(JSON_KEY_INSTRUMENTS)) {
       reader.Skip();
       continue;
     }
@@ -106,9 +106,9 @@ void InstrumentBank::RestoreContent(JsonReader &reader) {
       };
 
       while (reader.NextKey()) {
-        if (reader.KeyIs("id")) {
+        if (reader.KeyIs(JSON_KEY_ID)) {
           id = reader.ReadInt();
-        } else if (reader.KeyIs("type")) {
+        } else if (reader.KeyIs(JSON_KEY_TYPE)) {
           char type[16];
           reader.ReadString(type, sizeof(type));
           for (uint32_t t = 0; t < IT_LAST; t++) {

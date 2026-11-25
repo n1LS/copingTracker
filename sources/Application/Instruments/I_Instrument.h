@@ -108,7 +108,7 @@ protected:
   etl::string<MAX_INSTRUMENT_NAME_LENGTH> name_;
 
 public:
-  I_Instrument(etl::ivector<Variable *> *list, const char *nodeName = "instrument",
+  I_Instrument(etl::ivector<Variable *> *list, const char *nodeName = JSON_NODE_INSTRUMENT,
                bool registerWithPersistence = false)
       : VariableContainer(list), Persistent(nodeName, registerWithPersistence),
         volume_(Token::InstrumentParameterVolume, 0xff), pan_(Token::InstrumentParameterPan, 0x80),

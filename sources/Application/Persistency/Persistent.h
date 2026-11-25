@@ -14,6 +14,7 @@
 
 #include "Application/Persistency/JsonReader.h"
 #include "Application/Persistency/JsonWriter.h"
+#include "Application/Persistency/PersistenceConstants.h"
 #include "Foundation/Services/SubService.h"
 #include "System/Console/n_assert.h"
 

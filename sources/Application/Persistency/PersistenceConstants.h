@@ -42,4 +42,34 @@
 
 #define PROJECT_SAMPLES_DIR "samples"
 
+/* json keys: kebab-case ****************************************************/
+
+// members of the project file, one per Persistent
+#define JSON_NODE_PROJECT "project"
+#define JSON_NODE_SONG "song"
+#define JSON_NODE_TABLES "tables"
+#define JSON_NODE_GROOVES "grooves"
+#define JSON_NODE_INSTRUMENT_BANK "instrument-bank"
+#define JSON_NODE_MIXER "mixer"
+// the root of an instrument file is the instrument itself, this is only the name its Persistent registers under
+#define JSON_NODE_INSTRUMENT "instrument"
+
+// keys inside of them
+#define JSON_KEY_VERSION "version"
+#define JSON_KEY_TYPE "type"
+#define JSON_KEY_NAME "name"
+#define JSON_KEY_ID "id"
+#define JSON_KEY_STEPS "steps"
+#define JSON_KEY_VARIABLES "variables"
+#define JSON_KEY_EFFECTS "effects"
+#define JSON_KEY_SLICES "slices"
+#define JSON_KEY_COLORS "colors"
+#define JSON_KEY_ROWS "rows"
+#define JSON_KEY_CHAINS "chains"
+#define JSON_KEY_PHRASES "phrases"
+#define JSON_KEY_TABLES "tables"
+#define JSON_KEY_GROOVES "grooves"
+#define JSON_KEY_INSTRUMENTS "instruments"
+#define JSON_KEY_TABLE_RATIO "table-ratio"
+
 #endif // _PERSISTENCE_CONSTANTS_H_

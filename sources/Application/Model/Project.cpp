@@ -35,7 +35,7 @@
 #define DEFAULT_DELAY_WET 0x80
 
 Project::Project(const char *name)
-    : Persistent("Project"), VariableContainer(&variables_), song_(), tempoNudge_(0),
+    : Persistent(JSON_NODE_PROJECT), VariableContainer(&variables_), song_(), tempoNudge_(0),
       tempo_(Token::VarTempo, DEFAULT_TEMPO), masterVolume_(Token::VarMasterVolume, DEFAULT_MASTER_VOLUME),
       channelVolume1_(Token::VarChannel1Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume2_(Token::VarChannel2Volume, DEFAULT_CHANNEL_VOLUME),
@@ -432,13 +432,13 @@ int Project::PurgeInstruments() {
   return purged;
 }
 
-// "tableRatio": 2, "variables": {"VarTempo": 138, ...}
+// "table-ratio": 2, "variables": {"VarTempo": 138, ...}
 void Project::RestoreContent(JsonReader &reader) {
   int tableRatio = 1;
   while (reader.NextKey()) {
-    if (reader.KeyIs("tableRatio")) {
+    if (reader.KeyIs(JSON_KEY_TABLE_RATIO)) {
       tableRatio = reader.ReadInt();
-    } else if (reader.KeyIs("variables")) {
+    } else if (reader.KeyIs(JSON_KEY_VARIABLES)) {
       if (!reader.BeginObject()) {
         return;
       }
@@ -462,11 +462,11 @@ void Project::RestoreContent(JsonReader &reader) {
 }
 
 void Project::SaveContent(JsonWriter &writer) {
-  writer.Int("tableRatio", SyncMaster::GetInstance()->GetTableRatio());
+  writer.Int(JSON_KEY_TABLE_RATIO, SyncMaster::GetInstance()->GetTableRatio());
 
   // save all of the project's parameters, except the project name, which is derived from the projects directory
   // name
-  writer.BeginObject("variables");
+  writer.BeginObject(JSON_KEY_VARIABLES);
   for (Variable *variable : variables_) {
     if (variable->GetID() != Token::VarProjectName) {
       WriteVariableJson(writer, *variable);

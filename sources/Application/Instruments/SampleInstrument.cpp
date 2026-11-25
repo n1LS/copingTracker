@@ -1540,12 +1540,12 @@ void SampleInstrument::SaveContent(JsonWriter &writer) {
     }
   }
   if (count > 0) {
-    writer.IntArray("slices", slicePoints_.data(), count);
+    writer.IntArray(JSON_KEY_SLICES, slicePoints_.data(), count);
   }
 }
 
 bool SampleInstrument::RestoreKey(JsonReader &reader) {
-  if (!reader.KeyIs("slices")) {
+  if (!reader.KeyIs(JSON_KEY_SLICES)) {
     return I_Instrument::RestoreKey(reader);
   }
   if (!reader.BeginArray()) {

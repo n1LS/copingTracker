@@ -127,22 +127,22 @@ void I_Instrument::ProcessCompressor(int channel, fixed *buffer, int size) {
 //  "effects": {"InstrumentParameterEqOn": true, ...}}
 // the type comes first, it is needed to create the instrument before the rest is read
 void I_Instrument::SaveContent(JsonWriter &writer) {
-  writer.String("type", InstrumentTypeNames[GetType()].persistence);
-  writer.String("version", PRODUCT_VERSION);
+  writer.String(JSON_KEY_TYPE, InstrumentTypeNames[GetType()].persistence);
+  writer.String(JSON_KEY_VERSION, PRODUCT_VERSION);
 
   // Save the instrument name as its not stored in the Variables
   if (!name_.empty()) {
-    writer.String("name", name_.c_str());
+    writer.String(JSON_KEY_NAME, name_.c_str());
   }
 
-  writer.BeginObject("variables");
+  writer.BeginObject(JSON_KEY_VARIABLES);
   for (auto it = Variables()->begin(); it != Variables()->end(); it++) {
     WriteVariableJson(writer, **it);
   }
   writer.EndObject();
 
   // The equalizer and compressor settings are not Variables, they are saved the same way though
-  writer.BeginObject("effects");
+  writer.BeginObject(JSON_KEY_EFFECTS);
   for (Token token : EffectParameterTokens) {
     const bool isOn = (token == Token::InstrumentParameterEqOn) || (token == Token::InstrumentParameterCompOn);
     if (isOn) {
@@ -155,7 +155,7 @@ void I_Instrument::SaveContent(JsonWriter &writer) {
 }
 
 bool I_Instrument::RestoreKey(JsonReader &reader) {
-  if (reader.KeyIs("type") || reader.KeyIs("version")) {
+  if (reader.KeyIs(JSON_KEY_TYPE) || reader.KeyIs(JSON_KEY_VERSION)) {
     char text[32];
     reader.ReadString(text, sizeof(text));
     // TODO: We already know the instrument type so need to validate it matches the imported one here
@@ -163,7 +163,7 @@ bool I_Instrument::RestoreKey(JsonReader &reader) {
     return true;
   }
 
-  if (reader.KeyIs("name")) {
+  if (reader.KeyIs(JSON_KEY_NAME)) {
     char text[MAX_VARIABLE_STRING_LENGTH + 1];
     reader.ReadString(text, sizeof(text));
     if (!reader.HadError()) {
@@ -173,7 +173,7 @@ bool I_Instrument::RestoreKey(JsonReader &reader) {
     return true;
   }
 
-  if (reader.KeyIs("variables")) {
+  if (reader.KeyIs(JSON_KEY_VARIABLES)) {
     if (!reader.BeginObject()) {
       return true;
     }
@@ -196,7 +196,7 @@ bool I_Instrument::RestoreKey(JsonReader &reader) {
     return true;
   }
 
-  if (reader.KeyIs("effects")) {
+  if (reader.KeyIs(JSON_KEY_EFFECTS)) {
     if (!reader.BeginObject()) {
       return true;
     }
