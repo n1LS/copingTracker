@@ -34,6 +34,10 @@ public:
   // pressed or let go in between change nothing, so the views do not need to know about any of it.
   void BeginMute(int from, int to);
   void BeginSolo(int from, int to);
+  // a mute / solo chord is held (the legend shows what releasing does)
+  bool IsMuteSoloHeld() const {
+    return armed_ != Armed::None;
+  }
   // every button release, from View::ProcessButton
   void OnButtonUp(uint16_t button, uint16_t mask);
 

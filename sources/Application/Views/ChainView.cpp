@@ -846,6 +846,9 @@ void ChainView::DrawView() {
 }
 
 ContextLegend ChainView::currentContextLegend() const {
+  if (UIController::GetInstance()->IsMuteSoloHeld()) {
+    return ContextLegend::SoloMute;
+  }
   if (viewMode_ == VM_CLONE) {
     return ContextLegend::ChainClone;
   }

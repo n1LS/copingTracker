@@ -42,8 +42,9 @@ direction is ignored.
 > Both views derive from `PhraseEditingView`, which implements the input they share:
 > `NAV + direction`, `NAV + NAV`, `PLAY`, `NAV + PLAY` and `EDIT + direction` (switching the phrase).
 >
-> **Context legend:** in clone and selection mode (and in the song view while the loop is
-> being selected, legend `SongLoop`) the song, chain, phrase and table
+> **Context legend:** in clone and selection mode (in the song view also while the loop is
+> being selected, legend `SongLoop`, and in the song, chain and phrase view while a mute / solo
+> chord is held, legend `SoloMute`) the song, chain, phrase and table
 > views replace the notes / command help in the bottom info area with a legend of the
 > available combos. The legends live in `tools/manual/raw_data/ContextLegends.copingDoc`
 > and must be kept in sync with the tables below.
@@ -744,6 +745,7 @@ Extends `FileListView` (see §2.3) with its own buttons:
   channel (the selected channels in the song view), `ENTER + NAV` solos it. Both
   work while held: letting go of `EDIT` / `ENTER` while `NAV` is still held takes it back
   (the mutes from before the solo are restored), letting go of `NAV` first keeps it.
+  While the chord is held the `SoloMute` legend is shown.
   Other buttons pressed or released in between change nothing. A kept solo ends with
   the next `ENTER + NAV` (which restores the mutes from before it) or with `NAV + ALT`
   (un-mute all).

@@ -1078,6 +1078,9 @@ void PhraseView::DrawView() {
 }
 
 ContextLegend PhraseView::currentContextLegend() const {
+  if (UIController::GetInstance()->IsMuteSoloHeld()) {
+    return ContextLegend::SoloMute;
+  }
   if (viewMode_ == VM_CLONE) {
     return ContextLegend::PhraseClone;
   }
