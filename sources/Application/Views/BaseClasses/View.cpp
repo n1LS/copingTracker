@@ -608,8 +608,7 @@ void View::DrawRect(const GUIRect r, Color color) {
 void View::drawPlaybackIndicator() {
   SetBackgroundColor(Theme::View::Title::bg);
   SetColor(Theme::View::Title::fg);
-  int startX = SCREEN_WIDTH - 5;
-  DrawChar(startX, 0, Player::GetInstance()->IsRunning() ? CHAR(char_indicator_position_s) : ' ');
+  DrawChar(INDICATOR_PLAY_STATUS_X, 0, Player::GetInstance()->IsRunning() ? CHAR(char_indicator_position_s) : ' ');
 }
 
 void View::drawBattery() {

@@ -302,12 +302,67 @@ void SongView::extendSelection() {
 
 void SongView::OnFocus() {
   clipboard_.active_ = false;
+  titleScrollStart_ = AppWindow::GetAnimationFrameCounter();
 
   // eg. if the user was in master channel in mixerview and came to songview
   // we need to make sure we're not outside channel range
   if (viewData_->songX_ > SONG_CHANNEL_COUNT - 1) {
     viewData_->songX_ = 0; // default to channel 1
   }
+}
+
+// The title is hidden by the indicators from INDICATOR_LEFT_MOST on, the project name after the 5 character prefix
+// ("Song " / "Live ") scrolls when it is longer than the rest: waits at the start, steps one character at a time,
+// waits at the end, starts over. The animation frame counter is the time base.
+static constexpr int titlePrefixLength = 5;
+static constexpr int titleNameWidth = INDICATOR_LEFT_MOST - titlePrefixLength;
+static constexpr uint32_t titleScrollStepFrames = etClock_HZ / 4; // ~4 characters per second
+static constexpr uint32_t titleScrollPauseFrames = etClock_HZ * 3 / 2;
+
+int SongView::titleScrollOffset() const {
+  Variable *v = viewData_->project_->FindVariable(Token::VarProjectName);
+  const int overflow = static_cast<int>(v->GetString().length()) - titleNameWidth;
+  if (overflow <= 0) {
+    return 0;
+  }
+  const uint32_t scrollFrames = overflow * titleScrollStepFrames;
+  const uint32_t cycle = titleScrollPauseFrames + scrollFrames + titleScrollPauseFrames;
+  const uint32_t t = (AppWindow::GetAnimationFrameCounter() - titleScrollStart_) % cycle;
+  if (t < titleScrollPauseFrames) {
+    return 0;
+  }
+  if (t < titleScrollPauseFrames + scrollFrames) {
+    return (t - titleScrollPauseFrames) / titleScrollStepFrames;
+  }
+  return overflow;
+}
+
+// fullTitle: the whole title line (DrawView), otherwise only the part the indicators leave free (animation)
+void SongView::drawTitleText(bool fullTitle) {
+  Variable *v = viewData_->project_->FindVariable(Token::VarProjectName);
+  const char *name = v->GetString().c_str();
+  const int nameLength = static_cast<int>(strlen(name));
+  const int offset = titleScrollOffset();
+  titleScrollDrawn_ = offset;
+  const char *prefix = Player::GetInstance()->GetSequencerMode() == SM_SONG ? "Song " : "Live ";
+
+  char shown[SCREEN_WIDTH + 1];
+  const int width = fullTitle ? INDICATOR_BATTERY_GAUGE_X : INDICATOR_LEFT_MOST;
+  const int visible = std::max(0, std::min(titleNameWidth, nameLength - offset));
+  npf_snprintf(shown, sizeof(shown), "%s", prefix);
+  memcpy(shown + titlePrefixLength, name + std::min(offset, nameLength), visible);
+  shown[titlePrefixLength + visible] = '\0';
+  if (fullTitle) {
+    DrawTitle("%s", shown);
+    return;
+  }
+  // pad to the free width, the prefix is part of it
+  size_t len = strlen(shown);
+  memset(shown + len, ' ', width - len);
+  shown[width] = '\0';
+  SetBackgroundColor(Theme::View::Title::bg);
+  SetColor(Theme::View::Title::fg);
+  DrawString(0, 0, shown, fBold);
 }
 
 GUIRect SongView::getSelectionRect() {
@@ -921,8 +976,7 @@ void SongView::DrawView() {
   // Draw title
 
   Player *player = Player::GetInstance();
-  Variable *v = viewData_->project_->FindVariable(Token::VarProjectName);
-  DrawTitle(player->GetSequencerMode() == SM_SONG ? "Song %s" : "Live %s", v->GetString().c_str());
+  drawTitleText(true);
 
   // Compute song grid location
 
@@ -1223,6 +1277,9 @@ void SongView::AnimationUpdate() {
   // This ensures all UI drawing happens on the "main" thread (core0)
 
   // Always update VU meter even if other parts of UI dont need updating
+  if (titleScrollOffset() != titleScrollDrawn_) {
+    drawTitleText(false);
+  }
   drawMasterVuMeter(player);
   drawTitleVuMeter(player);
   drawTitleCPUMeter();
