@@ -11,7 +11,7 @@
 #include "Application/AppWindow.h"
 #include "Application/Instruments/CommandList.h"
 
-const int commandsPerRow = 5;
+const int commandsPerRow = 6;
 
 bool CommandView::inUse_ = false;
 alignas(CommandView) static unsigned char CommandViewStorage[sizeof(CommandView)];
@@ -43,33 +43,36 @@ CommandView::CommandView(View &view, Token command) : ModalView(view) {
 }
 
 void CommandView::DrawView() {
-  int top = 3;
-  DrawWindow(2, top, 28, 16, "Command Selector");
+  int top = 2;
+  DrawWindow(1, top, 30, 18, "Command Selector");
+
+  DrawFilledBorder(2, top + 3, 28, 8, Theme::Dialog::Panel::sub, true);
 
   for (int cmd = 0; cmd < CommandList::CommandCount; cmd++) {
     bool active = cmd == index_;
     Token command = CommandList::AllCommands[cmd];
 
-    SetColor(active ? Theme::Dialog::Button::fg(true) : Theme::Dialog::fg);
-    SetBackgroundColor(active ? Theme::Dialog::Button::bg(true) : Theme::Dialog::bg);
-
-    int x = 5 + (cmd % commandsPerRow) * 5;
-    int y = top + 3 + (cmd / commandsPerRow);
-
-    DrawString(x, y, command.c_str());
-
+    int x = 4 + (cmd % commandsPerRow) * 4;
+    int y = top + 4 + (cmd / commandsPerRow);
+    
     if (active) {
       SetColor(Theme::Dialog::Button::bg(true));
-      SetBackgroundColor(Theme::Dialog::bg);
+      SetBackgroundColor(Theme::Dialog::Panel::sub);
+      DrawChar(x - 1, y, CHAR(char_button_border_left_s));
+      DrawChar(x + 3, y, CHAR(char_button_border_right_s));
+
+      SetColor(Theme::Dialog::Button::fg(true));
+      SetBackgroundColor(Theme::Dialog::Button::bg(true));
+    } else {
+      SetColor(Theme::View::fg);
+      SetBackgroundColor(Theme::Dialog::Panel::sub);
     }
 
-    DrawChar(x - 1, y, active ? CHAR(char_button_border_left_s) : ' ');
-    DrawChar(x + 3, y, active ? CHAR(char_button_border_right_s) : ' ');
+    DrawString(x, y, command.c_str());
   }
 
-  SetColor(Theme::Dialog::Title::fg);
-  DrawString(3, top + 10, "Command description:");
-  drawCommandLegend(3, top + 11, CommandList::AllCommands[index_]);
+  DrawFilledBorder(2, top + 11, 28, 6, Theme::Dialog::Panel::bg, true);
+  drawCommandLegend(3, top + 12, CommandList::AllCommands[index_]);
 }
 
 void CommandView::ProcessSelection(uint16_t mask) {

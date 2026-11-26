@@ -545,7 +545,13 @@ bool View::trackNavDoubleTap(uint16_t button, uint16_t mask, bool pressed) {
 void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
   static int depth = 0;
 
-  heldButtons_ = pressed ? (mask | button) : mask;
+  // The buttons that are down feed the chord hints of the view. While a modal is open the view below it keeps showing
+  // what it showed when the modal opened (the part of the screen the modal does not cover), the buttons of the modal
+  // do not change it.
+  const uint16_t held = pressed ? (mask | button) : mask;
+  if (depth == 0 && !modalView_) {
+    heldButtons_ = held;
+  }
 
   // ALT + EDIT opens the menu, it stays open while ALT is held
   if (pressed && !modalView_ && SupportsUndo() && IsPair(button, mask, BM_ALT, BM_EDIT)) {
@@ -572,6 +578,10 @@ void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
   depth++;
   dispatchButton(button, mask, pressed);
   depth--;
+  if (depth == 0 && !modalView_) {
+    // a modal that was open is closed now
+    heldButtons_ = held;
+  }
   if (!pressed && button == BM_ALT) {
     menuOpen_ = false;
     menuUsedUndo_ = false;
