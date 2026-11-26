@@ -1,5 +1,191 @@
 F                             
 C                             
+v0.6.0a             2026-11-26
+0                             
+0                             
+                              
+F                             
+0                             
+- Added mute, solo, and       
+F                             
+0                             
+  unmute‑all to the piano roll
+F                             
+0                             
+- Displayed available         
+F                             
+0                             
+  shortcuts while modifier    
+F                             
+0                             
+  buttons were held           
+F                             
+0                             
+- Added selection, cut, copy, 
+F                             
+0                             
+  and paste to the groove view
+F                             
+0                             
+- Improved undo/redo menus    
+F                             
+0                             
+  across all views            
+F                             
+0                             
+- Added undo/redo for song    
+F                             
+0                             
+  data across all six views   
+F                             
+0                             
+- Improved mute and solo      
+F                             
+0                             
+  controls and restored       
+F                             
+0                             
+  previous mute states        
+F                             
+0                             
+- Displayed contextual help   
+F                             
+0                             
+  while selecting a song loop 
+F                             
+0                             
+- Changed project files to a  
+F                             
+0                             
+  new JSON format             
+F                             
+0                             
+- Saved only changed data in  
+F                             
+0                             
+  project files               
+F                             
+0                             
+- Fixed grooves not being     
+F                             
+0                             
+  properly cleared or restored
+F                             
+0                             
+- Fixed GM instrument names   
+F                             
+0                             
+  not appearing correctly     
+F                             
+0                             
+- Scrolled long project names 
+F                             
+0                             
+  in the song view            
+F                             
+0                             
+- Fixed last character being  
+F                             
+0                             
+  cut off in context legends  
+F                             
+0                             
+- Fixed occasional display    
+F                             
+0                             
+  corruption in the mirrored  
+F                             
+0                             
+  UI                          
+F                             
+0                             
+- Added a CPU load indicator  
+F                             
+0                             
+  to the user interface       
+F                             
+0                             
+- Gave empty chains and       
+F                             
+0                             
+  phrases distinct colors     
+F                             
+0                             
+- Improved waveform display   
+F                             
+0                             
+  when zooming in and out     
+F                             
+0                             
+- Added zero‑crossing         
+F                             
+0                             
+  navigation to sample markers
+F                             
+0                             
+  and slice points            
+F                             
+0                             
+- Cleared unused slice points 
+F                             
+0                             
+  when reducing the maximum   
+F                             
+0                             
+  slice count                 
+F                             
+0                             
+- Fixed cursor highlighting in
+F                             
+0                             
+  the groove view             
+F                             
+0                             
+- Improved sample editor      
+F                             
+0                             
+  marker controls and waveform
+F                             
+0                             
+  navigation                  
+F                             
+0                             
+- Made sample editing         
+F                             
+0                             
+  operations easier to access 
+F                             
+0                             
+- Added project renaming to   
+F                             
+0                             
+  the project browser         
+F                             
+0                             
+- Improved selection behavior 
+F                             
+0                             
+  when leaving clone mode     
+F                             
+0                             
+- Fixed cursor highlighting   
+F                             
+0                             
+  after cutting and copying   
+F                             
+0                             
+- Fixed returning to the      
+F                             
+0                             
+  sample pool after editing a 
+F                             
+0                             
+  sample                      
+0                             
+0                             
+                              
+F                             
+C                             
 v0.5.0a             2026-11-19
 0                             
 0                             
