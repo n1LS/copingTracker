@@ -1,5 +1,5 @@
-0                             
-4                             
+0                          8  
+4                          8  
 SongClone                     
 F              7          F8  
 0                             
@@ -13,8 +13,8 @@ ACTIONS     ú  Clone chain ∞∞∞
 F 7                        8  
 0                             
 ù up or other key: select  ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 SongSelection                 
 F        7                 8  
 0                             
@@ -28,8 +28,8 @@ F   7       F           7  8
 F   7       F           7  8  
 0                             
 ù+ü Extend                 ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 ChainClone                    
 F              7           8  
 0                             
@@ -43,8 +43,8 @@ ACTIONS     ú  Clone phrase∞∞∞
 F 7                        8  
 0                             
 ù up or other key: select  ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 ChainSelection                
 F        7  F            7 8  
 0                             
@@ -58,8 +58,8 @@ F  7     F         7       8
 F   7     F                8  
 0                             
 ù+ü Extend                 ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 PhraseSelection               
 F                          8  
 0                             
@@ -73,8 +73,8 @@ F   7       F      7       8
 F   7                      8  
 0                             
 ù+ü Extend                 ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 TableSelection                
 F                          8  
 0                             
@@ -88,8 +88,8 @@ F   7       F      7       8
 8           F      7       8  
 0                             
             öôòó   Select  ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 RollSelection                 
 F                          8  
 0                             
@@ -104,7 +104,7 @@ F   7       F   7          8
 0                             
 öó  Extend  ù+ü Extend all ∞∞∞
 0                             
-4                             
+4                          8  
 SongLoop                      
 F                          8  
 0                             
@@ -118,8 +118,8 @@ F   7                      8
 F   7                      8  
 0                             
 û+ö when looping: remove   ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 SoloMute                      
 F                          8  
 0                             
@@ -133,8 +133,8 @@ F   7         9    7       8
 F   7                      8  
 0                             
 û+ù Un-mute all            ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 PhraseCloneTable              
 F              7           8  
 0                             
@@ -149,7 +149,7 @@ F 7                        8
 0                             
 ù up or other key: select  ∞∞∞
 0                             
-4                             
+4                          8  
 PhraseCloneInstrument         
 F              7           8  
 0                             
@@ -163,8 +163,8 @@ ACTIONS     ú  Clone instr ∞∞∞
 F 7                        8  
 0                             
 ù up or other key: select  ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 TableMenu                     
 F           7      F       8  
 0                             
@@ -178,8 +178,8 @@ ACTIONS                    ∞∞∞
 F 7                        8  
 0                             
 ù up or other key: select  ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 RollMenu                      
 F           7      F       8  
 0                             
@@ -193,8 +193,8 @@ ACTIONS                    ∞∞∞
 F 7                        8  
 0                             
 ù up or other key: select  ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 GrooveMenu                    
 F                          8  
 0                             
@@ -208,8 +208,8 @@ ACTIONS                    ∞∞∞
 F 7                      0 8  
 0                             
 ù up or other key: select  ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 PhraseMenu                    
 F           7      9       8  
 0                             
@@ -223,8 +223,8 @@ ACTIONS                    ∞∞∞
 F 7                        8  
 0                             
 ù up or other key: select  ∞∞∞
-0                             
-4                             
+0                          8  
+4                          8  
 GrooveSelection               
 F                          8  
 0                             
@@ -238,3 +238,378 @@ F   7       F      7       8
 7           F  7           8  
 0                             
             òô     Select  ∞∞∞
+0                          8  
+4                          8  
+SongChordsAlt                 
+F 7         F  7           8  
+0                             
+û Unmute *  öó Tempo       ∞∞∞
+F 7         F  7           8  
+0                             
+õ Play row  òô Section     ∞∞∞
+F 7                        8  
+0                             
+ü Menu                     ∞∞∞
+F 7                        8  
+0                             
+ú Paste                    ∞∞∞
+0                             
+4                          8  
+SongChordsNav                 
+F 7         F  9           8  
+0                             
+ù Unmute *  ò  Workspace   ∞∞∞
+F 7         F  9           8  
+0                             
+õ Stop      ó  Chain       ∞∞∞
+F 7         F  9           8  
+0                             
+ü Mute      ô  Mixer       ∞∞∞
+F 7         F  7           8  
+0                             
+ú Solo      ö  Toggle Loop ∞∞∞
+0                          8  
+4                          8  
+SongChordsEdit                
+F 7         F  7           8  
+0                             
+ù Menu      òô Page        ∞∞∞
+F 7         F  7           8  
+0                             
+õ Run live  öó Song/Live   ∞∞∞
+F 7                        8  
+0                             
+û Mute                     ∞∞∞
+8                             
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+SongChordsEnter               
+F 7         F  7           8  
+0                             
+ü Cut       ó  Chain +1    ∞∞∞
+8           F  7           8  
+0                             
+            ö  Chain -1    ∞∞∞
+8           F  7           8  
+0                             
+            ò  Chain +10   ∞∞∞
+8           F  7           8  
+0                             
+            ô  Chain -10   ∞∞∞
+0                          8  
+4                          8  
+ChainChordsAlt                
+7      F 7     F 7         8  
+0                             
+       ú Paste ü Menu      ∞∞∞
+F 7                        8  
+0                             
+û Un-mute all              ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+ChainChordsNav                
+F 7    9    F 79        79 8  
+0                             
+õ Play      ö  Song        ∞∞∞
+F 7   9    7F 79        79 8  
+0                             
+ü Mute      ó  Phrase      ∞∞∞
+F 7         F 79        79 8  
+0                             
+ú Solo      ô  Generator   ∞∞∞
+F 7            9     7     8  
+0                             
+ù Unmute *                 ∞∞∞
+0                          8  
+4                          8  
+ChainChordsEdit               
+F 7   F 7   F  7           8  
+0                             
+û Mute      öó Channel     ∞∞∞
+F 7         F  7           8  
+0                             
+ù Menu      òô Chain       ∞∞∞
+7                          8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+ChainChordsEnter              
+F 7    F 7  F7F7           8  
+0                             
+ü Cut       ó  Value +1    ∞∞∞
+7           F  7           8  
+0                             
+            ö  Value -1    ∞∞∞
+7           F7F7           8  
+0                             
+            ò  Value +10   ∞∞∞
+0           F  7        0  8  
+0                             
+            ô  Value -10   ∞∞∞
+0                             
+4                          8  
+PhraseChordsAlt               
+F 7                        8  
+0                             
+ú Paste                    ∞∞∞
+F 7                        8  
+0                             
+û Unmute *                 ∞∞∞
+F 7   0                    8  
+0                             
+ü Menu                     ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+PhraseChordsNav               
+F 7   F9    F 79      7    8  
+0                             
+ü Mute      ò  Groove      ∞∞∞
+F 7   9 7   F 79      7    8  
+0                             
+õ Play      ö  Chain       ∞∞∞
+F 7    9    F 79         7 8  
+0                             
+ú Solo      ó  Instrument  ∞∞∞
+F 7         F 79      7    8  
+0                             
+ù Un-mute   ô  Table       ∞∞∞
+0                          8  
+4                          8  
+PhraseChordsEdit              
+F 7   F 9   F  7      9  7 8  
+0                             
+û Mute      öó Channel     ∞∞∞
+F 7   9  7  F  7      9  7 8  
+0                             
+ù Menu      òô Phrase      ∞∞∞
+9     7        9     7     8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+PhraseChordsEnter             
+F 7  9      F 97           8  
+0                             
+ü Cut       öó Change value∞∞∞
+9       7   F 7            8  
+0                             
+            òô             ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+TableChordsAlt                
+F 7    9      79     7     8  
+0                             
+ú Paste                    ∞∞∞
+F 7   0                    8  
+0                             
+ü Menu                     ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+TableChordsNav                
+F 7   9     F 9         7  8  
+0                             
+õ Play      ò  Phrase      ∞∞∞
+9       7   F  9        7  8  
+0                             
+            ö  Mixer       ∞∞∞
+0           F  9        0  8  
+0                             
+            ó  Table       ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+Table2ChordsNav               
+F 7   F9    F  9         7 8  
+0                             
+õ Play      ò  Instrument  ∞∞∞
+9           F  9         7 8  
+0                             
+            ö  Table       ∞∞∞
+9            0             8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                             
+4                          8  
+TableChordsEdit               
+F 7    F7   F 7            8  
+0                             
+ù Menu      ó  Table + 1   ∞∞∞
+7           F7             8  
+0                             
+            ö  Table - 1   ∞∞∞
+7           F7             8  
+0                             
+            ò  Table + 10  ∞∞∞
+0           F0 7         0 8  
+0                             
+            ô  Table - 10  ∞∞∞
+0                          8  
+4                          8  
+TableChordsEnter              
+F 7    F 9  F  7           8  
+0                             
+ü Cut       òô Change value∞∞∞
+9    7     9F              8  
+0                             
+            öó             ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+GrooveChordsAlt               
+F 7                        8  
+0                             
+ú Paste                    ∞∞∞
+F 7   0                    8  
+0                             
+ü Menu                     ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+GrooveChordsNav               
+F 7   F9    F  9          78  
+0                             
+õ Play      ö  Workspace   ∞∞∞
+9     7     F  9          78  
+0                             
+            ô  Phrase      ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+GrooveChordsEdit              
+F 7   F 7   F7F7           8  
+0                             
+ù Menu      ó  Groove + 1  ∞∞∞
+F 7         F7             8  
+0                             
+ú Cut       ö  Groove - 1  ∞∞∞
+7           F7             8  
+0                             
+            ò  Groove + 10 ∞∞∞
+0           F0 7          08  
+0                             
+            ô  Groove - 10 ∞∞∞
+0                             
+4                          8  
+GrooveChordsEnter             
+F 7    F 7  F  7           8  
+0                             
+ü Cut       òô Change value∞∞∞
+7           F              8  
+0                             
+            öó             ∞∞∞
+0          7               8  
+0                             
+                           ∞∞∞
+0                          8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+RollChordsAlt                 
+F 7         F 7            8  
+0                             
+ú Paste     ó  Go to fields∞∞∞
+F 7                        8  
+0                             
+ü Menu                     ∞∞∞
+F 7      0                 8  
+0                             
+û Unmute                   ∞∞∞
+0           7       0      8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+RollChordsNav                 
+F 7   9     F 9            8  
+0                             
+ü Mute      ò  Groove      ∞∞∞
+F 7   9 7   F 9            8  
+0                             
+õ Play      ö  Chain       ∞∞∞
+F 7       9 F 9          7 8  
+0                             
+ú Solo      ó  Instrument  ∞∞∞
+F 7       9 F 9          7 8  
+0                             
+ù Unmute    ô  Table       ∞∞∞
+0                          8  
+4                          8  
+RollChordsEdit                
+F 7   F 9   F  7           8  
+0                             
+û Mute      öó Channel     ∞∞∞
+F 7         F  7           8  
+0                             
+ú Del note  òô Phrase      ∞∞∞
+F 7         97             8  
+0                             
+ù Menu                     ∞∞∞
+9           7  9     7     8  
+0                             
+                           ∞∞∞
+0                          8  
+4                          8  
+RollChordsEnter               
+F7          F  7           8  
+0                             
+ü Del note  òô Note        ∞∞∞
+7           F  7           8  
+0                             
+            öó Move in time∞∞∞
+7F7                        8  
+0                             
+                           ∞∞∞
+0 7          0             8  
+0                             
+                           ∞∞∞
