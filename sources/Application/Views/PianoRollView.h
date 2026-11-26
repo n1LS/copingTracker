@@ -21,10 +21,14 @@ public:
   virtual void ButtonDown(uint16_t newButton, uint16_t mask) override;
   virtual void DrawView() override;
   virtual void OnFocus() override;
+  bool SupportsUndo() const override {
+    return true;
+  }
   void onCommandPicked(Token command) override;
   // the legend of the selection is shown in the info area while there is one
   ContextLegend currentContextLegend() const override;
   virtual void ButtonUp(uint16_t button, uint16_t mask) override;
+  void AfterUndoRedo() override;
   virtual void AnimationUpdate() override;
 
 protected:
@@ -107,6 +111,8 @@ private:
   // the step the selection started at, and whether there is a selection
   int8_t selectionAnchor_ = 0;
   bool selecting_ = false;
+  // the menu that ALT + EDIT opened: any other button starts the selection
+  bool menu_ = false;
   bool panelFocus_ = false;
   StepField panelField_ = StepField::Note;
 };

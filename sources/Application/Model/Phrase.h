@@ -12,6 +12,7 @@
 #ifndef _PHRASE_H_
 #define _PHRASE_H_
 
+#include "Application/Model/UndoJournal.h"
 #include "Foundation/Types/Types.h"
 #include <bitset>
 
@@ -101,15 +102,34 @@ public:
     return Token::enum_type(steps_[phrase][step].getCmd2());
   }
   inline void setCmd1(int phrase, int step, Token f) {
-    steps_[phrase][step].setCmd1(static_cast<uint8_t>(f.raw()));
+    EditStep(phrase, step).setCmd1(static_cast<uint8_t>(f.raw()));
   }
   inline void setCmd2(int phrase, int step, Token f) {
-    steps_[phrase][step].setCmd2(static_cast<uint8_t>(f.raw()));
+    EditStep(phrase, step).setCmd2(static_cast<uint8_t>(f.raw()));
   }
 
-  PhraseStep steps_[PHRASE_COUNT][STEPS_PER_PHRASE];
+  // The steps. Everything that changes one goes through EditStep / EditSteps, they record the bytes in the undo
+  // history before they hand out the memory (call them right before the change, not to look).
+  const PhraseStep &Step(int phrase, int step) const {
+    return steps_[phrase][step];
+  }
+  const PhraseStep *Steps(int phrase) const {
+    return steps_[phrase];
+  }
+  PhraseStep &EditStep(int phrase, int step) {
+    UndoJournal::RecordChange(&steps_[phrase][step], sizeof(PhraseStep));
+    return steps_[phrase][step];
+  }
+  // all STEPS_PER_PHRASE steps of the phrase
+  PhraseStep *EditSteps(int phrase) {
+    UndoJournal::RecordChange(steps_[phrase], sizeof(steps_[phrase]));
+    return steps_[phrase];
+  }
 
 private:
+  friend class Song; // saves and loads the steps as they are
+
+  PhraseStep steps_[PHRASE_COUNT][STEPS_PER_PHRASE];
   std::bitset<PHRASE_COUNT> isUsed_;
 };
 

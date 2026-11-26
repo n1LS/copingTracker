@@ -47,6 +47,8 @@ public:
   Song();
   ~Song();
   void Reset();
+  // chain, phrase and table allocation from the data, see the definition
+  void RebuildAllocation(bool afterEdit);
 
   // Whether a chain is empty, the phrases it references count (it stops at the first one that has something)
   ChainContent GetChainContent(uint8_t chain) const;
@@ -54,9 +56,31 @@ public:
   virtual void SaveContent(JsonWriter &writer);
   virtual void RestoreContent(JsonReader &reader);
 
-  SongRow rows_[SONG_ROW_COUNT];
+  // The chain of each channel in each row. Everything that changes one goes through EditCell, it records the byte in
+  // the undo history before it hands out the memory (call it right before the change, not to look).
+  const SongRow &Row(int row) const {
+    return rows_[row];
+  }
+  uint8_t Cell(int row, int channel) const {
+    return rows_[row].chains[channel];
+  }
+  uint8_t &EditCell(int row, int channel) {
+    UndoJournal::RecordChange(&rows_[row].chains[channel], sizeof(uint8_t));
+    return rows_[row].chains[channel];
+  }
+
+  // The rows firstRow..lastRow are recorded in the undo history, the array of all rows is handed out (for the
+  // operations that move whole blocks of the song around).
+  SongRow *EditRows(int firstRow, int lastRow) {
+    UndoJournal::RecordChange(&rows_[firstRow], sizeof(SongRow) * (lastRow - firstRow + 1));
+    return rows_;
+  }
+
   Chain chain_;
   Phrase phrase_;
+
+private:
+  SongRow rows_[SONG_ROW_COUNT];
 };
 
 #endif

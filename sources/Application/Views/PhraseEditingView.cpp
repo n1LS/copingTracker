@@ -152,7 +152,7 @@ void PhraseEditingView::changeNote(int step, ViewUpdateDirection direction) {
 
 void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
   // the note is a bit-field of the step, so it is changed here and written back
-  PhraseStep &data = currentSteps()[step];
+  PhraseStep &data = editStep(step);
   unsigned char note = data.note;
   unsigned char *c = &note;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
@@ -224,7 +224,7 @@ void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
 }
 
 void PhraseEditingView::changeInstrument(int step, ViewUpdateDirection direction) {
-  PhraseStep &data = currentSteps()[step];
+  PhraseStep &data = editStep(step);
   unsigned char instrument = data.getInstrument();
   updateData(&instrument, stepOffsets_[direction], MAX_INSTRUMENT_COUNT - 1, false);
   data.setInstrument(instrument);
@@ -232,7 +232,7 @@ void PhraseEditingView::changeInstrument(int step, ViewUpdateDirection direction
 }
 
 void PhraseEditingView::changeVolume(int step, ViewUpdateDirection direction) {
-  PhraseStep &data = currentSteps()[step];
+  PhraseStep &data = editStep(step);
   // the volume is 1..15, or NO_VOLUME
   uint8_t vol = data.getVolume();
 
@@ -259,7 +259,7 @@ void PhraseEditingView::changeVolume(int step, ViewUpdateDirection direction) {
 }
 
 void PhraseEditingView::changeCommand(int step, bool second, ViewUpdateDirection direction) {
-  PhraseStep &data = currentSteps()[step];
+  PhraseStep &data = editStep(step);
   Token token = second ? Token::enum_type(data.getCmd2()) : Token::enum_type(data.getCmd1());
 
   switch (direction) {
@@ -304,7 +304,7 @@ bool PhraseEditingView::openCommandPicker(int step, bool second) {
 }
 
 void PhraseEditingView::setCommand(int step, bool second, Token command) {
-  PhraseStep &data = currentSteps()[step];
+  PhraseStep &data = editStep(step);
 
   const uint8_t raw = static_cast<uint8_t>(command.raw());
   if (second) {
@@ -327,7 +327,7 @@ void PhraseEditingView::loadParamEditor(int step, bool second) {
 }
 
 void PhraseEditingView::changeCommandParam(int step, bool second, ViewUpdateDirection direction) {
-  PhraseStep &data = currentSteps()[step];
+  PhraseStep &data = editStep(step);
 
   // pick correct input and output for the selected column
   Token currentCmd = second ? Token::enum_type(data.getCmd2()) : Token::enum_type(data.getCmd1());
@@ -343,13 +343,14 @@ void PhraseEditingView::changeCommandParam(int step, bool second, ViewUpdateDire
 }
 
 bool PhraseEditingView::pasteLastValue(int step, StepField field) {
-  PhraseStep &data = currentSteps()[step];
+  const PhraseStep &data = currentSteps()[step];
 
   switch (field) {
     case StepField::Note:
       if (data.note == NO_NOTE) {
-        data.note = viewData_->phraseLastNote_;
-        data.setInstrument(viewData_->phraseLastInstrument_);
+        PhraseStep &edit = editStep(step);
+        edit.note = viewData_->phraseLastNote_;
+        edit.setInstrument(viewData_->phraseLastInstrument_);
         return true;
       }
       viewData_->phraseLastNote_ = data.note;
@@ -357,7 +358,7 @@ bool PhraseEditingView::pasteLastValue(int step, StepField field) {
       break;
     case StepField::Instrument:
       if (data.getInstrument() == NO_INSTRUMENT) {
-        data.setInstrument(viewData_->phraseLastInstrument_);
+        editStep(step).setInstrument(viewData_->phraseLastInstrument_);
         return true;
       }
       viewData_->phraseLastInstrument_ = data.getInstrument();
@@ -365,7 +366,7 @@ bool PhraseEditingView::pasteLastValue(int step, StepField field) {
     case StepField::Volume:
       if (data.getVolume() == NO_VOLUME) {
         if (viewData_->phraseLastVolume_ != NO_VOLUME) {
-          data.setVolume(viewData_->phraseLastVolume_);
+          editStep(step).setVolume(viewData_->phraseLastVolume_);
           return true;
         }
       } else {
@@ -380,9 +381,9 @@ bool PhraseEditingView::pasteLastValue(int step, StepField field) {
         if (token == Token::InstrumentCommandNone) {
           const uint8_t last = static_cast<uint8_t>(static_cast<char>(viewData_->phraseLastCmd_));
           if (second) {
-            data.setCmd2(last);
+            editStep(step).setCmd2(last);
           } else {
-            data.setCmd1(last);
+            editStep(step).setCmd1(last);
           }
           return true;
         }
@@ -435,13 +436,12 @@ static void copyStepField(PhraseStep &target, const PhraseStep &source, StepFiel
 }
 
 int PhraseEditingView::pasteClipboardAt(int step) {
-  PhraseStep *steps = currentSteps();
   const int height = viewData_->clipboardHeight_;
 
   for (int i = 0; i < viewData_->clipboardWidth_; i++) {
     const StepField field = static_cast<StepField>(i + viewData_->clipboardCol_);
     for (int j = 0; j < height; j++) {
-      copyStepField(steps[(j + step) % STEPS_PER_PHRASE], viewData_->clipboardSteps_[j], field);
+      copyStepField(editStep((j + step) % STEPS_PER_PHRASE), viewData_->clipboardSteps_[j], field);
     }
   }
   return height;
@@ -453,7 +453,7 @@ bool PhraseEditingView::nudgeSteps(int first, int last, StepField firstField, St
     return false;
   }
 
-  PhraseStep *steps = currentSteps();
+  const PhraseStep *steps = currentSteps();
   const PhraseStep jumped = steps[delta > 0 ? last + 1 : first - 1];
 
   auto copyFields = [&](PhraseStep &target, const PhraseStep &source) {
@@ -464,14 +464,14 @@ bool PhraseEditingView::nudgeSteps(int first, int last, StepField firstField, St
 
   if (delta > 0) {
     for (int step = last; step >= first; --step) {
-      copyFields(steps[step + 1], steps[step]);
+      copyFields(editStep(step + 1), steps[step]);
     }
-    copyFields(steps[first], jumped);
+    copyFields(editStep(first), jumped);
   } else {
     for (int step = first; step <= last; ++step) {
-      copyFields(steps[step - 1], steps[step]);
+      copyFields(editStep(step - 1), steps[step]);
     }
-    copyFields(steps[last], jumped);
+    copyFields(editStep(last), jumped);
   }
   return true;
 }
@@ -486,7 +486,36 @@ void PhraseEditingView::clearSteps(int first, int count) {
 
 void PhraseEditingView::clearStepField(int step, StepField field) {
   static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
-  PhraseStep &data = currentSteps()[step];
+  // nothing to clear: nothing to record, and what could be redone stays
+  const PhraseStep &current = currentSteps()[step];
+  bool empty = true;
+  switch (field) {
+    case StepField::Note:
+      empty = current.note == NO_NOTE;
+      break;
+    case StepField::Instrument:
+      empty = current.getInstrument() == NO_INSTRUMENT;
+      break;
+    case StepField::Volume:
+      empty = current.getVolume() == NO_VOLUME;
+      break;
+    case StepField::Command1:
+      empty = current.getCmd1() == kNone && current.param1 == 0;
+      break;
+    case StepField::Param1:
+      empty = current.param1 == 0;
+      break;
+    case StepField::Command2:
+      empty = current.getCmd2() == kNone && current.param2 == 0;
+      break;
+    case StepField::Param2:
+      empty = current.param2 == 0;
+      break;
+  }
+  if (empty) {
+    return;
+  }
+  PhraseStep &data = editStep(step);
 
   switch (field) {
     case StepField::Note:
@@ -543,7 +572,7 @@ const char *PhraseEditingView::findLiveIndicator() {
     if (player->GetQueueingMode(i) != QM_NONE) {
       // find the chain queued in channel
       unsigned char songPos = player->GetQueuePosition(i);
-      unsigned char *chain = viewData_->song_->rows_[songPos].chains + i;
+      const unsigned char *chain = viewData_->song_->Row(songPos).chains + i;
       if (*chain == viewData_->currentChain_) {
         return player->GetLiveIndicator(i);
       }
@@ -576,7 +605,7 @@ void PhraseEditingView::warpInChain(int offset) {
   int currentRow = viewData_->chainRow_;
   viewData_->chainRow_ += offset;
   if ((viewData_->chainRow_ < 16) && (viewData_->chainRow_ >= 0)) {
-    unsigned char *p = viewData_->GetCurrentChainPointer();
+    const unsigned char *p = viewData_->GetCurrentChainPointer();
     if (*p != 0xFF) {
       viewData_->currentPhrase_ = *p;
       onPhraseSwitched();
@@ -598,14 +627,14 @@ void PhraseEditingView::warpToNeighbour(int offset) {
   for (int x = oldX + offset; x >= 0 && x < SONG_CHANNEL_COUNT; x += offset) {
     viewData_->songX_ = x;
 
-    unsigned char *c = viewData_->GetCurrentSongPointer();
+    const unsigned char *c = viewData_->GetCurrentSongPointer();
     if (*c == 0xFF) {
       continue;
     }
 
     viewData_->currentChain_ = *c;
 
-    unsigned char *p = viewData_->GetCurrentChainPointer();
+    const unsigned char *p = viewData_->GetCurrentChainPointer();
     if (*p == 0xFF) {
       continue;
     }

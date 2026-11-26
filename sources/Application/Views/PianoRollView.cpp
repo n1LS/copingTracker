@@ -166,6 +166,7 @@ void PianoRollView::OnFocus() {
   // the grid has the focus when the view opens, there is no selection
   panelFocus_ = false;
   selecting_ = false;
+  menu_ = false;
 
   centerOnNotes();
   placeCursor();
@@ -228,9 +229,15 @@ void PianoRollView::ButtonDown(uint16_t newButton, uint16_t mask) {
     if (selecting_) {
       extendSelectionToPhrase();
     } else {
-      startSelection();
+      // the menu: undo / redo, and any other button starts the selection
+      menu_ = true;
+      isDirty_ = true;
     }
     return;
+  }
+  if (menu_) {
+    menu_ = false;
+    startSelection();
   }
   if (selecting_) {
     if (IsChord(newButton, mask, BM_EDIT)) {
@@ -284,6 +291,15 @@ void PianoRollView::ButtonDown(uint16_t newButton, uint16_t mask) {
 }
 
 void PianoRollView::ButtonUp(uint16_t button, uint16_t mask) {
+  // there is nothing to do in the menu without ALT: the selection starts here instead of with the next button (when
+  // the menu was used for undo / redo it just ends)
+  if (menu_ && button == BM_ALT) {
+    menu_ = false;
+    if (!menuUsedUndo_) {
+      startSelection();
+    }
+    isDirty_ = true;
+  }
   // stop the preview when ENTER is released, as in the phrase view
   if (!(mask & BM_ENTER)) {
     stopAudition();
@@ -291,7 +307,16 @@ void PianoRollView::ButtonUp(uint16_t button, uint16_t mask) {
 }
 
 ContextLegend PianoRollView::currentContextLegend() const {
+  if (menu_) {
+    return ContextLegend::RollMenu;
+  }
   return selecting_ ? ContextLegend::RollSelection : ContextLegend::None;
+}
+
+// the menu that ALT + EDIT opened stays open while ALT is held
+void PianoRollView::AfterUndoRedo() {
+  View::AfterUndoRedo();
+  menu_ = menuOpen_;
 }
 
 int PianoRollView::selectionFirst() const {
@@ -345,7 +370,7 @@ void PianoRollView::cutSelection() {
 }
 
 void PianoRollView::transposeSelection(ViewUpdateDirection direction) {
-  PhraseStep *steps = currentSteps();
+  const PhraseStep *steps = currentSteps();
 
   // the steps with a note, an empty step or a note off has nothing to transpose
   for (int step = selectionFirst(); step <= selectionLast(); step++) {
@@ -499,7 +524,7 @@ void PianoRollView::onCommandPicked(Token command) {
 
 void PianoRollView::editPanelField(ViewUpdateDirection direction) {
   const int step = viewData_->phraseCurPos_;
-  PhraseStep &data = currentSteps()[step];
+  const PhraseStep &data = currentSteps()[step];
 
   switch (panelField_) {
     case StepField::Note:
@@ -556,7 +581,7 @@ void PianoRollView::followNoteOfStep() {
 }
 
 void PianoRollView::placeNote() {
-  PhraseStep &step = currentSteps()[viewData_->phraseCurPos_];
+  PhraseStep &step = editStep(viewData_->phraseCurPos_);
 
   // as in the phrase view: a step without a note gets the last instrument,
   // and the note becomes the last note and instrument to paste
@@ -583,7 +608,7 @@ static void clearNote(PhraseStep &step) {
 }
 
 void PianoRollView::removeNote() {
-  PhraseStep &step = currentSteps()[viewData_->phraseCurPos_];
+  PhraseStep &step = editStep(viewData_->phraseCurPos_);
 
   if (step.note == NO_NOTE) {
     // cutting an empty note slot adds a note off, as in the phrase view
@@ -626,7 +651,7 @@ void PianoRollView::scrollToCursor() {
 
 void PianoRollView::moveNote(int sign) {
   const int step = viewData_->phraseCurPos_;
-  PhraseStep &data = currentSteps()[step];
+  const PhraseStep &data = currentSteps()[step];
 
   // there is no note to move in an empty step
   if (data.note == NO_NOTE) {
@@ -646,7 +671,7 @@ void PianoRollView::moveNote(int sign) {
 }
 
 void PianoRollView::moveNoteInTime(int delta) {
-  PhraseStep *steps = currentSteps();
+  const PhraseStep *steps = currentSteps();
   const int from = viewData_->phraseCurPos_;
   const int to = from + delta;
 
@@ -656,11 +681,12 @@ void PianoRollView::moveNoteInTime(int delta) {
   }
 
   // what the note owns moves, as ENTER + EDIT removes it: the commands stay in their step
-  steps[to].note = steps[from].note;
-  steps[to].setInstrument(steps[from].getInstrument());
-  steps[to].setVolume(steps[from].getVolume());
+  PhraseStep &target = editStep(to);
+  target.note = steps[from].note;
+  target.setInstrument(steps[from].getInstrument());
+  target.setVolume(steps[from].getVolume());
 
-  clearNote(steps[from]);
+  clearNote(editStep(from));
 
   viewData_->phraseCurPos_ = to;
   isDirty_ = true;

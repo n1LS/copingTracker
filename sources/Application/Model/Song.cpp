@@ -47,6 +47,8 @@ ChainContent Song::GetChainContent(uint8_t chain) const {
 }
 
 void Song::Reset() {
+  // the history belongs to the data that is gone
+  UndoJournal::Instance().Clear();
   for (int i = 0; i < SONG_ROW_COUNT; i++) {
     for (int j = 0; j < SONG_CHANNEL_COUNT; j++) {
       rows_[i].chains[j] = EMPTY_SONG_VALUE;
@@ -218,7 +220,19 @@ void Song::RestoreContent(JsonReader &reader) {
     return;
   }
 
-  // Restore chain & phrase allocation table
+  RebuildAllocation(false);
+}
+
+// What is in use is worked out from the data: the chains the song plays, the chains and phrases with something in them,
+// the tables the phrases call. afterEdit: an undo / redo, the tables are worked out again as well and nothing is
+// changed. Otherwise (a project that was loaded) a table that is called is cut to the tables there are.
+void Song::RebuildAllocation(bool afterEdit) {
+  chain_.ClearAllocation();
+  phrase_.ClearAllocation();
+  TableHolder *th = TableHolder::GetInstance();
+  if (afterEdit) {
+    th->RebuildAllocation();
+  }
 
   for (int i = 0; i < SONG_ROW_COUNT; i++) {
     for (int j = 0; j < SONG_CHANNEL_COUNT; j++) {
@@ -239,8 +253,6 @@ void Song::RestoreContent(JsonReader &reader) {
     }
   }
 
-  TableHolder *th = TableHolder::GetInstance();
-
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < STEPS_PER_PHRASE; j++) {
       PhraseStep &step = phrase_.steps_[i][j];
@@ -248,12 +260,16 @@ void Song::RestoreContent(JsonReader &reader) {
         phrase_.SetUsed(i);
       }
       if (Token::enum_type(step.getCmd1()) == Token::InstrumentCommandTable) {
-        step.param1 &= 0x7F;
-        th->SetUsed(step.param1);
+        if (!afterEdit) {
+          step.param1 &= 0x7F;
+        }
+        th->SetUsed(step.param1 & 0x7F);
       }
       if (Token::enum_type(step.getCmd2()) == Token::InstrumentCommandTable) {
-        step.param2 &= 0x7F;
-        th->SetUsed(step.param2);
+        if (!afterEdit) {
+          step.param2 &= 0x7F;
+        }
+        th->SetUsed(step.param2 & 0x7F);
       }
     }
   }

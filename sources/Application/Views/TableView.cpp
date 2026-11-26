@@ -22,25 +22,28 @@
 
 namespace {
 
+// the command / parameter of a column of a step, recorded in the undo history before it is handed out
 inline uint8_t &getCmdRef(Table &table, int row, int col) {
+  TableStep &step = table.EditStep(row);
   switch (col) {
     case 0:
-      return table.steps_[row].cmd1;
+      return step.cmd1;
     case 1:
-      return table.steps_[row].cmd2;
+      return step.cmd2;
     default:
-      return table.steps_[row].cmd3;
+      return step.cmd3;
   }
 }
 
 inline uint16_t &getParamRef(Table &table, int row, int col) {
+  TableStep &step = table.EditStep(row);
   switch (col) {
     case 0:
-      return table.steps_[row].param1;
+      return step.param1;
     case 1:
-      return table.steps_[row].param2;
+      return step.param2;
     default:
-      return table.steps_[row].param3;
+      return step.param3;
   }
 }
 
@@ -55,12 +58,11 @@ static void SetCommandCallback(View &v, ModalView &dialog) {
 
 void TableView::setCurrentlySelectedCommand(Token command) {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
-  TableStep &step = table.steps_[row_];
-
   if (col_ != colCmd1 && col_ != colCmd2 && col_ != colCmd3) {
     return;
   }
 
+  TableStep &step = table.EditStep(row_);
   switch (col_) {
     case colCmd1:
       step.cmd1 = command.raw();
@@ -174,7 +176,7 @@ void TableView::fillClipboardData() {
   Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
 
   for (int i = 0; i < clipboard_.height_; i++) {
-    clipboard_.steps_[i] = table.steps_[clipboard_.row_ + i];
+    clipboard_.steps_[i] = table.Step(clipboard_.row_ + i);
   }
   updateCursor(0, 0);
 }
@@ -191,8 +193,8 @@ void TableView::nudgeSelection(int delta) {
     return;
   }
 
-  TableStep *steps = TableHolder::GetInstance()->GetTable(viewData_->currentTable_).steps_;
-  const TableStep jumped = steps[delta > 0 ? bottom + 1 : top - 1];
+  Table &nudgeTable = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
+  const TableStep jumped = nudgeTable.Step(delta > 0 ? bottom + 1 : top - 1);
 
   // only the columns of the selection move
   auto copyColumns = [&](TableStep &target, const TableStep &source) {
@@ -222,14 +224,14 @@ void TableView::nudgeSelection(int delta) {
 
   if (delta > 0) {
     for (int row = bottom; row >= top; --row) {
-      copyColumns(steps[row + 1], steps[row]);
+      copyColumns(nudgeTable.EditStep(row + 1), nudgeTable.Step(row));
     }
-    copyColumns(steps[top], jumped);
+    copyColumns(nudgeTable.EditStep(top), jumped);
   } else {
     for (int row = top; row <= bottom; ++row) {
-      copyColumns(steps[row - 1], steps[row]);
+      copyColumns(nudgeTable.EditStep(row - 1), nudgeTable.Step(row));
     }
-    copyColumns(steps[bottom], jumped);
+    copyColumns(nudgeTable.EditStep(bottom), jumped);
   }
 
   // the selection, the position it started at (the cursor goes back there after a copy) and the cursor move
@@ -295,22 +297,22 @@ void TableView::cutSelection() {
       const int row = j + clipboard_.row_;
       switch (i + clipboard_.col_) {
         case colCmd1:
-          table.steps_[row].cmd1 = Token(Token::InstrumentCommandNone).raw8();
+          table.EditStep(row).cmd1 = Token(Token::InstrumentCommandNone).raw8();
           break;
         case colCmdVal1:
-          table.steps_[row].param1 = 0x0000;
+          table.EditStep(row).param1 = 0x0000;
           break;
         case colCmd2:
-          table.steps_[row].cmd2 = Token(Token::InstrumentCommandNone).raw8();
+          table.EditStep(row).cmd2 = Token(Token::InstrumentCommandNone).raw8();
           break;
         case colCmdVal2:
-          table.steps_[row].param2 = 0x0000;
+          table.EditStep(row).param2 = 0x0000;
           break;
         case colCmd3:
-          table.steps_[row].cmd3 = Token(Token::InstrumentCommandNone).raw8();
+          table.EditStep(row).cmd3 = Token(Token::InstrumentCommandNone).raw8();
           break;
         case colCmdVal3:
-          table.steps_[row].param3 = 0x0000;
+          table.EditStep(row).param3 = 0x0000;
           break;
       }
     }
@@ -344,22 +346,22 @@ void TableView::pasteClipboard() {
       const int row = (j + row_) % 16;
       switch (i + clipboard_.col_) {
         case colCmd1:
-          table.steps_[row].cmd1 = clipboard_.steps_[j].cmd1;
+          table.EditStep(row).cmd1 = clipboard_.steps_[j].cmd1;
           break;
         case colCmdVal1:
-          table.steps_[row].param1 = clipboard_.steps_[j].param1;
+          table.EditStep(row).param1 = clipboard_.steps_[j].param1;
           break;
         case colCmd2:
-          table.steps_[row].cmd2 = clipboard_.steps_[j].cmd2;
+          table.EditStep(row).cmd2 = clipboard_.steps_[j].cmd2;
           break;
         case colCmdVal2:
-          table.steps_[row].param2 = clipboard_.steps_[j].param2;
+          table.EditStep(row).param2 = clipboard_.steps_[j].param2;
           break;
         case colCmd3:
-          table.steps_[row].cmd3 = clipboard_.steps_[j].cmd3;
+          table.EditStep(row).cmd3 = clipboard_.steps_[j].cmd3;
           break;
         case colCmdVal3:
-          table.steps_[row].param3 = clipboard_.steps_[j].param3;
+          table.EditStep(row).param3 = clipboard_.steps_[j].param3;
           break;
       }
     }
@@ -394,19 +396,19 @@ void TableView::updateCursor(int dx, int dy) {
       p.x_ += 3;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
-      cmdEdit_.SetInt(table.steps_[row_].param1);
+      cmdEdit_.SetInt(table.Step(row_).param1);
       break;
     case colCmdVal2:
       p.x_ += 11;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
-      cmdEdit_.SetInt(table.steps_[row_].param2);
+      cmdEdit_.SetInt(table.Step(row_).param2);
       break;
     case colCmdVal3:
       p.x_ += 19;
       p.y_ += row_;
       cmdEditField_.SetPosition(p);
-      cmdEdit_.SetInt(table.steps_[row_].param3);
+      cmdEdit_.SetInt(table.Step(row_).param3);
       break;
   };
 
@@ -505,9 +507,8 @@ void TableView::pasteLast() {
     case colCmd3:
       {
         const int commandColumn = col_ / 2;
-        uint8_t &command = getCmdRef(table, row_, commandColumn);
-        if (command == Token(Token::InstrumentCommandNone).raw8()) {
-          command = static_cast<uint8_t>(lastCmd_);
+        if (table.getCmd(row_, commandColumn) == Token::InstrumentCommandNone) {
+          getCmdRef(table, row_, commandColumn) = static_cast<uint8_t>(lastCmd_);
           isDirty_ = true;
         } else {
           lastCmd_ = table.getCmd(row_, commandColumn);
@@ -539,16 +540,24 @@ bool TableView::navigationDown(uint16_t direction) {
   return false;
 }
 
+void TableView::beginSelection() {
+  if (!clipboard_.active_) {
+    clipboard_.active_ = true;
+    clipboard_.col_ = col_;
+    clipboard_.row_ = row_;
+    saveCol_ = col_;
+    saveRow_ = row_;
+  }
+}
+
 void TableView::ButtonDown(uint16_t newButton, uint16_t mask) {
+  // the menu that ALT + EDIT opened: any other button starts the selection (as in the song, chain and phrase view)
+  if (viewMode_ == VM_CLONE) {
+    viewMode_ = VM_SELECTION;
+  }
 
   if (viewMode_ == VM_SELECTION) {
-    if (!clipboard_.active_) {
-      clipboard_.active_ = true;
-      clipboard_.col_ = col_;
-      clipboard_.row_ = row_;
-      saveCol_ = col_;
-      saveRow_ = row_;
-    }
+    beginSelection();
     processSelectionButtonMask(newButton, mask);
   } else {
     processNormalButtonMask(newButton, mask);
@@ -566,7 +575,7 @@ void TableView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
     if (picker) {
       if (col_ == colCmd1 || col_ == colCmd2 || col_ == colCmd3) {
         Table &table = TableHolder::GetInstance()->GetTable(viewData_->currentTable_);
-        TableStep &step = table.steps_[row_];
+        const TableStep &step = table.Step(row_);
         uint8_t cmd = Token::InstrumentCommandNone;
 
         switch (col_) {
@@ -595,7 +604,8 @@ void TableView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
   }
 
   if (IsPair(newButton, mask, BM_EDIT, BM_ALT)) {
-    viewMode_ = VM_SELECTION;
+    // the menu: undo / redo, and any other button starts the selection
+    viewMode_ = VM_CLONE;
   } else if (mask == BM_EDIT) {
     switch (newButton) {
       case BM_LEFT:
@@ -715,7 +725,9 @@ void TableView::setTextProps(int col, int row, Color color = Theme::View::fg) {
 }
 
 ContextLegend TableView::currentContextLegend() const {
-  // ALT+EDIT goes straight to selection here, there is no clone mode
+  if (viewMode_ == VM_CLONE) {
+    return ContextLegend::TableMenu;
+  }
   if (viewMode_ == VM_SELECTION || clipboard_.active_) {
     return ContextLegend::TableSelection;
   }
@@ -944,4 +956,26 @@ void TableView::AnimationUpdate() {
   }
 
   // Flush the window to ensure changes are displayed
+}
+
+void TableView::ButtonUp(uint16_t button, uint16_t mask) {
+  // there is nothing to do in the menu without ALT: the selection starts here instead of with the next button (when
+  // the menu was used for undo / redo it just ends)
+  if (viewMode_ == VM_CLONE && button == BM_ALT) {
+    if (menuUsedUndo_) {
+      viewMode_ = VM_NORMAL;
+    } else {
+      viewMode_ = VM_SELECTION;
+      beginSelection();
+    }
+    isDirty_ = true;
+  }
+}
+
+// the menu that ALT + EDIT opened stays open while ALT is held
+void TableView::AfterUndoRedo() {
+  View::AfterUndoRedo();
+  if (menuOpen_) {
+    viewMode_ = VM_CLONE;
+  }
 }

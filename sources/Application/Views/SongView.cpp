@@ -161,10 +161,11 @@ void SongView::pasteLast() {
   // If we're on an empty spot, we past the last chain
   // otherwise we take the current chain as last
 
-  unsigned char *c = viewData_->GetCurrentSongPointer();
+  const unsigned char *c = viewData_->GetCurrentSongPointer();
   if (*c == 0xFF) {
-    *c = lastChain_;
-    viewData_->song_->chain_.SetUsed(*c);
+    unsigned char *edit = viewData_->EditCurrentSongPointer();
+    *edit = lastChain_;
+    viewData_->song_->chain_.SetUsed(*edit);
     isDirty_ = true;
   } else {
     lastChain_ = *c;
@@ -178,7 +179,7 @@ void SongView::pasteLast() {
 
 void SongView::clonePosition() {
 
-  unsigned char *pos = viewData_->GetCurrentSongPointer();
+  const unsigned char *pos = viewData_->GetCurrentSongPointer();
   unsigned char current = *pos;
   if (current == 255)
     return;
@@ -187,8 +188,8 @@ void SongView::clonePosition() {
   if (next == NO_MORE_CHAIN)
     return;
 
-  ChainStep *src = viewData_->song_->chain_.steps_[current];
-  ChainStep *dst = viewData_->song_->chain_.steps_[next];
+  const ChainStep *src = viewData_->song_->chain_.Steps(current);
+  ChainStep *dst = viewData_->song_->chain_.EditSteps(next);
 
   for (int i = 0; i < 16; i++) {
     *dst++ = *src++;
@@ -218,13 +219,15 @@ void SongView::nudgeSelection(int dx, int dy) {
   const int top = r.Top();
   const int width = r.Width();
   const int height = r.Height();
-  SongRow *rows = viewData_->song_->rows_;
 
   // the first / last row or channel
   if (left + dx < 0 || left + width - 1 + dx >= SONG_CHANNEL_COUNT || top + dy < 0 ||
       top + height - 1 + dy >= SONG_ROW_COUNT) {
     return;
   }
+
+  // the rows of the selection and the one next to them that can jump in
+  SongRow *rows = viewData_->song_->EditRows(std::max(0, top - 1), std::min(SONG_ROW_COUNT - 1, top + height));
 
   if (dy != 0) {
     // the row in the way jumps to the row that was just emptied, in the columns of the selection
@@ -397,7 +400,7 @@ void SongView::fillClipboardData() {
   clipboard_.width_ = selRect.Width();
   clipboard_.height_ = selRect.Height();
 
-  unsigned char *src = viewData_->song_->rows_[selRect.Top()].chains + selRect.Left();
+  const unsigned char *src = viewData_->song_->Row(selRect.Top()).chains + selRect.Left();
   unsigned char *dst = clipboard_.data_;
 
   for (int j = 0; j < clipboard_.height_; j++) {
@@ -438,7 +441,9 @@ void SongView::cutSelection() {
 
   // now move all rows up for cut
 
-  unsigned char *dst = viewData_->song_->rows_[selRect.Top()].chains + selRect.Left();
+  // everything below moves up
+  unsigned char *dst =
+      viewData_->song_->EditRows(selRect.Top(), SONG_ROW_COUNT - 1)[selRect.Top()].chains + selRect.Left();
   unsigned char *src = dst + SONG_CHANNEL_COUNT * clipboard_.height_;
 
   int rowCount = SONG_ROW_COUNT - selRect.Bottom();
@@ -482,6 +487,8 @@ void SongView::pasteClipboard() {
 
   int width = clipboard_.width_;
   int height = clipboard_.height_;
+  Song *song = viewData_->song_;
+  const int insertRow = viewData_->songY_ + viewData_->songOffset_;
 
   if (viewData_->songX_ + width > SONG_CHANNEL_COUNT) {
     width = SONG_CHANNEL_COUNT - viewData_->songX_;
@@ -492,7 +499,7 @@ void SongView::pasteClipboard() {
 
     // Move down from insert point
 
-    unsigned char *dst = viewData_->song_->rows_[SONG_ROW_COUNT - 1].chains + viewData_->songX_;
+    unsigned char *dst = song->EditRows(insertRow, SONG_ROW_COUNT - 1)[SONG_ROW_COUNT - 1].chains + viewData_->songX_;
     unsigned char *src = dst - height * SONG_CHANNEL_COUNT;
 
     int rowCount = SONG_ROW_COUNT - (viewData_->songY_ + viewData_->songOffset_);
@@ -508,7 +515,7 @@ void SongView::pasteClipboard() {
 
   // Prepare copy pointer
 
-  unsigned char *dst = viewData_->GetCurrentSongPointer();
+  unsigned char *dst = song->EditRows(insertRow, insertRow + height - 1)[insertRow].chains + viewData_->songX_;
   unsigned char *src = clipboard_.data_;
 
   for (int j = 0; j < height; j++) {
@@ -599,7 +606,7 @@ void SongView::jumpToNextSection(int direction) {
   int current = viewData_->songY_ + viewData_->songOffset_;
   bool foundGap = false;
   for (int i = 0; i < SONG_ROW_COUNT; i++) {
-    unsigned char *start = viewData_->song_->rows_[current].chains + viewData_->songX_;
+    const unsigned char *start = viewData_->song_->Row(current).chains + viewData_->songX_;
     if (foundGap && (*start != 0xFF)) {
       break;
     } else {
@@ -619,7 +626,7 @@ void SongView::jumpToNextSection(int direction) {
 
   if (direction < 0) {
     while (current > 0) {
-      unsigned char *start = viewData_->song_->rows_[current].chains + viewData_->songX_;
+      const unsigned char *start = viewData_->song_->Row(current).chains + viewData_->songX_;
       if (*start == 0xFF) {
         current++;
         break;
@@ -665,8 +672,13 @@ void SongView::ButtonUp(uint16_t button, uint16_t mask) {
   // Cloning needs ALT (ENTER while ALT is held), so there is nothing to clone once ALT is let go: the selection
   // starts here instead of with the next key press
   if (viewMode_ == VM_CLONE && button == BM_ALT) {
-    viewMode_ = VM_SELECTION;
-    beginSelection();
+    if (menuUsedUndo_) {
+      // the menu was used for undo / redo, nothing to select
+      viewMode_ = VM_NORMAL;
+    } else {
+      viewMode_ = VM_SELECTION;
+      beginSelection();
+    }
     isDirty_ = true;
   }
 }
@@ -742,7 +754,7 @@ void SongView::switchTo(ViewType vt, ViewTransition transition) {
 }
 
 void SongView::enterChainUnderCursor() {
-  unsigned char *data = viewData_->GetCurrentSongPointer();
+  const unsigned char *data = viewData_->GetCurrentSongPointer();
   if (*data != 0xFF) {
     ViewEventData ved = {VT_CHAIN, vtRevealFromRight};
     ViewEvent ve(vetSwitchView, &ved);
@@ -982,7 +994,7 @@ void SongView::DrawView() {
   char row[3];
   GUIPoint pos = anchor;
 
-  unsigned char *data = viewData_->song_->rows_[viewData_->songOffset_].chains;
+  const unsigned char *data = viewData_->song_->Row(viewData_->songOffset_).chains;
 
   int16_t dx = 3;
   int16_t dy = 1;
@@ -1148,7 +1160,7 @@ void SongView::drawChainPreview() {
   buffer[2] = 0;
 
   int row = viewData_->songY_ + viewData_->songOffset_;
-  unsigned char chainId = viewData_->song_->rows_[row].chains[viewData_->songX_];
+  unsigned char chainId = viewData_->song_->Cell(row, viewData_->songX_);
 
   if (chainId == EMPTY_SONG_VALUE) {
     return;
@@ -1161,7 +1173,7 @@ void SongView::drawChainPreview() {
 
   for (int i = 0; i < PHRASES_PER_CHAIN; i++) {
     SetColor(Theme::Song::preview((i % ALT_ROW_NUMBER) == 0));
-    unsigned char phraseId = viewData_->song_->chain_.steps_[chainId][i].phrase;
+    unsigned char phraseId = viewData_->song_->chain_.Step(chainId, i).phrase;
 
     if (phraseId == EMPTY_CHAIN_VALUE) {
       DrawString(pos.x_ + 24, pos.y_ + i, "--");
@@ -1408,4 +1420,12 @@ void SongView::toggleLoopState() {
   }
 
   SetDirty(true);
+}
+
+// the menu that ALT + EDIT opened stays open (the clone action is still there) while ALT is held
+void SongView::AfterUndoRedo() {
+  View::AfterUndoRedo();
+  if (menuOpen_) {
+    viewMode_ = VM_CLONE;
+  }
 }

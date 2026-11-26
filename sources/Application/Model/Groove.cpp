@@ -173,6 +173,11 @@ bool Groove::TriggerChannel(int i) {
   return length == 0 || (c.ticks_ % length) == 0;
 }
 
-unsigned char *Groove::GetGrooveData(int groove) {
+const unsigned char *Groove::GetGrooveData(int groove) const {
   return data_[groove];
-};
+}
+
+unsigned char *Groove::EditGrooveData(int groove) {
+  UndoJournal::RecordChange(data_[groove], STEPS_PER_GROOVE);
+  return data_[groove];
+}

@@ -74,7 +74,7 @@ void ChainView::GeneratorWizardCallback(View &v, ModalView &dialog) {
   }
 
   ViewData *data = view.viewData_;
-  ChainStep *chain = data->song_->chain_.steps_[data->currentChain_];
+  const ChainStep *chain = data->song_->chain_.Steps(data->currentChain_);
   uint8_t length = 0;
   for (int y = 0; y < STEPS_PER_PHRASE; y++) {
     if (chain[y].phrase == EMPTY_CHAIN_VALUE) {
@@ -110,9 +110,9 @@ void ChainView::pasteLastPhrase() {
   // If we're on an empty spot, we past the last phrase
   // otherwise we take the current phrase as last
 
-  unsigned char *c = viewData_->GetCurrentChainPointer();
+  const unsigned char *c = viewData_->GetCurrentChainPointer();
   if ((*c == 0xFF)) {
-    *c = lastPhrase_;
+    *viewData_->EditCurrentChainPointer() = lastPhrase_;
     isDirty_ = true;
   } else {
     lastPhrase_ = *c;
@@ -172,7 +172,7 @@ void ChainView::warpInColumn(int offset) {
   // move and check we're on valid chain
 
   viewData_->UpdateSongCursor(0, offset);
-  unsigned char *data = viewData_->GetCurrentSongPointer();
+  const unsigned char *data = viewData_->GetCurrentSongPointer();
   if (*data != 0xFF) {
     viewData_->currentChain_ = *data;
     isDirty_ = true;
@@ -188,7 +188,7 @@ void ChainView::warpToNeighbour(int offset) {
   int newPos = viewData_->songX_ + offset;
   if ((newPos > -1) && (newPos < SONG_CHANNEL_COUNT)) {
     viewData_->songX_ = newPos;
-    unsigned char *c = viewData_->GetCurrentSongPointer();
+    const unsigned char *c = viewData_->GetCurrentSongPointer();
     if (*c != 0xFF) {
       viewData_->currentChain_ = *c;
       isDirty_ = true;
@@ -200,7 +200,7 @@ void ChainView::warpToNeighbour(int offset) {
 
 void ChainView::clonePosition() {
 
-  unsigned char *pos = viewData_->GetCurrentChainPointer();
+  const unsigned char *pos = viewData_->GetCurrentChainPointer();
   unsigned char current = *pos;
   if (current == 255)
     return;
@@ -209,8 +209,8 @@ void ChainView::clonePosition() {
   if (next == NO_MORE_PHRASE)
     return;
 
-  PhraseStep *src = viewData_->song_->phrase_.steps_[current];
-  PhraseStep *dst = viewData_->song_->phrase_.steps_[next];
+  const PhraseStep *src = viewData_->song_->phrase_.Steps(current);
+  PhraseStep *dst = viewData_->song_->phrase_.EditSteps(next);
   for (int i = 0; i < 16; i++) {
     *dst++ = *src++;
   };
@@ -260,7 +260,7 @@ void ChainView::fillClipboardData() {
 
   // Copy the data
 
-  ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+  const ChainStep *base = viewData_->song_->chain_.Steps(viewData_->currentChain_);
 
   for (int i = 0; i < clipboard_.height_; i++) {
     clipboard_.steps_[i] = base[clipboard_.row_ + i];
@@ -280,7 +280,9 @@ void ChainView::nudgeSelection(int delta) {
     return;
   }
 
-  ChainStep *steps = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+  Chain &chain = viewData_->song_->chain_;
+  const int chainId = viewData_->currentChain_;
+  const ChainStep *steps = chain.Steps(chainId);
   const ChainStep jumped = steps[delta > 0 ? bottom + 1 : top - 1];
 
   // only the columns of the selection move: the phrase (0) and the transpose (1)
@@ -296,14 +298,14 @@ void ChainView::nudgeSelection(int delta) {
 
   if (delta > 0) {
     for (int row = bottom; row >= top; --row) {
-      copyColumns(steps[row + 1], steps[row]);
+      copyColumns(chain.EditStep(chainId, row + 1), steps[row]);
     }
-    copyColumns(steps[top], jumped);
+    copyColumns(chain.EditStep(chainId, top), jumped);
   } else {
     for (int row = top; row <= bottom; ++row) {
-      copyColumns(steps[row - 1], steps[row]);
+      copyColumns(chain.EditStep(chainId, row - 1), steps[row]);
     }
-    copyColumns(steps[bottom], jumped);
+    copyColumns(chain.EditStep(chainId, bottom), jumped);
   }
 
   // the selection, the position it started at (the cursor goes back there after a copy) and the cursor move
@@ -378,16 +380,17 @@ void ChainView::cutSelection() {
 
   // Loop over selection col, row & clear data inside it
 
-  ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+  Chain &chain = viewData_->song_->chain_;
+  const int chainId = viewData_->currentChain_;
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          base[j + clipboard_.row_].phrase = 0xFF;
+          chain.EditStep(chainId, j + clipboard_.row_).phrase = 0xFF;
           break;
         case 1:
-          base[j + clipboard_.row_].transpose = 0x00;
+          chain.EditStep(chainId, j + clipboard_.row_).transpose = 0x00;
           break;
       }
     }
@@ -418,16 +421,17 @@ void ChainView::pasteClipboard() {
     height = 16 - viewData_->chainRow_;
   }
 
-  ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+  Chain &chain = viewData_->song_->chain_;
+  const int chainId = viewData_->currentChain_;
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
         case 0:
-          base[j + viewData_->chainRow_].phrase = clipboard_.steps_[j].phrase;
+          chain.EditStep(chainId, j + viewData_->chainRow_).phrase = clipboard_.steps_[j].phrase;
           break;
         case 1:
-          base[j + viewData_->chainRow_].transpose = clipboard_.steps_[j].transpose;
+          chain.EditStep(chainId, j + viewData_->chainRow_).transpose = clipboard_.steps_[j].transpose;
           break;
       }
     }
@@ -472,8 +476,13 @@ void ChainView::ButtonUp(uint16_t button, uint16_t mask) {
   // Cloning needs ALT (ENTER while ALT is held), so there is nothing to clone once ALT is let go: the selection
   // starts here instead of with the next key press
   if (viewMode_ == VM_CLONE && button == BM_ALT) {
-    viewMode_ = VM_SELECTION;
-    beginSelection();
+    if (menuUsedUndo_) {
+      // the menu was used for undo / redo, nothing to select
+      viewMode_ = VM_NORMAL;
+    } else {
+      viewMode_ = VM_SELECTION;
+      beginSelection();
+    }
     isDirty_ = true;
   }
   if (button == BM_ENTER) {
@@ -483,7 +492,7 @@ void ChainView::ButtonUp(uint16_t button, uint16_t mask) {
 
 void ChainView::finalizePhraseUpdate() {
   if (updatingPhrase_) {
-    uint8_t p = viewData_->song_->chain_.steps_[viewData_->currentChain_][updateRow_].phrase;
+    uint8_t p = viewData_->song_->chain_.Step(viewData_->currentChain_, updateRow_).phrase;
     viewData_->song_->phrase_.SetUsed(p);
     updatingPhrase_ = false;
   }
@@ -546,7 +555,7 @@ void ChainView::ButtonDown(uint16_t newButton, uint16_t mask) {
 
 void ChainView::openGeneratorWizard() {
   auto *wizard = GeneratorWizardModal::Create(*this, viewData_->project_->GetInstrumentBank());
-  ChainStep *chain = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+  const ChainStep *chain = viewData_->song_->chain_.Steps(viewData_->currentChain_);
   uint8_t length = 0;
   while (length < STEPS_PER_PHRASE && chain[length].phrase != EMPTY_CHAIN_VALUE) {
     length++;
@@ -557,7 +566,7 @@ void ChainView::openGeneratorWizard() {
 }
 
 void ChainView::enterPhraseUnderCursor() {
-  unsigned char *data = viewData_->GetCurrentChainPointer();
+  const unsigned char *data = viewData_->GetCurrentChainPointer();
   if (*data != 0xFF) {
     viewData_->currentPhrase_ = *data;
     NavigateToPhrase(vtRevealFromRight);
@@ -715,7 +724,7 @@ void ChainView::OnFocus() {
 
   // reset the cursor position to within the range with data
   while (viewData_->chainRow_ > 0 &&
-         viewData_->song_->chain_.steps_[viewData_->currentChain_][viewData_->chainRow_].phrase == 0xFF) {
+         viewData_->song_->chain_.Step(viewData_->currentChain_, viewData_->chainRow_).phrase == 0xFF) {
     viewData_->chainRow_--;
   }
 
@@ -768,7 +777,7 @@ void ChainView::DrawView() {
   drawRowNumbers(pos.x_ - 3, pos.y_, 0, 16);
 
   // Display phrases
-  ChainStep *base = viewData_->song_->chain_.steps_[viewData_->currentChain_];
+  const ChainStep *base = viewData_->song_->chain_.Steps(viewData_->currentChain_);
 
   char row[6];
   row[5] = 0;
@@ -827,7 +836,7 @@ void ChainView::DrawView() {
 
   Player *player = Player::GetInstance();
 
-  unsigned char phrase = viewData_->song_->chain_.steps_[viewData_->currentChain_][viewData_->chainRow_].phrase;
+  unsigned char phrase = viewData_->song_->chain_.Step(viewData_->currentChain_, viewData_->chainRow_).phrase;
   if (phrase != EMPTY_CHAIN_VALUE) {
     drawPhrasePreview(phrase);
   }
@@ -930,7 +939,7 @@ void ChainView::AnimationUpdate() {
         if (player->GetQueueingMode(i) != QM_NONE) {
           // find the chain queued in channel
           unsigned char songPos = player->GetQueuePosition(i);
-          unsigned char *chain = viewData_->song_->rows_[songPos].chains + i;
+          const unsigned char *chain = viewData_->song_->Row(songPos).chains + i;
           if (*chain == viewData_->currentChain_) {
             unsigned char chainPos = player->GetQueueChainPosition(i);
             pos.y_ = anchor.y_ + chainPos;
@@ -958,7 +967,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   DrawString(pos.x_, pos.y_ - 1, "Nte In");
 
   // Display notes
-  PhraseStep *steps = viewData_->song_->phrase_.steps_[phrase];
+  const PhraseStep *steps = viewData_->song_->phrase_.Steps(phrase);
   unsigned char lastInstr = NO_INSTRUMENT;
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   int currentInstrument = NO_INSTRUMENT;
@@ -985,7 +994,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   pos = GetAnchor();
   pos.x_ += 21;
 
-  PhraseStep *instrSteps = viewData_->song_->phrase_.steps_[phrase];
+  const PhraseStep *instrSteps = viewData_->song_->phrase_.Steps(phrase);
 
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
@@ -999,5 +1008,13 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
       DrawString(pos.x_, pos.y_, buffer);
     }
     pos.y_++;
+  }
+}
+
+// the menu that ALT + EDIT opened stays open (the clone action is still there) while ALT is held
+void ChainView::AfterUndoRedo() {
+  View::AfterUndoRedo();
+  if (menuOpen_) {
+    viewMode_ = VM_CLONE;
   }
 }

@@ -13,6 +13,7 @@
 
 #define _TABLE_H_
 
+#include "Application/Model/UndoJournal.h"
 #include "Application/Persistency/Persistent.h"
 #include "Foundation/T_Singleton.h"
 #include "Foundation/Types/Types.h"
@@ -62,7 +63,19 @@ public:
     }
   }
 
-public:
+  // The steps. Everything that changes one goes through EditStep, it records the bytes in the undo history before it
+  // hands out the memory (call it right before the change, not to look).
+  const TableStep &Step(int step) const {
+    return steps_[step];
+  }
+  TableStep &EditStep(int step) {
+    UndoJournal::RecordChange(&steps_[step], sizeof(TableStep));
+    return steps_[step];
+  }
+
+private:
+  friend class TableHolder; // saves and loads the steps as they are
+
   TableStep steps_[TABLE_STEPS];
 };
 
@@ -72,6 +85,8 @@ public:
   void Reset();
   Table &GetTable(int table);
   void SetUsed(int table);
+  // what has something in it is in use
+  void RebuildAllocation();
   int GetNext();
   int Clone(int table);
   virtual void SaveContent(JsonWriter &writer);

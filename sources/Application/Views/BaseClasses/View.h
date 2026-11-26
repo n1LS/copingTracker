@@ -265,6 +265,8 @@ public:
   };
 
   virtual void LoseFocus() {
+    menuOpen_ = false;
+    menuUsedUndo_ = false;
     if (!hasFocus_) {
       return;
     }
@@ -278,6 +280,15 @@ public:
   // `mask` holds the OTHER buttons held at that moment (it never contains
   // `button`). On release `mask` is what remains held after the release.
   void ProcessButton(uint16_t button, uint16_t mask, bool pressed);
+  // ALT + EDIT + LEFT / RIGHT undo / redo the song data in the views that return true here
+  virtual bool SupportsUndo() const {
+    return false;
+  }
+  // ALT + EDIT opens a menu of actions in the views that support undo: clone, selection, undo / redo (LEFT / RIGHT). It
+  // stays open while ALT is held, EDIT can be let go. menuUsedUndo_: undo / redo was used, so letting go of ALT does
+  // not start a selection
+  static bool menuOpen_;
+  static bool menuUsedUndo_;
 
   void Redraw();
 
@@ -377,6 +388,10 @@ protected:
   void drawContextLegend(uint8_t x, uint8_t y, ContextLegend legend);
   // Views that have context help override this and return the legend for their current mode
   virtual ContextLegend currentContextLegend() const;
+  // the data under the view was replaced by an undo / redo: modes and selections end, the cursor is put back in range
+  virtual void AfterUndoRedo();
+  void dispatchButton(uint16_t button, uint16_t mask, bool pressed);
+  void undoRedo(bool undo);
   // Draws the legend of the current mode into the info area and claims it
   // (infoAreaMode_). Returns false, and draws nothing, if the mode has none.
   bool drawContextLegendInfoArea();

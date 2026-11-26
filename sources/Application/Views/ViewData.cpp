@@ -64,13 +64,13 @@ void ViewData::Load(Project *project) {
 }
 
 bool ViewData::SelectInstrumentOfPhraseStep(int step) {
-  const uint8_t instrument = song_->phrase_.steps_[currentPhrase_][step].getInstrument();
+  const uint8_t instrument = song_->phrase_.Step(currentPhrase_, step).getInstrument();
   currentInstrumentID_ = (instrument != NO_INSTRUMENT) ? instrument : phraseLastInstrument_;
   return currentInstrumentID_ != NO_INSTRUMENT;
 }
 
 void ViewData::SelectTableOfPhraseStep(int step) {
-  const PhraseStep &phraseStep = song_->phrase_.steps_[currentPhrase_][step];
+  const PhraseStep &phraseStep = song_->phrase_.Step(currentPhrase_, step);
   if (Token::enum_type(phraseStep.getCmd1()) == Token::InstrumentCommandTable) {
     currentTable_ = phraseStep.param1 & (TABLE_COUNT - 1);
   } else if (Token::enum_type(phraseStep.getCmd2()) == Token::InstrumentCommandTable) {
@@ -79,14 +79,13 @@ void ViewData::SelectTableOfPhraseStep(int step) {
 }
 
 unsigned char ViewData::UpdateSongChain(int offset) {
-  unsigned char *c = &song_->rows_[songOffset_ + songY_].chains[songX_];
+  unsigned char *c = &song_->EditCell(songOffset_ + songY_, songX_);
   updateData(c, offset, CHAIN_COUNT - 1, false);
   return *c;
 }
 
 void ViewData::SetSongChain(unsigned char value) {
-  unsigned char *c = &song_->rows_[songOffset_ + songY_].chains[songX_];
-  *c = value;
+  song_->EditCell(songOffset_ + songY_, songX_) = value;
 }
 
 void ViewData::UpdateSongOffset(int offset) {
@@ -121,8 +120,12 @@ void ViewData::checkSongBoundaries() {
   }
 }
 
-unsigned char *ViewData::GetCurrentSongPointer() {
-  return &song_->rows_[songOffset_ + songY_].chains[songX_];
+const unsigned char *ViewData::GetCurrentSongPointer() {
+  return &song_->Row(songOffset_ + songY_).chains[songX_];
+}
+
+unsigned char *ViewData::EditCurrentSongPointer() {
+  return &song_->EditCell(songOffset_ + songY_, songX_);
 }
 
 int ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
@@ -132,12 +135,12 @@ int ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
 
   switch (chainCol_ + dx) {
     case 0:
-      c = &song_->chain_.steps_[currentChain_][chainRow_ + dy].phrase;
+      c = &song_->chain_.EditStep(currentChain_, chainRow_ + dy).phrase;
       limit = PHRASE_COUNT - 1;
       wrap = false;
       break;
     case 1:
-      c = &song_->chain_.steps_[currentChain_][chainRow_ + dy].transpose;
+      c = &song_->chain_.EditStep(currentChain_, chainRow_ + dy).transpose;
       limit = 0xFF;
       wrap = false;
       break;
@@ -164,9 +167,13 @@ void ViewData::UpdateChainCursor(int dx, int dy) {
 }
 
 void ViewData::SetChainPhrase(unsigned char value) {
-  song_->chain_.steps_[currentChain_][chainRow_].phrase = value;
+  song_->chain_.EditStep(currentChain_, chainRow_).phrase = value;
 }
 
-unsigned char *ViewData::GetCurrentChainPointer() {
-  return &song_->chain_.steps_[currentChain_][chainRow_].phrase;
+const unsigned char *ViewData::GetCurrentChainPointer() {
+  return &song_->chain_.Step(currentChain_, chainRow_).phrase;
+}
+
+unsigned char *ViewData::EditCurrentChainPointer() {
+  return &song_->chain_.EditStep(currentChain_, chainRow_).phrase;
 }

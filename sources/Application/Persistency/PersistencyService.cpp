@@ -13,6 +13,7 @@
 #include "../Instruments/SamplePool.h"
 #include "PersistenceConstants.h"
 
+#include "Application/Model/UndoJournal.h"
 #include "Foundation/Constants/Version.h"
 #include "Foundation/Types/Types.h"
 #include "Persistent.h"
@@ -305,6 +306,9 @@ bool PersistencyService::Exists(const char *projectName) {
 }
 
 PersistencyResult PersistencyService::Load(const char *projectName) {
+  // the history belongs to the project that is gone
+  UndoJournal::Instance().Clear();
+
   // first check if autosave exists
   etl::string<128> autoSavePath(PROJECTS_DIR);
   autoSavePath.append("/");

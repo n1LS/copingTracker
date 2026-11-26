@@ -441,9 +441,9 @@ stereosample Player::GetMasterLevel() {
 
 bool Player::isPlayable(int row, int col, int chainPos) {
 
-  uint8_t *chain = &viewData_->song_->rows_[row].chains[col];
+  const uint8_t *chain = &viewData_->song_->Row(row).chains[col];
   if (*chain != 0xFF) {
-    uint8_t data = viewData_->song_->chain_.steps_[*chain][chainPos].phrase;
+    uint8_t data = viewData_->song_->chain_.Step(*chain, chainPos).phrase;
     return (data != 0xFF);
   }
   return false;
@@ -453,14 +453,14 @@ bool Player::findPlayable(uint8_t *row, int col, uint8_t chainPos) {
 
   // first look if current is fine
 
-  uint8_t *chain = &viewData_->song_->rows_[*row].chains[col];
+  const uint8_t *chain = &viewData_->song_->Row(*row).chains[col];
   if (*chain != 0xFF) {
-    uint8_t data = viewData_->song_->chain_.steps_[*chain][chainPos].phrase;
+    uint8_t data = viewData_->song_->chain_.Step(*chain, chainPos).phrase;
     return (data != 0xFF);
   }
 
   while (*row != 255) {
-    chain = &viewData_->song_->rows_[*row].chains[col];
+    chain = &viewData_->song_->Row(*row).chains[col];
     if (*chain != 0xFF) {
       break;
     }
@@ -473,7 +473,7 @@ bool Player::findPlayable(uint8_t *row, int col, uint8_t chainPos) {
   // Find upwards the first blank
 
   while (*row != 255) {
-    chain = &viewData_->song_->rows_[*row].chains[col];
+    chain = &viewData_->song_->Row(*row).chains[col];
     if (*chain == 0xFF) {
       break;
     }
@@ -485,10 +485,10 @@ bool Player::findPlayable(uint8_t *row, int col, uint8_t chainPos) {
   } else {
     *row += 1;
   }
-  chain = &viewData_->song_->rows_[*row].chains[col];
+  chain = &viewData_->song_->Row(*row).chains[col];
   uint8_t data = 0xFF;
   if (*chain != 0xFF) {
-    data = viewData_->song_->chain_.steps_[*chain][chainPos].phrase;
+    data = viewData_->song_->chain_.Step(*chain, chainPos).phrase;
   }
   return (data != 0xFF);
 }
@@ -662,7 +662,7 @@ void Player::ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT]) {
         // If groove says it is time to play OR or the delay just expired
         if (gs->TriggerChannel(i) || (delayExpired && delayExpired[i])) {
           int pos = viewData_->phrasePlayPos_[i];
-          const PhraseStep &step = viewData_->song_->phrase_.steps_[phrase][pos];
+          const PhraseStep &step = viewData_->song_->phrase_.Step(phrase, pos);
           Token token = Token::enum_type(step.getCmd1());
           uint8_t param = step.param1;
 
@@ -680,8 +680,8 @@ void Player::ProcessCommands(bool delayExpired[SONG_CHANNEL_COUNT]) {
 
           // Now process second command row
 
-          token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd2());
-          param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
+          token = Token::enum_type(viewData_->song_->phrase_.Step(phrase, pos).getCmd2());
+          param = viewData_->song_->phrase_.Step(phrase, pos).param2;
 
           // if there's any command to trigger, first pass it on the player
           // then pass it on to the instrument
@@ -783,7 +783,7 @@ void Player::triggerLiveChains() {
  ********************************************************/
 
 void Player::updateSongPos(int pos, int channel, int chainPos, int hop) {
-  unsigned char *data = &viewData_->song_->rows_[pos].chains[channel];
+  const uint8_t *data = &viewData_->song_->Row(pos).chains[channel];
   viewData_->songPlayPos_[channel] = pos;
   viewData_->currentPlayChain_[channel] = *data;
   updateChainPos(chainPos, channel, hop);
@@ -798,7 +798,7 @@ void Player::updateChainPos(int pos, int channel, int hop) {
   unsigned char chain = viewData_->currentPlayChain_[channel];
   if (chain != 0xFF) {
     viewData_->chainPlayPos_[channel] = pos;
-    viewData_->currentPlayPhrase_[channel] = viewData_->song_->chain_.steps_[chain][pos].phrase;
+    viewData_->currentPlayPhrase_[channel] = viewData_->song_->chain_.Step(chain, pos).phrase;
     if (viewData_->currentPlayPhrase_[channel] == EMPTY_CHAIN_VALUE) {
       // This could happen if starting in song mode on a row where a chain contains no phrase
       mixer_.StopChannel(channel);
@@ -825,26 +825,26 @@ void Player::updatePhrasePos(int pos, int channel) {
 
   // Check both param colum 1 & 2 for commands that might delay or canccel the note
 
-  Token token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd1());
+  Token token = Token::enum_type(viewData_->song_->phrase_.Step(phrase, pos).getCmd1());
   if (token == Token::InstrumentCommandMaybe) {
-    uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param1;
+    uint8_t param = viewData_->song_->phrase_.Step(phrase, pos).param1;
     if (param < (rand() & 0xff)) {
       timeToStart_[channel] = 0xffff'ffff;
     }
   } else if (token == Token::InstrumentCommandDelay) {
-    uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param1;
+    uint8_t param = viewData_->song_->phrase_.Step(phrase, pos).param1;
     timeToStart_[channel] = (param & 0x0F) + 1;
   }
 
   // command 2
-  token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd2());
+  token = Token::enum_type(viewData_->song_->phrase_.Step(phrase, pos).getCmd2());
   if (token == Token::InstrumentCommandMaybe) {
-    uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
+    uint8_t param = viewData_->song_->phrase_.Step(phrase, pos).param2;
     if (param < (rand() & 0xff)) {
       timeToStart_[channel] = 0xffff'ffff;
     }
   } else if (token == Token::InstrumentCommandDelay) {
-    uint8_t param = viewData_->song_->phrase_.steps_[phrase][pos].param2;
+    uint8_t param = viewData_->song_->phrase_.Step(phrase, pos).param2;
     timeToStart_[channel] = (param & 0x0F) + 1;
   }
 }
@@ -862,16 +862,16 @@ void Player::playCursorPosition(int channel) {
 
   Song *song = viewData_->song_;
   Phrase *phrase = &(song->phrase_);
-  unsigned char note = phrase->steps_[currentPhrase][pos].note;
-  uint8_t stepVolume = phrase->steps_[currentPhrase][pos].getVolume();
+  unsigned char note = phrase->Step(currentPhrase, pos).note;
+  uint8_t stepVolume = phrase->Step(currentPhrase, pos).getVolume();
 
   unsigned char instrumentId = instrumentOnChannel_[channel];
   if (pos == 0) {
     // first note, instrument might be NO_INSTRUMNET
-    instrumentId = phrase->steps_[currentPhrase][pos].getInstrument();
+    instrumentId = phrase->Step(currentPhrase, pos).getInstrument();
   } else {
     // not the first step, we can never lose the instrument during this phrase
-    int newValue = phrase->steps_[currentPhrase][pos].getInstrument();
+    int newValue = phrase->Step(currentPhrase, pos).getInstrument();
     if (newValue != NO_INSTRUMENT) {
       instrumentId = newValue;
     }
@@ -923,7 +923,7 @@ void Player::playCursorPosition(int channel) {
       }
 
       if (!preserveNote) {
-        note += viewData_->song_->chain_.steps_[chain][chainPos].transpose;
+        note += viewData_->song_->chain_.Step(chain, chainPos).transpose;
         note += project_->GetTranspose();
       }
 
@@ -1044,13 +1044,13 @@ void Player::RetriggerChannelInstrument(int channel, int semitoneOffset, bool st
 int Player::getChannelHop(int channel, int pos) {
 
   int phrase = viewData_->currentPlayPhrase_[channel];
-  Token token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd1());
+  Token token = Token::enum_type(viewData_->song_->phrase_.Step(phrase, pos).getCmd1());
   if (token == Token::InstrumentCommandHop) {
-    return (viewData_->song_->phrase_.steps_[phrase][pos].param1) & 0xF;
+    return (viewData_->song_->phrase_.Step(phrase, pos).param1) & 0xF;
   }
-  token = Token::enum_type(viewData_->song_->phrase_.steps_[phrase][pos].getCmd2());
+  token = Token::enum_type(viewData_->song_->phrase_.Step(phrase, pos).getCmd2());
   if (token == Token::InstrumentCommandHop) {
-    return (viewData_->song_->phrase_.steps_[phrase][pos].param2) & 0xF;
+    return (viewData_->song_->phrase_.Step(phrase, pos).param2) & 0xF;
   }
   return -1;
 }
@@ -1172,7 +1172,7 @@ void Player::moveToNextPhrase(int channel, int hop) {
 
   bool canContinue = (pos < phraseLength);
   if (canContinue) {
-    canContinue = (viewData_->song_->chain_.steps_[chain][pos].phrase != 0xFF);
+    canContinue = (viewData_->song_->chain_.Step(chain, pos).phrase != 0xFF);
   }
 
   // If so, we trigger it. Otherwise, we go to the next phrase
@@ -1259,11 +1259,11 @@ void Player::moveToNextChain(int channel, int hop) {
     }
 
     int pos = (viewData_->songPlayPos_[channel]) + 1;
-    uint8_t chainId = viewData_->song_->rows_[pos].chains[channel];
+    uint8_t chainId = viewData_->song_->Cell(pos, channel);
     bool loopBack = (chainId == EMPTY_SONG_VALUE);
     // Check if first step of chain contains somethin, if not we loop back
     if (!loopBack) {
-      unsigned char phraseId = viewData_->song_->chain_.steps_[chainId][0].phrase;
+      unsigned char phraseId = viewData_->song_->chain_.Step(chainId, 0).phrase;
       loopBack = (phraseId == EMPTY_CHAIN_VALUE);
     };
     if (loopBack) {
@@ -1288,14 +1288,14 @@ void Player::moveToNextChain(int channel, int hop) {
       // Otherwise proceed with normal loop back behavior
       pos--;
       while (pos >= 0) {
-        chainId = viewData_->song_->rows_[pos].chains[channel];
+        chainId = viewData_->song_->Cell(pos, channel);
 
         if (chainId == EMPTY_SONG_VALUE) {
           // we stop searching if there's a blank
           break;
         } else {
           // Or if first phrase of chain is empty
-          if (viewData_->song_->chain_.steps_[chainId][0].phrase == EMPTY_CHAIN_VALUE) {
+          if (viewData_->song_->chain_.Step(chainId, 0).phrase == EMPTY_CHAIN_VALUE) {
             break;
           }
         }

@@ -57,9 +57,16 @@ protected:
   // EDIT + UP / DOWN: the previous / next phrase in the chain
   bool processPhraseSwitchInput(uint16_t newButton, uint16_t mask);
 
-  // the steps of the phrase that is edited
-  PhraseStep *currentSteps() const {
-    return viewData_->song_->phrase_.steps_[viewData_->currentPhrase_];
+  // the steps of the phrase that is edited: to read them. editStep / editSteps record what they hand out in the undo
+  // history, call them right before the change.
+  const PhraseStep *currentSteps() const {
+    return viewData_->song_->phrase_.Steps(viewData_->currentPhrase_);
+  }
+  PhraseStep &editStep(int step) {
+    return viewData_->song_->phrase_.EditStep(viewData_->currentPhrase_, step);
+  }
+  PhraseStep *editSteps() {
+    return viewData_->song_->phrase_.EditSteps(viewData_->currentPhrase_);
   }
 
   // the fields that change what can be heard: they restart the preview when they change

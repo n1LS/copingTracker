@@ -43,7 +43,7 @@ class PhraseGenerator {
 public:
   // Writes one generated bassline phrase per chain step (at most 4) with the
   // settings' instrument. Rests clear note and instrument of a step.
-  static void GenerateBasslinePhrases(Project *project, ChainStep *phraseIndexes, uint8_t length,
+  static void GenerateBasslinePhrases(Project *project, const ChainStep *phraseIndexes, uint8_t length,
                                       BasslineGenerator::Settings settings) {
     if (length > BasslineGenerator::kMaxPhrases) {
       length = BasslineGenerator::kMaxPhrases;
@@ -62,7 +62,7 @@ public:
     for (uint8_t i = 0; i < out.phraseCount; ++i) {
       const uint8_t phrase = phraseIndexes[i].phrase;
       for (uint8_t step = 0; step < BasslineGenerator::kSteps; ++step) {
-        PhraseStep &s = project->song_.phrase_.steps_[phrase][step];
+        PhraseStep &s = project->song_.phrase_.EditStep(phrase, step);
         const uint8_t note = out.note[i][step];
         s.note = note == BasslineGenerator::kNoNote ? NO_NOTE : note;
         s.setInstrument(note == BasslineGenerator::kNoNote ? NO_INSTRUMENT : settings.instrument);
@@ -70,7 +70,7 @@ public:
     }
   }
 
-  static void GenerateDrumPhrases(Project *project, ChainStep *phraseIndexes, uint8_t length, Settings settings) {
+  static void GenerateDrumPhrases(Project *project, const ChainStep *phraseIndexes, uint8_t length, Settings settings) {
     settings.phraseCount = length;
     settings.voices = (settings.target == Target::LSDJKit) ? VoiceCount::Duo : VoiceCount::Mono;
     DrumChain out;
@@ -106,15 +106,16 @@ public:
 
       for (uint8_t step = 0; step < pattern.steps; step++) {
         const StepMask mask = static_cast<StepMask>(1u << step);
+        PhraseStep &s = project->song_.phrase_.EditStep(phrase, step);
 
-        project->song_.phrase_.steps_[phrase][step].note = NO_NOTE;
-        project->song_.phrase_.steps_[phrase][step].setInstrument(NO_INSTRUMENT);
+        s.note = NO_NOTE;
+        s.setInstrument(NO_INSTRUMENT);
 
         int voices = 0;
 
         for (uint8_t sound = 0; sound < kSoundCount; ++sound) {
           if (pattern.sound[sound] & mask) {
-            project->song_.phrase_.steps_[phrase][step].setInstrument(settings.instrument);
+            s.setInstrument(settings.instrument);
 
             if (settings.target == Target::LSDJKit) {
               // A note holds two samples, note / 15 and note % 15, where 0 is
@@ -122,17 +123,17 @@ public:
               // sounds fit in a step.
               const int sample = LSDJKitMap[sound] + 1;
               if (voices == 0) {
-                project->song_.phrase_.steps_[phrase][step].note = sample * 15; // left
+                s.note = sample * 15; // left
               } else if (voices == 1) {
-                project->song_.phrase_.steps_[phrase][step].note += sample; // right
+                s.note += sample; // right
               }
               voices++;
             } else if (settings.target == Target::SlicedSample) {
               // single slices, no note offset
-              project->song_.phrase_.steps_[phrase][step].note = sound;
+              s.note = sound;
             } else {
               // gm instrument or DrumInstrument, use note at C3 offset
-              project->song_.phrase_.steps_[phrase][step].note = 36 + sound;
+              s.note = 36 + sound;
             }
           }
         }

@@ -49,6 +49,10 @@ public:
   ContextLegend currentContextLegend() const override;
   void DrawEditingValue();
   virtual void OnFocus();
+  bool SupportsUndo() const override {
+    return true;
+  }
+  void AfterUndoRedo() override;
   virtual void AnimationUpdate();
   void onCommandPicked(Token command) override;
 

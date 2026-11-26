@@ -13,6 +13,7 @@
 #define _GROOVE_H_
 
 #include "Application/Model/Song.h"
+#include "Application/Model/UndoJournal.h"
 #include "Application/Persistency/Persistent.h"
 #include "Foundation/T_Singleton.h"
 
@@ -37,7 +38,10 @@ public:
   void SetGroove(int channel, int groove);
   bool UpdateGroove(ChannelGroove &g, bool reverse);
   void GetChannelData(int channel, int *groove, int *position);
-  unsigned char *GetGrooveData(int groove);
+  // The steps of a groove, EditGrooveData records them in the undo history before it hands them out (call it right
+  // before the change, not to look).
+  const unsigned char *GetGrooveData(int groove) const;
+  unsigned char *EditGrooveData(int groove);
   virtual void SaveContent(JsonWriter &writer);
   virtual void RestoreContent(JsonReader &reader);
 

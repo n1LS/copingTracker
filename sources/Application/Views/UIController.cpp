@@ -11,6 +11,7 @@
 
 #include "UIController.h"
 
+#include "Application/Model/UndoJournal.h"
 #include "Application/Player/Player.h"
 #include "Application/Views/BaseClasses/View.h"
 
@@ -102,4 +103,14 @@ void UIController::OnButtonUp(uint16_t button, uint16_t mask) {
     }
     armed_ = Armed::None;
   }
+}
+
+bool UIController::UndoRedo(bool undo) {
+  UndoJournal &journal = UndoJournal::Instance();
+  uint32_t hint = 0;
+  if (!(undo ? journal.Undo(hint) : journal.Redo(hint))) {
+    return false;
+  }
+  viewData_->song_->RebuildAllocation(true);
+  return true;
 }

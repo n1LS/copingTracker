@@ -40,10 +40,17 @@ public:
   ContextLegend currentContextLegend() const override;
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void OnFocus();
+  bool SupportsUndo() const override {
+    return true;
+  }
+  void AfterUndoRedo() override;
+  virtual void ButtonUp(uint16_t button, uint16_t mask) override;
   virtual void AnimationUpdate();
   void setCurrentlySelectedCommand(Token command);
 
 protected:
+  // the selection starts at the cursor
+  void beginSelection();
   void processNormalButtonMask(uint16_t newButton, uint16_t mask);
   void processSelectionButtonMask(uint16_t newButton, uint16_t mask);
 

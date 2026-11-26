@@ -26,6 +26,10 @@ public:
   virtual void DrawView();
   ContextLegend currentContextLegend() const override;
   virtual void OnFocus();
+  bool SupportsUndo() const override {
+    return true;
+  }
+  void AfterUndoRedo() override;
   virtual void OnPlayerUpdate(PlayerEventType, unsigned int tick = 0);
   virtual void AnimationUpdate();
 

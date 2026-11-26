@@ -38,6 +38,9 @@ public:
   bool IsMuteSoloHeld() const {
     return armed_ != Armed::None;
   }
+  // Undo / redo of the song data, false when there is nothing to undo / redo. The allocation of chains, phrases and
+  // tables is worked out again afterwards.
+  bool UndoRedo(bool undo);
   // every button release, from View::ProcessButton
   void OnButtonUp(uint16_t button, uint16_t mask);
 

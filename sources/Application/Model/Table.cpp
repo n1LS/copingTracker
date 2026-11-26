@@ -32,6 +32,7 @@ void Table::Reset() {
 }
 
 void Table::Copy(const Table &other) {
+  UndoJournal::RecordChange(steps_, sizeof(steps_));
   for (int i = 0; i < TABLE_STEPS; i++) {
     steps_[i] = other.steps_[i];
   }
@@ -147,9 +148,17 @@ void TableHolder::RestoreContent(JsonReader &reader) {
   }
 }
 
+void TableHolder::RebuildAllocation() {
+  for (int i = 0; i < TABLE_COUNT; i++) {
+    allocation_[i] = !table_[i].IsEmpty();
+  }
+}
+
 void TableHolder::SetUsed(int i) {
-  if (i >= TABLE_COUNT) {
-    NAssert(i < 128);
+  // a command can hold a table number of up to 0x7F, the player plays everything from 0x20 on as table 0x1F: there
+  // is nothing to mark
+  if (i < 0 || i >= TABLE_COUNT) {
+    return;
   }
   allocation_[i] = true;
 }

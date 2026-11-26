@@ -10,6 +10,7 @@ add_library(application_model
   Project.cpp
   Scale.cpp
   Song.cpp
+  UndoJournal.cpp
   Table.cpp
 )
 

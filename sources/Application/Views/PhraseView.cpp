@@ -130,7 +130,7 @@ void PhraseView::updateCursor(int dx, int dy) {
     // Try to see if the current chain has a phrase after this one
     if ((viewMode_ != VM_SELECTION) && (viewData_->chainRow_ < 15)) {
       viewData_->chainRow_++;
-      unsigned char *p = viewData_->GetCurrentChainPointer();
+      const unsigned char *p = viewData_->GetCurrentChainPointer();
       if (*p != 0xFF) {
         viewData_->currentPhrase_ = *p;
         row_ = 0;
@@ -147,7 +147,7 @@ void PhraseView::updateCursor(int dx, int dy) {
     // Try to see if the current chain has a phrase before this one
     if ((viewMode_ != VM_SELECTION) && (viewData_->chainRow_ > 0)) {
       viewData_->chainRow_--;
-      unsigned char *p = viewData_->GetCurrentChainPointer();
+      const unsigned char *p = viewData_->GetCurrentChainPointer();
       if (*p != 0xFF) {
         viewData_->currentPhrase_ = *p;
         row_ = 15;
@@ -233,9 +233,8 @@ void PhraseView::pasteLast() {
 
 void PhraseView::cutPosition() {
   // cutting an empty note slot adds a note off
-  PhraseStep &current = currentSteps()[row_];
-  if (col_ == colNote && current.note == NO_NOTE) {
-    current.note = NOTE_OFF;
+  if (col_ == colNote && currentSteps()[row_].note == NO_NOTE) {
+    editStep(row_).note = NOTE_OFF;
     isDirty_ = true;
     return;
   }
@@ -301,7 +300,7 @@ void PhraseView::fillClipboardData() {
 
   // Copy the data
 
-  PhraseStep *base = currentSteps();
+  const PhraseStep *base = currentSteps();
 
   for (int i = 0; i < clipboard_.height_; i++) {
     viewData_->clipboardSteps_[i] = base[clipboard_.row_ + i];
@@ -412,32 +411,32 @@ void PhraseView::cutSelection() {
   // Loop over selection col, row & clear data inside it
 
   static const uint8_t kNone = static_cast<uint8_t>(static_cast<char>(Token::InstrumentCommandNone));
-  PhraseStep *base = currentSteps();
+  // (the steps are recorded one by one)
 
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
       int r = j + clipboard_.row_;
       switch (i + clipboard_.col_) {
         case colNote:
-          base[r].note = NO_NOTE;
+          editStep(r).note = NO_NOTE;
           break;
         case colInstrument:
-          base[r].setInstrument(NO_INSTRUMENT);
+          editStep(r).setInstrument(NO_INSTRUMENT);
           break;
         case colCmd1:
-          base[r].setCmd1(kNone);
+          editStep(r).setCmd1(kNone);
           break;
         case colCmdVal1:
-          base[r].param1 = 0x0000;
+          editStep(r).param1 = 0x0000;
           break;
         case colCmd2:
-          base[r].setCmd2(kNone);
+          editStep(r).setCmd2(kNone);
           break;
         case colCmdVal2:
-          base[r].param2 = 0x0000;
+          editStep(r).param2 = 0x0000;
           break;
         case colVolume:
-          base[r].setVolume(NO_VOLUME);
+          editStep(r).setVolume(NO_VOLUME);
           break;
       }
     }
@@ -515,8 +514,13 @@ void PhraseView::ButtonUp(uint16_t button, uint16_t mask) {
   // Cloning needs ALT (ENTER while ALT is held), so there is nothing to clone once ALT is let go: the selection
   // starts here instead of with the next key press
   if (viewMode_ == VM_CLONE && button == BM_ALT) {
-    viewMode_ = VM_SELECTION;
-    beginSelection();
+    if (menuUsedUndo_) {
+      // the menu was used for undo / redo, nothing to select
+      viewMode_ = VM_NORMAL;
+    } else {
+      viewMode_ = VM_SELECTION;
+      beginSelection();
+    }
     isDirty_ = true;
   }
 
@@ -530,13 +534,21 @@ enum class TableCloneResult { NotApplicable, Cloned, NoFreeTable };
 
 // Clones the table the TABLE command in the given command value column of the step points to and
 // makes the step point to the copy (returned in clonedTable).
-static TableCloneResult cloneStepTable(PhraseStep &step, int col, uint16_t &clonedTable) {
-  uint16_t *param = nullptr;
-  if (col == colCmdVal1 && Token::enum_type(step.getCmd1()) == Token::InstrumentCommandTable) {
-    param = &step.param1;
-  } else if (col == colCmdVal2 && Token::enum_type(step.getCmd2()) == Token::InstrumentCommandTable) {
-    param = &step.param2;
+// which command (1 or 2) of the step is a TABLE command that the column belongs to (the command or its parameter), 0
+// when there is none
+static int tableCommandAt(const PhraseStep &step, int col) {
+  if ((col == colCmd1 || col == colCmdVal1) && Token::enum_type(step.getCmd1()) == Token::InstrumentCommandTable) {
+    return 1;
   }
+  if ((col == colCmd2 || col == colCmdVal2) && Token::enum_type(step.getCmd2()) == Token::InstrumentCommandTable) {
+    return 2;
+  }
+  return 0;
+}
+
+static TableCloneResult cloneStepTable(PhraseStep &step, int col, uint16_t &clonedTable) {
+  const int command = tableCommandAt(step, col);
+  uint16_t *param = command == 1 ? &step.param1 : command == 2 ? &step.param2 : nullptr;
 
   if (param == nullptr) {
     return TableCloneResult::NotApplicable;
@@ -569,7 +581,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
         // New Instruments default to type NONE!
         if (next != NO_MORE_INSTRUMENT &&
             bank->AssignInstrumentToSlot(IT_NONE, next) == InstrumentAssignResult::Success) {
-          currentSteps()[row_].setInstrument(static_cast<uint8_t>(next));
+          editStep(row_).setInstrument(static_cast<uint8_t>(next));
           viewData_->phraseLastInstrument_ = next;
           isDirty_ = true;
         } else {
@@ -585,7 +597,7 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
           TableHolder *th = TableHolder::GetInstance();
           uint16_t next = th->GetNext();
           if (next != NO_MORE_TABLE) {
-            uint16_t *c = &currentSteps()[row_].param1;
+            uint16_t *c = &editStep(row_).param1;
             *c = next;
             isDirty_ = true;
             consumed = true;
@@ -613,18 +625,18 @@ void PhraseView::ButtonDown(uint16_t newButton, uint16_t mask) {
   if (cloneChord || cloneModeChord) {
     if (col_ < colVolume) {
       InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
-      PhraseStep &current = currentSteps()[row_];
+      const PhraseStep &current = currentSteps()[row_];
       if (current.getInstrument() != NO_INSTRUMENT) {
         uint16_t next = bank->Clone(current.getInstrument());
         if (next != NO_MORE_INSTRUMENT) {
-          current.setInstrument(static_cast<uint8_t>(next));
+          editStep(row_).setInstrument(static_cast<uint8_t>(next));
           viewData_->phraseLastInstrument_ = next;
           isDirty_ = true;
         }
       }
     } else {
       uint16_t clonedTable = 0;
-      switch (cloneStepTable(currentSteps()[row_], col_, clonedTable)) {
+      switch (cloneStepTable(editStep(row_), col_, clonedTable)) {
         case TableCloneResult::Cloned:
           isDirty_ = true;
           cmdEdit_.SetInt(clonedTable);
@@ -808,7 +820,7 @@ void PhraseView::setTextProps(int col, int row, Color textColor = Theme::View::f
 void PhraseView::DrawEditingValue() {
   GUIPoint pos = GetAnchor();
   int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
-  PhraseStep *stepsBase = currentSteps();
+  const PhraseStep *stepsBase = currentSteps();
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instrObj = bank->noneInstrument();
 
@@ -911,7 +923,7 @@ void PhraseView::DrawView() {
   // global data
 
   int phraseLength = viewData_->project_->FindVariable(Token::VarPhraseLength)->GetInt();
-  PhraseStep *stepsBase = currentSteps();
+  const PhraseStep *stepsBase = currentSteps();
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instrObj = bank->noneInstrument();
 
@@ -1082,7 +1094,15 @@ ContextLegend PhraseView::currentContextLegend() const {
     return ContextLegend::SoloMute;
   }
   if (viewMode_ == VM_CLONE) {
-    return ContextLegend::PhraseClone;
+    // ALT + EDIT is a menu of actions, what ENTER does depends on where the cursor is
+    const PhraseStep &step = currentSteps()[row_];
+    if (col_ < colVolume) {
+      return step.getInstrument() != NO_INSTRUMENT ? ContextLegend::PhraseCloneInstrument : ContextLegend::PhraseMenu;
+    }
+    if (tableCommandAt(step, col_) != 0) {
+      return ContextLegend::PhraseCloneTable;
+    }
+    return ContextLegend::PhraseMenu;
   }
   if (viewMode_ == VM_SELECTION || clipboard_.active_) {
     return ContextLegend::PhraseSelection;
@@ -1216,4 +1236,12 @@ void PhraseView::AnimationUpdate() {
   }
 
   // Flush the window to ensure changes are displayed
+}
+
+// the menu that ALT + EDIT opened stays open (the clone action is still there) while ALT is held
+void PhraseView::AfterUndoRedo() {
+  View::AfterUndoRedo();
+  if (menuOpen_) {
+    viewMode_ = VM_CLONE;
+  }
 }

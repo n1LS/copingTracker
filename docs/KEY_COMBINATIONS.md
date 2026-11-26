@@ -42,6 +42,20 @@ direction is ignored.
 > Both views derive from `PhraseEditingView`, which implements the input they share:
 > `NAV + direction`, `NAV + NAV`, `PLAY`, `NAV + PLAY` and `EDIT + direction` (switching the phrase).
 >
+> **Undo / redo:** `ALT + EDIT` opens a menu of actions in the song, chain, phrase, piano roll, table and groove view. The menu stays
+> open while `ALT` is held (`EDIT` can be let go): `LEFT` undoes, `RIGHT` redoes (a held arrow repeats), in the song, chain and phrase
+> view `ENTER` clones and `UP` / `DOWN` start a selection. While the menu is open `ALT + LEFT / RIGHT` are undo / redo, not
+> their usual action (tempo nudge, piano roll fields). Letting go of `ALT` ends the menu; after an undo / redo it does not start a
+> selection, as it does from the clone mode without one. The menu of every view has a legend with the undo keys (`SongClone`, `ChainClone`, `PhraseCloneInstrument`, `PhraseCloneTable`,
+> `PhraseMenu`, `TableMenu`, `RollMenu`, `GrooveMenu`); in the table and piano roll view it only has undo / redo and the selection. `View::ProcessButton` handles it before the view sees the key, so it works in
+> every mode; the mode that `ALT + EDIT` armed (clone, selection) ends. Every button press, with everything it triggers (also
+> in a modal), is one entry of the history (`UndoJournal`, a ring of `UNDO_BUFFER_SIZE` = 6144 bytes, the oldest
+> entries are dropped when it is full; a press that does not fit at all clears it and shows "Undo history cleared").
+> Presses of the same buttons within 800 ms that change the same memory merge into one entry, so a value that is
+> changed by several presses is undone in one go. Covered: song rows, chains, phrases, tables and grooves. Not covered:
+> instruments (their variables, creating, cloning), project variables, samples, config. The history is cleared when a
+> project is loaded. The data classes only hand out writable memory through `Edit...` accessors that record it first.
+>
 > **Context legend:** in clone and selection mode (in the song view also while the loop is
 > being selected, legend `SongLoop`, and in the song, chain and phrase view while a mute / solo
 > chord is held, legend `SoloMute`) the song, chain, phrase and table
@@ -308,11 +322,12 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`.
 |---------|--------|
 | any button, once `ENTER` is no longer held | Stop note audition (`stopAudition`); normally this is the release of `ENTER` itself |
 
-*Clone mode (`VM_CLONE`)* — entered with `EDIT + ALT`, legend `PhraseClone`:
+*Clone mode (`VM_CLONE`)* — entered with `EDIT + ALT`, it works as a menu of actions. The legend depends on the cursor: `PhraseCloneInstrument` on the note / instrument column of a step that has an instrument (`ENTER` clones it), `PhraseCloneTable` on the command or parameter column of a `TABLE` command (`ENTER` clones the table), `PhraseMenu` everywhere else (no clone). All three show `LEFT` / `RIGHT` = undo / redo and `UP` / `DOWN` = select:
 
 | Combination | Type | Action |
 |-------------|------|--------|
-| `ENTER` while `ALT` is held | chord | Clone the instrument (note / instrument columns) or the table (command value columns holding a `TABLE` command) under the cursor and point the step to the copy, back to normal mode. A table number of `0x20` or more clones table `0x1F`, like the player plays it. If no table is free, a warning toast "No more tables available." is shown. Does nothing in the volume and command columns |
+| `ENTER` while `ALT` is held | chord | Clone the instrument (note / instrument columns) or the table (command or parameter column of a `TABLE` command) under the cursor and point the step to the copy, back to normal mode. A table number of `0x20` or more clones table `0x1F`, like the player plays it. If no table is free, a warning toast "No more tables available." is shown. Does nothing in the volume column, or on a command that is not `TABLE` |
+| `LEFT` / `RIGHT` while `ALT + EDIT` are held | chord | Undo / redo, see the note on undo above; clone mode ends |
 | any other button | chord | Leaves clone mode and starts a **selection**; the button is then handled as in selection mode |
 | `ALT` released | release | Leaves clone mode and starts the **selection** at the cursor right away (cloning needs `ALT` held, so there is nothing to clone any more); the selection legend is shown |
 
@@ -386,7 +401,7 @@ Scroll indicators, above (row 2) and below (row 19) the note labels (column 5):
 | `char_indicator_down_s` | the view can be scrolled down (the bottom is not note 0 yet) |
 | `char_symbol_bpm_s` next to the arrow (column 6) | the phrase has notes above / below the visible range (note offs do not count) |
 
-*Selection mode* — started with `EDIT + ALT`, legend `RollSelection` (shown in the bottom 4 rows instead of the notes, as the phrase view shows `PhraseSelection`). The selected steps are highlighted over the whole height of the grid (`Theme::View::Selection` colors, the step index too), the cursor cell in them is inverted. There is no selection while the fields have the focus (`ALT + LEFT / RIGHT` ends it), and it ends when another phrase is switched to or the view is left.
+*Selection mode* — started from the menu that `EDIT + ALT` opens (legend `RollMenu`: `LEFT` / `RIGHT` undo / redo, any other button or letting go of `ALT` starts the selection), legend `RollSelection` (shown in the bottom 4 rows instead of the notes, as the phrase view shows `PhraseSelection`). The selected steps are highlighted over the whole height of the grid (`Theme::View::Selection` colors, the step index too), the cursor cell in them is inverted. There is no selection while the fields have the focus (`ALT + LEFT / RIGHT` ends it), and it ends when another phrase is switched to or the view is left.
 
 | Combination | Type | Action |
 |-------------|------|--------|
@@ -419,7 +434,7 @@ The indicators are drawn from `AnimationUpdate` after a player update, and not w
 | `RIGHT` | chord | Next step; stops at the last step and does not change the phrase |
 | `ENTER` | chord | Set the note of the cursor's step to the note of the cursor. As in the phrase view a step without a note gets the last instrument; the note and its instrument become the last note and instrument to paste. On a step with a note it moves the note and keeps its instrument, volume and commands. The note is previewed (audition of the step, as in the phrase view) while `ENTER` is held; releasing it stops the preview |
 | `ENTER + UP / DOWN` | chord | Move the note of the cursor's step one step up / down in the scale and key of the project, the same as `ENTER + RIGHT / LEFT` in the note column of the phrase view (`changeNote`). A sliced sample stays inside its slices, a note off becomes C3 (or the nearest note of the scale below), at the ends of the range the note wraps. A step without a note is left alone. The cursor follows the note and the view scrolls with it; the note becomes the last note to paste. The note is previewed again with its new pitch (as in the phrase view the audition `ENTER` started restarts) |
-| `EDIT + ALT` (either order) | chord | Start a **selection** of whole steps at the cursor step (all fields: note, instrument, volume, both commands with parameters). With a selection: extend it to all steps of the phrase (towards the end the cursor is on, pressed again it flips to the other end) |
+| `EDIT + ALT` (either order) | chord | Open the menu (see above), which starts a **selection** of whole steps at the cursor step (all fields: note, instrument, volume, both commands with parameters). With a selection: extend it to all steps of the phrase (towards the end the cursor is on, pressed again it flips to the other end) |
 | `ENTER + ALT` (ALT held first, no selection) | chord | **Paste** the clipboard over the steps from the cursor step, wrapping around at the end of the phrase, only the fields that are in the clipboard. The cursor goes to the step after the pasted ones. Nothing happens with an empty clipboard |
 | `ALT + RIGHT` | chord | Put the focus on the fields of the step on the right of the grid (note, instrument, volume, command 1 and 2). The selection in the grid is drawn inverted (the color of the glyph as the background, black text) instead of in the selection colors, the selected field has the selection colors. The focus rect is the field |
 | `ALT + LEFT` | chord | Back to the grid |
@@ -467,7 +482,7 @@ until the roll is left.
 | `EDIT + DOWN` | chord | Warp to the table 0x10 before the current one (`warpToNeighbour(-16)`) |
 | `EDIT + UP` | chord | Warp to the table 0x10 after the current one (`warpToNeighbour(+16)`) |
 | `ENTER + EDIT` | chord | Cut value at cursor (`cutPosition`) |
-| `EDIT + ALT` | chord, either order | Enter **selection mode** (`VM_SELECTION`) |
+| `EDIT + ALT` | chord, either order | Open the **menu** (`VM_CLONE`, legend `TableMenu`: `LEFT` / `RIGHT` undo / redo, any other button or letting go of `ALT` starts the selection) |
 | `ENTER + DOWN` | chord | Value −`0x10`; in a command column: previous command group |
 | `ENTER + UP` | chord | Value +`0x10`; in a command column: next command group |
 | `ENTER + LEFT` | chord | Value −`0x01`; in a command column: previous command |
@@ -481,7 +496,7 @@ until the roll is left.
 | `PLAY` | chord | Start phrase playback (`PM_PHRASE`) |
 | `DOWN / UP / LEFT / RIGHT` | chord | Move cursor |
 
-*Selection mode* — legend `TableSelection` (there is no clone mode; `EDIT + ALT` goes straight to selection):
+*Selection mode* — legend `TableSelection`, it starts from the menu that `EDIT + ALT` opens (there is nothing to clone in the table view, the menu has undo / redo and the selection):
 
 | Combination | Type | Action |
 |-------------|------|--------|
@@ -500,7 +515,9 @@ until the roll is left.
 | `EDIT + LEFT / RIGHT` | chord | Warp to neighbouring groove (`warpGroove(∓1)`) |
 | `EDIT + DOWN` | chord | Warp groove −`0x10` |
 | `EDIT + UP` | chord | Warp groove +`0x10` |
-| `EDIT + ENTER` | chord, either order | Clear value at cursor (`clearCursorValue`) |
+| `EDIT + ENTER` | chord, either order | Cut the value at the cursor: it goes to the clipboard and is cleared (`cutPosition`) |
+| `ALT + ENTER` | chord | Paste the clipboard at the cursor (rows continue at the top after the last one), the cursor moves below it |
+| `EDIT + ALT` | chord, either order | Open the **menu** (`VM_CLONE`, legend `GrooveMenu`): `LEFT` / `RIGHT` undo / redo, any other button or letting go of `ALT` starts the selection |
 | `ENTER + LEFT / RIGHT` | chord | Value −/ + `0x01` (clamped to `0x01`..`0x0F`) |
 | `ENTER + DOWN / UP` | chord | Value −/ + `0x01`, identical to LEFT / RIGHT (the `sync` argument of `updateCursorValue` is unused) |
 | `ENTER` alone | chord | Initialize cursor value (`initCursorValue`) |
@@ -510,7 +527,18 @@ until the roll is left.
 | `PLAY` | chord | Start phrase playback (`PM_PHRASE`) |
 | `DOWN / UP` | chord | Move row cursor |
 
-The groove view has no clone, new or selection mode and therefore no context legend.
+*Selection mode* — legend `GrooveSelection`, it starts from the menu that `EDIT + ALT` opens (there is nothing to clone, the menu has undo / redo and the selection). The selected rows are highlighted and the focus rect covers them.
+
+| Combination | Type | Action |
+|-------------|------|--------|
+| `DOWN / UP` | chord | Extend the selection (it stops at the first and last row) |
+| `EDIT` | chord | **Copy** the selected rows, ends the selection, the cursor goes back to where it started |
+| `ALT + ENTER` | chord | **Cut**: copy and clear the selected rows, ends the selection |
+| `EDIT + ALT` | chord, either order | Extend the selection to all rows (a second time it flips to the other end) |
+| `ENTER + EDIT + DOWN / UP` | chord | Move the selected rows one row, the row in the way jumps to the other end of the selection |
+| `NAV + PLAY` / `PLAY` | chord | Start phrase playback with / without retrig |
+
+The clipboard is kept when another groove is opened, so values can be pasted into other grooves.
 
 ### 3.6 `InstrumentView` (`Views/InstrumentView.cpp`)
 

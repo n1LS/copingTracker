@@ -30,12 +30,16 @@ public:
   void UpdateSongOffset(int offset);
   void UpdateSongCursor(int dx, int dy);
   void SetSongChain(unsigned char);
-  unsigned char *GetCurrentSongPointer();
+  // the chain under the cursor of the song view, Edit... records it in the undo history first
+  const unsigned char *GetCurrentSongPointer();
+  unsigned char *EditCurrentSongPointer();
 
   void UpdateChainCursor(int dx, int dy);
   int UpdateChainCursorValue(int offset, int dx, int dy);
   void SetChainPhrase(unsigned char value);
-  unsigned char *GetCurrentChainPointer();
+  // the phrase under the cursor of the chain view, Edit... records it in the undo history first
+  const unsigned char *GetCurrentChainPointer();
+  unsigned char *EditCurrentChainPointer();
 
   // Shared by the phrase view and the piano roll view. `step` is the cursor row in the phrase.
   // Makes the instrument of the phrase step the current instrument. A step without an

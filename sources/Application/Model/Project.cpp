@@ -310,7 +310,7 @@ void Project::Purge() {
 
   for (int i = 0; i < SONG_ROW_COUNT; i++) {
     for (int j = 0; j < SONG_CHANNEL_COUNT; j++) {
-      uint8_t v = song_.rows_[i].chains[j];
+      uint8_t v = song_.Cell(i, j);
       if (v != DATA_UNUSED_VALUE) {
         song_.chain_.SetUsed(v);
       }
@@ -320,15 +320,19 @@ void Project::Purge() {
   for (int i = 0; i < CHAIN_COUNT; i++) {
     if (song_.chain_.IsUsed(i)) {
       for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
-        uint8_t p = song_.chain_.steps_[i][j].phrase;
+        uint8_t p = song_.chain_.Step(i, j).phrase;
         if (p != DATA_UNUSED_VALUE) {
           song_.phrase_.SetUsed(p);
         }
       }
     } else {
       for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
-        song_.chain_.steps_[i][j].phrase = DATA_UNUSED_VALUE;
-        song_.chain_.steps_[i][j].transpose = 0x00;
+        const ChainStep &current = song_.chain_.Step(i, j);
+        if (current.phrase != DATA_UNUSED_VALUE || current.transpose != 0x00) {
+          ChainStep &step = song_.chain_.EditStep(i, j);
+          step.phrase = DATA_UNUSED_VALUE;
+          step.transpose = 0x00;
+        }
       }
     }
   }
@@ -336,7 +340,13 @@ void Project::Purge() {
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
       if (!song_.phrase_.IsUsed(i)) {
-        PhraseStep *step = &(song_.phrase_.steps_[i][j]);
+        const PhraseStep &current = song_.phrase_.Step(i, j);
+        if (current.note == DATA_UNUSED_VALUE && current.getInstrument() == NO_INSTRUMENT &&
+            current.getCmd1() == Token::InstrumentCommandNone && current.param1 == 0 &&
+            current.getCmd2() == Token::InstrumentCommandNone && current.param2 == 0) {
+          continue;
+        }
+        PhraseStep *step = &song_.phrase_.EditStep(i, j);
         step->note = DATA_UNUSED_VALUE;
         step->setInstrument(NO_INSTRUMENT);
         step->setCmd1(Token::InstrumentCommandNone);
@@ -405,7 +415,7 @@ int Project::PurgeInstruments() {
 
   for (int i = 0; i < PHRASE_COUNT; i++) {
     for (int j = 0; j < 16; j++) {
-      uint8_t instr = song_.phrase_.steps_[i][j].getInstrument();
+      uint8_t instr = song_.phrase_.Step(i, j).getInstrument();
       if (instr != DATA_UNUSED_VALUE) {
         NAssert(instr < MAX_INSTRUMENT_COUNT);
         used[instr] = true;

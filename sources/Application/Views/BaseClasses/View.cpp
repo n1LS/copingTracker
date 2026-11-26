@@ -11,6 +11,7 @@
 
 #include "View.h"
 #include "Application/AppWindow.h"
+#include "Application/Model/UndoJournal.h"
 #include "Application/Player/Player.h"
 #include "Application/Utils/CommandHelp.h"
 #include "Application/Utils/ContextLegend.generated.h"
@@ -18,11 +19,13 @@
 #include "Application/Utils/mathutils.h"
 #include "Application/Views/ModalDialogs/MessageBox.h"
 #include "Application/Views/SampleEditorView.h"
+#include "Application/Views/ToastView.h"
 #include "Application/Views/UIController.h"
 #include "Foundation/Constants/GraphicCharacters.h"
 #include "Foundation/Constants/SpecialCharacters.h"
 #include "ModalView.h"
 #include "System/Console/Trace.h"
+#include "System/System/System.h"
 #include <UIFramework/SimpleBaseClasses/EventManager.h>
 #include <nanoprintf.h>
 
@@ -537,7 +540,68 @@ bool View::trackNavDoubleTap(uint16_t button, uint16_t mask, bool pressed) {
   return false;
 }
 
+// Everything a button does is one entry of the undo history: the data classes record what they change while the action
+// is open. A modal handles its buttons through the same function, the outermost call is the action.
 void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
+  static int depth = 0;
+
+  // ALT + EDIT opens the menu, it stays open while ALT is held
+  if (pressed && !modalView_ && SupportsUndo() && IsPair(button, mask, BM_ALT, BM_EDIT)) {
+    menuOpen_ = true;
+  }
+
+  // LEFT / RIGHT in the menu: undo / redo, not an action itself
+  if (pressed && depth == 0 && !modalView_ && SupportsUndo() && (button == BM_LEFT || button == BM_RIGHT) &&
+      menuOpen_ && (mask & BM_ALT) && (mask & ~(BM_ALT | BM_EDIT)) == 0) {
+    undoRedo(button == BM_LEFT);
+    if (isDirty_) {
+      ((AppWindow &)w_).SetDirty();
+    }
+    return;
+  }
+
+  UndoJournal &journal = UndoJournal::Instance();
+  if (depth == 0) {
+    // a press of the same buttons soon again, like a value that is changed by several presses, merges with the one
+    // before when it changes the same memory
+    const uint32_t key = pressed ? (0x80000000u | (static_cast<uint32_t>(button) << 16) | mask) : 0;
+    journal.BeginAction(key, static_cast<uint32_t>(System::GetInstance()->GetClock()));
+  }
+  depth++;
+  dispatchButton(button, mask, pressed);
+  depth--;
+  if (!pressed && button == BM_ALT) {
+    menuOpen_ = false;
+    menuUsedUndo_ = false;
+  }
+  if (depth == 0) {
+    journal.CommitAction(0);
+    if (journal.TakeOverflowed()) {
+      ToastView::GetInstance()->Show("Undo history cleared", &ttWarning, ToastDuration::regular);
+    }
+  }
+}
+
+void View::undoRedo(bool undo) {
+  if (UIController::GetInstance()->UndoRedo(undo)) {
+    menuUsedUndo_ = true;
+    AfterUndoRedo();
+    ToastView::GetInstance()->Show(undo ? "Undo" : "Redo", &ttInfo, ToastDuration::quick);
+  } else {
+    ToastView::GetInstance()->Show(undo ? "Nothing to undo" : "Nothing to redo", &ttInfo, ToastDuration::quick);
+  }
+}
+
+bool View::menuOpen_ = false;
+bool View::menuUsedUndo_ = false;
+
+void View::AfterUndoRedo() {
+  viewMode_ = VM_NORMAL;
+  OnFocus();
+  isDirty_ = true;
+}
+
+void View::dispatchButton(uint16_t button, uint16_t mask, bool pressed) {
   if (!pressed) {
     // a mute / solo chord that is held ends here, whichever view or modal gets the release
     UIController::GetInstance()->OnButtonUp(button, mask);
