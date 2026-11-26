@@ -289,6 +289,8 @@ public:
   // not start a selection
   static bool menuOpen_;
   static bool menuUsedUndo_;
+  // the buttons that are down at the moment, kept up to date by ProcessButton (for the legends of the chords)
+  static uint16_t heldButtons_;
 
   void Redraw();
 

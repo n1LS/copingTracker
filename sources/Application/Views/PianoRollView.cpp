@@ -16,6 +16,7 @@
 #include "Application/Utils/char.h"
 #include "Foundation/Constants/GraphicCharacters.h"
 #include "Foundation/Constants/SpecialCharacters.h"
+#include "UIController.h"
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -208,6 +209,20 @@ void PianoRollView::ButtonDown(uint16_t newButton, uint16_t mask) {
     return;
   }
 
+  // mute and solo of the channel, as in the phrase view (no mute while a selection is made, as there)
+  if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
+    unMuteAll();
+    return;
+  }
+  if (IsChord(newButton, mask, BM_ENTER, BM_NAV)) {
+    switchSoloMode();
+    return;
+  }
+  if (!selecting_ && IsPair(newButton, mask, BM_EDIT, BM_NAV)) {
+    toggleMute();
+    return;
+  }
+
   // ALT + RIGHT / LEFT: to the fields of the step on the right / back to the grid
   if (IsChord(newButton, mask, BM_RIGHT, BM_ALT)) {
     focusPanel(true);
@@ -307,10 +322,31 @@ void PianoRollView::ButtonUp(uint16_t button, uint16_t mask) {
 }
 
 ContextLegend PianoRollView::currentContextLegend() const {
+  if (UIController::GetInstance()->IsMuteSoloHeld()) {
+    return ContextLegend::SoloMute;
+  }
   if (menu_) {
     return ContextLegend::RollMenu;
   }
-  return selecting_ ? ContextLegend::RollSelection : ContextLegend::None;
+  if (selecting_) {
+    return ContextLegend::RollSelection;
+  }
+  // a single button that is down (not an arrow): the chords that can follow (the fields have their own input)
+  if (!panelFocus_) {
+    switch (heldButtons_) {
+      case BM_ALT:
+        return ContextLegend::RollChordsAlt;
+      case BM_NAV:
+        return ContextLegend::RollChordsNav;
+      case BM_EDIT:
+        return ContextLegend::RollChordsEdit;
+      case BM_ENTER:
+        return ContextLegend::RollChordsEnter;
+      default:
+        break;
+    }
+  }
+  return ContextLegend::None;
 }
 
 // the menu that ALT + EDIT opened stays open while ALT is held

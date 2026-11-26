@@ -52,6 +52,10 @@ protected:
 
   // Input of both views. They return true if the press was handled.
   // PLAY: play the phrase, NAV + PLAY: play it from the previous position
+  // mute and solo of the channel of the phrase, shared with the piano roll
+  void unMuteAll();
+  void toggleMute();
+  void switchSoloMode();
   bool processPlaybackInput(uint16_t newButton, uint16_t mask);
   // EDIT + LEFT / RIGHT: the phrase of the previous / next channel,
   // EDIT + UP / DOWN: the previous / next phrase in the chain

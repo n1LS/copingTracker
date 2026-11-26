@@ -15,6 +15,7 @@
 #include "Application/Model/Scale.h"
 #include "Application/Player/Player.h"
 #include "Application/Views/CommandView.h"
+#include "Application/Views/UIController.h"
 #include <algorithm>
 
 static const int16_t stepOffsets_[4] = {-1, 1, 16, -16};
@@ -647,4 +648,20 @@ void PhraseEditingView::warpToNeighbour(int offset) {
 
   viewData_->songX_ = oldX;
   viewData_->currentChain_ = oldChain;
+}
+
+void PhraseEditingView::unMuteAll() {
+  UIController *controller = UIController::GetInstance();
+  controller->UnMuteAll();
+}
+
+void PhraseEditingView::toggleMute() {
+  UIController *controller = UIController::GetInstance();
+  controller->BeginMute(viewData_->songX_, viewData_->songX_);
+}
+
+void PhraseEditingView::switchSoloMode() {
+  UIController *controller = UIController::GetInstance();
+  controller->BeginSolo(viewData_->songX_, viewData_->songX_);
+  isDirty_ = true;
 }

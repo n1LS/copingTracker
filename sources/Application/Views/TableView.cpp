@@ -731,6 +731,19 @@ ContextLegend TableView::currentContextLegend() const {
   if (viewMode_ == VM_SELECTION || clipboard_.active_) {
     return ContextLegend::TableSelection;
   }
+  // a single button that is down (not an arrow): the chords that can follow
+  switch (heldButtons_) {
+    case BM_ALT:
+      return ContextLegend::TableChordsAlt;
+    case BM_NAV:
+      return viewType_ == VT_TABLE2 ? ContextLegend::Table2ChordsNav : ContextLegend::TableChordsNav;
+    case BM_EDIT:
+      return ContextLegend::TableChordsEdit;
+    case BM_ENTER:
+      return ContextLegend::TableChordsEnter;
+    default:
+      break;
+  }
   return ContextLegend::None;
 }
 

@@ -864,6 +864,19 @@ ContextLegend ChainView::currentContextLegend() const {
   if (viewMode_ == VM_SELECTION || clipboard_.active_) {
     return ContextLegend::ChainSelection;
   }
+  // a single button that is down (not an arrow): the chords that can follow
+  switch (heldButtons_) {
+    case BM_ALT:
+      return ContextLegend::ChainChordsAlt;
+    case BM_NAV:
+      return ContextLegend::ChainChordsNav;
+    case BM_EDIT:
+      return ContextLegend::ChainChordsEdit;
+    case BM_ENTER:
+      return ContextLegend::ChainChordsEnter;
+    default:
+      break;
+  }
   return ContextLegend::None;
 }
 

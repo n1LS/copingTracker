@@ -90,9 +90,6 @@ protected:
     return row_;
   }
   void onPhraseSwitched() override;
-  void unMuteAll();
-  void toggleMute();
-  void switchSoloMode();
 
   void processNormalButtonMask(uint16_t newButton, uint16_t mask);
   void processSelectionButtonMask(uint16_t newButton, uint16_t mask);

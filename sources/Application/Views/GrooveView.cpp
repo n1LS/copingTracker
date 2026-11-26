@@ -508,6 +508,19 @@ ContextLegend GrooveView::currentContextLegend() const {
   if (viewMode_ == VM_SELECTION || clipboard_.active_) {
     return ContextLegend::GrooveSelection;
   }
+  // a single button that is down (not an arrow): the chords that can follow
+  switch (heldButtons_) {
+    case BM_ALT:
+      return ContextLegend::GrooveChordsAlt;
+    case BM_NAV:
+      return ContextLegend::GrooveChordsNav;
+    case BM_EDIT:
+      return ContextLegend::GrooveChordsEdit;
+    case BM_ENTER:
+      return ContextLegend::GrooveChordsEnter;
+    default:
+      break;
+  }
   return ContextLegend::None;
 }
 

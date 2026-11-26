@@ -466,22 +466,6 @@ void PhraseView::pasteClipboard() {
   isDirty_ = true;
 }
 
-void PhraseView::unMuteAll() {
-  UIController *controller = UIController::GetInstance();
-  controller->UnMuteAll();
-}
-
-void PhraseView::toggleMute() {
-  UIController *controller = UIController::GetInstance();
-  controller->BeginMute(viewData_->songX_, viewData_->songX_);
-}
-
-void PhraseView::switchSoloMode() {
-  UIController *controller = UIController::GetInstance();
-  controller->BeginSolo(viewData_->songX_, viewData_->songX_);
-  isDirty_ = true;
-}
-
 void PhraseView::OnFocus() {
   PhraseEditingView::OnFocus();
   // the piano roll moves the same cursor row, the step
@@ -1106,6 +1090,19 @@ ContextLegend PhraseView::currentContextLegend() const {
   }
   if (viewMode_ == VM_SELECTION || clipboard_.active_) {
     return ContextLegend::PhraseSelection;
+  }
+  // a single button that is down (not an arrow): the chords that can follow
+  switch (heldButtons_) {
+    case BM_ALT:
+      return ContextLegend::PhraseChordsAlt;
+    case BM_NAV:
+      return ContextLegend::PhraseChordsNav;
+    case BM_EDIT:
+      return ContextLegend::PhraseChordsEdit;
+    case BM_ENTER:
+      return ContextLegend::PhraseChordsEnter;
+    default:
+      break;
   }
   return ContextLegend::None;
 }

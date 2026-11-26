@@ -1108,6 +1108,19 @@ ContextLegend SongView::currentContextLegend() const {
   if (loopState_ == lsSelecting) {
     return ContextLegend::SongLoop;
   }
+  // a single button that is down (not an arrow): the chords that can follow
+  switch (heldButtons_) {
+    case BM_ALT:
+      return ContextLegend::SongChordsAlt;
+    case BM_NAV:
+      return ContextLegend::SongChordsNav;
+    case BM_EDIT:
+      return ContextLegend::SongChordsEdit;
+    case BM_ENTER:
+      return ContextLegend::SongChordsEnter;
+    default:
+      break;
+  }
   return ContextLegend::None;
 }
 

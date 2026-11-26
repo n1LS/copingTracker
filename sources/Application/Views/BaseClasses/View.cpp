@@ -545,6 +545,8 @@ bool View::trackNavDoubleTap(uint16_t button, uint16_t mask, bool pressed) {
 void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
   static int depth = 0;
 
+  heldButtons_ = pressed ? (mask | button) : mask;
+
   // ALT + EDIT opens the menu, it stays open while ALT is held
   if (pressed && !modalView_ && SupportsUndo() && IsPair(button, mask, BM_ALT, BM_EDIT)) {
     menuOpen_ = true;
@@ -594,6 +596,7 @@ void View::undoRedo(bool undo) {
 
 bool View::menuOpen_ = false;
 bool View::menuUsedUndo_ = false;
+uint16_t View::heldButtons_ = 0;
 
 void View::AfterUndoRedo() {
   viewMode_ = VM_NORMAL;

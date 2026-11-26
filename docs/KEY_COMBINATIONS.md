@@ -62,6 +62,12 @@ direction is ignored.
 > views replace the notes / command help in the bottom info area with a legend of the
 > available combos. The legends live in `tools/manual/raw_data/ContextLegends.copingDoc`
 > and must be kept in sync with the tables below.
+>
+> **Chord hints:** while a single button is held in the song, chain, phrase, table or groove view (`ALT`, `NAV`, `EDIT` or `ENTER`,
+> not an arrow; `PLAY` has no chords) the info area shows the chords that can follow, legends `SongChordsAlt` / `Nav` / `Edit` /
+> `Enter` and the same with `Chain`, `Phrase`, `Table`, `Groove` and `Roll` (the second table view has its own `Table2ChordsNav`; in the
+> piano roll they are only shown while the grid has the focus). Any other legend (menu, selection, mute / solo, loop) takes priority, and the hint is gone as soon as a
+> second button is down or the button is released.
 
 Chords made only of ALT / NAV / EDIT have no natural trigger, so either key may
 be the last one pressed (`IsPair(...)`): `EDIT+ALT`, `EDIT+NAV`, `NAV+ALT`,
@@ -435,6 +441,9 @@ The indicators are drawn from `AnimationUpdate` after a player update, and not w
 | `ENTER` | chord | Set the note of the cursor's step to the note of the cursor. As in the phrase view a step without a note gets the last instrument; the note and its instrument become the last note and instrument to paste. On a step with a note it moves the note and keeps its instrument, volume and commands. The note is previewed (audition of the step, as in the phrase view) while `ENTER` is held; releasing it stops the preview |
 | `ENTER + UP / DOWN` | chord | Move the note of the cursor's step one step up / down in the scale and key of the project, the same as `ENTER + RIGHT / LEFT` in the note column of the phrase view (`changeNote`). A sliced sample stays inside its slices, a note off becomes C3 (or the nearest note of the scale below), at the ends of the range the note wraps. A step without a note is left alone. The cursor follows the note and the view scrolls with it; the note becomes the last note to paste. The note is previewed again with its new pitch (as in the phrase view the audition `ENTER` started restarts) |
 | `EDIT + ALT` (either order) | chord | Open the menu (see above), which starts a **selection** of whole steps at the cursor step (all fields: note, instrument, volume, both commands with parameters). With a selection: extend it to all steps of the phrase (towards the end the cursor is on, pressed again it flips to the other end) |
+| `EDIT + NAV` | chord, either order | Toggle **mute** of the channel, taken back when `EDIT` is let go while `NAV` is held (see the appendix); not while a selection is made |
+| `NAV + ENTER` | chord | Toggle **solo** of the channel, taken back when `ENTER` is let go while `NAV` is held (see the appendix) |
+| `NAV + ALT` | chord, either order | Un-mute all |
 | `ENTER + ALT` (ALT held first, no selection) | chord | **Paste** the clipboard over the steps from the cursor step, wrapping around at the end of the phrase, only the fields that are in the clipboard. The cursor goes to the step after the pasted ones. Nothing happens with an empty clipboard |
 | `ALT + RIGHT` | chord | Put the focus on the fields of the step on the right of the grid (note, instrument, volume, command 1 and 2). The selection in the grid is drawn inverted (the color of the glyph as the background, black text) instead of in the selection colors, the selected field has the selection colors. The focus rect is the field |
 | `ALT + LEFT` | chord | Back to the grid |
