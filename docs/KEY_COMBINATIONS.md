@@ -199,7 +199,7 @@ Modes: `VM_NEW` (chain-to-create armed), `VM_CLONE` (clone armed),
 | `NAV + RIGHT` | chord | Navigate → **Chain view** |
 | `NAV + UP` | chord | Navigate → **Project view** |
 | `NAV + DOWN` | chord | Navigate → **Mixer view** |
-| `NAV + LEFT` | chord | Toggle song loop (`toggleLoopState`); while the end of the loop is being selected (`lsSelecting`) the `SongLoop` legend is shown, unless the clone / selection legend is active |
+| `NAV + LEFT` | chord | Toggle song loop (`toggleLoopState`); while the end of the loop is being selected (`lsSelecting`) the `SongLoop` legend is shown, unless the clone / selection legend is active. A loop that is set is saved with the project (song rows of its start and end) and is active again after loading |
 | `NAV + PLAY` | chord | Stop (`onStop`) |
 | `ALT + DOWN` | chord | Jump to next section (`jumpToNextSection(+1)`) |
 | `ALT + UP` | chord | Jump to previous section (`jumpToNextSection(-1)`) |

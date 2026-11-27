@@ -860,7 +860,7 @@ void PianoRollView::drawNoteLabels() {
     // draw note name
     noteToString(note, label);
     // the notes that are not part of the scale of the project are inactive
-    const bool inScale = scaleSteps[scale][(note + 12 - scaleRoot) % 12];
+    const bool inScale = scales[scale].steps[(note + 12 - scaleRoot) % 12];
     const Color labelColor = inScale ? Theme::View::index(inOctave == 0) : Theme::View::inactive;
     if (selected && panelFocus_) {
       // the focus is on the right: the selection is only the regular colors inverted

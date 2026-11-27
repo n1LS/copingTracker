@@ -15,9 +15,68 @@
 #include "Application/Utils/char.h"
 #include <cstdint>
 
-const int numScales = 44;
-extern const char *const scaleNames[numScales];
-extern const bool scaleSteps[numScales][12];
+struct Scale {
+  const char *name;
+  bool steps[12];
+};
+
+// Source of scales in original release:
+// https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/PitchConstellations.svg/1280px-PitchConstellations.svg.png
+
+inline const Scale scales[] = {
+    // common
+    {"Chromatic", {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
+    {"Ionian", {1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1}},
+    {"Aeolian", {1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0}},
+    {"Major Penta", {1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0}},
+    {"Minor Penta", {1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0}},
+    {"Blues", {1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0}},
+    {"Dorian", {1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0}},
+    {"Mixolydian", {1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0}},
+    {"Phrygian", {1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0}},
+    {"Lydian", {1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1}},
+    {"Harm. Minor", {1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1}},
+    {"Melodic Minor", {1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1}},
+
+    // fairly common
+    {"Whole Tone", {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0}},
+    {"Octatonic", {1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1}},
+    {"Phryg. Dom.", {1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0}},
+    {"Locrian", {1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0}},
+    {"Bebop Dom.", {1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1}},
+    {"Harm. Major", {1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1}},
+    {"Dbl.Harmonic", {1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1}},
+    {"Altered", {1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0}},
+
+    // other
+    {"Acoustic", {1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0}},
+    {"Adonal Mal.", {1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0}},
+    {"Algerian", {1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1}},
+    {"Augmented", {1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1}},
+    {"Enigmatic", {1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1}},
+    {"Flamenco", {1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1}},
+    {"Gypsy", {1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0}},
+    {"Half Dimin.", {1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0}},
+    {"Hirajoshi", {1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0}},
+    {"Hung. Gypsy", {1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1}},
+    {"Hung. Minor", {1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1}},
+    {"Insen", {1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0}},
+    {"Istrian", {1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0}},
+    {"Iwato", {1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0}},
+    {"Lyd. Aug.", {1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1}},
+    {"Major Bebop", {1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1}},
+    {"MajorLocrian", {1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0}},
+    {"Mel. Min. Asc", {1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1}},
+    {"Neap. Major", {1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1}},
+    {"Neap. Minor", {1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1}},
+    {"Persian", {1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1}},
+    {"Prometheus", {1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0}},
+    {"Tritone", {1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0}},
+    {"Ukrainian", {1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0}},
+};
+
+constexpr int numScales = sizeof(scales) / sizeof(scales[0]);
+extern const std::array<const char *, numScales> scaleNames;
 
 // Function that calculates semitone offset based on scale, position in scale,
 // and root note

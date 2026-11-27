@@ -134,7 +134,8 @@ int ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
   bool wrap = false;
 
   switch (chainCol_ + dx) {
-    // TODO nILS: figure out how to separate the column numbers from the enum, so that this does not depend on the order of the enum values
+    // TODO nILS: figure out how to separate the column numbers from the enum, so that this does not depend on the order
+    // of the enum values
     case 0:
       c = &song_->chain_.EditStep(currentChain_, chainRow_ + dy).phrase;
       limit = PHRASE_COUNT - 1;

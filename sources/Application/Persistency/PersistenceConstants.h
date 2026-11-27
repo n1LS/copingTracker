@@ -72,5 +72,6 @@
 #define JSON_KEY_INSTRUMENTS "instruments"
 #define JSON_KEY_TABLE_RATIO "table-ratio"
 #define JSON_KEY_SCALE_AWARE "scale-aware"
+#define JSON_KEY_LOOP "loop"
 
 #endif // _PERSISTENCE_CONSTANTS_H_

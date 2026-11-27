@@ -312,6 +312,18 @@ void SongView::OnFocus() {
   if (viewData_->songX_ > SONG_CHANNEL_COUNT - 1) {
     viewData_->songX_ = 0; // default to channel 1
   }
+
+  // the loop is part of the project (a loaded project brings its own, or none)
+  const Song *song = viewData_->song_;
+  if (song->HasLoop()) {
+    loopA_ = song->LoopStart();
+    loopB_ = song->LoopEnd();
+    loopState_ = lsLooping;
+    Player::GetInstance()->SetLoopPoints(loopA_, loopB_);
+  } else if (loopState_ == lsLooping) {
+    loopState_ = lsIdle;
+    Player::GetInstance()->SetLoopPoints(NO_LOOP, NO_LOOP);
+  }
 }
 
 void SongView::drawTitleText() {
@@ -1373,12 +1385,14 @@ void SongView::toggleLoopState() {
       // loop is fully selected
       loopB_ = viewData_->songY_ + viewData_->songOffset_;
       Player::GetInstance()->SetLoopPoints(loopA_, loopB_);
+      viewData_->song_->SetLoop(loopA_, loopB_);
       loopState_ = lsLooping;
       break;
 
     case lsLooping:
       // end looping
       Player::GetInstance()->SetLoopPoints(NO_LOOP, NO_LOOP);
+      viewData_->song_->ClearLoop();
       loopState_ = lsIdle;
   }
 

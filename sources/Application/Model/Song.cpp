@@ -56,6 +56,7 @@ void Song::Reset() {
   }
   chain_.Reset();
   phrase_.Reset();
+  ClearLoop();
 }
 
 // only what is there is saved, empty chains and phrases are left out and so are the steps of the others that are
@@ -88,6 +89,11 @@ void Song::SaveContent(JsonWriter &writer) {
     writer.IntArray(nullptr, rows_[i].chains, SONG_CHANNEL_COUNT);
   }
   writer.EndArray();
+
+  if (HasLoop()) {
+    const int loop[2] = {loopStart_, loopEnd_};
+    writer.IntArray(JSON_KEY_LOOP, loop, 2);
+  }
 
   writer.BeginArray(JSON_KEY_CHAINS);
   for (int i = 0; i < CHAIN_COUNT; i++) {
@@ -177,6 +183,12 @@ void Song::RestoreContent(JsonReader &reader) {
           }
         }
         row++;
+      }
+    } else if (reader.KeyIs(JSON_KEY_LOOP)) {
+      int loop[2] = {-1, -1};
+      const size_t count = reader.ReadIntArray(loop, 2);
+      if (count >= 2 && loop[0] >= 0 && loop[1] >= 0 && loop[0] < SONG_ROW_COUNT && loop[1] < SONG_ROW_COUNT) {
+        SetLoop(loop[0], loop[1]);
       }
     } else if (reader.KeyIs(JSON_KEY_CHAINS) || reader.KeyIs(JSON_KEY_PHRASES)) {
       const bool isChain = reader.KeyIs(JSON_KEY_CHAINS);

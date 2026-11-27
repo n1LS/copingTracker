@@ -78,7 +78,7 @@ void GeneratorWizardModal::PresetKeyAndScale(uint8_t root, int scale) {
     return;
   }
   for (const auto &m : kMap) {
-    if (strcmp(scaleNames[scale], m.name) == 0) {
+    if (strcmp(scales[scale].name, m.name) == 0) {
       bassScale_ = static_cast<uint8_t>(m.scale);
     }
   }

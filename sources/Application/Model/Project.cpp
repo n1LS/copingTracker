@@ -16,7 +16,6 @@
 #include "Application/Persistency/PersistencyService.h"
 #include "Application/Persistency/VariableJson.h"
 #include "Application/Player/SyncMaster.h"
-#include "Foundation/Constants/Version.h"
 #include "Foundation/Variables/WatchedVariable.h"
 #include "Groove.h"
 #include "Scale.h"
@@ -45,7 +44,7 @@ Project::Project(const char *name)
       channelVolume6_(Token::VarChannel6Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume7_(Token::VarChannel7Volume, DEFAULT_CHANNEL_VOLUME),
       channelVolume8_(Token::VarChannel8Volume, DEFAULT_CHANNEL_VOLUME), wrap_(Token::VarWrap, false),
-      transpose_(Token::VarTranspose, 0), scale_(Token::VarScale, scaleNames, numScales, 0),
+      transpose_(Token::VarTranspose, 0), scale_(Token::VarScale, scaleNames.data(), numScales, 0),
       scaleRoot_(Token::VarScaleRoot, noteNames, 12, 0), phraseLength_(Token::VarPhraseLength, 16),
       phraseDivision_(Token::VarPhraseDivision, 4), delayTime_(Token::VarDelayTime, DEFAULT_DELAY_TIME),
       delayFeedback_(Token::VarDelayFeedback, DEFAULT_DELAY_FEEDBACK), delayWet_(Token::VarDelayWet, DEFAULT_DELAY_WET),

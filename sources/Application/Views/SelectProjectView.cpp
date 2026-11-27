@@ -83,7 +83,8 @@ void SelectProjectView::ChooseWhatToLoad(const char *name) {
     return;
   }
   // the autosave is the default: it is newer than the project file
-  MessageBox *mb = MessageBox::Create(*this, "Load", "Load saved project or", "latest changes?",  MBBF_AUTOSAVE | MBBF_PROJECT, MBBF_AUTOSAVE);
+  MessageBox *mb = MessageBox::Create(*this, "Load", "Load saved project or", "latest changes?",
+                                      MBBF_AUTOSAVE | MBBF_PROJECT, MBBF_AUTOSAVE);
   DoModal(mb, ModalViewCallback::create<&LoadSourceCallback>());
 }
 

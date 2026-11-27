@@ -795,7 +795,7 @@ void ChainView::DrawView() {
       DrawString(pos.x_, pos.y_ - 1, "Ph S Tsp");
       break;
     case colScaleAware:
-      DrawString(pos.x_, pos.y_ - 1, "Ph Scale");
+      DrawString(pos.x_ - 1, pos.y_ - 1, "Use Scale");
       break;
     case colTranspose:
       DrawString(pos.x_, pos.y_ - 1, "Ph S Tsp");
@@ -1016,7 +1016,7 @@ void ChainView::AnimationUpdate() {
 
 void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
-  pos.x_ += 14;
+  pos.x_ += 13;
 
   SetColor(Theme::Song::preview(false));
   DrawString(pos.x_, pos.y_ - 1, "Nte" char_key_right_s "Tsp In");
@@ -1068,7 +1068,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
 
   // Draw instruments
   pos = GetAnchor();
-  pos.x_ += 22;
+  pos.x_ += 21;
 
   const PhraseStep *instrSteps = viewData_->song_->phrase_.Steps(phrase);
 

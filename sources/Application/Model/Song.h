@@ -76,10 +76,32 @@ public:
     return rows_;
   }
 
+  // The loop of the song view, the first and last song row, it is part of the project but not of the undo history.
+  // No loop is -1.
+  bool HasLoop() const {
+    return loopStart_ >= 0;
+  }
+  int LoopStart() const {
+    return loopStart_;
+  }
+  int LoopEnd() const {
+    return loopEnd_;
+  }
+  void SetLoop(int start, int end) {
+    loopStart_ = start < end ? start : end;
+    loopEnd_ = start < end ? end : start;
+  }
+  void ClearLoop() {
+    loopStart_ = -1;
+    loopEnd_ = -1;
+  }
+
   Chain chain_;
   Phrase phrase_;
 
 private:
+  int loopStart_ = -1;
+  int loopEnd_ = -1;
   SongRow rows_[SONG_ROW_COUNT];
 };
 
