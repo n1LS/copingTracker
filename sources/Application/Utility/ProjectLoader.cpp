@@ -133,7 +133,7 @@ void ProjectLoader::RunPhaseC(const char *projectName) {
   PersistencyService *persist = PersistencyService::GetInstance();
   Project *project = &project_;
 
-  bool succeeded = (persist->Load(projectName) == PERSIST_LOADED);
+  bool succeeded = (persist->Load(projectName, persist->BootUseAutosave()) == PERSIST_LOADED);
   if (!succeeded) {
     Trace::Error("PROJECTLOADER", "Failed to load project '%s'", projectName);
     SamplePool::GetInstance()->Reset();

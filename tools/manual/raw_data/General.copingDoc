@@ -370,6 +370,36 @@ need for duplicate patterns.
 7                             
 0                             
                               
+F                             
+0                             
+Instrument exceptions         
+F                             
+0                             
+                              
+7                   F   7     
+0                             
+This mechanism does not apply 
+7      F    7                 
+0                             
+to any Drum instruments or    
+7                          F  
+0                             
+Sample instruments using a GM 
+F                 7           
+0                             
+instrument >= 128 (GM drum    
+7                             
+0                             
+kits).                        
+7                             
+0                             
+                              
+F                             
+0                             
+Input                         
+F                             
+0                             
+                              
 7                             
 0                             
 All chromatic notes can be    
@@ -394,48 +424,60 @@ Example, key C, scale Ionic:
 7                             
 0                             
                               
-7 E 7F  7C 7                  
+7 E  F   C  7                 
 0                             
   00 C-3 00 š on-scale        
-7 6 7    4 7                  
+7 6  7   4                    
 0                             
   01 --- --                   
-7 6 7    4 7                  
+4 6  7   4  7                 
 0                             
   02 D-3 00 š on-scale        
-7 6 7B  74 7B4B        7      
+7 6  B   4  B                 
 0                             
   03 D#3 00 š off-scale       
-7 E 7F  7C 7                  
+B E  F   C  7                 
 0                             
   04 E-3 00 š on-scale        
-7 6 7    4 7                  
+7 6  7   4                    
 0                             
   05 --- --                   
-7 6 7    4 7                  
+4 6  7   4  7                 
 0                             
   06 G-4 00 š on-scale        
 7                             
 0                             
                               
-7                             
+7                    F        
 0                             
-Each chain row has a transpose
+Each chain row has a Transpose
 7                             
 0                             
 setting that applies a semi-  
 7                             
 0                             
 tone offset to all notes in   
+7             F               
+0                             
+that row. The Scale-aware     
 7                             
 0                             
-that row. The scale-aware     
+setting determines whether    
 7                             
 0                             
-setting determines how notes  
+the transposed values snap to 
 7                             
 0                             
-are handled after trans-      
+the project's scale.      .   
 7                             
 0                             
-position                      
+                              
+7                             
+0                             
+After those transpositions the
+7                             
+0                             
+global project transposition  
+7                             
+0                             
+is applied.                   

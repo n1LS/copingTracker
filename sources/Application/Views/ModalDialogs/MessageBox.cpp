@@ -15,33 +15,34 @@
 #include <Application/AppWindow.h>
 #include <new>
 
-static const char *buttonText[MBL_LAST] = {"Ok", "Yes", "Cancel", "No", "Stop"};
+static const char *buttonText[MBL_LAST] = {"Ok", "Yes", "Cancel", "No", "Stop", "Autosave", "Project"};
 
 bool MessageBox::inUse_ = false;
 alignas(MessageBox) static unsigned char MessageBoxStorage[sizeof(MessageBox)];
 void *MessageBox::storage_ = MessageBoxStorage;
 
-MessageBox *MessageBox::Create(View &view, const char *title, const char *message, int btnFlags) {
+MessageBox *MessageBox::Create(View &view, const char *title, const char *message, int btnFlags, int defaultFlag) {
   if (inUse_) {
     auto *existing = reinterpret_cast<MessageBox *>(storage_);
     existing->~MessageBox();
     inUse_ = false;
   }
   inUse_ = true;
-  return new (storage_) MessageBox(view, title, message, btnFlags);
+  return new (storage_) MessageBox(view, title, message, btnFlags, defaultFlag);
 }
 
-MessageBox *MessageBox::Create(View &view, const char *title, const char *message, const char *message2, int btnFlags) {
+MessageBox *MessageBox::Create(View &view, const char *title, const char *message, const char *message2, int btnFlags,
+                               int defaultFlag) {
   if (inUse_) {
     auto *existing = reinterpret_cast<MessageBox *>(storage_);
     existing->~MessageBox();
     inUse_ = false;
   }
   inUse_ = true;
-  return new (storage_) MessageBox(view, title, message, message2, btnFlags);
+  return new (storage_) MessageBox(view, title, message, message2, btnFlags, defaultFlag);
 }
 
-MessageBox::MessageBox(View &view, const char *title, const char *message, int btnFlags)
+MessageBox::MessageBox(View &view, const char *title, const char *message, int btnFlags, int defaultFlag)
     : ModalView(view), title_(title), line1_(message) {
   buttonCount_ = 0;
 
@@ -53,11 +54,17 @@ MessageBox::MessageBox(View &view, const char *title, const char *message, int b
   }
 
   selected_ = buttonCount_ - 1;
+  for (int i = 0; i < buttonCount_; i++) {
+    if (defaultFlag & (1 << button_[i])) {
+      selected_ = i;
+    }
+  }
   NAssert(buttonCount_ != 0);
 }
 
 // Constructor for 2 line message
-MessageBox::MessageBox(View &view, const char *title, const char *messageLine1, const char *messageLine2, int btnFlags)
+MessageBox::MessageBox(View &view, const char *title, const char *messageLine1, const char *messageLine2, int btnFlags,
+                       int defaultFlag)
     : ModalView(view), title_(title), line1_(messageLine1), line2_(messageLine2) {
   buttonCount_ = 0;
 
@@ -69,6 +76,11 @@ MessageBox::MessageBox(View &view, const char *title, const char *messageLine1, 
   }
 
   selected_ = buttonCount_ - 1;
+  for (int i = 0; i < buttonCount_; i++) {
+    if (defaultFlag & (1 << button_[i])) {
+      selected_ = i;
+    }
+  }
   NAssert(buttonCount_ != 0);
 }
 

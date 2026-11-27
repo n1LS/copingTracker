@@ -36,9 +36,19 @@ class PersistencyService : public Service, public T_Singleton<PersistencyService
 public:
   PersistencyService();
   PersistencyResult Save(const char *projectName, const char *oldProjectName, bool saveAs);
-  PersistencyResult Load(const char *projectName);
+  PersistencyResult Load(const char *projectName, bool useAutosave = true);
+  // useAutosave: false when the state asks for the project file (SelectProjectView), see BootUseAutosave
   PersistencyResult LoadCurrentProjectName(char *projectName);
+  // the project that opens at the next boot is kept in the state file, with useAutosave false it asks for the
+  // project file instead of the autosave file that is loaded when there is one (second line "project").
+  // Neither touches the autosave file: only saving the project removes it.
   PersistencyResult SaveProjectState(const char *projectName);
+  PersistencyResult WriteProjectState(const char *projectName, bool useAutosave);
+  // what the state file asked for at the last LoadCurrentProjectName, true after SaveProjectState
+  bool BootUseAutosave() const {
+    return bootUseAutosave_;
+  }
+  bool HasAutosave(const char *projectName);
   PersistencyResult CreateProject();
   bool Exists(const char *projectName);
   bool PurgeUnnamedProject();
@@ -63,6 +73,7 @@ private:
   etl::string<MAX_PROJECT_SAMPLE_PATH_LENGTH> pathBufferA;
   etl::string<MAX_PROJECT_SAMPLE_PATH_LENGTH> pathBufferB;
   char deleteNameBuffer_[PFILENAME_SIZE];
+  bool bootUseAutosave_ = true;
 };
 
 #endif

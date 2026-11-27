@@ -50,7 +50,7 @@ static void CreateNewProjectCallback(View &v, ModalView &dialog) {
 static bool Save(const char *projName, const char *oldName, bool saveAs) {
   PersistencyService *persist = PersistencyService::GetInstance();
 
-  if (persist->Save(projName, oldName, true) != PERSIST_SAVED) {
+  if (persist->Save(projName, oldName, saveAs) != PERSIST_SAVED) {
     return false;
   }
 
@@ -294,8 +294,7 @@ void ProjectView::drawTitleText() {
   char buffer[SCREEN_WIDTH + 1];
   const int width = INDICATOR_PLAY_STATUS_X - 11;
 
-  npf_snprintf(buffer, sizeof(buffer), "Workspace %-*.*s",
-      width, width, name);
+  npf_snprintf(buffer, sizeof(buffer), "Workspace %-*.*s", width, width, name);
 
   if (strlen(name) > width)
     buffer[10 + width - 1] = CHAR(char_indicator_ellipsis_s);
@@ -377,16 +376,12 @@ void ProjectView::Update(Observable &, I_ObservableData *data) {
             DoModal(mb, ModalViewCallback::create<&SaveAsOverwriteCallback>());
             return;
           }
-
-          if (Save(projName, oldProjName_.c_str(), saveAsFlag_)) {
-            clearSaveAsFlag();
-            TOAST_SAVE_SUCCESS();
-          } else {
-            TOAST_SAVE_FAILURE();
-          }
         }
-        // all good so now persist the new project name in project state
-        if (persist->SaveProjectState(projName) == PERSIST_SAVED) {
+
+        // the project is written (a plain save too, it used to only write the project state), and the project
+        // name goes to the project state
+        if (Save(projName, saveAsFlag_ ? oldProjName_.c_str() : projName, saveAsFlag_)) {
+          clearSaveAsFlag();
           TOAST_SAVE_SUCCESS();
         } else {
           TOAST_SAVE_FAILURE();

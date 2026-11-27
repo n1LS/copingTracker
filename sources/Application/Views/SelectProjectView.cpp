@@ -48,11 +48,10 @@ static const FileListConfig kSelectProjectConfig{
 
 static void LoadProjectCallback(View &v, ModalView &dialog) {
   if (dialog.GetReturnCode() == MBL_YES) {
-    // User accepted losing changes. Write the selected project name to the
-    // boot-state file (/.current) and reboot so the project loads through the
-    // exact same code path as on boot (Application::initProject ->
-    // PersistencyService::LoadCurrentProjectName). This guarantees project
-    // loading behaves identically to a fresh boot.
+    // User accepted losing changes. The project is written to the boot-state file (/.current) and the system reboots
+    // so the project loads through the exact same code path as on boot (Application::initProject ->
+    // PersistencyService::LoadCurrentProjectName). This guarantees project loading behaves identically to a fresh
+    // boot.
     SelectProjectView &view = (SelectProjectView &)v;
 
     char name[MAX_PROJECT_NAME_LENGTH + 1];
@@ -61,22 +60,44 @@ static void LoadProjectCallback(View &v, ModalView &dialog) {
       Trace::Log("SELECTPROJECTVIEW", "Cannot load: no valid project name");
       return;
     }
-
-    // Mirror PersistencyService::SaveProjectState byte-for-byte: write only the
-    // bare project name (no newline, no terminator) to SD_BASE_DIR "/.current".
-    auto fs = FileSystem::GetInstance();
-    auto current = fs->Open(PROJECT_STATE_FILE, "w");
-    if (!current) {
-      Trace::Log("SELECTPROJECTVIEW", "Could not open %s", PROJECT_STATE_FILE);
-      return;
-    }
-    current->Write(name, 1, strlen(name));
-    current->Sync();
-
-    Trace::Log("SELECTPROJECTVIEW", "Saved '%s' to .current, rebooting", name);
-    System *sys = System::GetInstance();
-    sys->SystemReboot(); // watchdog reset; does not return
+    view.ChooseWhatToLoad(name);
   }
+}
+
+// the answer of "Autosave" / "Project": it decides what PersistencyService::Load gets as useAutosave
+static void LoadSourceCallback(View &v, ModalView &dialog) {
+  SelectProjectView &view = (SelectProjectView &)v;
+
+  char name[MAX_PROJECT_NAME_LENGTH + 1];
+  view.getHighlightedProjectName(name);
+  if (strlen(name) == 0) {
+    Trace::Log("SELECTPROJECTVIEW", "Cannot load: no valid project name");
+    return;
+  }
+  view.RebootIntoProject(name, dialog.GetReturnCode() != MBL_PROJECT);
+}
+
+void SelectProjectView::ChooseWhatToLoad(const char *name) {
+  if (!PersistencyService::GetInstance()->HasAutosave(name)) {
+    RebootIntoProject(name, true);
+    return;
+  }
+  // the autosave is the default: it is newer than the project file
+  MessageBox *mb = MessageBox::Create(*this, "Load", "Load saved project or", "latest changes?",  MBBF_AUTOSAVE | MBBF_PROJECT, MBBF_AUTOSAVE);
+  DoModal(mb, ModalViewCallback::create<&LoadSourceCallback>());
+}
+
+void SelectProjectView::RebootIntoProject(const char *name, bool useAutosave) {
+  // the state file has the bare project name (no newline, no terminator), and a second line when the project file
+  // is asked for
+  if (PersistencyService::GetInstance()->WriteProjectState(name, useAutosave) != PERSIST_SAVED) {
+    Trace::Log("SELECTPROJECTVIEW", "Could not write %s", PROJECT_STATE_FILE);
+    return;
+  }
+
+  Trace::Log("SELECTPROJECTVIEW", "Saved '%s' to .current (autosave %b), rebooting", name, useAutosave);
+  System *sys = System::GetInstance();
+  sys->SystemReboot(); // watchdog reset; does not return
 }
 
 static void RenameProjectCallback(View &v, ModalView &dialog) {
@@ -199,7 +220,7 @@ void SelectProjectView::LoadSelectedProject() {
     return;
   }
 
-  MessageBox *mb = MessageBox::Create(*this, "Load", "Load song and lose changes?", MBBF_YES | MBBF_NO);
+  MessageBox *mb = MessageBox::Create(*this, "Load", "Discard changes and", "load project?", MBBF_YES | MBBF_NO);
   DoModal(mb, ModalViewCallback::create<&LoadProjectCallback>());
 }
 

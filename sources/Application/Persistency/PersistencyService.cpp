@@ -305,19 +305,13 @@ bool PersistencyService::Exists(const char *projectName) {
   return fs->exists(projectFilePath.c_str());
 }
 
-PersistencyResult PersistencyService::Load(const char *projectName) {
+PersistencyResult PersistencyService::Load(const char *projectName, bool useAutosave) {
   // the history belongs to the project that is gone
   UndoJournal::Instance().Clear();
 
-  // first check if autosave exists
-  etl::string<128> autoSavePath(PROJECTS_DIR);
-  autoSavePath.append("/");
-  autoSavePath.append(projectName);
-  autoSavePath.append("/");
-  autoSavePath.append(AUTO_SAVE_FILENAME);
-
   auto fs = FileSystem::GetInstance();
-  bool useAutosave = (fs->exists(autoSavePath.c_str()));
+  // the autosave is only used when it exists
+  useAutosave = useAutosave && HasAutosave(projectName);
 
   Trace::Log("PERSISTENCYSERVICE", "using autosave: %b", useAutosave);
   // if autosave exists, then we load it instead of the normal project file
@@ -360,6 +354,15 @@ PersistencyResult PersistencyService::Load(const char *projectName) {
   return PERSIST_LOADED;
 }
 
+bool PersistencyService::HasAutosave(const char *projectName) {
+  etl::string<128> autoSavePath(PROJECTS_DIR);
+  autoSavePath.append("/");
+  autoSavePath.append(projectName);
+  autoSavePath.append("/");
+  autoSavePath.append(AUTO_SAVE_FILENAME);
+  return FileSystem::GetInstance()->exists(autoSavePath.c_str());
+}
+
 PersistencyResult PersistencyService::LoadCurrentProjectName(char *projectName) {
   auto fs = FileSystem::GetInstance();
   if (fs->exists(PROJECT_STATE_FILE)) {
@@ -368,9 +371,19 @@ PersistencyResult PersistencyService::LoadCurrentProjectName(char *projectName) 
       Trace::Error("PERSISTENCYSERVICE: Could not open project state file");
       return PERSIST_LOAD_FAILED;
     }
-    int len = current->Read(projectName, MAX_PROJECT_NAME_LENGTH);
-    projectName[len] = '\0';
-    Trace::Log("APPLICATION", "read [%d] load proj name: %s", len, projectName);
+    // the name, and a second line "project" when the project file is asked for (see WriteProjectState)
+    char state[MAX_PROJECT_NAME_LENGTH + 1 + 8 + 1];
+    int len = current->Read(state, sizeof(state) - 1);
+    state[len < 0 ? 0 : len] = '\0';
+    bootUseAutosave_ = true;
+    if (char *newline = strchr(state, '\n')) {
+      *newline = '\0';
+      bootUseAutosave_ = strncmp(newline + 1, "project", 7) != 0;
+    }
+    state[MAX_PROJECT_NAME_LENGTH] = '\0';
+    strcpy(projectName, state);
+    len = static_cast<int>(strlen(projectName));
+    Trace::Log("APPLICATION", "read [%d] load proj name: %s, autosave %b", len, projectName, bootUseAutosave_);
     if (Exists(projectName)) {
       return PERSIST_LOADED;
     } else {
@@ -384,14 +397,26 @@ PersistencyResult PersistencyService::LoadCurrentProjectName(char *projectName) 
   }
 }
 
-PersistencyResult PersistencyService::SaveProjectState(const char *projectName) {
+PersistencyResult PersistencyService::WriteProjectState(const char *projectName, bool useAutosave) {
   auto fs = FileSystem::GetInstance();
   auto current = fs->Open(PROJECT_STATE_FILE, "w");
   if (!current) {
     return PERSIST_ERROR;
   }
   current->Write(projectName, 1, (int)strlen(projectName));
+  if (!useAutosave) {
+    current->Write("\nproject", 1, 8);
+  }
+  // the system reboots right after this
+  current->Sync();
   return PERSIST_SAVED;
+}
+
+PersistencyResult PersistencyService::SaveProjectState(const char *projectName) {
+  // the project is open now: what the state file asked for is done. The autosave stays, only saving the project
+  // removes it (SaveProjectData)
+  bootUseAutosave_ = true;
+  return WriteProjectState(projectName, true);
 }
 
 void PersistencyService::CreatePath(etl::istring &path, const etl::ivector<const char *> &segments) {

@@ -20,15 +20,26 @@
 #endif
 #include <Application/AppWindow.h>
 
-enum MessageBoxList { MBL_OK = 0, MBL_YES, MBL_CANCEL, MBL_NO, MBL_STOP, MBL_LAST };
+// The buttons are shown in this order, from left to right
+enum MessageBoxList { MBL_OK = 0, MBL_YES, MBL_CANCEL, MBL_NO, MBL_STOP, MBL_AUTOSAVE, MBL_PROJECT, MBL_LAST };
 
-enum MessageBoxButtonFlag { MBBF_OK = 0x01, MBBF_YES = 0x02, MBBF_CANCEL = 0x04, MBBF_NO = 0x08, MBBF_STOP = 0x10 };
+enum MessageBoxButtonFlag {
+  MBBF_OK = 0x01,
+  MBBF_YES = 0x02,
+  MBBF_CANCEL = 0x04,
+  MBBF_NO = 0x08,
+  MBBF_STOP = 0x10,
+  MBBF_AUTOSAVE = 0x20,
+  MBBF_PROJECT = 0x40
+};
 
 class MessageBox : public ModalView {
 public:
-  static MessageBox *Create(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
+  // defaultFlag: the button (one of the flags) that is selected when the box opens, without it the last button is
+  static MessageBox *Create(View &view, const char *title, const char *message, int btnFlags = MBBF_OK,
+                            int defaultFlag = 0);
   static MessageBox *Create(View &view, const char *title, const char *message, const char *message2,
-                            int btnFlags = MBBF_OK);
+                            int btnFlags = MBBF_OK, int defaultFlag = 0);
   virtual ~MessageBox();
   virtual void Destroy() override;
 
@@ -40,14 +51,15 @@ public:
   virtual void AnimationUpdate() {};
 
 protected:
-  MessageBox(View &view, const char *title, const char *message, int btnFlags = MBBF_OK);
-  MessageBox(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK);
+  MessageBox(View &view, const char *title, const char *message, int btnFlags = MBBF_OK, int defaultFlag = 0);
+  MessageBox(View &view, const char *title, const char *message, const char *message2, int btnFlags = MBBF_OK,
+             int defaultFlag = 0);
   etl::string<SCREEN_WIDTH - 2> title_ = "";
   etl::string<SCREEN_WIDTH - 2> line1_ = "";
   etl::string<SCREEN_WIDTH - 2> line2_ = "";
-  int button_[4];
-  int buttonPosition_[4];
-  int buttonLength_[4];
+  int button_[MBL_LAST];
+  int buttonPosition_[MBL_LAST];
+  int buttonLength_[MBL_LAST];
   int buttonY_;
   int buttonCount_;
   int selected_;

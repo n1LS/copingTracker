@@ -36,6 +36,11 @@ public:
   // Renames the selected project to newName, if it can be: the directory of the project is moved. Shows a toast
   // that tells how it went, rescans the projects and selects the renamed one.
   void RenameProject(const char *newName);
+  // Writes the project to open to the boot state and reboots into it: with useAutosave false the project file is
+  // loaded, otherwise the autosave if there is one. Does not return.
+  void RebootIntoProject(const char *name, bool useAutosave);
+  // when the project has an autosave: asks which of the two to load, otherwise reboots into the project
+  void ChooseWhatToLoad(const char *name);
 
 protected:
   virtual void PrepareItemDrawing(int index, bool isSelected, Color *fg, Color *bg, char *buffer,

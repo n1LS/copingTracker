@@ -68,7 +68,8 @@ bool Application::initProject(char *projectName) {
 
   // read new proj name after reboot
   if (PersistencyService::GetInstance()->LoadCurrentProjectName(projectName) != PERSIST_LOAD_FAILED) {
-    if (PersistencyService::GetInstance()->Load(projectName) == PERSIST_LOAD_FAILED) {
+    if (PersistencyService::GetInstance()->Load(projectName, PersistencyService::GetInstance()->BootUseAutosave()) ==
+        PERSIST_LOAD_FAILED) {
       Trace::Error("failed to load CURRENT proj: %s", projectName);
       if (strcmp(projectName, UNNAMED_PROJECT_NAME) == 0) {
         // untitled project is missing so need to create a new one

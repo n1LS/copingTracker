@@ -156,6 +156,12 @@ be a name (not empty, none of the characters `\ / : * ? " < > |`, spaces around 
 no project has it already (upper and lower case are the same on the card, only the case of a name can change) and it is not the
 project that is loaded (that one is saved to its directory). A toast tells how it went (success or the reason). The projects
 are scanned again and the renamed one is selected.
+**Load** asks "Load song and lose changes?" first. If the project has an autosave file a second box asks which one to load, with the
+buttons **Autosave** (selected, the autosave is newer than the project file) and **Project** (`LEFT / RIGHT` select, `ENTER` confirms).
+The answer is the `useAutosave` argument of `PersistencyService::Load`: the boot state file (`.current`) gets the project name, and a
+second line `project` when the project file was chosen, then the system reboots into the project. At boot `LoadCurrentProjectName`
+reads both (`BootUseAutosave()`), and `SaveProjectState` clears the request again once the project is open. Loading never removes the
+autosave file, only saving the project does.
 
 ### 2.4 Value fields (`UIIntField`, `UIIntVarField`, `UIHexVarField`, ...)
 Generic value editing reached through `FieldView`:
@@ -619,6 +625,9 @@ The clipboard is kept when another groove is opened, so values can be pasted int
 | `NAV + UP` | chord | Navigate → **Device view** |
 | `PLAY` | chord | Start song playback |
 | bare arrows | chord | Field navigation (§2.1) |
+
+The **Save** action writes the project (`project.json`, through a temporary file) and the project name to the boot state, and removes the
+autosave file of the project; with a new name it first checks that no project has it (overwrite question) and copies the samples.
 
 ### 4.4 `DeviceView` (`Views/DeviceView.cpp`)
 
