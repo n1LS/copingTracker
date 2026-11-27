@@ -209,6 +209,8 @@ Modes: `VM_NEW` (chain-to-create armed), `VM_CLONE` (clone armed),
 | `PLAY` | chord | Start playback of chain (`onStart`) |
 | `DOWN / UP / LEFT / RIGHT` | chord | Move cursor |
 
+The phrase preview on the right of the chain shows each step's note and, next to it, the note as it is played: the transposition of the row, the scale-aware mapping and the project transposition applied (`???` when the result is out of range). Steps of instruments that are not transposable show the note unchanged.
+
 *Clone mode (`VM_CLONE`)* — entered with `EDIT + ALT`, legend `SongClone`:
 
 | Combination | Type | Action |

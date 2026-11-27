@@ -11,6 +11,7 @@
 
 #include "ChainView.h"
 #include "Application/Model/Generators/PhraseGenerator.h"
+#include "Application/Model/Scale.h"
 #include "Application/Utils/ContextLegend.generated.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/ModalDialogs/GeneratorWizardModal.h"
@@ -19,7 +20,6 @@
 #include "System/Console/Trace.h"
 #include "UIController.h"
 #include "ViewData.h"
-
 #include <nanoprintf.h>
 
 // phrase, transposition (hex and signed), scale-aware flag
@@ -789,16 +789,16 @@ void ChainView::DrawView() {
 
   SetColor(Theme::View::inactive);
   SetBackgroundColor(Theme::View::bg);
-  
+
   switch (viewData_->chainCol_) {
     case colPhrase:
       DrawString(pos.x_, pos.y_ - 1, "Ph S Tsp");
       break;
     case colScaleAware:
-      DrawString(pos.x_, pos.y_ - 1, "Ph Scale-Aware");
+      DrawString(pos.x_, pos.y_ - 1, "Ph Scale");
       break;
     case colTranspose:
-      DrawString(pos.x_, pos.y_ - 1, "Ph S Transpose");
+      DrawString(pos.x_, pos.y_ - 1, "Ph S Tsp");
       break;
   }
 
@@ -835,7 +835,7 @@ void ChainView::DrawView() {
   }
 
   // Draw scale-aware: the notes of the rows are mapped into the scale of the project
-  
+
   pos.x_ += 3;
 
   const GUIPoint flagAnchor = GetAnchor();
@@ -1016,10 +1016,10 @@ void ChainView::AnimationUpdate() {
 
 void ChainView::drawPhrasePreview(uint8_t phrase) {
   GUIPoint pos = GetAnchor();
-  pos.x_ += 17;
+  pos.x_ += 14;
 
   SetColor(Theme::Song::preview(false));
-  DrawString(pos.x_, pos.y_ - 1, "Nte In");
+  DrawString(pos.x_, pos.y_ - 1, "Nte" char_key_right_s "Tsp In");
 
   // Display notes
   const PhraseStep *steps = viewData_->song_->phrase_.Steps(phrase);
@@ -1039,15 +1039,36 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
       instrument = bank->GetInstrument(instr);
     }
 
-    char buffer[4];
-    instrument->noteDisplay(note, buffer);
-    DrawString(pos.x_, pos.y_, buffer);
+    // the note as it is in the phrase ...
+    char noteText[4];
+    instrument->noteDisplay(note, noteText);
+    DrawString(pos.x_, pos.y_, noteText);
+
+    // ... and as it will be played: the transposition of the chain row of this phrase, the scale mapping of the row
+    // and the transposition of the project, when the instrument of the step is transposable (it is the one that is set
+    // at or before the step)
+    if (instrument->IsTransposable() && note != NO_NOTE && note != NOTE_OFF) {
+      const Chain &chain = viewData_->song_->chain_;
+      const int row = viewData_->chainRow_;
+      const int chainTranspose = static_cast<int8_t>(chain.Step(viewData_->currentChain_, row).transpose);
+      const bool scaleAware = chain.IsScaleAware(viewData_->currentChain_, row);
+      Project *project = viewData_->project_;
+      const int played = transposeNote(note, chainTranspose, scaleAware, project->GetScale(), project->GetScaleRoot(),
+                                       project->GetTranspose());
+      if (played >= 0 && played < HIGHEST_PLAYABLE_NOTE) {
+        instrument->noteDisplay(static_cast<uint8_t>(played), noteText);
+      } else {
+        // out of the range that is played
+        strcpy(noteText, "???");
+      }
+    }
+    DrawString(pos.x_ + 4, pos.y_, noteText);
     pos.y_++;
   }
 
   // Draw instruments
   pos = GetAnchor();
-  pos.x_ += 21;
+  pos.x_ += 22;
 
   const PhraseStep *instrSteps = viewData_->song_->phrase_.Steps(phrase);
 
