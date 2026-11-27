@@ -61,7 +61,7 @@ void Song::Reset() {
 // only what is there is saved, empty chains and phrases are left out and so are the steps of the others that are
 // as a reset leaves them:
 //   "rows": [[chain of each channel] per row, up to the last row that is not empty],
-//   "chains": [{"id": 4, "steps": [[step, phrase, transpose], ...]}],
+//   "chains": [{"id": 4, "scale-aware": 5, "steps": [[step, phrase, transpose], ...]}], (the mask has a bit per step)
 //   "phrases": [{"id": 3, "steps": [[step, note, instrument, volume, command 1, value 1, command 2, value 2], ...]}]
 // the instrument is 255 for none and the volume 0 for none, the commands are the numbers of the Tokens
 static bool isDefaultStep(const ChainStep &s) {
@@ -95,11 +95,14 @@ void Song::SaveContent(JsonWriter &writer) {
     for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
       empty = empty && isDefaultStep(chain_.steps_[i][j]);
     }
-    if (empty) {
+    if (empty && chain_.scaleAware_[i] == 0) {
       continue;
     }
     writer.BeginObject();
     writer.Int(JSON_KEY_ID, i);
+    if (chain_.scaleAware_[i] != 0) {
+      writer.Int(JSON_KEY_SCALE_AWARE, chain_.scaleAware_[i]);
+    }
     writer.BeginArray(JSON_KEY_STEPS);
     for (int j = 0; j < PHRASES_PER_CHAIN; j++) {
       if (!isDefaultStep(chain_.steps_[i][j])) {
@@ -188,6 +191,12 @@ void Song::RestoreContent(JsonReader &reader) {
         while (reader.NextKey()) {
           if (reader.KeyIs(JSON_KEY_ID)) {
             id = reader.ReadInt();
+          } else if (isChain && reader.KeyIs(JSON_KEY_SCALE_AWARE)) {
+            // the id comes first
+            const uint32_t mask = reader.ReadUInt();
+            if (id >= 0 && id < CHAIN_COUNT) {
+              chain_.scaleAware_[id] = static_cast<uint16_t>(mask);
+            }
           } else if (reader.KeyIs(JSON_KEY_STEPS)) {
             // the id comes first
             if (isChain) {

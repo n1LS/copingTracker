@@ -568,7 +568,7 @@ void PianoRollView::editPanelField(ViewUpdateDirection direction) {
       if (data.note == NO_NOTE) {
         return;
       }
-      // as in the phrase view: LEFT / RIGHT one step in the scale, UP / DOWN an octave
+      // as in the phrase view: LEFT / RIGHT one semitone, UP / DOWN an octave
       changeNote(step, direction);
       followNoteOfStep();
       break;
@@ -694,7 +694,7 @@ void PianoRollView::moveNote(int sign) {
     return;
   }
 
-  // one step in the scale, with the key and scale of the project, as ENTER + LEFT / RIGHT in the phrase view
+  // one semitone, as ENTER + LEFT / RIGHT in the phrase view
   changeNote(step, sign, true);
 
   // the cursor follows the note

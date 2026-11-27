@@ -331,3 +331,111 @@ B7       B       F7
 7                F7           
 0                             
                  Table        
+7                             
+0                             
+                              
+0F                            
+C                             
+ TRANSPOSITION & SCALES       
+7                             
+0                             
+                              
+7                             
+0                             
+A project can define a root   
+7                             
+0                             
+note and scale, which together
+7                             
+0                             
+determine its tonal center.   
+7                             
+0                             
+These settings allow phrases  
+7                             
+0                             
+to be transposed within chains
+7                             
+0                             
+while maintaining their       
+7                             
+0                             
+relationship to the project's 
+7                             
+0                             
+key and scale, reducing the   
+7                             
+0                             
+need for duplicate patterns.  
+7                             
+0                             
+                              
+7                             
+0                             
+All chromatic notes can be    
+7                             
+0                             
+entered freely, regardless of 
+7                             
+0                             
+the project scale. Notes not  
+7                             
+0                             
+belonging to the project scale
+7                             
+0                             
+are visually distinguished.   
+7                             
+0                             
+                              
+7                             
+0                             
+Example, key C, scale Ionic:  
+7                             
+0                             
+                              
+7 E 7F  7C 7                  
+0                             
+  00 C-3 00 š on-scale        
+7 6 7    4 7                  
+0                             
+  01 --- --                   
+7 6 7    4 7                  
+0                             
+  02 D-3 00 š on-scale        
+7 6 7B  74 7B4B        7      
+0                             
+  03 D#3 00 š off-scale       
+7 E 7F  7C 7                  
+0                             
+  04 E-3 00 š on-scale        
+7 6 7    4 7                  
+0                             
+  05 --- --                   
+7 6 7    4 7                  
+0                             
+  06 G-4 00 š on-scale        
+7                             
+0                             
+                              
+7                             
+0                             
+Each chain row has a transpose
+7                             
+0                             
+setting that applies a semi-  
+7                             
+0                             
+tone offset to all notes in   
+7                             
+0                             
+that row. The scale-aware     
+7                             
+0                             
+setting determines how notes  
+7                             
+0                             
+are handled after trans-      
+7                             
+0                             
+position                      

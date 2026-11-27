@@ -67,6 +67,8 @@ public:
 private:
   bool canRenderFromFirstSongRow() const;
 
+  void drawTitleText();
+  
   Project *project_;
   // Debug
   unsigned long lastTick_;

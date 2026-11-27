@@ -9,7 +9,7 @@ F
 - Added mute, solo, and       
 F                             
 0                             
-  unmute‑all to the piano roll
+  unmute all to the piano roll
 F                             
 0                             
 - Displayed available         
@@ -117,7 +117,7 @@ F
   when zooming in and out     
 F                             
 0                             
-- Added zero‑crossing         
+- Added zero-crossing         
 F                             
 0                             
   navigation to sample markers

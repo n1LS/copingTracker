@@ -287,12 +287,27 @@ void ProjectView::Reset() {
   oldProjName_ = getProjectName();
 }
 
+void ProjectView::drawTitleText() {
+  Variable *v = viewData_->project_->FindVariable(Token::VarProjectName);
+  const char *name = v->GetString().c_str();
+
+  char buffer[SCREEN_WIDTH + 1];
+  const int width = INDICATOR_PLAY_STATUS_X - 11;
+
+  npf_snprintf(buffer, sizeof(buffer), "Workspace %-*.*s",
+      width, width, name);
+
+  if (strlen(name) > width)
+    buffer[10 + width - 1] = CHAR(char_indicator_ellipsis_s);
+
+  DrawTitle(buffer);
+}
+
 void ProjectView::DrawView() {
   Clear();
 
   // Draw title
-  Variable *v = viewData_->project_->FindVariable(Token::VarProjectName);
-  DrawTitle("Workspace %s", v->GetString().c_str());
+  drawTitleText();
 
   // Draw map first: the Browse button's left border sits on the map's last column
   drawMap();

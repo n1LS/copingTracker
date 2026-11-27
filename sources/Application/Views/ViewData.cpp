@@ -134,16 +134,26 @@ int ViewData::UpdateChainCursorValue(int offset, int dx, int dy) {
   bool wrap = false;
 
   switch (chainCol_ + dx) {
+    // TODO nILS: figure out how to separate the column numbers from the enum, so that this does not depend on the order of the enum values
     case 0:
       c = &song_->chain_.EditStep(currentChain_, chainRow_ + dy).phrase;
       limit = PHRASE_COUNT - 1;
       wrap = false;
       break;
-    case 1:
+    case 2:
       c = &song_->chain_.EditStep(currentChain_, chainRow_ + dy).transpose;
       limit = 0xFF;
       wrap = false;
       break;
+    case 1:
+      {
+        // the scale-aware flag: ENTER alone (offset 0) toggles it, ENTER + RIGHT / UP set it and ENTER + LEFT / DOWN
+        // clear it (ENTER toggles when it is pressed, a second toggle by the arrow would undo that)
+        const int row = chainRow_ + dy;
+        const bool on = offset == 0 ? !song_->chain_.IsScaleAware(currentChain_, row) : offset > 0;
+        song_->chain_.SetScaleAware(currentChain_, row, on);
+        return on ? 1 : 0;
+      }
     default:
       return -1;
   }
@@ -156,8 +166,8 @@ void ViewData::UpdateChainCursor(int dx, int dy) {
   chainCol_ += dx;
   chainRow_ += dy;
 
-  if (chainCol_ > 1)
-    chainCol_ = 1;
+  if (chainCol_ > 2)
+    chainCol_ = 2;
   if (chainCol_ < 0)
     chainCol_ = 0;
   if (chainRow_ > 15)

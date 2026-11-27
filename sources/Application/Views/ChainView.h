@@ -16,6 +16,8 @@
 #include "ScreenView.h"
 #include "ViewData.h"
 
+enum ChainStepColumn { colPhrase, colScaleAware, colTranspose };
+
 class ChainView : public ScreenView {
 public:
   ChainView(GUIWindow &w, ViewData *data);
@@ -88,6 +90,7 @@ private:
     int width_;
     int height_;
     ChainStep steps_[16];
+    bool scaleAware_[16];
   } clipboard_;
 
   int saveRow_;

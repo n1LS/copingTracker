@@ -55,10 +55,30 @@ public:
     return steps_[chain];
   }
 
+  // Scale-aware: per step of a chain a flag (one bit of a 16 bit mask per chain, bit n is step n). The notes of the
+  // phrase are mapped into the scale of the project after they were transposed, see transposeNote. Changes are
+  // recorded in the undo history like the steps.
+  bool IsScaleAware(int chain, int step) const {
+    return ((scaleAware_[chain] >> step) & 1u) != 0;
+  }
+  uint16_t ScaleAwareMask(int chain) const {
+    return scaleAware_[chain];
+  }
+  void SetScaleAware(int chain, int step, bool on) {
+    UndoJournal::RecordChange(&scaleAware_[chain], sizeof(uint16_t));
+    const uint16_t bit = static_cast<uint16_t>(1u << step);
+    scaleAware_[chain] = on ? (scaleAware_[chain] | bit) : (scaleAware_[chain] & ~bit);
+  }
+  void SetScaleAwareMask(int chain, uint16_t mask) {
+    UndoJournal::RecordChange(&scaleAware_[chain], sizeof(uint16_t));
+    scaleAware_[chain] = mask;
+  }
+
 private:
   friend class Song; // saves and loads the steps as they are
 
   ChainStep steps_[CHAIN_COUNT][PHRASES_PER_CHAIN];
+  uint16_t scaleAware_[CHAIN_COUNT];
   std::bitset<CHAIN_COUNT> isUsed_;
 };
 

@@ -169,7 +169,7 @@ void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
     }
   }
 
-  // Get the offset based on the change (one step in the scale or an octave)
+  // Get the offset based on the change (one semitone or an octave)
   int offset = smallChange ? 1 : 12;
   if (sign < 0) {
     offset *= -1;
@@ -192,7 +192,7 @@ void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
 
   // TODO nILS: this should also happen in SampleInstrument's AffectNote instead of getting special treatmnt here
   if (sampleInstrument && sampleInstrument->GetSliceNoteRange(sliceFirst, sliceLast)) {
-    // Apply scale or slice range constraints
+    // Apply the slice range constraints
     int newNote = *c + offset;
 
     if (newNote < sliceFirst) {
@@ -202,21 +202,8 @@ void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
     }
     *c = static_cast<unsigned char>(newNote);
   } else {
-    int scale = viewData_->project_->GetScale();
-    int scaleRoot = viewData_->project_->GetScaleRoot();
-
-    // Calculate the new note with the offset
-    int newNote = *c + offset;
-
-    // Check if the note is in the scale (adjusted for root)
-    if (instrument && instrument->IsTransposable()) {
-      // Add/remove from offset to match selected scale
-      while (newNote >= 0 && !scaleSteps[scale][(newNote + 12 - scaleRoot) % 12]) {
-        offset > 0 ? offset++ : offset--;
-        newNote = *c + offset;
-      }
-    }
-
+    // every note can be entered, the scale of the project only colors the notes (the phrase view) and maps them
+    // when they are played (scale-aware chain steps)
     updateData(c, offset, instrument ? instrument->GetHighestNote() : HIGHEST_NOTE, true);
   }
 

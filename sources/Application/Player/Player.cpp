@@ -16,6 +16,7 @@
 #include "Application/Mixer/MixerService.h"
 #include "Application/Model/Config.h"
 #include "Application/Model/Groove.h"
+#include "Application/Model/Scale.h"
 #include "Application/Player/TablePlayback.h"
 #include "Application/Utils/char.h"
 #include "Application/Views/BaseClasses/ViewEvent.h"
@@ -918,9 +919,17 @@ void Player::playCursorPosition(int channel) {
       bool preserveNote = !instrument->IsTransposable();
 
       if (!preserveNote) {
-        // transposable -> apply both transposition sources
-        note += viewData_->song_->chain_.Step(chain, chainPos).transpose;
-        note += project_->GetTranspose();
+        // transposable: the transposition of the chain step is added, if the chain step is scale-aware the result is
+        // mapped into the scale of the project, and last the transposition of the project is added (it moves
+        // everything). The note in the phrase is never changed.
+        const bool chainKnown = chain >= 0 && chain < CHAIN_COUNT;
+        const int chainTranspose =
+            chainKnown ? static_cast<int8_t>(viewData_->song_->chain_.Step(chain, chainPos).transpose) : 0;
+        const bool scaleAware = chainKnown && viewData_->song_->chain_.IsScaleAware(chain, chainPos);
+        const int transposed = transposeNote(note, chainTranspose, scaleAware, project_->GetScale(),
+                                             project_->GetScaleRoot(), project_->GetTranspose());
+        // outside of 0..255 is out of the range that is played, as it was
+        note = (transposed < 0 || transposed > 255) ? 255 : static_cast<unsigned char>(transposed);
       }
 
       // Check if note is in acceptable midi range

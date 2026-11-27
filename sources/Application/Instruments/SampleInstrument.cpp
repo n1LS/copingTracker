@@ -1648,6 +1648,10 @@ void SampleInstrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], char
 }
 
 bool SampleInstrument::IsTransposable() {
-  // sliced instruments to not support transpositioning or scales
-  return !HasSlicesForPlayback();
+  // sliced instruments do not support transposition or scales
+  const bool hasSlices = HasSlicesForPlayback();
+  // gm instruments >= 128 are kits and not transposable either
+  const bool gmKit = (gmInstrument_.GetInt() >= 128);
+
+  return !(hasSlices || gmKit);
 }

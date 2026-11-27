@@ -109,12 +109,7 @@ private:
   uint32_t lastUiLoad_ = 0;
 #endif
 
-  // the project name in the title scrolls when it does not fit: the frame the scrolling started at (OnFocus)
-  // and the scroll offset that is drawn at the moment
-  uint32_t titleScrollStart_ = 0;
-  int titleScrollDrawn_ = 0;
-  int titleScrollOffset() const;
-  void drawTitleText(bool fullTitle);
+  void drawTitleText();
 
   LoopState loopState_ = lsIdle;
   int loopA_;

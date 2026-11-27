@@ -26,6 +26,7 @@ void Chain::Reset() {
       steps_[i][j].phrase = EMPTY_CHAIN_VALUE;
       steps_[i][j].transpose = 0x00;
     }
+    scaleAware_[i] = 0;
     isUsed_[i] = false;
   }
 }

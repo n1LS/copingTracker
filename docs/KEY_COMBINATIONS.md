@@ -238,6 +238,14 @@ Modes: `VM_NEW` (chain-to-create armed), `VM_CLONE` (clone armed),
 
 Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`.
 
+Columns: the phrase, the transposition (hex and signed decimal) and the **scale-aware** flag (`Sc`, drawn `char_symbol_indicatorFull_s`
+when on, `char_symbol_indicatorEmpty_s` when off). When a note is played (`transposeNote` in `Scale.cpp`): instruments that are not
+transposable (`IsTransposable()`) play the note as it is; otherwise the transposition of the chain row is added, with the flag on the
+result is mapped into the scale of the project (a note that is not in the scale moves to the next note of the scale in the direction of
+the chain transposition: up with a positive one, down with a negative one, the nearest, downwards on a tie, without transposition),
+and last the transposition of the project is added, it moves everything and is not mapped. The notes in the phrases are never changed.
+The flags of a chain are one 16 bit mask (`Chain::ScaleAwareMask`, bit n is row n), saved as `"scale-aware"` of the chain.
+
 *Normal mode*
 
 | Combination | Type | Action |
@@ -247,12 +255,12 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`.
 | `ENTER + EDIT` | chord | Cut phrase at cursor (`cutPosition`) |
 | `EDIT + ALT` | chord, either order | Enter **clone mode** |
 | `EDIT + NAV` | chord, either order | Toggle mute, taken back when `EDIT` is let go while `NAV` is held (see appendix) |
-| `ENTER + DOWN` | chord | Phrase value −`0x10` (row col) / −`0x0C` (other col) |
-| `ENTER + UP` | chord | Phrase value +`0x10` / +`0x0C` |
-| `ENTER + LEFT` | chord | Phrase value −`0x01` |
-| `ENTER + RIGHT` | chord | Phrase value +`0x01` |
+| `ENTER + DOWN` | chord | Phrase value −`0x10` (row col) / −`0x0C` (transposition); scale-aware column: switch the flag off |
+| `ENTER + UP` | chord | Phrase value +`0x10` / +`0x0C`; scale-aware column: switch the flag on |
+| `ENTER + LEFT` | chord | Phrase value −`0x01`; scale-aware column: switch the flag off |
+| `ENTER + RIGHT` | chord | Phrase value +`0x01`; scale-aware column: switch the flag on |
 | `ENTER + ALT` | chord | Paste clipboard (`pasteClipboard`) |
-| `ENTER` alone | chord | Paste last phrase into slot; in the phrase column (column 0) it also arms `VM_NEW` |
+| `ENTER` alone | chord | Paste last phrase into slot; in the phrase column (column 0) it also arms `VM_NEW`; in the scale-aware column it toggles the flag |
 | `ENTER + NAV` | chord | Toggle solo, taken back when `ENTER` is let go while `NAV` is held; a kept solo ends with the next `ENTER + NAV` (see appendix) |
 | `NAV + LEFT` | chord | Navigate → **Song view** |
 | `NAV + RIGHT` | chord | Navigate → **Phrase view** (current phrase) |
@@ -284,7 +292,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`.
 | `EDIT` alone | chord | Copy selection |
 | `EDIT + NAV` | chord, either order | Toggle mute |
 | `EDIT + ALT` | chord, either order | Extend selection |
-| `ENTER + EDIT + DOWN / UP` (`ENTER` held first) | chord | **Nudge** the selection (`nudgeSelection`): the content of the selected columns (phrase, transpose) moves one row up / down, the row in the way jumps to the row that was just emptied at the other end (nothing is lost). The selection and the cursor move with it; at the first / last row nothing happens |
+| `ENTER + EDIT + DOWN / UP` (`ENTER` held first) | chord | **Nudge** the selection (`nudgeSelection`): the content of the selected columns (phrase, transpose, scale-aware flag) moves one row up / down, the row in the way jumps to the row that was just emptied at the other end (nothing is lost). The selection and the cursor move with it; at the first / last row nothing happens |
 | `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust selected value (`updateSelectionValue`; ±`0x10` / ±`0x0C` in the phrase / other column for UP / DOWN) |
 | `ENTER + ALT` | chord | Cut selection |
 | `ENTER + NAV` | chord | Toggle solo |
@@ -309,7 +317,7 @@ Modes: `VM_NEW`, `VM_CLONE`, `VM_SELECTION`.
 | `ENTER + EDIT` | chord | Cut value at cursor (`cutPosition`) |
 | `EDIT + ALT` | chord, either order | Enter **clone mode** (`VM_CLONE`) |
 | `EDIT + NAV` | chord, either order | Toggle mute, taken back when `EDIT` is let go while `NAV` is held (see appendix) |
-| `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust cursor value (`updateCursorValue`). In the note column LEFT / RIGHT move the note one step down / up in the scale and key of the project (`changeNote`), UP / DOWN move it an octave. Other columns: DOWN / LEFT decrease, UP / RIGHT increase |
+| `ENTER + DOWN / UP / LEFT / RIGHT` | chord | Adjust cursor value (`updateCursorValue`). In the note column LEFT / RIGHT move the note one semitone down / up (`changeNote`, any note can be entered, the scale of the project does not change it), UP / DOWN move it an octave. Notes that are not in the scale and key of the project are drawn in `Theme::SemanticColors::offScale`, unless the instrument of the step is not transposable. Other columns: DOWN / LEFT decrease, UP / RIGHT increase |
 | `ENTER + ALT` | chord | Paste clipboard (`pasteClipboard`) |
 | `ENTER` alone | chord | Paste last value; on command columns a **command picker** opens (if enabled); on the instrument and command value columns arms `VM_NEW`; on the note, instrument and volume columns starts **audition** (hold ENTER, release stops) |
 | `ENTER + NAV` | chord | Toggle solo, taken back when `ENTER` is let go while `NAV` is held; a kept solo ends with the next `ENTER + NAV` (see appendix) |
@@ -415,7 +423,7 @@ Scroll indicators, above (row 2) and below (row 19) the note labels (column 5):
 | `LEFT / RIGHT` | chord | Move the cursor step, which extends or shrinks the selection |
 | `UP / DOWN` | chord | Move the cursor note (the selection does not change) |
 | `ENTER + EDIT + LEFT / RIGHT` (`ENTER` held first) | chord | **Move** the selected steps (whole steps, all fields) one step left / right. The step they move into jumps to the other end of the selection (the step that was just emptied), so nothing is lost. The selection and the cursor move with them; at the first / last step nothing happens (no wrapping) |
-| `ENTER + arrows` | chord | **Transpose** the notes of the selected steps as the phrase view does for a selection: `LEFT` / `RIGHT` one step down / up in the scale and key of the project, `UP` / `DOWN` an octave (`changeNote`). Steps without a note and note offs are left alone, instruments are not changed. The cursor note follows the note of the cursor step |
+| `ENTER + arrows` | chord | **Transpose** the notes of the selected steps as the phrase view does for a selection: `LEFT` / `RIGHT` one semitone down / up, `UP` / `DOWN` an octave (`changeNote`). Steps without a note and note offs are left alone, instruments are not changed. The cursor note follows the note of the cursor step |
 | `EDIT` alone | chord | **Copy** the selected steps (whole steps) to the clipboard, back to normal mode with the cursor at the step the selection started at |
 | `ENTER + ALT` (ALT held first) | chord | **Cut**: copy, then clear all fields of the selected steps, back to normal mode |
 | `EDIT + ALT` (either order) | chord | Extend the selection to the whole phrase |
@@ -440,7 +448,7 @@ The indicators are drawn from `AnimationUpdate` after a player update, and not w
 | `LEFT` | chord | Previous step; stops at step 0 and does not change the phrase |
 | `RIGHT` | chord | Next step; stops at the last step and does not change the phrase |
 | `ENTER` | chord | Set the note of the cursor's step to the note of the cursor. As in the phrase view a step without a note gets the last instrument; the note and its instrument become the last note and instrument to paste. On a step with a note it moves the note and keeps its instrument, volume and commands. The note is previewed (audition of the step, as in the phrase view) while `ENTER` is held; releasing it stops the preview |
-| `ENTER + UP / DOWN` | chord | Move the note of the cursor's step one step up / down in the scale and key of the project, the same as `ENTER + RIGHT / LEFT` in the note column of the phrase view (`changeNote`). A sliced sample stays inside its slices, a note off becomes C3 (or the nearest note of the scale below), at the ends of the range the note wraps. A step without a note is left alone. The cursor follows the note and the view scrolls with it; the note becomes the last note to paste. The note is previewed again with its new pitch (as in the phrase view the audition `ENTER` started restarts) |
+| `ENTER + UP / DOWN` | chord | Move the note of the cursor's step one semitone up / down, the same as `ENTER + RIGHT / LEFT` in the note column of the phrase view (`changeNote`). A sliced sample stays inside its slices, a note off becomes C3, at the ends of the range the note wraps. A step without a note is left alone. The cursor follows the note and the view scrolls with it; the note becomes the last note to paste. The note is previewed again with its new pitch (as in the phrase view the audition `ENTER` started restarts) |
 | `EDIT + ALT` (either order) | chord | Open the menu (see above), which starts a **selection** of whole steps at the cursor step (all fields: note, instrument, volume, both commands with parameters). With a selection: extend it to all steps of the phrase (towards the end the cursor is on, pressed again it flips to the other end) |
 | `EDIT + NAV` | chord, either order | Toggle **mute** of the channel, taken back when `EDIT` is let go while `NAV` is held (see the appendix); not while a selection is made |
 | `NAV + ENTER` | chord | Toggle **solo** of the channel, taken back when `ENTER` is let go while `NAV` is held (see the appendix) |
@@ -450,7 +458,7 @@ The indicators are drawn from `AnimationUpdate` after a player update, and not w
 | `ALT + LEFT` | chord | Back to the grid |
 | arrows (focus on the fields) | chord | `UP` / `DOWN`: note, instrument, volume, command 1, command 2; `LEFT` / `RIGHT`: the command or its parameter. The other chords of the grid do nothing while the fields have the focus (`PLAY`, `NAV` + arrows, `NAV + NAV` and `EDIT` + arrows work as always). The grid has the focus when the view opens |
 | `ENTER` (focus on the fields) | chord | As `ENTER` on the column in the phrase view: an empty field gets the last value used (an empty note also the last instrument), a field that has a value makes it the last one to paste. Note, instrument and volume are previewed while `ENTER` is held. A parameter has no last value. On a command field the command picker opens first (if it is enabled in the config, as in the phrase view; it starts with the command of the step or the last one used). New instruments / tables and cloning of the phrase view are not available in the roll |
-| `ENTER + arrows` (focus on the fields) | chord | Edit the selected field as in the phrase view (`updateCursorValue`): note `LEFT` / `RIGHT` one step in the scale, `UP` / `DOWN` an octave (an empty step is left alone, the cursor follows the note); instrument `LEFT` / `RIGHT` ∓1, `UP` / `DOWN` ±`0x10`; volume `LEFT` / `RIGHT` ∓1, `UP` max, `DOWN` none; command previous / next (`LEFT` / `RIGHT`) or alphabetically (`UP` / `DOWN`); parameter: `LEFT` / `RIGHT` select the digit (the edited digit is drawn inverted), `UP` / `DOWN` change it. Note, instrument and volume restart the preview |
+| `ENTER + arrows` (focus on the fields) | chord | Edit the selected field as in the phrase view (`updateCursorValue`): note `LEFT` / `RIGHT` one semitone, `UP` / `DOWN` an octave (an empty step is left alone, the cursor follows the note); instrument `LEFT` / `RIGHT` ∓1, `UP` / `DOWN` ±`0x10`; volume `LEFT` / `RIGHT` ∓1, `UP` max, `DOWN` none; command previous / next (`LEFT` / `RIGHT`) or alphabetically (`UP` / `DOWN`); parameter: `LEFT` / `RIGHT` select the digit (the edited digit is drawn inverted), `UP` / `DOWN` change it. Note, instrument and volume restart the preview |
 | `ENTER + EDIT` (focus on the fields) | chord | Clear the field: the note as `ENTER + EDIT` in the grid, no instrument, no volume, a command (with its parameter), a parameter of 0. Nothing is put on a clipboard |
 | `ENTER + LEFT / RIGHT` | chord | Move the note of the cursor's step to the previous / next step, with its instrument and volume (the commands stay in their step). A note that is already in the target step is deleted. The cursor follows; at the first / last step and on a step without a note nothing happens |
 | `ENTER + EDIT` | chord | As cutting the note column in the phrase view: removes the note of the cursor's step together with its instrument and volume; on a step without a note it sets a note off. Nothing is put on a clipboard (the roll has none) |

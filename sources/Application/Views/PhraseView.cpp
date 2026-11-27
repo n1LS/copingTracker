@@ -322,11 +322,19 @@ void PhraseView::updateSelectionValue(ViewUpdateDirection direction) {
 
   for (int i = 0; i < r.Width(); i++) {
     for (int j = 0; j < r.Height(); j++) {
+      if (col_ + i == colNote) {
+        // some note values do not get adjusted
+        int current = currentSteps()[row_ + j].note;
+        if (current == NO_NOTE || current == NOTE_OFF) {
+          continue;
+        }
+      }
       if (col_ + i < 2) {
         updateCursorValue(direction, i, j);
       }
     }
   }
+
   row_ = saveRow_;
   col_ = saveCol_;
 }
@@ -910,6 +918,8 @@ void PhraseView::DrawView() {
   const PhraseStep *stepsBase = currentSteps();
   InstrumentBank *bank = viewData_->project_->GetInstrumentBank();
   I_Instrument *instrObj = bank->noneInstrument();
+  const int scale = viewData_->project_->GetScale();
+  const int scaleRoot = viewData_->project_->GetScaleRoot();
 
   // Display row numbers
 
@@ -941,7 +951,13 @@ void PhraseView::DrawView() {
       instrObj = bank->GetInstrument(lastInstr);
     }
 
-    setTextProps(colNote, j, Theme::Phrase::note(hilit), phraseLength);
+    // a note that is not in the scale of the project has its own color, unless the instrument does not transpose
+    // (nothing is mapped to a scale for it)
+    Color noteColor = Theme::Phrase::note(hilit);
+    if (note != NO_NOTE && note != NOTE_OFF && instrObj->IsTransposable() && !isInScale(note, scale, scaleRoot)) {
+      noteColor = Theme::SemanticColors::offScale;
+    }
+    setTextProps(colNote, j, noteColor, phraseLength);
 
     if (note == NO_NOTE) {
       DrawString(anchor.x_ + columnPositions_[colNote], y, "---");

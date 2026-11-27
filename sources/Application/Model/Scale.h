@@ -27,4 +27,16 @@ uint8_t getSemitonesOffset(uint8_t scale, uint8_t number, uint8_t root);
 // *below* the root, so callers subtract it.
 uint8_t getSemitonesOffsetDown(uint8_t scale, uint8_t number, uint8_t root);
 
+// Whether a note (any MIDI note, also below 0 or above 127) is one of the notes of the scale around the root note
+bool isInScale(int note, int scale, int root);
+
+// Moves a note that is not in the scale to a note of the scale: upwards with a direction above 0, downwards with a
+// direction below 0 and to the nearest with 0 (downwards if both are as far). A note that is in the scale stays.
+int snapToScale(int note, int scale, int root, int direction);
+
+// The note a note of a phrase becomes: first the transposition of the chain step is added, with scaleAware the result
+// is mapped into the scale (in the direction of that transposition, the nearest without one), and last the
+// transposition of the project is added, it moves everything and is not mapped. The stored note is not changed.
+int transposeNote(int note, int chainTransposition, bool scaleAware, int scale, int root, int projectTransposition);
+
 #endif

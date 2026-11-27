@@ -22,8 +22,9 @@
 
 #include <nanoprintf.h>
 
-const int columnPositions_[2] = {0, 3};
-const int columnWidths_[2] = {2, 2};
+// phrase, transposition (hex and signed), scale-aware flag
+const int columnPositions_[3] = {0, 3, 5};
+const int columnWidths_[3] = {2, 1, 2};
 
 ChainView::ChainView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
   updatingPhrase_ = false;
@@ -37,6 +38,7 @@ ChainView::ChainView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData)
 
   for (int i = 0; i < 16; i++) {
     clipboard_.steps_[i] = {0xFF, 0};
+    clipboard_.scaleAware_[i] = false;
   };
 }
 
@@ -53,6 +55,7 @@ void ChainView::Reset() {
   clipboard_.row_ = 0;
   for (int i = 0; i < 16; i++) {
     clipboard_.steps_[i] = {0xFF, 0};
+    clipboard_.scaleAware_[i] = false;
   }
 
   saveRow_ = 0;
@@ -139,7 +142,7 @@ void ChainView::updateCursorValue(int offset, int dx, int dy) {
   if (v == -1)
     return;
 
-  if (viewData_->chainCol_ == 0) {
+  if (viewData_->chainCol_ == colPhrase) {
     lastPhrase_ = v;
     updatingPhrase_ = true;
     updateRow_ = viewData_->chainRow_;
@@ -148,7 +151,7 @@ void ChainView::updateCursorValue(int offset, int dx, int dy) {
   isDirty_ = true;
 }
 
-void ChainView::updateSelectionValue(int offset) { // HERE
+void ChainView::updateSelectionValue(int offset) {
   int savecol = viewData_->chainCol_;
   int saverow = viewData_->chainRow_;
   GUIRect r = getSelectionRect();
@@ -264,6 +267,7 @@ void ChainView::fillClipboardData() {
 
   for (int i = 0; i < clipboard_.height_; i++) {
     clipboard_.steps_[i] = base[clipboard_.row_ + i];
+    clipboard_.scaleAware_[i] = viewData_->song_->chain_.IsScaleAware(viewData_->currentChain_, clipboard_.row_ + i);
   };
 }
 
@@ -284,28 +288,31 @@ void ChainView::nudgeSelection(int delta) {
   const int chainId = viewData_->currentChain_;
   const ChainStep *steps = chain.Steps(chainId);
   const ChainStep jumped = steps[delta > 0 ? bottom + 1 : top - 1];
+  const bool jumpedAware = chain.IsScaleAware(chainId, delta > 0 ? bottom + 1 : top - 1);
 
-  // only the columns of the selection move: the phrase (0) and the transpose (1)
-  auto copyColumns = [&](ChainStep &target, const ChainStep &source) {
+  // only the columns of the selection move: the phrase (0), the transpose (1) and the scale-aware flag (2)
+  auto copyColumns = [&](int targetRow, const ChainStep &source, bool sourceAware) {
     for (int col = left; col <= right; col++) {
-      if (col == 0) {
-        target.phrase = source.phrase;
+      if (col == colPhrase) {
+        chain.EditStep(chainId, targetRow).phrase = source.phrase;
+      } else if (col == colTranspose) {
+        chain.EditStep(chainId, targetRow).transpose = source.transpose;
       } else {
-        target.transpose = source.transpose;
+        chain.SetScaleAware(chainId, targetRow, sourceAware);
       }
     }
   };
 
   if (delta > 0) {
     for (int row = bottom; row >= top; --row) {
-      copyColumns(chain.EditStep(chainId, row + 1), steps[row]);
+      copyColumns(row + 1, steps[row], chain.IsScaleAware(chainId, row));
     }
-    copyColumns(chain.EditStep(chainId, top), jumped);
+    copyColumns(top, jumped, jumpedAware);
   } else {
     for (int row = top; row <= bottom; ++row) {
-      copyColumns(chain.EditStep(chainId, row - 1), steps[row]);
+      copyColumns(row - 1, steps[row], chain.IsScaleAware(chainId, row));
     }
-    copyColumns(chain.EditStep(chainId, bottom), jumped);
+    copyColumns(bottom, jumped, jumpedAware);
   }
 
   // the selection, the position it started at (the cursor goes back there after a copy) and the cursor move
@@ -318,12 +325,12 @@ void ChainView::nudgeSelection(int delta) {
 
 void ChainView::extendSelection() {
   GUIRect rect = getSelectionRect();
-  if (rect.Left() > 0 || rect.Right() < 1) {
+  if (rect.Left() > 0 || rect.Right() < 2) {
     if (viewData_->chainCol_ < clipboard_.col_) {
       viewData_->chainCol_ = 0;
-      clipboard_.col_ = 1;
+      clipboard_.col_ = 2;
     } else {
-      viewData_->chainCol_ = 1;
+      viewData_->chainCol_ = 2;
       clipboard_.col_ = 0;
     }
     isDirty_ = true;
@@ -386,11 +393,14 @@ void ChainView::cutSelection() {
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < clipboard_.height_; j++) {
       switch (i + clipboard_.col_) {
-        case 0:
+        case colPhrase:
           chain.EditStep(chainId, j + clipboard_.row_).phrase = 0xFF;
           break;
-        case 1:
+        case colTranspose:
           chain.EditStep(chainId, j + clipboard_.row_).transpose = 0x00;
+          break;
+        case colScaleAware:
+          chain.SetScaleAware(chainId, j + clipboard_.row_, false);
           break;
       }
     }
@@ -427,11 +437,14 @@ void ChainView::pasteClipboard() {
   for (int i = 0; i < clipboard_.width_; i++) {
     for (int j = 0; j < height; j++) {
       switch (i + clipboard_.col_) {
-        case 0:
+        case colPhrase:
           chain.EditStep(chainId, j + viewData_->chainRow_).phrase = clipboard_.steps_[j].phrase;
           break;
-        case 1:
+        case colTranspose:
           chain.EditStep(chainId, j + viewData_->chainRow_).transpose = clipboard_.steps_[j].transpose;
+          break;
+        case colScaleAware:
+          chain.SetScaleAware(chainId, j + viewData_->chainRow_, clipboard_.scaleAware_[j]);
           break;
       }
     }
@@ -603,10 +616,10 @@ void ChainView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
         cutPosition();
         break;
       case BM_DOWN:
-        updateCursorValue(viewData_->chainCol_ == 0 ? -0x10 : -0x0C);
+        updateCursorValue(viewData_->chainCol_ == colPhrase ? -0x10 : -0x0C);
         break;
       case BM_UP:
-        updateCursorValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
+        updateCursorValue(viewData_->chainCol_ == colPhrase ? 0x10 : 0x0C);
         break;
       case BM_LEFT:
         updateCursorValue(-1);
@@ -621,9 +634,15 @@ void ChainView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
     } else if (mask == BM_NAV) {
       switchSoloMode();
     } else if (mask == 0) {
-      pasteLastPhrase();
-      if (viewData_->chainCol_ == 0)
-        viewMode_ = VM_NEW;
+      if (viewData_->chainCol_ == colScaleAware) {
+        // the scale-aware flag
+        updateCursorValue(0);
+      } else {
+        pasteLastPhrase();
+        if (viewData_->chainCol_ == colPhrase) {
+          viewMode_ = VM_NEW;
+        }
+      }
     }
   } else if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
     unMuteAll();
@@ -673,10 +692,10 @@ void ChainView::processSelectionButtonMask(uint16_t newButton, uint16_t mask) {
     // Enter modifier
     switch (newButton) {
       case BM_DOWN:
-        updateSelectionValue(viewData_->chainCol_ == 0 ? -0x10 : -0x0C);
+        updateSelectionValue(viewData_->chainCol_ == colPhrase ? -0x10 : -0x0C);
         break;
       case BM_UP:
-        updateSelectionValue(viewData_->chainCol_ == 0 ? 0x10 : 0x0C);
+        updateSelectionValue(viewData_->chainCol_ == colPhrase ? 0x10 : 0x0C);
         break;
       case BM_LEFT:
         updateSelectionValue(-0x01);
@@ -770,7 +789,18 @@ void ChainView::DrawView() {
 
   SetColor(Theme::View::inactive);
   SetBackgroundColor(Theme::View::bg);
-  DrawString(pos.x_, pos.y_ - 1, "Ph Tsp");
+  
+  switch (viewData_->chainCol_) {
+    case colPhrase:
+      DrawString(pos.x_, pos.y_ - 1, "Ph S Tsp");
+      break;
+    case colScaleAware:
+      DrawString(pos.x_, pos.y_ - 1, "Ph Scale-Aware");
+      break;
+    case colTranspose:
+      DrawString(pos.x_, pos.y_ - 1, "Ph S Transpose");
+      break;
+  }
 
   // Display row numbers
 
@@ -804,15 +834,25 @@ void ChainView::DrawView() {
     }
   }
 
-  // Draw Transpose
-
+  // Draw scale-aware: the notes of the rows are mapped into the scale of the project
+  
   pos.x_ += 3;
+
+  const GUIPoint flagAnchor = GetAnchor();
+  for (int j = 0; j < 16; j++) {
+    setTextProps(1, j);
+    const bool aware = viewData_->song_->chain_.IsScaleAware(viewData_->currentChain_, j);
+    DrawString(flagAnchor.x_ + columnPositions_[1], flagAnchor.y_ + j,
+               aware ? char_symbol_indicatorFull_s : char_symbol_indicatorEmpty_s);
+  }
+
+  // Draw Transpose
 
   for (int j = 0; j < 16; j++) {
     unsigned char d = base[j].transpose;
     byteToHexString(d, row);
-    setTextProps(1, j);
-    DrawString(pos.x_, pos.y_, row);
+    setTextProps(2, j);
+    DrawString(flagAnchor.x_ + columnPositions_[2], pos.y_, row);
 
     // also draw signed decimal display
     int8_t transpose = (int8_t)d;
@@ -822,17 +862,19 @@ void ChainView::DrawView() {
     if (transpose > 0) {
       npf_snprintf(row, sizeof(row), "+%2d", transpose);
       SetColor(Theme::Data::positive);
-      DrawString(pos.x_ + 3, pos.y_, row);
+      DrawString(flagAnchor.x_ + columnPositions_[2] + 3, pos.y_, row);
     } else if (transpose < 0) {
       npf_snprintf(row, sizeof(row), "-%2d", -transpose);
       SetColor(Theme::Data::negative);
-      DrawString(pos.x_ + 3, pos.y_, row);
+      DrawString(flagAnchor.x_ + columnPositions_[2] + 3, pos.y_, row);
     } else {
-      DrawString(pos.x_ + 3, pos.y_, "   ");
+      DrawString(flagAnchor.x_ + columnPositions_[2] + 3, pos.y_, "   ");
     }
 
     pos.y_++;
   }
+
+  // other drawings: phrase preview, map, notes, context legend
 
   Player *player = Player::GetInstance();
 

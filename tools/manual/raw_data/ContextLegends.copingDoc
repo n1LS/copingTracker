@@ -301,15 +301,15 @@ F 7         F  7           8
 0                          8  
 4                          8  
 ChainChordsAlt                
-7      F 7     F 7         8  
-0                             
-       ú Paste ü Menu      ∞∞∞
 F 7                        8  
 0                             
-û Un-mute all              ∞∞∞
-0                          8  
+ú Paste                    ∞∞∞
+F 7                        8  
 0                             
-                           ∞∞∞
+û Unmute *                 ∞∞∞
+F 7    0                   8  
+0                             
+ü Menu                     ∞∞∞
 0                          8  
 0                             
                            ∞∞∞
@@ -387,7 +387,7 @@ F 7    9    F 79         7 8
 ú Solo      ó  Instrument  ∞∞∞
 F 7         F 79      7    8  
 0                             
-ù Un-mute   ô  Table       ∞∞∞
+ù Unmute    ô  Table       ∞∞∞
 0                          8  
 4                          8  
 PhraseChordsEdit              
@@ -610,6 +610,6 @@ F7          F  7           8
 7F7                        8  
 0                             
                            ∞∞∞
-0 7          0             8  
+0 7          0        7    8  
 0                             
                            ∞∞∞

@@ -203,3 +203,49 @@ uint8_t getSemitonesOffsetDown(uint8_t scale, uint8_t number, uint8_t root) {
 
   return i;
 }
+
+bool isInScale(int note, int scale, int root) {
+  if (scale < 0 || scale >= numScales || root < 0 || root >= 12) {
+    return true;
+  }
+  return scaleSteps[scale][((note - root) % 12 + 12) % 12];
+}
+
+int snapToScale(int note, int scale, int root, int direction) {
+  if (isInScale(note, scale, root)) {
+    return note;
+  }
+  // every scale contains its root, so a note is found within an octave
+  if (direction > 0) {
+    for (int i = 1; i < 12; i++) {
+      if (isInScale(note + i, scale, root)) {
+        return note + i;
+      }
+    }
+  } else if (direction < 0) {
+    for (int i = 1; i < 12; i++) {
+      if (isInScale(note - i, scale, root)) {
+        return note - i;
+      }
+    }
+  } else {
+    for (int i = 1; i <= 6; i++) {
+      if (isInScale(note - i, scale, root)) {
+        return note - i;
+      }
+      if (isInScale(note + i, scale, root)) {
+        return note + i;
+      }
+    }
+  }
+  return note;
+}
+
+int transposeNote(int note, int chainTransposition, bool scaleAware, int scale, int root, int projectTransposition) {
+  int transposed = note + chainTransposition;
+  if (scaleAware) {
+    transposed = snapToScale(transposed, scale, root, chainTransposition);
+  }
+  // the project moves everything, after the notes were put into the scale
+  return transposed + projectTransposition;
+}
