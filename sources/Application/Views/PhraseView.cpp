@@ -1092,7 +1092,7 @@ ContextLegend PhraseView::currentContextLegend() const {
     return ContextLegend::PhraseSelection;
   }
   // a single button that is down (not an arrow): the chords that can follow
-  switch (heldButtons_) {
+  switch (chordHintButtons()) {
     case BM_ALT:
       return ContextLegend::PhraseChordsAlt;
     case BM_NAV:

@@ -111,6 +111,7 @@ struct Theme {
   };
 
   struct SemanticColors {
+    FIXED(offScale, LIGHT_YELLOW)
     FIXED(pitch, MAGENTA)
     FIXED(filter, LIGHT_RED)
     FIXED(volume, LIGHT_YELLOW)
@@ -300,6 +301,12 @@ public:
   static bool menuUsedUndo_;
   // the buttons that are down at the moment, kept up to date by ProcessButton (for the legends of the chords)
   static uint16_t heldButtons_;
+  // since when they are down (ms), the chord hints only show after a single button was held for kChordHintDelayMs
+  static uint32_t heldSinceMs_;
+  static constexpr uint32_t kChordHintDelayMs = 150;
+  // the buttons the chord hint is for: the held ones once they have been down for the delay, 0 before that and
+  // while a modal is open (the part of the screen it does not cover stays as it is)
+  uint16_t chordHintButtons() const;
 
   void Redraw();
 
@@ -403,6 +410,7 @@ protected:
   virtual void AfterUndoRedo();
   void dispatchButton(uint16_t button, uint16_t mask, bool pressed);
   void undoRedo(bool undo);
+  static void setHeldButtons(uint16_t held);
   // Draws the legend of the current mode into the info area and claims it
   // (infoAreaMode_). Returns false, and draws nothing, if the mode has none.
   bool drawContextLegendInfoArea();

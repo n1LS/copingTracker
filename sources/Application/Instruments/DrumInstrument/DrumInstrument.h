@@ -64,7 +64,7 @@ public:
     return &variables_;
   }
 
-  virtual bool SupportsScales() override {
+  virtual bool IsTransposable() override {
     return false;
   }
 

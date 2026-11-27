@@ -865,7 +865,7 @@ ContextLegend ChainView::currentContextLegend() const {
     return ContextLegend::ChainSelection;
   }
   // a single button that is down (not an arrow): the chords that can follow
-  switch (heldButtons_) {
+  switch (chordHintButtons()) {
     case BM_ALT:
       return ContextLegend::ChainChordsAlt;
     case BM_NAV:

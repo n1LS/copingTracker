@@ -209,7 +209,7 @@ void PhraseEditingView::changeNote(int step, int sign, bool smallChange) {
     int newNote = *c + offset;
 
     // Check if the note is in the scale (adjusted for root)
-    if (instrument && instrument->SupportsScales()) {
+    if (instrument && instrument->IsTransposable()) {
       // Add/remove from offset to match selected scale
       while (newNote >= 0 && !scaleSteps[scale][(newNote + 12 - scaleRoot) % 12]) {
         offset > 0 ? offset++ : offset--;

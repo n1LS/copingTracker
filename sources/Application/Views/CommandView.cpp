@@ -54,7 +54,7 @@ void CommandView::DrawView() {
 
     int x = 4 + (cmd % commandsPerRow) * 4;
     int y = top + 4 + (cmd / commandsPerRow);
-    
+
     if (active) {
       SetColor(Theme::Dialog::Button::bg(true));
       SetBackgroundColor(Theme::Dialog::Panel::sub);

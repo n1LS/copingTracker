@@ -41,7 +41,7 @@ public:
     return IT_LSDJKIT;
   }
 
-  virtual bool SupportsScales() override {
+  virtual bool IsTransposable() override {
     return false;
   }
 

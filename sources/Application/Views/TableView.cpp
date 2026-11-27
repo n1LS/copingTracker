@@ -732,7 +732,7 @@ ContextLegend TableView::currentContextLegend() const {
     return ContextLegend::TableSelection;
   }
   // a single button that is down (not an arrow): the chords that can follow
-  switch (heldButtons_) {
+  switch (chordHintButtons()) {
     case BM_ALT:
       return ContextLegend::TableChordsAlt;
     case BM_NAV:

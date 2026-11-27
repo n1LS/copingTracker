@@ -333,7 +333,7 @@ ContextLegend PianoRollView::currentContextLegend() const {
   }
   // a single button that is down (not an arrow): the chords that can follow (the fields have their own input)
   if (!panelFocus_) {
-    switch (heldButtons_) {
+    switch (chordHintButtons()) {
       case BM_ALT:
         return ContextLegend::RollChordsAlt;
       case BM_NAV:

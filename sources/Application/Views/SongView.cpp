@@ -1109,7 +1109,7 @@ ContextLegend SongView::currentContextLegend() const {
     return ContextLegend::SongLoop;
   }
   // a single button that is down (not an arrow): the chords that can follow
-  switch (heldButtons_) {
+  switch (chordHintButtons()) {
     case BM_ALT:
       return ContextLegend::SongChordsAlt;
     case BM_NAV:

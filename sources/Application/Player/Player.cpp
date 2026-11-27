@@ -912,17 +912,13 @@ void Player::playCursorPosition(int channel) {
       instrumentId = 0;
     }
 
-    if (instrument != 0) {
+    if (instrument != NULL) {
       int chain = viewData_->currentPlayChain_[channel];
       int chainPos = viewData_->chainPlayPos_[channel];
-      bool preserveNote = false;
-      // TODO: this is special handling that should not happen here
-      if (instrument->GetType() == IT_SAMPLE) {
-        SampleInstrument *sampleInstrument = static_cast<SampleInstrument *>(instrument);
-        preserveNote = sampleInstrument->HasSlicesForPlayback();
-      }
+      bool preserveNote = !instrument->IsTransposable();
 
       if (!preserveNote) {
+        // transposable -> apply both transposition sources
         note += viewData_->song_->chain_.Step(chain, chainPos).transpose;
         note += project_->GetTranspose();
       }

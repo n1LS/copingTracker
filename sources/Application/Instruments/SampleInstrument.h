@@ -108,6 +108,8 @@ public:
   virtual bool RestoreKey(JsonReader &reader) override;
   void Purge();
 
+  virtual bool IsTransposable() override;
+
 protected:
   void updateInstrumentData(bool search);
   void doTickUpdate(int channel);

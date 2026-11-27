@@ -1646,3 +1646,8 @@ void SampleInstrument::noteDisplayCondensed(uint8_t note, char (&line1)[3], char
   // default handling regular notes
   I_Instrument::noteDisplayCondensed(note, line1, line2);
 }
+
+bool SampleInstrument::IsTransposable() {
+  // sliced instruments to not support transpositioning or scales
+  return !HasSlicesForPlayback();
+}

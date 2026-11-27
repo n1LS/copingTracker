@@ -550,7 +550,7 @@ void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
   // do not change it.
   const uint16_t held = pressed ? (mask | button) : mask;
   if (depth == 0 && !modalView_) {
-    heldButtons_ = held;
+    setHeldButtons(held);
   }
 
   // ALT + EDIT opens the menu, it stays open while ALT is held
@@ -580,7 +580,7 @@ void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
   depth--;
   if (depth == 0 && !modalView_) {
     // a modal that was open is closed now
-    heldButtons_ = held;
+    setHeldButtons(held);
   }
   if (!pressed && button == BM_ALT) {
     menuOpen_ = false;
@@ -591,6 +591,13 @@ void View::ProcessButton(uint16_t button, uint16_t mask, bool pressed) {
     if (journal.TakeOverflowed()) {
       ToastView::GetInstance()->Show("Undo history cleared", &ttWarning, ToastDuration::regular);
     }
+  }
+}
+
+void View::setHeldButtons(uint16_t held) {
+  if (held != heldButtons_) {
+    heldButtons_ = held;
+    heldSinceMs_ = System::GetInstance()->Millis();
   }
 }
 
@@ -607,6 +614,14 @@ void View::undoRedo(bool undo) {
 bool View::menuOpen_ = false;
 bool View::menuUsedUndo_ = false;
 uint16_t View::heldButtons_ = 0;
+uint32_t View::heldSinceMs_ = 0;
+
+uint16_t View::chordHintButtons() const {
+  if (modalView_ || System::GetInstance()->Millis() - heldSinceMs_ < kChordHintDelayMs) {
+    return 0;
+  }
+  return heldButtons_;
+}
 
 void View::AfterUndoRedo() {
   viewMode_ = VM_NORMAL;

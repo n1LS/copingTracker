@@ -509,7 +509,7 @@ ContextLegend GrooveView::currentContextLegend() const {
     return ContextLegend::GrooveSelection;
   }
   // a single button that is down (not an arrow): the chords that can follow
-  switch (heldButtons_) {
+  switch (chordHintButtons()) {
     case BM_ALT:
       return ContextLegend::GrooveChordsAlt;
     case BM_NAV:

@@ -64,10 +64,11 @@ direction is ignored.
 > and must be kept in sync with the tables below.
 >
 > **Chord hints:** while a single button is held in the song, chain, phrase, table or groove view (`ALT`, `NAV`, `EDIT` or `ENTER`,
-> not an arrow; `PLAY` has no chords) the info area shows the chords that can follow, legends `SongChordsAlt` / `Nav` / `Edit` /
+> not an arrow; `PLAY` has no chords) the info area shows the chords that can follow once the button has been held for 250 ms (a tap never shows it, `View::kChordHintDelayMs`), legends `SongChordsAlt` / `Nav` / `Edit` /
 > `Enter` and the same with `Chain`, `Phrase`, `Table`, `Groove` and `Roll` (the second table view has its own `Table2ChordsNav`; in the
 > piano roll they are only shown while the grid has the focus). Any other legend (menu, selection, mute / solo, loop) takes priority, and the hint is gone as soon as a
-> second button is down or the button is released.
+> second button is down or the button is released. While a modal is open (the command picker) the part of the screen it does not
+> cover does not change: no hint is shown and the buttons of the modal do not change it.
 
 Chords made only of ALT / NAV / EDIT have no natural trigger, so either key may
 be the last one pressed (`IsPair(...)`): `EDIT+ALT`, `EDIT+NAV`, `NAV+ALT`,
