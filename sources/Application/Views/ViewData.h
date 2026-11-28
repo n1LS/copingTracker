@@ -37,9 +37,12 @@ public:
   void UpdateChainCursor(int dx, int dy);
   int UpdateChainCursorValue(int offset, int dx, int dy);
   void SetChainPhrase(unsigned char value);
+  void SetChainTranspose(unsigned char value);
   // the phrase under the cursor of the chain view, Edit... records it in the undo history first
   const unsigned char *GetCurrentChainPointer();
   unsigned char *EditCurrentChainPointer();
+  const unsigned char *GetCurrentChainTransposePointer();
+  unsigned char *EditCurrentChainTransposePointer();
 
   // Shared by the phrase view and the piano roll view. `step` is the cursor row in the phrase.
   // Makes the instrument of the phrase step the current instrument. A step without an

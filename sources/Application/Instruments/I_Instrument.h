@@ -163,7 +163,7 @@ public:
   virtual void SetStepVolume(int channel, uint8_t volume) = 0;
 
   virtual bool IsEmpty() = 0;
-  
+
   virtual bool IsTransposable() {
     return true;
   }

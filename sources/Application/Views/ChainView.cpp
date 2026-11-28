@@ -29,6 +29,7 @@ const int columnWidths_[3] = {2, 1, 2};
 ChainView::ChainView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData) {
   updatingPhrase_ = false;
   lastPhrase_ = 0;
+  lastTranspose_ = 0;
   lastPlayingPos_ = 0;
   lastQueuedPos_ = 0;
 
@@ -45,6 +46,7 @@ ChainView::ChainView(GUIWindow &w, ViewData *viewData) : ScreenView(w, viewData)
 void ChainView::Reset() {
   updatingPhrase_ = false;
   lastPhrase_ = 0;
+  lastTranspose_ = 0;
   lastPlayingPos_ = 0;
   lastQueuedPos_ = 0;
 
@@ -100,6 +102,12 @@ void ChainView::setPhrase(unsigned char value) {
   isDirty_ = true;
 }
 
+void ChainView::setTranspose(unsigned char value) {
+  viewData_->SetChainTranspose(value);
+  lastTranspose_ = value;
+  isDirty_ = true;
+}
+
 void ChainView::cutPosition() {
   clipboard_.active_ = true;
   clipboard_.row_ = viewData_->chainRow_;
@@ -110,7 +118,7 @@ void ChainView::cutPosition() {
 }
 
 void ChainView::pasteLastPhrase() {
-  // If we're on an empty spot, we past the last phrase
+  // If we're on an empty spot, we paste the last phrase
   // otherwise we take the current phrase as last
 
   const unsigned char *c = viewData_->GetCurrentChainPointer();
@@ -119,6 +127,19 @@ void ChainView::pasteLastPhrase() {
     isDirty_ = true;
   } else {
     lastPhrase_ = *c;
+  }
+}
+
+void ChainView::pasteLastTranspose() {
+  // If we're on an empty spot, we paste the last transpose
+  // otherwise we take the current transpose as last
+
+  const unsigned char *c = viewData_->GetCurrentChainTransposePointer();
+  if ((*c == 0x00)) {
+    *viewData_->EditCurrentChainTransposePointer() = lastTranspose_;
+    isDirty_ = true;
+  } else {
+    lastTranspose_ = *c;
   }
 }
 
@@ -142,12 +163,17 @@ void ChainView::updateCursorValue(int offset, int dx, int dy) {
   if (v == -1)
     return;
 
-  if (viewData_->chainCol_ == colPhrase) {
-    lastPhrase_ = v;
-    updatingPhrase_ = true;
-    updateRow_ = viewData_->chainRow_;
+  switch (viewData_->chainCol_) {
+    case colPhrase:
+      lastPhrase_ = v;
+      updatingPhrase_ = true;
+      updateRow_ = viewData_->chainRow_;
+      break;
+    case colTranspose:
+      lastTranspose_ = v;
+      updateRow_ = viewData_->chainRow_;
+      break;
   }
-
   isDirty_ = true;
 }
 
@@ -634,14 +660,18 @@ void ChainView::processNormalButtonMask(uint16_t newButton, uint16_t mask) {
     } else if (mask == BM_NAV) {
       switchSoloMode();
     } else if (mask == 0) {
-      if (viewData_->chainCol_ == colScaleAware) {
-        // the scale-aware flag
-        updateCursorValue(0);
-      } else {
-        pasteLastPhrase();
-        if (viewData_->chainCol_ == colPhrase) {
+      switch (viewData_->chainCol_) {
+        case colPhrase:
+          pasteLastPhrase();
           viewMode_ = VM_NEW;
-        }
+          break;
+        case colScaleAware:
+          // the scale-aware flag
+          updateCursorValue(0);
+          break;
+        case colTranspose:
+          pasteLastTranspose();
+          break;
       }
     }
   } else if (IsPair(newButton, mask, BM_NAV, BM_ALT)) {
@@ -1019,7 +1049,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   pos.x_ += 13;
 
   SetColor(Theme::Song::preview(false));
-  DrawString(pos.x_, pos.y_ - 1, "Nte" char_key_right_s "Tsp In");
+  DrawString(pos.x_, pos.y_ - 1, "Nte Tsp In");
 
   // Display notes
   const PhraseStep *steps = viewData_->song_->phrase_.Steps(phrase);
@@ -1033,6 +1063,7 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
   for (int j = 0; j < 16; j++) {
     SetColor(Theme::Song::preview((j % ALT_ROW_NUMBER) == 0));
     unsigned char note = steps[j].note;
+    int played = note;
     unsigned char instr = steps[j].getInstrument();
 
     if (instr != NO_INSTRUMENT) {
@@ -1053,8 +1084,8 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
       const int chainTranspose = static_cast<int8_t>(chain.Step(viewData_->currentChain_, row).transpose);
       const bool scaleAware = chain.IsScaleAware(viewData_->currentChain_, row);
       Project *project = viewData_->project_;
-      const int played = transposeNote(note, chainTranspose, scaleAware, project->GetScale(), project->GetScaleRoot(),
-                                       project->GetTranspose());
+      played = transposeNote(note, chainTranspose, scaleAware, project->GetScale(), project->GetScaleRoot(),
+                             project->GetTranspose());
       if (played >= 0 && played < HIGHEST_PLAYABLE_NOTE) {
         instrument->noteDisplay(static_cast<uint8_t>(played), noteText);
       } else {
@@ -1062,6 +1093,11 @@ void ChainView::drawPhrasePreview(uint8_t phrase) {
         strcpy(noteText, "???");
       }
     }
+
+    if (played != note) {
+      DrawChar(pos.x_ + 3, pos.y_, CHAR(char_key_right_s));
+    }
+
     DrawString(pos.x_ + 4, pos.y_, noteText);
     pos.y_++;
   }

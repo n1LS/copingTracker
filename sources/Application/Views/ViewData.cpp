@@ -181,10 +181,22 @@ void ViewData::SetChainPhrase(unsigned char value) {
   song_->chain_.EditStep(currentChain_, chainRow_).phrase = value;
 }
 
+void ViewData::SetChainTranspose(unsigned char value) {
+  song_->chain_.EditStep(currentChain_, chainRow_).transpose = value;
+}
+
 const unsigned char *ViewData::GetCurrentChainPointer() {
   return &song_->chain_.Step(currentChain_, chainRow_).phrase;
 }
 
 unsigned char *ViewData::EditCurrentChainPointer() {
   return &song_->chain_.EditStep(currentChain_, chainRow_).phrase;
+}
+
+const unsigned char *ViewData::GetCurrentChainTransposePointer() {
+  return &song_->chain_.Step(currentChain_, chainRow_).transpose;
+}
+
+unsigned char *ViewData::EditCurrentChainTransposePointer() {
+  return &song_->chain_.EditStep(currentChain_, chainRow_).transpose;
 }

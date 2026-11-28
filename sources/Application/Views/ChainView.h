@@ -41,11 +41,13 @@ protected:
   void updateCursorValue(int offset, int dx = 0, int dy = 0);
   void updateSelectionValue(int offset);
   void setPhrase(unsigned char value);
+  void setTranspose(unsigned char value);
   void warpToNeighbour(int offset);
   void warpInColumn(int offset);
   void cutPosition();
   void clonePosition();
   void pasteLastPhrase();
+  void pasteLastTranspose();
   void extendSelection();
   // starts a selection at the cursor, if there is none
   void beginSelection();
@@ -75,11 +77,10 @@ protected:
   static void GeneratorWizardCallback(View &v, ModalView &dialog);
 
 private:
-  bool updatingPhrase_;      // Tells if we're in the middle
-                             // of updating a phrase to avoid
-                             // allocation of unused phrases
+  bool updatingPhrase_;      // Tells if we're in the middle of updating a phrase to avoid allocation of unused phrases
   int updateRow_;            // Tells which row is being updated
   unsigned char lastPhrase_; // Clipboard for phrase
+  unsigned char lastTranspose_; // Clipboard for transpose
   int lastPlayingPos_;
   int lastQueuedPos_;
 
